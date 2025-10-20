@@ -1,0 +1,16 @@
+# Environnements virtuels Python
+venv/
+__pycache__/
+
+# Node / React
+node_modules/
+build/
+dist/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers de configuration locaux
+.env
+*.log
