@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* --- LIGHT THEME --- */
+    --color-primary: #4F9DDE;
+    --color-secondary: #A3AAED;
+    --color-bg:#4f9ede13;
+    --color-surface: #FFFFFF;
+    --color-text-main: #1B213F;
+    --color-text-muted: #959BA5;
+  }
+
+  .dark {
+    /* --- DARK THEME --- */
+    --color-primary: linear-gradient(90deg, #4F9DDE, #A3AAED);
+    --color-secondary: #2F4F70;
+    --color-bg: #0E2A46;
+    --color-surface: #2F4F70;
+    --color-text-main: #FFFFFF;
+    --color-text-muted: #CACEF7;
+  }
+
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-text-main);
+  }
+
+  button {
+    background: var(--color-primary);
+    color: white;
+  }
+}
