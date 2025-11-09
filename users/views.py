@@ -85,3 +85,10 @@ class AdminLoginView(APIView):
             return Response({"error": "Mot de passe incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
         except Administrateur.DoesNotExist:
             return Response({"error": "Admin introuvable"}, status=status.HTTP_404_NOT_FOUND)
+        
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    """
+    Permet d'afficher ou de modifier le profil d'un utilisateur spécifique.
+    """
+    queryset = Utilisateur.objects.all()
+    serializer_class = UtilisateurSerializer
