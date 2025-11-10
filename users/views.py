@@ -1,18 +1,18 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.contrib.auth.hashers import make_password, check_password
 from .models import Utilisateur, Etudiant, Enseignant, Administrateur
-from .serializers import UtilisateurSerializer, EtudiantSerializer, EnseignantSerializer
+from .serializers import UtilisateurSerializer, EtudiantSerializer, EnseignantSerializer, AdministrateurSerializer
+
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = UtilisateurSerializer
 
     def create(self, request, *args, **kwargs):
-        role = request.data.get("role")  # 'etudiant' ou 'enseignant'
-        user_serializer = self.get_serializer(data=request.data) #
+        role = request.data.get("role")
+        user_serializer = self.get_serializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
-        user = user_serializer.save(mot_de_passe=make_password(request.data["mot_de_passe"]))
+        user = user_serializer.save()
 
         if role == "etudiant":
             Etudiant.objects.create(
@@ -29,6 +29,7 @@ class RegisterView(generics.CreateAPIView):
         data = user_serializer.data
         data.pop("mot_de_passe", None)
         data["role"] = role
+
         return Response({
             "message": "Utilisateur créé avec succès",
             "user": data
@@ -41,21 +42,20 @@ class LoginView(APIView):
         password = request.data.get('mot_de_passe')
 
         try:
-            user = Utilisateur.objects.get(adresse_email=email) #On cherche l’utilisateur dans la base de données grâce à l’email fourni.
-            if check_password(password, user.mot_de_passe):
+            user = Utilisateur.objects.get(adresse_email=email)
+            if user.check_password(password):
                 role = None
                 role_data = {}
-                try:
-                    etu = user.etudiant
+
+                if hasattr(user, 'etudiant'):
                     role = "etudiant"
-                    role_data = {"specialite": etu.specialite, "annee_etude": etu.annee_etude}
-                except Etudiant.DoesNotExist:
-                    try:
-                        ens = user.enseignant
-                        role = "enseignant"
-                        role_data = {"grade": ens.grade}
-                    except Enseignant.DoesNotExist:
-                        pass
+                    role_data = {
+                        "specialite": user.etudiant.specialite,
+                        "annee_etude": user.etudiant.annee_etude
+                    }
+                elif hasattr(user, 'enseignant'):
+                    role = "enseignant"
+                    role_data = {"grade": user.enseignant.grade}
 
                 return Response({
                     "message": "Connexion réussie",
@@ -65,10 +65,17 @@ class LoginView(APIView):
                     "role": role,
                     **role_data
                 }, status=status.HTTP_200_OK)
+
             return Response({"error": "Mot de passe incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+
         except Utilisateur.DoesNotExist:
             return Response({"error": "Utilisateur introuvable"}, status=status.HTTP_404_NOT_FOUND)
-        
+
+
+class AdminRegisterView(generics.CreateAPIView):
+    serializer_class = AdministrateurSerializer
+
+
 class AdminLoginView(APIView):
     def post(self, request):
         email = request.data.get('email_admin')
@@ -76,7 +83,7 @@ class AdminLoginView(APIView):
 
         try:
             admin = Administrateur.objects.get(email_admin=email)
-            if check_password(password, admin.mdp_admin):
+            if admin.check_password(password):
                 return Response({
                     "message": "Connexion admin réussie",
                     "id_admin": admin.id_admin,
@@ -85,10 +92,30 @@ class AdminLoginView(APIView):
             return Response({"error": "Mot de passe incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
         except Administrateur.DoesNotExist:
             return Response({"error": "Admin introuvable"}, status=status.HTTP_404_NOT_FOUND)
-        
+
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
-    """
-    Permet d'afficher ou de modifier le profil d'un utilisateur spécifique.
-    """
     queryset = Utilisateur.objects.all()
     serializer_class = UtilisateurSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        user = self.get_object()
+        data = UtilisateurSerializer(user).data
+
+        # Ajouter rôle et infos spécifiques
+        role = None
+        try:
+            etu = user.etudiant
+            role = "etudiant"
+            data["specialite"] = etu.specialite
+            data["annee_etude"] = etu.annee_etude
+        except Etudiant.DoesNotExist:
+            try:
+                ens = user.enseignant
+                role = "enseignant"
+                data["grade"] = ens.grade
+            except Enseignant.DoesNotExist:
+                pass
+
+        data["role"] = role
+        return Response(data)
