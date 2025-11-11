@@ -43,4 +43,4 @@ class GagnerBadge(models.Model):
         unique_together = ('utilisateur', 'badge')  # un badge ne peut être gagné qu'une fois
 
     def __str__(self):
-        return f"{self.utilisateur.username} earned {self.badge.nom}"
+     return f"{self.utilisateur} earned {self.badge.nom}"
