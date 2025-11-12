@@ -1,7 +1,6 @@
 import React from "react";
-import { FiSun } from "react-icons/fi";
+import { FiSun, FiMoon } from "react-icons/fi";
 import { MdTranslate } from "react-icons/md";
-
 
 export default function NavLinks() {
   return (
@@ -12,12 +11,14 @@ export default function NavLinks() {
     </a>
   </li>
   <li>
-    <a href="#impact" className="text-[var(--color-text-main)] hover:opacity-80  transition">Impact</a>
+    <a href="#impact" className="text-[var(--color-text-main)] hover:opacity-80  transition ">Impact</a>
   </li>
   <li>
     <a href="#services" className="text-[var(--color-text-main)] hover:opacity-80  transition">Services</a>
   </li>
-  <li className="cursor-pointer text-[var(--color-text-main)] hover:opacity-80  transition">
+
+  {/* toggle theme */}
+  <li className="cursor-pointer text-[var(--color-text-main)] hover:opacity-80  transitions">
     <FiSun size={18} />
   </li>
   <li className="cursor-pointer text-[var(--color-text-main)] hover:opacity-80  transition">

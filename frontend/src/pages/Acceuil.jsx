@@ -8,8 +8,6 @@ export default function Acceuil() {
       <Header />
       <Footer />
     </div>
-
-  
   );
 }
 

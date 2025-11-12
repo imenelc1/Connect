@@ -1,15 +1,17 @@
 import React from "react";
 import Logo from "./logo";
-import NavLinks from "./NavLinks";
-import Button from "./ButtonCA";
 import ButtonCA from "./ButtonCA";
+import NavLinks from "./NavLinks";
 
 export default function Navbar() {
   return (
     <nav className="flex items-center justify-between">
       <Logo />
-      <NavLinks />
-      <ButtonCA />
+      <div className="flex items-center space-x-8">
+    <NavLinks />
+    <ButtonCA />
+  </div>
+     
     </nav>
   );
 }

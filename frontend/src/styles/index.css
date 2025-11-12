@@ -2,14 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
   :root {
     /* --- LIGHT THEME --- */
-    --color-primary: #4F9DDE;
+     --color-primary: /*#4F9DDE*/ #4f9cdd; 
     --color-secondary: #A3AAED;
-    --color-bg:#4f9ede13;
+     --color-bg:/*#4f9ede13*/ #f5f9fd; 
     --color-surface: #FFFFFF;
-    --color-text-main: #1B213F;
+   --color-text-main:  /* #1B213F*/#4a4b4c; 
     --color-text-muted: #959BA5;
   }
 
@@ -25,12 +26,49 @@
 
 
   body {
+  
+  font-family: 'Poppins', sans-serif;
+
     background: var(--color-bg);
     color: var(--color-text-main);
+    overflow-x: hidden;
   }
 
   button {
     background: var(--color-primary);
     color: white;
   }
+.inner-shadow {
+  box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.text-inner-shadow {
+  color: #c7ccf4;
+  text-shadow:
+    1px 1px 0 #00000025,
+   -1px -1px 0 #00000025,
+    1px -1px 0 #00000025,
+   -1px 1px 0 #00000025;
+}
+
+
+.text-3d {
+  color: #c7ccf4;
+  
+  text-shadow: 0 2px 1px #ffffff,   /* haut clair */
+    0 -2px 1px rgba(0, 0, 0, 0.25), /* bas sombre */ 
+     2px 2px 4px rgba(0,0,0,0.2);  /* flou général */
+  /* 0 1px 0 #fff, 0 -1px 0 rgba(0,0,0,0.25); */
+}
+
+
+
+
+
+
+
+
+
+
+
 }

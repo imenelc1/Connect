@@ -1,7 +1,7 @@
 import React from "react";
 import Acceuil from "./pages/Acceuil";
 
-function App() {
+export default function App() {
   return (
     <div className="App">
       <Acceuil />
@@ -9,4 +9,3 @@ function App() {
   );
 }
 
-export default App;
