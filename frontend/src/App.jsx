@@ -1,23 +1,14 @@
+// src/App.jsx
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
-import StudentSignup from "./pages/StudentSignUp";
-import InstructorSignup from "./pages/InstructorSignUp";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
 
-function App() {
+const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/signup/student" element={<StudentSignup />} />
-        <Route path="/signup/instructor" element={<InstructorSignup />} />
-        <Route path="*" element={<Navigate to="/signup/student" replace />} />
-      </Routes>
-    </Router>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
-}
+};
 
 export default App;

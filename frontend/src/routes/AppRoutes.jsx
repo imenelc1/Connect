@@ -1,13 +1,14 @@
-// src/Routes/AppRoutes.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Signup from "../pages/StudentSignUp";
+import StudentSignup from "../pages/StudentSignUp";
+import InstructorSignup from "../pages/InstructorSignUp";
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Signup />} />
-      {/* Plus tard : ajouter d'autres routes comme Signin */}
+      <Route path="/student-signup" element={<StudentSignup />} />
+      <Route path="/instructor-signup" element={<InstructorSignup />} />
+      {/* Ajoutez d'autres routes ici */}
     </Routes>
   );
 };
