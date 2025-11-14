@@ -1,3 +1,4 @@
+// 
 import Cards from "./Cards";
 import "../../styles/index.css";
 import {
@@ -9,42 +10,39 @@ import {
   FaComments
 } from "react-icons/fa";
 
-
-
-
 export default function CardsSection() {
   const features = [
     {
-      icon: <FaBookOpen/>,
+      icon: <FaBookOpen />,
       title: "STRUCTURED COURSES",
       text: "Progressive and well-organized lessons to master fundamental concepts.",
     },
     {
       icon: <FaChartLine />,
-      title:"PERSONALIZED TRACKING",
+      title: "PERSONALIZED TRACKING",
       text: "Track your progress and identify your strengths and areas for improvement.",
       gradient: true,
     },
     {
       icon: <FaUsers />,
-      title:"ACCESSIBLE TO EVERYONE",
+      title: "ACCESSIBLE TO EVERYONE",
       text: "A platform designed for all levels — from beginners to experts.",
     },
     {
       icon: <FaBrain />,
-      title: "Integrated AI",
-      text: "Smart and well-organized lessons to master fundamental concepts.",
+      title: "INTEGRATED AI",
+      text: "AI-powered guidance that adapts to your level, helping you learn faster and understand complex concepts with clarity.",
     },
     {
       icon: <FaGamepad />,
-      title: "Gamification",
-      text: "Track your progress and identify your strengths and areas for improvement.",
+      title: "GAMIFICATION",
+      text: "Boost your learning with interactive challenges, achievements, and rewards that turn your progress into a game.",
       gradient: true,
     },
     {
       icon: <FaComments />,
-      title: "Forums for collaboration",
-      text: "A platform designed for all levels — from beginners to experts.",
+      title: "FORUMS FOR COLLABORATION",
+      text: "Collaborate, exchange ideas, and get help through dedicated forums connecting students and teachers.",
     },
   ];
 
