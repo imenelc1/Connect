@@ -8,19 +8,19 @@ import "../styles/index.css";
 function Choice() {
     return (
 
-     <div className="Choice flex flex-col min-h-screen  bg-[radial-gradient(circle_at_center,_#bad7f0,_#ffffff)]
+     <div className="Choice flex flex-col h-screen overflow-hidden bg-[radial-gradient(circle_at_center,_#bad7f0,_#ffffff)]
 ">
 
 
-            <header className="mt-10 ml-10">
+            <header className="p-6">
                 <Logo className="w-20 h-30" />
             </header>
 
 
-            <main className="flex flex-col gap-20 items-center mt-20 flex-grow text-center ">
+            <main className="flex flex-col flex-grow justify-center items-center gap-20 text-center px-4 ">
                
                 
-                    <Icon  className=" w-46 md:w-32 md:w-64 md:h-40  drop-shadow-lg " />
+                    <Icon   />
                     <p className='font-poppins text-3xl #a5a5a5ff' id='p-choice'>
                         To Personalize your experience, please indicate <br /> your profile.
                     </p>

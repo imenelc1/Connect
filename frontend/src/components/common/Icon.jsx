@@ -20,12 +20,13 @@
 import LogoIconeLight from "../../assets/LogoIconeLight.svg";
 import "../../styles/index.css";
 
-export default function Icon({ className=" "}) {
+export default function Icon() {
   return (
     <div className="mt-10 md:mt-0">
       <img
         src={LogoIconeLight}
         alt=" Icon"
+        className=" w-46  md:w-64 md:h-40  drop-shadow-lg "
        />
     </div>
   );
