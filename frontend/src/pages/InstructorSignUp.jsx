@@ -31,9 +31,9 @@ const InstructorSignup = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8" style={{ backgroundColor: "#f5f9fd" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center p-8 overflow-hidden" style={{ backgroundColor: "#f5f9fd" }}>
       {/* Header */}
-      <div className="w-full max-w-6xl flex items-center px-6 pt-5 pb-2 mb-2">
+      <div className="w-full max-w-3xl md:max-w-4xl lg:max-w-5xl flex items-center px-6 pt-5 pb-2 mb-2">
         <img src={logo} alt="Connect Logo" className="w-36 h-auto" />
         <div className="flex-1 flex justify-center">
           <AuthTabs active="signup" />
@@ -83,7 +83,7 @@ const InstructorSignup = () => {
         {/* Mascotte */}
         <div className="flex-1 flex items-center justify-center relative bg-white overflow-hidden">
           {/* Halo bleu */}
-          <div className="absolute w-72 h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
+          <div className="absolute w-48 h-48 md:w-64 md:h-64 rounded-full blur-2xl" style={{ background: "rgba(52,144,220,0.6)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
 
           {/* Cercle < > collé au rectangle */}
           <div
@@ -112,7 +112,8 @@ const InstructorSignup = () => {
           </div>
 
           {/* Mascotte */}
-          <img src={robot} alt="robot" className="max-w-xs md:max-w-md drop-shadow-lg relative z-10" />
+          <img src={robot} alt="robot"   className="max-w-[180px] md:max-w-[260px] drop-shadow-lg relative z-10"
+ />
         </div>
       </div>
     </div>
