@@ -60,7 +60,8 @@ const InstructorSignup = () => {
 
         {/* Tabs parfaitement centrés */}
         <div className="flex justify-center">
-          <AuthTabs active="signup" />
+                <AuthTabs role="instructor" active="signup" />
+
         </div>
       </header>
 

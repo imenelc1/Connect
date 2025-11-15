@@ -72,7 +72,7 @@ const StudentSignup = () => {
 
         {/* Onglets centrés */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <AuthTabs active="signup" />
+           <AuthTabs role="student" active="signup" />
         </div>
 
         {/* Espace vide à droite */}

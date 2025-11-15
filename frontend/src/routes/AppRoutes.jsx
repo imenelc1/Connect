@@ -3,7 +3,8 @@ import Acceuil from "../pages/Acceuil";
 import Choice from "../pages/Choice";
 import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
-
+import LoginInstructor from "../pages/LoginInstructor";
+import LoginStudent from "../pages/LoginStudent";
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -11,8 +12,13 @@ export default function AppRoutes() {
         <Route path="/" element={<Acceuil />} />
         <Route path="/choice" element={<Choice />} />
 
-        <Route path="/student-signup" element={<StudentSignup />} />
-        <Route path="/instructor-signup" element={<InstructorSignup />} />
+       {/* SIGNUP */}
+        <Route path="/signup/instructor" element={<InstructorSignup />} />
+        <Route path="/signup/student" element={<StudentSignup />} />
+
+        {/* LOGIN */}
+        <Route path="/login/instructor" element={<LoginInstructor />} />
+        <Route path="/login/student" element={<LoginStudent />} />
       </Routes>
     </BrowserRouter>
   );
