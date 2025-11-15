@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 
 import "../../styles/index.css";
-import Button from "../common/button";
+import Button from "../common/Button";
 
 export default function HeroSection() {
   const navigate = useNavigate();

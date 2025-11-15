@@ -39,10 +39,7 @@
     overflow-x: hidden;
   }
 
-  button {
-    background: linear-gradient(to right, #458fc2, #2d6980);
-    color: white;
-  }
+ 
 .inner-shadow {
   box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
 }

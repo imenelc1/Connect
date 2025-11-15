@@ -5,7 +5,9 @@ import Logo from '../components/common/logo';
 import Button from '../components/common/Button';
 import Footer from '../components/layout/Footer';
 import "../styles/index.css";
+import { useNavigate } from "react-router-dom";
 function Choice() {
+    const navigate = useNavigate();
     return (
 
    <div className="Choice flex flex-col h-screen bg-[radial-gradient(circle_at_center,_#bad7f0,_#ffffff)]">
@@ -24,15 +26,15 @@ function Choice() {
         </p>
 
         <div className="flex gap-10 md:gap-16">
-            <Button className="shadow-md rounded-3xl font-bold font-poppins 
-                    text-lg sm:text-xl md:text-2xl hover:opacity-90 
+            <Button  onClick={() => navigate("/instructor-signup")}  className="shadow-md rounded-3xl font-bold font-poppins bg-gradient-to-r from-[#458fc2] to-[#2d6980]
+                    text-lg sm:text-xl md:text-2xl hover:opacity-90  text-white
                     flex w-36 sm:w-48 md:w-56 items-center justify-center gap-3 px-10 py-4">
                 <UserRound size={24}/>
                 Instructor
             </Button>
 
-            <Button className="shadow-md rounded-3xl font-bold font-poppins 
-                    text-lg sm:text-xl md:text-2xl hover:opacity-90 
+            <Button  onClick={() => navigate("/student-signup")} className="shadow-md rounded-3xl font-bold font-poppins bg-gradient-to-r from-[#458fc2] to-[#2d6980]
+                    text-lg sm:text-xl md:text-2xl hover:opacity-90  text-white
                     flex w-36 sm:w-48 md:w-56 items-center justify-center gap-3 px-10 py-4">
                 <GraduationCap size={24}/>
                 Student
