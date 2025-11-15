@@ -4,6 +4,9 @@ module.exports = {
     "./index.html",             // pour le fichier HTML principal
     "./src/**/*.{js,jsx,ts,tsx}" // pour tous tes fichiers React
   ],
+
+  
+
   theme: {
     extend: {
       fontFamily: {

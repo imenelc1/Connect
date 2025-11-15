@@ -3,7 +3,7 @@ import Navbar from "../common/Navbar";
 import Text from "../common/Text";
 import Icon from "../common/Icon";
 import "../../styles/index.css";
-import Button from "../common/Button";
+import Button from "../common/button";
 
 export default function Header() {
   return (
