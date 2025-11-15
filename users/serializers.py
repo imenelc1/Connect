@@ -12,7 +12,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
             'id_utilisateur', 'nom', 'prenom', 'date_naissance',
             'adresse_email', 'mot_de_passe', 'matricule'
         ]
-
+   
     def create(self, validated_data):
         mot_de_passe = validated_data.pop('mot_de_passe')
         user = Utilisateur(**validated_data)

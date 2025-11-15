@@ -5,6 +5,8 @@ import AuthTabs from "../components/common/AuthTabs";
 import logo from "../assets/LogoLight.svg";
 import robot from "../assets/mascotte.svg";
 import googleIcon from "../assets/google-icon.svg";
+import api from "../services/api";
+
 import {
   FaUser,
   FaEnvelope,
@@ -31,17 +33,54 @@ const InstructorSignup = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+const [message, setMessage] = useState("");
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Vérifier mots de passe
     if (formData.password !== formData.confirm) {
-      alert("Les mots de passe ne correspondent pas !");
+      setErrorMessage(" Les mots de passe ne correspondent pas !");
       return;
     }
-    console.log("Instructor signup submitted:", formData);
+    const payload = {
+  nom: formData.nickname,      // si c'est bien votre "nom"
+  prenom: formData.fullname,   // si c'est bien votre "prenom"
+  adresse_email: formData.email,
+  mot_de_passe: formData.password,
+  date_naissance: formData.dob,
+  matricule: formData.regnumber,
+  
+  role: "enseignant",
+  grade: formData.rank
+};
+
+    
+      try {
+      const res = await api.post("register/", payload); // 🔥 API Axios
+
+      setMessage("Inscription réussie ! ");
+
+      setTimeout(() => {
+        window.location.href = "/login-instructor";
+      }, 1500);
+
+     } catch (err) {
+  console.log("Erreur API:", err);
+
+  // ⭐ Ajoute ceci pour voir l’erreur JSON exacte :
+  console.log("Django error response:", err.response?.data);
+
+  setMessage(
+    err.response?.data?.error ||
+    "Erreur réseau, vérifie que Django tourne bien"
+  );
+}
+
   };
 
   return (
@@ -49,34 +88,37 @@ const InstructorSignup = () => {
       className="min-h-screen flex flex-col items-center justify-start p-8"
       style={{ backgroundColor: "#f5f9fd" }}
     >
-      {/* --------- HEADER ---------- */}
+      
       <header className="w-full relative flex items-center justify-center py-4 mb-8">
-        {/* Logo complètement à gauche */}
         <img
           src={logo}
           alt="Connect Logo"
           className="absolute left-6 top-1/2 -translate-y-1/2 w-28 md:w-36"
         />
 
-        {/* Tabs parfaitement centrés */}
         <div className="flex justify-center">
-                <AuthTabs role="instructor" active="signup" />
-
+          <AuthTabs role="instructor" active="signup" />
         </div>
       </header>
 
-      {/* --------- CONTAINER ---------- */}
       <div
         className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl flex overflow-hidden"
         style={{ boxShadow: "0 6px 48px rgba(52,144,220,.12)" }}
       >
-        {/* ---------- FORM SIDE ---------- */}
+        
         <div className="flex-1 p-10 bg-white">
           <h2 className="text-2xl font-semibold text-slate-700 mb-6">
             Welcome to <span className="text-sky-500">connect</span>
           </h2>
 
+          {/* MESSAGE  */}
+          {message && (
+            <p className="text-center text-red-500 mb-4 font-semibold">
+              {message}
+            </p>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
+
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Enter your nickname"
@@ -192,22 +234,22 @@ const InstructorSignup = () => {
               Continue with Google
             </Button>
 
-            <Button type="submit"variant="primary">
+            <Button type="submit" variant="primary">
               <FaPaperPlane className="inline mr-2" /> Sign up
             </Button>
 
             <p className="text-sm text-gray-500 text-center">
               Already have an account?{" "}
-              <a href="#" className="text-sky-500">
+              <a href="/instructor/login" className="text-sky-500">
                 Sign in
               </a>
             </p>
           </form>
         </div>
 
-        {/* ---------- RIGHT SIDE (ROBOT + FOND + CERCLE + RECTANGLE) ---------- */}
+        {/* --- RIGHT SIDE --- */}
         <div className="flex-1 flex items-center justify-center relative bg-white overflow-hidden">
-          {/* Fond bleu flou derrière la mascotte */}
+
           <div
             className="absolute w-72 h-72 rounded-full blur-3xl"
             style={{
@@ -218,7 +260,6 @@ const InstructorSignup = () => {
             }}
           />
 
-          {/* Cercle "< >" */}
           <div
             className="absolute w-12 h-12 rounded-full flex items-center justify-center z-20"
             style={{
@@ -239,7 +280,6 @@ const InstructorSignup = () => {
             </span>
           </div>
 
-          {/* Rectangle avec texte */}
           <div className="absolute z-10" style={{ top: "70px", right: "40px" }}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -274,7 +314,6 @@ const InstructorSignup = () => {
             </svg>
           </div>
 
-          {/* Mascotte */}
           <img
             src={robot}
             alt="robot"

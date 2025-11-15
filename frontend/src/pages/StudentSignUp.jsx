@@ -5,6 +5,7 @@ import AuthTabs from "../components/common/AuthTabs";
 import logo from "../assets/LogoLight.svg";
 import robot from "../assets/mascotte.svg";
 import googleIcon from "../assets/google-icon.svg";
+import api from "../services/api";
 import {
   FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaIdBadge,
   FaGraduationCap, FaPaperPlane, FaEye, FaEyeSlash
@@ -43,43 +44,73 @@ const StudentSignup = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleChange = e =>
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
+
     if (formData.password !== formData.confirm) {
-      alert("Les mots de passe ne correspondent pas !");
+      setMessage("Les mots de passe ne correspondent pas !");
       return;
     }
-    console.log("Envoi au backend :", formData);
+
+    // Mapping pour Django
+    const payload = {
+      nom: formData.nickname,
+      prenom: formData.fullname,
+      adresse_email: formData.email,
+      mot_de_passe: formData.password,
+      date_naissance: formData.dob,
+      matricule: formData.regnumber,
+      specialite: formData.field,
+      annee_etude: formData.year,
+      role: "etudiant",
+    };
+
+
+      try {
+      const res = await api.post("register/", payload); // 🔥 API Axios
+
+      setMessage("Inscription réussie ! ");
+
+      setTimeout(() => {
+        window.location.href = "/login-etudiant";
+      }, 1500);
+
+    } catch (err) {
+      console.log("Erreur API:", err);
+
+      // 🔥 Protection contre erreur réseau
+      setMessage(
+        err.response?.data?.error ||
+        "Erreur réseau, vérifie que Django tourne bien"
+      );
+    }
   };
+
 
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center p-0"
       style={{ backgroundColor: "#f5f9fd" }}
     >
-
-      {/* Header corrigé */}
+      {/* Header */}
       <div className="w-full flex items-center justify-between px-8 py-5 relative">
-        
-        {/* Logo à gauche */}
         <div className="flex-shrink-0">
           <img src={logo} alt="Connect Logo" className="w-28 md:w-36 h-auto" />
         </div>
 
-        {/* Onglets centrés */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
            <AuthTabs role="student" active="signup" />
         </div>
 
-        {/* Espace vide à droite */}
         <div className="w-32"></div>
       </div>
 
-      {/* Formulaire + Mascotte */}
+      {/* Formulaire + mascotte */}
       <div
         className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl flex overflow-hidden"
         style={{ boxShadow: "0 6px 48px 0 rgba(52,144,220,.12)" }}
@@ -90,6 +121,12 @@ const StudentSignup = () => {
           <h2 className="text-2xl font-semibold text-slate-700 mb-6">
             Welcome to <span className="text-sky-500">connect</span>
           </h2>
+
+          {message && (
+            <p className="text-center text-red-500 mb-4 font-semibold">
+              {message}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -197,40 +234,19 @@ const StudentSignup = () => {
               Continue with Google
             </Button>
 
-            <Button type="submit"variant="primary">
+            <Button type="submit" variant="primary">
               <FaPaperPlane className="inline mr-2" /> Sign up
             </Button>
 
             <p className="text-sm text-gray-500 text-center">
               Already have an account?{" "}
-              <a href="#" className="text-sky-500">Sign in</a>
+              <a href="/login-etudiant" className="text-sky-500">Sign in</a>
             </p>
           </form>
         </div>
 
         {/* Mascotte */}
         <div className="flex-1 flex items-center justify-center relative bg-white overflow-hidden">
-          <div
-            className="absolute w-72 h-72 rounded-full blur-3xl"
-            style={{ background: "rgba(52,144,220,0.6)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
-          />
-          <div
-            className="absolute w-12 h-12 rounded-full flex items-center justify-center z-20"
-            style={{ backgroundColor: "#FFFFFF", border: "2px solid rgba(0,0,0,0.13)", top: "50px", right: "40px" }}
-          >
-            <span style={{ color: "#3490DC", fontSize: "22px", fontWeight: "bold" }}>&lt;&gt;</span>
-          </div>
-          <div className="absolute z-10" style={{ top: "70px", right: "40px" }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="300" height="175" viewBox="0 0 331 193" fill="none">
-              <g filter="url(#filter0_dd)">
-                <path d="M11 22C11 13.7157 17.7157 7 26 7H304.372C312.656 7 319.372 13.7157 319.372 22V162.204C319.372 170.488 312.656 177.204 304.372 177.204H26C17.7157 177.204 11 170.488 11 162.204V22Z" fill="white" fillOpacity="0.97" />
-                <path d="M26 7.5H304.372C312.38 7.50008 318.872 13.9919 318.872 22V162.204C318.872 170.212 312.38 176.704 304.372 176.704H26C17.9919 176.704 11.5 170.212 11.5 162.204V22C11.5 13.9919 17.9919 7.5 26 7.5Z" stroke="black" strokeOpacity="0.13" />
-              </g>
-              <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" fontSize="20" fontWeight="500" fill="#000">
-                Join CONNECT, dear student!
-              </text>
-            </svg>
-          </div>
           <img src={robot} alt="robot" className="max-w-xs md:max-w-md drop-shadow-lg relative z-10" />
         </div>
       </div>

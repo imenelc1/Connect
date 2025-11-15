@@ -14,62 +14,72 @@ class RegisterView(generics.CreateAPIView):
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
 
+        # Création du profil selon le rôle
         if role == "etudiant":
             Etudiant.objects.create(
                 utilisateur=user,
                 specialite=request.data.get("specialite"),
                 annee_etude=request.data.get("annee_etude")
             )
+
         elif role == "enseignant":
             Enseignant.objects.create(
                 utilisateur=user,
                 grade=request.data.get("grade")
             )
 
+        # Réponse
         data = user_serializer.data
-        data.pop("mot_de_passe", None)
         data["role"] = role
-
         return Response({
             "message": "Utilisateur créé avec succès",
             "user": data
         }, status=status.HTTP_201_CREATED)
 
 
+
 class LoginView(APIView):
     def post(self, request):
-        email = request.data.get('adresse_email')
-        password = request.data.get('mot_de_passe')
+        email = request.data.get("adresse_email") or request.data.get("email")
+        password = request.data.get("mot_de_passe") or request.data.get("password")
+
+        if not email or not password:
+            return Response({"error": "Email et mot de passe requis"}, status=400)
 
         try:
             user = Utilisateur.objects.get(adresse_email=email)
+
             if user.check_password(password):
                 role = None
                 role_data = {}
 
-                if hasattr(user, 'etudiant'):
+                if hasattr(user, "etudiant"):
                     role = "etudiant"
                     role_data = {
                         "specialite": user.etudiant.specialite,
-                        "annee_etude": user.etudiant.annee_etude
+                        "annee_etude": user.etudiant.annee_etude,
                     }
-                elif hasattr(user, 'enseignant'):
+
+                elif hasattr(user, "enseignant"):
                     role = "enseignant"
-                    role_data = {"grade": user.enseignant.grade}
+                    role_data = {
+                        "grade": user.enseignant.grade,
+                    }
 
                 return Response({
                     "message": "Connexion réussie",
                     "user_id": user.id_utilisateur,
                     "nom": user.nom,
                     "prenom": user.prenom,
+                    "email": user.adresse_email,
                     "role": role,
                     **role_data
-                }, status=status.HTTP_200_OK)
+                }, status=200)
 
-            return Response({"error": "Mot de passe incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Mot de passe incorrect"}, status=401)
 
         except Utilisateur.DoesNotExist:
-            return Response({"error": "Utilisateur introuvable"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Utilisateur introuvable"}, status=404)
 
 
 class AdminRegisterView(generics.CreateAPIView):

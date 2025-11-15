@@ -6,10 +6,34 @@ import GoogleButton from "../components/common/GoogleButton";
 import PrimaryButton from "../components/common/PrimaryButton";
 import Mascotte from "../assets/mascotte.svg";
 import LogoLight from "../assets/LogoLight.svg";
+import api from "../services/api";
 
 export default function LoginInstructor() {
   const [activeTab, setActiveTab] = useState("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
 
+    try {
+      const res = await api.post("login/", {
+        email: email,
+        password: password,
+      });
+
+      console.log("LOGIN SUCCESS =", res.data);
+      alert("Connexion instructeur réussie !");
+    } catch (error) {
+      console.log(error);
+      if (error.response) {
+        setErrorMsg(error.response.data.error);
+      } else {
+        setErrorMsg("Erreur réseau");
+      }
+    }
+  };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Logo en haut à gauche */}
@@ -31,11 +55,16 @@ export default function LoginInstructor() {
            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 w-full">
             Welcome to <span className="text-blue-500">connect</span>
           </h2>
-          <form className="space-y-4">
+            {errorMsg && (
+            <p className="text-red-500 text-center text-sm mb-3">{errorMsg}</p>
+          )}
+          <form className="space-y-4"onSubmit={handleSubmit}>
             <InputField
               label=" email address"
               placeholder=" email address"
               icon="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <InputField
               label="Enter your Password"
@@ -43,6 +72,8 @@ export default function LoginInstructor() {
               type="password"
               icon="password"
               showForgot={true}   
+               value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <Divider text="Or" />
             <GoogleButton />
