@@ -1,15 +1,17 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
 @layer base {
   :root {
     /* --- LIGHT THEME --- */
-    --color-primary: #4F9DDE;
+     --color-primary: /*#4F9DDE*/ #4f9cdd; 
     --color-secondary: #A3AAED;
-    --color-bg:#4f9ede13;
+     --color-bg:/*#4f9ede13*/ #f5f9fd; 
     --color-surface: #FFFFFF;
-    --color-text-main: #1B213F;
+   --color-text-main:  /* #1B213F*/#4a4b4c; 
     --color-text-muted: #959BA5;
   }
 
@@ -25,12 +27,111 @@
 
 
   body {
+  
+  font-family: 'Poppins', sans-serif;
+
     background: var(--color-bg);
     color: var(--color-text-main);
+    overflow-x: hidden;
   }
 
   button {
-    background: var(--color-primary);
+    background: linear-gradient(to right, #458fc2, #2d6980);
     color: white;
   }
+.inner-shadow {
+  box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.text-inner-shadow {
+  color: #c7ccf4;
+  text-shadow:
+    1px 1px 0 #00000025,
+   -1px -1px 0 #00000025,
+    1px -1px 0 #00000025,
+   -1px 1px 0 #00000025;
+}
+
+
+.text-3d {
+  color: #c7ccf4;
+  
+  text-shadow: 0 2px 1px #ffffff,   /* haut clair */
+    0 -2px 1px rgba(0, 0, 0, 0.25), /* bas sombre */ 
+     2px 2px 4px rgba(0,0,0,0.2);  /* flou général */
+  /* 0 1px 0 #fff, 0 -1px 0 rgba(0,0,0,0.25); */
+}
+#p-choice{
+  color: rgb(133, 133, 133);
+
+}
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  line-height: 1.6;
+}
+.about-content p{
+  width: 70%;
+}
+.about-container h1{
+
+ background:  linear-gradient(to right, #4F9DDE,#2F4F70, #2F4F70);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+font-weight: 550;
+  font-size: 2rem;
+}
+
+
+.vision-section h2 {
+   background: linear-gradient(to top, #4F9DDE,#2F4F70,#2F4F70);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+.mission-values .our{
+  width: 140px;
+  border-radius: 10px;
+  height: 60px;
+
+   background: linear-gradient(to top, #cce0f5, #ffffff);
+ 
+
+}
+.vision-section{
+  display: flex;
+}
+
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .about-container {
+    padding: 1rem;
+  }
+  
+  .mission-values-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .about-header h1 {
+    font-size: 2rem;
+  }
+  
+  .mission-card,
+  .values-card,
+  .vision-card {
+    padding: 1.5rem;
+  }
+}
+
+
+
+
 }

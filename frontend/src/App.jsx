@@ -1,7 +1,12 @@
-export default function App() {
+import React from 'react';
+import Choice from"./pages/Choice";
+
+function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-500 text-white text-2xl font-bold">
-      Tailwind fonctionne 🎉
+    <div className="App">
+  
+      <Choice />
     </div>
   );
 }
+export default App;
