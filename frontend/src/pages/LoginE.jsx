@@ -5,7 +5,7 @@ import InputField from "../components/common/InputField";
 import Divider from "../components/common/Divider";
 import GoogleButton from "../components/common/GoogleButton";
 import PrimaryButton from "../components/common/PrimaryButton";
-import Mascotte from "../components/common/mascotte.svg";
+import Mascotte from "../assets/mascotte.svg";
 import LogoLight from "../assets/LogoLight.svg";
 
 export default function LoginE() {
