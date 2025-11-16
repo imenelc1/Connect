@@ -1,10 +1,14 @@
-import React from 'react';
-import Logo from './components/common/Logo.jsx';
+// src/App.jsx
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
 
-export default function App() {
+const App = () => {
   return (
-    <div className="App ">
-      <Logo />
-    </div>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
-}
+};
+
+export default App;
