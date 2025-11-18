@@ -275,10 +275,8 @@ const StudentSignup = () => {
 
             <div className="text-center text-gray-400">Or</div>
 
-            <Button variant="outline">
-              <img src={googleIcon} alt="google" className="inline-block w-5 h-5 mr-2" />
-              Continue with Google
-            </Button>
+            <Button text="Continue with Google" variant="google" />
+           
 
             <Button type="submit" variant="primary">
               <FaPaperPlane className="inline mr-2" /> Sign up

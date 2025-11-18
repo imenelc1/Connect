@@ -6,7 +6,6 @@ import logo from "../assets/LogoLight.svg";
 import robot from "../assets/mascotte.svg";
 import googleIcon from "../assets/google-icon.svg";
 import api from "../services/api";
-import GoogleButton from "../components/common/GoogleButton";
 
 import { FaEye, FaEyeSlash, FaPaperPlane } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -231,7 +230,8 @@ const InstructorSignup = () => {
 
             <div className="text-center text-gray-400">Or</div>
 
-            <GoogleButton />
+            <Button text="Continue with Google" variant="google" />
+
             <Button type="submit" variant="primary">
               <FaPaperPlane className="inline mr-2" /> Sign up
             </Button>

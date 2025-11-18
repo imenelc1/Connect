@@ -21,14 +21,18 @@ export default function HeroSection() {
           <Text />
             
           <div className="flex space-x-4">
-            <Button  onClick={() => navigate("/choice")} className=" bg-[var(--color-primary)] text-white px-12 py-2 rounded-xl font-medium shadow hover:opacity-90 transition flex flex-row items-center gap-2">
-           <FaPaperPlane className="text-white text-lg" size={16} />
-            Get Started
+            <Button 
+              variant="heroPrimary"
+              onClick={() => navigate("/choice")}
+            >
+              <FaPaperPlane className="text-white text-lg" size={16} />
+              Get Started
             </Button>
 
-           <Button className=" border border-[var(--color-primary)] text-[var(--color-primary)] bg-white px-12 py-2 rounded-xl font-medium hover:bg-[var(--color-bg)] transition ">
-            how it works
-           </Button > 
+              <Button variant="heroOutline">
+                how it works
+              </Button>
+
           </div>
      
         </div>

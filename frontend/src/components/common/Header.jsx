@@ -1,6 +1,6 @@
 import React from "react";
 import Logo from "./logo";
-import ButtonCA from "./ButtonCA";
+import Button from "./Button";
 import HeaderLinks from "./HeaderLinks";
 
 export default function Navbar() {
@@ -9,7 +9,8 @@ export default function Navbar() {
       <Logo />
       <div className="flex items-center space-x-8">
     <HeaderLinks />
-    <ButtonCA />
+    <Button text="Create Account" variant="ca" />
+
   </div>
      
     </nav>

@@ -26,17 +26,14 @@ function Choice() {
         </p>
 
         <div className="flex gap-10 md:gap-16">
-            <Button  onClick={() => navigate("/signup/instructor")}  className="shadow-md rounded-3xl font-bold font-poppins bg-gradient-to-r from-[#458fc2] to-[#2d6980]
-                    text-lg sm:text-xl md:text-2xl hover:opacity-90  text-white
-                    flex w-36 sm:w-48 md:w-56 items-center justify-center gap-3 px-10 py-4">
-                <UserRound size={24}/>
+            <Button variant="choice" onClick={() => navigate("/signup/instructor")}>
+                <UserRound size={24} />
                 Instructor
             </Button>
 
-            <Button  onClick={() => navigate("/signup/student")} className="shadow-md rounded-3xl font-bold font-poppins bg-gradient-to-r from-[#458fc2] to-[#2d6980]
-                    text-lg sm:text-xl md:text-2xl hover:opacity-90  text-white
-                    flex w-36 sm:w-48 md:w-56 items-center justify-center gap-3 px-10 py-4">
-                <GraduationCap size={24}/>
+           
+            <Button variant="choice" onClick={() => navigate("/signup/student")}>
+                <GraduationCap size={24} />
                 Student
             </Button>
         </div>

@@ -2,14 +2,13 @@ import { useState } from "react";
 import AuthTabs from "../components/common/AuthTabs";
 import Input from "../components/common/Input"; // <== ICI
 import Divider from "../components/common/Divider";
-import GoogleButton from "../components/common/GoogleButton";
-import PrimaryButton from "../components/common/PrimaryButton";
+
 import Mascotte from "../assets/mascotte.svg";
 import LogoLight from "../assets/LogoLight.svg";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-
+import Button from "../components/common/Button";
 export default function LoginStudent() {
   const [activeTab] = useState("signin");
   const [email, setEmail] = useState("");
@@ -127,7 +126,8 @@ export default function LoginStudent() {
 
             <Divider text="Or" />
 
-            <GoogleButton />
+            <Button text="Continue with Google" variant="google" />
+            
 
             <p className="text-sm text-gray-500 text-center mt-4">
               Don't have an account?{" "}
@@ -136,7 +136,7 @@ export default function LoginStudent() {
               </a>
             </p>
 
-            <PrimaryButton text="Sign in" type="submit" />
+            <Button text="Sign in" variant="primary" type="submit" />
           </form>
         </div>
 
