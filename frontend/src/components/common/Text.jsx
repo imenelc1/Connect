@@ -5,7 +5,7 @@ export default function Text() {
     <div className="space-y-6 ">
       {/* Grand titre */}
       <h1 className="text-5xl md:text-6xl font-bold leading-tight text-3d">
-        <span  className="text-[var(--color-primary)]">A</span>{" "}
+        <span  className="text-primary">A</span>{" "}
         <span style={{ color: "var(--color-secondary)" }} >Smarter Way</span> {" "}
         <span className="text-[var(--color-primary)]">To</span> {" "}
        

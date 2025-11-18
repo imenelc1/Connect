@@ -13,7 +13,7 @@ export default function HeroSection() {
   const navigate = useNavigate();
   return (
 
-    <header className="bg-[var(--color-bg)] min-h-[90vh] flex flex-col  px-8 py-0 md:px-16">
+    <header className="bg-surface min-h-[90vh] flex flex-col  px-8 py-0 md:px-16">
       <Header />
         
       <div className="flex flex-col md:flex-row items-center justify-between mt-15 md:mt-20">
@@ -21,7 +21,7 @@ export default function HeroSection() {
           <Text />
             
           <div className="flex space-x-4">
-            <Button  onClick={() => navigate("/choice")} className=" bg-[var(--color-primary)] text-white px-12 py-2 rounded-xl font-medium shadow hover:opacity-90 transition flex flex-row items-center gap-2">
+            <Button  onClick={() => navigate("/choice")} className=" bg-primary text-white px-12 py-2 rounded-xl font-medium shadow hover:opacity-90 transition flex flex-row items-center gap-2">
            <FaPaperPlane className="text-white text-lg" size={16} />
             Get Started
             </Button>

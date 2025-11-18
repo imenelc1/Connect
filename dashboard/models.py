@@ -28,7 +28,10 @@ class Badge(models.Model):
     nom = models.CharField(max_length=100)
     description = models.TextField()
     icone = models.ImageField(upload_to='badges/', null=True, blank=True)
-    condition = models.CharField(max_length=255, help_text="Condition to earn this badge")
+    condition = models.CharField(max_length=255)
+    categorie = models.CharField(max_length=50, default="Général")
+    numpoints = models.IntegerField(default=0)
+
 
     def __str__(self):
         return self.nom

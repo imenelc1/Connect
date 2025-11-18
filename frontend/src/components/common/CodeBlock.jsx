@@ -4,7 +4,7 @@ import "../../styles/index.css";
 
 export default function CodeBlock() {
   return (
-    <div className="relative bg-[var(--color-surface)] p-6 rounded-2xl shadow-lg  w-[420px] h-[260px] md:w-[450px] md:h-[260px] ">
+    <div className="relative bg-grad-1 p-6 rounded-2xl shadow-lg  w-[420px] h-[260px] md:w-[450px] md:h-[260px] ">
 
       {/* Nom du fichier */}
       <div className="text-[var(--color-text-main)] mb-3 font-bold">
