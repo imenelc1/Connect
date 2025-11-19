@@ -7,7 +7,7 @@ import robot from "../assets/mascotte.svg";
 import googleIcon from "../assets/google-icon.svg";
 import api from "../services/api";
 
-import { FaEye, FaEyeSlash, FaPaperPlane } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge , FaCalendarAlt, FaLock, FaEnvelope, FaUser } from "react-icons/fa";
 import toast from "react-hot-toast";
 
 const InstructorSignup = () => {
@@ -134,7 +134,7 @@ const InstructorSignup = () => {
                 value={formData.nickname}
                 onChange={handleChange}
                 placeholder="Nickname"
-                icon="user"
+                icon={<FaUser />}
                 error={errors.nickname}
               />
 
@@ -144,7 +144,7 @@ const InstructorSignup = () => {
                 value={formData.fullname}
                 onChange={handleChange}
                 placeholder="Full name"
-                icon="user"
+                icon={<FaUser />}
                 error={errors.fullname}
               />
             </div>
@@ -156,7 +156,7 @@ const InstructorSignup = () => {
               onChange={handleChange}
               placeholder="Email address"
               type="email"
-              icon="email"
+              icon={<FaEnvelope />}
               error={errors.email}
             />
 
@@ -167,7 +167,7 @@ const InstructorSignup = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Password"
-              icon="lock"
+              icon={<FaLock />}
               error={errors.password}
               rightIcon={
                 showPassword ? (
@@ -185,7 +185,7 @@ const InstructorSignup = () => {
               value={formData.confirm}
               onChange={handleChange}
               placeholder="Confirm password"
-              icon="lock"
+              icon={<FaLock />}
               error={errors.confirm}
               rightIcon={
                 showConfirm ? (
@@ -203,7 +203,7 @@ const InstructorSignup = () => {
                 type="date"
                 value={formData.dob}
                 onChange={handleChange}
-                icon="calendar"
+                icon={<FaCalendarAlt />}
                 error={errors.dob}
               />
 
@@ -213,7 +213,7 @@ const InstructorSignup = () => {
                 value={formData.regnumber}
                 onChange={handleChange}
                 placeholder="Registration number"
-                icon="badge"
+                icon={<FaIdBadge />}
                 error={errors.regnumber}
               />
             </div>
@@ -224,7 +224,7 @@ const InstructorSignup = () => {
               value={formData.rank}
               onChange={handleChange}
               placeholder="Rank"
-              icon="star"
+              icon={<FaStar />}
               error={errors.rank}
             />
 

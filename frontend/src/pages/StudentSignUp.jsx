@@ -8,7 +8,7 @@ import googleIcon from "../assets/google-icon.svg";
 import api from "../services/api";
 import {
   FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaIdBadge,
-  FaGraduationCap, FaPaperPlane, FaEye, FaEyeSlash
+  FaGraduationCap, FaPaperPlane, FaEye, FaEyeSlash, FaStar
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 
@@ -160,8 +160,8 @@ const StudentSignup = () => {
           <h2 className="text-2xl font-semibold text-slate-700 mb-6">
             Welcome to <span className="text-sky-500">connect</span>
           </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+ 
+         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label="Enter your nickname"
@@ -202,6 +202,7 @@ const StudentSignup = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Password"
+              icon={<FaLock />}
              
               rightIcon={
                 showPassword
@@ -218,6 +219,7 @@ const StudentSignup = () => {
               value={formData.confirm}
               onChange={handleChange}
               placeholder="Confirm password"
+              icon={<FaLock />}
               
               rightIcon={
                 showConfirm
@@ -235,6 +237,7 @@ const StudentSignup = () => {
                 value={formData.dob}
                 onChange={handleChange}
                 placeholder="Date of birth"
+                icon={<FaCalendarAlt />}
                 
                 error={errors.dob}
               />
@@ -245,6 +248,7 @@ const StudentSignup = () => {
                 value={formData.regnumber}
                 onChange={handleChange}
                 placeholder="Registration number"
+                icon={<FaIdBadge />}
                 
                  error={errors.regnumber}
               />
@@ -257,6 +261,7 @@ const StudentSignup = () => {
                 value={formData.field}
                 onChange={handleChange}
                 placeholder="Field of study"
+                icon={<FaStar />}
                 
                 error={errors.field}
 
@@ -267,7 +272,7 @@ const StudentSignup = () => {
                 name="year"
                 value={formData.year}
                 onChange={handleChange}
-                
+                icon={<FaGraduationCap/>}
                 options={["L1", "L2", "L3", "Ing1", "Ing2", "Ing3", "M1", "M2"]}
                  error={errors.year}
               />

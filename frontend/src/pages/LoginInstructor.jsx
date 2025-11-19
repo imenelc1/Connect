@@ -6,7 +6,7 @@ import Mascotte from "../assets/mascotte.svg";
 import LogoLight from "../assets/LogoLight.svg";
 import api from "../services/api";
 import toast from "react-hot-toast";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import {FaEnvelope, FaLock, FaEye, FaEyeSlash} from "react-icons/fa";
 import Button from "../components/common/Button";
 
 export default function LoginInstructor() {
@@ -99,7 +99,7 @@ export default function LoginInstructor() {
               label="Email address"
               name="email"
               placeholder="Email address"
-              icon="email"
+              icon={<FaEnvelope />}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errorEmail}
@@ -111,15 +111,15 @@ export default function LoginInstructor() {
               name="password"
               placeholder="Password"
               type={showPassword ? "text" : "password"}
-              icon="lock"
+              icon={<FaLock />}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errorPassword}
               rightIcon={
                 showPassword ? (
-                  <FiEyeOff size={18} onClick={() => setShowPassword(false)} />
+                  <FaEyeSlash size={18} onClick={() => setShowPassword(false)} />
                 ) : (
-                  <FiEye size={18} onClick={() => setShowPassword(true)} />
+                  <FaEye size={18} onClick={() => setShowPassword(true)} />
                 )
               }
             />
@@ -135,7 +135,8 @@ export default function LoginInstructor() {
               </a>
             </p>
 
-           <Button text="Login" variant="primary" onClick={handleLogin} />
+           <Button text="Login" variant="primary" type="submit" />
+
 
           </form>
         </div>

@@ -22,7 +22,7 @@ export default function Input({
       >
         {/* LEFT ICON */}
         {icon && (
-          <span className="mr-3 text-gray-400 text-lg flex items-center">
+          <span className="mr-3 text-gray-300 text-lg flex items-center">
             {icon}
           </span>
         )}

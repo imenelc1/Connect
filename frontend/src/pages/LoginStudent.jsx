@@ -7,8 +7,7 @@ import Mascotte from "../assets/mascotte.svg";
 import LogoLight from "../assets/LogoLight.svg";
 import api from "../services/api";
 import toast from "react-hot-toast";
-import { FiEye, FiEyeOff } from "react-icons/fi";
-import Button from "../components/common/Button";
+import {FaEnvelope, FaLock, FaEye, FaEyeSlash} from "react-icons/fa";import Button from "../components/common/Button";
 export default function LoginStudent() {
   const [activeTab] = useState("signin");
   const [email, setEmail] = useState("");
@@ -92,9 +91,8 @@ export default function LoginStudent() {
             <Input
               label="Email address"
               name="email"
-              icon="email"
               placeholder="Email address"
-              value={email}
+              icon={<FaEnvelope />}
               onChange={(e) => setEmail(e.target.value)}
               error={errorEmail}
             />
@@ -103,7 +101,7 @@ export default function LoginStudent() {
             <Input
               label="Enter your Password"
               name="password"
-              icon="lock"
+              icon={<FaLock />}
               placeholder="Password"
               type={showPassword ? "text" : "password"}
               value={password}
@@ -111,12 +109,12 @@ export default function LoginStudent() {
               error={errorPassword}
               rightIcon={
                 showPassword ? (
-                  <FiEyeOff
+                  <FaEyeSlash
                     size={18}
                     onClick={() => setShowPassword(false)}
                   />
                 ) : (
-                  <FiEye
+                  <FaEye
                     size={18}
                     onClick={() => setShowPassword(true)}
                   />
