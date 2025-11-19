@@ -5,18 +5,18 @@ export default function Text() {
     <div className="space-y-6 ">
       {/* Grand titre */}
       <h1 className="text-5xl md:text-6xl font-bold leading-tight text-3d">
-        <span  className="text-[var(--color-primary)]">A</span>{" "}
-        <span style={{ color: "var(--color-secondary)" }} >Smarter Way</span> {" "}
-        <span className="text-[var(--color-primary)]">To</span> {" "}
+        <span  className="text-primary">A</span>{" "}
+        <span className="text-secondary text-3d">Smarter Way</span> {" "}
+        <span className="text-primary">To</span> {" "}
        
-        <span className="text-[var(--color-primary)]">Learn </span> {" "}
-        <span style={{ color: "var(--color-secondary)" }} >C</span> {" "}
-         <span className="text-[var(--color-primary)]">and </span> {" "}
-          <span className="text-[var(--color-primary)]">Algorithms </span>
+        <span className="text-primary">Learn </span> {" "}
+        <span className="text-secondary text-3d" >C</span> {" "}
+         <span className="text-primary">and </span> {" "}
+          <span className="text-primary">Algorithms </span>
       </h1>
 
       {/* Texte descriptif */}
-      <p className="text-[var(--color-text-main)] text-lg leading-relaxed max-w-lg font-medium">
+      <p className="text-textc text-lg leading-relaxed max-w-lg font-regular">
         Empowering Students And Teachers To Learn, Teach, And Collaborate
         Around C Programming.
       </p>

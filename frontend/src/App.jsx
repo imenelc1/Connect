@@ -1,14 +1,7 @@
 import React from "react";
-import Acceuil from "./pages/Acceuil";
-
-
+import AppRoutes from "./routes/AppRoutes.jsx";
 
 export default function App() {
-  return (
-    <div className="App">
-      <Acceuil />
-      
-    </div>
-  );
+  return <AppRoutes />;
 }
 

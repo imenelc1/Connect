@@ -2,62 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---- Palette LIGHT (RGB converted) ---- */
+:root {
+  --color-primary: 79 157 222;   /* #4F9DDE bleu */
+  --color-secondary:179 186 241; /* #A3AAED violet clair */
+  --color-tertiary: 186 104 200; /* #BA68C8 violet foncé */
+  --color-gray: 153 161 175;     /* #99A1AF lancien bg*/
+  --color-bg: 255 255 255;       /* #FFFFFF blanc */
+  --color-surface: 245 249 253;  /* léger gris clair le backgroud du footer header etc  */
+  --color-text : 74 75 76;        /* #0A0A0A pour le text*/
+  --color-yellow-code:192 180 44;
+  --color-title-card:47 79 112;
+--color-icons-about: 195 153 210;
 
-@layer base {
-  :root {
-    /* --- LIGHT THEME --- */
-     --color-primary: /*#4F9DDE*/ #4f9cdd; 
-    --color-secondary: #A3AAED;
-     --color-bg:/*#4f9ede13*/ #f5f9fd; 
-    --color-surface: #FFFFFF;
-   --color-text-main:  /* #1B213F*/#717182; 
-    --color-text-muted: #959BA5;
-    --color-yellow-code:#c2b634;
-  
-
-    
-  }
-
-  .dark {
-    /* --- DARK THEME --- */
-    --color-primary: linear-gradient(90deg, #4F9DDE, #A3AAED);
-    --color-secondary: #2F4F70;
-    --color-bg: #0E2A46;
-    --color-surface: #2F4F70;
-    --color-text-main: #FFFFFF;
-    --color-text-muted: #CACEF7;
-  }
-
-
-  body {
-  
-  font-family: 'Poppins', sans-serif;
-
-    background: var(--color-bg);
-    color: var(--color-text-main);
-    overflow-x: hidden;
-  }
-
-  button {
-    background: var(--color-primary);
-    color: white;
-  }
-
-.inner-shadow {
-  box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
+  /* Dégradés LIGHT */
+  --grad-1: linear-gradient(135deg, #4F9DDE, #2F4F70);
+  --grad-2: linear-gradient(135deg, #4F9DDE, #FFFFFF);
+  --grad-3: linear-gradient(135deg, #b3baf1, #FFFFFF);
+  --grad-4: linear-gradient(135deg, #BA68C8, #FFFFFF);
 }
 
+/* ---- Palette DARK ---- */
+.dark {
+  --color-primary: 47 79 112;    /* #2F4F70 */
+  --color-secondary: 30 41 57;    /* #1E2939 */
+  --color-tertiary: 186 104 200; /* tu peux changer si besoin */
+  --color-gray: 229 231 235;     /* #E5E7EB */
+  --color-bg: 15 18 26;          /* sombre */
+  --color-surface: 25 32 45;
+  --color-text: 255 255 255;
+
+  /* Dégradés DARK */
+  --grad-dark-1: linear-gradient(135deg, #4F9DDE, #A3AAED);
+  --grad-dark-2: linear-gradient(135deg, #4F9DDE, #2F4F70);
+  --grad-dark-3: linear-gradient(135deg, #A3AAED, #2F4F70);
+  --grad-dark-4: linear-gradient(135deg, #BA68C8, #2F4F70);
+}
+
+/* ---- Base ---- */
+@layer base {
+  body {
+    background: rgb(var(--color-bg));
+    color: rgb(var(--color-text));
+  }
+}
+
+/* ---- Utilities ---- */
+@layer utilities {
+  .bg-grad-1 { background-image: var(--grad-1); }
+  .bg-grad-2 { background-image: var(--grad-2); }
+  .bg-grad-3 { background-image: var(--grad-3); }
+  .bg-grad-4 { background-image: var(--grad-4); }
+
+  .bg-grad-dark-1 { background-image: var(--grad-dark-1); }
+  .bg-grad-dark-2 { background-image: var(--grad-dark-2); }
+  .bg-grad-dark-3 { background-image: var(--grad-dark-3); }
+  .bg-grad-dark-4 { background-image: var(--grad-dark-4); }
+}
 
 .text-3d {
-  color: #c7ccf4;
-  
-  text-shadow: 0 2px 1px #ffffff,   /* haut clair */
-    0 -2px 1px rgba(0, 0, 0, 0.25), /* bas sombre */ 
-     2px 2px 4px rgba(0,0,0,0.2);  /* flou général */
-  /* 0 1px 0 #fff, 0 -1px 0 rgba(0,0,0,0.25); */
+  .text-3d {
+
+
+  text-shadow: 
+    0 2px 1px #ffffff,            /* haut clair */
+    0 -2px 1px rgba(0, 0, 0, 0.25),/* bas sombre */
+    2px 2px 4px rgba(0,0,0,0.2),   /* flou général */
+    0 1px 0 #fff,
+    0 -1px 0 rgba(0,0,0,0.25);
 }
-
-
-
 
 }

@@ -52,7 +52,7 @@ export default function CardsSection() {
         Why Choose CONNECT?
       </h2>
 
-      <p className="text-center text-[var(--color-text-main)] mt-2 mb-12">
+      <p className="text-center text-textc mt-2 mb-12">
         We provide the tools and resources you need to master C programming and algorithms effectively
       </p>
 
