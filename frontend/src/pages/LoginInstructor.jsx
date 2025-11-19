@@ -30,6 +30,13 @@ export default function LoginInstructor() {
       setErrorEmail("Email obligatoire");
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailRegex.test(email)) {
+  setErrorEmail("Format email invalide");
+  return;
+}
+
     if (!password) {
       setErrorPassword("Mot de passe obligatoire");
       return;

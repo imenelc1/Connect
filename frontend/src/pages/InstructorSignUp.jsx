@@ -30,84 +30,104 @@ const InstructorSignup = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const matriculeRegex = /^\d{12}$/;
 
-    const newErrors = {};
+  const newErrors = {};
 
-    // 🔍 Validation
-    if (!formData.nickname.trim())
-      newErrors.nickname = "Pseudo obligatoire.";
+  // --- PSEUDO ---
+  if (!formData.nickname.trim())
+    newErrors.nickname = "Pseudo obligatoire.";
 
-    if (!formData.fullname.trim())
-      newErrors.fullname = "Nom complet obligatoire.";
+  // --- NOM COMPLET ---
+  if (!formData.fullname.trim())
+    newErrors.fullname = "Nom complet obligatoire.";
 
-    if (!formData.email.trim())
-      newErrors.email = "Email obligatoire.";
-    else if (!emailRegex.test(formData.email))
-      newErrors.email = "Email invalide.";
+  // --- EMAIL ---
+  if (!formData.email.trim())
+    newErrors.email = "Email obligatoire.";
+  else if (!emailRegex.test(formData.email))
+    newErrors.email = "Format email invalide.";
 
-    if (!formData.password.trim())
-      newErrors.password = "Mot de passe obligatoire.";
-    else if (formData.password.length < 8)
-      newErrors.password = "Minimum 8 caractères.";
+  // --- MOT DE PASSE ---
+  if (!formData.password.trim())
+    newErrors.password = "Mot de passe obligatoire.";
+  else if (formData.password.length < 8)
+    newErrors.password = "Minimum 8 caractères.";
 
-    if (!formData.confirm.trim())
-      newErrors.confirm = "Confirmez votre mot de passe.";
-    else if (formData.confirm !== formData.password)
-      newErrors.confirm = "Les mots de passe ne correspondent pas.";
+  // --- CONFIRMATION ---
+  if (!formData.confirm.trim())
+    newErrors.confirm = "Confirmez votre mot de passe.";
+  else if (formData.confirm !== formData.password)
+    newErrors.confirm = "Les mots de passe ne correspondent pas.";
 
-    if (!formData.dob.trim())
-      newErrors.dob = "Date de naissance obligatoire.";
+  // --- DATE DE NAISSANCE ---
+  if (!formData.dob.trim()) {
+    newErrors.dob = "Date de naissance obligatoire.";
+  } else {
+    const birthDate = new Date(formData.dob);
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setFullYear(today.getFullYear() - 25);
 
-    if (!formData.regnumber.trim())
-      newErrors.regnumber = "Matricule obligatoire.";
+    if (birthDate > minDate)
+      newErrors.dob = "Vous devez avoir au moins 25 ans.";
+  }
 
-    if (!formData.rank.trim())
-      newErrors.rank = "Grade obligatoire.";
+  // --- MATRICULE ---
+  if (!formData.regnumber.trim())
+    newErrors.regnumber = "Matricule obligatoire.";
+  else if (!matriculeRegex.test(formData.regnumber))
+    newErrors.regnumber = "Matricule invalide (12 chiffres attendus).";
 
-    setErrors(newErrors);
+  // --- GRADE ---
+  if (!formData.rank.trim())
+    newErrors.rank = "Grade obligatoire.";
 
-    if (Object.keys(newErrors).length > 0) return;
+  // STOP si erreurs
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) return;
 
-    // 🔥 Payload Django
-    const payload = {
-      nom: formData.nickname,
-      prenom: formData.fullname,
-      adresse_email: formData.email,
-      mot_de_passe: formData.password,
-      date_naissance: formData.dob,
-      matricule: formData.regnumber,
-      grade: formData.rank,
-      role: "enseignant"
-    };
+  // --- PAYLOAD ---
+  const payload = {
+    nom: formData.nickname,
+    prenom: formData.fullname,
+    adresse_email: formData.email,
+    mot_de_passe: formData.password,
+    date_naissance: formData.dob,
+    matricule: formData.regnumber,
+    grade: formData.rank,
+    role: "enseignant"
+  };
 
-    try {
-      const res = await api.post("register/", payload);
-      toast.success("Inscription réussie !");
+  try {
+    const res = await api.post("register/", payload);
+    toast.success("Inscription réussie !");
 
-      setTimeout(() => {
-        window.location.href = "/dashboard-instructor";
-      }, 1500);
+    setTimeout(() => {
+      window.location.href = "/dashboard-instructor";
+    }, 1500);
 
-    } catch (err) {
-      const errorsApi = err.response?.data;
+  } catch (err) {
+    const errorsApi = err.response?.data;
 
-      if (errorsApi) {
-        if (errorsApi.error) {
-          toast.error(errorsApi.error);
-          return;
-        }
-
-        const msg = Object.values(errorsApi).flat().join("\n");
-        toast.error(msg);
+    if (errorsApi) {
+      if (errorsApi.error) {
+        toast.error(errorsApi.error);
         return;
       }
 
-      toast.error("Erreur réseau. Vérifiez Django.");
+      const msg = Object.values(errorsApi).flat().join("\n");
+      toast.error(msg);
+      return;
     }
-  };
+
+    toast.error("Erreur réseau. Vérifiez Django.");
+  }
+};
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start p-8 bg-[#f5f9fd]">

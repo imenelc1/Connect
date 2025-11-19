@@ -61,26 +61,52 @@ const StudentSignup = () => {
     if (name === "confirm" && value !== formData.password)
       setErrors(prev => ({ ...prev, confirm: "Les mots de passe ne correspondent pas" }));
   };
+  
+  
+// --- VALIDATION GLOBALE ---
+const validateForm = () => {
+  const newErrors = {};
 
-  // --- VALIDATION GLOBALE ---
-  const validateForm = () => {
-    const newErrors = {};
+  // Champs obligatoires
+  if (!formData.nickname) newErrors.nickname = "Champ obligatoire";
+  if (!formData.fullname) newErrors.fullname = "Champ obligatoire";
+  if (!formData.email) {
+  newErrors.email = "Email obligatoire";
+} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+  newErrors.email = "Format d'email invalide";
+}
+  if (!formData.password) newErrors.password = "Mot de passe obligatoire";
+  if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères";
 
-    if (!formData.nickname) newErrors.nickname = "Champ obligatoire";
-    if (!formData.fullname) newErrors.fullname = "Champ obligatoire";
-    if (!formData.email) newErrors.email = "Email obligatoire";
-    if (!formData.password) newErrors.password = "Mot de passe obligatoire";
-    if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères";
-    if (formData.confirm !== formData.password) newErrors.confirm = "Mot de passe non identique";
+  if (formData.confirm !== formData.password)
+    newErrors.confirm = "Mot de passe non identique";
 
-    if (!formData.dob) newErrors.dob = "Champ obligatoire";
-    if (!formData.regnumber) newErrors.regnumber = "Champ obligatoire";
-    if (!formData.field) newErrors.field = "Champ obligatoire";
-    if (!formData.year) newErrors.year = "Champ obligatoire";
+  if (!formData.dob) newErrors.dob = "Champ obligatoire";
+  if (!formData.regnumber) newErrors.regnumber = "Champ obligatoire";
+  if (!formData.field) newErrors.field = "Champ obligatoire";
+  if (!formData.year) newErrors.year = "Champ obligatoire";
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  // Matricule : 12 chiffres
+  if (formData.regnumber && !/^\d{12}$/.test(formData.regnumber)) {
+    newErrors.regnumber =
+      "Matricule invalide (format: année BAC + numéro du diplôme du bac)";
+  }
+
+  // Âge minimum 16 ans
+  if (formData.dob) {
+    const birthDate = new Date(formData.dob);
+    const minDate = new Date();
+    minDate.setFullYear(minDate.getFullYear() - 16);
+
+    if (birthDate > minDate) {
+      newErrors.dob = "Vous devez avoir au moins 16 ans.";
+    }
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
 
   // --- SUBMIT ---
   const handleSubmit = async e => {
@@ -255,17 +281,39 @@ const StudentSignup = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your field of study"
-                name="field"
-                value={formData.field}
-                onChange={handleChange}
-                placeholder="Field of study"
-                icon={<FaStar />}
-                
-                error={errors.field}
+<div className="w-full">
+  <label className="block mb-1 text-sm font-medium text-gray-700">
+    Enter your field of study
+  </label>
 
-              />
+  <div className="relative">
+    <select
+      name="field"
+      value={formData.field}
+      onChange={handleChange}
+      className={`w-full p-3 pl-10 rounded-lg border ${
+        errors.field ? "border-red-500" : "border-gray-300"
+      }`}
+    >
+      <option value="">-- Select your field --</option>
+      <option value="informatique">Informatique</option>
+      <option value="mathematiques">Mathématiques</option>
+      <option value="genie_civil">Génie Civil</option>
+      <option value="genie_electrique">Génie Électrique</option>
+      <option value="genie_mecanique">Génie Mécanique</option>
+      <option value="biologie">Biologie</option>
+    </select>
+
+    {/* Icône à gauche comme dans ton Input */}
+    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+      <FaStar />
+    </span>
+  </div>
+
+  {errors.field && (
+    <p className="text-red-500 text-sm mt-1">{errors.field}</p>
+  )}
+</div>
 
               <Select
                 label="Enter your academic year"
