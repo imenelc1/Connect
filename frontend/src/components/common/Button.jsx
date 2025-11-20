@@ -23,7 +23,6 @@ export default function Button({
 
     ca: `${base} bg-[var(--color-primary)] text-white shadow-md hover:opacity-90 px-4`,
 
-    google: `${base} bg-white text-gray-700 border border-gray-300 hover:bg-gray-100`,
 
     send: `${base} text-white`,
     choice: `${base} shadow-md rounded-3xl font-bold font-poppins 

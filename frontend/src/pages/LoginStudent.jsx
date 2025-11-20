@@ -1,8 +1,6 @@
 import { useState } from "react";
 import AuthTabs from "../components/common/AuthTabs";
 import Input from "../components/common/Input"; // <== ICI
-import Divider from "../components/common/Divider";
-
 import Mascotte from "../assets/mascotte.svg";
 import LogoLight from "../assets/LogoLight.svg";
 import api from "../services/api";
@@ -51,28 +49,43 @@ if (!emailRegex.test(email)) {
       toast.success("Connexion réussie !");
       window.location.href = "/dashboard-etudiant";
 
-    } catch (error) {
-      const backendError = error.response?.data?.error;
+  } catch (error) {
+      const backend = error.response?.data;
+      console.log("Erreur backend login étudiant:", backend);
 
-      if (backendError) {
-        const msg = backendError.toLowerCase();
+      if (backend && typeof backend === "object") {
+        const newErrors = {};
 
-        if (msg.includes("utilisateur") || msg.includes("email")) {
-          setErrorEmail("Adresse email inconnue");
-          return;
-        }
+        // correspondances backend → frontend
+        const mapKey = {
+          adresse_email: "email",
+          email: "email",
+          mot_de_passe: "password",
+          password: "password",
+          non_field_errors: "password",
+          detail: "password",
+          error: "password" // <== très important pour "Mot de passe incorrect"
+        };
 
-        if (msg.includes("mot de passe")) {
-          setErrorPassword("Mot de passe incorrect");
-          return;
-        }
+        Object.keys(backend).forEach((key) => {
+          const value = Array.isArray(backend[key])
+            ? backend[key][0]
+            : backend[key];
 
-        setErrorPassword(backendError);
+          const target = mapKey[key] || key;
+          newErrors[target] = value;
+        });
+
+        // injection dans l'UI
+        if (newErrors.email) setErrorEmail(newErrors.email);
+        if (newErrors.password) setErrorPassword(newErrors.password);
+
         return;
       }
 
       setErrorPassword("Erreur réseau");
     }
+
   };
 
   return (
@@ -128,11 +141,6 @@ if (!emailRegex.test(email)) {
                 )
               }
             />
-
-            <Divider text="Or" />
-
-            <Button text="Continue with Google" variant="google" />
-            
 
             <p className="text-sm text-gray-500 text-center mt-4">
               Don't have an account?{" "}

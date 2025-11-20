@@ -28,7 +28,16 @@ const InstructorSignup = () => {
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
+// --- MAPPING BACKEND → FRONTEND ---
+  const fieldMap = {
+    nom: "nickname",
+    prenom: "fullname",
+    adresse_email: "email",
+    mot_de_passe: "password",
+    date_naissance: "dob",
+    matricule: "regnumber",
+    grade: "rank",
+  };
   const handleSubmit = async (e) => {
   e.preventDefault();
 
@@ -110,22 +119,33 @@ const InstructorSignup = () => {
       window.location.href = "/dashboard-instructor";
     }, 1500);
 
-  } catch (err) {
-    const errorsApi = err.response?.data;
+ } catch (err) {
+      const apiErrors = err.response?.data;
 
-    if (errorsApi) {
-      if (errorsApi.error) {
-        toast.error(errorsApi.error);
+      if (apiErrors) {
+        // Error globale : { "error": "..." }
+        if (apiErrors.error) {
+          toast.error(apiErrors.error);
+          return;
+        }
+
+        // Backend → Front errors
+        const backendMappedErrors = {};
+
+        Object.keys(apiErrors).forEach((key) => {
+          const frontendKey = fieldMap[key] || key;
+          backendMappedErrors[frontendKey] = apiErrors[key][0];
+        });
+
+        setErrors((prev) => ({ ...prev, ...backendMappedErrors }));
+
+        // Toast avec toutes les erreurs
+        toast.error(Object.values(backendMappedErrors).join("\n"));
         return;
       }
 
-      const msg = Object.values(errorsApi).flat().join("\n");
-      toast.error(msg);
-      return;
+      toast.error("Erreur réseau. Vérifiez Django.");
     }
-
-    toast.error("Erreur réseau. Vérifiez Django.");
-  }
 };
 
 
@@ -248,9 +268,6 @@ const InstructorSignup = () => {
               error={errors.rank}
             />
 
-            <div className="text-center text-gray-400">Or</div>
-
-            <Button text="Continue with Google" variant="google" />
 
             <Button type="submit" variant="primary">
               <FaPaperPlane className="inline mr-2" /> Sign up

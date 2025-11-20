@@ -1,7 +1,6 @@
 import { useState } from "react";
 import AuthTabs from "../components/common/AuthTabs";
 import Input from "../components/common/Input"; 
-import Divider from "../components/common/Divider";
 import Mascotte from "../assets/mascotte.svg";
 import LogoLight from "../assets/LogoLight.svg";
 import api from "../services/api";
@@ -56,22 +55,38 @@ if (!emailRegex.test(email)) {
       window.location.href = "/dashboard-enseignant";
 
     } catch (error) {
-      const backendError = error.response?.data?.error;
+      const backend = error.response?.data;
 
-      if (backendError) {
-        const msg = backendError.toLowerCase();
+      console.log("Erreur backend login enseignant:", backend);
 
-        if (msg.includes("utilisateur") || msg.includes("email")) {
-          setErrorEmail("Adresse email inconnue");
-          return;
-        }
+      if (backend && typeof backend === "object") {
+        const newErrors = {};
 
-        if (msg.includes("mot de passe")) {
-          setErrorPassword("Mot de passe incorrect");
-          return;
-        }
+        // ===============================
+        // MAPPING BACKEND → FRONTEND
+        // ===============================
+        const mapKey = {
+          adresse_email: "email",
+          email: "email",
+          mot_de_passe: "password",
+          password: "password",
+          non_field_errors: "password",
+          detail: "password",
+          error: "password"
+        };
 
-        setErrorPassword(backendError);
+         Object.keys(backend).forEach((key) => {
+          const value = Array.isArray(backend[key])
+            ? backend[key][0]
+            : backend[key];
+
+          const target = mapKey[key] || key;
+          newErrors[target] = value;
+        });
+        // Injection dans l’UI
+        if (newErrors.email) setErrorEmail(newErrors.email);
+        if (newErrors.password) setErrorPassword(newErrors.password);
+
         return;
       }
 
@@ -130,10 +145,6 @@ if (!emailRegex.test(email)) {
                 )
               }
             />
-
-            <Divider text="Or" />
-
-            <Button text="Continue with Google" variant="google" />
 
             <p className="text-sm text-gray-500 text-center mt-4">
               Don't have an account?{" "}

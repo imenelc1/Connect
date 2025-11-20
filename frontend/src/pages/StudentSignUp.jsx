@@ -12,11 +12,14 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 
-const Select = ({ label, icon, name, value, onChange, options }) => (
+const Select = ({ label, icon, name, value, onChange, options,error }) => (
   <div className="flex flex-col mb-4">
     <label className="mb-1 font-semibold text-gray-700">{label}</label>
-    <div className="flex items-center border border-gray-300 rounded-md px-3 py-2 bg-white">
-      {icon && <span className="mr-2 text-gray-400">{icon}</span>}
+     <div
+      className={`flex items-center rounded-md px-3 py-2 bg-white
+        ${error ? "border-red-500" : "border-gray-300"} border`}
+    >
+      {icon && <span className="mr-2 text-gray-300">{icon}</span>}
       <select
         name={name}
         value={value}
@@ -27,6 +30,9 @@ const Select = ({ label, icon, name, value, onChange, options }) => (
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
     </div>
+    
+    {/* Affiche le message d'erreur sous le champ */}
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
   </div>
 );
 
@@ -135,30 +141,54 @@ const validateForm = () => {
       toast.success("Inscription réussie !");
       setTimeout(() => (window.location.href = "/dashboard-etudiant"), 1500);
 
-    } catch (err) {
-      const backend = err.response?.data;
-      console.log("Erreur backend:", backend);
+} catch (err) {
+  const backend = err.response?.data;
+  console.log("Erreur backend:", backend);
 
-      const newErrors = {};
+  if (backend && typeof backend === "object") {
+    const newErrors = {};
 
-      // Email déjà utilisé
-      if (backend?.adresse_email) {
-        newErrors.email = backend.adresse_email[0];
-      }
+    // Traitement des erreurs par champ
+    Object.keys(backend).forEach((key) => {
+      const firstError = Array.isArray(backend[key])
+        ? backend[key][0]
+        : backend[key];
 
-      // Matricule déjà utilisé
-      if (backend?.matricule) {
-        newErrors.regnumber = backend.matricule[0];
-      }
+      const mapKey = {
+        adresse_email: "email",
+        mot_de_passe: "password",
+        date_naissance: "dob",
+        matricule: "regnumber",
+        specialite: "field",
+        annee_etude: "year",
+        nom: "nickname",
+        prenom: "fullname",
+      };
 
-      // Autres erreurs
-      if (backend) {
-        const msg = Object.values(backend).flat().join("\n");
-        toast.error(msg);
-      }
+      const targetField = mapKey[key] || key;
 
-      setErrors(prev => ({ ...prev, ...newErrors }));
+      newErrors[targetField] = firstError;
+    });
+
+    // Erreurs générales non liées à un champ
+    const generalErrors = Object.keys(backend)
+      .filter((key) => !["adresse_email", "mot_de_passe", "date_naissance", "matricule", "specialite", "annee_etude", "nom", "prenom"].includes(key))
+      .map((key) =>
+        Array.isArray(backend[key]) ? backend[key][0] : backend[key]
+      );
+
+    if (generalErrors.length > 0) {
+      toast.error(generalErrors.join("\n"));
     }
+
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+    return;
+  }
+
+  toast.error("Erreur réseau");
+}
+
+
   };
 
   return (
@@ -305,7 +335,7 @@ const validateForm = () => {
     </select>
 
     {/* Icône à gauche comme dans ton Input */}
-    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-500">
+    <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-300">
       <FaStar />
     </span>
   </div>
@@ -325,11 +355,6 @@ const validateForm = () => {
                  error={errors.year}
               />
             </div>
-
-            <div className="text-center text-gray-400">Or</div>
-
-            <Button text="Continue with Google" variant="google" />
-           
 
             <Button type="submit" variant="primary">
               <FaPaperPlane className="inline mr-2" /> Sign up
