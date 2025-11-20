@@ -48,3 +48,4 @@ class Option(models.Model):
     id_option = models.AutoField(primary_key=True)
     texte_option = models.CharField(max_length=255)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+

@@ -126,30 +126,28 @@ class DashboardViewSet(viewsets.ViewSet):
         })
     
 
-# maj de l'attribut avancment cour
-@action(detail=False, methods=['post'])
-def update_progress(self, request):
-    utilisateur = request.user
-    cours_id = request.data.get("cours")
-    avancement = request.data.get("avancement_cours", 0)
-
-    progression, _ = ProgressionCours.objects.get_or_create(
-        utilisateur=utilisateur,
-        cours_id=cours_id
-    )
-
-    # on garde le max si l'utilisateur recule
-    progression.avancement_cours = max(progression.avancement_cours, avancement)
-    progression.save()
-
-    return Response({"status": "progress updated"})
-  
-
 
 class DashboardStatsView(APIView):
 
+    def post(self, request):
+        utilisateur = request.user
+        cours_id = request.data.get("cours")
+        avancement = request.data.get("avancement_cours", 0)
+
+        progression, _ = ProgressionCours.objects.get_or_create(
+            utilisateur=utilisateur,
+            cours_id=cours_id
+        )
+
+        # on garde le max si l'utilisateur recule
+        progression.avancement_cours = max(progression.avancement_cours, avancement)
+        progression.save()
+
+        return Response({"status": "progress updated"})
+    
+
     def get(self, request):
-        utilisateur = Utilisateur.objects.get(id_utilisateur=3)
+        utilisateur = Utilisateur.objects.get(id_utilisateur=6)
         request.user = utilisateur
 
         # 1) AVERAGE STUDENT PROGRESS
@@ -200,3 +198,16 @@ class DashboardStatsView(APIView):
 
         return Response(data, status=status.HTTP_200_OK)
 
+
+class TentativeExerciceViewSet(viewsets.ModelViewSet):
+    ...
+    
+    @action(detail=True, methods=['patch'])
+    def add_feedback(self, request, pk=None):
+        tentative = self.get_object()
+        feedback = request.data.get('feedback')
+        if feedback is not None:
+            tentative.feedback = feedback
+            tentative.save()
+            return Response({"status": "feedback added"})
+        return Response({"error": "No feedback provided"}, status=400)

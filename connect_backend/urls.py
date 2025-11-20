@@ -16,6 +16,8 @@ urlpatterns = [
     path('api/dashboard/', include('dashboard.urls')),
 
     path("stats/", DashboardStatsView.as_view(), name="dashboard-stats"),
+    path('api/courses/', include('courses.urls')),
+    path('api/spaces/', include('spaces.urls'))
 ]
 
 if settings.DEBUG:

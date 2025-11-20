@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'ia',
     'dashboard',
     'feedback',
+    'spaces',
     # API et CORS
     'rest_framework',
     'corsheaders',

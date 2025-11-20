@@ -17,6 +17,7 @@ class TentativeExercice(models.Model):
     score = models.FloatField()
     temps_passe = models.DurationField()
     reponse = models.TextField()
+    feedback = models.TextField(blank=True, null=True)
 
 class Analyse(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)

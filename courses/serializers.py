@@ -4,31 +4,35 @@ from .models import Cours, Section, Lecon, Exercice, Question, Option, Quiz
 class CoursSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cours
-        fields = 'all'
+        fields = '__all__'
 
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = 'all'
+        fields = '__all__'
 
 class LeconSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecon
-        fields = 'all'
+        fields = '__all__'
 
 class ExerciceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exercice
-        fields = 'all'
+        fields = '__all__'
+
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = 'all'
+        fields = '__all__'
+
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields = 'all'
+        fields = '__all__'
+
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = 'all'
+        fields = '__all__'
+
