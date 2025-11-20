@@ -1,14 +1,10 @@
-// src/App.jsx
 import React from "react";
-import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
+import AppRoutes from "./routes/AppRoutes.jsx";
+import { Toaster } from "react-hot-toast";
+import "./i18n";
+<Toaster position="top-center" />
 
-const App = () => {
-  return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
-  );
-};
+export default function App() {
+  return <AppRoutes />;
+}
 
-export default App;

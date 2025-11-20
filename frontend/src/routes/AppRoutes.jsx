@@ -1,16 +1,25 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Acceuil from "../pages/Acceuil";
+import Choice from "../pages/Choice";
 import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
-
-const AppRoutes = () => {
+import LoginInstructor from "../pages/LoginInstructor";
+import LoginStudent from "../pages/LoginStudent";
+export default function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/student-signup" />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Acceuil />} />
+        <Route path="/choice" element={<Choice />} />
 
-      <Route path="/student-signup" element={<StudentSignup />} />
-      <Route path="/instructor-signup" element={<InstructorSignup />} />
-    </Routes>
+       {/* SIGNUP */}
+        <Route path="/signup/instructor" element={<InstructorSignup />} />
+        <Route path="/signup/student" element={<StudentSignup />} />
+
+        {/* LOGIN */}
+        <Route path="/login/instructor" element={<LoginInstructor />} />
+        <Route path="/login/student" element={<LoginStudent />} />
+      </Routes>
+    </BrowserRouter>
   );
-};
-
-export default AppRoutes;
+}

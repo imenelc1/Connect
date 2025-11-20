@@ -1,0 +1,20 @@
+{
+  "welcomeStudent": "Bienvenue cher étudiant !",
+  "welcomeInstructor": "Bienvenue cher instructeur !",
+  "nickname": "Pseudo",
+  "fullname": "Nom complet",
+  "email": "Email",
+  "password": "Mot de passe",
+  "confirmPassword": "Confirmer le mot de passe",
+  "dob": "Date de naissance",
+  "regnumber": "Numéro d'inscription",
+  "field": "Spécialité",
+  "year": "Année d'étude",
+  "rank": "Grade",
+  "signUp": "S'inscrire",
+  "signIn": "Se connecter",
+  "or": "Ou",
+  "alreadyHaveAccount": "Vous avez déjà un compte ?",
+  "selectOption": "Sélectionnez une option",
+  "googleSignIn": "Ou connectez-vous avec Google"
+}

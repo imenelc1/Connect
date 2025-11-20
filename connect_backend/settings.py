@@ -60,8 +60,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+     "http://127.0.0.1:5173",
+     "http://localhost:5173",
 ]
 ROOT_URLCONF = 'connect_backend.urls'
 
@@ -88,8 +91,12 @@ WSGI_APPLICATION = 'connect_backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'connect',  # Nom de ta base PostgreSQL
+        'USER': 'postgres',    # Ton nom d’utilisateur PostgreSQL
+        'PASSWORD': 'imene',  # Celui que tu as choisi à l’installation
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -111,6 +118,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 
 # Internationalization
@@ -134,3 +146,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'users.Utilisateur'
