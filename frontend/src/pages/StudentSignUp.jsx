@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FaUser, FaEnvelope, FaLock, FaPaperPlane, FaEye, FaEyeSlash, FaCalendarAlt, FaIdBadge, FaBook } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaPaperPlane, FaEye, FaEyeSlash, FaCalendarAlt, FaIdBadge, FaLayerGroup, FaCalendarCheck } from "react-icons/fa";
+
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
@@ -110,7 +111,7 @@ const StudentSignup = () => {
       {/* Tabs */}
       <AuthTabs role="student" active="signup" />
 
-      {/* Conteneur principal responsive */}
+      {/* Conteneur principal */}
       <div className="flex flex-col md:flex-row w-[1000px] max-w-full min-h-[550px] bg-white rounded-3xl shadow-lg overflow-hidden relative pt-12 mx-auto">
 
         {/* Formulaire */}
@@ -137,8 +138,8 @@ const StudentSignup = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input label="Field" name="field" value={formData.field} onChange={handleChange} placeholder="Field" icon={<FaBook />} error={errors.field} />
-              <Select label="Year" name="year" value={formData.year} onChange={handleChange} options={["L1","L2","L3","Ing1","Ing2","Ing3","M1","M2"]} icon={<FaBook />} error={errors.year} />
+              <Input label="Field" name="field" value={formData.field} onChange={handleChange} placeholder="Field" icon={<FaLayerGroup />} error={errors.field} />
+              <Select label="Year" name="year" value={formData.year} onChange={handleChange} options={["L1","L2","L3","Ing1","Ing2","Ing3","M1","M2"]} icon={<FaCalendarCheck />} error={errors.year} />
             </div>
 
             <div className="text-center text-gray-400">Or</div>

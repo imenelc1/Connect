@@ -89,7 +89,7 @@ const InstructorSignup = () => {
       {/* Tabs */}
       <AuthTabs role="instructor" active="signup" />
 
-      {/* Conteneur principal responsive */}
+      {/* Conteneur principal */}
       <div className="flex flex-col md:flex-row w-[1000px] max-w-full min-h-[550px] bg-white rounded-3xl shadow-lg overflow-hidden relative pt-12 mx-auto">
 
         {/* Formulaire */}
