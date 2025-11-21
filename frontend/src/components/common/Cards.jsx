@@ -1,5 +1,8 @@
-
+import { useTranslation } from "react-i18next";
+import React from "react";
+import "../../styles/index.css";
 export default function Cards({ icon, title, text, gradient }) {
+    const { t } = useTranslation();
   return (
     <div
       className={`
@@ -25,11 +28,11 @@ export default function Cards({ icon, title, text, gradient }) {
       </div>
 
       <h3 className="text-base font-bold uppercase whitespace-nowrap text-text">
-        {title}
+         {t(title)}
       </h3>
 
       <p className="text-left text-base opacity-90 text-text">
-        {text}
+        {t(text)}
       </p>
     </div>
   );

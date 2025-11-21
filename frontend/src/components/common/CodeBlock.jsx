@@ -4,7 +4,7 @@ import "../../styles/index.css";
 
 export default function CodeBlock() {
   return (
-    <div className="relative  p-4 sm:p-6 rounded-2xl shadow-lg w-full max-w-[420px] md:max-w-[450px] h-[260px]">
+    <div className="relative  p-4 sm:p-6 rounded-2xl shadow-lg w-full w-[420px] h-[260px] md:max-w-[450px] h-[260px]">
 
       {/* Nom du fichier */}
       <div className="text-textc mb-3 font-bold">
