@@ -4,8 +4,8 @@ import { initReactI18next } from "react-i18next";
 
 import translationFR from "./locales/fr-Choice/translation.json";
 import translationEN from "./locales/en-Choice/translation.json";
-import translationFRAcceuil from "./locales/fr/translation.json";
-import translationENAcceuil from "./locales/en/translation.json";
+import translationFRAcceuil from "./locales/fr-Acceuil/translation.json";
+import translationENAcceuil from "./locales/en-Acceuil/translation.json";
 
 const resources = {
   fr: { translation: translationFR, acceuil: translationFRAcceuil },

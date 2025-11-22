@@ -1,34 +1,39 @@
 import React from "react";
-import { FiSun, FiMoon } from "react-icons/fi";
-import { MdTranslate } from "react-icons/md";
+import { FiSun, FiGlobe } from "react-icons/fi";
 
 export default function NavLinks() {
   return (
-   <ul className="flex items-center space-x-8 text-[var(--color-text-main)] font-medium">
-  <li>
-    <a href="/" className="text-[var(--color-text-main) hover:opacity-80  transition]">
-      Home
-    </a>
-  </li>
-  <li>
-    <a href="#impact" className="text-[var(--color-text-main)] hover:opacity-80  transition ">Impact</a>
-  </li>
-  <li>
-    <a href="#services" className="text-[var(--color-text-main)] hover:opacity-80  transition">Services</a>
-  </li>
+    // Liste de navigation (utilisée dans d’autres pages)
+    <ul className="flex items-center space-x-8 text-[var(--color-text-main)] font-medium">
 
-  {/* toggle theme */}
-  <li className="cursor-pointer text-[var(--color-text-main)] hover:opacity-80  transitions">
-    <FiSun size={18} />
-  </li>
-  <li className="cursor-pointer text-[var(--color-text-main)] hover:opacity-80  transition">
-  <FiGlobe size={20} title="Changer la langue" />
+      {/* Liens simples */}
+      <li>
+        <a href="/" className="text-[var(--color-text-main)] hover:opacity-80 transition">
+          Home
+        </a>
+      </li>
 
-</li>
-</ul>
+      <li>
+        <a href="#impact" className="text-[var(--color-text-main)] hover:opacity-80 transition">
+          Impact
+        </a>
+      </li>
 
+      <li>
+        <a href="#services" className="text-[var(--color-text-main)] hover:opacity-80 transition">
+          Services
+        </a>
+      </li>
 
+      {/* Icône pour changer le thème (statique ici) */}
+      <li className="cursor-pointer hover:opacity-80 transition">
+        <FiSun size={18} />
+      </li>
 
-
+      {/* Icône pour changer la langue (statique ici) */}
+      <li className="cursor-pointer hover:opacity-80 transition">
+        <FiGlobe size={20} title="Changer la langue" />
+      </li>
+    </ul>
   );
 }
