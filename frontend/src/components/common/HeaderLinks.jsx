@@ -1,7 +1,8 @@
 import React, { useState, useContext } from "react";
 import { FiSun, FiMoon, FiMenu, FiX } from "react-icons/fi";
+import { FiGlobe } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
-import ThemeContext from "../../context/ThemeContext"; 
+import ThemeContext from "../../context/ThemeContext";
 
 export default function HeaderLinks() {
   const { t, i18n } = useTranslation("acceuil");
@@ -10,8 +11,10 @@ export default function HeaderLinks() {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
-  const changeLanguage = (lang) => {
-    i18n.changeLanguage(lang);
+  // Toggle FR ↔ EN
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
   };
 
   const links = [
@@ -22,7 +25,7 @@ export default function HeaderLinks() {
 
   return (
     <nav className="w-full flex items-center justify-between px-4 md:px-8 py-4 bg-surface relative">
-      
+
       {/* Desktop Links */}
       <div className="hidden md:flex items-center space-x-6">
         {links.map((link, index) => (
@@ -39,21 +42,11 @@ export default function HeaderLinks() {
           {darkMode ? <FiMoon size={20} /> : <FiSun size={20} />}
         </button>
 
-        {/* Language */}
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => changeLanguage("en")}
-            className={`px-2 py-1 rounded ${i18n.language === "en" ? "bg-primary text-white" : "hover:bg-gray-200"}`}
-          >
-            EN
-          </button>
-          <button
-            onClick={() => changeLanguage("fr")}
-            className={`px-2 py-1 rounded ${i18n.language === "fr" ? "bg-primary text-white" : "hover:bg-gray-200"}`}
-          >
-            FR
-          </button>
-        </div>
+        {/* Language Icon */}
+        <button onClick={toggleLanguage} className="hover:text-primary transition">
+          <FiGlobe size={20} title="Changer la langue" />
+
+        </button>
       </div>
 
       {/* Hamburger Menu Button */}
@@ -76,24 +69,16 @@ export default function HeaderLinks() {
           ))}
 
           <div className="flex items-center space-x-4">
+            {/* Theme */}
             <button onClick={toggleDarkMode}>
               {darkMode ? <FiMoon size={20} /> : <FiSun size={20} />}
             </button>
 
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => changeLanguage("en")}
-                className={`px-2 py-1 rounded ${i18n.language === "en" ? "bg-primary text-white" : "hover:bg-gray-200"}`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => changeLanguage("fr")}
-                className={`px-2 py-1 rounded ${i18n.language === "fr" ? "bg-primary text-white" : "hover:bg-gray-200"}`}
-              >
-                FR
-              </button>
-            </div>
+            {/* Language */}
+            <button onClick={toggleLanguage} className="hover:text-primary transition">
+              <FiGlobe size={20} title="Changer la langue" />
+
+            </button>
           </div>
         </div>
       )}

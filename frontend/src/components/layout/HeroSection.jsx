@@ -19,7 +19,7 @@ export default function HeroSection() {
     <header className="bg-surface min-h-[70vh]  md:min-h-[90vh] flex flex-col  px-8 py-0 md:px-16">
       <Header />
         
-      <div className="flex flex-col md:flex-row items-center justify-between mt-15 md:mt-20">
+<div className="flex flex-col md:flex-row items-start md:items-center justify-between mt-15 md:mt-20">
         <div className="max-w-xl md:max-w-2xl space-y-6">
           <Text />
             
