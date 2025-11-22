@@ -9,12 +9,19 @@ export default {
     extend: {
       colors: {
         primary: "rgb(var(--color-primary) / <alpha-value>)",
+        muted: "rgb(var(--color-muted) / <alpha-value>)",
         secondary: "rgb(var(--color-secondary) / <alpha-value>)",
+        supp: "rgb(var(--color-supp) / <alpha-value>)",
         tertiary: "rgb(var(--color-tertiary) / <alpha-value>)",
         grayc: "rgb(var(--color-gray) / <alpha-value>)",
         background: "rgb(var(--color-bg) / <alpha-value>)",
         surface: "rgb(var(--color-surface) / <alpha-value>)",
         textc: "rgb(var(--color-text) / <alpha-value>)",
+        yellowc: "rgb(var(--color-yellow-code))" ,
+        card_title: "rgb(var(--color-title-card))",
+        icons_about: "rgb(var(--color-icons-about))",
+
+        
       },
       backgroundImage: {
         "grad-1": "var(--grad-1)",
