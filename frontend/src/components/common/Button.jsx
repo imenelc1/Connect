@@ -21,7 +21,10 @@ export default function Button({
   const variants = {
     primary: `${base} bg-sky-500 text-white hover:bg-sky-600`,
 
-    ca: `${base} bg-[var(--color-primary)] text-white shadow-md hover:opacity-90 px-4`,
+    ca: `${base} flex items-center space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-3
+                 px-2 sm:px-3 md:px-7 lg:px-10
+                 text-xs sm:text-sm lg:text-lg
+                 bg-primary text-white rounded-full shadow-md hover:opacity-90 transition`,
 
 
     send: `${base} text-white`,

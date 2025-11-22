@@ -1,0 +1,67 @@
+{
+    "acceuil":{
+        "home":"acceuil",
+        "about":"à propos",
+        "features": "Services",
+        "Bcreate":"créer un compte",
+        "title_part1": "Une façon",
+    "title_part2": " plus intelligente",
+    "title_part3": "d'apprendre",
+   
+    "title_part4": "le C",
+    "title_part5": "et l'algorithmique",
+        "p_heroS":"Fournir aux étudiants et enseignants les outils pour apprendre, enseigner et collaborer en C",
+        "button_start": "Commencer",
+        "button_work":"comment ça marche",
+
+
+"aboutTitle": "À propos de CONNECT",
+    "aboutParagraph1": "Fondé en 2025, CONNECT a été créé par des ingénieurs logiciels passionnés par l'idée de rendre l'éducation à la programmation accessible et efficace pour tous.",
+    "aboutParagraph2": "Nous croyons que l'apprentissage du code doit être engageant, interactif et personnalisé. Notre plateforme combine les technologies éducatives de pointe avec des méthodes d'enseignement éprouvées pour créer une expérience d'apprentissage unique.",
+    "aboutParagraph3": "Avec des milliers d'étudiants et d'enseignants utilisant notre plateforme quotidiennement, nous nous engageons à améliorer et à développer continuellement nos offres pour répondre aux besoins évolutifs de la communauté éducative en programmation.",
+    "missionTitle": "Notre Mission",
+    "missionText": "Donner à la prochaine génération de programmeurs les compétences et la confiance dont ils ont besoin pour réussir dans le monde numérique.",
+    "valuesTitle": "Nos Valeurs",
+    "valuesText": "L'excellence dans l'éducation, l'inclusivité, l'innovation et une approche centrée sur l'étudiant guident tout ce que nous faisons.",
+    "visionTitle": "Notre Vision",
+    "visionText": "Un monde où l'éducation de qualité en programmation est accessible à tous, indépendamment de leur parcours ou de leur localisation.",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       "whyChoose": "Pourquoi choisir CONNECT ?",
+    "whyChooseText": "Nous fournissons les outils et ressources nécessaires pour maîtriser efficacement la programmation en C et les algorithmes",
+    "structuredCourses": "COURS STRUCTURÉS",
+    "structuredCoursesText": "Des leçons progressives et bien organisées pour maîtriser les concepts fondamentaux.",
+    "personalizedTracking": "SUIVI PERSONNALISÉ",
+    "personalizedTrackingText": "Suivez vos progrès et identifiez vos points forts et vos axes d'amélioration.",
+    "accessibleEveryone": "ACCESSIBLE À TOUS",
+    "accessibleEveryoneText": "Une plateforme conçue pour tous les niveaux — des débutants aux experts.",
+    "integratedAI": "IA INTÉGRÉE",
+    "integratedAIText": "Une IA qui s'adapte à votre niveau pour apprendre plus vite et comprendre les concepts complexes.",
+    "gamification": "GAMIFICATION",
+    "gamificationText": "Boostez votre apprentissage avec des défis interactifs, des succès et des récompenses qui transforment votre progression en jeu.",
+    "forumsCollaboration": "FORUMS DE COLLABORATION",
+    "forumsCollaborationText": "Collaborez, échangez des idées et obtenez de l'aide grâce à des forums dédiés reliant étudiants et enseignants.",
+
+"copyright": "Droit d'auteur ©2025",
+    "all_rights": "|| tous droits réservés",
+    "footer_policy": "Politique de réservation"
+
+    }
+}

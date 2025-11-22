@@ -17,6 +17,10 @@ class TentativeExercice(models.Model):
     score = models.FloatField()
     temps_passe = models.DurationField()
     reponse = models.TextField()
+<<<<<<< HEAD
+=======
+    feedback = models.TextField(blank=True, null=True)
+>>>>>>> meriemi
 
 class Analyse(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
@@ -46,4 +50,8 @@ class GagnerBadge(models.Model):
         unique_together = ('utilisateur', 'badge')  # un badge ne peut être gagné qu'une fois
 
     def __str__(self):
+<<<<<<< HEAD
      return f"{self.utilisateur} earned {self.badge.nom}"
+=======
+     return f"{self.utilisateur} earned {self.badge.nom}"
+>>>>>>> meriemi

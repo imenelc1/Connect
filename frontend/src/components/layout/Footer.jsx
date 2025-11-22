@@ -1,37 +1,29 @@
 import React from "react";
 import "../../styles/index.css"; 
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+     const { t } = useTranslation("acceuil");
   return (
-     <footer
-      style={{
-         backgroundColor: "var(--color-bg)", //couleur du fond
-        display: "flex", //les alligner
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1rem",
-        position: "relative",
-      }}
+     <footer  className="bg-surface py-4 flex flex-col md:flex-row
+        items-center justify-between
+        px-80 py-4
+        text-center md:text-center
+        "
+      
     >
       {/* Texte principal au centre */}
-      <p style={{ color: "var(--color-secondary)", textAlign: "center", margin: 0 }}>
-        Copy right ©2025{" "}
-        <span style={{ color: "var(--color-primary)", fontWeight: "600" }}>
+      <p className= "text-supp text-center sm:text-center md:text-center lg:text-center" >
+      {t("acceuil.copyright")} {" "}
+        <span className="text-muted font-semibold" >
          {"C{}nnect"}
         </span>{" "}
-        || all right reserved
+       {t("acceuil.all_rights")}
       </p>
 
       {/* Lien à droite */}
-      <p
-        style={{
-          color: "var(--color-secondary)",
-          position: "absolute",
-          right: "1rem",
-          margin: 0,
-        }}
-      >
-        &gt; Politique de réservation
+      <p className="text-muted mt-2 md:mt-0 cursor-pointer" >
+        &gt; {t("acceuil.footer_policy")}
       </p>
     </footer>
   );

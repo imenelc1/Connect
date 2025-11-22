@@ -22,7 +22,8 @@ export default function NavLinks() {
     <FiSun size={18} />
   </li>
   <li className="cursor-pointer text-[var(--color-text-main)] hover:opacity-80  transition">
-  <MdTranslate size={18} title="Changer la langue" />
+  <FiGlobe size={20} title="Changer la langue" />
+
 </li>
 </ul>
 

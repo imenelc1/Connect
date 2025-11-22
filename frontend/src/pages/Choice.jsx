@@ -1,48 +1,55 @@
-import React from 'react';
+import React, { useContext } from "react";
 import { GraduationCap, UserRound } from "lucide-react";
-import Icon from '../components/common/Icon';
-import Logo from '../components/common/logo';
+import IconeLogoComponent from '../components/common/IconeLogoComponent';
 import Button from '../components/common/Button';
-import Footer from '../components/layout/Footer';
+import { useTranslation } from "react-i18next";
 import "../styles/index.css";
 import { useNavigate } from "react-router-dom";
+import ThemeContext from "../context/ThemeContext";
+import LogoComponent from "../components/common/LogoComponent"
+import ThemeButton from "../components/common/ThemeButton";
+
 function Choice() {
-    const navigate = useNavigate();
-    return (
+  const navigate = useNavigate();
+  const { t} = useTranslation();
+  const {toggleDarkMode } = useContext(ThemeContext);
 
-   <div className="Choice flex flex-col h-screen bg-[radial-gradient(circle_at_center,_#bad7f0,_#ffffff)]">
+  return (
+    <div className="Choice flex flex-col h-screen bg-grad-5">
 
-    <header className="p-6">
-        <Logo className="w-20 h-30" />
-    </header>
+      <div className="flex flex-row gap-[1000px]">
+         <header className="p-2">
+          <LogoComponent />
+         </header>
 
-    <main className="flex flex-col items-center justify-center flex-1 
-                    gap-8 text-center px-4">
-        
-        <Icon />
+         <ThemeButton onClick={toggleDarkMode}/>
+      </div>
 
-        <p className="font-poppins text-xl sm:text-2xl md:text-3xl text-[#a5a5a5]">
-            To Personalize your experience, please indicate <br /> your profile.
+      <main className="flex flex-col items-center justify-center flex-1 gap-16 text-center px-4">
+        <IconeLogoComponent size="w-28 h-28" />
+        <p className="font-poppins text-l sm:text-xl md:text-2xl text-grayc">
+          {t("choice.title")} <br />
+          {t("choice.title_contd")}
         </p>
 
         <div className="flex gap-10 md:gap-16">
-            <Button variant="choice" onClick={() => navigate("/signup/instructor")}>
-                <UserRound size={24} />
-                Instructor
-            </Button>
+          <Button
+            onClick={() => navigate("/signup/instructor")}
+            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-1 sm:text-l md:text-l hover:opacity-90 text-white flex w-26 sm:w-38 md:w-46 lg:w-50 items-center justify-center gap-3 px-3 py-3"
+          >
+            <UserRound /> {t("choice.instructor")}
+          </Button>
 
-           
-            <Button variant="choice" onClick={() => navigate("/signup/student")}>
-                <GraduationCap size={24} />
-                Student
-            </Button>
+          <Button
+            onClick={() => navigate("/signup/student")}
+             className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-1 sm:text-l md:text-l hover:opacity-90 text-white flex w-26 sm:w-38 md:w-46 lg:w-50 items-center justify-center gap-3 px-3 py-3"
+          >
+            <GraduationCap /> {t("choice.student")}
+          </Button>
         </div>
-    </main>
-
-    <Footer />
-</div>
-
-    );
+      </main>
+    </div>
+  );
 }
 
 export default Choice;

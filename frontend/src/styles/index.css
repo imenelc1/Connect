@@ -1,138 +1,79 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ---- Palette LIGHT (RGB converted) ---- */
+:root {
+  --color-primary: 79 157 222;   /* #4F9DDE */
+  --color-muted: 79 157 222; 
+  --color-secondary: 163 170 237; /* #A3AAED */
+  --color-supp:163 170 237;
+  --color-tertiary: 186 104 200; /* #BA68C8 */
+  --color-gray: 153 161 175;     /* #99A1AF */
+  --color-bg: 255 255 255;       /* #FFFFFF */
+  --color-surface: 245 247 250;  /* léger */
+  --color-text: 10 10 10;        /* #0A0A0A */
+  --color-grisclair:165 165 165;   /* #a5a5a5*/
+  --color-yellow-code: 192 180 44;
 
+
+  /* Dégradés LIGHT */
+  --grad-1: linear-gradient(135deg, #4F9DDE, #2F4F70);
+  --grad-2: linear-gradient(135deg, #4F9DDE, #FFFFFF);
+  --grad-3: linear-gradient(135deg, #A3AAED, #FFFFFF);
+  --grad-4: linear-gradient(135deg, #BA68C8, #FFFFFF);
+  --grad-5: radial-gradient(circle at center, #bad7f0, #ffffff);
+
+}
+
+/* ---- Palette DARK ---- */
+.dark {
+  --color-primary: 47 79 112;  
+  --color-muted: 255 255 255;
+  --color-secondary: 30 41 57;    /* #1E2939 */
+  --color-supp:79 157 222;
+  --color-tertiary: 186 104 200; 
+  --color-gray: 229 231 235;     /* #E5E7EB */
+  --color-bg: 15 18 26;          /* sombre */
+  --color-surface: 25 32 45;
+  --color-text: 255 255 255;
+  --color-yellow-code:192 180 44;
+  --color-title-card:47 79 112;
+  --color-icons-about: 195 153 210;
+
+  /* Dégradés DARK */
+  --grad-dark-1: linear-gradient(135deg, #4F9DDE, #A3AAED);
+  --grad-dark-2: linear-gradient(135deg, #4F9DDE, #2F4F70);
+  --grad-dark-3: linear-gradient(135deg, #A3AAED, #2F4F70);
+  --grad-dark-4: linear-gradient(135deg, #BA68C8, #2F4F70);
+}
+
+/* ---- Base ---- */
 @layer base {
-  :root {
-    /* --- LIGHT THEME --- */
-     --color-primary: /*#4F9DDE*/ #4f9cdd; 
-    --color-secondary: #A3AAED;
-     --color-bg:/*#4f9ede13*/ #f5f9fd; 
-    --color-surface: #FFFFFF;
-   --color-text-main:  /* #1B213F*/#4a4b4c; 
-    --color-text-muted: #959BA5;
-    --color-yellow-code:#c2b634;
-  
-
-    
-  }
-
-  .dark {
-    /* --- DARK THEME --- */
-    --color-primary: linear-gradient(90deg, #4F9DDE, #A3AAED);
-    --color-secondary: #2F4F70;
-    --color-bg: #0E2A46;
-    --color-surface: #2F4F70;
-    --color-text-main: #FFFFFF;
-    --color-text-muted: #CACEF7;
-  }
-
-
   body {
-  
-  font-family: 'Poppins', sans-serif;
-
-    background: var(--color-bg);
-    color: var(--color-text-main);
-    overflow-x: hidden;
-  }
-
- 
-.inner-shadow {
-  box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.25);
-}
-
-.text-inner-shadow {
-  color: #c7ccf4;
-  text-shadow:
-    1px 1px 0 #00000025,
-   -1px -1px 0 #00000025,
-    1px -1px 0 #00000025,
-   -1px 1px 0 #00000025;
-}
-
-
-.text-3d {
-  color: #c7ccf4;
-  
-  text-shadow: 0 2px 1px #ffffff,   /* haut clair */
-    0 -2px 1px rgba(0, 0, 0, 0.25), /* bas sombre */ 
-     2px 2px 4px rgba(0,0,0,0.2);  /* flou général */
-  /* 0 1px 0 #fff, 0 -1px 0 rgba(0,0,0,0.25); */
-}
-#p-choice{
-  color: rgb(133, 133, 133);
-
-}
-.about-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  line-height: 1.6;
-}
-.about-content p{
-  width: 70%;
-}
-.about-container h1{
-
- background:  linear-gradient(to right, #4F9DDE,#2F4F70, #2F4F70);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-font-weight: 550;
-  font-size: 2rem;
-}
-
-
-.vision-section h2 {
-   background: linear-gradient(to top, #4F9DDE,#2F4F70,#2F4F70);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  margin-bottom: 1rem;
-  font-size: 1.8rem;
-}
-.mission-values .our{
-  width: 140px;
-  border-radius: 10px;
-  height: 60px;
-
-   background: linear-gradient(to top, #cce0f5, #ffffff);
- 
-
-}
-.vision-section{
-  display: flex;
-}
-
-
-
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .about-container {
-    padding: 1rem;
-  }
-  
-  .mission-values-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .about-header h1 {
-    font-size: 2rem;
-  }
-  
-  .mission-card,
-  .values-card,
-  .vision-card {
-    padding: 1.5rem;
+    background: rgb(var(--color-bg));
+    color: rgb(var(--color-text));
   }
 }
 
+@layer utilities {
 
+  /* Dégradés LIGHT */
+  .bg-grad-1 { background-image: var(--grad-1); }
+  .bg-grad-2 { background-image: var(--grad-2); }
+  .bg-grad-3 { background-image: var(--grad-3); }
+  .bg-grad-4 { background-image: var(--grad-4); }
 
+  /* Dégradés DARK (même classe → change automatiquement) */
+  .dark .bg-grad-1 { background-image: var(--grad-dark-1); }
+  .dark .bg-grad-2 { background-image: var(--grad-dark-2); }
+  .dark .bg-grad-3 { background-image: var(--grad-dark-3); }
+  .dark .bg-grad-4 { background-image: var(--grad-dark-4); }
 
+}
+.bg-grad-5 {
+  background-image: radial-gradient(circle at center, #bad7f0, #ffffff);
+}
+.dark .bg-grad-5 {
+  background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
 }

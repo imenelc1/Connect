@@ -9,51 +9,53 @@ import {
   FaUsers,
   FaComments
 } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 export default function CardsSection() {
+  const { t } = useTranslation("acceuil");
   const features = [
     {
       icon: <FaBookOpen />,
-      title: "STRUCTURED COURSES",
-      text: "Progressive and well-organized lessons to master fundamental concepts.",
+      title: "acceuil.structuredCourses",
+      text: "acceuil.structuredCoursesText",
     },
     {
       icon: <FaChartLine />,
-      title: "PERSONALIZED TRACKING",
-      text: "Track your progress and identify your strengths and areas for improvement.",
+      title: "acceuil.personalizedTracking",
+      text: "acceuil.personalizedTrackingText",
       gradient: true,
     },
     {
       icon: <FaUsers />,
-      title: "ACCESSIBLE TO EVERYONE",
-      text: "A platform designed for all levels — from beginners to experts.",
+      title: "acceuil.accessibleEveryone",
+      text: "acceuil.accessibleEveryoneText",
     },
     {
       icon: <FaBrain />,
-      title: "INTEGRATED AI",
-      text: "AI-powered guidance that adapts to your level, helping you learn faster and understand complex concepts with clarity.",
+      title: "acceuil.integratedAI",
+      text: "acceuil.integratedAIText",
     },
     {
       icon: <FaGamepad />,
-      title: "GAMIFICATION",
-      text: "Boost your learning with interactive challenges, achievements, and rewards that turn your progress into a game.",
+      title: "acceuil.gamification",
+      text: "acceuil.gamificationText",
       gradient: true,
     },
     {
       icon: <FaComments />,
-      title: "FORUMS FOR COLLABORATION",
-      text: "Collaborate, exchange ideas, and get help through dedicated forums connecting students and teachers.",
+      title: "acceuil.forumsCollaboration",
+      text: "acceuil.forumsCollaborationText",
     },
   ];
 
   return (
     <section className="py-20">
-      <h2 className="text-center text-3xl font-bold text-black">
-        Why Choose CONNECT?
+      <h2 className="text-center text-3xl font-bold text-textc">
+        {t("acceuil.whyChoose")}
       </h2>
 
-      <p className="text-center text-[var(--color-text-main)] mt-2 mb-12">
-        We provide the tools and resources you need to master C programming and algorithms effectively
+      <p className="text-center text-textc mt-2 mb-12">
+       {t("acceuil.whyChooseText")}
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto px-4 place-items-center">
