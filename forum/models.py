@@ -24,8 +24,4 @@ class Commentaire(models.Model):
 class Like(models.Model):
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-<<<<<<< HEAD
     date_liker = models.DateField()
-=======
-    date_liker = models.DateField()
->>>>>>> meriemi

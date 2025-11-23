@@ -20,6 +20,7 @@ module.exports = {
         yellowc: "rgb(var(--color-yellow-code))" ,
         card_title: "rgb(var(--color-title-card))",
         icons_about: "rgb(var(--color-icons-about))",
+        card: "rgb(var(--color-card) / <alpha-value>)",
 
         
       },

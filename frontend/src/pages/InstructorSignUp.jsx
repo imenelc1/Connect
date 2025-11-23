@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
@@ -6,11 +6,22 @@ import logo from "../assets/LogoLight.svg";
 import robot from "../assets/mascotte.svg";
 import googleIcon from "../assets/google-icon.svg";
 import api from "../services/api";
+import LogoComponent from "../components/common/LogoComponent";
 
-import { FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge , FaCalendarAlt, FaLock, FaEnvelope, FaUser } from "react-icons/fa";
+
+import { 
+  FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge,
+  FaCalendarAlt, FaLock, FaEnvelope, FaUser, FaGraduationCap
+} from "react-icons/fa";
+
+import { FiGlobe } from "react-icons/fi";
+
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import ThemeContext from "../context/ThemeContext";
+import ThemeButton from "../components/common/ThemeButton";
 
-const InstructorSignup = () => {
+const InstructorSignUp = () => {
   const [formData, setFormData] = useState({
     nickname: "",
     fullname: "",
@@ -21,7 +32,8 @@ const InstructorSignup = () => {
     regnumber: "",
     rank: ""
   });
-
+ const { t, i18n } = useTranslation("signup");
+  const { toggleDarkMode } = useContext(ThemeContext);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -147,146 +159,71 @@ const InstructorSignup = () => {
       toast.error("Erreur réseau. Vérifiez Django.");
     }
 };
-
+ const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start p-8 bg-[#f5f9fd]">
-      <header className="w-full relative flex items-center justify-center py-4 mb-8">
-        <img src={logo} alt="Connect Logo" className="absolute left-6 w-28 md:w-36" />
+     <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4">
+      {/* Header: logo, dark mode, langue */}
+      <div className="flex items-center justify-start w-full mb-4">
+       <LogoComponent />
+        <ThemeButton onClick={toggleDarkMode} />
+        <FiGlobe size={20} title="Changer la langue" onClick={toggleLanguage} className="ml-4 cursor-pointer"/>
+      </div>
 
-        <AuthTabs role="instructor" active="signup" />
-      </header>
+      <AuthTabs role="instructor" active="signup"/>
 
-      <div className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl flex overflow-hidden">
-
-        {/* LEFT FORM */}
-        <div className="flex-1 p-10 bg-white">
-          <h2 className="text-2xl font-semibold text-slate-700 mb-6">
-            Welcome to <span className="text-sky-500">connect</span>
+      <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card rounded-3xl shadow-lg overflow-hidden relative mt-2">
+        {/* Formulaire */}
+        <div className="w-full md:w-1/2 p-10">
+          <h2 className="text-2xl font-semibold text-muted text-center mb-6">
+            {t("welcomeInstructor")}
           </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your nickname"
-                name="nickname"
-                value={formData.nickname}
-                onChange={handleChange}
-                placeholder="Nickname"
-                icon={<FaUser />}
-                error={errors.nickname}
-              />
-
-              <Input
-                label="Enter your full name"
-                name="fullname"
-                value={formData.fullname}
-                onChange={handleChange}
-                placeholder="Full name"
-                icon={<FaUser />}
-                error={errors.fullname}
-              />
+            <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
+              <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
             </div>
 
-            <Input
-              label="Enter your email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email address"
-              type="email"
-              icon={<FaEnvelope />}
-              error={errors.email}
-            />
+            <Input label={t("email")} name="email" type="email" value={formData.email} onChange={handleChange} placeholder={t("email")} icon={<FaEnvelope />} error={errors.email} />
 
-            <Input
-              label="Enter your password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              icon={<FaLock />}
-              error={errors.password}
-              rightIcon={
-                showPassword ? (
-                  <FaEyeSlash onClick={() => setShowPassword(!showPassword)} />
-                ) : (
-                  <FaEye onClick={() => setShowPassword(!showPassword)} />
-                )
-              }
-            />
+            <Input label={t("password")} name="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} placeholder={t("password")} icon={<FaLock />} rightIcon={showPassword ? <FaEyeSlash onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" /> : <FaEye onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" />} error={errors.password} />
 
-            <Input
-              label="Confirm password"
-              name="confirm"
-              type={showConfirm ? "text" : "password"}
-              value={formData.confirm}
-              onChange={handleChange}
-              placeholder="Confirm password"
-              icon={<FaLock />}
-              error={errors.confirm}
-              rightIcon={
-                showConfirm ? (
-                  <FaEyeSlash onClick={() => setShowConfirm(!showConfirm)} />
-                ) : (
-                  <FaEye onClick={() => setShowConfirm(!showConfirm)} />
-                )
-              }
-            />
+            <Input label={t("confirmPassword")} name="confirm" type={showConfirm ? "text" : "password"} value={formData.confirm} onChange={handleChange} placeholder={t("confirmPassword")} icon={<FaLock />} rightIcon={showConfirm ? <FaEyeSlash onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" /> : <FaEye onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" />} error={errors.confirm} />
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your date of birth"
-                name="dob"
-                type="date"
-                value={formData.dob}
-                onChange={handleChange}
-                icon={<FaCalendarAlt />}
-                error={errors.dob}
-              />
-
-              <Input
-                label="Enter your registration number"
-                name="regnumber"
-                value={formData.regnumber}
-                onChange={handleChange}
-                placeholder="Registration number"
-                icon={<FaIdBadge />}
-                error={errors.regnumber}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("dob")} name="dob" type="date" value={formData.dob} onChange={handleChange} placeholder={t("dob")} icon={<FaCalendarAlt />} error={errors.dob} />
+              <Input label={t("regnumber")} name="regnumber" value={formData.regnumber} onChange={handleChange} placeholder={t("regnumber")} icon={<FaIdBadge />} error={errors.regnumber} />
             </div>
 
-            <Input
-              label="Enter your rank"
-              name="rank"
-              value={formData.rank}
-              onChange={handleChange}
-              placeholder="Rank"
-              icon={<FaStar />}
-              error={errors.rank}
-            />
+            <Input label={t("rank")} name="rank" value={formData.rank} onChange={handleChange} placeholder={t("rank")} icon={<FaGraduationCap />} error={errors.rank} />
 
-
-            <Button type="submit" variant="primary">
-              <FaPaperPlane className="inline mr-2" /> Sign up
-            </Button>
-
-            <p className="text-sm text-gray-500 text-center">
-              Already have an account?
-              <a href="/LoginInstructor" className="text-sky-500"> Sign in</a>
-            </p>
+          
+            <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
           </form>
         </div>
 
-        {/* RIGHT SIDE IMAGE */}
-        <div className="flex-1 flex items-center justify-center bg-white relative">
-          <img src={robot} alt="robot" className="max-w-xs md:max-w-md z-10" />
+        {/* Mascotte */}
+        <div className="w-full md:w-1/2 relative flex items-center justify-center mt-8 md:mt-0 bg-card">
+          <div className="absolute top-12 md:top-16 right-4 md:right-12 bg-white rounded-xl shadow p-6 md:p-9 w-max min-h-[80px] z-20">
+            <p className="text-gray-700 font-medium text-sm">
+              {t("welcomeInstructor")}
+            </p>
+            <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow">
+              <span style={{ color: "#4F9DDE", fontSize: "20px", fontWeight: "bold" }}>&lt;&gt;</span>
+            </div>
+          </div>
+
+          <div className="absolute w-56 md:w-72 h-56 md:h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "45%", left: "50%", transform: "translate(-50%, -50%)" }} />
+          <img src={robot} alt="Robot Mascotte" className="w-56 md:w-72 z-10 -mt-10 md:-mt-10" />
         </div>
+
       </div>
     </div>
   );
-};
+}
 
-export default InstructorSignup;
+
+export default InstructorSignUp;

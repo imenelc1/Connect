@@ -15,6 +15,7 @@
   --color-text: 10 10 10;        /* #0A0A0A */
   --color-grisclair:165 165 165;   /* #a5a5a5*/
   --color-yellow-code: 192 180 44;
+  --color-card: 255 255 255;
 
 
   /* Dégradés LIGHT */
@@ -40,6 +41,7 @@
   --color-yellow-code:192 180 44;
   --color-title-card:47 79 112;
   --color-icons-about: 195 153 210;
+  --color-card: 47 79 112;
 
   /* Dégradés DARK */
   --grad-dark-1: linear-gradient(135deg, #4F9DDE, #A3AAED);

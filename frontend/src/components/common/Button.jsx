@@ -21,7 +21,7 @@ export default function Button({
 
   // Variants disponibles : chaque style correspond à un usage spécifique
   const variants = {
-    primary: `${base} bg-sky-500 text-white hover:bg-sky-600`,
+    primary: `${base} bg-grad-1 text-white hover:bg-sky-600`,
 
     ca: `${base} flex items-center space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-3
          px-2 sm:px-3 md:px-7 lg:px-10 text-xs sm:text-sm lg:text-lg

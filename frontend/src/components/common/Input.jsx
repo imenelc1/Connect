@@ -5,7 +5,7 @@ export default function Input({ label, icon, rightIcon, error, ...props }) {
   return (
     <div className="flex flex-col mb-4">
       {/* ---------------------- Label du champ ---------------------- */}
-      <label className="mb-1 font-semibold text-gray-700">
+      <label className="mb-1 font-semibold text-grayc">
         {label}
       </label>
 

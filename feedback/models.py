@@ -11,8 +11,4 @@ class Notification(models.Model):
     id_notif = models.AutoField(primary_key=True)
     message_notif = models.TextField()
     date_envoie = models.DateTimeField(auto_now_add=True)
-<<<<<<< HEAD
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-=======
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
->>>>>>> meriemi
