@@ -1,37 +1,48 @@
 
-
-import { Home, LayoutDashboard, BookOpen, FileCheck2, Users, Settings, LogOut } from "lucide-react";
 import React from "react";
- import "../../styles/index.css";
-  import { NavLink } from "react-router-dom";  //il va gerer les routes (links quoi)
+import "../../styles/index.css";
+import { NavLink } from "react-router-dom";
 
+// Icônes Lucide (modernes et légères)
+import { Settings, LogOut } from "lucide-react";
 
-export default function SideNavbar({ links = [], userName = "", userRole = "", userInitials = "" }) {
-  //user role cest soit enseignant ou etudiant
+export default function SideNavbar({
+  links = [],
+  userName = "",
+  userRole = "",
+  userInitials = "",
+}) {
   return (
     <aside className="w-64 h-screen bg-white shadow-2xl flex flex-col justify-between p-4 rounded-3xl font-medium">
-      {/* Top User */}
+
+      {/* -----------------------------------------------------------------
+          HEADER UTILISATEUR (nom + rôle + initiales)
+      ------------------------------------------------------------------ */}
       <div>
         <div className="flex items-center gap-3 p-4 bg-white/60 rounded-2xl shadow-sm">
-          <div className="w-12 h-12 flex items-center justify-center bg-primary text-surface  rounded-full">{userInitials}</div>
+          {/* Rond avec les initiales */}
+          <div className="w-12 h-12 flex items-center justify-center bg-primary text-surface rounded-full">
+            {userInitials}
+          </div>
+
+          {/* Nom + rôle */}
           <div className="flex flex-col text-sm">
-            { <span className="font-semibold text-textc">{userRole}</span>  } {/*ca et userinitiales va etre recuperer automatiquement de la bdd je les ai ajouté juste pour le test*/}
+            <span className="font-semibold text-textc">{userRole}</span>
             <span className="text-grayc">{userName}</span>
           </div>
         </div>
 
-        {/* Navigation Links */}
+        {/* -----------------------------------------------------------------
+            NAVIGATION PRINCIPALE (générée dynamiquement)
+        ------------------------------------------------------------------ */}
         <nav className="mt-8 flex flex-col gap-2 font-semibold">
           {links.map((item, index) => (
             <NavLink
               key={index}
               to={item.href}
-           className={ //({ isActive }) => je l'ai mis en commentaire car on doit d'abord definir les routes pour que ca marche
-                `flex items-start gap-3 px-4 py-3 rounded-xl transition-all shadow-sm text-primary `
-                //  {isActive ? "bg-primary text-white" : "hover:bg-primary"
-                //     }
-              }
+              className="flex items-start gap-3 px-4 py-3 rounded-xl transition-all shadow-sm text-primary"
             >
+              {/* Icône dynamique */}
               <item.icon size={18} />
               <span>{item.label}</span>
             </NavLink>
@@ -39,37 +50,42 @@ export default function SideNavbar({ links = [], userName = "", userRole = "", u
         </nav>
       </div>
 
-      {/* Bottom */}
-      <div className="flex flex-col gap-2 mt-4 rounded-xl bg-primary/10 ">
+      {/* -----------------------------------------------------------------
+         BAS DE LA SIDEBAR (Settings + Logout)
+      ------------------------------------------------------------------ */}
+      <div className="flex flex-col gap-2 mt-4 rounded-xl bg-primary/10">
+
+        {/* ⚙️ Settings */}
         <NavLink
           to="/settings"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all shadow-sm
-             ${isActive
+            `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all shadow-sm ${
+              isActive
                 ? "bg-gradient-to-r from-primary to-primarylight text-white"
-                : "text-primary hover:bg-gradient-to-r hover:from-primary/20 "}`
+                : "text-primary hover:bg-gradient-to-r hover:from-primary/20"
+            }`
           }
         >
           <Settings size={18} className="text-primary" />
           <span className="font-semibold">Settings</span>
         </NavLink>
 
+        {/* 🚪 Logout */}
+        <NavLink
+          to="/logout"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all shadow-sm ${
+              isActive
+                ? "bg-gradient-to-r from-primary to-primarylight text-white"
+                : "text-primary hover:bg-gradient-to-r hover:from-primary/20"
+            }`
+          }
+        >
+          <LogOut size={18} className="text-primary" />
+          <span className="font-semibold">Log Out</span>
+        </NavLink>
 
-<NavLink
-  to="/logout"
-  className={({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all shadow-sm
-     ${isActive
-        ? "bg-gradient-to-r from-primary to-primarylight text-white"
-        : "text-primary hover:bg-gradient-to-r hover:from-primary/20 "}`
-  }
->
-  <LogOut size={18} className="text-primary" />
-  <span className="font-semibold">Log Out</span>
-</NavLink>
       </div>
     </aside>
   );
 }
-
-

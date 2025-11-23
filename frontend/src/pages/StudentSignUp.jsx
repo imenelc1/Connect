@@ -1,17 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { FaUser, FaEnvelope, FaLock, FaPaperPlane, FaEye, FaEyeSlash, FaCalendarAlt, FaIdBadge, FaLayerGroup, FaCalendarCheck } from "react-icons/fa";
+import { FiGlobe } from "react-icons/fi";
+
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
-import logo from "../assets/LogoLight.svg";
+import GoogleButton from "../components/common/GoogleButton";
+import LogoComponent from "../components/common/LogoComponent";
 import robot from "../assets/mascotte.svg";
-import googleIcon from "../assets/google-icon.svg";
 import api from "../services/api";
-import {
-  FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaIdBadge,
-  FaGraduationCap, FaPaperPlane, FaEye, FaEyeSlash
-} from "react-icons/fa";
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import ThemeContext from "../context/ThemeContext";
+import ThemeButton from "../components/common/ThemeButton";
 
-const Select = ({ label, icon, name, value, onChange, options }) => (
+const Select = ({ label, icon, name, value, onChange, options, error }) => (
   <div className="flex flex-col mb-4">
     <label className="mb-1 font-semibold text-gray-700">{label}</label>
     <div className="flex items-center border border-gray-300 rounded-md px-3 py-2 bg-white">
@@ -22,14 +25,18 @@ const Select = ({ label, icon, name, value, onChange, options }) => (
         onChange={onChange}
         className="flex-1 outline-none bg-transparent cursor-pointer font-inherit appearance-none"
       >
-        <option value="">Select an option</option>
+        <option value="">{label}</option>
         {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
       </select>
     </div>
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
   </div>
 );
 
-const StudentSignup = () => {
+export default function StudentSignup() {
+  const { t, i18n } = useTranslation("signup");
+  const { toggleDarkMode } = useContext(ThemeContext);
+
   const [formData, setFormData] = useState({
     nickname: "",
     fullname: "",
@@ -42,22 +49,39 @@ const StudentSignup = () => {
     year: ""
   });
 
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [message, setMessage] = useState("");
 
-  const handleChange = e =>
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: "" }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.nickname) newErrors.nickname = t("required");
+    if (!formData.fullname) newErrors.fullname = t("required");
+    if (!formData.email) newErrors.email = t("required");
+    if (!formData.password) newErrors.password = t("required");
+    if (formData.password.length < 8) newErrors.password = t("passwordLength");
+    if (formData.confirm !== formData.password) newErrors.confirm = t("passwordMatch");
+    if (!formData.dob) newErrors.dob = t("required");
+    if (!formData.regnumber) newErrors.regnumber = t("required");
+    if (!formData.field) newErrors.field = t("required");
+    if (!formData.year) newErrors.year = t("required");
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirm) {
-      setMessage("Les mots de passe ne correspondent pas !");
+    if (!validateForm()) {
+      toast.error(t("fixErrors"));
       return;
     }
 
-    // Mapping pour Django
     const payload = {
       nom: formData.nickname,
       prenom: formData.fullname,
@@ -70,188 +94,86 @@ const StudentSignup = () => {
       role: "etudiant",
     };
 
-
-      try {
-      const res = await api.post("register/", payload); // 🔥 API Axios
-
-      setMessage("Inscription réussie ! ");
-
-      setTimeout(() => {
-        window.location.href = "/login-etudiant";
-      }, 1500);
-
+    try {
+      await api.post("register/", payload);
+      toast.success(t("signUp"));
+      setTimeout(() => (window.location.href = "/dashboard-etudiant"), 1500);
     } catch (err) {
-      console.log("Erreur API:", err);
-
-      // 🔥 Protection contre erreur réseau
-      setMessage(
-        err.response?.data?.error ||
-        "Erreur réseau, vérifie que Django tourne bien"
-      );
+      const backend = err.response?.data;
+      const newErrors = {};
+      if (backend?.adresse_email) newErrors.email = backend.adresse_email[0];
+      if (backend?.matricule) newErrors.regnumber = backend.matricule[0];
+      if (backend) toast.error(Object.values(backend).flat().join("\n"));
+      setErrors(prev => ({ ...prev, ...newErrors }));
     }
   };
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
+  };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center p-0"
-      style={{ backgroundColor: "#f5f9fd" }}
-    >
-      {/* Header */}
-      <div className="w-full flex items-center justify-between px-8 py-5 relative">
-        <div className="flex-shrink-0">
-          <img src={logo} alt="Connect Logo" className="w-28 md:w-36 h-auto" />
-        </div>
-
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-           <AuthTabs role="student" active="signup" />
-        </div>
-
-        <div className="w-32"></div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4">
+      {/* Header: logo, dark mode, langue */}
+      <div className="flex items-center justify-start w-full mb-4">
+        <LogoComponent />
+        <ThemeButton onClick={toggleDarkMode} />
+        <FiGlobe size={20} title="Changer la langue" onClick={toggleLanguage} className="ml-4 cursor-pointer"/>
       </div>
 
-      {/* Formulaire + mascotte */}
-      <div
-        className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl flex overflow-hidden"
-        style={{ boxShadow: "0 6px 48px 0 rgba(52,144,220,.12)" }}
-      >
+      <AuthTabs role="student" active="signup"/>
 
+      <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card rounded-3xl shadow-lg overflow-hidden relative mt-2">
         {/* Formulaire */}
-        <div className="flex-1 p-10 bg-white">
-          <h2 className="text-2xl font-semibold text-slate-700 mb-6">
-            Welcome to <span className="text-sky-500">connect</span>
+        <div className="w-full md:w-1/2 p-10">
+          <h2 className="text-2xl font-semibold text-muted text-center mb-6">
+            {t("welcomeStudent")}
           </h2>
 
-          {message && (
-            <p className="text-center text-red-500 mb-4 font-semibold">
-              {message}
-            </p>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your nickname"
-                name="nickname"
-                value={formData.nickname}
-                onChange={handleChange}
-                placeholder="Nickname"
-                icon={<FaUser />}
-              />
-              <Input
-                label="Enter your name"
-                name="fullname"
-                value={formData.fullname}
-                onChange={handleChange}
-                placeholder="Full name"
-                icon={<FaUser />}
-              />
+          <form className="space-y-4 pt-20" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
+              <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
             </div>
 
-            <Input
-              label="Enter your Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email address"
-              icon={<FaEnvelope />}
-            />
+            <Input label={t("email")} name="email" type="email" value={formData.email} onChange={handleChange} placeholder={t("email")} icon={<FaEnvelope />} error={errors.email} />
 
-            <Input
-              label="Enter your Password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              icon={<FaLock />}
-              rightIcon={
-                showPassword
-                  ? <FaEyeSlash onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" />
-                  : <FaEye onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" />
-              }
-            />
+            <Input label={t("password")} name="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} placeholder={t("password")} icon={<FaLock />} rightIcon={showPassword ? <FaEyeSlash onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" /> : <FaEye onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" />} error={errors.password} />
 
-            <Input
-              label="Confirm your password"
-              name="confirm"
-              type={showConfirm ? "text" : "password"}
-              value={formData.confirm}
-              onChange={handleChange}
-              placeholder="Confirm password"
-              icon={<FaLock />}
-              rightIcon={
-                showConfirm
-                  ? <FaEyeSlash onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" />
-                  : <FaEye onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" />
-              }
-            />
+            <Input label={t("confirmPassword")} name="confirm" type={showConfirm ? "text" : "password"} value={formData.confirm} onChange={handleChange} placeholder={t("confirmPassword")} icon={<FaLock />} rightIcon={showConfirm ? <FaEyeSlash onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" /> : <FaEye onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" />} error={errors.confirm} />
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your date of birth"
-                name="dob"
-                type="date"
-                value={formData.dob}
-                onChange={handleChange}
-                placeholder="Date of birth"
-                icon={<FaCalendarAlt />}
-              />
-              <Input
-                label="Enter your registration number"
-                name="regnumber"
-                value={formData.regnumber}
-                onChange={handleChange}
-                placeholder="Registration number"
-                icon={<FaIdBadge />}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("dob")} name="dob" type="date" value={formData.dob} onChange={handleChange} placeholder={t("dob")} icon={<FaCalendarAlt />} error={errors.dob} />
+              <Input label={t("regnumber")} name="regnumber" value={formData.regnumber} onChange={handleChange} placeholder={t("regnumber")} icon={<FaIdBadge />} error={errors.regnumber} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your field of study"
-                name="field"
-                value={formData.field}
-                onChange={handleChange}
-                placeholder="Field of study"
-                icon={<FaGraduationCap />}
-              />
-              <Select
-                label="Enter your academic year"
-                name="year"
-                value={formData.year}
-                onChange={handleChange}
-                icon={<FaGraduationCap />}
-                options={["L1", "L2", "L3", "Ingenieur"]}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("field")} name="field" value={formData.field} onChange={handleChange} placeholder={t("field")} icon={<FaLayerGroup />} error={errors.field} />
+              <Select label={t("year")} name="year" value={formData.year} onChange={handleChange} options={["L1","L2","L3","Ing1","Ing2","Ing3","M1","M2"]} icon={<FaCalendarCheck />} error={errors.year} />
             </div>
 
-            <div className="text-center text-gray-400">Or</div>
-
-            <Button variant="outline">
-              <img src={googleIcon} alt="google" className="inline-block w-5 h-5 mr-2" />
-              Continue with Google
-            </Button>
-
-            <Button type="submit" variant="primary">
-              <FaPaperPlane className="inline mr-2" /> Sign up
-            </Button>
-
-            <p className="text-sm text-gray-500 text-center">
-              Already have an account?{" "}
-              <a href="/login-etudiant" className="text-sky-500">Sign in</a>
-            </p>
+            <div className="text-center text-gray-400">{t("or")}</div>
+            <GoogleButton />
+            <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
           </form>
         </div>
 
         {/* Mascotte */}
-        <div className="flex-1 flex items-center justify-center relative bg-white overflow-hidden">
-          <img src={robot} alt="robot" className="max-w-xs md:max-w-md drop-shadow-lg relative z-10" />
+        <div className="w-full md:w-1/2 relative flex items-center justify-center mt-8 md:mt-0 bg-card">
+          <div className="absolute top-12 md:top-16 right-4 md:right-12 bg-white rounded-xl shadow p-6 md:p-9 w-max min-h-[80px] z-20">
+            <p className="text-gray-700 font-medium text-sm">
+              {t("welcomeStudent")}
+            </p>
+            <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow">
+              <span style={{ color: "#4F9DDE", fontSize: "20px", fontWeight: "bold" }}>&lt;&gt;</span>
+            </div>
+          </div>
+
+          <div className="absolute w-56 md:w-72 h-56 md:h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "45%", left: "50%", transform: "translate(-50%, -50%)" }} />
+          <img src={robot} alt="Robot Mascotte" className="w-56 md:w-72 z-10 -mt-10 md:-mt-10" />
         </div>
       </div>
     </div>
   );
-};
-
-export default StudentSignup;
+}

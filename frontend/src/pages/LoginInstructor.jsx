@@ -1,121 +1,194 @@
 import { useState } from "react";
 import AuthTabs from "../components/common/AuthTabs";
-import InputField from "../components/common/InputField";
+import Input from "../components/common/Input";
 import Divider from "../components/common/Divider";
 import GoogleButton from "../components/common/GoogleButton";
-import PrimaryButton from "../components/common/PrimaryButton";
 import Mascotte from "../assets/mascotte.svg";
-import LogoLight from "../assets/LogoLight.svg";
+import LogoComponent from "../components/common/LogoComponent";
 import api from "../services/api";
+import toast from "react-hot-toast";
+import { FiEye, FiEyeOff,FiGlobe } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
+import Button from "../components/common/Button";
+import { useContext } from "react";
+// Thème global (dark/light mode)
+import ThemeContext from "../context/ThemeContext";
+import ThemeButton from "../components/common/ThemeButton";
 
 export default function LoginInstructor() {
-  const [activeTab, setActiveTab] = useState("signin");
+  const [activeTab] = useState("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorEmail, setErrorEmail] = useState("");
+  const [errorPassword, setErrorPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+   // Traduction (espace de noms : "login")
+    const { t, i18n } = useTranslation("login");
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg("");
+
+    setErrorEmail("");
+    setErrorPassword("");
+
+    if (!email) {
+      setErrorEmail(t("errors.emailRequired"));
+      return;
+    }
+    if (!password) {
+      setErrorPassword(t("errors.passwordRequired"));
+      return;
+    }
+    if (password.length < 8) {
+      setErrorPassword(t("errors.passwordLength"));
+      return;
+    }
 
     try {
-      const res = await api.post("login/", {
-        email: email,
-        password: password,
-      });
-
-      console.log("LOGIN SUCCESS =", res.data);
-      alert("Connexion instructeur réussie !");
+      const res = await api.post("login/", { email, password });
+      toast.success(t("success.login"));
+      window.location.href = "/dashboard-enseignant";
     } catch (error) {
-      console.log(error);
-      if (error.response) {
-        setErrorMsg(error.response.data.error);
-      } else {
-        setErrorMsg("Erreur réseau");
+      const backendError = error.response?.data?.error;
+      if (backendError) {
+        const msg = backendError.toLowerCase();
+        if (msg.includes("utilisateur") || msg.includes("email")) {
+          setErrorEmail(t("errors.emailNotFound"));
+          return;
+        }
+        if (msg.includes("mot de passe")) {
+          setErrorPassword(t("errors.wrongPassword"));
+          return;
+        }
+        setErrorPassword(backendError);
+        return;
       }
+      setErrorPassword(t("errors.networkError"));
     }
   };
+
+   //Permet de changer la langue (FR ↔ EN)
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
+  };
+  
+  // Récupération de la fonction permettant de changer le thème
+  const { toggleDarkMode } = useContext(ThemeContext);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Logo en haut à gauche */}
-<div className="absolute top-4 left-4">
-  <img src={LogoLight} alt="Logo" className="w-32" />
-</div>
-
+    // RESPONSIVE: Padding horizontal sur mobile
+    <div className="flex flex-col items-center justify-center min-h-screen bg-surface px-4 sm:px-0 pb-50">
       
-      {/* Boutons Sign in / Sign up au-dessus du cadre */}
-<AuthTabs role="instructor" active="signin" />
-
-
-      {/* Cadre principal */}
-      <div className="flex w-[1000px] min-h-[550px] bg-white rounded-3xl shadow-lg overflow-hidden relative  pt-12">
-        
-        {/* Partie gauche : formulaire */}
-        <div className="w-1/2 p-10">
+      <div className="flex items-center justify-star w-full ml-20">
           
-           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 w-full">
-            Welcome to <span className="text-blue-500">connect</span>
+           <LogoComponent />
+           {/* Bouton pour activer/désactiver le dark mode */}
+           <ThemeButton onClick={toggleDarkMode} />
+
+            {/* Bouton pour changer la langue */}
+           <FiGlobe size={20} title="Changer la langue" onClick={toggleLanguage} />
+        </div>
+        
+      {/* RESPONSIVE: AuthTabs avec margin top sur mobile */}
+      <AuthTabs role="instructor" active="signin" className="mt-8 sm:mt-0" />
+       
+      {/* RESPONSIVE: Conteneur principal - colonne sur mobile, ligne sur desktop */}
+     <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card/75 rounded-3xl shadow-lg overflow-hidden relative mt-5">
+
+        {/* FORMULAIRE - RESPONSIVE: Largeur 100% sur mobile, 1/2 sur desktop */}
+        <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:p-10 0 bg-card">
+          <h2 className="text-2xl font-semibold  text-center mb-6">
+            <span className="text-textc">{t("login.title")}</span><span>  </span><span className="text-muted">{t("login.connect")}</span>
           </h2>
-            {errorMsg && (
-            <p className="text-red-500 text-center text-sm mb-3">{errorMsg}</p>
-          )}
-          <form className="space-y-4"onSubmit={handleSubmit}>
-            <InputField
-              label=" email address"
-              placeholder=" email address"
-              icon="email"
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <Input
+              label={t("login.email")}
+              name="email"
+              placeholder={t("login.email")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              error={errorEmail}
             />
-            <InputField
-              label="Enter your Password"
-              placeholder="Password"
-              type="password"
-              icon="password"
-              showForgot={true}   
-               value={password}
+
+            <Input 
+              label={t("login.password")}
+              name="password"
+              placeholder={t("login.password")}
+              type={showPassword ? "text" : "password"}
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
+              error={errorPassword}
+              rightIcon={
+                showPassword ? (
+                  <FiEyeOff
+                    size={18}
+                    onClick={() => setShowPassword(false)}
+                    className="cursor-pointer text-grayc"
+                  />
+                ) : (
+                  <FiEye
+                    size={18}
+                    onClick={() => setShowPassword(true)}
+                    className="cursor-pointer text-grayc"
+                  />
+                )
+              }
             />
-            <Divider text="Or" />
+
+            <Divider text={t("login.or")} />
             <GoogleButton />
-            <p className="text-sm text-gray-500 text-center mt-4">
-              Don't have an account?{" "}
-              <a href="#" className="text-blue-500 font-medium hover:underline">
-                Sign in
+
+            <p className="text-sm text-grayc text-center mt-4">
+              {t("login.noAccount")}{" "}
+              <a href="InstructorSignUp" className="text-muted font-medium hover:underline">
+                {t("login.signUp")}
               </a>
             </p>
-            <PrimaryButton
-              text={activeTab === "signin" ? "Sign in" : "Sign up"}
-              type="submit"
-            />
+
+            <Button text={t("login.signIn")} type="submit" />
           </form>
         </div>
 
-        {/* Partie droite : robot */}
-<div className="w-1/2 relative flex items-center justify-center bg-white">
+        {/* MASCOTTE - RESPONSIVE: Largeur 100% sur mobile, 1/2 sur desktop avec hauteur fixe */}
+        <div className="w-full lg:w-1/2 relative flex items-center justify-center bg-card min-h-[400px] lg:min-h-0">
+          <div className="absolute top-4 right-4 bg-white rounded-xl shadow p-6 sm:p-9 w-max min-h-[80px] z-20">
+            <p className="text-gray-700 font-medium text-sm whitespace-pre-line">
+              {t("login.welcomeInstructor")}
+            </p>
 
-  {/* Rectangle "Welcome, dear instructor!" */}
-  <div className="absolute top-4 right-4 bg-white rounded-xl shadow p-9 w-max min-h-[80px] z-20">
-    <p className="text-gray-700 font-medium text-sm">
-      Welcome, dear <br></br>instructor!
-    </p>
+            <div
+              className="absolute -top-2 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow"
+              style={{ backgroundColor: "#FFFFFF" }}
+            >
+              <span
+                style={{
+                  color: "#4F9DDE",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                }}
+              >
+                &lt;&gt;
+              </span>
+            </div>
+          </div>
 
-    {/* Petit cercle en haut à droite */}
-     <div
-    className="absolute -top-2 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow"
-    style={{ backgroundColor: "#FFFFFF" }}   // cercle blanc
-  >
-    <span style={{ color: "#4F9DDE", fontSize: "20px", fontWeight: "bold" }}>
-      &lt;&gt;
-    </span>
-  </div>
-  </div>
-  {/* Fond nuage bleu clair derrière le robot */}
-    <div className="absolute w-72 h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
+          {/* RESPONSIVE: Bulle floue taille adaptative */}
+          <div
+            className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full blur-3xl"
+            style={{
+              background: "rgba(52,144,220,0.6)",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)"
+            }}
+          />
 
-  {/* Robot */}
-  <img src={Mascotte} alt="Robot Mascotte" className="w-72 z-10" />
-</div>
-
+          {/* RESPONSIVE: Mascotte taille adaptative */}
+          <img src={Mascotte} alt="Robot Mascotte" className="w-48 sm:w-60 lg:w-73 z-10" />
+        </div>
 
       </div>
     </div>

@@ -1,0 +1,20 @@
+{
+  "welcomeStudent": "Welcome, dear Student!",
+  "welcomeInstructor": "Welcome, dear Instructor!",
+  "nickname": "Nickname",
+  "fullname": "Full Name",
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "dob": "Date of Birth",
+  "regnumber": "Registration Number",
+  "field": "Field of Study",
+  "year": "Academic Year",
+  "rank": "Rank",
+  "signUp": "Sign Up",
+  "signIn": "Sign In",
+  "or": "Or",
+  "alreadyHaveAccount": "Already have an account?",
+  "selectOption": "Select an option",
+  "googleSignIn": "Or sign in with Google"
+}

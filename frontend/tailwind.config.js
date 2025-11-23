@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx,html}",
     "./public/index.html",
@@ -20,6 +20,7 @@ export default {
         yellowc: "rgb(var(--color-yellow-code))" ,
         card_title: "rgb(var(--color-title-card))",
         icons_about: "rgb(var(--color-icons-about))",
+        card: "rgb(var(--color-card) / <alpha-value>)",
 
         
       },

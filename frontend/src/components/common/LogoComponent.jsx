@@ -1,9 +1,13 @@
+
 import { useContext } from "react";
 import ThemeContext from "../../context/ThemeContext";
-import LogoLight from "../../assets/LogoLight.svg"
-import LogoDark from "../../assets/LogoDark.svg"
+
+// Logos pour dark / light mode
+import LogoLight from "../../assets/LogoLight.svg";
+import LogoDark from "../../assets/LogoDark.svg";
 
 function LogoComponent() {
+  // Récupère l’état du thème appliqué (darkMode = true/false)
   const { darkMode } = useContext(ThemeContext);
 
   return (
