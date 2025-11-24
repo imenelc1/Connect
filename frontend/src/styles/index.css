@@ -20,9 +20,9 @@
 
   /* Dégradés LIGHT */
   --grad-1: linear-gradient(135deg, #4F9DDE, #2F4F70);
-  --grad-2: linear-gradient(135deg, #4F9DDE, #FFFFFF);
-  --grad-3: linear-gradient(135deg, #A3AAED, #FFFFFF);
-  --grad-4: linear-gradient(135deg, #BA68C8, #FFFFFF);
+  --grad-2: linear-gradient(135deg, #4f9ede23, #FFFFFF);
+  --grad-3: linear-gradient(135deg, #a3aaed4d, #FFFFFF);
+  --grad-4: linear-gradient(135deg, #ba68c82b, #FFFFFF);
   --grad-5: radial-gradient(circle at center, #bad7f0, #ffffff);
 
 }
@@ -78,4 +78,7 @@
 }
 .dark .bg-grad-5 {
   background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
+}
+.search-bg {
+  background: linear-gradient(135deg, #ffffff, #e9f3ff);
 }

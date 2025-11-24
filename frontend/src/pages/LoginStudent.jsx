@@ -104,12 +104,13 @@ export default function LoginStudent() {
     try {
       // Envoi des identifiants
       const res = await api.post("login/", { email, password });
+      localStorage.setItem("user", JSON.stringify(res.data));
 
       // Notification succès
       toast.success("Connexion réussie !");
 
       // Redirection vers tableau de bord étudiant
-      window.location.href = "/dashboard-etudiant";
+      window.location.href = "/all-courses";
 
     } catch (error) {
 
@@ -131,7 +132,7 @@ export default function LoginStudent() {
           password: "password",
           non_field_errors: "password",
           detail: "password",
-          error: "password" // Souvent "Mot de passe incorrect"
+          error: "password" 
         };
 
         // Transformation des erreurs backend → erreurs UI

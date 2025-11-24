@@ -5,6 +5,8 @@ import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
 import LoginInstructor from "../pages/LoginInstructor";
 import LoginStudent from "../pages/LoginStudent";
+import AllCoursesPage from "../pages/AllCoursesPage";
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -19,6 +21,9 @@ export default function AppRoutes() {
         {/* LOGIN */}
         <Route path="/login/instructor" element={<LoginInstructor />} />
         <Route path="/login/student" element={<LoginStudent />} />
+
+        <Route path="/all-courses" element={<AllCoursesPage />} />
+
       </Routes>
     </BrowserRouter>
   );

@@ -125,10 +125,11 @@ const InstructorSignUp = () => {
 
   try {
     const res = await api.post("register/", payload);
+    localStorage.setItem("user", JSON.stringify(res.data));
     toast.success("Inscription réussie !");
 
     setTimeout(() => {
-      window.location.href = "/dashboard-instructor";
+      window.location.href = "/all-courses";
     }, 1500);
 
  } catch (err) {

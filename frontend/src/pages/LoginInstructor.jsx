@@ -58,8 +58,10 @@ export default function LoginInstructor() {
     // --- Appel API ---
     try {
       const res = await api.post("login/", { email, password });
+      console.log("Login API response:", res.data);
+      localStorage.setItem("user", JSON.stringify(res.data));
       toast.success("Connexion réussie !");
-      window.location.href = "/dashboard-enseignant";
+      window.location.href = "/all-courses";
 
     } catch (error) {
       const backend = error.response?.data;
