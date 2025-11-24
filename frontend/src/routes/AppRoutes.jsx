@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Acceuil from "../pages/Acceuil";
+import Acceuil from "../pages/acceuil";
 import Choice from "../pages/Choice";
 import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
@@ -11,7 +11,7 @@ export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Acceuil />} />
+        <Route path="/acceuil" element={<Acceuil />} />
         <Route path="/choice" element={<Choice />} />
 
        {/* SIGNUP */}

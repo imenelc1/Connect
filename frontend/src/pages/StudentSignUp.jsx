@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import ThemeButton from "../components/common/ThemeButton";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Select = ({ label, icon, name, value, onChange, options, error }) => (
   <div className="flex flex-col mb-4">
@@ -47,6 +48,7 @@ export default function StudentSignUp() {
 
   const { t, i18n } = useTranslation("signup");
   const { toggleDarkMode } = useContext(ThemeContext);
+const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     nickname: "",
@@ -139,9 +141,9 @@ export default function StudentSignUp() {
     try {
       const res = await api.post("register/", payload);
 
-      localStorage.setItem("user", JSON.stringify(res.data));
-      toast.success("Inscription réussie !");
-      setTimeout(() => (window.location.href = "/all-courses"), 1500);
+     localStorage.setItem("user", JSON.stringify(res.data));
+toast.success("Inscription réussie !");
+navigate("/all-courses");
 
     } catch (err) {
       const backend = err.response?.data;
