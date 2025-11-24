@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import Utilisateur
-from courses.models import Cours, Exercice
+from courses.models import Cours
+from Exercices.models import Exercice
 
 class ProgressionCours(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)

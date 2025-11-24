@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     # Apps du projet
     'users',
     'courses',
+    'Exercices',
+    'Quiz',
     'forum',
     'ia',
     'dashboard',
@@ -94,7 +96,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'connect',  # Nom de ta base PostgreSQL
         'USER': 'postgres',    # Ton nom d’utilisateur PostgreSQL
-        'PASSWORD': 'imene',  # Celui que tu as choisi à l’installation
+        'PASSWORD': 'postgressql GP',  # Celui que tu as choisi à l’installation
         'HOST': 'localhost',
         'PORT': '5432',
     }
