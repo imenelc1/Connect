@@ -1,32 +1,43 @@
-import { useState } from "react";
+import { useState, useContext , useEffect } from "react";
 import AuthTabs from "../components/common/AuthTabs";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
-
-import Mascotte from "../assets/mascotte.svg";
+import Mascotte from "../components/common/Mascotte.jsx";
 import api from "../services/api";
 import toast from "react-hot-toast";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiGlobe } from "react-icons/fi";
+import { FaEnvelope, FaLock } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-import { FiGlobe } from "react-icons/fi";
-// Composants personnalisés
-import { useContext } from "react";
+
 import LogoComponent from "../components/common/LogoComponent";
 import ThemeButton from "../components/common/ThemeButton";
-// Thème global (dark/light mode)
 import ThemeContext from "../context/ThemeContext";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
 
 export default function LoginStudent() {
   const [activeTab] = useState("signin");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
   const [errorPassword, setErrorPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [userRole, setUserRole] = useState(""); 
 
- // Traduction (espace de noms : "login")
-    const { t, i18n } = useTranslation("login");
 
+  const { t, i18n } = useTranslation("login");
+
+  const { toggleDarkMode } = useContext(ThemeContext);
+ 
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
+  };
+
+  // ==============================
+  //      HANDLE SUBMIT
+  // ==============================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -37,241 +48,173 @@ export default function LoginStudent() {
       setErrorEmail(t("errors.emailRequired"));
       return;
     }
+
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) {
+      setErrorEmail(t("errors.invalidEmail"));
+      return;
+    }
+
     if (!password) {
       setErrorPassword(t("errors.passwordRequired"));
       return;
     }
+
     if (password.length < 8) {
       setErrorPassword(t("errors.passwordLength"));
       return;
     }
 
-  // États d'erreur (affichage sous Input)
-  const [errorEmail, setErrorEmail] = useState("");
-  const [errorPassword, setErrorPassword] = useState("");
-
-  // Gestion visibilité du mot de passe
-  const [showPassword, setShowPassword] = useState(false);
-
-  /**
-   * ==============================
-   *   SOUMISSION DU FORMULAIRE
-   * ==============================
-   */
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Empêche le refresh de la page
-
-    // Réinitialisation des erreurs
-    setErrorEmail("");
-    setErrorPassword("");
-
-    /**
-     * ======================
-     *   VALIDATION FRONTEND
-     * ======================
-     */
-
-    // Vérification email vide
-    if (!email) {
-      setErrorEmail("Email obligatoire");
-      return;
-    }
-
-    // Vérification format email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErrorEmail("Format email invalide");
-      return;
-    }
-
-    // Vérification mot de passe vide
-    if (!password) {
-      setErrorPassword("Mot de passe obligatoire");
-      return;
-    }
-
-    // Vérification longueur minimum
-    if (password.length < 8) {
-      setErrorPassword("Minimum 8 caractères");
-      return;
-    }
-
-    /**
-     * ======================
-     *   REQUÊTE BACKEND
-     * ======================
-     */
     try {
-      // Envoi des identifiants
       const res = await api.post("login/", { email, password });
-      localStorage.setItem("user", JSON.stringify(res.data));
+      
+  console.log("🟢 LOGIN SUCCESS:", res.data); // <---- IMPORTANT
+  
+  localStorage.setItem("user", JSON.stringify(res.data));
 
-      // Notification succès
-      toast.success("Connexion réussie !");
-
-      // Redirection vers tableau de bord étudiant
+      toast.success(t("login.success"));
       window.location.href = "/all-courses";
 
     } catch (error) {
-
       const backend = error.response?.data;
-      console.log("Erreur backend login étudiant:", backend);
 
-      /**
-       * =========================================
-       *   TRAITEMENT DES ERREURS DU BACKEND
-       * =========================================
-       */
       if (backend && typeof backend === "object") {
-        const newErrors = {};
-
         const mapKey = {
-          adresse_email: "email",
           email: "email",
+          adresse_email: "email",
           mot_de_passe: "password",
           password: "password",
           non_field_errors: "password",
           detail: "password",
-          error: "password" 
         };
 
-        // Transformation des erreurs backend → erreurs UI
         Object.keys(backend).forEach((key) => {
-          const value = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
+          const val = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
           const target = mapKey[key] || key;
-          newErrors[target] = value;
-        });
 
-        // Injection des erreurs dans les setters React
-        if (newErrors.email) setErrorEmail(newErrors.email);
-        if (newErrors.password) setErrorPassword(newErrors.password);
+          if (target === "email") setErrorEmail(val);
+          if (target === "password") setErrorPassword(val);
+        });
 
         return;
       }
 
-      // Cas exceptionnel : aucun message backend
       setErrorPassword("Erreur réseau");
     }
   };
 
-  //Permet de changer la langue (FR ↔ EN)
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-  };
-
-    // Récupération de la fonction permettant de changer le thème
-  const { toggleDarkMode } = useContext(ThemeContext);
-
   return (
-    // RESPONSIVE: Padding horizontal sur mobile
     <div className="flex flex-col items-center justify-center min-h-screen bg-surface px-4 sm:px-0 pb-50">
-        <div className="flex items-center justify-star w-full ml-20">
-          
-           <LogoComponent />
-           {/* Bouton pour activer/désactiver le dark mode */}
-           <ThemeButton onClick={toggleDarkMode} />
+      
+             {/* Header */}
+  <div className="flex w-full mb-4 items-center justify-between px-4 pt-12">
 
-            {/* Bouton pour changer la langue */}
-           <FiGlobe size={20} title="Changer la langue" onClick={toggleLanguage} />
-        </div>
-        
-      {/* RESPONSIVE: AuthTabs avec margin top sur mobile */}
-      <AuthTabs role="student" active="signin" className="mt-20 sm:mt-0" />
-       
-      {/* RESPONSIVE: Conteneur principal - colonne sur mobile, ligne sur desktop */}
-      <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card/75 rounded-3xl shadow-lg overflow-hidden relative mt-30">
+    {/* Logo normal (grand) — visible seulement md+ */}
+    <div className="hidden md:block">
+      <LogoComponent className="-mt-10 ml-20" />
+    </div>
 
-        {/* FORMULAIRE - RESPONSIVE: Largeur 100% sur mobile, 1/2 sur desktop */}
-        <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:p-10 bg-card">
-          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
-           <span className="text-textc">{t("login.title")}</span><span>  </span><span className="text-muted">{t("login.connect")}</span>
+    {/* Petit logo — visible seulement sur mobile */}
+    <div className="block md:hidden">
+      <LogoIconeComponent className="w-8 h-8 -ml-1" />
+    </div>
+
+    {/* Actions */}
+    <div className="flex items-center gap-4">
+      <ThemeButton onClick={toggleDarkMode} />
+      <FiGlobe
+        size={20}
+        title="Changer la langue"
+        onClick={toggleLanguage}
+        className="cursor-pointer"
+      />
+    </div>
+  </div>
+
+
+      <AuthTabs
+          role={userRole || "student"}
+          active="signin"
+          tab1Label={t("login.signIn")}
+          tab2Label={t("login.signUp")}
+          className="mt-20 sm:mt-0"
+      />
+
+
+      <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[500px]  bg-card rounded-3xl shadow-lg overflow-hidden relative mt-5 mb-5">
+
+        {/* FORM */}
+        <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:m-10 bg-card">
+          <h2 className="text-2xl font-semibold text-center mb-6">
+            <span className="text-textc">{t("login.title")}</span>{" "}
+            <span className="text-muted">{t("login.connect")}</span>
           </h2>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-6">
+
             <Input
-              label={t("login.email")} 
-              name="email"
-              placeholder={t("login.email")}
+              label={t("login.email")}
               value={email}
-              icon={<FaEnvelope />}
               onChange={(e) => setEmail(e.target.value)}
+              icon={<FaEnvelope />}
               error={errorEmail}
             />
 
-            {/* Champ Mot de passe + icône affichage */}
             <Input
               label={t("login.password")}
-              name="password"
-              placeholder={t("login.password")}
-              icon={<FaLock />}
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              icon={<FaLock />}
               error={errorPassword}
               rightIcon={
                 showPassword ? (
-                  <FiEyeOff
-                    size={18}
-                    onClick={() => setShowPassword(false)}
-                    className="cursor-pointer text-gray-500 hover:text-gray-700"
-                  />
+                  <FiEyeOff size={18} onClick={() => setShowPassword(false)} className="cursor-pointer" />
                 ) : (
-                  <FiEye
-                    size={18}
-                    onClick={() => setShowPassword(true)}
-                    className="cursor-pointer text-gray-500 hover:text-gray-700"
-                  />
+                  <FiEye size={18} onClick={() => setShowPassword(true)} className="cursor-pointer" />
                 )
               }
             />
 
-           
+            <Button text={t("login.signIn")} type="submit" />
 
-            <p className="text-sm text-grayc text-center mt-4">
+            <p className="text-sm text-center mt-4">
               {t("login.noAccount")}{" "}
-              <a href="StudentSignUp" className="text-muted font-medium hover:underline">
+              <a href="/signup/student" className="text-muted hover:underline">
                 {t("login.signUp")}
               </a>
             </p>
-
-            <Button text={t("login.signIn")} type="submit" />
           </form>
         </div>
 
-        {/* MASCOTTE - RESPONSIVE: Largeur 100% sur mobile, 1/2 sur desktop avec hauteur fixe */}
-        <div className="w-full lg:w-1/2 relative flex items-center justify-center bg-card min-h-[400px] lg:min-h-0">
-          <div className="absolute top-4 right-4 rounded-xl shadow p-6 sm:p-9 w-max min-h-[80px] bg-white z-20">
-            <p className="text-grayc font-medium text-sm whitespace-pre-line">
-              {t("login.welcome")}
-            </p>
+        {/* MASCOTTE - RESPONSIVE */}
+<div className="w-full lg:w-1/2 -relative flex items-center justify-center bg-card h-80 lg:h-auto mt-6 lg:mt-0 H-auto hidden lg:block">
 
-            <div
-              className="absolute -top-2 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow"
-            >
-              <span className="text-[#4F9DDE] text-[20px] font-bold">
-                &lt;&gt;
-              </span>
-            </div>
-          </div>
-
-          {/* RESPONSIVE: Bulle floue taille adaptative */}
+  {/* RESPONSIVE: Bulle floue taille adaptative */}
           <div
             className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full blur-3xl"
             style={{
               background: "rgba(52,144,220,0.6)",
               top: "50%",
-              left: "50%",
+              left: "70%",
               transform: "translate(-50%, -50%)"
             }}
           />
 
-          {/* RESPONSIVE: Mascotte taille adaptative */}
-          <img src={Mascotte} alt="Robot Mascotte" className="w-48 sm:w-60 lg:w-73 z-10" />
-        </div>
+  {/* Carte info au-dessus */}
+  <div className="absolute top-8 right-10 rounded-xl shadow p-6 sm:p-9 w-max min-h-[80px] bg-white z-20">
+    <p className="text-black font-medium text-sm whitespace-pre-line">
+      {t("login.welcome")}
+    </p>
+    <div className="absolute -top-5 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow bg-white">
+      <span className="text-[#4F9DDE] text-[20px] font-bold">&lt;&gt;</span>
+    </div>
+  </div>
 
+</div>
+
+     <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-20 mr-10 " />
       </div>
     </div>
   );
-}
 }

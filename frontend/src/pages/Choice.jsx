@@ -63,7 +63,7 @@ function Choice() {
           {/* Choix : Instructeur */}
           <Button
             onClick={() => navigate("/signup/instructor")}
-            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-3 py-3"
+            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-6 py-4"
           >
             <UserRound /> {t("choice.instructor")}
           </Button>
@@ -71,7 +71,7 @@ function Choice() {
           {/* Choix : Étudiant */}
           <Button
             onClick={() => navigate("/signup/student")}
-            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-3 py-3"
+            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-6 py-4"
           >
             <GraduationCap /> {t("choice.student")}
           </Button>

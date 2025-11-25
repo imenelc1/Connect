@@ -18,7 +18,7 @@
   --color-card: 255 255 255;
 
 
-  /* Dégradés LIGHT */
+    /* Dégradés LIGHT */
   --grad-1: linear-gradient(135deg, #4F9DDE, #2F4F70);
   --grad-2: linear-gradient(135deg, #4f9ede23, #FFFFFF);
   --grad-3: linear-gradient(135deg, #a3aaed4d, #FFFFFF);
@@ -60,7 +60,7 @@
 
 @layer utilities {
 
-  /* Dégradés LIGHT */
+   /* Dégradés LIGHT */
   .bg-grad-1 { background-image: var(--grad-1); }
   .bg-grad-2 { background-image: var(--grad-2); }
   .bg-grad-3 { background-image: var(--grad-3); }
@@ -79,6 +79,11 @@
 .dark .bg-grad-5 {
   background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
 }
-.search-bg {
-  background: linear-gradient(135deg, #ffffff, #e9f3ff);
+
+/* Fix autofill bleu */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 30px white inset !important; /* remplace le bleu par blanc */
+  -webkit-text-fill-color: rgb(172, 179, 194) !important;      /* garde le texte lisible */
 }

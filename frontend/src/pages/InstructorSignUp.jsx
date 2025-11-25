@@ -2,12 +2,12 @@ import React, { useState, useContext } from "react";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
-import logo from "../assets/LogoLight.svg";
-import robot from "../assets/mascotte.svg";
-import googleIcon from "../assets/google-icon.svg";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
+import Mascotte from "../components/common/Mascotte.jsx";
+import Select from "../components/common/Select";
 import api from "../services/api";
-import LogoComponent from "../components/common/LogoComponent";
 
+import LogoComponent from "../components/common/LogoComponent";
 
 import { 
   FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge,
@@ -165,23 +165,48 @@ const InstructorSignUp = () => {
     i18n.changeLanguage(newLang);
   };
 
-  return (
-     <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4">
-      {/* Header: logo, dark mode, langue */}
-      <div className="flex items-center justify-start w-full mb-4">
-       <LogoComponent />
-        <ThemeButton onClick={toggleDarkMode} />
-        <FiGlobe size={20} title="Changer la langue" onClick={toggleLanguage} className="ml-4 cursor-pointer"/>
-      </div>
+    return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4 pt-12">
+  {/* Header */}
+  <div className="flex w-full mb-4 items-center justify-between px-4">
 
-      <AuthTabs role="instructor" active="signup"/>
+    {/* Logo normal (grand) — visible seulement md+ */}
+    <div className="hidden md:block">
+      <LogoComponent className="-mt-10 ml-20" />
+    </div>
+
+    {/* Petit logo — visible seulement sur mobile */}
+    <div className="block md:hidden">
+      <LogoIconeComponent className="w-8 h-8 -ml-1" />
+    </div>
+
+    {/* Actions */}
+    <div className="flex items-center gap-4">
+      <ThemeButton onClick={toggleDarkMode} />
+      <FiGlobe
+        size={20}
+        title="Changer la langue"
+        onClick={toggleLanguage}
+        className="cursor-pointer"
+      />
+    </div>
+  </div>
+
+
+
+
+      <AuthTabs
+          role="instructor"
+          active="signup"
+          tab1Label={t("login.signIn")}
+          tab2Label={t("login.signUp")}
+          className="mt-20 sm:mt-0"
+      />
 
       <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card rounded-3xl shadow-lg overflow-hidden relative mt-2">
         {/* Formulaire */}
         <div className="w-full md:w-1/2 p-10">
-          <h2 className="text-2xl font-semibold text-muted text-center mb-6">
-            {t("welcomeInstructor")}
-          </h2>
+         <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
             <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
@@ -199,15 +224,25 @@ const InstructorSignUp = () => {
               <Input label={t("regnumber")} name="regnumber" value={formData.regnumber} onChange={handleChange} placeholder={t("regnumber")} icon={<FaIdBadge />} error={errors.regnumber} />
             </div>
 
-            <Input label={t("rank")} name="rank" value={formData.rank} onChange={handleChange} placeholder={t("rank")} icon={<FaGraduationCap />} error={errors.rank} />
-
-          
+            <Select label={t("rank")} name="rank" value={formData.rank} onChange={handleChange} placeholder={t("rank")} options={[
+                    { value: "Prof", label: "Professor" },
+                    { value: "maitre conf", label: "Maitre de conférences" },
+                    { value: "maitre ass", label: "maitre assistant" },
+                  ]} />
             <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
+              <p className="text-sm text-grayc text-center mt-4">
+                          {t("alreadyHaveAccount")}{" "}
+                          <a href="/login/student" className="text-muted font-medium hover:underline">
+                            {t("signIn")}
+                          </a>
+                        </p>
+            
+                       
           </form>
         </div>
 
         {/* Mascotte */}
-        <div className="w-full md:w-1/2 relative flex items-center justify-center mt-8 md:mt-0 bg-card">
+        <div className="w-full md:w-1/2 relative flex items-center justify-center mt-8 md:mt-0 bg-card hidden lg:block">
           <div className="absolute top-12 md:top-16 right-4 md:right-12 bg-white rounded-xl shadow p-6 md:p-9 w-max min-h-[80px] z-20">
             <p className="text-gray-700 font-medium text-sm">
               {t("welcomeInstructor")}
@@ -218,13 +253,14 @@ const InstructorSignUp = () => {
           </div>
 
           <div className="absolute w-56 md:w-72 h-56 md:h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "45%", left: "50%", transform: "translate(-50%, -50%)" }} />
-          <img src={robot} alt="Robot Mascotte" className="w-56 md:w-72 z-10 -mt-10 md:-mt-10" />
+           <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-10 right-20 h-58 z-10 mt-40 mr-10 " />
         </div>
 
       </div>
     </div>
   );
 }
+
 
 
 export default InstructorSignUp;

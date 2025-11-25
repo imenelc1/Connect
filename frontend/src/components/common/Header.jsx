@@ -9,7 +9,7 @@ export default function Header() {
     <nav className="flex items-center justify-between sm:px-6 lg:px-12 py-2 w-full">
       
       {/* Logo situé à gauche */}
-      <LogoComponent />
+      <LogoComponent className="ml-0 md:-ml-8" />
 
       {/* Liens du header + bouton Create Account */}
       <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6 lg:space-x-8">

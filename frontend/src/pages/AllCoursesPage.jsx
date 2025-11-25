@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/common/Navbar";
-import { Plus } from "lucide-react";
+import { Plus,Bell } from "lucide-react";
 import CourseCard from "../components/common/CourseCard";
 import Button from "../components/common/Button";
 import CourseFilters from "../components/common/CourseFilters";
 import CourseSearchBar from "../components/common/CourseSearchBar";
 import { useTranslation } from "react-i18next";
-
+import UserCircle from "../components/common/UserCircle";
 const courses = [
   {
     title: "Structures de Données",
@@ -47,6 +47,7 @@ export default function AllCoursesPage() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allcourses");
+const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
   const filteredCourses =
@@ -82,6 +83,15 @@ export default function AllCoursesPage() {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
+<UserCircle initials={initials} />
+<div
+  className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
+             text-gray-700 shadow-lg flex items-center justify-center 
+             cursor-pointer hover:bg-gray-100 transition z-50"
+>
+  <Bell size={22} strokeWidth={1.8} />
+</div>
+
 
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"
@@ -105,14 +115,17 @@ export default function AllCoursesPage() {
         <CourseSearchBar />
 
         {/* Filters */}
+        <div className="mt-6 mb-6">
         <CourseFilters
           showCompletedFilter={userRole === "etudiant"}
           onFilterChange={setFilterLevel}
           activeFilter={filterLevel}
+          
         />
+      </div>
 
         {/* Cards */}
-        <div className="grid ..." style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
+        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
         {filteredCourses.map((course, idx) => (
           <CourseCard
             key={idx}

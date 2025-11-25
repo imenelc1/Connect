@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../../styles/index.css";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
+import IconeLogoComponent from "../common/IconeLogoComponent";
 import {
   Settings,
   LogOut,
@@ -96,20 +96,24 @@ export default function Navbar() {
         )}
       </button>
 
-      {/* HEADER */}
-      <div className="flex items-center gap-2.5 p-2.5 bg-white rounded-2xl shadow-sm">
-        <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold shrink-0">
-          {initials}
-        </div>
+     {/* HEADER */}
+<div className="flex items-center justify-center p-2.5 bg-white rounded-2xl shadow-sm">
 
-        {!collapsed && (
-          <div className="flex flex-col leading-tight">
-            <span className="text-textc font-semibold text-sm capitalize">{userData.role}</span>
-            <span className="text-grayc text-xs">{userData.nom} {userData.prenom}</span>
-          </div>
-        )}
-      </div>
- 
+  {/* LOGO TOUJOURS VISIBLE */}
+  <IconeLogoComponent
+    size={collapsed ? "w-10 h-10 -ml-2" : "w-10 h-14"}
+    className={`transition-all duration-300 -ml-4`}
+  />
+
+  {/* TEXTE QUI DISPARAÎT EN MODE COLLAPSÉ */}
+  {!collapsed && (
+    <div className="flex flex-col leading-tight ml-3">
+      <span className="text-textc font-semibold text-sm capitalize">{userData.role}</span>
+      <span className="text-grayc text-xs">{userData.nom} {userData.prenom}</span>
+    </div>
+  )}
+</div>
+
       {/* NAVIGATION */}
       <nav className="mt-4 flex flex-col gap-1.5 font-medium">
         {links.map((item, i) => (

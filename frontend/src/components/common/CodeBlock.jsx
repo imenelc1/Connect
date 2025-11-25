@@ -4,7 +4,7 @@ import "../../styles/index.css";
 export default function CodeBlock() {
   return (
     // Conteneur principal du bloc de code (carte stylisée)
-    <div className="relative p-4 sm:p-6 rounded-2xl shadow-lg w-full w-[420px] h-[260px] md:max-w-[450px] bg-surface">
+    <div className="relative p-4 sm:p-6 rounded-2xl shadow-lg w-full w-[260px] h-[300px] md:w-[450px] md:h-[300px] bg-surface">
 
       {/* Nom du fichier affiché en haut */}
       <div className="text-textc mb-3 font-bold">
@@ -12,7 +12,7 @@ export default function CodeBlock() {
       </div>
 
       {/* Bloc contenant le code source */}
-      <pre className="p-5 rounded-xl font-mono text-[15px] leading-6 shadow-inner overflow-x-auto">
+      <pre className="p-5 rounded-xl font-mono text-[15px] leading-6 shadow-inner">
         <code>
           {/* Code C stylisé syntaxiquement */}
           <span className="text-yellowc font-bold">#INCLUDE</span>{" "}

@@ -11,7 +11,8 @@ export default function Body() {
     <section className="py-20 bg-[var(--color-surface)] flex flex-col items-center gap-16 w-full max-w-[1400px] mx-auto px-6">
       
       {/* ---------------------- PARTIE 1 : Code + Mascotte ---------------------- */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+      <div className="flex flex-row items-center justify-center gap-0">
+
         {/* Bloc de code */}
         <div className="md:-translate-y-10">
           <CodeBlock />
