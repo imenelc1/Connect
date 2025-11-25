@@ -61,7 +61,7 @@ export default function Setting() {
                 {/* -------- PROFILE TAB -------- */}
                 {activeTab === "profile" && (
 
-                    <div className="mt-10 bg-primary/ backdrop-blur-md rounded-3xl shadow-md p-6 sm:p-6 md:p-8  border border-white/40">
+                    <div className="mt-10 bg-primary/10 backdrop-blur-md rounded-3xl shadow-md p-6 sm:p-6 md:p-8  border border-white/40">
 
 
 
