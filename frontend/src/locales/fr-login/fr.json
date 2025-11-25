@@ -1,0 +1,26 @@
+{
+  "login": {
+    "title": "Bienvenue sur",
+    "connect": "connect",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "or": "Ou",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signUp": "S'inscrire",
+    "signIn": "Se connecter",
+    "welcome": "Bienvenue, cher\nétudiant !",
+    "welcomeInstructor": "Bienvenue, cher\ninstructeur !", 
+    "language": "Langue"
+  },
+  "errors": {
+    "emailRequired": "Email obligatoire",
+    "passwordRequired": "Mot de passe obligatoire",
+    "passwordLength": "Minimum 8 caractères",
+    "emailNotFound": "Adresse email inconnue",
+    "wrongPassword": "Mot de passe incorrect",
+    "networkError": "Erreur réseau"
+  },
+  "success": {
+    "login": "Connexion réussie !"
+  }
+}
