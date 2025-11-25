@@ -66,9 +66,12 @@ export default function LoginStudent() {
     }
 
     try {
-      const res = await api.post("login/", { email, password });
-      
-  console.log("🟢 LOGIN SUCCESS:", res.data); // <---- IMPORTANT
+const res = await api.post("login/", { 
+  email, 
+  password,
+  role: "etudiant" // <-- Obligatoire pour que le backend sache que c'est un étudiant
+});      
+  console.log(" LOGIN SUCCESS:", res.data); // <---- IMPORTANT
   
   localStorage.setItem("user", JSON.stringify(res.data));
 
@@ -76,31 +79,48 @@ export default function LoginStudent() {
       window.location.href = "/all-courses";
 
     } catch (error) {
-      const backend = error.response?.data;
+  const backend = error.response?.data;
 
-      if (backend && typeof backend === "object") {
-        const mapKey = {
-          email: "email",
-          adresse_email: "email",
-          mot_de_passe: "password",
-          password: "password",
-          non_field_errors: "password",
-          detail: "password",
-        };
+  // 🔥 SI BACKEND RENVOIE UN MESSAGE GÉNÉRAL (CAS 403, 401, etc.)
+  if (typeof backend?.detail === "string") {
+    setErrorPassword(backend.detail);
+    toast.error(backend.detail);
+    return;
+  }
 
-        Object.keys(backend).forEach((key) => {
-          const val = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
-          const target = mapKey[key] || key;
+  if (typeof backend?.error === "string") {
+    setErrorPassword(backend.error);
+    toast.error(backend.error);
+    return;
+  }
 
-          if (target === "email") setErrorEmail(val);
-          if (target === "password") setErrorPassword(val);
-        });
+  // 🟦 ANALYSE NORMALISÉE (tes anciennes règles)
+  if (backend && typeof backend === "object") {
+    const mapKey = {
+      email: "email",
+      adresse_email: "email",
+      mot_de_passe: "password",
+      password: "password",
+      non_field_errors: "password",
+      detail: "password",
+    };
 
-        return;
-      }
+    Object.keys(backend).forEach((key) => {
+      const val = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
+      const target = mapKey[key] || key;
 
-      setErrorPassword("Erreur réseau");
-    }
+      if (target === "email") setErrorEmail(val);
+      if (target === "password") setErrorPassword(val);
+    });
+
+    return;
+  }
+
+  // 🌐 Erreur réseau
+  setErrorPassword("Erreur réseau");
+  toast.error("Erreur réseau");
+}
+
   };
 
   return (

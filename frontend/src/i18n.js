@@ -2,14 +2,14 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
-import translationFR from "./locales/fr-Choice/translation.json";
-import translationEN from "./locales/en-Choice/translation.json";
-import translationFRAcceuil from "./locales/fr-Acceuil/translation.json";
-import translationENAcceuil from "./locales/en-Acceuil/translation.json";
-import translationFRLogin from "./locales/fr-login/fr.json";
-import translationENLogin from "./locales/en-login/en.json";
-import translationFRSignup from "./locales/fr-sign/translation.json";
-import translationENSignup from "./locales/en-sign/translation.json";
+import translationFR from "./locales/choice/fr-Choice/translation.json";
+import translationEN from "./locales/choice/en-Choice/translation.json";
+import translationFRAcceuil from "./locales/Acceuil/fr-Acceuil/translation.json";
+import translationENAcceuil from "./locales/Acceuil/en-Acceuil/translation.json";
+import translationFRLogin from "./locales/login/fr-login/fr.json";
+import translationENLogin from "./locales/login/en-login/en.json";
+import translationFRSignup from "./locales/signup/fr-sign/translation.json";
+import translationENSignup from "./locales/signup/en-sign/translation.json";
 import translationENNavbar from "./locales/Navbar/en-Navbar/translation.json";
 import translationFRNavbar from "./locales/Navbar/fr-Navbar/translation.json";
 import translationENAllCourses from "./locales/AllCourses/en/translation.json";

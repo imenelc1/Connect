@@ -46,7 +46,7 @@ export default function Navbar() {
   const initials = `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase();
 
   const studentLinks = [
-    { href: "/home", label: t("home"), icon: Home },
+    { href: "/", label: t("home"), icon: Home },
     { href: "/dashboard", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/exercises", label: t("exercises"), icon: Clipboard },
@@ -150,7 +150,7 @@ export default function Navbar() {
         </NavLink>
 
         <NavLink
-          to="/acceuil"
+          to="/"
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors
             ${isActive

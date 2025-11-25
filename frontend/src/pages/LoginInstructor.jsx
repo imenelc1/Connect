@@ -2,12 +2,13 @@
 import { useState } from "react";
 import AuthTabs from "../components/common/AuthTabs";
 import Input from "../components/common/Input"; 
-import Mascotte from "../assets/mascotte.svg";
+import Mascotte from "../components/common/Mascotte.jsx";
 import LogoComponent from "../components/common/LogoComponent";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FiGlobe,FiEye,FiEyeOff } from "react-icons/fi";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
 
 import Button from "../components/common/Button";
 import { useTranslation } from "react-i18next";
@@ -57,8 +58,11 @@ export default function LoginInstructor() {
 
     // --- Appel API ---
     try {
-      const res = await api.post("login/", { email, password });
-      console.log("Login API response:", res.data);
+const res = await api.post("login/", { 
+  email, 
+  password,
+  role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
+});      console.log("Login API response:", res.data);
       localStorage.setItem("user", JSON.stringify(res.data));
       toast.success("Connexion réussie !");
       window.location.href = "/all-courses";
