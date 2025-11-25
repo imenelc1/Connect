@@ -1,4 +1,4 @@
-// 
+
 import Cards from "./Cards";
 import "../../styles/index.css";
 import {
@@ -7,57 +7,68 @@ import {
   FaBrain,
   FaGamepad,
   FaUsers,
-  FaComments
+  FaComments,
 } from "react-icons/fa";
 
+import { useTranslation } from "react-i18next";
+
 export default function CardsSection() {
+  // Hook i18next → permet de traduire le texte dynamiquement
+  const { t } = useTranslation("acceuil");
+
+  // Liste des cartes à afficher
+  // Chaque objet contient une icône, un titre, un texte, et parfois gradient
   const features = [
     {
       icon: <FaBookOpen />,
-      title: "STRUCTURED COURSES",
-      text: "Progressive and well-organized lessons to master fundamental concepts.",
+      title: "acceuil.structuredCourses",
+      text: "acceuil.structuredCoursesText",
     },
     {
       icon: <FaChartLine />,
-      title: "PERSONALIZED TRACKING",
-      text: "Track your progress and identify your strengths and areas for improvement.",
-      gradient: true,
+      title: "acceuil.personalizedTracking",
+      text: "acceuil.personalizedTrackingText",
+      gradient: true, // active un style différent dans Card
     },
     {
       icon: <FaUsers />,
-      title: "ACCESSIBLE TO EVERYONE",
-      text: "A platform designed for all levels — from beginners to experts.",
+      title: "acceuil.accessibleEveryone",
+      text: "acceuil.accessibleEveryoneText",
     },
     {
       icon: <FaBrain />,
-      title: "INTEGRATED AI",
-      text: "AI-powered guidance that adapts to your level, helping you learn faster and understand complex concepts with clarity.",
+      title: "acceuil.integratedAI",
+      text: "acceuil.integratedAIText",
     },
     {
       icon: <FaGamepad />,
-      title: "GAMIFICATION",
-      text: "Boost your learning with interactive challenges, achievements, and rewards that turn your progress into a game.",
+      title: "acceuil.gamification",
+      text: "acceuil.gamificationText",
       gradient: true,
     },
     {
       icon: <FaComments />,
-      title: "FORUMS FOR COLLABORATION",
-      text: "Collaborate, exchange ideas, and get help through dedicated forums connecting students and teachers.",
+      title: "acceuil.forumsCollaboration",
+      text: "acceuil.forumsCollaborationText",
     },
   ];
 
   return (
     <section className="py-20">
-      <h2 className="text-center text-3xl font-bold text-black">
-        Why Choose CONNECT?
+      {/* Titre principal */}
+      <h2 className="text-center text-3xl font-bold text-textc">
+        {t("acceuil.whyChoose")}
       </h2>
 
-      <p className="text-center text-[var(--color-text-main)] mt-2 mb-12">
-        We provide the tools and resources you need to master C programming and algorithms effectively
+      {/* Sous-titre */}
+      <p className="text-center text-textc mt-2 mb-12">
+        {t("acceuil.whyChooseText")}
       </p>
 
+      {/* Grille contenant les cartes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto px-4 place-items-center">
         {features.map((f, i) => (
+          // Chaque carte est rendue à partir du composant Cards
           <Cards
             key={i}
             icon={f.icon}

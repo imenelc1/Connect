@@ -14,8 +14,8 @@ const AuthTabs = ({ role = "student", active = "signin" }) => {
         onClick={() => goTo("signin")}
         className={`flex-1 py-2 rounded-l-full font-medium transition-colors duration-300 ${
           active === "signin"
-            ? "bg-blue-500 text-white"
-            : "bg-white text-gray-600 hover:bg-gray-100"
+            ? "bg-grad-1 text-white"
+            : "bg-white text-gray-600 hover:bg-white"
         }`}
       >
         Sign in
@@ -25,8 +25,8 @@ const AuthTabs = ({ role = "student", active = "signin" }) => {
         onClick={() => goTo("signup")}
         className={`flex-1 py-2 rounded-full font-medium transition-colors duration-300 ${
           active === "signup"
-            ? "bg-blue-500 text-white"
-            : "bg-white text-gray-600 hover:bg-gray-100"
+            ? "bg-grad-1 text-white"
+            : "bg-white text-gray-600 hover:bg-white"
         }`}
       >
         Sign up

@@ -5,20 +5,22 @@ import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
 import LoginInstructor from "../pages/LoginInstructor";
 import LoginStudent from "../pages/LoginStudent";
+import Setting from "../pages/Setting";
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Acceuil />} />
-        <Route path="/choice" element={<Choice />} />
+            {/* <Route path="/" element={<Acceuil />} />
+            <Route path="/choice" element={<Choice />} /> */}
 
        {/* SIGNUP */}
-        <Route path="/signup/instructor" element={<InstructorSignup />} />
-        <Route path="/signup/student" element={<StudentSignup />} />
+        {/* <Route path="/signup/instructor" element={<InstructorSignup />} />
+        <Route path="/signup/student" element={<StudentSignup />} /> */}
 
         {/* LOGIN */}
-        <Route path="/login/instructor" element={<LoginInstructor />} />
-        <Route path="/login/student" element={<LoginStudent />} />
+        {/* <Route path="/login/instructor" element={<LoginInstructor />} />
+        <Route path="/login/student" element={<LoginStudent />} /> */}
+        <Route path="/" element={<Setting />} />
       </Routes>
     </BrowserRouter>
   );

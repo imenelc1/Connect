@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
@@ -6,20 +6,22 @@ import logo from "../assets/LogoLight.svg";
 import robot from "../assets/mascotte.svg";
 import googleIcon from "../assets/google-icon.svg";
 import api from "../services/api";
+import LogoComponent from "../components/common/LogoComponent";
 
-import {
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaCalendarAlt,
-  FaIdBadge,
-  FaStar,
-  FaPaperPlane,
-  FaEye,
-  FaEyeSlash
+
+import { 
+  FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge,
+  FaCalendarAlt, FaLock, FaEnvelope, FaUser, FaGraduationCap
 } from "react-icons/fa";
 
-const InstructorSignup = () => {
+import { FiGlobe } from "react-icons/fi";
+
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import ThemeContext from "../context/ThemeContext";
+import ThemeButton from "../components/common/ThemeButton";
+
+const InstructorSignUp = () => {
   const [formData, setFormData] = useState({
     nickname: "",
     fullname: "",
@@ -30,299 +32,198 @@ const InstructorSignup = () => {
     regnumber: "",
     rank: ""
   });
-
+ const { t, i18n } = useTranslation("signup");
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-const [message, setMessage] = useState("");
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
+// --- MAPPING BACKEND → FRONTEND ---
+  const fieldMap = {
+    nom: "nickname",
+    prenom: "fullname",
+    adresse_email: "email",
+    mot_de_passe: "password",
+    date_naissance: "dob",
+    matricule: "regnumber",
+    grade: "rank",
+  };
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Vérifier mots de passe
-    if (formData.password !== formData.confirm) {
-      setErrorMessage(" Les mots de passe ne correspondent pas !");
-      return;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const matriculeRegex = /^\d{12}$/;
+
+  const newErrors = {};
+
+  // --- PSEUDO ---
+  if (!formData.nickname.trim())
+    newErrors.nickname = "Pseudo obligatoire.";
+
+  // --- NOM COMPLET ---
+  if (!formData.fullname.trim())
+    newErrors.fullname = "Nom complet obligatoire.";
+
+  // --- EMAIL ---
+  if (!formData.email.trim())
+    newErrors.email = "Email obligatoire.";
+  else if (!emailRegex.test(formData.email))
+    newErrors.email = "Format email invalide.";
+
+  // --- MOT DE PASSE ---
+  if (!formData.password.trim())
+    newErrors.password = "Mot de passe obligatoire.";
+  else if (formData.password.length < 8)
+    newErrors.password = "Minimum 8 caractères.";
+
+  // --- CONFIRMATION ---
+  if (!formData.confirm.trim())
+    newErrors.confirm = "Confirmez votre mot de passe.";
+  else if (formData.confirm !== formData.password)
+    newErrors.confirm = "Les mots de passe ne correspondent pas.";
+
+  // --- DATE DE NAISSANCE ---
+  if (!formData.dob.trim()) {
+    newErrors.dob = "Date de naissance obligatoire.";
+  } else {
+    const birthDate = new Date(formData.dob);
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setFullYear(today.getFullYear() - 25);
+
+    if (birthDate > minDate)
+      newErrors.dob = "Vous devez avoir au moins 25 ans.";
+  }
+
+  // --- MATRICULE ---
+  if (!formData.regnumber.trim())
+    newErrors.regnumber = "Matricule obligatoire.";
+  else if (!matriculeRegex.test(formData.regnumber))
+    newErrors.regnumber = "Matricule invalide (12 chiffres attendus).";
+
+  // --- GRADE ---
+  if (!formData.rank.trim())
+    newErrors.rank = "Grade obligatoire.";
+
+  // STOP si erreurs
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) return;
+
+  // --- PAYLOAD ---
+  const payload = {
+    nom: formData.nickname,
+    prenom: formData.fullname,
+    adresse_email: formData.email,
+    mot_de_passe: formData.password,
+    date_naissance: formData.dob,
+    matricule: formData.regnumber,
+    grade: formData.rank,
+    role: "enseignant"
+  };
+
+  try {
+    const res = await api.post("register/", payload);
+    toast.success("Inscription réussie !");
+
+    setTimeout(() => {
+      window.location.href = "/dashboard-instructor";
+    }, 1500);
+
+ } catch (err) {
+      const apiErrors = err.response?.data;
+
+      if (apiErrors) {
+        // Error globale : { "error": "..." }
+        if (apiErrors.error) {
+          toast.error(apiErrors.error);
+          return;
+        }
+
+        // Backend → Front errors
+        const backendMappedErrors = {};
+
+        Object.keys(apiErrors).forEach((key) => {
+          const frontendKey = fieldMap[key] || key;
+          backendMappedErrors[frontendKey] = apiErrors[key][0];
+        });
+
+        setErrors((prev) => ({ ...prev, ...backendMappedErrors }));
+
+        // Toast avec toutes les erreurs
+        toast.error(Object.values(backendMappedErrors).join("\n"));
+        return;
+      }
+
+      toast.error("Erreur réseau. Vérifiez Django.");
     }
-    const payload = {
-  nom: formData.nickname,      // si c'est bien votre "nom"
-  prenom: formData.fullname,   // si c'est bien votre "prenom"
-  adresse_email: formData.email,
-  mot_de_passe: formData.password,
-  date_naissance: formData.dob,
-  matricule: formData.regnumber,
-  
-  role: "enseignant",
-  grade: formData.rank
 };
-
-    
-      try {
-      const res = await api.post("register/", payload); // 🔥 API Axios
-
-      setMessage("Inscription réussie ! ");
-
-      setTimeout(() => {
-        window.location.href = "/login-instructor";
-      }, 1500);
-
-     } catch (err) {
-  console.log("Erreur API:", err);
-
-  // ⭐ Ajoute ceci pour voir l’erreur JSON exacte :
-  console.log("Django error response:", err.response?.data);
-
-  setMessage(
-    err.response?.data?.error ||
-    "Erreur réseau, vérifie que Django tourne bien"
-  );
-}
-
+ const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-start p-8"
-      style={{ backgroundColor: "#f5f9fd" }}
-    >
-      
-      <header className="w-full relative flex items-center justify-center py-4 mb-8">
-        <img
-          src={logo}
-          alt="Connect Logo"
-          className="absolute left-6 top-1/2 -translate-y-1/2 w-28 md:w-36"
-        />
+     <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4">
+      {/* Header: logo, dark mode, langue */}
+      <div className="flex items-center justify-start w-full mb-4">
+       <LogoComponent />
+        <ThemeButton onClick={toggleDarkMode} />
+        <FiGlobe size={20} title="Changer la langue" onClick={toggleLanguage} className="ml-4 cursor-pointer"/>
+      </div>
 
-        <div className="flex justify-center">
-          <AuthTabs role="instructor" active="signup" />
-        </div>
-      </header>
+      <AuthTabs role="instructor" active="signup"/>
 
-      <div
-        className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl flex overflow-hidden"
-        style={{ boxShadow: "0 6px 48px rgba(52,144,220,.12)" }}
-      >
-        
-        <div className="flex-1 p-10 bg-white">
-          <h2 className="text-2xl font-semibold text-slate-700 mb-6">
-            Welcome to <span className="text-sky-500">connect</span>
+      <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card rounded-3xl shadow-lg overflow-hidden relative mt-2">
+        {/* Formulaire */}
+        <div className="w-full md:w-1/2 p-10">
+          <h2 className="text-2xl font-semibold text-muted text-center mb-6">
+            {t("welcomeInstructor")}
           </h2>
-
-          {/* MESSAGE  */}
-          {message && (
-            <p className="text-center text-red-500 mb-4 font-semibold">
-              {message}
-            </p>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your nickname"
-                name="nickname"
-                value={formData.nickname}
-                onChange={handleChange}
-                placeholder="Nickname"
-                icon={<FaUser />}
-              />
-              <Input
-                label="Enter your full name"
-                name="fullname"
-                value={formData.fullname}
-                onChange={handleChange}
-                placeholder="Full name"
-                icon={<FaUser />}
-              />
+            <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
+              <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
             </div>
 
-            <Input
-              label="Enter your Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email address"
-              icon={<FaEnvelope />}
-            />
+            <Input label={t("email")} name="email" type="email" value={formData.email} onChange={handleChange} placeholder={t("email")} icon={<FaEnvelope />} error={errors.email} />
 
-            <Input
-              label="Enter your Password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              icon={<FaLock />}
-              rightIcon={
-                showPassword ? (
-                  <FaEyeSlash
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="cursor-pointer"
-                  />
-                ) : (
-                  <FaEye
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="cursor-pointer"
-                  />
-                )
-              }
-            />
+            <Input label={t("password")} name="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} placeholder={t("password")} icon={<FaLock />} rightIcon={showPassword ? <FaEyeSlash onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" /> : <FaEye onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" />} error={errors.password} />
 
-            <Input
-              label="Confirm your password"
-              name="confirm"
-              type={showConfirm ? "text" : "password"}
-              value={formData.confirm}
-              onChange={handleChange}
-              placeholder="Confirm password"
-              icon={<FaLock />}
-              rightIcon={
-                showConfirm ? (
-                  <FaEyeSlash
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    className="cursor-pointer"
-                  />
-                ) : (
-                  <FaEye
-                    onClick={() => setShowConfirm(!showConfirm)}
-                    className="cursor-pointer"
-                  />
-                )
-              }
-            />
+            <Input label={t("confirmPassword")} name="confirm" type={showConfirm ? "text" : "password"} value={formData.confirm} onChange={handleChange} placeholder={t("confirmPassword")} icon={<FaLock />} rightIcon={showConfirm ? <FaEyeSlash onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" /> : <FaEye onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" />} error={errors.confirm} />
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your date of birth"
-                name="dob"
-                type="date"
-                value={formData.dob}
-                onChange={handleChange}
-                placeholder="Date of birth"
-                icon={<FaCalendarAlt />}
-              />
-              <Input
-                label="Enter your registration number"
-                name="regnumber"
-                value={formData.regnumber}
-                onChange={handleChange}
-                placeholder="Registration number"
-                icon={<FaIdBadge />}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("dob")} name="dob" type="date" value={formData.dob} onChange={handleChange} placeholder={t("dob")} icon={<FaCalendarAlt />} error={errors.dob} />
+              <Input label={t("regnumber")} name="regnumber" value={formData.regnumber} onChange={handleChange} placeholder={t("regnumber")} icon={<FaIdBadge />} error={errors.regnumber} />
             </div>
 
-            <Input
-              label="Enter your rank"
-              name="rank"
-              value={formData.rank}
-              onChange={handleChange}
-              placeholder="Rank"
-              icon={<FaStar />}
-            />
+            <Input label={t("rank")} name="rank" value={formData.rank} onChange={handleChange} placeholder={t("rank")} icon={<FaGraduationCap />} error={errors.rank} />
 
-            <div className="text-center text-gray-400">Or</div>
-
-            <Button variant="outline">
-              <img
-                src={googleIcon}
-                alt="google"
-                className="inline-block w-5 h-5 mr-2"
-              />
-              Continue with Google
-            </Button>
-
-            <Button type="submit" variant="primary">
-              <FaPaperPlane className="inline mr-2" /> Sign up
-            </Button>
-
-            <p className="text-sm text-gray-500 text-center">
-              Already have an account?{" "}
-              <a href="/instructor/login" className="text-sky-500">
-                Sign in
-              </a>
-            </p>
+          
+            <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
           </form>
         </div>
 
-        {/* --- RIGHT SIDE --- */}
-        <div className="flex-1 flex items-center justify-center relative bg-white overflow-hidden">
-
-          <div
-            className="absolute w-72 h-72 rounded-full blur-3xl"
-            style={{
-              background: "rgba(52,144,220,0.6)",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)"
-            }}
-          />
-
-          <div
-            className="absolute w-12 h-12 rounded-full flex items-center justify-center z-20"
-            style={{
-              backgroundColor: "#FFFFFF",
-              border: "2px solid rgba(0,0,0,0.13)",
-              top: "50px",
-              right: "40px"
-            }}
-          >
-            <span
-              style={{
-                color: "#3490DC",
-                fontSize: "22px",
-                fontWeight: "bold"
-              }}
-            >
-              &lt;&gt;
-            </span>
+        {/* Mascotte */}
+        <div className="w-full md:w-1/2 relative flex items-center justify-center mt-8 md:mt-0 bg-card">
+          <div className="absolute top-12 md:top-16 right-4 md:right-12 bg-white rounded-xl shadow p-6 md:p-9 w-max min-h-[80px] z-20">
+            <p className="text-gray-700 font-medium text-sm">
+              {t("welcomeInstructor")}
+            </p>
+            <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow">
+              <span style={{ color: "#4F9DDE", fontSize: "20px", fontWeight: "bold" }}>&lt;&gt;</span>
+            </div>
           </div>
 
-          <div className="absolute z-10" style={{ top: "70px", right: "40px" }}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="300"
-              height="175"
-              viewBox="0 0 331 193"
-              fill="none"
-            >
-              <g filter="url(#filter0_dd)">
-                <path
-                  d="M11 22C11 13.7157 17.7157 7 26 7H304.372C312.656 7 319.372 13.7157 319.372 22V162.204C319.372 170.488 312.656 177.204 304.372 177.204H26C17.7157 177.204 11 170.488 11 162.204V22Z"
-                  fill="white"
-                  fillOpacity="0.97"
-                />
-                <path
-                  d="M26 7.5H304.372C312.38 7.50008 318.872 13.9919 318.872 22V162.204C318.872 170.212 312.38 176.704 304.372 176.704H26C17.9919 176.704 11.5 170.212 11.5 162.204V22C11.5 13.9919 17.9919 7.5 26 7.5Z"
-                  stroke="black"
-                  strokeOpacity="0.13"
-                />
-              </g>
-              <text
-                x="50%"
-                y="50%"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="20"
-                fontWeight="500"
-                fill="#000"
-              >
-                Join CONNECT, dear Instructor!
-              </text>
-            </svg>
-          </div>
-
-          <img
-            src={robot}
-            alt="robot"
-            className="max-w-xs md:max-w-md drop-shadow-lg relative z-10"
-          />
+          <div className="absolute w-56 md:w-72 h-56 md:h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "45%", left: "50%", transform: "translate(-50%, -50%)" }} />
+          <img src={robot} alt="Robot Mascotte" className="w-56 md:w-72 z-10 -mt-10 md:-mt-10" />
         </div>
+
       </div>
     </div>
   );
-};
+}
 
-export default InstructorSignup;
+
+export default InstructorSignUp;

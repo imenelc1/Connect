@@ -1,0 +1,45 @@
+{
+  "Setting": {
+    "Profile": "Profile",
+    "Preferences": "Preferences",
+    "Account": "Account"
+  },
+  "Profile": {
+    "Editprofile":"Edit profile",
+    "FullName": "Full Name",
+    "NickName": "Nick Name",
+    "Datebirth": "Date of birth",
+    "EmailAddress": "Email address",
+    "RegistratioNumber": "Registration Number",
+    "Grade": "Grade",
+    "Instructor": "Instructor",
+    "Assistant": "Assistant"
+  },
+  
+
+  "Preferences": {
+    "Theme": "Theme",
+    "LightMode": "Light Mode",
+    "Brightp": "Bright and clean interface",
+    "DarkMode": "Dark Mode",
+    "Easyp": "Easy on the eyes in low light",
+    "Language": "Language",
+    "Selectp": "Select your preferred language",
+    "French": "French",
+    "English": "English"
+  },"Account": {
+    "Security": "Security",
+    "CurrentPassword": "Current Password",
+    "EnterCurrent": "Enter current password",
+    "NewPassword": "New Password",
+    "EnterNew": "Enter new password",
+    "ConfirmNewPassword": "Confirm New Password",
+    "EnterConfirm": "Enter confirm password",
+    "UpdatePass": "Update Password",
+    "DangerZone": "Danger Zone",
+    "HDelete": "Delete Account",
+    "deleteP": "Permanently delete your account and all data. This action cannot be undone.",
+    "DeleteAccount": "Delete Account"
+  }
+  
+}
