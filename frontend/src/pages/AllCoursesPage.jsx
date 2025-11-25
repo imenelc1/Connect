@@ -1,12 +1,11 @@
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/common/Navbar";
 import { Plus } from "lucide-react";
 import CourseCard from "../components/common/CourseCard";
 import Button from "../components/common/Button";
 import CourseFilters from "../components/common/CourseFilters";
 import CourseSearchBar from "../components/common/CourseSearchBar";
-import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const courses = [
   {
@@ -17,7 +16,6 @@ const courses = [
     author: "Dr. Cheikh Farid",
     initials: "C.F",
     isMine: true,
-
   },
   {
     title: "Algorithmes Avancés",
@@ -39,7 +37,6 @@ const courses = [
   },
 ];
 
-// --- Mapping niveau → gradient personnalisé ---
 const gradientMap = {
   beginner: "bg-grad-2",
   intermediate: "bg-grad-3",
@@ -47,33 +44,63 @@ const gradientMap = {
 };
 
 export default function AllCoursesPage() {
- const userData = JSON.parse(localStorage.getItem("user"));
-const userRole = userData?.user?.role ?? userData?.role;
-console.log("AllCoursesPage userRole:", userRole);
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userRole = userData?.user?.role ?? userData?.role;
+  const { t } = useTranslation("allcourses");
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-const filteredCourses =
+  const filteredCourses =
     filterLevel === "ALL"
       ? courses
-      : courses.filter(course => course.level === filterLevel);
- const sidebarWidth = 240;
+      : courses.filter((course) => course.level === filterLevel);
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handler = (e) => setSidebarCollapsed(e.detail);
+    window.addEventListener("sidebarChanged", handler);
+    return () => window.removeEventListener("sidebarChanged", handler);
+  }, []);
+
+  useEffect(() => {
+    const resizeHandler = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", resizeHandler);
+    return () => window.removeEventListener("resize", resizeHandler);
+  }, []);
+
+  const sidebarWidth = sidebarCollapsed ? 60 : 240;
+
+  // Définition dynamique du nombre de colonnes
+  const getGridCols = () => {
+    if (windowWidth < 640) return 1; // mobile
+    if (windowWidth < 1024) return 2; // tablette
+    if (sidebarCollapsed) return 3; // desktop sidebar fermé
+    return 3; // desktop sidebar ouvert (fixé pour garder taille ancienne version)
+  };
+
   return (
     <div className="flex bg-surface min-h-screen">
-
       <Navbar />
-      <main className={`flex-1 p-8`} style={{ marginLeft: sidebarWidth }}>
+
+      <main
+        className="flex-1 p-4 md:p-8 transition-all duration-300"
+        style={{ marginLeft: sidebarWidth }}
+      >
         {/* Top */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Courses</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+        <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
 
-          {userRole === "enseignant" && (
-            <Button variant="courseStart" className="!w-auto px-6 flex items-center gap-2">
-              <Plus size={18} />
-              Create a new Course
-            </Button>
-          )}
-        </div>
-
+        {userRole === "enseignant" && (
+          <Button
+            variant="courseStart"
+            className="!w-full sm:!w-auto px-6 flex items-center gap-2"
+          >
+            <Plus size={18} />
+            {t("createCourseBtn")}
+          </Button>
+        )}
+      </div>
         {/* Search */}
         <CourseSearchBar />
 
@@ -85,17 +112,20 @@ const filteredCourses =
         />
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {filteredCourses.map((course, idx) => (
-            <CourseCard
-              key={idx}
-              className={gradientMap[course.level] ?? "bg-grad-1"}
-              course={course}
-              role={userRole}
-              showProgress={userRole === "etudiant"}
-            />
-          ))}
-        </div>
+        <div className="grid ..." style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
+        {filteredCourses.map((course, idx) => (
+          <CourseCard
+            key={idx}
+            className={gradientMap[course.level] ?? "bg-grad-1"}
+            course={{
+              ...course,
+              level: t(`levels.${course.level}`) // <-- traduction du niveau
+            }}
+            role={userRole}
+            showProgress={userRole === "etudiant"}
+          />
+        ))}
+      </div>
       </main>
     </div>
   );

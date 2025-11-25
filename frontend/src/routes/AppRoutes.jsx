@@ -11,7 +11,7 @@ export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/acceuil" element={<Acceuil />} />
+        <Route path="/" element={<Acceuil />} />
         <Route path="/choice" element={<Choice />} />
 
        {/* SIGNUP */}

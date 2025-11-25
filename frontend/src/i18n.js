@@ -10,10 +10,13 @@ import translationFRLogin from "./locales/fr-login/fr.json";
 import translationENLogin from "./locales/en-login/en.json";
 import translationFRSignup from "./locales/fr-sign/translation.json";
 import translationENSignup from "./locales/en-sign/translation.json";
-
+import translationENNavbar from "./locales/Navbar/en-Navbar/translation.json";
+import translationFRNavbar from "./locales/Navbar/fr-Navbar/translation.json";
+import translationENAllCourses from "./locales/AllCourses/en/translation.json";
+import translationFRAllCourses from "./locales/AllCourses/fr/translation.json";
 const resources = {
-  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup },
-  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup },
+  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses },
+  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses },
 };
 
 i18n
