@@ -1,6 +1,8 @@
 {
-  "welcomeStudent": "Welcome, dear Student!",
-  "welcomeInstructor": "Welcome, dear Instructor!",
+  "title": "Welcome",
+  "connect": "to Connect",
+  "welcomeStudent": "Join CONNECT, dear Student!",
+  "welcomeInstructor": "Join CONNECT, dear Instructor!",
   "nickname": "Nickname",
   "fullname": "Full Name",
   "email": "Email",

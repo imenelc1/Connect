@@ -3,7 +3,7 @@ import React from "react";
 
 export default function Input({ label, icon, rightIcon, error, ...props }) {
   return (
-    <div className="flex flex-col mb-4">
+    <div className="flex flex-col mb-4 appearance-none text-secondary">
       {/* ---------------------- Label du champ ---------------------- */}
       <label className="mb-1 font-semibold text-grayc">
         {label}
@@ -14,7 +14,7 @@ export default function Input({ label, icon, rightIcon, error, ...props }) {
           - focus-within = active le ring lorsque l’input est focus
       */}
       <div
-        className={`flex items-center border rounded-full px-4 py-2 bg-white ${
+        className={`flex items-center border rounded-full px-4 py-2 bg-white text-black ${
           error ? "border-red-500" : "border-gray-300"
         } focus-within:ring-2 focus-within:ring-sky-300`}
       >

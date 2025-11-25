@@ -1,22 +1,27 @@
 import React, { useState, useContext } from "react";
-import { FaUser, FaEnvelope, FaLock, FaPaperPlane, FaEye, FaEyeSlash, FaCalendarAlt, FaIdBadge, FaGraduationCap } from "react-icons/fa";
-import { FiGlobe } from "react-icons/fi";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
-import GoogleButton from "../components/common/GoogleButton";
-import LogoComponent from "../components/common/LogoComponent";
-import robot from "../assets/mascotte.svg";
+import Mascotte from "../components/common/Mascotte.jsx";
 import api from "../services/api";
+import LogoComponent from "../components/common/LogoComponent";
+import Select from "../components/common/Select";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
+
+
+import { 
+  FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge,
+  FaCalendarAlt, FaLock, FaEnvelope, FaUser, FaGraduationCap
+} from "react-icons/fa";
+
+import { FiGlobe } from "react-icons/fi";
+
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import ThemeButton from "../components/common/ThemeButton";
 
-export default function InstructorSignup() {
-  const { t, i18n } = useTranslation("signup");
-  const { toggleDarkMode } = useContext(ThemeContext);
-
+const InstructorSignUp = () => {
   const [formData, setFormData] = useState({
     nickname: "",
     fullname: "",
@@ -27,88 +32,181 @@ export default function InstructorSignup() {
     regnumber: "",
     rank: ""
   });
+ const { t, i18n } = useTranslation("signup");
+  const { toggleDarkMode } = useContext(ThemeContext);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: "" }));
+  const handleChange = (e) =>
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+// --- MAPPING BACKEND → FRONTEND ---
+  const fieldMap = {
+    nom: "nickname",
+    prenom: "fullname",
+    adresse_email: "email",
+    mot_de_passe: "password",
+    date_naissance: "dob",
+    matricule: "regnumber",
+    grade: "rank",
   };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.nickname) newErrors.nickname = t("required");
-    if (!formData.fullname) newErrors.fullname = t("required");
-    if (!formData.email) newErrors.email = t("required");
-    if (!formData.password) newErrors.password = t("required");
-    if (formData.password.length < 8) newErrors.password = t("passwordLength");
-    if (formData.confirm !== formData.password) newErrors.confirm = t("passwordMatch");
-    if (!formData.dob) newErrors.dob = t("required");
-    if (!formData.regnumber) newErrors.regnumber = t("required");
-    if (!formData.rank) newErrors.rank = t("required");
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) {
-      toast.error(t("fixErrors"));
-      return;
-    }
+  e.preventDefault();
 
-    const payload = {
-      nom: formData.nickname,
-      prenom: formData.fullname,
-      adresse_email: formData.email,
-      mot_de_passe: formData.password,
-      date_naissance: formData.dob,
-      matricule: formData.regnumber,
-      grade: formData.rank,
-      role: "instructor",
-    };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const matriculeRegex = /^\d{12}$/;
 
-    try {
-      await api.post("register/", payload);
-      toast.success(t("signUp"));
-      setTimeout(() => (window.location.href = "/dashboard-instructor"), 1500);
-    } catch (err) {
-      const backend = err.response?.data;
-      const newErrors = {};
-      if (backend?.adresse_email) newErrors.email = backend.adresse_email[0];
-      if (backend?.matricule) newErrors.regnumber = backend.matricule[0];
-      if (backend) toast.error(Object.values(backend).flat().join("\n"));
-      setErrors(prev => ({ ...prev, ...newErrors }));
-    }
+  const newErrors = {};
+
+  // --- PSEUDO ---
+  if (!formData.nickname.trim())
+    newErrors.nickname = "Pseudo obligatoire.";
+
+  // --- NOM COMPLET ---
+  if (!formData.fullname.trim())
+    newErrors.fullname = "Nom complet obligatoire.";
+
+  // --- EMAIL ---
+  if (!formData.email.trim())
+    newErrors.email = "Email obligatoire.";
+  else if (!emailRegex.test(formData.email))
+    newErrors.email = "Format email invalide.";
+
+  // --- MOT DE PASSE ---
+  if (!formData.password.trim())
+    newErrors.password = "Mot de passe obligatoire.";
+  else if (formData.password.length < 8)
+    newErrors.password = "Minimum 8 caractères.";
+
+  // --- CONFIRMATION ---
+  if (!formData.confirm.trim())
+    newErrors.confirm = "Confirmez votre mot de passe.";
+  else if (formData.confirm !== formData.password)
+    newErrors.confirm = "Les mots de passe ne correspondent pas.";
+
+  // --- DATE DE NAISSANCE ---
+  if (!formData.dob.trim()) {
+    newErrors.dob = "Date de naissance obligatoire.";
+  } else {
+    const birthDate = new Date(formData.dob);
+    const today = new Date();
+    const minDate = new Date();
+    minDate.setFullYear(today.getFullYear() - 25);
+
+    if (birthDate > minDate)
+      newErrors.dob = "Vous devez avoir au moins 25 ans.";
+  }
+
+  // --- MATRICULE ---
+  if (!formData.regnumber.trim())
+    newErrors.regnumber = "Matricule obligatoire.";
+  else if (!matriculeRegex.test(formData.regnumber))
+    newErrors.regnumber = "Matricule invalide (12 chiffres attendus).";
+
+  // --- GRADE ---
+  if (!formData.rank.trim())
+    newErrors.rank = "Grade obligatoire.";
+
+  // STOP si erreurs
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) return;
+
+  // --- PAYLOAD ---
+  const payload = {
+    nom: formData.nickname,
+    prenom: formData.fullname,
+    adresse_email: formData.email,
+    mot_de_passe: formData.password,
+    date_naissance: formData.dob,
+    matricule: formData.regnumber,
+    grade: formData.rank,
+    role: "enseignant"
   };
 
-  const toggleLanguage = () => {
+  try {
+    const res = await api.post("register/", payload);
+    toast.success("Inscription réussie !");
+
+    setTimeout(() => {
+      window.location.href = "/dashboard-instructor";
+    }, 1500);
+
+ } catch (err) {
+      const apiErrors = err.response?.data;
+
+      if (apiErrors) {
+        // Error globale : { "error": "..." }
+        if (apiErrors.error) {
+          toast.error(apiErrors.error);
+          return;
+        }
+
+        // Backend → Front errors
+        const backendMappedErrors = {};
+
+        Object.keys(apiErrors).forEach((key) => {
+          const frontendKey = fieldMap[key] || key;
+          backendMappedErrors[frontendKey] = apiErrors[key][0];
+        });
+
+        setErrors((prev) => ({ ...prev, ...backendMappedErrors }));
+
+        // Toast avec toutes les erreurs
+        toast.error(Object.values(backendMappedErrors).join("\n"));
+        return;
+      }
+
+      toast.error("Erreur réseau. Vérifiez Django.");
+    }
+};
+ const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
     i18n.changeLanguage(newLang);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4">
-      {/* Header: logo, dark mode, langue */}
-      <div className="flex items-center justify-start w-full mb-4">
-       <LogoComponent />
-        <ThemeButton onClick={toggleDarkMode} />
-        <FiGlobe size={20} title="Changer la langue" onClick={toggleLanguage} className="ml-4 cursor-pointer"/>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4 pt-12">
+  {/* Header */}
+  <div className="flex w-full mb-4 items-center justify-between px-4">
 
-      <AuthTabs role="instructor" active="signup"/>
+    {/* Logo normal (grand) — visible seulement md+ */}
+    <div className="hidden md:block">
+      <LogoComponent className="-mt-10 ml-20" />
+    </div>
+
+    {/* Petit logo — visible seulement sur mobile */}
+    <div className="block md:hidden">
+      <LogoIconeComponent className="w-8 h-8 -ml-1" />
+    </div>
+
+    {/* Actions */}
+    <div className="flex items-center gap-4">
+      <ThemeButton onClick={toggleDarkMode} />
+      <FiGlobe
+        size={20}
+        title="Changer la langue"
+        onClick={toggleLanguage}
+        className="cursor-pointer"
+      />
+    </div>
+  </div>
+
+
+
+
+      <AuthTabs
+          role="instructor"
+          active="signup"
+          tab1Label={t("login.signIn")}
+          tab2Label={t("login.signUp")}
+          className="mt-20 sm:mt-0"
+      />
 
       <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card rounded-3xl shadow-lg overflow-hidden relative mt-2">
         {/* Formulaire */}
         <div className="w-full md:w-1/2 p-10">
-          <h2 className="text-2xl font-semibold text-muted text-center mb-6">
-            {t("welcomeInstructor")}
-          </h2>
-
-          <form className="space-y-4" onSubmit={handleSubmit}>
+         <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
+            <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
               <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
@@ -125,16 +223,17 @@ export default function InstructorSignup() {
               <Input label={t("regnumber")} name="regnumber" value={formData.regnumber} onChange={handleChange} placeholder={t("regnumber")} icon={<FaIdBadge />} error={errors.regnumber} />
             </div>
 
-            <Input label={t("rank")} name="rank" value={formData.rank} onChange={handleChange} placeholder={t("rank")} icon={<FaGraduationCap />} error={errors.rank} />
-
-            <div className="text-center text-gray-400">{t("or")}</div>
-            <GoogleButton />
+            <Select label={t("rank")} name="rank" value={formData.rank} onChange={handleChange} placeholder={t("rank")} options={[
+                    { value: "Prof", label: "Professor" },
+                    { value: "maitre conf", label: "Maitre de conférences" },
+                    { value: "maitre ass", label: "maitre assistant" },
+                  ]} />
             <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
           </form>
         </div>
 
         {/* Mascotte */}
-        <div className="w-full md:w-1/2 relative flex items-center justify-center mt-8 md:mt-0 bg-card">
+        <div className="w-full md:w-1/2 relative flex items-center justify-center mt-8 md:mt-0 bg-card hidden lg:block">
           <div className="absolute top-12 md:top-16 right-4 md:right-12 bg-white rounded-xl shadow p-6 md:p-9 w-max min-h-[80px] z-20">
             <p className="text-gray-700 font-medium text-sm">
               {t("welcomeInstructor")}
@@ -145,10 +244,13 @@ export default function InstructorSignup() {
           </div>
 
           <div className="absolute w-56 md:w-72 h-56 md:h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "45%", left: "50%", transform: "translate(-50%, -50%)" }} />
-          <img src={robot} alt="Robot Mascotte" className="w-56 md:w-72 z-10 -mt-10 md:-mt-10" />
+           <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-10 right-20 h-58 z-10 mt-40 mr-10 " />
         </div>
 
       </div>
     </div>
   );
 }
+
+
+export default InstructorSignUp;

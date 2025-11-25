@@ -79,3 +79,11 @@
 .dark .bg-grad-5 {
   background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
 }
+
+/* Fix autofill bleu */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 30px white inset !important; /* remplace le bleu par blanc */
+  -webkit-text-fill-color: rgb(172, 179, 194) !important;      /* garde le texte lisible */
+}
