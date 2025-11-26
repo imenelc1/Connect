@@ -29,7 +29,7 @@ export default function Setting() {
 
 
     const [activeTab, setActiveTab] = useState("profile");
-    // Permet de changer la langue (FR ↔ EN)
+    // Permet de changer la langue (FR ↔ EN)²
     // const toggleLanguage = () => {
     //     const newLang = i18n.language === "fr" ? "en" : "fr";
     //     i18n.changeLanguage(newLang);
@@ -46,7 +46,7 @@ export default function Setting() {
 
             {/* Sidebar : cachée sur mobile, visible sur large écrans */}
             <div className="hidden lg:block w-64 ">
-                 <LogoComponent />
+                
                 
                 <Navbar />
             </div>
@@ -313,7 +313,7 @@ export default function Setting() {
                                 <Button
                                     variant="Setting"
                                     onClick={() => navigate("/")}
-                                    className="bg-sky-500 hover:bg-sky-600 text-white font-medium px-6 py-2 rounded-lg shadow h-15 w-[250px] "
+                                    className="bg-sky-500 hover:bg-sky-600 text-white font-medium px-6 py-2 rounded-lg shadow h-15 w-[180px] "
                                 >  {t("Account.UpdatePass")}</Button>
                             </div>
                         </div>
@@ -334,7 +334,7 @@ export default function Setting() {
                                 <Button
                                     variant="Setting"
                                     onClick={() => navigate("/")}
-                                     className="bg-red-500  hover:bg-red-600 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base w-[200px]"
+                                     className="bg-red-500  hover:bg-red-600 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base w-[205px]"
                                 >  {t("Account.DeleteAccount")}
                                 </Button>
                              

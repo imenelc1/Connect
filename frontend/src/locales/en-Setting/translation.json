@@ -37,7 +37,7 @@
     "EnterConfirm": "Enter confirm password",
     "UpdatePass": "Update Password",
     "DangerZone": "Danger Zone",
-    "HDelete": "Delete Account",
+    "HDelete": "Delete ",
     "deleteP": "Permanently delete your account and all data. This action cannot be undone.",
     "DeleteAccount": "Delete Account"
   }
