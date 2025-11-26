@@ -63,5 +63,24 @@
     "all_rights": "|| tous droits réservés",
     "footer_policy": "Politique de réservation"
 
-    }
+    },
+
+
+
+
+"course": {
+    "basic_info": "Informations de base",
+    "title": "Titre",
+    "topic": "Sujet du cours",
+    "duration": "Durée",
+    "level": "Niveau",
+    "cancel": "Annuler",
+    "save_next": "Enregistrer & Suivant",
+
+    "curriculum": "Programme du cours",
+    "add_section": "Ajouter une section",
+    "add_lesson": "Ajouter une leçon",
+    "publish_course": "Publier le cours",
+    "back": "Retour"
+  }
 }

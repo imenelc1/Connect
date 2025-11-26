@@ -5,13 +5,15 @@ import Body from "../components/layout/Body";
 
 
 
+
 export default function Acceuil() {
-   
+
   return (
     <div className="overflow-x-hidden ">
       <HeroSection />
-       <Body/>
+      <Body />
       <Footer />
+
 
     </div>
   );

@@ -79,5 +79,25 @@
     "footer_policy": "Booking Policy"
 
 
-    }
+    },
+
+
+
+
+
+    "course": {
+    "basic_info": "Basic information",
+    "title": "Title",
+    "topic": "Course topic",
+    "duration": "Duration",
+    "level": "Level",
+    "cancel": "Cancel",
+    "save_next": "Save & Next",
+
+    "curriculum": "Course Curriculum",
+    "add_section": "Add section",
+    "add_lesson": "Add lesson",
+    "publish_course": "Publish Course",
+    "back": "Back"
+  }
 }

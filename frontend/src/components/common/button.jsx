@@ -10,7 +10,7 @@ export default function Button({
   ...props
 }) {
   // styles par défaut si on utilise "variant"
-  const base = "w-full rounded-full py-2 px-4 text-sm font-medium transition";
+  const base = "w-auto inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-medium transition";
 
   const variants = {
     primary: `${base} bg-sky-500 text-white hover:bg-sky-600`,

@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 
 
 import "../../styles/index.css";
-import Button from "../common/Button";
+import Button from "../common/button";
 
 export default function HeroSection() {
   const navigate = useNavigate();

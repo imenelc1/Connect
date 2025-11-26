@@ -1,75 +1,142 @@
+import React, { useEffect, useState } from "react";
+import "../../styles/index.css";
+import { NavLink } from "react-router-dom";
+import {
+  Settings,
+  LogOut,
+  Home,
+  BookOpen,
+  Users,
+  Award,
+  Clipboard,
+  Activity,
+  MessageCircle,
+  FileText,
+} from "lucide-react";
 
+export default function Navbar() {
+  const [userData, setUserData] = useState({
+    nom: "",
+    prenom: "",
+    role: "",
+  });
 
-import { Home, LayoutDashboard, BookOpen, FileCheck2, Users, Settings, LogOut } from "lucide-react";
-import React from "react";
- import "../../styles/index.css";
-  import { NavLink } from "react-router-dom";  //il va gerer les routes (links quoi)
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
 
+      // Récupère l'objet utilisateur correct, quelle que soit la structure
+      const userObj = parsed.user || parsed.utilisateur || parsed;
 
-export default function SideNavbar({ links = [], userName = "", userRole = "", userInitials = "" }) {
-  //user role cest soit enseignant ou etudiant
+      setUserData({
+        nom: userObj.nom || "",
+        prenom: userObj.prenom || "",
+        role: userObj.role || "",
+      });
+    }
+  }, []);
+
+  const initials = `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase();
+
+  // Liens selon le rôle
+  const studentLinks = [
+    { href: "/home", label: "Home", icon: Home },
+    { href: "/dashboard", label: "Dashboard", icon: Activity },
+    { href: "/all-courses", label: "Courses", icon: BookOpen },
+    { href: "/exercises", label: "Exercises", icon: Clipboard },
+    { href: "/quizzes", label: "Quizzes", icon: FileText },
+    { href: "/ranking", label: "Ranking", icon: Award },
+    { href: "/community", label: "Community", icon: MessageCircle },
+  ];
+
+  const teacherLinks = [
+    { href: "/home", label: "Home", icon: Home },
+    { href: "/dashboard", label: "Dashboard", icon: Activity },
+    { href: "/all-courses", label: "Courses", icon: BookOpen },
+    { href: "/exercises", label: "Exercises", icon: Clipboard },
+    { href: "/quizzes", label: "Quizzes", icon: FileText },
+    { href: "/mystudents", label: "My Students", icon: Users },
+    { href: "/mycommunity", label: "My Community", icon: MessageCircle },
+  ];
+
+  const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
+
   return (
-    <aside className="w-64 h-screen bg-white shadow-2xl flex flex-col justify-between p-4 rounded-3xl font-medium">
-      {/* Top User */}
-      <div>
-        <div className="flex items-center gap-3 p-4 bg-white/60 rounded-2xl shadow-sm">
-          <div className="w-12 h-12 flex items-center justify-center bg-primary text-surface  rounded-full">{userInitials}</div>
-          <div className="flex flex-col text-sm">
-            { <span className="font-semibold text-textc">{userRole}</span>  } {/*ca et userinitiales va etre recuperer automatiquement de la bdd je les ai ajouté juste pour le test*/}
-            <span className="text-grayc">{userName}</span>
-          </div>
+    <aside className={`
+      fixed top-0 left-0 h-screen bg-white rounded-r-3xl shadow-2xl p-4 flex flex-col justify-between z-50
+      transition-transform duration-300
+      w-60
+      
+    `}>
+    
+      {/* HEADER — INITIALS + NOM */}
+      <div className="flex items-center gap-2.5 p-2.5 bg-white rounded-2xl shadow-sm">
+        <div className="w-10 h-10 flex items-center justify-center rounded-full text-white font-semibold text-base bg-primary">
+          {initials}
         </div>
-
-        {/* Navigation Links */}
-        <nav className="mt-8 flex flex-col gap-2 font-semibold">
-          {links.map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.href}
-           className={ //({ isActive }) => je l'ai mis en commentaire car on doit d'abord definir les routes pour que ca marche
-                `flex items-start gap-3 px-4 py-3 rounded-xl transition-all shadow-sm text-primary `
-                //  {isActive ? "bg-primary text-white" : "hover:bg-primary"
-                //     }
-              }
-            >
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-        </nav>
+        <div className="flex flex-col leading-tight">
+          <span className="text-textc font-semibold text-sm capitalize">{userData.role}</span>
+          <span className="text-grayc text-xs">{userData.nom} {userData.prenom}</span>
+        </div>
       </div>
 
-      {/* Bottom */}
-      <div className="flex flex-col gap-2 mt-4 rounded-xl bg-primary/10 ">
+      {/* NAVIGATION */}
+      <nav className="mt-4 flex flex-col gap-1.5 font-medium">
+        {links.map((item, i) => (
+          <NavLink
+            key={i}
+            to={item.href}
+            className={({ isActive }) =>
+              `
+              flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all
+              ${isActive
+                ? "bg-primary border-primary text-white hover:bg-primary/90"
+                : "bg-white border-surface text-primary hover:bg-grad-2"
+              }
+              `
+            }
+          >
+            <item.icon size={19} strokeWidth={1.5} />
+            <span className="text-sm">{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* SETTINGS + LOGOUT */}
+      <div className="flex flex-col gap-1.5 mt-3 pb-3">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all shadow-sm
-             ${isActive
-                ? "bg-gradient-to-r from-primary to-primarylight text-white"
-                : "text-primary hover:bg-gradient-to-r hover:from-primary/20 "}`
+            `
+            flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors
+            ${isActive
+              ? "bg-primary border-primary text-white hover:bg-primary/90"
+              : "bg-card border-surface text-primary hover:bg-grad-2"
+            }
+            `
           }
         >
-          <Settings size={18} className="text-primary" />
-          <span className="font-semibold">Settings</span>
+          <Settings size={18} strokeWidth={1.5} />
+          <span className="text-sm font-medium">Settings</span>
         </NavLink>
 
-
-<NavLink
-  to="/logout"
-  className={({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all shadow-sm
-     ${isActive
-        ? "bg-gradient-to-r from-primary to-primarylight text-white"
-        : "text-primary hover:bg-gradient-to-r hover:from-primary/20 "}`
-  }
->
-  <LogOut size={18} className="text-primary" />
-  <span className="font-semibold">Log Out</span>
-</NavLink>
+        <NavLink
+          to="/acceuil"
+          className={({ isActive }) =>
+            `
+            flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors
+            ${isActive
+              ? "bg-grad-2 border-primary text-primary"
+              : "bg-card border-surface text-red-500 hover:bg-red-100"
+            }
+            `
+          }
+        >
+          <LogOut size={18} strokeWidth={1.5} />
+          <span className="text-sm font-medium">Log Out</span>
+        </NavLink>
       </div>
     </aside>
   );
 }
-
-
