@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/common/Navbar";
 import { Plus,Bell } from "lucide-react";
-import CourseCard from "../components/common/CourseCard";
+import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
-import CourseFilters from "../components/common/CourseFilters";
-import CourseSearchBar from "../components/common/CourseSearchBar";
+import ContentFilters from "../components/common/ContentFilters";
+import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
+import ThemeButton from "../components/common/ThemeButton";
+import ThemeContext from "../context/ThemeContext";
+import { useContext } from "react";
+
 const courses = [
   {
     title: "Structures de Données",
@@ -89,6 +93,8 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
              text-gray-700 shadow-lg flex items-center justify-center 
              cursor-pointer hover:bg-gray-100 transition z-50"
 >
+    <ThemeButton onClick={toggleDarkMode} />
+
   <Bell size={22} strokeWidth={1.8} />
 </div>
 
@@ -104,7 +110,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         {userRole === "enseignant" && (
           <Button
             variant="courseStart"
-            className="!w-full sm:!w-auto px-6 flex items-center gap-2"
+            className="!w-full mr-40 sm:!w-auto px-6 flex items-center gap-2"
           >
             <Plus size={18} />
             {t("createCourseBtn")}
@@ -112,32 +118,33 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         )}
       </div>
         {/* Search */}
-        <CourseSearchBar />
+        <ContentSearchBar placeholder={t("searchPlaceholder")} />
+
 
         {/* Filters */}
         <div className="mt-6 mb-6">
-        <CourseFilters
-          showCompletedFilter={userRole === "etudiant"}
-          onFilterChange={setFilterLevel}
-          activeFilter={filterLevel}
-          
-        />
+       <ContentFilters
+  showCompletedFilter={userRole === "student"}
+  onFilterChange={setFilterLevel}
+  activeFilter={filterLevel}
+/>
       </div>
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-        {filteredCourses.map((course, idx) => (
-          <CourseCard
-            key={idx}
-            className={gradientMap[course.level] ?? "bg-grad-1"}
-            course={{
-              ...course,
-              level: t(`levels.${course.level}`) // <-- traduction du niveau
-            }}
-            role={userRole}
-            showProgress={userRole === "etudiant"}
-          />
-        ))}
+        {filteredCourses.map((item, idx) => (
+  <ContentCard
+    key={idx}
+    className={gradientMap[item.level] ?? "bg-grad-1"}
+    item={{
+      ...item,
+      level: t(`levels.${item.level}`) // traduction du niveau
+    }}
+    role={userRole}
+    showProgress={userRole === "student"}
+  />
+))}
+
       </div>
       </main>
     </div>
