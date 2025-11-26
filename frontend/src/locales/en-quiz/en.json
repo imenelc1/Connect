@@ -1,0 +1,42 @@
+{
+  "newQuiz": "NEW Quiz",
+  "exitPreview": "Exit Preview",
+  "noData": "No quiz data found.",
+  "title": "Quiz Title",
+  "description": "Quiz description...",
+  "minutes": "minutes",
+  "points": "points",
+  "level": "Advanced",
+  "questionText": "Enter your question here...",
+  "answerOption": "Answer option...",
+  "sendQuiz": "Send Quiz",
+
+  "quizSettings": "Quiz Settings",
+  "quizTitle": "Quiz Title",
+  "quizTitlePlaceholder": "Quiz title...",
+  "descriptionLabel": "Description",
+  "descriptionPlaceholder": "Quiz description...",
+  "duration": "Duration (minutes)",
+  "passingScore": "Passing Score (%)",
+  "quizLevel": "Quiz Level",
+  "beginner": "Beginner",
+  "intermediate": "Intermediate",
+  "advanced": "Advanced",
+
+  "quizSummary": "Quiz Summary",
+  "totalQuestions": "Total Questions:",
+  "totalPoints": "Total Points:",
+  "passScore": "Pass Score:",
+  "durationLabel": "Duration:",
+
+  "questions": "Questions",
+  "addQuestion": "Add Question",
+
+  "answers": "Answers",
+  "answerOptionA": "Answer option A",
+  "answerOptionB": "Answer option B",
+  "addAnswer": "Add Answer",
+
+  "saveDraft": "Save as Draft",
+  "previewQuiz": "Preview Quiz"
+}

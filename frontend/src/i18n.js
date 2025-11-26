@@ -1,42 +1,60 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
+
+// A lightweight global sync using localStorage + custom event.
+// Ensures all components toggle instantly without a Provider.
+
+const LANG_KEY = "app_lang";
+const EVENT_NAME = "langchange";
+
+function getInitialLang() {
+  const saved = localStorage.getItem(LANG_KEY);
+  return saved === "en" || saved === "fr" ? saved : "fr";
+}
 
 const useI18n = () => {
-  const [language, setLanguage] = useState('fr');
+  const [language, setLanguage] = useState(getInitialLang());
   const [translations, setTranslations] = useState({});
 
   useEffect(() => {
-    loadTranslations(language);
+    const load = async () => {
+      try {
+        const mod =
+          language === "fr"
+            ? await import("./locales/fr-quiz/fr.json")
+            : await import("./locales/en-quiz/en.json");
+        setTranslations(mod.default || mod);
+      } catch (e) {
+        console.error("Error loading translations:", e);
+        setTranslations({});
+      }
+    };
+    load();
   }, [language]);
 
-  const loadTranslations = async (lang) => {
-    try {
-      let translations;
-      if (lang === 'fr') {
-        // CHEMIN : depuis la racine src
-        translations = await import('./locales/fr-login/fr.json');
-      } else {
-        // CHEMIN : depuis la racine src
-        translations = await import('./locales/en-login/en.json');
+  // Listen for global lang changes (same page)
+  useEffect(() => {
+    const handler = (e) => {
+      if (e?.detail && (e.detail === "fr" || e.detail === "en")) {
+        setLanguage(e.detail);
       }
-      setTranslations(translations.default || translations);
-    } catch (error) {
-      console.error('Error loading translations:', error);
-    }
-  };
+    };
+    window.addEventListener(EVENT_NAME, handler);
+    return () => window.removeEventListener(EVENT_NAME, handler);
+  }, []);
 
   const toggleLanguage = () => {
-    setLanguage(prevLang => prevLang === 'fr' ? 'en' : 'fr');
+    const next = language === "fr" ? "en" : "fr";
+    localStorage.setItem(LANG_KEY, next);
+    // broadcast to all components in this page
+    window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: next }));
+    setLanguage(next);
   };
 
   const t = (key) => {
-    const keys = key.split('.');
-    let value = translations;
-    
-    for (const k of keys) {
-      value = value?.[k];
-    }
-    
-    return value || key;
+    const parts = key.split(".");
+    let cur = translations;
+    for (const p of parts) cur = cur?.[p];
+    return cur ?? key;
   };
 
   return { language, toggleLanguage, t };
