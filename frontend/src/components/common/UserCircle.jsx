@@ -20,7 +20,7 @@ export default function UserCircle({ initials, onToggleTheme, onChangeLang }) {
       {/* Circle button */}
       <div
         onClick={() => setOpen(!open)}
-        className="w-12 h-12 rounded-full bg-primary text-white 
+        className="w-12 h-12 rounded-full bg-grad-1 text-white 
                    flex items-center justify-center font-semibold shadow-lg 
                    cursor-pointer hover:opacity-90 transition"
       >

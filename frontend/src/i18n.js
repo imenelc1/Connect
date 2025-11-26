@@ -14,9 +14,14 @@ import translationENNavbar from "./locales/Navbar/en-Navbar/translation.json";
 import translationFRNavbar from "./locales/Navbar/fr-Navbar/translation.json";
 import translationENAllCourses from "./locales/AllCourses/en/translation.json";
 import translationFRAllCourses from "./locales/AllCourses/fr/translation.json";
+import translationFRNewExercise from "./locales/NewExercise/fr-newExercise.json";
+import translationENNewExercise from "./locales/NewExercise/en-newExercise.json";
+import translationFRExercisePreview from "./locales/NewExercise/fr-previewExercise.json";
+import translationENExercisePreview from "./locales/NewExercise/en-previewExercise.json";
+  
 const resources = {
-  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses },
-  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses },
+  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses, newExercise: translationFRNewExercise, exercisePreview: translationFRExercisePreview },
+  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses, newExercise: translationENNewExercise, exercisePreview: translationENExercisePreview },
 };
 
 i18n

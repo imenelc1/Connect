@@ -1,0 +1,29 @@
+{
+  "title": {
+    "page": "Nouvel exercice"
+  },
+  "form": {
+    "title_label": "Titre",
+    "title_placeholder": "Titre de l'exercice",
+
+    "statement_label": "Énoncé de l'exercice",
+    "statement_placeholder": "Écrivez les instructions de l'exercice...",
+
+    "category_label": "Catégorie",
+    "duration_label": "Durée",
+    "level_label": "Niveau"
+  },
+  "select": {
+    "placeholder": "Sélectionner",
+    "day": "Jour",
+    "week": "Semaine",
+    "month": "Mois",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé"
+  },
+  "buttons": {
+    "cancel": "Annuler",
+    "save_next": "Suivant"
+  }
+}

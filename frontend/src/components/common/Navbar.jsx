@@ -70,7 +70,7 @@ export default function Navbar() {
   return (
     <aside
       className={`
-        h-screen bg-white rounded-3xl shadow-2xl p-4 flex flex-col justify-between
+        h-screen bg-background rounded-3xl shadow-2xl p-4 flex flex-col justify-between
         fixed top-0 left-0 transition-all duration-300 z-50
         ${collapsed ? "w-20" : "w-60"}
         md:translate-x-0
@@ -84,7 +84,7 @@ export default function Navbar() {
           absolute top-6
           ${collapsed ? "right-0 translate-x-1/2" : "-right-5"}
           ${collapsed ? "w-8 h-8" : "w-10 h-10"}
-          rounded-full bg-primary text-white
+          rounded-full bg-grad-1 text-white
           shadow-lg flex items-center justify-center
           z-50 transition-all duration-300
         `}
@@ -97,7 +97,7 @@ export default function Navbar() {
       </button>
 
      {/* HEADER */}
-<div className="flex items-center justify-center p-2.5 bg-white rounded-2xl shadow-sm">
+<div className="flex items-center justify-center p-2.5 bg-background rounded-2xl shadow-sm">
 
   {/* LOGO TOUJOURS VISIBLE */}
   <IconeLogoComponent
@@ -121,10 +121,10 @@ export default function Navbar() {
             key={i}
             to={item.href}
             className={({ isActive }) =>
-              `flex items-center px-4 py-2.5 rounded-xl border transition-all
+              `flex items-center px-4 py-2.5 rounded-xl border transition-all 
               ${isActive
                 ? "bg-primary border-primary text-white"
-                : "bg-white border-surface text-primary hover:bg-grad-2"
+                : "bg-background border-surface text-nav hover:bg-grad-2"
               }`
             }
           >
@@ -141,8 +141,8 @@ export default function Navbar() {
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors
             ${isActive
-              ? "bg-primary border-primary text-white"
-              : "bg-card border-surface text-primary hover:bg-grad-2"}`
+              ? "bg-grad-1 border-primary text-white"
+              : "bg-card border-surface text-muted hover:bg-grad-2"}`
           }
         >
           <Settings size={18} strokeWidth={1.5} />
@@ -154,7 +154,7 @@ export default function Navbar() {
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors
             ${isActive
-              ? "bg-grad-2 border-primary text-primary"
+              ? "bg-grad-1 border-primary text-primary"
               : "bg-card border-surface text-red-500 hover:bg-red-100"}`
           }
         >

@@ -9,7 +9,8 @@ export default function ContentProgress({ value = 0 }) {
           style={{ width: `${value}%` }}
         ></div>
       </div>
-      <p className="text-sm text-grayc mt-1">{value}% completed</p>
+
+      <p className="text-sm text-muted mt-1">{value}% completed</p>
     </div>
   );
 }

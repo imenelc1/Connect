@@ -7,10 +7,10 @@ import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
+
+import { useContext } from "react";
 import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
-import { useContext } from "react";
-
 const courses = [
   {
     title: "Structures de Données",
@@ -46,6 +46,8 @@ const gradientMap = {
   intermediate: "bg-grad-3",
   advanced: "bg-grad-4",
 };
+
+
 
 export default function AllCoursesPage() {
   const userData = JSON.parse(localStorage.getItem("user"));
@@ -84,6 +86,8 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
     return 3; // desktop sidebar ouvert (fixé pour garder taille ancienne version)
   };
 
+  const { toggleDarkMode } = useContext(ThemeContext);
+
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
@@ -93,8 +97,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
              text-gray-700 shadow-lg flex items-center justify-center 
              cursor-pointer hover:bg-gray-100 transition z-50"
 >
-    <ThemeButton onClick={toggleDarkMode} />
-
+  <ThemeButton onClick={toggleDarkMode} />
   <Bell size={22} strokeWidth={1.8} />
 </div>
 
@@ -107,44 +110,45 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
 
+      </div>
+        {/* Search */}
+        <ContentSearchBar />
+
+        {/* Filters */}
+        <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
+        <ContentFilters
+          showCompletedFilter={userRole === "etudiant"}
+          onFilterChange={setFilterLevel}
+          activeFilter={filterLevel}
+          
+        />
+
         {userRole === "enseignant" && (
           <Button
             variant="courseStart"
-            className="!w-full mr-40 sm:!w-auto px-6 flex items-center gap-2"
+            className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6"
           >
             <Plus size={18} />
             {t("createCourseBtn")}
           </Button>
         )}
-      </div>
-        {/* Search */}
-        <ContentSearchBar placeholder={t("searchPlaceholder")} />
 
-
-        {/* Filters */}
-        <div className="mt-6 mb-6">
-       <ContentFilters
-  showCompletedFilter={userRole === "student"}
-  onFilterChange={setFilterLevel}
-  activeFilter={filterLevel}
-/>
       </div>
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-        {filteredCourses.map((item, idx) => (
-  <ContentCard
-    key={idx}
-    className={gradientMap[item.level] ?? "bg-grad-1"}
-    item={{
-      ...item,
-      level: t(`levels.${item.level}`) // traduction du niveau
-    }}
-    role={userRole}
-    showProgress={userRole === "student"}
-  />
-))}
-
+        {filteredCourses.map((course, idx) => (
+          <ContentCard
+            key={idx}
+            className={gradientMap[course.level] ?? "bg-grad-1"}
+            course={{
+              ...course,
+              level: t(`levels.${course.level}`) // <-- traduction du niveau
+            }}
+            role={userRole}
+            showProgress={userRole === "etudiant"}
+          />
+        ))}
       </div>
       </main>
     </div>

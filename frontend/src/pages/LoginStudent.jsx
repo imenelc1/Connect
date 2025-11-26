@@ -94,7 +94,7 @@ const res = await api.post("login/", {
     return;
   }
 
-  // 🟦 ANALYSE NORMALISÉE (tes anciennes règles)
+  //  ANALYSE NORMALISÉE
   if (backend && typeof backend === "object") {
     const mapKey = {
       email: "email",
@@ -116,7 +116,7 @@ const res = await api.post("login/", {
     return;
   }
 
-  // 🌐 Erreur réseau
+  //  Erreur réseau
   setErrorPassword("Erreur réseau");
   toast.error("Erreur réseau");
 }
@@ -175,6 +175,7 @@ const res = await api.post("login/", {
             <Input
               label={t("login.email")}
               value={email}
+              placeholder={t("login.email")}
               onChange={(e) => setEmail(e.target.value)}
               icon={<FaEnvelope />}
               error={errorEmail}
@@ -184,6 +185,7 @@ const res = await api.post("login/", {
               label={t("login.password")}
               type={showPassword ? "text" : "password"}
               value={password}
+              placeholder={t("login.password")}
               onChange={(e) => setPassword(e.target.value)}
               icon={<FaLock />}
               error={errorPassword}
