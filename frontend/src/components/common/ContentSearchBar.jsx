@@ -7,10 +7,7 @@ export default function ContentSearchBar() {
         placeholder="Search..."
       />
 
-      <select className="rounded-xl px-4 py-2 shadow bg-white border border-primary/30 text-primary font-medium">
-        <option>My courses</option>
-        <option>All courses</option>
-      </select>
+     
 
     </div>
   );

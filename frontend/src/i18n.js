@@ -18,10 +18,15 @@ import translationFRNewExercise from "./locales/NewExercise/fr-newExercise.json"
 import translationENNewExercise from "./locales/NewExercise/en-newExercise.json";
 import translationFRExercisePreview from "./locales/NewExercise/fr-previewExercise.json";
 import translationENExercisePreview from "./locales/NewExercise/en-previewExercise.json";
-  
+import translationFRAllExercises from "./locales/AllExercises/fr/translation.json";
+import translationENAllExercises from "./locales/AllExercises/en/translation.json";
+import translationFRAllQuizzes from "./locales/AllQuizzes/fr/translation.json";
+import translationENAllQuizzes from "./locales/AllQuizzes/en/translation.json"; 
+import translationFRFilters from "./locales/Filters/fr/translation.json";
+import translationENFilters from "./locales/Filters/en/translation.json";
 const resources = {
-  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses, newExercise: translationFRNewExercise, exercisePreview: translationFRExercisePreview },
-  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses, newExercise: translationENNewExercise, exercisePreview: translationENExercisePreview },
+  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses, newExercise: translationFRNewExercise, exercisePreview: translationFRExercisePreview, allExercises: translationFRAllExercises, allQuizzes: translationFRAllQuizzes, filters: translationFRFilters },
+  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses, newExercise: translationENNewExercise, exercisePreview: translationENExercisePreview, allExercises: translationENAllExercises, allQuizzes: translationENAllQuizzes, filters: translationENFilters },
 };
 
 i18n

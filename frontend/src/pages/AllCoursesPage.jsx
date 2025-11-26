@@ -7,7 +7,7 @@ import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
-
+import i18n from "../i18n";
 import { useContext } from "react";
 import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
@@ -91,7 +91,8 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-<UserCircle initials={initials} />
+<UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
+  onChangeLang={(lang) => i18n.changeLanguage(lang)} />
 <div
   className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
              text-gray-700 shadow-lg flex items-center justify-center 

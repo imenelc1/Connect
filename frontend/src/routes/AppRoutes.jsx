@@ -8,7 +8,8 @@ import LoginStudent from "../pages/LoginStudent";
 import AllCoursesPage from "../pages/AllCoursesPage";
 import NewExercise from "../pages/NewExercice";
 import ExercisePreview from "../pages/ExercisePreview";
-
+import AllExercisesPage from "../pages/AllExercisesPage";
+import AllQuizzesPage from "../pages/AllQuizzesPage";
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -26,10 +27,15 @@ export default function AppRoutes() {
 
         {/* ALL COURSES */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
+         {/* ALL Exercises */}
+        <Route path="/all-exercises" element={<AllExercisesPage />} />
+        {/* ALL QUIZZES */}
+        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
 
         {/*new exercise*/}
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
+
 
 
 
