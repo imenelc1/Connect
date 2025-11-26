@@ -2,22 +2,19 @@
 import { useState } from "react";
 import AuthTabs from "../components/common/AuthTabs";
 import Input from "../components/common/Input"; 
+import Mascotte from "../components/common/Mascotte.jsx";
 import LogoComponent from "../components/common/LogoComponent";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FiGlobe,FiEye,FiEyeOff } from "react-icons/fi";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
 
 import Button from "../components/common/Button";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
 import ThemeContext from "../context/ThemeContext";
 import ThemeButton from "../components/common/ThemeButton";
-import Mascotte from "../components/common/Mascotte.jsx";
-import LogoIconeComponent from "../components/common/IconeLogoComponent";
-
-
-
 export default function LoginInstructor() {
   //  États pour les champs
   const [email, setEmail] = useState("");
@@ -61,9 +58,14 @@ export default function LoginInstructor() {
 
     // --- Appel API ---
     try {
-      const res = await api.post("login/", { email, password });
+const res = await api.post("login/", { 
+  email, 
+  password,
+  role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
+});      console.log("Login API response:", res.data);
+      localStorage.setItem("user", JSON.stringify(res.data));
       toast.success("Connexion réussie !");
-      window.location.href = "/dashboard-enseignant";
+      window.location.href = "/all-courses";
 
     } catch (error) {
       const backend = error.response?.data;
@@ -191,7 +193,7 @@ export default function LoginInstructor() {
          
             <p className="text-sm text-grayc text-center mt-4">
               {t("login.noAccount")}{" "}
-              <a href="InstructorSignUp" className="text-muted font-medium hover:underline">
+              <a href="/signup/instructor" className="text-muted font-medium hover:underline">
                 {t("login.signUp")}
               </a>
             </p>

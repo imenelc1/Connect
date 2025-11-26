@@ -40,6 +40,11 @@ export default function Button({
     heroOutline: `${base} border border-[var(--color-primary)]
                   text-[var(--color-primary)] bg-white rounded-xl font-medium
                   hover:bg-[var(--color-bg)] px-12 py-2 transition`,
+    courseStart:`${base}
+      rounded-full px-2 py-2 bg-primary text-white hover:bg-grad-1 hover:text-surface transition-all shadow-sm"`,
+    createCourse :`${base} flex items-center gap-2
+      px-6 py-2 rounded-full bg-grad-3 text-white font-medium shadow-md
+      hover:opacity-90 transition-all`,
   };
 
   // Icônes automatiques selon le variant

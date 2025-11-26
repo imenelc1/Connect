@@ -2,12 +2,12 @@ import React, { useState, useContext } from "react";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
-import Mascotte from "../components/common/Mascotte.jsx";
-import api from "../services/api";
-import LogoComponent from "../components/common/LogoComponent";
-import Select from "../components/common/Select";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
+import Mascotte from "../components/common/Mascotte.jsx";
+import Select from "../components/common/Select";
+import api from "../services/api";
 
+import LogoComponent from "../components/common/LogoComponent";
 
 import { 
   FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge,
@@ -125,10 +125,11 @@ const InstructorSignUp = () => {
 
   try {
     const res = await api.post("register/", payload);
+    localStorage.setItem("user", JSON.stringify(res.data));
     toast.success("Inscription réussie !");
 
     setTimeout(() => {
-      window.location.href = "/dashboard-instructor";
+      window.location.href = "/all-courses";
     }, 1500);
 
  } catch (err) {
@@ -164,7 +165,7 @@ const InstructorSignUp = () => {
     i18n.changeLanguage(newLang);
   };
 
-  return (
+    return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4 pt-12">
   {/* Header */}
   <div className="flex w-full mb-4 items-center justify-between px-4">
@@ -229,6 +230,14 @@ const InstructorSignUp = () => {
                     { value: "maitre ass", label: "maitre assistant" },
                   ]} />
             <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
+              <p className="text-sm text-grayc text-center mt-4">
+                          {t("alreadyHaveAccount")}{" "}
+                          <a href="/login/student" className="text-muted font-medium hover:underline">
+                            {t("signIn")}
+                          </a>
+                        </p>
+            
+                       
           </form>
         </div>
 
@@ -251,6 +260,7 @@ const InstructorSignUp = () => {
     </div>
   );
 }
+
 
 
 export default InstructorSignUp;

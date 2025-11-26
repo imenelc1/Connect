@@ -1,0 +1,15 @@
+{
+  "topbar": {
+    "curriculum": "Curriculum",
+    "publish": "Publish"
+  },
+  "title": {
+    "preview": "Exercise Preview",
+    "back": "<"
+  },
+  "buttons": {
+    "previous": "Previous",
+    "save_draft": "Save as draft",
+    "publish": "Publish Exercise"
+  }
+}

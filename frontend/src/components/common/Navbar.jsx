@@ -1,90 +1,166 @@
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/index.css";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import IconeLogoComponent from "../common/IconeLogoComponent";
+import {
+  Settings,
+  LogOut,
+  Home,
+  BookOpen,
+  Users,
+  Award,
+  Clipboard,
+  Activity,
+  MessageCircle,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
-// Icônes Lucide (modernes et légères)
-import { Settings, LogOut } from "lucide-react";
+export default function Navbar() {
+ const { t } = useTranslation("navbar"); // <-- namespace navbar
 
-export default function SideNavbar({
-  links = [],
-  userName = "",
-  userRole = "",
-  userInitials = "",
-}) {
+
+  const [collapsed, setCollapsed] = useState(false);
+  const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      const userObj = parsed.user || parsed.utilisateur || parsed;
+
+      setUserData({
+        nom: userObj.nom || "",
+        prenom: userObj.prenom || "",
+        role: userObj.role || "",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("sidebarChanged", { detail: collapsed }));
+  }, [collapsed]);
+
+  const initials = `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase();
+
+  const studentLinks = [
+    { href: "/", label: t("home"), icon: Home },
+    { href: "/dashboard", label: t("dashboard"), icon: Activity },
+    { href: "/all-courses", label: t("courses"), icon: BookOpen },
+    { href: "/exercises", label: t("exercises"), icon: Clipboard },
+    { href: "/quizzes", label: t("quizzes"), icon: FileText },
+    { href: "/ranking", label: t("ranking"), icon: Award },
+    { href: "/community", label: t("community"), icon: MessageCircle },
+  ];
+
+  const teacherLinks = [
+    { href: "/home", label: t("home"), icon: Home },
+    { href: "/dashboard", label: t("dashboard"), icon: Activity },
+    { href: "/all-courses", label: t("courses"), icon: BookOpen },
+    { href: "/exercises", label: t("exercises"), icon: Clipboard },
+    { href: "/quizzes", label: t("quizzes"), icon: FileText },
+    { href: "/mystudents", label: t("mystudents"), icon: Users },
+    { href: "/mycommunity", label: t("mycommunity"), icon: MessageCircle },
+  ];
+
+  const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
+
   return (
-    <aside className="w-64 h-screen bg-white shadow-2xl flex flex-col justify-between p-4 rounded-3xl font-medium">
+    <aside
+      className={`
+        h-screen bg-background rounded-3xl shadow-2xl p-4 flex flex-col justify-between
+        fixed top-0 left-0 transition-all duration-300 z-50
+        ${collapsed ? "w-20" : "w-60"}
+        md:translate-x-0
+        ${collapsed ? "translate-x-0" : "max-md:-translate-x-full"}
+      `}
+    >
+      {/* TOGGLE BUTTON */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className={`
+          absolute top-6
+          ${collapsed ? "right-0 translate-x-1/2" : "-right-5"}
+          ${collapsed ? "w-8 h-8" : "w-10 h-10"}
+          rounded-full bg-grad-1 text-white
+          shadow-lg flex items-center justify-center
+          z-50 transition-all duration-300
+        `}
+      >
+        {collapsed ? (
+          <ChevronRight size={18} strokeWidth={2} />
+        ) : (
+          <ChevronLeft size={20} strokeWidth={2} />
+        )}
+      </button>
 
-      {/* -----------------------------------------------------------------
-          HEADER UTILISATEUR (nom + rôle + initiales)
-      ------------------------------------------------------------------ */}
-      <div>
-        <div className="flex items-center gap-3 p-4 bg-white/60 rounded-2xl shadow-sm">
-          {/* Rond avec les initiales */}
-          <div className="w-12 h-12 flex items-center justify-center bg-primary text-surface rounded-full">
-            {userInitials}
-          </div>
+     {/* HEADER */}
+<div className="flex items-center justify-center p-2.5 bg-background rounded-2xl shadow-sm">
 
-          {/* Nom + rôle */}
-          <div className="flex flex-col text-sm">
-            <span className="font-semibold text-textc">{userRole}</span>
-            <span className="text-grayc">{userName}</span>
-          </div>
-        </div>
+  {/* LOGO TOUJOURS VISIBLE */}
+  <IconeLogoComponent
+    size={collapsed ? "w-10 h-10 -ml-2" : "w-10 h-14"}
+    className={`transition-all duration-300 -ml-4`}
+  />
 
-        {/* -----------------------------------------------------------------
-            NAVIGATION PRINCIPALE (générée dynamiquement)
-        ------------------------------------------------------------------ */}
-        <nav className="mt-8 flex flex-col gap-2 font-semibold">
-          {links.map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.href}
-              className="flex items-start gap-3 px-4 py-3 rounded-xl transition-all shadow-sm text-primary"
-            >
-              {/* Icône dynamique */}
-              <item.icon size={18} />
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-        </nav>
-      </div>
+  {/* TEXTE QUI DISPARAÎT EN MODE COLLAPSÉ */}
+  {!collapsed && (
+    <div className="flex flex-col leading-tight ml-3">
+      <span className="text-textc font-semibold text-sm capitalize">{userData.role}</span>
+      <span className="text-grayc text-xs">{userData.nom} {userData.prenom}</span>
+    </div>
+  )}
+</div>
 
-      {/* -----------------------------------------------------------------
-         BAS DE LA SIDEBAR (Settings + Logout)
-      ------------------------------------------------------------------ */}
-      <div className="flex flex-col gap-2 mt-4 rounded-xl bg-primary/10">
+      {/* NAVIGATION */}
+      <nav className="mt-4 flex flex-col gap-1.5 font-medium">
+        {links.map((item, i) => (
+          <NavLink
+            key={i}
+            to={item.href}
+            className={({ isActive }) =>
+              `flex items-center px-4 py-2.5 rounded-xl border transition-all 
+              ${isActive
+                ? "bg-primary border-primary text-white"
+                : "bg-background border-surface text-nav hover:bg-grad-2"
+              }`
+            }
+          >
+            <item.icon size={19} strokeWidth={1.5} />
+            {!collapsed && <span className="ml-3 text-sm">{item.label}</span>}
+          </NavLink>
+        ))}
+      </nav>
 
-        {/* ⚙️ Settings */}
+      {/* SETTINGS + LOGOUT */}
+      <div className="flex flex-col gap-1.5 mt-3 pb-3">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all shadow-sm ${
-              isActive
-                ? "bg-gradient-to-r from-primary to-primarylight text-white"
-                : "text-primary hover:bg-gradient-to-r hover:from-primary/20"
-            }`
+            `flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors
+            ${isActive
+              ? "bg-grad-1 border-primary text-white"
+              : "bg-card border-surface text-muted hover:bg-grad-2"}`
           }
         >
-          <Settings size={18} className="text-primary" />
-          <span className="font-semibold">Settings</span>
+          <Settings size={18} strokeWidth={1.5} />
+          {!collapsed && <span className="text-sm font-medium">{t("settings")}</span>}
         </NavLink>
 
-        {/* 🚪 Logout */}
         <NavLink
-          to="/logout"
+          to="/"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-2xl transition-all shadow-sm ${
-              isActive
-                ? "bg-gradient-to-r from-primary to-primarylight text-white"
-                : "text-primary hover:bg-gradient-to-r hover:from-primary/20"
-            }`
+            `flex items-center gap-3 px-4 py-2 rounded-xl border transition-colors
+            ${isActive
+              ? "bg-grad-1 border-primary text-primary"
+              : "bg-card border-surface text-red-500 hover:bg-red-100"}`
           }
         >
-          <LogOut size={18} className="text-primary" />
-          <span className="font-semibold">Log Out</span>
+          <LogOut size={18} strokeWidth={1.5} />
+          {!collapsed && <span className="text-sm font-medium">{t("logout")}</span>}
         </NavLink>
-
       </div>
     </aside>
   );

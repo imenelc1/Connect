@@ -1,23 +1,32 @@
 import React, { useState, useContext } from "react";
-import { FaUser, FaEnvelope, FaLock, FaPaperPlane, FaEye, FaEyeSlash, FaCalendarAlt, FaIdBadge, FaLayerGroup, FaCalendarCheck } from "react-icons/fa";
+import {
+  FaUser, FaEnvelope, FaLock, FaPaperPlane,
+  FaEye, FaEyeSlash, FaCalendarAlt, FaIdBadge,
+  FaLayerGroup, FaCalendarCheck
+} from "react-icons/fa";
 import { FiGlobe } from "react-icons/fi";
 
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
 import LogoComponent from "../components/common/LogoComponent";
+import Select from "../components/common/Select";
+import Mascotte from "../components/common/Mascotte";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
 import api from "../services/api";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import ThemeButton from "../components/common/ThemeButton";
 import toast from "react-hot-toast";
-import Select from "../components/common/Select";
-import Mascotte from "../components/common/Mascotte";
-import LogoIconeComponent from "../components/common/IconeLogoComponent";
+import { useNavigate } from "react-router-dom";
+
+
 
 export default function StudentSignUp() {
+
   const { t, i18n } = useTranslation("signup");
   const { toggleDarkMode } = useContext(ThemeContext);
+const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     nickname: "",
@@ -31,16 +40,14 @@ export default function StudentSignUp() {
     year: ""
   });
 
-   const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // --- CHANGE HANDLER ---
   const handleChange = e => {
     const { name, value } = e.target;
 
     setFormData(prev => ({ ...prev, [name]: value }));
-
     setErrors(prev => ({ ...prev, [name]: "" }));
 
     if (name === "password" && value.length < 8)
@@ -49,56 +56,48 @@ export default function StudentSignUp() {
     if (name === "confirm" && value !== formData.password)
       setErrors(prev => ({ ...prev, confirm: "Les mots de passe ne correspondent pas" }));
   };
-  
-  
-// --- VALIDATION GLOBALE ---
-const validateForm = () => {
-  const newErrors = {};
 
-  // Champs obligatoires
-  if (!formData.nickname) newErrors.nickname = "Champ obligatoire";
-  if (!formData.fullname) newErrors.fullname = "Champ obligatoire";
-  if (!formData.email) {
-  newErrors.email = "Email obligatoire";
-} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-  newErrors.email = "Format d'email invalide";
-}
-  if (!formData.password) newErrors.password = "Mot de passe obligatoire";
-  if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères";
+  // VALIDATION
+  const validateForm = () => {
+    const newErrors = {};
 
-  if (formData.confirm !== formData.password)
-    newErrors.confirm = "Mot de passe non identique";
+    if (!formData.nickname) newErrors.nickname = "Champ obligatoire";
+    if (!formData.fullname) newErrors.fullname = "Champ obligatoire";
 
-  if (!formData.dob) newErrors.dob = "Champ obligatoire";
-  if (!formData.regnumber) newErrors.regnumber = "Champ obligatoire";
-  if (!formData.field) newErrors.field = "Champ obligatoire";
-  if (!formData.year) newErrors.year = "Champ obligatoire";
+    if (!formData.email)
+      newErrors.email = "Email obligatoire";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      newErrors.email = "Format d'email invalide";
 
-  // Matricule : 12 chiffres
-  if (formData.regnumber && !/^\d{12}$/.test(formData.regnumber)) {
-    newErrors.regnumber =
-      "Matricule invalide (format: année BAC + numéro du diplôme du bac)";
-  }
+    if (!formData.password) newErrors.password = "Mot de passe obligatoire";
+    if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères";
 
-  // Âge minimum 16 ans
-  if (formData.dob) {
+    if (formData.confirm !== formData.password)
+      newErrors.confirm = "Mot de passe non identique";
+
+    if (!formData.dob) newErrors.dob = "Champ obligatoire";
+    if (!formData.regnumber) newErrors.regnumber = "Champ obligatoire";
+    if (!formData.field) newErrors.field = "Champ obligatoire";
+    if (!formData.year) newErrors.year = "Champ obligatoire";
+
+    if (formData.regnumber && !/^\d{12}$/.test(formData.regnumber))
+      newErrors.regnumber = "Matricule invalide (12 chiffres)";
+
     const birthDate = new Date(formData.dob);
     const minDate = new Date();
     minDate.setFullYear(minDate.getFullYear() - 16);
-
-    if (birthDate > minDate) {
+    if (birthDate > minDate)
       newErrors.dob = "Vous devez avoir au moins 16 ans.";
-    }
-  }
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-
-  // --- SUBMIT ---
+  // SUBMIT
   const handleSubmit = async e => {
     e.preventDefault();
+
+    console.log("FORM SUBMITTED"); // Debug
 
     if (!validateForm()) {
       toast.error("Veuillez corriger les erreurs.");
@@ -118,67 +117,50 @@ const validateForm = () => {
     };
 
     try {
-      await api.post("register/", payload);
+      const res = await api.post("register/", payload);
 
-      toast.success("Inscription réussie !");
-      setTimeout(() => (window.location.href = "/dashboard-etudiant"), 1500);
+     localStorage.setItem("user", JSON.stringify(res.data));
+toast.success("Inscription réussie !");
+navigate("/all-courses");
 
-} catch (err) {
-  const backend = err.response?.data;
-  console.log("Erreur backend:", backend);
+    } catch (err) {
+      const backend = err.response?.data;
 
-  if (backend && typeof backend === "object") {
-    const newErrors = {};
+      if (backend && typeof backend === "object") {
+        const newErrors = {};
 
-    // Traitement des erreurs par champ
-    Object.keys(backend).forEach((key) => {
-      const firstError = Array.isArray(backend[key])
-        ? backend[key][0]
-        : backend[key];
+        Object.keys(backend).forEach(key => {
+          const firstError = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
 
-      const mapKey = {
-        adresse_email: "email",
-        mot_de_passe: "password",
-        date_naissance: "dob",
-        matricule: "regnumber",
-        specialite: "field",
-        annee_etude: "year",
-        nom: "nickname",
-        prenom: "fullname",
-      };
+          const mapKey = {
+            adresse_email: "email",
+            mot_de_passe: "password",
+            date_naissance: "dob",
+            matricule: "regnumber",
+            specialite: "field",
+            annee_etude: "year",
+            nom: "nickname",
+            prenom: "fullname",
+          };
 
-      const targetField = mapKey[key] || key;
+          const targetField = mapKey[key] || key;
+          newErrors[targetField] = firstError;
+        });
 
-      newErrors[targetField] = firstError;
-    });
+        setErrors(newErrors);
 
-    // Erreurs générales non liées à un champ
-    const generalErrors = Object.keys(backend)
-      .filter((key) => !["adresse_email", "mot_de_passe", "date_naissance", "matricule", "specialite", "annee_etude", "nom", "prenom"].includes(key))
-      .map((key) =>
-        Array.isArray(backend[key]) ? backend[key][0] : backend[key]
-      );
+        toast.error("Erreur : " + Object.values(newErrors)[0]);
+        return;
+      }
 
-    if (generalErrors.length > 0) {
-      toast.error(generalErrors.join("\n"));
+      toast.error("Erreur réseau");
     }
-
-    setErrors((prev) => ({ ...prev, ...newErrors }));
-    return;
-  }
-
-  toast.error("Erreur réseau");
-}
-
-
   };
 
-   const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-  };
+  const toggleLanguage = () =>
+    i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
 
-  return (
+   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4 pt-12">
        {/* Header */}
   <div className="flex w-full mb-4 items-center justify-between px-4 md:-mt-10">
@@ -271,10 +253,16 @@ const validateForm = () => {
   error={errors.year}
 />
             </div>
-
-            <div className="text-center text-gray-400">{t("or")}</div>
            
             <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
+              <p className="text-sm text-grayc text-center mt-4">
+              {t("alreadyHaveAccount")}{" "}
+              <a href="/login/student" className="text-muted font-medium hover:underline">
+                {t("signIn")}
+              </a>
+            </p>
+
+           
           </form>
         </div>
 
@@ -296,4 +284,3 @@ const validateForm = () => {
     </div>
   );
 }
-

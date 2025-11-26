@@ -1,8 +1,7 @@
-import { useState, useContext } from "react";
+import { useState, useContext , useEffect } from "react";
 import AuthTabs from "../components/common/AuthTabs";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
-
 import Mascotte from "../components/common/Mascotte.jsx";
 import api from "../services/api";
 import toast from "react-hot-toast";
@@ -23,10 +22,13 @@ export default function LoginStudent() {
   const [errorEmail, setErrorEmail] = useState("");
   const [errorPassword, setErrorPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [userRole, setUserRole] = useState(""); 
+
 
   const { t, i18n } = useTranslation("login");
 
   const { toggleDarkMode } = useContext(ThemeContext);
+ 
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
@@ -64,37 +66,61 @@ export default function LoginStudent() {
     }
 
     try {
-      await api.post("login/", { email, password });
+const res = await api.post("login/", { 
+  email, 
+  password,
+  role: "etudiant" // <-- Obligatoire pour que le backend sache que c'est un étudiant
+});      
+  console.log(" LOGIN SUCCESS:", res.data); // <---- IMPORTANT
+  
+  localStorage.setItem("user", JSON.stringify(res.data));
 
       toast.success(t("login.success"));
-      window.location.href = "/dashboard-etudiant";
+      window.location.href = "/all-courses";
 
     } catch (error) {
-      const backend = error.response?.data;
+  const backend = error.response?.data;
 
-      if (backend && typeof backend === "object") {
-        const mapKey = {
-          email: "email",
-          adresse_email: "email",
-          mot_de_passe: "password",
-          password: "password",
-          non_field_errors: "password",
-          detail: "password",
-        };
+  //  SI BACKEND RENVOIE UN MESSAGE GÉNÉRAL (CAS 403, 401, etc.)
+  if (typeof backend?.detail === "string") {
+    setErrorPassword(backend.detail);
+    toast.error(backend.detail);
+    return;
+  }
 
-        Object.keys(backend).forEach((key) => {
-          const val = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
-          const target = mapKey[key] || key;
+  if (typeof backend?.error === "string") {
+    setErrorPassword(backend.error);
+    toast.error(backend.error);
+    return;
+  }
 
-          if (target === "email") setErrorEmail(val);
-          if (target === "password") setErrorPassword(val);
-        });
+  //  ANALYSE NORMALISÉE
+  if (backend && typeof backend === "object") {
+    const mapKey = {
+      email: "email",
+      adresse_email: "email",
+      mot_de_passe: "password",
+      password: "password",
+      non_field_errors: "password",
+      detail: "password",
+    };
 
-        return;
-      }
+    Object.keys(backend).forEach((key) => {
+      const val = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
+      const target = mapKey[key] || key;
 
-      setErrorPassword("Erreur réseau");
-    }
+      if (target === "email") setErrorEmail(val);
+      if (target === "password") setErrorPassword(val);
+    });
+
+    return;
+  }
+
+  //  Erreur réseau
+  setErrorPassword("Erreur réseau");
+  toast.error("Erreur réseau");
+}
+
   };
 
   return (
@@ -127,7 +153,7 @@ export default function LoginStudent() {
 
 
       <AuthTabs
-          role="student"
+          role={userRole || "student"}
           active="signin"
           tab1Label={t("login.signIn")}
           tab2Label={t("login.signUp")}
@@ -149,6 +175,7 @@ export default function LoginStudent() {
             <Input
               label={t("login.email")}
               value={email}
+              placeholder={t("login.email")}
               onChange={(e) => setEmail(e.target.value)}
               icon={<FaEnvelope />}
               error={errorEmail}
@@ -158,6 +185,7 @@ export default function LoginStudent() {
               label={t("login.password")}
               type={showPassword ? "text" : "password"}
               value={password}
+              placeholder={t("login.password")}
               onChange={(e) => setPassword(e.target.value)}
               icon={<FaLock />}
               error={errorPassword}
@@ -174,7 +202,7 @@ export default function LoginStudent() {
 
             <p className="text-sm text-center mt-4">
               {t("login.noAccount")}{" "}
-              <a href="StudentSignUp" className="text-muted hover:underline">
+              <a href="/signup/student" className="text-muted hover:underline">
                 {t("login.signUp")}
               </a>
             </p>
