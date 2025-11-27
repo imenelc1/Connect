@@ -34,6 +34,12 @@ export default function AppRoutes() {
         {/* ALL QUIZZES */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
 
+        {/* ALL EXERCISES */}
+        <Route path="/all-exercises" element={<AllExercisesPage />} />
+
+        {/* ALL QUIZZES */}
+        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
+
         {/*new exercise*/}
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />

@@ -16,9 +16,10 @@ export default function HeaderLinks() {
 
   // Permet de changer la langue (FR ↔ EN)
   const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-  };
+  const newLang = i18n.language === "fr" ? "en" : "fr";
+  i18n.changeLanguage(newLang);
+  localStorage.setItem("lang", newLang); // <-- persistance
+};
 
   // Liens du header
   const links = [

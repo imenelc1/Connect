@@ -68,25 +68,23 @@ export default function Navbar() {
 
   const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
 
-  // 🔥 Course pages matched
+  // 🔥 logique pour activer le bouton Courses dans toutes les pages liées aux cours
   const courseRoutes = [
-    "/CoursInfo",
-    "/Course",
-    "/EditCourse",
-    "/CreateCourse",
-  ];
-  const isCourseRelated = courseRoutes.some((path) =>
-    location.pathname.startsWith(path)
-  );
+    "/all-courses",
+  "/CoursInfo",
 
-  // 🔥 Exercise pages matched
-  const exerciseRoutes = [
-    "/new-exercise",
-    "/exerciseInfo",
-    "/exercise",
-    "/edit-exercise",
   ];
-  const isExerciseRelated = exerciseRoutes.some((path) =>
+  const exerciseRoutes = [
+  "/all-exercises",
+  "/new-exercise",
+  "/exercise-preview",
+];
+
+const quizRoutes = [
+  "/all-quizzes",
+
+];
+  const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
 
@@ -133,15 +131,17 @@ export default function Navbar() {
         {links.map((item, i) => {
           let forceActive = false;
 
-          // ⭐ COURSE BUTTON
-          if (item.href === "/all-courses" && isCourseRelated) {
-            forceActive = true;
-          }
+          // ⭐ si c'est le bouton cours, on force active dans toutes les pages courses
+         if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
+   if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
 
-          // ⭐ EXERCISE BUTTON
-          if (item.href === "/all-exercises" && isExerciseRelated) {
-            forceActive = true;
-          }
+  if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
 
           return (
             <NavLink
@@ -158,7 +158,7 @@ export default function Navbar() {
               <item.icon size={17} strokeWidth={1.5} />
               {!collapsed && <span className="ml-2">{item.label}</span>}
             </NavLink>
-          )
+          );
         })}
       </nav>
 
@@ -180,7 +180,9 @@ export default function Navbar() {
           to="/"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive ? "bg-grad-1 text-white" : "bg-card text-red-500 hover:bg-red-100"
+              isActive
+                ? "bg-grad-1 text-white"
+                : "bg-card text-red-500 hover:bg-red-100"
             }`
           }
         >

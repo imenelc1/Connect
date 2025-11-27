@@ -96,9 +96,11 @@ export default function AllQuizzesPage() {
 
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
-            showCompletedFilter={userRole === "etudiant"}
-            onFilterChange={setFilterLevel}
-            activeFilter={filterLevel}
+            type="quizzes"
+  userRole={userRole}
+  onFilterChange={setFilterLevel}   // ✔️ correction
+  activeFilter={filterLevel}        // ✔️ correction
+  showCompletedFilter={userRole === "etudiant"}
           />
 
           {userRole === "enseignant" && (
@@ -115,10 +117,7 @@ export default function AllQuizzesPage() {
             <ContentCard
               key={idx}
               className={gradientMap[quiz.level]}
-              course={{
-                ...quiz,
-                level: t(`levels.${quiz.level}`),
-              }}
+              course={quiz}
               role={userRole}
               showProgress={userRole === "etudiant"}
             />

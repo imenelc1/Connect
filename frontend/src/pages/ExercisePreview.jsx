@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import SideNavbar from "../components/common/Navbar";
 import { PlayCircle, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
-import { useContext } from "react";
+import Topbar from "../components/common/TopBar";
+import { FileText, Activity } from "lucide-react";
+
 
 export default function ExercisePreview() {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation("exercisePreview");
 
-  // Fonction pour changer de langue
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
     i18n.changeLanguage(newLang);
@@ -17,9 +20,14 @@ export default function ExercisePreview() {
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
+  const exerciseSteps = [
+  { label: t("exercises.info"), icon: FileText, route: "/new-exercise" },
+  { label: t("exercises.preview"), icon: Activity, route: "/exercise-preview" }
+];
+
   return (
     <div className="flex w-full min-h-screen bg-surface">
-
+      
       {/* SIDEBAR */}
       <SideNavbar
         links={[]}
@@ -29,43 +37,28 @@ export default function ExercisePreview() {
       />
 
       {/* MAIN CONTENT */}
-      < div className="flex-1 flex flex-col p-6 ml-72">
-        <ThemeButton onClick={toggleDarkMode} />
-
-        {/* TOP BAR */}
-        <div className="w-full bg-background border-b border-gray-200 px-10 py-3 mb-10 
-                        flex items-center justify-between shadow-sm">
-
-          {/* LEFT : CURRICULUM */}
-          <div className="flex items-center gap-1 ">
-            <PlayCircle size={16} className="text-nav" />
-            <span className="font-medium text-nav">
-              {t("topbar.curriculum")}
-            </span>
-          </div>
-
-          {/* RIGHT : Publish + Lang Switch */}
-          <div className="flex items-center gap-4">
-
-            <div className="flex items-center gap-1 cursor-pointer">
-              <PlayCircle size={16} className="text-nav" />
-              <span className=" font-medium text-nav">
-                {t("topbar.publish")}
-              </span>
-            </div>
-
-            {/* SWITCH LANGUE */}
-            <button 
-              onClick={toggleLanguage} 
-              className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg text-sm">
+      <div className="flex-1 flex flex-col p-6 ml-72">
+        
+          <div>
+             <ThemeButton onClick={toggleDarkMode} />
+         <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg text-sm"
+            >
               <Globe size={16} /> {i18n.language.toUpperCase()}
             </button>
           </div>
+      
+        {/* TOP BAR */}
+        <Topbar steps={exerciseSteps} activeStep={2} className="flex justify-between" />
 
+        {/* LANGUAGE SWITCHER */}
+        <div className="w-full flex justify-end mb-4">
+  
         </div>
 
         {/* TITLE */}
-        <h2 className="text-2xl font-semibold text-textc mb-6 flex items-center gap-2">
+        <h2 className="text-2xl font-semibold text-textc mb-6 flex items-center gap-2 mt-10">
           <span className="text-sky-600 text-2xl font-bold cursor-pointer">
             {t("title.back")}
           </span>
@@ -76,8 +69,7 @@ export default function ExercisePreview() {
 
         {/* EXERCISE CONTENT */}
         <div className="w-full flex justify-center">
-          <div className="w-full max-w-4xl bg-grad-3
-                          border text-nav rounded-3xl shadow-sm p-8">
+          <div className="w-full max-w-4xl bg-grad-3 border text-nav rounded-3xl shadow-sm p-8">
 
             <h3 className="text-md font-bold text-nav mb-4">
               Exercice 1: Somme de deux nombres
@@ -104,8 +96,7 @@ export default function ExercisePreview() {
 
         {/* FOOTER BUTTONS */}
         <div className="flex justify-between items-center mt-10 max-w-xl w-full mx-auto">
-
-          <button className="px-6 py-2 bg-[#DDE7FF] text-gray-700 rounded-xl text-sm shadow">
+          <button className="px-6 py-2 bg-[#DDE7FF] text-gray-700 rounded-xl text-sm shadow" onClick={() => navigate("/new-exercise")}>
             {t("buttons.previous")}
           </button>
 
@@ -118,8 +109,8 @@ export default function ExercisePreview() {
               {t("buttons.publish")}
             </button>
           </div>
-
         </div>
+
       </div>
     </div>
   );

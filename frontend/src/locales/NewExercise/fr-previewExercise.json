@@ -11,5 +11,9 @@
     "previous": "Précédent",
     "save_draft": "Enregistrer comme brouillon",
     "publish": "Publier l'exercice"
+  },
+    "exercises": {
+    "info": "Informations sur l'exercice",
+    "preview": "Aperçu de l'exercice"
   }
 }
