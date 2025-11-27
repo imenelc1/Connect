@@ -1,0 +1,15 @@
+{
+  "topbar": {
+    "curriculum": "Curriculum",
+    "publish": "Publier"
+  },
+  "title": {
+    "preview": "Aperçu de l'exercice",
+    "back": "<"
+  },
+  "buttons": {
+    "previous": "Précédent",
+    "save_draft": "Enregistrer comme brouillon",
+    "publish": "Publier l'exercice"
+  }
+}

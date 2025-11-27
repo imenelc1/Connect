@@ -1,0 +1,10 @@
+{
+  "quizzesTitle": "Quizzes",
+  "createQuizBtn": "Create a new Quiz",
+  "searchPlaceholder": "Search...",
+  "levels": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
+  }
+}

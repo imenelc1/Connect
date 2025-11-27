@@ -1,51 +1,84 @@
-import React from 'react';
+import React, { useContext } from "react";
+
+// Icônes provenant de la librairie lucide-react
 import { GraduationCap, UserRound } from "lucide-react";
-import Icon from '../components/common/Icon';
-import Logo from '../components/common/logo';
+
+// Composants personnalisés
+import IconeLogoComponent from '../components/common/IconeLogoComponent';
 import Button from '../components/common/Button';
-import Footer from '../components/layout/Footer';
-import "../styles/index.css";
+import LogoComponent from "../components/common/LogoComponent";
+import ThemeButton from "../components/common/ThemeButton";
+
+// Traduction (i18next)
+import { useTranslation } from "react-i18next";
+
+// Navigation entre routes (React Router)
 import { useNavigate } from "react-router-dom";
+
+// Thème global (dark/light mode)
+import ThemeContext from "../context/ThemeContext";
+
+// Styles globaux
+import "../styles/index.css";
+
 function Choice() {
-    const navigate = useNavigate();
-    return (
 
-   <div className="Choice flex flex-col h-screen bg-[radial-gradient(circle_at_center,_#bad7f0,_#ffffff)]">
+  // Hook pour naviguer vers d'autres pages
+  const navigate = useNavigate();
 
-    <header className="p-6">
-        <Logo className="w-20 h-30" />
-    </header>
+  // Hook de traduction
+  const { t } = useTranslation();
 
-    <main className="flex flex-col items-center justify-center flex-1 
-                    gap-8 text-center px-4">
-        
-        <Icon />
+  // Récupération de la fonction permettant de changer le thème
+  const { toggleDarkMode } = useContext(ThemeContext);
 
-        <p className="font-poppins text-xl sm:text-2xl md:text-3xl text-[#a5a5a5]">
-            To Personalize your experience, please indicate <br /> your profile.
+  return (
+    <div className="Choice flex flex-col h-screen bg-grad-5">
+
+      {/* Header : logo + bouton thème */}
+      <div className="flex flex-row gap-[1000px]">
+        <header className="p-2">
+          <LogoComponent />
+        </header>
+
+        {/* Bouton pour activer/désactiver le dark mode */}
+        <ThemeButton onClick={toggleDarkMode} />
+      </div>
+
+      {/* Contenu principal */}
+      <main className="flex flex-col items-center justify-center flex-1 gap-16 text-center px-4">
+
+        {/* Logo animé / icône principale */}
+        <IconeLogoComponent size="w-28 h-28" />
+
+        {/* Texte descriptif venant du fichier de traduction */}
+        <p className="font-poppins text-l sm:text-xl md:text-2xl text-grayc">
+          {t("choice.title")} <br />
+          {t("choice.title_contd")}
         </p>
 
+        {/* Boutons de choix (instructeur ou étudiant) */}
         <div className="flex gap-10 md:gap-16">
-            <Button  onClick={() => navigate("/signup/instructor")}  className="shadow-md rounded-3xl font-bold font-poppins bg-gradient-to-r from-[#458fc2] to-[#2d6980]
-                    text-lg sm:text-xl md:text-2xl hover:opacity-90  text-white
-                    flex w-36 sm:w-48 md:w-56 items-center justify-center gap-3 px-10 py-4">
-                <UserRound size={24}/>
-                Instructor
-            </Button>
 
-            <Button  onClick={() => navigate("/signup/student")} className="shadow-md rounded-3xl font-bold font-poppins bg-gradient-to-r from-[#458fc2] to-[#2d6980]
-                    text-lg sm:text-xl md:text-2xl hover:opacity-90  text-white
-                    flex w-36 sm:w-48 md:w-56 items-center justify-center gap-3 px-10 py-4">
-                <GraduationCap size={24}/>
-                Student
-            </Button>
+          {/* Choix : Instructeur */}
+          <Button
+            onClick={() => navigate("/signup/instructor")}
+            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-6 py-4"
+          >
+            <UserRound /> {t("choice.instructor")}
+          </Button>
+
+          {/* Choix : Étudiant */}
+          <Button
+            onClick={() => navigate("/signup/student")}
+            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-6 py-4"
+          >
+            <GraduationCap /> {t("choice.student")}
+          </Button>
         </div>
-    </main>
-
-    <Footer />
-</div>
-
-    );
+      </main>
+    </div>
+  );
 }
 
 export default Choice;

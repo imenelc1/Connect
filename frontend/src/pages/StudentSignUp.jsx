@@ -1,35 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import {
+  FaUser, FaEnvelope, FaLock, FaPaperPlane,
+  FaEye, FaEyeSlash, FaCalendarAlt, FaIdBadge,
+  FaLayerGroup, FaCalendarCheck
+} from "react-icons/fa";
+import { FiGlobe } from "react-icons/fi";
+
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import AuthTabs from "../components/common/AuthTabs";
-import logo from "../assets/LogoLight.svg";
-import robot from "../assets/mascotte.svg";
-import googleIcon from "../assets/google-icon.svg";
+import LogoComponent from "../components/common/LogoComponent";
+import Select from "../components/common/Select";
+import Mascotte from "../components/common/Mascotte";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
 import api from "../services/api";
-import {
-  FaUser, FaEnvelope, FaLock, FaCalendarAlt, FaIdBadge,
-  FaGraduationCap, FaPaperPlane, FaEye, FaEyeSlash
-} from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import ThemeContext from "../context/ThemeContext";
+import ThemeButton from "../components/common/ThemeButton";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const Select = ({ label, icon, name, value, onChange, options }) => (
-  <div className="flex flex-col mb-4">
-    <label className="mb-1 font-semibold text-gray-700">{label}</label>
-    <div className="flex items-center border border-gray-300 rounded-md px-3 py-2 bg-white">
-      {icon && <span className="mr-2 text-gray-400">{icon}</span>}
-      <select
-        name={name}
-        value={value}
-        onChange={onChange}
-        className="flex-1 outline-none bg-transparent cursor-pointer font-inherit appearance-none"
-      >
-        <option value="">Select an option</option>
-        {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-      </select>
-    </div>
-  </div>
-);
 
-const StudentSignup = () => {
+
+export default function StudentSignUp() {
+
+  const { t, i18n } = useTranslation("signup");
+  const { toggleDarkMode } = useContext(ThemeContext);
+const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     nickname: "",
     fullname: "",
@@ -42,22 +40,82 @@ const StudentSignup = () => {
     year: ""
   });
 
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [message, setMessage] = useState("");
 
-  const handleChange = e =>
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = e => {
+    const { name, value } = e.target;
 
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: "" }));
+    if (name === "nickname" && /\d/.test(value))
+  setErrors(prev => ({ ...prev, nickname: "Le nom ne peut pas contenir de chiffres" }));
+
+if (name === "fullname" && /\d/.test(value))
+  setErrors(prev => ({ ...prev, fullname: "Le prénom ne peut pas contenir de chiffres" }));
+
+
+    if (name === "password" && value.length < 8)
+      setErrors(prev => ({ ...prev, password: "Minimum 8 caractères" }));
+
+    if (name === "confirm" && value !== formData.password)
+      setErrors(prev => ({ ...prev, confirm: "Les mots de passe ne correspondent pas" }));
+  };
+
+  // VALIDATION
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.nickname) newErrors.nickname = "Champ obligatoire";
+    if (!formData.fullname) newErrors.fullname = "Champ obligatoire";
+    if (/\d/.test(formData.nickname))
+  newErrors.nickname = "Le nom ne peut pas contenir de chiffres";
+
+if (/\d/.test(formData.fullname))
+  newErrors.fullname = "Le prénom ne peut pas contenir de chiffres";
+
+
+    if (!formData.email)
+      newErrors.email = "Email obligatoire";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      newErrors.email = "Format d'email invalide";
+
+    if (!formData.password) newErrors.password = "Mot de passe obligatoire";
+    if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères";
+
+    if (formData.confirm !== formData.password)
+      newErrors.confirm = "Mot de passe non identique";
+
+    if (!formData.dob) newErrors.dob = "Champ obligatoire";
+    if (!formData.regnumber) newErrors.regnumber = "Champ obligatoire";
+    if (!formData.field) newErrors.field = "Champ obligatoire";
+    if (!formData.year) newErrors.year = "Champ obligatoire";
+
+    if (formData.regnumber && !/^\d{12}$/.test(formData.regnumber))
+      newErrors.regnumber = "Matricule invalide (12 chiffres)";
+
+    const birthDate = new Date(formData.dob);
+    const minDate = new Date();
+    minDate.setFullYear(minDate.getFullYear() - 16);
+    if (birthDate > minDate)
+      newErrors.dob = "Vous devez avoir au moins 16 ans.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // SUBMIT
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirm) {
-      setMessage("Les mots de passe ne correspondent pas !");
+    console.log("FORM SUBMITTED"); // Debug
+
+    if (!validateForm()) {
+      toast.error("Veuillez corriger les erreurs.");
       return;
     }
 
-    // Mapping pour Django
     const payload = {
       nom: formData.nickname,
       prenom: formData.fullname,
@@ -70,188 +128,171 @@ const StudentSignup = () => {
       role: "etudiant",
     };
 
+    try {
+      const res = await api.post("register/", payload);
 
-      try {
-      const res = await api.post("register/", payload); // 🔥 API Axios
-
-      setMessage("Inscription réussie ! ");
-
-      setTimeout(() => {
-        window.location.href = "/login-etudiant";
-      }, 1500);
+     localStorage.setItem("user", JSON.stringify(res.data));
+toast.success("Inscription réussie !");
+navigate("/all-courses");
 
     } catch (err) {
-      console.log("Erreur API:", err);
+      const backend = err.response?.data;
 
-      // 🔥 Protection contre erreur réseau
-      setMessage(
-        err.response?.data?.error ||
-        "Erreur réseau, vérifie que Django tourne bien"
-      );
+      if (backend && typeof backend === "object") {
+        const newErrors = {};
+
+        Object.keys(backend).forEach(key => {
+          const firstError = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
+
+          const mapKey = {
+            adresse_email: "email",
+            mot_de_passe: "password",
+            date_naissance: "dob",
+            matricule: "regnumber",
+            specialite: "field",
+            annee_etude: "year",
+            nom: "nickname",
+            prenom: "fullname",
+          };
+
+          const targetField = mapKey[key] || key;
+          newErrors[targetField] = firstError;
+        });
+
+        setErrors(newErrors);
+
+        toast.error("Erreur : " + Object.values(newErrors)[0]);
+        return;
+      }
+
+      toast.error("Erreur réseau");
     }
   };
 
+  const toggleLanguage = () =>
+    i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
 
-  return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center p-0"
-      style={{ backgroundColor: "#f5f9fd" }}
-    >
-      {/* Header */}
-      <div className="w-full flex items-center justify-between px-8 py-5 relative">
-        <div className="flex-shrink-0">
-          <img src={logo} alt="Connect Logo" className="w-28 md:w-36 h-auto" />
-        </div>
+   return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4 pt-12">
+       {/* Header */}
+  <div className="flex w-full mb-4 items-center justify-between px-4 md:-mt-10">
 
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-           <AuthTabs role="student" active="signup" />
-        </div>
+    {/* Logo normal (grand) — visible seulement md+ */}
+    <div className="hidden md:block">
+      <LogoComponent className="-mt-10 ml-20" />
+    </div>
 
-        <div className="w-32"></div>
-      </div>
+    {/* Petit logo — visible seulement sur mobile */}
+    <div className="block md:hidden">
+      <LogoIconeComponent className="w-8 h-8 -ml-1" />
+    </div>
 
-      {/* Formulaire + mascotte */}
-      <div
-        className="max-w-6xl w-full bg-white rounded-2xl shadow-2xl flex overflow-hidden"
-        style={{ boxShadow: "0 6px 48px 0 rgba(52,144,220,.12)" }}
-      >
+    {/* Actions */}
+    <div className="flex items-center gap-4">
+      <ThemeButton onClick={toggleDarkMode} />
+      <FiGlobe
+        size={20}
+        title="Changer la langue"
+        onClick={toggleLanguage}
+        className="cursor-pointer"
+      />
+    </div>
+  </div>
 
+      <AuthTabs
+          role="student"
+          active="signup"
+          tab1Label={t("login.signIn")}
+          tab2Label={t("login.signUp")}
+          className="mt-20 sm:mt-0"
+      />
+
+      <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card rounded-3xl shadow-lg overflow-hidden relative mt-2">
         {/* Formulaire */}
-        <div className="flex-1 p-10 bg-white">
-          <h2 className="text-2xl font-semibold text-slate-700 mb-6">
-            Welcome to <span className="text-sky-500">connect</span>
-          </h2>
+        <div className="w-full md:w-1/2 p-10">
+         <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
 
-          {message && (
-            <p className="text-center text-red-500 mb-4 font-semibold">
-              {message}
-            </p>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your nickname"
-                name="nickname"
-                value={formData.nickname}
-                onChange={handleChange}
-                placeholder="Nickname"
-                icon={<FaUser />}
-              />
-              <Input
-                label="Enter your name"
-                name="fullname"
-                value={formData.fullname}
-                onChange={handleChange}
-                placeholder="Full name"
-                icon={<FaUser />}
-              />
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
+              <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
             </div>
 
-            <Input
-              label="Enter your Email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email address"
-              icon={<FaEnvelope />}
-            />
+            <Input label={t("email")} name="email" type="email" value={formData.email} onChange={handleChange} placeholder={t("email")} icon={<FaEnvelope />} error={errors.email} />
 
-            <Input
-              label="Enter your Password"
-              name="password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              icon={<FaLock />}
-              rightIcon={
-                showPassword
-                  ? <FaEyeSlash onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" />
-                  : <FaEye onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" />
-              }
-            />
+            <Input label={t("password")} name="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} placeholder={t("password")} icon={<FaLock />} rightIcon={showPassword ? <FaEyeSlash onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" /> : <FaEye onClick={() => setShowPassword(!showPassword)} className="cursor-pointer" />} error={errors.password} />
 
-            <Input
-              label="Confirm your password"
-              name="confirm"
-              type={showConfirm ? "text" : "password"}
-              value={formData.confirm}
-              onChange={handleChange}
-              placeholder="Confirm password"
-              icon={<FaLock />}
-              rightIcon={
-                showConfirm
-                  ? <FaEyeSlash onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" />
-                  : <FaEye onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" />
-              }
-            />
+            <Input label={t("confirmPassword")} name="confirm" type={showConfirm ? "text" : "password"} value={formData.confirm} onChange={handleChange} placeholder={t("confirmPassword")} icon={<FaLock />} rightIcon={showConfirm ? <FaEyeSlash onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" /> : <FaEye onClick={() => setShowConfirm(!showConfirm)} className="cursor-pointer" />} error={errors.confirm} />
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your date of birth"
-                name="dob"
-                type="date"
-                value={formData.dob}
-                onChange={handleChange}
-                placeholder="Date of birth"
-                icon={<FaCalendarAlt />}
-              />
-              <Input
-                label="Enter your registration number"
-                name="regnumber"
-                value={formData.regnumber}
-                onChange={handleChange}
-                placeholder="Registration number"
-                icon={<FaIdBadge />}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input label={t("dob")} name="dob" type="date" value={formData.dob} onChange={handleChange} placeholder={t("dob")} icon={<FaCalendarAlt />} error={errors.dob} />
+              <Input label={t("regnumber")} name="regnumber" value={formData.regnumber} onChange={handleChange} placeholder={t("regnumber")} icon={<FaIdBadge />} error={errors.regnumber} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Enter your field of study"
-                name="field"
-                value={formData.field}
-                onChange={handleChange}
-                placeholder="Field of study"
-                icon={<FaGraduationCap />}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select
-                label="Enter your academic year"
-                name="year"
-                value={formData.year}
-                onChange={handleChange}
-                icon={<FaGraduationCap />}
-                options={["L1", "L2", "L3", "Ingenieur"]}
-              />
+                  label={t("field")}
+                  name="field"
+                  value={formData.field}
+                  onChange={handleChange}
+                  placeholder={t("selectField")}
+                  icon={<FaLayerGroup />}
+                  options={[
+                    { value: "math", label: "Mathematics" },
+                    { value: "cs", label: "Computer Science" },
+                    { value: "ST", label: "Science and Technology" },
+                  ]}
+                  error={errors.field}
+                />
+
+              <Select
+                  label={t("year")}
+                  name="year"
+                  value={formData.year}
+                  onChange={handleChange}
+                  placeholder={t("selectYear")}
+                  options={[
+                    { value: "L1", label: "L1" },
+                    { value: "L2", label: "L2" },
+                    { value: "L3", label: "L3" },
+                    { value: "Ing1", label: "Ing1" },
+                    { value: "Ing2", label: "Ing2" },
+                    { value: "Ing3", label: "Ing3" },
+                    { value: "Ing4", label: "Ing4" },
+                    { value: "M1", label: "M1" },
+                    { value: "M2", label: "M2" },
+                  ]}
+  error={errors.year}
+/>
             </div>
-
-            <div className="text-center text-gray-400">Or</div>
-
-            <Button variant="outline">
-              <img src={googleIcon} alt="google" className="inline-block w-5 h-5 mr-2" />
-              Continue with Google
-            </Button>
-
-            <Button type="submit" variant="primary">
-              <FaPaperPlane className="inline mr-2" /> Sign up
-            </Button>
-
-            <p className="text-sm text-gray-500 text-center">
-              Already have an account?{" "}
-              <a href="/login-etudiant" className="text-sky-500">Sign in</a>
+           
+            <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
+              <p className="text-sm text-grayc text-center mt-4">
+              {t("alreadyHaveAccount")}{" "}
+              <a href="/login/student" className="text-muted font-medium hover:underline">
+                {t("signIn")}
+              </a>
             </p>
+
+           
           </form>
         </div>
 
         {/* Mascotte */}
-        <div className="flex-1 flex items-center justify-center relative bg-white overflow-hidden">
-          <img src={robot} alt="robot" className="max-w-xs md:max-w-md drop-shadow-lg relative z-10" />
+        <div className="w-full md:w-1/2 relative flex items-center justify-center mt-8 md:mt-0 bg-card hidden lg:block">
+          <div className="absolute top-12 md:top-16 right-4 md:right-12 bg-white rounded-xl shadow p-6 md:p-9 w-max min-h-[80px] z-20 mt-12">
+            <p className="text-gray-700 font-medium text-sm">
+              {t("welcomeStudent")}
+            </p>
+            <div className="absolute -top-4 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow bg-white">
+              <span style={{ color: "#4F9DDE", fontSize: "20px", fontWeight: "bold" }}>&lt;&gt;</span>
+            </div>
+          </div>
+
+          <div className="absolute w-56 md:w-72 h-56 md:h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "45%", left: "50%", transform: "translate(-50%, -50%)" }} />
+          <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-40 mr-10 " />
         </div>
       </div>
     </div>
   );
-};
-
-export default StudentSignup;
+}

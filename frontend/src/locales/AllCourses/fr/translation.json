@@ -1,0 +1,10 @@
+{
+  "coursesTitle": "Cours",
+  "createCourseBtn": "Créer un nouveau cours",
+  "levels": {
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé"
+  },
+  "searchPlaceholder": "Rechercher un cours..."
+}
