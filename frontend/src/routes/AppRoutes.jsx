@@ -8,6 +8,7 @@ import LoginStudent from "../pages/LoginStudent";
 import AllCoursesPage from "../pages/AllCoursesPage";
 import NewExercise from "../pages/NewExercice";
 import ExercisePreview from "../pages/ExercisePreview";
+import CoursInfo from "../pages/CoursInfo";
 
 export default function AppRoutes() {
   return (
@@ -30,6 +31,9 @@ export default function AppRoutes() {
         {/*new exercise*/}
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
+
+        {/*new course*/}
+        <Route path="/CoursInfo" element={<CoursInfo />} />
 
 
 

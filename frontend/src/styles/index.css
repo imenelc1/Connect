@@ -17,12 +17,16 @@
   --color-yellow-code: 192 180 44;
   --color-card: 255 255 255;
   --color-nav:79 157 222;
+  --color-blue:79 157 222;
+  --color-purple:163 170 237;
+  --color-pink:187 104 200;
+
 
 
     /* Dégradés LIGHT */
   --grad-1: linear-gradient(135deg, #4F9DDE, #2F4F70);
-  --grad-2: linear-gradient(135deg, #4f9ede41, #FFFFFF);
-  --grad-3: linear-gradient(135deg, #a3aaed3f, #FFFFFF);
+  --grad-2: linear-gradient(135deg, #4f9ede12, #FFFFFF);
+  --grad-3: linear-gradient(135deg, #a3aaed40, #FFFFFF);
   --grad-4: linear-gradient(135deg, #ba68c815, #FFFFFF);
   --grad-5: radial-gradient(circle at center, #bad7f0, #ffffff);
 
@@ -44,11 +48,12 @@
   --color-icons-about: 195 153 210;
   --color-card: 47 79 112;
   --color-nav:255 255 255;
+  
 
   /* Dégradés DARK */
   --grad-dark-1: linear-gradient(135deg, #4F9DDE, #A3AAED);
-  --grad-dark-2: linear-gradient(135deg, #4f9edeac, rgba(47, 79, 112, 0.459));
-  --grad-dark-3: linear-gradient(135deg, #a3aaed6d, #2f4f7066);
+  --grad-dark-2: linear-gradient(135deg, #4f9ede8c, rgba(47, 79, 112, 0.459));
+  --grad-dark-3: linear-gradient(135deg, #a3aaed72, #2f4f7066);
   --grad-dark-4: linear-gradient(135deg, #ba68c878, #2f4f70);
 }
 
@@ -81,6 +86,7 @@
 .dark .bg-grad-5 {
   background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
 }
+
 
 /* Fix autofill bleu */
 input:-webkit-autofill,

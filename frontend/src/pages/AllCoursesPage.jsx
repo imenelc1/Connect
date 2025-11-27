@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/common/Navbar";
 import { Plus,Bell } from "lucide-react";
-import CourseCard from "../components/common/CourseCard";
+import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
-import CourseFilters from "../components/common/CourseFilters";
-import CourseSearchBar from "../components/common/CourseSearchBar";
+import ContentFilters from "../components/common/ContentFilters";
+import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
 
@@ -91,12 +91,12 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-<UserCircle initials={initials} />
-<div
-  className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
-             text-gray-700 shadow-lg flex items-center justify-center 
-             cursor-pointer hover:bg-gray-100 transition z-50"
->
+        <UserCircle initials={initials} />
+        <div
+          className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
+                    text-gray-700 shadow-lg flex items-center justify-center 
+                    cursor-pointer hover:bg-gray-100 transition z-50"
+        >
   <ThemeButton onClick={toggleDarkMode} />
   <Bell size={22} strokeWidth={1.8} />
 </div>
@@ -112,11 +112,11 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
 
       </div>
         {/* Search */}
-        <CourseSearchBar />
+        <ContentSearchBar />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
-        <CourseFilters
+        <ContentFilters
           showCompletedFilter={userRole === "etudiant"}
           onFilterChange={setFilterLevel}
           activeFilter={filterLevel}
@@ -126,7 +126,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         {userRole === "enseignant" && (
           <Button
             variant="courseStart"
-            className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6"
+            className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
           >
             <Plus size={18} />
             {t("createCourseBtn")}
@@ -138,7 +138,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
         {filteredCourses.map((course, idx) => (
-          <CourseCard
+          <ContentCard
             key={idx}
             className={gradientMap[course.level] ?? "bg-grad-1"}
             course={{

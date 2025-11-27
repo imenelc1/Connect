@@ -2,8 +2,13 @@ import React from "react";
 import LogoComponent from "./LogoComponent";
 import Button from "./Button";
 import HeaderLinks from "./HeaderLinks";
+import { useTranslation } from "react-i18next";
+
+
 
 export default function Header() {
+  const { t } = useTranslation("acceuil");
+  
   return (
     // Barre de navigation principale
     <nav className="flex items-center justify-between sm:px-6 lg:px-12 py-2 w-full">
@@ -16,7 +21,7 @@ export default function Header() {
         <HeaderLinks />
 
         {/* Bouton d’appel à l’action */}
-        <Button text="Create Account" variant="ca" />
+        <Button text={t("acceuil.create_account")} variant="ca" />
       </div>
     </nav>
   );

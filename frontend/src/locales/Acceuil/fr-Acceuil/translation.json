@@ -10,9 +10,10 @@
    
     "title_part4": "le C",
     "title_part5": "et l'algorithmique",
-        "p_heroS":"Fournir aux étudiants et enseignants les outils pour apprendre, enseigner et collaborer en C",
-        "button_start": "Commencer",
-        "button_work":"comment ça marche",
+    "p_heroS":"Fournir aux étudiants et enseignants les outils pour apprendre, enseigner et collaborer en C",
+    "button_start": "Commencer",
+    "button_work":"comment ça marche",
+    "create_account":"Créer un compte",
 
 
 "aboutTitle": "À propos de CONNECT",

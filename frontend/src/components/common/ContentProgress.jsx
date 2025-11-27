@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function CourseProgress({ value = 0 }) {
+export default function ContentProgress({ value = 0 }) {
   return (
     <div className="mt-4 w-full">
       <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">

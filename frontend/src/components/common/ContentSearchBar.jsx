@@ -1,4 +1,4 @@
-export default function CourseSearchBar() {
+export default function ContentSearchBar() {
   return (
     <div className="flex justify-center items-center gap-4 my-6">
       

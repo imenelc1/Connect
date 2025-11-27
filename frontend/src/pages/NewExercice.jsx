@@ -4,6 +4,8 @@ import { Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
+import Select from "../components/common/Select";
+import Input from "../components/common/Input";
 
 export default function NewExercise() {
   const { t, i18n } = useTranslation("newExercise");
@@ -68,15 +70,15 @@ export default function NewExercise() {
           <label className="block text-textc font-semibold mb-2">
             {t("form.title_label")}
           </label>
-          <input
+          <Input
             type="text"
             name="title"
             placeholder={t("form.title_placeholder")}
             value={formData.title}
             onChange={handleChange}
             className="w-full rounded-full border border-grayc
-                       px-5 py-3 bg-grad-3 shadow-sm focus:outline-none
-                       focus:ring-2 focus:ring-primary mb-6"
+                       px-5 py-3 shadow-sm focus:outline-none
+                       focus:ring-2 focus:ring-primary mb-6 bg-secondary/10"
           />
 
           {/* STATEMENT */}
@@ -90,8 +92,8 @@ export default function NewExercise() {
             onChange={handleChange}
             rows={6}
             className="w-full rounded-3xl border border-grayc
-                       px-5 py-3 bg-grad-3 shadow-sm focus:outline-none
-                       focus:ring-2 focus:ring-primary mb-10 resize-none"
+                       px-5 py-3 shadow-sm focus:outline-none
+                       focus:ring-2 focus:ring-primary mb-10 resize-none shadow-sm text-black bg-secondary/10"
           />
 
           {/* GRID */}
@@ -102,19 +104,20 @@ export default function NewExercise() {
               <label className="block text-textc font-semibold mb-2">
                 {t("form.category_label")}
               </label>
-              <select
+              <Select 
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
                 className="w-full rounded-full border border-grayc
                            px-5 py-3 bg-background shadow-sm focus:outline-none
-                           focus:ring-2 focus:ring-primary"
-              >
-                <option value="">{t("select.placeholder")}</option>
-                <option value="day">{t("select.day")}</option>
-                <option value="week">{t("select.week")}</option>
-                <option value="month">{t("select.month")}</option>
-              </select>
+                           focus:ring-2 focus:ring-primary" options={
+                [
+                  { value: "", label: t("select.placeholder") },
+                  { value: "day", label: t("select.day") },
+                  { value: "week", label: t("select.week") },
+                  { value: "month", label: t("select.month") },
+                ]
+              } />
             </div>
 
             {/* DURATION */}
@@ -122,19 +125,20 @@ export default function NewExercise() {
               <label className="block text-textc font-semibold mb-2">
                 {t("form.duration_label")}
               </label>
-              <select
+              <Select
                 name="duration"
                 value={formData.duration}
                 onChange={handleChange}
                 className="w-full rounded-full border border-grayc
                            px-5 py-3 bg-background shadow-sm focus:outline-none
                            focus:ring-2 focus:ring-primary"
-              >
-                <option value="">{t("select.placeholder")}</option>
-                <option value="day">{t("select.day")}</option>
-                <option value="week">{t("select.week")}</option>
-                <option value="month">{t("select.month")}</option>
-              </select>
+                options={[
+                  { value: "", label: t("select.placeholder") },
+                  { value: "day", label: t("select.day") },
+                  { value: "week", label: t("select.week") },
+                  { value: "month", label: t("select.month") },
+                ]}
+              />
             </div>
 
             {/* LEVEL */}
@@ -142,19 +146,20 @@ export default function NewExercise() {
               <label className="block text-textc font-semibold mb-2">
                 {t("form.level_label")}
               </label>
-              <select
+              <Select
                 name="level"
                 value={formData.level}
                 onChange={handleChange}
                 className="w-full rounded-full border border-grayc
                            px-5 py-3 bg-background shadow-sm focus:outline-none
                            focus:ring-2 focus:ring-primary"
-              >
-                <option value="">{t("select.placeholder")}</option>
-                <option value="beginner">{t("select.beginner")}</option>
-                <option value="intermediate">{t("select.intermediate")}</option>
-                <option value="advanced">{t("select.advanced")}</option>
-              </select>
+                options={[
+                  { value: "", label: t("select.placeholder") },
+                  { value: "beginner", label: t("select.beginner") },
+                  { value: "intermediate", label: t("select.intermediate") },
+                  { value: "advanced", label: t("select.advanced") },
+                ]}
+              />
             </div>
           </div>
 

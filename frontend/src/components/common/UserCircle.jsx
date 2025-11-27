@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Sun, Moon, Globe } from "lucide-react";
 
 export default function UserCircle({ initials, onToggleTheme, onChangeLang }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Fermer quand on clique en dehors
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -16,48 +16,48 @@ export default function UserCircle({ initials, onToggleTheme, onChangeLang }) {
   }, []);
 
   return (
-    <div ref={menuRef} className="fixed top-6 right-6 z-50">
-      {/* Circle button */}
+    <div ref={menuRef} className="fixed top-6 right-6 z-50 select-none">
+      {/* Circle */}
       <div
         onClick={() => setOpen(!open)}
-        className="w-12 h-12 rounded-full bg-grad-1 text-white 
-                   flex items-center justify-center font-semibold shadow-lg 
-                   cursor-pointer hover:opacity-90 transition"
+        className="w-12 h-12 rounded-full bg-grad-1 text-white flex items-center justify-center font-semibold shadow-lg cursor-pointer hover:opacity-90"
       >
         {initials}
       </div>
 
-      {/* Dropdown menu */}
-      {open && (
-        <div
-          className="mt-3 w-48 bg-white dark:bg-gray-800 shadow-xl rounded-xl p-2 border
-                     animate-[fadeIn_0.15s_ease-out]"
-        >
+      {/* Dropdown */}
+{open && (
+  <div
+    className="absolute top-14 right-0 w-60 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-2xl 
+               rounded-2xl p-3 border border-white/30 dark:border-gray-700/40 
+               animate-[fadeIn_0.15s_ease-out]"
+  >
+          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 mb-2">Paramètres</h3>
+
+          {/* Theme */}
           <button
             onClick={onToggleTheme}
-            className="w-full flex items-center px-3 py-2 rounded-lg 
-                       hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-gray-200/60 dark:hover:bg-gray-700/50 transition"
           >
-            Changer thème
+            <span className="flex items-center gap-2"><Sun size={16} /><span>Changer le thème</span></span>
+            <Moon size={16} />
           </button>
 
+          {/* FR */}
           <button
             onClick={() => onChangeLang("fr")}
-            className="w-full flex items-center px-3 py-2 rounded-lg 
-                       hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-gray-200/60 dark:hover:bg-gray-700/50 transition"
           >
-            Langue : Français
+            <span className="flex items-center gap-2"><Globe size={16} /> Français</span>
           </button>
 
+          {/* EN */}
           <button
             onClick={() => onChangeLang("en")}
-            className="w-full flex items-center px-3 py-2 rounded-lg 
-                       hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-gray-200/60 dark:hover:bg-gray-700/50 transition"
           >
-            Langue : English
+            <span className="flex items-center gap-2"><Globe size={16} /> English</span>
           </button>
-
-          {/* Tu peux ajouter autant d’options que tu veux */}
         </div>
       )}
     </div>

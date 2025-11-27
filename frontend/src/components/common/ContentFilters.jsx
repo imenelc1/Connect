@@ -1,4 +1,4 @@
-export default function CourseFilters({ showCompletedFilter, onFilterChange, activeFilter }) {
+export default function ContentFilters({ showCompletedFilter, onFilterChange, activeFilter }) {
   const levels = ["ALL", "beginner", "intermediate", "advanced"];
 
   return (

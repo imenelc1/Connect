@@ -22,6 +22,10 @@ module.exports = {
         icons_about: "rgb(var(--color-icons-about))",
         card: "rgb(var(--color-card) / <alpha-value>)",
         nav: "rgb(var(--color-nav) / <alpha-value>)",
+        blue: "rgb(var(--color-blue) / <alpha-value>)",
+        purple: "rgb(var(--color-purple) / <alpha-value>)",
+        pink: "rgb(var(--color-pink) / <alpha-value>)",
+
         
       },
       backgroundImage: {
