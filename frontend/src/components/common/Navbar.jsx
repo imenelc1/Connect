@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../../styles/index.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import IconeLogoComponent from "../common/IconeLogoComponent";
 import {
@@ -21,6 +21,7 @@ import {
 
 export default function Navbar() {
   const { t } = useTranslation("navbar");
+  const location = useLocation();
 
   const [collapsed, setCollapsed] = useState(false);
   const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
@@ -47,8 +48,8 @@ export default function Navbar() {
     { href: "/", label: t("home"), icon: Home },
     { href: "/dashboard", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
-    { href: "/exercises", label: t("exercises"), icon: Clipboard },
-    { href: "/quizzes", label: t("quizzes"), icon: FileText },
+    { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
+    { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
     { href: "/ranking", label: t("ranking"), icon: Award },
     { href: "/community", label: t("community"), icon: MessageCircle },
     { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
@@ -58,14 +59,36 @@ export default function Navbar() {
     { href: "/home", label: t("home"), icon: Home },
     { href: "/dashboard", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
-    { href: "/exercises", label: t("exercises"), icon: Clipboard },
-    { href: "/quizzes", label: t("quizzes"), icon: FileText },
+    { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
+    { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
     { href: "/mystudents", label: t("mystudents"), icon: Users },
     { href: "/mycommunity", label: t("mycommunity"), icon: MessageCircle },
     { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
   ];
 
   const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
+
+  // 🔥 Course pages matched
+  const courseRoutes = [
+    "/CoursInfo",
+    "/Course",
+    "/EditCourse",
+    "/CreateCourse",
+  ];
+  const isCourseRelated = courseRoutes.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
+  // 🔥 Exercise pages matched
+  const exerciseRoutes = [
+    "/new-exercise",
+    "/exerciseInfo",
+    "/exercise",
+    "/edit-exercise",
+  ];
+  const isExerciseRelated = exerciseRoutes.some((path) =>
+    location.pathname.startsWith(path)
+  );
 
   return (
     <aside
@@ -74,7 +97,7 @@ export default function Navbar() {
       ${collapsed ? "w-16" : "w-56"}`}
     >
 
-      {/* TOGGLE BUTTON */}
+      {/* Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className={`absolute top-4 
@@ -86,7 +109,7 @@ export default function Navbar() {
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
       </button>
 
-      {/* HEADER */}
+      {/* Header */}
       <div className="flex items-center justify-center p-2 bg-card rounded-2xl shadow-sm -mt-1 mb-1">
         <IconeLogoComponent
           size={collapsed ? "w-8 h-8 -ml-2" : "w-8 h-10"}
@@ -107,22 +130,36 @@ export default function Navbar() {
 
       {/* NAVIGATION */}
       <nav className="mt-2 flex flex-col gap-1 font-medium pb-3 border-b border-surface/60">
-        {links.map((item, i) => (
-          <NavLink
-            key={i}
-            to={item.href}
-            className={({ isActive }) =>
-              `flex items-center px-3 py-2 rounded-xl text-sm transition-all ${
-                isActive
-                  ? "bg-grad-1 border-primary text-white"
-                  : "bg-card border-surface text-nav hover:bg-grad-2"
-              }`
-            }
-          >
-            <item.icon size={17} strokeWidth={1.5} />
-            {!collapsed && <span className="ml-2">{item.label}</span>}
-          </NavLink>
-        ))}
+        {links.map((item, i) => {
+          let forceActive = false;
+
+          // ⭐ COURSE BUTTON
+          if (item.href === "/all-courses" && isCourseRelated) {
+            forceActive = true;
+          }
+
+          // ⭐ EXERCISE BUTTON
+          if (item.href === "/all-exercises" && isExerciseRelated) {
+            forceActive = true;
+          }
+
+          return (
+            <NavLink
+              key={i}
+              to={item.href}
+              className={({ isActive }) =>
+                `flex items-center px-3 py-2 rounded-xl text-sm transition-all ${
+                  isActive || forceActive
+                    ? "bg-grad-1 border-primary text-white"
+                    : "bg-card border-surface text-nav hover:bg-grad-2"
+                }`
+              }
+            >
+              <item.icon size={17} strokeWidth={1.5} />
+              {!collapsed && <span className="ml-2">{item.label}</span>}
+            </NavLink>
+          )
+        })}
       </nav>
 
       {/* SETTINGS + LOGOUT */}
@@ -131,9 +168,7 @@ export default function Navbar() {
           to="/settings"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive
-                ? "bg-grad-1 text-white"
-                : "bg-card text-muted hover:bg-grad-2"
+              isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
             }`
           }
         >
@@ -144,10 +179,8 @@ export default function Navbar() {
         <NavLink
           to="/"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-xl  text-sm transition-colors ${
-              isActive
-                ? "bg-grad-1 text-white"
-                : "bg-card text-red-500 hover:bg-red-100"
+            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+              isActive ? "bg-grad-1 text-white" : "bg-card text-red-500 hover:bg-red-100"
             }`
           }
         >

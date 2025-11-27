@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import SideNavbar from "../components/common/Navbar";
 import { Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -6,10 +7,13 @@ import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
 import Select from "../components/common/Select";
 import Input from "../components/common/Input";
-
+import Topbar from "../components/common/TopBar";
+import { FileText, Activity, CheckCircle } from "lucide-react";
 export default function NewExercise() {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation("newExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
+
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
@@ -28,6 +32,13 @@ export default function NewExercise() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+
+  const exerciseSteps = [
+  { label: t("exercises.info"), icon: FileText, route: "/NewExercise" },
+  { label: t("exercises.preview"), icon: Activity, route: "/exercise-preview" }
+];
+
+
   return (
     <div className="flex w-full min-h-screen bg-surface">
 
@@ -42,26 +53,23 @@ export default function NewExercise() {
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col ml-72 px-6 py-2">
 
-        <ThemeButton onClick={toggleDarkMode} />
-
-        {/* TOP BAR */}
-        <div className="w-full flex justify-between items-center mb-10">
-          <h1 className="text-3xl font-semibold text-textc">
-            {t("title.page")}
-          </h1>
-
+      <div>
+          <ThemeButton onClick={toggleDarkMode} />
           {/* SWITCH LANGUE */}
           <div
             onClick={toggleLanguage}
-            className="flex items-center gap-2 bg-surface hover:bg-muted
-                       rounded-lg px-3 py-1 cursor-pointer shadow"
+            className=""
           >
-            <Globe size={16} className="text-textc" />
-            <span className="text-textc font-medium text-sm">
-              {i18n.language.toUpperCase()}
-            </span>
+            <Globe size={16} />
           </div>
-        </div>
+      </div>
+        
+
+        {/* TOP BAR */}
+
+       <Topbar steps={exerciseSteps} activeStep={1} className="flex justify-between"/>
+
+    
 
         {/* FORM */}
         <div className="w-full">
@@ -170,7 +178,7 @@ export default function NewExercise() {
               {t("buttons.cancel")}
             </button>
 
-            <button className="px-6 py-2 bg-primary text-white rounded-xl shadow hover:bg-grad-1">
+            <button className="px-6 py-2 bg-primary text-white rounded-xl shadow hover:bg-grad-1" onClick={() => navigate("/exercise-preview")}>
               {t("buttons.save_next")}
             </button>
           </div>

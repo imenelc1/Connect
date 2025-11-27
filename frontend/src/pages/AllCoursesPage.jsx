@@ -7,9 +7,9 @@ import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
-
+import i18n from "../i18n";
 import { useContext } from "react";
-import ThemeButton from "../components/common/ThemeButton";
+import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
 const courses = [
   {
@@ -54,6 +54,7 @@ export default function AllCoursesPage() {
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allcourses");
 const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
   const filteredCourses =
@@ -91,13 +92,13 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-        <UserCircle initials={initials} />
-        <div
-          className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
-                    text-gray-700 shadow-lg flex items-center justify-center 
-                    cursor-pointer hover:bg-gray-100 transition z-50"
-        >
-  <ThemeButton onClick={toggleDarkMode} />
+<UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
+  onChangeLang={(lang) => i18n.changeLanguage(lang)} />
+<div
+  className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
+             text-gray-700 shadow-lg flex items-center justify-center 
+             cursor-pointer hover:bg-gray-100 transition z-50"
+>
   <Bell size={22} strokeWidth={1.8} />
 </div>
 
@@ -127,6 +128,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
           <Button
             variant="courseStart"
             className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
+            onClick={() => navigate("/CoursInfo")}
           >
             <Plus size={18} />
             {t("createCourseBtn")}

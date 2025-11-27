@@ -9,6 +9,8 @@ import AllCoursesPage from "../pages/AllCoursesPage";
 import NewExercise from "../pages/NewExercice";
 import ExercisePreview from "../pages/ExercisePreview";
 import CoursInfo from "../pages/CoursInfo";
+import AllExercisesPage from "../pages/AllExercisesPage";
+import AllQuizzesPage from "../pages/AllQuizzesPage";
 
 export default function AppRoutes() {
   return (
@@ -27,6 +29,12 @@ export default function AppRoutes() {
 
         {/* ALL COURSES */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
+
+        {/* ALL EXERCISES */}
+        <Route path="/all-exercises" element={<AllExercisesPage />} />
+
+        {/* ALL QUIZZES */}
+        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
 
         {/*new exercise*/}
         <Route path="/new-exercise" element={<NewExercise />} />

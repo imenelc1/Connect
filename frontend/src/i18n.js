@@ -18,10 +18,18 @@ import translationFRNewExercise from "./locales/NewExercise/fr-newExercise.json"
 import translationENNewExercise from "./locales/NewExercise/en-newExercise.json";
 import translationFRExercisePreview from "./locales/NewExercise/fr-previewExercise.json";
 import translationENExercisePreview from "./locales/NewExercise/en-previewExercise.json";
+import translationFRCourseInfo from "./locales/createCourse/fr/translation.json";
+import translationENCourseInfo from "./locales/createCourse/en/translation.json";
+import translationFRAllExercises from "./locales/AllExercises/fr/translation.json";
+import translationENAllExercises from "./locales/AllExercises/en/translation.json";
+import translationFRallQuizzes from "./locales/AllQuizzes/fr/translation.json";
+import translationENallQuizzes from "./locales/AllQuizzes/en/translation.json";
+import filtersFR from "./locales/filters/fr/translation.json";
+import filtersEN from "./locales/filters/en/translation.json"; 
   
 const resources = {
-  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses, newExercise: translationFRNewExercise, exercisePreview: translationFRExercisePreview },
-  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses, newExercise: translationENNewExercise, exercisePreview: translationENExercisePreview },
+  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses, newExercise: translationFRNewExercise, exercisePreview: translationFRExercisePreview, courseInfo: translationFRCourseInfo, allExercises: translationFRAllExercises, allQuizzes: translationFRallQuizzes, filters: filtersFR },
+  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses, newExercise: translationENNewExercise, exercisePreview: translationENExercisePreview, courseInfo: translationENCourseInfo, allExercises: translationENAllExercises, allQuizzes: translationENallQuizzes, filters: filtersEN },
 };
 
 i18n

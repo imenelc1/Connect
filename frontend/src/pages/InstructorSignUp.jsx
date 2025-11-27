@@ -32,15 +32,13 @@ const InstructorSignUp = () => {
     regnumber: "",
     rank: ""
   });
- const { t, i18n } = useTranslation("signup");
+  const { t, i18n } = useTranslation("signup");
   const { toggleDarkMode } = useContext(ThemeContext);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleChange = (e) =>
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-// --- MAPPING BACKEND → FRONTEND ---
+  // mapping backend -> frontend
   const fieldMap = {
     nom: "nickname",
     prenom: "fullname",
@@ -50,117 +48,185 @@ const InstructorSignUp = () => {
     matricule: "regnumber",
     grade: "rank",
   };
-  const handleSubmit = async (e) => {
-  e.preventDefault();
 
+  // regex utiles
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const matriculeRegex = /^\d{12}$/;
+  const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/; // lettres + accents + espaces + ' -
 
-  const newErrors = {};
+  // VALIDATION EN TEMPS RÉEL pendant la saisie
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  // --- PSEUDO ---
-  if (!formData.nickname.trim())
-    newErrors.nickname = "Pseudo obligatoire.";
+    // met à jour la valeur
+    setFormData(prev => ({ ...prev, [name]: value }));
 
-  // --- NOM COMPLET ---
-  if (!formData.fullname.trim())
-    newErrors.fullname = "Nom complet obligatoire.";
+    // reset de l'erreur pour ce champ
+    setErrors(prev => ({ ...prev, [name]: "" }));
 
-  // --- EMAIL ---
-  if (!formData.email.trim())
-    newErrors.email = "Email obligatoire.";
-  else if (!emailRegex.test(formData.email))
-    newErrors.email = "Format email invalide.";
+    // validations en direct par champ (pour UX immédiate)
+    if (name === "password") {
+      if (value.length < 8) {
+        setErrors(prev => ({ ...prev, password: "Minimum 8 caractères" }));
+      } else {
+        setErrors(prev => ({ ...prev, password: "" }));
+      }
 
-  // --- MOT DE PASSE ---
-  if (!formData.password.trim())
-    newErrors.password = "Mot de passe obligatoire.";
-  else if (formData.password.length < 8)
-    newErrors.password = "Minimum 8 caractères.";
+      // si confirm existant, vérifie cohérence
+      if (formData.confirm && formData.confirm !== value) {
+        setErrors(prev => ({ ...prev, confirm: "Les mots de passe ne correspondent pas" }));
+      } else if (formData.confirm && formData.confirm === value) {
+        setErrors(prev => ({ ...prev, confirm: "" }));
+      }
+    }
 
-  // --- CONFIRMATION ---
-  if (!formData.confirm.trim())
-    newErrors.confirm = "Confirmez votre mot de passe.";
-  else if (formData.confirm !== formData.password)
-    newErrors.confirm = "Les mots de passe ne correspondent pas.";
+    if (name === "confirm") {
+      if (value !== formData.password) {
+        setErrors(prev => ({ ...prev, confirm: "Les mots de passe ne correspondent pas" }));
+      } else {
+        setErrors(prev => ({ ...prev, confirm: "" }));
+      }
+    }
 
-  // --- DATE DE NAISSANCE ---
-  if (!formData.dob.trim()) {
-    newErrors.dob = "Date de naissance obligatoire.";
-  } else {
-    const birthDate = new Date(formData.dob);
-    const today = new Date();
-    const minDate = new Date();
-    minDate.setFullYear(today.getFullYear() - 25);
+    if ((name === "nickname" || name === "fullname") && /\d/.test(value)) {
+      setErrors(prev => ({ ...prev, [name]: "Ne doit pas contenir de chiffres" }));
+    } else if (name === "nickname" || name === "fullname") {
+      // clear only if it matches name rules
+      if (value.trim() === "") {
+        setErrors(prev => ({ ...prev, [name]: "" })); // keep required handled in final validate
+      } else if (!nameRegex.test(value)) {
+        setErrors(prev => ({ ...prev, [name]: "Caractères invalides (lettres seulement)" }));
+      } else {
+        setErrors(prev => ({ ...prev, [name]: "" }));
+      }
+    }
 
-    if (birthDate > minDate)
-      newErrors.dob = "Vous devez avoir au moins 25 ans.";
-  }
+    if (name === "email") {
+      if (value && !emailRegex.test(value)) {
+        setErrors(prev => ({ ...prev, email: "Format d'email invalide" }));
+      } else {
+        setErrors(prev => ({ ...prev, email: "" }));
+      }
+    }
 
-  // --- MATRICULE ---
-  if (!formData.regnumber.trim())
-    newErrors.regnumber = "Matricule obligatoire.";
-  else if (!matriculeRegex.test(formData.regnumber))
-    newErrors.regnumber = "Matricule invalide (12 chiffres attendus).";
+    if (name === "regnumber") {
+      if (value && !/^\d*$/.test(value)) {
+        setErrors(prev => ({ ...prev, regnumber: "Le matricule doit contenir uniquement des chiffres" }));
+      } else if (value && !matriculeRegex.test(value)) {
+        // si longueur différente de 12, message moins brutal
+        setErrors(prev => ({ ...prev, regnumber: "Matricule : 12 chiffres attendus" }));
+      } else {
+        setErrors(prev => ({ ...prev, regnumber: "" }));
+      }
+    }
 
-  // --- GRADE ---
-  if (!formData.rank.trim())
-    newErrors.rank = "Grade obligatoire.";
-
-  // STOP si erreurs
-  setErrors(newErrors);
-  if (Object.keys(newErrors).length > 0) return;
-
-  // --- PAYLOAD ---
-  const payload = {
-    nom: formData.nickname,
-    prenom: formData.fullname,
-    adresse_email: formData.email,
-    mot_de_passe: formData.password,
-    date_naissance: formData.dob,
-    matricule: formData.regnumber,
-    grade: formData.rank,
-    role: "enseignant"
+    if (name === "dob") {
+      if (value) {
+        const birthDate = new Date(value);
+        const minDate = new Date();
+        minDate.setFullYear(minDate.getFullYear() - 25); // 25 ans minimum
+        if (birthDate > minDate) {
+          setErrors(prev => ({ ...prev, dob: "Vous devez avoir au moins 25 ans." }));
+        } else {
+          setErrors(prev => ({ ...prev, dob: "" }));
+        }
+      } else {
+        setErrors(prev => ({ ...prev, dob: "" }));
+      }
+    }
   };
 
-  try {
-    const res = await api.post("register/", payload);
-    localStorage.setItem("user", JSON.stringify(res.data));
-    toast.success("Inscription réussie !");
+  // VALIDATION FINALE (utilisée au submit)
+  const validateForm = () => {
+    const newErrors = {};
 
-    setTimeout(() => {
-      window.location.href = "/all-courses";
-    }, 1500);
+    if (!formData.nickname.trim()) newErrors.nickname = "Pseudo obligatoire.";
+    else if (!nameRegex.test(formData.nickname)) newErrors.nickname = "Le pseudo ne doit contenir que des lettres.";
 
- } catch (err) {
+    if (!formData.fullname.trim()) newErrors.fullname = "Nom complet obligatoire.";
+    else if (!nameRegex.test(formData.fullname)) newErrors.fullname = "Le nom complet ne doit contenir que des lettres.";
+
+    if (!formData.email.trim()) newErrors.email = "Email obligatoire.";
+    else if (!emailRegex.test(formData.email)) newErrors.email = "Format email invalide.";
+
+    if (!formData.password.trim()) newErrors.password = "Mot de passe obligatoire.";
+    else if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères.";
+
+    if (formData.confirm !== formData.password) newErrors.confirm = "Mot de passe non identique";
+
+    if (!formData.dob) newErrors.dob = "Champ obligatoire";
+    else {
+      const birthDate = new Date(formData.dob);
+      const minDate = new Date();
+      minDate.setFullYear(minDate.getFullYear() - 25);
+      if (birthDate > minDate) newErrors.dob = "Vous devez avoir au moins 25 ans.";
+    }
+
+    if (!formData.regnumber) newErrors.regnumber = "Champ obligatoire";
+    else if (!matriculeRegex.test(formData.regnumber)) newErrors.regnumber = "Matricule invalide (12 chiffres)";
+
+    if (!formData.rank) newErrors.rank = "Grade obligatoire";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // SUBMIT
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      toast.error("Veuillez corriger les erreurs.");
+      return;
+    }
+
+    const payload = {
+      nom: formData.nickname,
+      prenom: formData.fullname,
+      adresse_email: formData.email,
+      mot_de_passe: formData.password,
+      date_naissance: formData.dob,
+      matricule: formData.regnumber,
+      grade: formData.rank,
+      role: "enseignant"
+    };
+
+    try {
+      const res = await api.post("register/", payload);
+      localStorage.setItem("user", JSON.stringify(res.data));
+      toast.success("Inscription réussie !");
+      // redirection
+      setTimeout(() => {
+        window.location.href = "/all-courses";
+      }, 1200);
+    } catch (err) {
       const apiErrors = err.response?.data;
 
       if (apiErrors) {
-        // Error globale : { "error": "..." }
         if (apiErrors.error) {
           toast.error(apiErrors.error);
           return;
         }
 
-        // Backend → Front errors
         const backendMappedErrors = {};
-
         Object.keys(apiErrors).forEach((key) => {
           const frontendKey = fieldMap[key] || key;
-          backendMappedErrors[frontendKey] = apiErrors[key][0];
+          // backend peut retourner array
+          const firstErr = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key];
+          backendMappedErrors[frontendKey] = firstErr;
         });
 
         setErrors((prev) => ({ ...prev, ...backendMappedErrors }));
 
-        // Toast avec toutes les erreurs
         toast.error(Object.values(backendMappedErrors).join("\n"));
         return;
       }
 
       toast.error("Erreur réseau. Vérifiez Django.");
     }
-};
- const toggleLanguage = () => {
+  };
+
+  const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
     i18n.changeLanguage(newLang);
   };
