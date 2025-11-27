@@ -9,6 +9,8 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
+import { useNavigate } from "react-router-dom";
+
 const exercises = [
   {
     title: "Exercice sur les Arbres Binaires",
@@ -42,6 +44,7 @@ export default function AllExercisesPage() {
   const { t } = useTranslation("allExercises");
 
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
   const filteredList =
@@ -80,7 +83,6 @@ export default function AllExercisesPage() {
       <UserCircle initials={initials} />
 
       <div className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white text-gray-700 shadow-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 transition z-50">
-        <ThemeButton onClick={toggleDarkMode} />
         <Bell size={22} strokeWidth={1.8} />
       </div>
 
@@ -102,7 +104,10 @@ export default function AllExercisesPage() {
           />
 
           {userRole === "enseignant" && (
-            <Button variant="courseStart" className="w-full sm:w-60">
+            <Button variant="courseStart" 
+            className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
+            onClick={() => navigate("/new-exercise")}
+            >
               <Plus size={18} />
               {t("createExerciseBtn")}
             </Button>

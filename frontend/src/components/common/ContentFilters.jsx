@@ -20,8 +20,8 @@ export default function ContentFilters({ showCompletedFilter, onFilterChange, ac
               onClick={() => onFilterChange(lvl)}
               className={
                 lvl === activeFilter
-                  ? "text-supp bg-white/20 px-3 py-1 rounded-full transition"
-                  : "text-grayc hover:text-supp transition px-3 py-1 rounded-full"
+                  ? "text-supp"
+                  : "text-grayc hover:text-supp transition "
               }
             >
               {lvl === "ALL" ? t("allLevels") : t(`levels.${lvl}`)}
@@ -47,7 +47,7 @@ export default function ContentFilters({ showCompletedFilter, onFilterChange, ac
           <select
             value={courseFilter}
             onChange={(e) => setCourseFilter(e.target.value)}
-            className="rounded-xl px-4 py-2 shadow bg-white border border-primary/30 text-primary font-medium cursor-pointer focus:ring-2 focus:ring-supp focus:outline-none transition"
+            className="rounded-xl px-4 py-2 shadow bg-white border border-primary/20 text-primary font-medium cursor-pointer focus:ring-2 focus:ring-supp focus:outline-none transition"
           >
             <option value="myCourses">{t("myCourses")}</option>
             <option value="allCourses">{t("allCourses")}</option>

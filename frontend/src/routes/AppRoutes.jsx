@@ -10,6 +10,8 @@ import NewExercise from "../pages/NewExercice";
 import ExercisePreview from "../pages/ExercisePreview";
 import AllExercisesPage from "../pages/AllExercisesPage";
 import AllQuizzesPage from "../pages/AllQuizzesPage";
+import CoursInfo from "../pages/CoursInfo";
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -35,6 +37,9 @@ export default function AppRoutes() {
         {/*new exercise*/}
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
+
+        {/*new course*/}
+        <Route path="/CoursInfo" element={<CoursInfo />} />
 
 
 

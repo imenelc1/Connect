@@ -49,6 +49,12 @@ const navigate = useNavigate();
 
     setFormData(prev => ({ ...prev, [name]: value }));
     setErrors(prev => ({ ...prev, [name]: "" }));
+    if (name === "nickname" && /\d/.test(value))
+  setErrors(prev => ({ ...prev, nickname: "Le nom ne peut pas contenir de chiffres" }));
+
+if (name === "fullname" && /\d/.test(value))
+  setErrors(prev => ({ ...prev, fullname: "Le prénom ne peut pas contenir de chiffres" }));
+
 
     if (name === "password" && value.length < 8)
       setErrors(prev => ({ ...prev, password: "Minimum 8 caractères" }));
@@ -63,6 +69,12 @@ const navigate = useNavigate();
 
     if (!formData.nickname) newErrors.nickname = "Champ obligatoire";
     if (!formData.fullname) newErrors.fullname = "Champ obligatoire";
+    if (/\d/.test(formData.nickname))
+  newErrors.nickname = "Le nom ne peut pas contenir de chiffres";
+
+if (/\d/.test(formData.fullname))
+  newErrors.fullname = "Le prénom ne peut pas contenir de chiffres";
+
 
     if (!formData.email)
       newErrors.email = "Email obligatoire";

@@ -102,7 +102,8 @@ export default function AllQuizzesPage() {
           />
 
           {userRole === "enseignant" && (
-            <Button variant="courseStart" className="w-full sm:w-60">
+            <Button variant="courseStart"
+             className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all">
               <Plus size={18} />
               {t("createQuizBtn")}
             </Button>
