@@ -1,43 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Navbar from "../components/common/Navbar";
-import { Plus,Bell } from "lucide-react";
+import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
 import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
-import { useTranslation } from "react-i18next";
-import UserCircle from "../components/common/UserCircle";
-import i18n from "../i18n";
-import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
-const courses = [
+import UserCircle from "../components/common/UserCircle";
+import { useTranslation } from "react-i18next";
+import ThemeButton from "../components/common/ThemeButton";
+import { useNavigate } from "react-router-dom";
+
+const exercises = [
   {
-    title: "Structures de Données",
-    description: "Explorez les arbres, graphes, tables de hachage et structures de données complexes.",
-    level: "beginner",
-    duration: "1h 30min",
-    author: "Dr. Cheikh Farid",
-    initials: "C.F",
-    isMine: true,
-  },
-  {
-    title: "Algorithmes Avancés",
-    description: "Optimisation, complexité, et techniques avancées pour résoudre des problèmes complexes.",
-    level: "advanced",
-    duration: "2h 15min",
-    author: "Dr. Alice Benali",
-    initials: "A.B",
-    isMine: false,
-  },
-  {
-    title: "Systèmes Informatiques",
-    description: "Architecture, compilation et fonctionnement interne d’un système moderne.",
+    title: "Exercice sur les Arbres Binaires",
+    description: "Résolvez des problèmes sur les arbres binaires, AVL, et parcours.",
     level: "intermediate",
-    duration: "2h 15min",
-    author: "Dr. Alice Benali",
-    initials: "A.B",
+    duration: "45 min",
+    author: "Dr. Farid",
+    initials: "F.D",
     isMine: true,
+  },
+  {
+    title: "Exercice Programmation Dynamique",
+    description: "Apprenez à formuler et résoudre des problèmes classiques de DP.",
+    level: "advanced",
+    duration: "1h 10 min",
+    author: "Dr. Benali",
+    initials: "B.A",
+    isMine: false,
   },
 ];
 
@@ -57,10 +48,10 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const filteredCourses =
+  const filteredexercises =
     filterLevel === "ALL"
-      ? courses
-      : courses.filter((course) => course.level === filterLevel);
+      ? exercises
+      : exercises.filter((exercise) => exercise.level === filterLevel);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -129,10 +120,10 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
           <Button
             variant="courseStart"
             className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
-            onClick={() => navigate("/CoursInfo")}
+            onClick={() => navigate("/new-exercise")}
           >
             <Plus size={18} />
-            {t("createCourseBtn")}
+            {t("createExerciseBtn")}
           </Button>
         )}
 
@@ -140,7 +131,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-        {filteredCourses.map((course, idx) => (
+        {filteredexercises.map((course, idx) => (
           <ContentCard
             key={idx}
             className={gradientMap[course.level] ?? "bg-grad-1"}

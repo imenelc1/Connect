@@ -11,8 +11,10 @@ export default function ContentFilters({
 }) {
   const { t } = useTranslation("filters");
   const levels = ["ALL", "beginner", "intermediate", "advanced"];
-
+  
   const [completedStatus, setCompletedStatus] = useState("");
+  const [courseFilter, setCourseFilter] = useState("");
+
   const [categoryFilter, setCategoryFilter] = useState("");
 
   // TEXTES DYNAMIQUES SELON LE TYPE
@@ -41,7 +43,7 @@ export default function ContentFilters({
       <div className="flex items-center gap-4 flex-wrap">
 
         {/* NIVEAUX */}
-        <div className="flex bg-primary/10 rounded-full px-6 py-2 gap-4 font-semibold shadow-inner text-sm">
+        <div className="flex bg-primary/20 rounded-full px-6 py-2 gap-4 font-semibold shadow-inner text-sm">
           {levels.map((lvl) => (
             <button
               key={lvl}

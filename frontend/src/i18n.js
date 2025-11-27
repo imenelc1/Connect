@@ -11,6 +11,8 @@ import translationFRSignup from "./locales/signup/fr-sign/translation.json";
 import translationENSignup from "./locales/signup/en-sign/translation.json";
 import translationENNavbar from "./locales/Navbar/en-Navbar/translation.json";
 import translationFRNavbar from "./locales/Navbar/fr-Navbar/translation.json";
+import translationFRCourseInfo from "./locales/createCourse/fr/translation.json";
+import translationENCourseInfo from "./locales/createCourse/en/translation.json";
 import translationFRNewExercise from "./locales/NewExercise/fr-newExercise.json";
 import translationENNewExercise from "./locales/NewExercise/en-newExercise.json";
 import translationFRExercisePreview from "./locales/NewExercise/fr-previewExercise.json";
@@ -33,7 +35,9 @@ const resources = {
     newExercise: translationFRNewExercise,
     exercisePreview: translationFRExercisePreview,
     filters: translationFRFilters,
-    contentPage: translationFRContentPage
+    contentPage: translationFRContentPage,
+    courseInfo: translationFRCourseInfo,
+
   },
 
   en: {
@@ -48,7 +52,8 @@ const resources = {
     newExercise: translationENNewExercise,
     exercisePreview: translationENExercisePreview,
     filters: translationENFilters,
-    contentPage: translationENContentPage
+    contentPage: translationENContentPage,
+    courseInfo: translationENCourseInfo,
   },
 };
 

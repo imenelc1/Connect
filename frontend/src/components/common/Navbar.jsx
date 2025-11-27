@@ -70,12 +70,20 @@ export default function Navbar() {
 
   // 🔥 logique pour activer le bouton Courses dans toutes les pages liées aux cours
   const courseRoutes = [
-    "/CoursInfo",
-    "/Course",
-    "/EditCourse",
-    "/CreateCourse",
-  ];
+    "/all-courses",
+  "/CoursInfo",
 
+  ];
+  const exerciseRoutes = [
+  "/all-exercises",
+  "/new-exercise",
+  "/exercise-preview",
+];
+
+const quizRoutes = [
+  "/all-quizzes",
+
+];
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
@@ -87,7 +95,7 @@ export default function Navbar() {
       ${collapsed ? "w-16" : "w-56"}`}
     >
 
-      {/* TOGGLE BUTTON */}
+      {/* Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className={`absolute top-4 
@@ -99,7 +107,7 @@ export default function Navbar() {
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
       </button>
 
-      {/* HEADER */}
+      {/* Header */}
       <div className="flex items-center justify-center p-2 bg-card rounded-2xl shadow-sm -mt-1 mb-1">
         <IconeLogoComponent
           size={collapsed ? "w-8 h-8 -ml-2" : "w-8 h-10"}
@@ -124,9 +132,16 @@ export default function Navbar() {
           let forceActive = false;
 
           // ⭐ si c'est le bouton cours, on force active dans toutes les pages courses
-          if (item.href === "/all-courses" && isCourseRelated) {
-            forceActive = true;
-          }
+         if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
+   if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
+
+  if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
 
           return (
             <NavLink
@@ -153,9 +168,7 @@ export default function Navbar() {
           to="/settings"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive
-                ? "bg-grad-1 text-white"
-                : "bg-card text-muted hover:bg-grad-2"
+              isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
             }`
           }
         >

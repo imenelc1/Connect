@@ -11,5 +11,9 @@
     "previous": "Previous",
     "save_draft": "Save as draft",
     "publish": "Publish Exercise"
+  },
+  "exercises": {
+    "info": "Exercise Info",
+    "preview": "Preview Exercise"
   }
 }
