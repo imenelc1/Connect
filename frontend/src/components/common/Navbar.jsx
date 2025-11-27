@@ -68,25 +68,15 @@ export default function Navbar() {
 
   const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
 
-  // 🔥 Course pages matched
+  // 🔥 logique pour activer le bouton Courses dans toutes les pages liées aux cours
   const courseRoutes = [
     "/CoursInfo",
     "/Course",
     "/EditCourse",
     "/CreateCourse",
   ];
-  const isCourseRelated = courseRoutes.some((path) =>
-    location.pathname.startsWith(path)
-  );
 
-  // 🔥 Exercise pages matched
-  const exerciseRoutes = [
-    "/new-exercise",
-    "/exerciseInfo",
-    "/exercise",
-    "/edit-exercise",
-  ];
-  const isExerciseRelated = exerciseRoutes.some((path) =>
+  const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
 
@@ -97,7 +87,7 @@ export default function Navbar() {
       ${collapsed ? "w-16" : "w-56"}`}
     >
 
-      {/* Toggle */}
+      {/* TOGGLE BUTTON */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className={`absolute top-4 
@@ -109,7 +99,7 @@ export default function Navbar() {
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
       </button>
 
-      {/* Header */}
+      {/* HEADER */}
       <div className="flex items-center justify-center p-2 bg-card rounded-2xl shadow-sm -mt-1 mb-1">
         <IconeLogoComponent
           size={collapsed ? "w-8 h-8 -ml-2" : "w-8 h-10"}
@@ -133,13 +123,8 @@ export default function Navbar() {
         {links.map((item, i) => {
           let forceActive = false;
 
-          // ⭐ COURSE BUTTON
+          // ⭐ si c'est le bouton cours, on force active dans toutes les pages courses
           if (item.href === "/all-courses" && isCourseRelated) {
-            forceActive = true;
-          }
-
-          // ⭐ EXERCISE BUTTON
-          if (item.href === "/all-exercises" && isExerciseRelated) {
             forceActive = true;
           }
 
@@ -158,7 +143,7 @@ export default function Navbar() {
               <item.icon size={17} strokeWidth={1.5} />
               {!collapsed && <span className="ml-2">{item.label}</span>}
             </NavLink>
-          )
+          );
         })}
       </nav>
 
@@ -168,7 +153,9 @@ export default function Navbar() {
           to="/settings"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
+              isActive
+                ? "bg-grad-1 text-white"
+                : "bg-card text-muted hover:bg-grad-2"
             }`
           }
         >
@@ -180,7 +167,9 @@ export default function Navbar() {
           to="/"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive ? "bg-grad-1 text-white" : "bg-card text-red-500 hover:bg-red-100"
+              isActive
+                ? "bg-grad-1 text-white"
+                : "bg-card text-red-500 hover:bg-red-100"
             }`
           }
         >

@@ -100,11 +100,7 @@ const res = await api.post("login/", {
       setErrorPassword("Erreur réseau");
     }
   };
-  //Permet de changer la langue (FR ↔ EN)
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-  };
+ 
   
   // Récupération de la fonction permettant de changer le thème
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -125,16 +121,7 @@ const res = await api.post("login/", {
       <LogoIconeComponent className="w-8 h-8 -ml-1" />
     </div>
 
-    {/* Actions */}
-    <div className="flex items-center gap-4">
-      <ThemeButton onClick={toggleDarkMode} />
-      <FiGlobe
-        size={20}
-        title="Changer la langue"
-        onClick={toggleLanguage}
-        className="cursor-pointer"
-      />
-    </div>
+   
   </div>
         
       {/* RESPONSIVE: AuthTabs avec margin top sur mobile */}
