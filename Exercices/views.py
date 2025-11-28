@@ -4,6 +4,16 @@ from django.shortcuts import render
 from rest_framework import generics
 from .models import Exercice
 from .serializers import  ExerciceSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+
+@api_view(['GET'])
+def Exercice_list_api(request):
+    exercice = Exercice.objects.all()
+    serializer = ExerciceSerializer(exercice, many=True)
+    return Response(serializer.data)
+
 
 
 

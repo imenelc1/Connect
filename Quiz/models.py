@@ -1,9 +1,10 @@
 from django.db import models
-from Exercices.models import Exercice
+from exercices.models import Exercice
 
 
 
 class Quiz(models.Model):
+    scoreMinimum=models.IntegerField()
     exercice = models.OneToOneField(Exercice, on_delete=models.CASCADE)
 
 class Question(models.Model):

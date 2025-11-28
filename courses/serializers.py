@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Cours, Section, Lecon
+
+
 class CoursSerializer(serializers.ModelSerializer):
     niveau_cour_label = serializers.CharField(source='get_niveau_cour_display', read_only=True)
     utilisateur = serializers.SerializerMethodField()
@@ -18,6 +20,8 @@ class CoursSerializer(serializers.ModelSerializer):
         hours = int(total_seconds // 3600)
         minutes = int((total_seconds % 3600) // 60)
         return f"{hours}h {minutes}m"
+
+
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
