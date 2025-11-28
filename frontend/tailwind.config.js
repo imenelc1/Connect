@@ -33,6 +33,8 @@ module.exports = {
         "grad-2": "var(--grad-2)",
         "grad-3": "var(--grad-3)",
         "grad-4": "var(--grad-4)",
+        "grad-5": "var(--grad-5)",
+        "grad-7": "var(--grad-7)",
         "grad-dark-1": "var(--grad-dark-1)",
         "grad-dark-2": "var(--grad-dark-2)",
         "grad-dark-3": "var(--grad-dark-3)",

@@ -90,6 +90,16 @@ export default function Navbar() {
     location.pathname.startsWith(path)
   );
 
+  const quizRoutes = [
+    "/create-quiz",
+    "/preview"
+  ];
+  const isQuizRelated = quizRoutes.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
+  const isSettingRelated = location.pathname.startsWith("/settings");
+
   return (
     <aside
       className={`h-screen bg-card rounded-3xl shadow-2xl p-3 flex flex-col justify-between
@@ -142,6 +152,18 @@ export default function Navbar() {
           if (item.href === "/all-exercises" && isExerciseRelated) {
             forceActive = true;
           }
+
+          // ⭐ QUIZ BUTTON
+          if (item.href === "/all-quizzes" && isQuizRelated) {
+            forceActive = true;
+          }
+
+          // ⭐ SETTINGS BUTTON
+          if (item.href === "/settings" && isSettingRelated) {
+            forceActive = true;
+          }
+
+
 
           return (
             <NavLink

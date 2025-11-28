@@ -26,10 +26,14 @@ import translationFRallQuizzes from "./locales/AllQuizzes/fr/translation.json";
 import translationENallQuizzes from "./locales/AllQuizzes/en/translation.json";
 import filtersFR from "./locales/filters/fr/translation.json";
 import filtersEN from "./locales/filters/en/translation.json"; 
-  
+import translationFRCreateQuiz from "./locales/fr-quiz/fr.json";
+import translationENCreateQuiz from "./locales/en-quiz/en.json"; 
+import translationFRSetting from "./locales/en-Setting/translation.json";
+import translationENSetting from "./locales/fr-Setting/translation.json";
+
 const resources = {
-  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses, newExercise: translationFRNewExercise, exercisePreview: translationFRExercisePreview, courseInfo: translationFRCourseInfo, allExercises: translationFRAllExercises, allQuizzes: translationFRallQuizzes, filters: filtersFR },
-  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses, newExercise: translationENNewExercise, exercisePreview: translationENExercisePreview, courseInfo: translationENCourseInfo, allExercises: translationENAllExercises, allQuizzes: translationENallQuizzes, filters: filtersEN },
+  fr: { translation: translationFR, acceuil: translationFRAcceuil, login: translationFRLogin, signup: translationFRSignup, navbar: translationFRNavbar, allcourses: translationFRAllCourses, newExercise: translationFRNewExercise, exercisePreview: translationFRExercisePreview, courseInfo: translationFRCourseInfo, allExercises: translationFRAllExercises, allQuizzes: translationFRallQuizzes, filters: filtersFR, createQuiz: translationFRCreateQuiz, Setting: translationFRSetting },
+  en: { translation: translationEN, acceuil: translationENAcceuil, login: translationENLogin, signup: translationENSignup, navbar: translationENNavbar, allcourses: translationENAllCourses, newExercise: translationENNewExercise, exercisePreview: translationENExercisePreview, courseInfo: translationENCourseInfo, allExercises: translationENAllExercises, allQuizzes: translationENallQuizzes, filters: filtersEN, createQuiz: translationENCreateQuiz, Setting: translationENSetting },
 };
 
 i18n

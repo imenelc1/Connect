@@ -11,6 +11,9 @@ import ExercisePreview from "../pages/ExercisePreview";
 import CoursInfo from "../pages/CoursInfo";
 import AllExercisesPage from "../pages/AllExercisesPage";
 import AllQuizzesPage from "../pages/AllQuizzesPage";
+import CreateQuiz from "../pages/CreateQuiz";
+import QuizPreview from "../pages/QuizPreview";
+import Setting from "../pages/Setting";
 
 export default function AppRoutes() {
   return (
@@ -42,8 +45,11 @@ export default function AppRoutes() {
 
         {/*new course*/}
         <Route path="/CoursInfo" element={<CoursInfo />} />
+        <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route path="/preview" element={<QuizPreview />} />
 
-
+        {/*settings*/}
+        <Route path="/settings" element={<Setting />} />
 
       </Routes>
     </BrowserRouter>
