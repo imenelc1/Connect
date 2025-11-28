@@ -11,39 +11,49 @@ import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import { useNavigate } from "react-router-dom";
 
-const exercises = [
-  {
-    title: "Exercice sur les Arbres Binaires",
-    description: "Résolvez des problèmes sur les arbres binaires, AVL, et parcours.",
-    level: "intermediate",
-    duration: "45 min",
-    author: "Dr. Farid",
-    initials: "F.D",
-    isMine: true,
-  },
-  {
-    title: "Exercice Programmation Dynamique",
-    description: "Apprenez à formuler et résoudre des problèmes classiques de DP.",
-    level: "advanced",
-    duration: "1h 10 min",
-    author: "Dr. Benali",
-    initials: "B.A",
-    isMine: false,
-  },
-];
+
 
 const gradientMap = {
-  beginner: "bg-grad-2",
-  intermediate: "bg-grad-3",
-  advanced: "bg-grad-4",
+  Débutant: "bg-grad-2",
+  Intermédiaire: "bg-grad-3",
+  Avancé: "bg-grad-4",
 };
 
 
 
 export default function AllCoursesPage() {
+
+const [exercises, setExercice] = useState([]);
+useEffect(() => {
+  fetch("http://localhost:8000/api/exercices/api/exo")
+    .then(res => res.json())
+    .then(data => {
+      const formatted = data.map(c => ({
+        title: c.titre_exo,
+        level: c.niveau_exercice_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
+        //levelLabel: t(`levels.${c.niveau_cour_label}`),
+        //duration: c.duration_readable,
+        //cours: c.cours,
+        description: c.enonce,
+        //categorie: c.categorie,
+        author: c.utilisateur,
+        initials: c.utilisateur
+    .split(" ")
+    .map(n => n[0])
+    .join("")
+    .toUpperCase(),
+        isMine: true
+      }));
+      setExercice(formatted);
+    })
+    .catch(err => console.error("Erreur chargement exercices :", err));
+}, []);
+
+
+
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
-  const { t } = useTranslation("allcourses");
+  const { t } = useTranslation("allExercises");
 const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
   const navigate = useNavigate();
 
@@ -109,7 +119,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
         <ContentFilters
-        type="courses"
+        type="exercises"
         userRole={userRole}                  // <-- corrige ici
   activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
   onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
@@ -131,11 +141,11 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-        {filteredexercises.map((course, idx) => (
+        {filteredexercises.map((exercise, idx) => (
           <ContentCard
             key={idx}
-            className={gradientMap[course.level] ?? "bg-grad-1"}
-            course={course}
+            className={gradientMap[exercise.level] ?? "bg-grad-1"}
+            course={exercise}
 
             role={userRole}
             showProgress={userRole === "etudiant"}
