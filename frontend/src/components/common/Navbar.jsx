@@ -87,11 +87,20 @@ useEffect(() => {
 
 const quizRoutes = [
   "/all-quizzes",
+   "/create-quiz",
+    "/preview"
 
 ];
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
+
+ 
+  const isQuizRelated = quizRoutes.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
+  const isSettingRelated = location.pathname.startsWith("/settings");
 
   return (
     <aside
@@ -148,6 +157,18 @@ const quizRoutes = [
     forceActive = true;
   }
 
+          // ⭐ QUIZ BUTTON
+          if (item.href === "/all-quizzes" && isQuizRelated) {
+            forceActive = true;
+          }
+
+          // ⭐ SETTINGS BUTTON
+          if (item.href === "/settings" && isSettingRelated) {
+            forceActive = true;
+          }
+
+
+
           return (
             <NavLink
               key={i}
@@ -187,7 +208,7 @@ const quizRoutes = [
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
               isActive
                 ? "bg-grad-1 text-white"
-                : "bg-card text-red-500 hover:bg-red-100"
+                : "bg-card text-red hover:bg-red/20"
             }`
           }
         >

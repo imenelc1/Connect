@@ -5,6 +5,7 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
     path('admin-login/', AdminLoginView.as_view(), name='admin-login'),
-    path('<int:pk>/', UserProfileView.as_view(), name='user-profile'),  # GET/PATCH profil utilisateur
+    path('profile/', UserProfileView.as_view(), name='user-profile-self'),
+  # GET/PATCH profil utilisateur
 
 ]

@@ -12,6 +12,9 @@ import AllExercisesPage from "../pages/AllExercisesPage";
 import AllQuizzesPage from "../pages/AllQuizzesPage";
 import CoursInfo from "../pages/CoursInfo";
 import CommunityPage from "../pages/CommunityPage";
+import CreateQuiz from "../pages/CreateQuiz";
+import QuizPreview from "../pages/QuizPreview";
+import Setting from "../pages/Setting";
 
 export default function AppRoutes() {
   return (
@@ -43,9 +46,14 @@ export default function AppRoutes() {
 
         {/* COURSE INFO */}
         <Route path="/CoursInfo" element={<CoursInfo />} />
+        <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route path="/preview" element={<QuizPreview />} />
 
         {/* COMMUNITY PAGE */}
         <Route path="/community" element={<CommunityPage />} />
+        {/*settings*/}
+        <Route path="/settings" element={<Setting />} />
+
       </Routes>
     </BrowserRouter>
   );

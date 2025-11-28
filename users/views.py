@@ -1,13 +1,15 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 from .models import Utilisateur, Etudiant, Enseignant, Administrateur
 from .serializers import UtilisateurSerializer, EtudiantSerializer, EnseignantSerializer, AdministrateurSerializer
 import jwt
 from django.conf import settings
 from datetime import datetime, timedelta
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from .serializers import ProfileSerializer
+from .jwt_helpers import jwt_required, IsAuthenticatedJWT
 # -----------------------------
 # Constantes JWT manquantes
 # -----------------------------
@@ -155,28 +157,10 @@ class AdminLoginView(APIView):
 # -----------------------------
 # User Profile
 # -----------------------------
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
-    queryset = Utilisateur.objects.all()
-    serializer_class = UtilisateurSerializer
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticatedJWT]
 
-    def retrieve(self, request, *args, **kwargs):
-        user = self.get_object()
-        data = UtilisateurSerializer(user).data
-
-        role = None
-
-        try:
-            etu = user.etudiant
-            role = "etudiant"
-            data["specialite"] = etu.specialite
-            data["annee_etude"] = etu.annee_etude
-        except Etudiant.DoesNotExist:
-            try:
-                ens = user.enseignant
-                role = "enseignant"
-                data["grade"] = ens.grade
-            except Enseignant.DoesNotExist:
-                pass
-
-        data["role"] = role
-        return Response(data)
+    def get_object(self):
+        return self.request.user  # ✅ maintenant c'est toujours un objet Utilisateur

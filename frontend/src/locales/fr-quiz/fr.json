@@ -1,0 +1,42 @@
+{
+  "newQuiz": "Nouveau Quiz",
+  "exitPreview": "Quitter l’aperçu",
+  "noData": "Aucune donnée de quiz trouvée.",
+  "title": "Titre du Quiz",
+  "description": "Description du quiz...",
+  "minutes": "minutes",
+  "points": "point(s)",
+  "level": "Avancé",
+  "questionText": "Entrez votre question ici...",
+  "answerOption": "Option de réponse...",
+  "sendQuiz": "Envoyer le quiz",
+
+  "quizSettings": "Paramètres du Quiz",
+  "quizTitle": "Titre du Quiz",
+  "quizTitlePlaceholder": "Titre du quiz...",
+  "descriptionLabel": "Description",
+  "descriptionPlaceholder": "Description du quiz...",
+  "duration": "Durée (minutes)",
+  "passingScore": "Score de passage",
+  "quizLevel": "Niveau du Quiz",
+  "beginner": "Débutant",
+  "intermediate": "Intermédiaire",
+  "advanced": "Avancé",
+
+  "quizSummary": "Résumé du Quiz",
+  "totalQuestions": "Nombre de questions :",
+  "totalPoints": "Nombre de points :",
+  "passScore": "Score requis :",
+  "durationLabel": "Durée :",
+
+  "questions": "Questions",
+  "addQuestion": "Ajouter une question",
+
+  "answers": "Réponses",
+  "answerOptionA": "Option de réponse A",
+  "answerOptionB": "Option de réponse B",
+  "addAnswer": "Ajouter une réponse",
+
+  "saveDraft": "Enregistrer le brouillon",
+  "previewQuiz": "Aperçu du Quiz"
+}
