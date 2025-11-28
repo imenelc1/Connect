@@ -5,7 +5,7 @@ from .models import Cours, Section, Lecon
 
 @admin.register(Cours)
 class CoursAdmin(admin.ModelAdmin):
-    list_display = ('titre_cour', 'niveau_cour', 'visibilite_cour', 'utilisateur', 'contenu_cour', 'description', 'duration')
+    list_display = ('titre_cour', 'niveau_cour', 'visibilite_cour', 'utilisateur',  'description', 'duration')
     search_fields = ('titre_cour',)
     list_filter = ('visibilite_cour', 'niveau_cour', 'utilisateur')
 

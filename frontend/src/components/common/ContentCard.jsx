@@ -7,15 +7,15 @@ import { useLocation } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 const levelStyles = {
-  beginner: "bg-blue text-white",
-  intermediate: "bg-purple text-white",
-  advanced: "bg-pink text-white",
+  Débutant: "bg-blue text-white",
+  Intermédiaire: "bg-purple text-white",
+  Avancé: "bg-pink text-white",
 };
 
 const buttonStyles = {
-  beginner: "bg-blue text-white",
-  intermediate: "bg-purple text-white",
-  advanced: "bg-pink text-white",
+  Débutant: "bg-blue text-white",
+  Intermédiaire: "bg-purple text-white",
+  Avancé: "bg-pink text-white",
 };
 
 export default function ContentCard({ course, role, showProgress, className = "" }) {
@@ -48,7 +48,7 @@ export default function ContentCard({ course, role, showProgress, className = ""
         <div className="flex justify-between items-start">
           <h2 className="font-semibold text-lg">{course.title}</h2>
           <span className={`px-3 py-1 text-xs rounded-full ${levelStyles[course.level]}`}>
-            {t(`levels.${course.level}`)}
+             {t(`levels.${course.level}`)}
           </span>
         </div>
 

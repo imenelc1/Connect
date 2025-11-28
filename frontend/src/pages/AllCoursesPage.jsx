@@ -11,46 +11,42 @@ import i18n from "../i18n";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
-const courses = [
-  {
-    title: "Structures de Données",
-    description: "Explorez les arbres, graphes, tables de hachage et structures de données complexes.",
-    level: "beginner",
-    duration: "1h 30min",
-    author: "Dr. Cheikh Farid",
-    initials: "C.F",
-    isMine: true,
-  },
-  {
-    title: "Algorithmes Avancés",
-    description: "Optimisation, complexité, et techniques avancées pour résoudre des problèmes complexes.",
-    level: "advanced",
-    duration: "2h 15min",
-    author: "Dr. Alice Benali",
-    initials: "A.B",
-    isMine: false,
-  },
-  {
-    title: "Systèmes Informatiques",
-    description: "Architecture, compilation et fonctionnement interne d’un système moderne.",
-    level: "intermediate",
-    duration: "2h 15min",
-    author: "Dr. Alice Benali",
-    initials: "A.B",
-    isMine: true,
-  },
-];
+
+
 
 const gradientMap = {
-  beginner: "bg-grad-2",
-  intermediate: "bg-grad-3",
-  advanced: "bg-grad-4",
+  Débutant: "bg-grad-2",
+  Intermédiaire: "bg-grad-3",
+  Avancé: "bg-grad-4",
 };
 
 
 
 export default function AllCoursesPage() {
-  const userData = JSON.parse(localStorage.getItem("user"));
+  const [courses, setCourses] = useState([]);
+useEffect(() => {
+  fetch("http://localhost:8000/api/courses/api/cours")
+    .then(res => res.json())
+    .then(data => {
+      const formatted = data.map(c => ({
+        title: c.titre_cour,
+        description: c.description,
+        level: c.niveau_cour_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
+        //levelLabel: t(`levels.${c.niveau_cour_label}`),
+        duration: c.duration_readable,
+        author: c.utilisateur,
+        initials: c.utilisateur
+    .split(" ")
+    .map(n => n[0])
+    .join("")
+    .toUpperCase(),
+        isMine: true
+      }));
+      setCourses(formatted);
+    })
+    .catch(err => console.error("Erreur chargement cours :", err));
+}, []);
+    const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allcourses");
 const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();

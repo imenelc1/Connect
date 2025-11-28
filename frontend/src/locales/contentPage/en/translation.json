@@ -11,9 +11,9 @@
   "searchCourses": "Search for courses...",
 
   "levels": {
-    "beginner": "Beginner",
-    "intermediate": "Intermediate",
-    "advanced": "Advanced"
+    "Débutant": "Beginner",
+    "Intermédiaire": "Intermediate",
+    "Avancé": "Advanced"
   },
 
  "continueCourse": "Continue the course",
