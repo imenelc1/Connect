@@ -11,6 +11,7 @@ import ExercisePreview from "../pages/ExercisePreview";
 import AllExercisesPage from "../pages/AllExercisesPage";
 import AllQuizzesPage from "../pages/AllQuizzesPage";
 import CoursInfo from "../pages/CoursInfo";
+import CommunityPage from "../pages/CommunityPage";
 
 export default function AppRoutes() {
   return (
@@ -19,7 +20,7 @@ export default function AppRoutes() {
         <Route path="/" element={<Acceuil />} />
         <Route path="/choice" element={<Choice />} />
 
-       {/* SIGNUP */}
+        {/* SIGNUP */}
         <Route path="/signup/instructor" element={<InstructorSignup />} />
         <Route path="/signup/student" element={<StudentSignup />} />
 
@@ -29,10 +30,6 @@ export default function AppRoutes() {
 
         {/* ALL COURSES */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
-         {/* ALL Exercises */}
-        <Route path="/all-exercises" element={<AllExercisesPage />} />
-        {/* ALL QUIZZES */}
-        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
 
         {/* ALL EXERCISES */}
         <Route path="/all-exercises" element={<AllExercisesPage />} />
@@ -40,16 +37,15 @@ export default function AppRoutes() {
         {/* ALL QUIZZES */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
 
-        {/*new exercise*/}
+        {/* NEW */}
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
 
-        {/*new course*/}
+        {/* COURSE INFO */}
         <Route path="/CoursInfo" element={<CoursInfo />} />
 
-
-
-
+        {/* COMMUNITY PAGE */}
+        <Route path="/community" element={<CommunityPage />} />
       </Routes>
     </BrowserRouter>
   );

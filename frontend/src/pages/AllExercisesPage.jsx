@@ -109,7 +109,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
         <ContentFilters
-        type="courses"
+        type="exercises"
         userRole={userRole}                  // <-- corrige ici
   activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
   onFilterChange={setFilterLevel}      // <- tu as setFilterLevel

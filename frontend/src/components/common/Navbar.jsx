@@ -26,9 +26,10 @@ export default function Navbar() {
   const [collapsed, setCollapsed] = useState(false);
   const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser && storedUser !== "undefined") {
+    try {
       const parsed = JSON.parse(storedUser);
       const userObj = parsed.user || parsed.utilisateur || parsed;
 
@@ -37,8 +38,12 @@ export default function Navbar() {
         prenom: userObj.prenom || "",
         role: userObj.role || "",
       });
+    } catch (err) {
+      console.error("Erreur parsing JSON user:", err);
+      setUserData({ nom: "", prenom: "", role: "" });
     }
-  }, []);
+  }
+}, []);
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("sidebarChanged", { detail: collapsed }));
@@ -62,7 +67,7 @@ export default function Navbar() {
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
     { href: "/mystudents", label: t("mystudents"), icon: Users },
-    { href: "/mycommunity", label: t("mycommunity"), icon: MessageCircle },
+    { href: "/community", label: t("mycommunity"), icon: MessageCircle },
     { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
   ];
 

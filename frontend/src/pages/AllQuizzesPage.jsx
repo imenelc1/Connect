@@ -77,10 +77,9 @@ export default function AllQuizzesPage() {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-      <UserCircle initials={initials} />
-
+      <UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
+        onChangeLang={(lang) => i18n.changeLanguage(lang)} />
       <div className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white text-gray-700 shadow-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 transition z-50">
-        <ThemeButton onClick={toggleDarkMode} />
         <Bell size={22} strokeWidth={1.8} />
       </div>
 

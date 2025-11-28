@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { FiEye, FiEyeOff, FiGlobe } from "react-icons/fi";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
-
+import { useNavigate } from "react-router-dom";
 import LogoComponent from "../components/common/LogoComponent";
 import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
@@ -16,7 +16,7 @@ import LogoIconeComponent from "../components/common/IconeLogoComponent";
 
 export default function LoginStudent() {
   const [activeTab] = useState("signin");
-
+const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
@@ -71,12 +71,20 @@ const res = await api.post("login/", {
   password,
   role: "etudiant" // <-- Obligatoire pour que le backend sache que c'est un étudiant
 });      
+console.log(res.data)
   console.log(" LOGIN SUCCESS:", res.data); // <---- IMPORTANT
   
-  localStorage.setItem("user", JSON.stringify(res.data));
+  // Combine user + role pour être sûr que role est présent
+const userWithRole = {
+  ...res.data.user,
+  role: res.data.role || res.data.user.role
+};
+
+localStorage.setItem("user", JSON.stringify(userWithRole));
+localStorage.setItem("token", res.data.token);
 
       toast.success(t("login.success"));
-      window.location.href = "/all-courses";
+      navigate("/all-courses");
 
     } catch (error) {
   const backend = error.response?.data;
