@@ -61,9 +61,9 @@ export default function Navbar() {
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
-    { href: "/mystudents", label: t("mystudents"), icon: Users },
-    { href: "/mycommunity", label: t("mycommunity"), icon: MessageCircle },
-    { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
+    { href: "/my-students", label: t("mystudents"), icon: Users },
+    { href: "/community", label: t("mycommunity"), icon: MessageCircle },
+    { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },
   ];
 
   const links = userData.role === "enseignant" ? teacherLinks : studentLinks;

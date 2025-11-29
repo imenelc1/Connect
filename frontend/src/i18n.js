@@ -32,6 +32,10 @@ import translationFRBadges from "./locales/badges/fr.json";
 import translationENBadges from "./locales/badges/en.json";
 import frCourses from "./locales/courses/fr-courses/translation.json";
 import enCourses from "./locales/courses/en-courses/translation.json";
+import translationFRMyStudents from "./locales/MyStudents/fr-MyStudents/translation.json";
+import translationENMyStudents from "./locales/MyStudents/en-MyStudents/translation.json";
+import translationFRSpaces from "./locales/Spaces/fr-Spaces/translation.json";
+import translationENSpaces from "./locales/Spaces/en-Spaces/translation.json";
 
 const resources = {
   fr: {
@@ -55,6 +59,8 @@ const resources = {
 
     courses: frCourses,
 
+  myStudents: translationFRMyStudents,
+  Spaces:translationFRSpaces
   },
 
   en: {
@@ -76,6 +82,8 @@ const resources = {
     Dashboard: translationENDashboard,
    badges: translationENBadges,
     courses: enCourses,
+    myStudents: translationENMyStudents,
+     Spaces: translationENSpaces
   },
 };
 

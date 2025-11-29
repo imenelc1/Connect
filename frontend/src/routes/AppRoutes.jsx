@@ -21,6 +21,8 @@ import Dashboardetu from "../pages/dash-etu";
 import Badges from "../pages/Badges"; // Ajoutez cette lign
   
 import Courses from "../pages/Courses";
+import MyStudents from "../pages/MyStudents";
+import Spaces from "../pages/Spaces";
 
 export default function AppRoutes() {
   return (
@@ -76,6 +78,10 @@ export default function AppRoutes() {
           <Route path="/courses" element={<Courses />} />
         {/*new course*/}
         <Route path="/CoursInfo" element={<CoursInfo />} />
+        {/* My Students */}
+        <Route path="/my-students" element={<MyStudents />} />
+        {/* Spaces */}
+        <Route path="/spaces" element={<Spaces />} />
 
 
 
