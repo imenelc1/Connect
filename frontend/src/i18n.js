@@ -21,7 +21,10 @@ import translationFRFilters from "./locales/Filters/fr/translation.json";
 import translationENFilters from "./locales/Filters/en/translation.json";
 import translationFRContentPage from "./locales/contentPage/fr/translation.json";
 import translationENContentPage from "./locales/contentPage/en/translation.json";
-
+import translationFRCreateQuiz from "./locales/fr-quiz/fr.json";
+import translationENCreateQuiz from "./locales/en-quiz/en.json"; 
+import translationFRSetting from "./locales/Settings/en-Setting/translation.json";
+import translationENSetting from "./locales/Settings/fr-Setting/translation.json";
 const resources = {
   fr: {
     translation: translationFR,
@@ -37,6 +40,8 @@ const resources = {
     filters: translationFRFilters,
     contentPage: translationFRContentPage,
     courseInfo: translationFRCourseInfo,
+  createQuiz: translationFRCreateQuiz,
+  setting: translationFRSetting,
 
   },
 
@@ -54,6 +59,8 @@ const resources = {
     filters: translationENFilters,
     contentPage: translationENContentPage,
     courseInfo: translationENCourseInfo,
+  createQuiz: translationENCreateQuiz,
+  setting: translationENSetting,
   },
 };
 

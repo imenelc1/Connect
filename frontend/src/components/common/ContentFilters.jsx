@@ -10,7 +10,7 @@ export default function ContentFilters({
   type = "courses" // NEW ➜ "courses" | "exercises" | "quizzes"
 }) {
   const { t } = useTranslation("filters");
-  const levels = ["ALL", "Débutant", "Intermédiaire", "Avancé"];
+  const levels = ["ALL", "beginner", "intermediate", "advanced"];
   
   const [completedStatus, setCompletedStatus] = useState("");
   const [courseFilter, setCourseFilter] = useState("");

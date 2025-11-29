@@ -85,7 +85,7 @@ export default function CoursePage() {
         {t("course.course_topic")}
       </label>
       <textarea
-        className="w-full min-h-[180px] border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2"
+        className="w-full min-h-[180px] border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2 text-black"
         text-black="true"
         placeholder={t("course.course_topic_placeholder")}
       />
