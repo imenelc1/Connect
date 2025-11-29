@@ -51,7 +51,7 @@ useEffect(() => {
 
   const studentLinks = [
     { href: "/", label: t("home"), icon: Home },
-    { href: "/dashboard", label: t("dashboard"), icon: Activity },
+    { href: "/dashboard-etu", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
@@ -62,7 +62,7 @@ useEffect(() => {
 
   const teacherLinks = [
     { href: "/home", label: t("home"), icon: Home },
-    { href: "/dashboard", label: t("dashboard"), icon: Activity },
+    { href: "/dashboard-ens", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },

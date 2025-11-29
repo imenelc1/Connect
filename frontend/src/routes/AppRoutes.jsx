@@ -15,6 +15,8 @@ import CommunityPage from "../pages/CommunityPage";
 import CreateQuiz from "../pages/CreateQuiz";
 import QuizPreview from "../pages/QuizPreview";
 import Setting from "../pages/Setting";
+import Dashboardens from "../pages/dash-ens";
+import Dashboardetu from "../pages/dash-etu";
 
 export default function AppRoutes() {
   return (
@@ -53,6 +55,9 @@ export default function AppRoutes() {
         <Route path="/community" element={<CommunityPage />} />
         {/*settings*/}
         <Route path="/settings" element={<Setting />} />
+        {/*dashboard*/}
+        <Route path="/dashboard-ens" element={<Dashboardens />} />
+        <Route path="/dashboard-etu" element={<Dashboardetu />} />
 
       </Routes>
     </BrowserRouter>

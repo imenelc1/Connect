@@ -154,7 +154,7 @@ const res = await api.post("login/", {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errorEmail}
-            />
+              icon={<FaEnvelope size={16} className="text-grayc" />}            />
 
             <Input 
               label={t("login.password")}
@@ -164,15 +164,16 @@ const res = await api.post("login/", {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errorPassword}
+              icon={<FaLock size={16} className="text-grayc" />}
               rightIcon={
                 showPassword ? (
-                  <FiEyeOff
+                  <FaEyeOff
                     size={18}
                     onClick={() => setShowPassword(false)}
                     className="cursor-pointer text-grayc"
                   />
                 ) : (
-                  <FiEye
+                  <FaEye
                     size={18}
                     onClick={() => setShowPassword(true)}
                     className="cursor-pointer text-grayc"

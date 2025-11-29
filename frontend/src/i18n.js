@@ -25,6 +25,9 @@ import translationFRCreateQuiz from "./locales/fr-quiz/fr.json";
 import translationENCreateQuiz from "./locales/en-quiz/en.json"; 
 import translationFRSetting from "./locales/Settings/en-Setting/translation.json";
 import translationENSetting from "./locales/Settings/fr-Setting/translation.json";
+import translationENDashboard from "./locales/Dashboard/en/translation.json";
+import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
+
 const resources = {
   fr: {
     translation: translationFR,
@@ -42,6 +45,7 @@ const resources = {
     courseInfo: translationFRCourseInfo,
   createQuiz: translationFRCreateQuiz,
   setting: translationFRSetting,
+    Dashboard: translationFRDashboard
 
   },
 
@@ -61,6 +65,7 @@ const resources = {
     courseInfo: translationENCourseInfo,
   createQuiz: translationENCreateQuiz,
   setting: translationENSetting,
+    Dashboard: translationENDashboard
   },
 };
 
