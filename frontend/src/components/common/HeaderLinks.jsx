@@ -16,9 +16,10 @@ export default function HeaderLinks() {
 
   // Permet de changer la langue (FR ↔ EN)
   const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-  };
+  const newLang = i18n.language === "fr" ? "en" : "fr";
+  i18n.changeLanguage(newLang);
+  localStorage.setItem("lang", newLang); // <-- persistance
+};
 
   // Liens du header
   const links = [
@@ -28,19 +29,20 @@ export default function HeaderLinks() {
   ];
 
   return (
-    <nav className="w-full flex items-center justify-between px-4 md:px-8 py-4 bg-surface relative">
+    <nav className="w-full flex items-center justify-between px-4 md:px-16 lg:px-16 py-4 bg-surface relative">
 
       {/* Version Desktop : visible à partir de md */}
-      <div className="hidden md:flex items-center space-x-6">
+      <div className="hidden md:flex items-center space-x-10 lg:space-x-12">
 
         {/* Liens statiques */}
         {links.map((link, index) => (
-          <button
-            key={index}
-            className="hover:text-primary transition font-medium"
-          >
-            {link.name}
-          </button>
+        <button
+          key={index}
+          className="hover:text-primary transition font-medium whitespace-nowrap"
+        >
+        {link.name}
+        </button>
+
         ))}
 
         {/* Bouton thème (dark/light) */}
@@ -63,33 +65,30 @@ export default function HeaderLinks() {
 
       {/* Menu mobile */}
       {menuOpen && (
-        <div className="absolute top-full left-0 w-full bg-surface shadow-md flex flex-col items-center py-4 space-y-4 md:hidden z-10">
+  <div className="absolute top-full left-0  bg-surface/90 shadow-lg flex flex-col items-center py-4 space-y-4 md:hidden rounded-b-2xl">
+    
+    {/* Liens mobiles */}
+    {links.map((link, index) => (
+      <button
+        key={index}
+        className="text-lg font-medium hover:text-primary transition w-full text-center py-2 whitespace-nowrap"
+      >
+        {link.name}
+      </button>
+    ))}
 
-          {/* Liens mobiles */}
-          {links.map((link, index) => (
-            <button
-              key={index}
-              className="text-lg font-medium hover:text-primary transition"
-            >
-              {link.name}
-            </button>
-          ))}
+    {/* Options thème + langue */}
+    <div className="flex items-center space-x-4 mt-2">
+      <button onClick={toggleDarkMode}>
+        {darkMode ? <FiMoon size={20}/> : <FiSun size={20}/>}
+      </button>
+      <button onClick={toggleLanguage}>
+        <FiGlobe size={20}/>
+      </button>
+    </div>
+  </div>
+)}
 
-          {/* Options (thème + langue) */}
-          <div className="flex items-center space-x-4">
-
-            {/* Toggle thème */}
-            <button onClick={toggleDarkMode}>
-              {darkMode ? <FiMoon size={20} /> : <FiSun size={20} />}
-            </button>
-
-            {/* Toggle langue */}
-            <button onClick={toggleLanguage} className="hover:text-primary transition">
-              <FiGlobe size={20} title="Changer la langue" />
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

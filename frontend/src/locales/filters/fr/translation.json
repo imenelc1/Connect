@@ -1,0 +1,15 @@
+{
+  "allLevels": "Tous",
+  "levels": {
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé"
+  },
+  "status": {
+    "all": "Tous",
+    "completed": "Terminés",
+    "notCompleted": "Non terminés"
+  },
+  "myCourses": "Mes cours",
+  "allCourses": "Tous les cours"
+}

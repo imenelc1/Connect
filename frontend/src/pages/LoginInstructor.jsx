@@ -2,12 +2,13 @@
 import { useState } from "react";
 import AuthTabs from "../components/common/AuthTabs";
 import Input from "../components/common/Input"; 
-import Mascotte from "../assets/mascotte.svg";
+import Mascotte from "../components/common/Mascotte.jsx";
 import LogoComponent from "../components/common/LogoComponent";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FiGlobe,FiEye,FiEyeOff } from "react-icons/fi";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
 
 import Button from "../components/common/Button";
 import { useTranslation } from "react-i18next";
@@ -57,9 +58,14 @@ export default function LoginInstructor() {
 
     // --- Appel API ---
     try {
-      const res = await api.post("login/", { email, password });
+const res = await api.post("login/", { 
+  email, 
+  password,
+  role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
+});      console.log("Login API response:", res.data);
+      localStorage.setItem("user", JSON.stringify(res.data));
       toast.success("Connexion réussie !");
-      window.location.href = "/dashboard-enseignant";
+      window.location.href = "/all-courses";
 
     } catch (error) {
       const backend = error.response?.data;
@@ -94,11 +100,7 @@ export default function LoginInstructor() {
       setErrorPassword("Erreur réseau");
     }
   };
-  //Permet de changer la langue (FR ↔ EN)
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-  };
+ 
   
   // Récupération de la fonction permettant de changer le thème
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -106,21 +108,33 @@ export default function LoginInstructor() {
     // RESPONSIVE: Padding horizontal sur mobile
     <div className="flex flex-col items-center justify-center min-h-screen bg-surface px-4 sm:px-0 pb-50">
       
-      <div className="flex items-center justify-star w-full ml-20">
-          
-           <LogoComponent />
-           {/* Bouton pour activer/désactiver le dark mode */}
-           <ThemeButton onClick={toggleDarkMode} />
+                {/* Header */}
+  <div className="flex w-full mb-4 items-center justify-between px-4 pt-12">
 
-            {/* Bouton pour changer la langue */}
-           <FiGlobe size={20} title="Changer la langue" onClick={toggleLanguage} />
-        </div>
+    {/* Logo normal (grand) — visible seulement md+ */}
+    <div className="hidden md:block">
+      <LogoComponent className="-mt-10 ml-20" />
+    </div>
+
+    {/* Petit logo — visible seulement sur mobile */}
+    <div className="block md:hidden">
+      <LogoIconeComponent className="w-8 h-8 -ml-1" />
+    </div>
+
+   
+  </div>
         
       {/* RESPONSIVE: AuthTabs avec margin top sur mobile */}
-      <AuthTabs role="instructor" active="signin" className="mt-8 sm:mt-0" />
+       <AuthTabs
+          role="instructor"
+          active="signin"
+          tab1Label={t("login.signIn")}
+          tab2Label={t("login.signUp")}
+          className="mt-23 sm:mt-0"
+      />
        
       {/* RESPONSIVE: Conteneur principal - colonne sur mobile, ligne sur desktop */}
-     <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card/75 rounded-3xl shadow-lg overflow-hidden relative mt-5">
+     <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[500px]  bg-card rounded-3xl shadow-lg overflow-hidden relative mt-5 mb-5">
 
         {/* FORMULAIRE - RESPONSIVE: Largeur 100% sur mobile, 1/2 sur desktop */}
         <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:p-10 0 bg-card">
@@ -166,7 +180,7 @@ export default function LoginInstructor() {
          
             <p className="text-sm text-grayc text-center mt-4">
               {t("login.noAccount")}{" "}
-              <a href="InstructorSignUp" className="text-muted font-medium hover:underline">
+              <a href="/signup/instructor" className="text-muted font-medium hover:underline">
                 {t("login.signUp")}
               </a>
             </p>
@@ -176,7 +190,7 @@ export default function LoginInstructor() {
         </div>
 
         {/* MASCOTTE - RESPONSIVE: Largeur 100% sur mobile, 1/2 sur desktop avec hauteur fixe */}
-        <div className="w-full lg:w-1/2 relative flex items-center justify-center bg-card min-h-[400px] lg:min-h-0">
+        <div className="w-full lg:w-1/2 relative flex items-center justify-center bg-card min-h-[400px] lg:min-h-0 hidden lg:block">
           <div className="absolute top-4 right-4 bg-white rounded-xl shadow p-6 sm:p-9 w-max min-h-[80px] z-20">
             <p className="text-gray-700 font-medium text-sm whitespace-pre-line">
               {t("login.welcomeInstructor")}
@@ -210,7 +224,7 @@ export default function LoginInstructor() {
           />
 
           {/* RESPONSIVE: Mascotte taille adaptative */}
-          <img src={Mascotte} alt="Robot Mascotte" className="w-48 sm:w-60 lg:w-73 z-10" />
+           <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-20 mr-10 " />
         </div>
 
       </div>

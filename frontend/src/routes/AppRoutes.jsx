@@ -1,17 +1,25 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Acceuil from "../pages/Acceuil";
+import Acceuil from "../pages/acceuil";
 import Choice from "../pages/Choice";
 import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
 import LoginInstructor from "../pages/LoginInstructor";
 import LoginStudent from "../pages/LoginStudent";
-import Setting from "../pages/Setting";
+import AllCoursesPage from "../pages/AllCoursesPage";
+import NewExercise from "../pages/NewExercice";
+import ExercisePreview from "../pages/ExercisePreview";
+import AllExercisesPage from "../pages/AllExercisesPage";
+import AllQuizzesPage from "../pages/AllQuizzesPage";
+import CoursInfo from "../pages/CoursInfo";
+import Dashboardens from "../pages/dash-ens";
+import Dashboardetu from "../pages/dash-etu";
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-            {/* <Route path="/" element={<Acceuil />} />
-            <Route path="/choice" element={<Choice />} /> */}
+        {/* <Route path="/" element={<Acceuil />} />
+        <Route path="/choice" element={<Choice />} /> */}
 
        {/* SIGNUP */}
         {/* <Route path="/signup/instructor" element={<InstructorSignup />} />
@@ -20,7 +28,35 @@ export default function AppRoutes() {
         {/* LOGIN */}
         {/* <Route path="/login/instructor" element={<LoginInstructor />} />
         <Route path="/login/student" element={<LoginStudent />} /> */}
-        <Route path="/" element={<Setting />} />
+
+        {/* ALL COURSES */}
+        {/* <Route path="/all-courses" element={<AllCoursesPage />} /> */}
+         {/* ALL Exercises */}
+        {/* <Route path="/all-exercises" element={<AllExercisesPage />} /> */}
+        {/* ALL QUIZZES */}
+        {/* <Route path="/all-quizzes" element={<AllQuizzesPage />} /> */}
+
+        {/* ALL EXERCISES */}
+        {/* <Route path="/all-exercises" element={<AllExercisesPage />} /> */}
+
+        {/* ALL QUIZZES */}
+        {/* <Route path="/all-quizzes" element={<AllQuizzesPage />} /> */}
+
+        {/*new exercise*/}
+        {/* <Route path="/new-exercise" element={<NewExercise />} />
+        <Route path="/exercise-preview" element={<ExercisePreview />} /> */}
+
+        {/*new course*/}
+        {/* <Route path="/CoursInfo" element={<CoursInfo />} /> */}
+
+        {/*Dashboard enseignant*/}
+        {/* <Route path="/" element={<Dashboardens />} /> */}
+        {/*Dashboard etudiant*/}
+        <Route path="/" element={<Dashboardetu />} />
+
+
+
+
       </Routes>
     </BrowserRouter>
   );

@@ -1,0 +1,26 @@
+
+{
+  "Dashboard": {
+    "Welcome": "Content de te revoir" ,
+    "Alwaysp":"Consultez régulièrement votre portail instructeur pour rester informé.",
+    "AverageS": "Progrès moyen des etudiants",
+    "Success": "Taux de réussite",
+    "AverageT": "Temps moyen passé",
+    "ActiveC":"Cours actifs",
+    "coursep":"progression du cours",
+    "Quick":"Actions rapides",
+    "CreateC":"Créer un cours",
+    "Space":"Actif Mes espaces",
+    "publish":"Publier un exercice",
+    "Stats":"Statistiques des étudiants",
+    "Published":"Publié",
+    "Draft":"Brouillon",
+    "quizzes":"Quiz",
+    "ActivityF":"Flux d'activité",
+    "Progress":"Progrès",
+    "GlobalP":"progression globale",
+    "Search":"Recherche"
+
+
+  }
+}

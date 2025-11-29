@@ -11,7 +11,6 @@ module.exports = {
         primary: "rgb(var(--color-primary) / <alpha-value>)",
         muted: "rgb(var(--color-muted) / <alpha-value>)",
         secondary: "rgb(var(--color-secondary) / <alpha-value>)",
-        setting:"rgb(var(--color-setting)/<alpha-value>)",
         supp: "rgb(var(--color-supp) / <alpha-value>)",
         tertiary: "rgb(var(--color-tertiary) / <alpha-value>)",
         grayc: "rgb(var(--color-gray) / <alpha-value>)",
@@ -22,6 +21,11 @@ module.exports = {
         card_title: "rgb(var(--color-title-card))",
         icons_about: "rgb(var(--color-icons-about))",
         card: "rgb(var(--color-card) / <alpha-value>)",
+        nav: "rgb(var(--color-nav) / <alpha-value>)",
+        blue: "rgb(var(--color-blue) / <alpha-value>)",
+        purple: "rgb(var(--color-purple) / <alpha-value>)",
+        pink: "rgb(var(--color-pink) / <alpha-value>)",
+
 
         
       },
@@ -34,7 +38,6 @@ module.exports = {
         "grad-dark-2": "var(--grad-dark-2)",
         "grad-dark-3": "var(--grad-dark-3)",
         "grad-dark-4": "var(--grad-dark-4)",
-        "grad-dark-7": "var(--grad-dark-7)",
       },
     },
   },
