@@ -1,0 +1,20 @@
+{
+  "allLevels": "All",
+  "levels": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
+  },
+  "status": {
+    "all": "All",
+    "completed": "Completed",
+    "notCompleted": "Not Completed"
+  },
+  "myCourses": "My Courses",
+  "allCourses": "All Courses",
+  "myExercises": "My Exercises",
+  "allExercises": "All Exercises",
+  "myQuizzes": "My Quizzes",
+  "allQuizzes": "All Quizzes"
+
+}

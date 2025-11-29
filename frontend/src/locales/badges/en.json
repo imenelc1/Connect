@@ -1,0 +1,25 @@
+{
+  "header": {
+    "title": "Your Achievement Journey",
+    "subtitle": "Keep pushing! You're doing amazing 🎉",
+    "level": "Level 8"
+  },
+  "footer": {
+    "title": "You're on fire !",
+    "subtitle": "Incredible work, you're becoming a coding master!"
+  },
+  "tabs": {
+    "all": "All Badges",
+    "progress": "Progress",
+    "success": "Success",
+    "special": "Special"
+  },
+  "stats": {
+    "badges": "Badges",
+    "unlocked": "Unlocked",
+    "days": "Days",
+    "streak": "Current Streak",
+    "xp": "XP",
+    "totalPoints": "Total Points"
+  }
+}
