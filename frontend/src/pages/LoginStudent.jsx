@@ -1,136 +1,232 @@
-import { useState } from "react";
-import AuthTabs from "../components/common/AuthTabs";
-import InputField from "../components/common/InputField";
-import Divider from "../components/common/Divider";
-import GoogleButton from "../components/common/GoogleButton";
-import PrimaryButton from "../components/common/PrimaryButton";
-import Mascotte from "../assets/mascotte.svg";
-import LogoLight from "../assets/LogoLight.svg";
+import { useState, useContext , useEffect } from "react";
+import AuthTabs from "../components/common/AuthTabs.jsx";
+import Button from "../components/common/Button.jsx";
+import Input from "../components/common/Input.jsx";
+import Mascotte from "../components/common/Mascotte.jsx";
 import api from "../services/api";
+import toast from "react-hot-toast";
+import { FiEye, FiEyeOff, FiGlobe } from "react-icons/fi";
+import { FaEnvelope, FaLock } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+
+import LogoComponent from "../components/common/LogoComponent.jsx";
+import ThemeButton from "../components/common/ThemeButton.jsx";
+import ThemeContext from "../context/ThemeContext.jsx";
+import LogoIconeComponent from "../components/common/IconeLogoComponent.jsx";
+
 export default function LoginStudent() {
-  const [activeTab, setActiveTab] = useState("signin");
+  const [activeTab] = useState("signin");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
- const handleSubmit = async (e) => {
+  const [errorEmail, setErrorEmail] = useState("");
+  const [errorPassword, setErrorPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [userRole, setUserRole] = useState(""); 
+
+
+  const { t, i18n } = useTranslation("login");
+
+  const { toggleDarkMode } = useContext(ThemeContext);
+ 
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
+  };
+
+  // ==============================
+  //      HANDLE SUBMIT
+  // ==============================
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg("");
+
+    setErrorEmail("");
+    setErrorPassword("");
+
+    if (!email) {
+      setErrorEmail(t("errors.emailRequired"));
+      return;
+    }
+
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email)) {
+      setErrorEmail(t("errors.invalidEmail"));
+      return;
+    }
+
+    if (!password) {
+      setErrorPassword(t("errors.passwordRequired"));
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorPassword(t("errors.passwordLength"));
+      return;
+    }
 
     try {
-      const response = await api.post("login/", {
-       adresse_email: email,
-       mot_de_passe: password,
+const res = await api.post("login/", { 
+  email, 
+  password,
+  role: "etudiant" // <-- Obligatoire pour que le backend sache que c'est un étudiant
+});      
+  console.log(" LOGIN SUCCESS:", res.data); // <---- IMPORTANT
+  
+  localStorage.setItem("user", JSON.stringify(res.data));
 
-      });
-
-      console.log("SUCCESS LOGIN =", response.data);
-
-      alert("Connexion réussie ");
-
-      // Si tu veux stocker :
-      // localStorage.setItem("user", JSON.stringify(response.data));
-
-      // Si tu veux rediriger après login :
-      // window.location.href = "/dashboard";
+      toast.success(t("login.success"));
+      window.location.href = "/all-courses";
 
     } catch (error) {
-      console.log(error);
+  const backend = error.response?.data;
 
-      if (error.response) {
-        setErrorMsg(error.response.data.error);
-      } else {
-        setErrorMsg("Erreur réseau. Vérifie que le backend est lancé.");
-      }
-    }
+  // 🔥 SI BACKEND RENVOIE UN MESSAGE GÉNÉRAL (CAS 403, 401, etc.)
+  if (typeof backend?.detail === "string") {
+    setErrorPassword(backend.detail);
+    toast.error(backend.detail);
+    return;
+  }
+
+  if (typeof backend?.error === "string") {
+    setErrorPassword(backend.error);
+    toast.error(backend.error);
+    return;
+  }
+
+  //  ANALYSE NORMALISÉE
+  if (backend && typeof backend === "object") {
+    const mapKey = {
+      email: "email",
+      adresse_email: "email",
+      mot_de_passe: "password",
+      password: "password",
+      non_field_errors: "password",
+      detail: "password",
+    };
+
+    Object.keys(backend).forEach((key) => {
+      const val = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
+      const target = mapKey[key] || key;
+
+      if (target === "email") setErrorEmail(val);
+      if (target === "password") setErrorPassword(val);
+    });
+
+    return;
+  }
+
+  //  Erreur réseau
+  setErrorPassword("Erreur réseau");
+  toast.error("Erreur réseau");
+}
+
   };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Logo en haut à gauche */}
-      <div className="absolute top-4 left-4">
-        <img src={LogoLight} alt="Logo" className="w-32" />
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-surface px-4 sm:px-0 pb-50">
+      
+             {/* Header */}
+  <div className="flex w-full mb-4 items-center justify-between px-4 pt-12">
 
-      {/* Boutons Sign in / Sign up au-dessus du cadre */}
-        <AuthTabs role="student" active="signin" />
+    {/* Logo normal (grand) — visible seulement md+ */}
+    <div className="hidden md:block">
+      <LogoComponent className="-mt-10 ml-20" />
+    </div>
+
+    {/* Petit logo — visible seulement sur mobile */}
+    <div className="block md:hidden">
+      <LogoIconeComponent className="w-8 h-8 -ml-1" />
+    </div>
+
+   
+  </div>
 
 
-      {/* Cadre principal */}
-      <div className="flex w-[1000px] min-h-[550px] bg-white rounded-3xl shadow-lg overflow-hidden relative pt-12">
-        {/* Partie gauche : formulaire */}
-        <div className="w-1/2 p-10">
-          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6 w-full">
-            Welcome to <span className="text-[#4F9DDE]">connect</span>
+      <AuthTabs
+          role={userRole || "student"}
+          active="signin"
+          tab1Label={t("login.signIn")}
+          tab2Label={t("login.signUp")}
+          className="mt-20 sm:mt-0"
+      />
+
+
+      <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[500px]  bg-card rounded-3xl shadow-lg overflow-hidden relative mt-5 mb-5">
+
+        {/* FORM */}
+        <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:m-10 bg-card">
+          <h2 className="text-2xl font-semibold text-center mb-6">
+            <span className="text-textc">{t("login.title")}</span>{" "}
+            <span className="text-muted">{t("login.connect")}</span>
           </h2>
-          {/* Message d'erreur */}
-          {errorMsg && (
-            <p className="text-red-500 text-sm text-center mb-3">
-              {errorMsg}
-            </p>
-          )}
-          <form className="space-y-4"onSubmit={handleSubmit}>
-            <InputField
-              label=" email address"
-              placeholder=" email address"
-              icon="email"
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+
+            <Input
+              label={t("login.email")}
               value={email}
+              placeholder={t("login.email")}
               onChange={(e) => setEmail(e.target.value)}
+              icon={<FaEnvelope />}
+              error={errorEmail}
             />
-            <InputField
-              label="Enter your Password"
-              placeholder="Password"
-              type="password"
-              icon="password"
-              showForgot={true}
+
+            <Input
+              label={t("login.password")}
+              type={showPassword ? "text" : "password"}
               value={password}
+              placeholder={t("login.password")}
               onChange={(e) => setPassword(e.target.value)}
+              icon={<FaLock />}
+              error={errorPassword}
+              rightIcon={
+                showPassword ? (
+                  <FiEyeOff size={18} onClick={() => setShowPassword(false)} className="cursor-pointer" />
+                ) : (
+                  <FiEye size={18} onClick={() => setShowPassword(true)} className="cursor-pointer" />
+                )
+              }
             />
-            <Divider text="Or" />
-            <GoogleButton />
-            <p className="text-sm text-gray-500 text-center mt-4">
-              Don't have an account?{" "}
-              <a href="#" className="text-[#4F9DDE] font-medium hover:underline">
-                Sign in
+
+            <Button text={t("login.signIn")} type="submit" />
+
+            <p className="text-sm text-center mt-4">
+              {t("login.noAccount")}{" "}
+              <a href="/signup/student" className="text-muted hover:underline">
+                {t("login.signUp")}
               </a>
             </p>
-            <PrimaryButton
-              text={activeTab === "signin" ? "Sign in" : "Sign up"}
-              type="submit"
-            />
           </form>
         </div>
 
-        {/* Partie droite : robot */}
-        <div className="w-1/2 relative flex items-center justify-center bg-white">
-          {/* Rectangle "Hello enseignant!" */}
-          <div className="absolute top-4 right-4 bg-white rounded-xl shadow p-9 w-max min-h-[80px] z-20">
-            <p className="text-gray-700 font-medium text-sm">
-              Welcome, dear  <br /> student!
-            </p>
+        {/* MASCOTTE - RESPONSIVE */}
+<div className="w-full lg:w-1/2 -relative flex items-center justify-center bg-card h-80 lg:h-auto mt-6 lg:mt-0 H-auto hidden lg:block">
 
-            {/* Petit cercle en haut à droite */}
-            <div
-              className="absolute -top-2 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow"
-              style={{ backgroundColor: "#FFFFFF" }}
-            >
-              <span
-                style={{
-                  color: "#4F9DDE",
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                }}
-              >
-                &lt;&gt;
-              </span>
-            </div>
-          </div>
+  {/* RESPONSIVE: Bulle floue taille adaptative */}
+          <div
+            className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full blur-3xl"
+            style={{
+              background: "rgba(52,144,220,0.6)",
+              top: "50%",
+              left: "70%",
+              transform: "translate(-50%, -50%)"
+            }}
+          />
 
-          {/* Fond nuage bleu clair derrière le robot */}
-            <div className="absolute w-72 h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} />
+  {/* Carte info au-dessus */}
+  <div className="absolute top-8 right-10 rounded-xl shadow p-6 sm:p-9 w-max min-h-[80px] bg-white z-20">
+    <p className="text-black font-medium text-sm whitespace-pre-line">
+      {t("login.welcome")}
+    </p>
+    <div className="absolute -top-5 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow bg-white">
+      <span className="text-[#4F9DDE] text-[20px] font-bold">&lt;&gt;</span>
+    </div>
+  </div>
 
+</div>
 
-          {/* Robot */}
-          <img src={Mascotte} alt="Robot Mascotte" className="w-72 z-10" />
-        </div>
+     <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-20 mr-10 " />
       </div>
     </div>
   );

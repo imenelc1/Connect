@@ -1,0 +1,31 @@
+{
+  "coursesTitle": "Cours",
+  "exercisesTitle": "Exercices",
+  "quizzesTitle": "Quiz",
+
+  "createCourseBtn": "Créer un nouveau cours",
+  "createExerciseBtn": "Créer un nouvel exercice",
+  "createQuizBtn": "Créer un nouveau quiz",
+
+  "searchPlaceholder": "Rechercher...",
+  "searchCourses": "Rechercher un cours...",
+
+  "levels": {
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé"
+  },
+
+  "continueCourse": "Continuer le cours",
+"continueExercise": "Continuer l’exercice",
+"continueQuiz": "Continuer le quiz",
+
+"restartCourse": "Recommencer le cours",
+"restartExercise": "Recommencer l’exercice",
+"restartQuiz": "Recommencer le quiz",
+
+"startCourse": "Commencer le cours",
+"startExercise": "Commencer l’exercice",
+"startQuiz": "Commencer le quiz"
+
+}

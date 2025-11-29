@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx,html}",
     "./public/index.html",
@@ -9,7 +9,9 @@ export default {
     extend: {
       colors: {
         primary: "rgb(var(--color-primary) / <alpha-value>)",
+        muted: "rgb(var(--color-muted) / <alpha-value>)",
         secondary: "rgb(var(--color-secondary) / <alpha-value>)",
+        supp: "rgb(var(--color-supp) / <alpha-value>)",
         tertiary: "rgb(var(--color-tertiary) / <alpha-value>)",
         grayc: "rgb(var(--color-gray) / <alpha-value>)",
         background: "rgb(var(--color-bg) / <alpha-value>)",
@@ -18,6 +20,13 @@ export default {
         yellowc: "rgb(var(--color-yellow-code))" ,
         card_title: "rgb(var(--color-title-card))",
         icons_about: "rgb(var(--color-icons-about))",
+        card: "rgb(var(--color-card) / <alpha-value>)",
+        nav: "rgb(var(--color-nav) / <alpha-value>)",
+        blue: "rgb(var(--color-blue) / <alpha-value>)",
+        purple: "rgb(var(--color-purple) / <alpha-value>)",
+        pink: "rgb(var(--color-pink) / <alpha-value>)",
+
+        
       },
       backgroundImage: {
         "grad-1": "var(--grad-1)",

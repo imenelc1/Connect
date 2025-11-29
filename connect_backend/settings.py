@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'ia',
     'dashboard',
     'feedback',
+    'spaces',
     # API et CORS
     'rest_framework',
     'corsheaders',
@@ -66,6 +68,28 @@ CORS_ALLOWED_ORIGINS = [
      "http://127.0.0.1:5173",
      "http://localhost:5173",
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+]
+  
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+CORS_ALLOW_HEADERS = [
+    "*",
+]
+
 ROOT_URLCONF = 'connect_backend.urls'
 
 TEMPLATES = [
@@ -94,7 +118,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'connect',  # Nom de ta base PostgreSQL
         'USER': 'postgres',    # Ton nom d’utilisateur PostgreSQL
-        'PASSWORD': 'insecurebutswag',  # Celui que tu as choisi à l’installation
+        'PASSWORD': 'imene',  # Celui que tu as choisi à l’installation
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -147,3 +171,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.Utilisateur'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -27,6 +27,8 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     adresse_email = models.EmailField(unique=True)
     matricule = models.CharField(max_length=20, unique=True, null=True, blank=True)
 
+    points = models.IntegerField(default=0)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 

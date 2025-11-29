@@ -1,0 +1,35 @@
+{
+  "title": {
+    "page": "New exercise"
+  },
+  "form": {
+    "title_label": "Title",
+    "title_placeholder": "Your exercise title",
+
+    "statement_label": "Exercise statement",
+    "statement_placeholder": "Write the instructions for your exercise...",
+
+    "category_label": "Category",
+    "duration_label": "Duration",
+    "level_label": "Level"
+  },
+  "select": {
+    "placeholder": "Select",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "save_next": "Save & Next"
+  },
+  "exercises": {
+    "info": "Exercise Info",
+    "preview": "Preview Exercise"
+  }
+
+}
+
