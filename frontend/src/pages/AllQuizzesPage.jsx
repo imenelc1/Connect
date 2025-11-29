@@ -9,6 +9,9 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
+import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 const quizzes = [
   {
     title: "Quiz Structures de Données",
@@ -40,6 +43,7 @@ export default function AllQuizzesPage() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allQuizzes");
+const navigate = useNavigate();
 
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
@@ -104,6 +108,8 @@ export default function AllQuizzesPage() {
 
           {userRole === "enseignant" && (
             <Button variant="courseStart"
+            onClick={() => navigate("/create-quiz")}
+
              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all">
               <Plus size={18} />
               {t("createQuizBtn")}
