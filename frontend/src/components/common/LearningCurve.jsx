@@ -25,21 +25,21 @@ export default function LearningCurve({ title = "Avancement du cours" }) {
   const lastIndex = data.length - 1;
 
   return (
-    <div className="bg-card p-6 rounded-3xl shadow-md w-full h-full">
-      <h2 className="text-lg text-primary font-semibold mb-2">{title}</h2>
+    <div className="bg-card p-4 rounded-2xl shadow-md w-full h-full">
+      <h2 className="text-base text-primary font-semibold mb-1">{title}</h2>
 
-      <div className="w-full h-64">
+      <div className="w-full h-48"> {/* 🔥 plus petit */}
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid stroke="bg-rgb(var(--color-surface))" vertical={false} />
-            <XAxis dataKey="day" stroke="rgb(var(--color-gray))" />
-            <YAxis stroke="rgb(var(--color-gray))" />
-            <Tooltip contentStyle={{ borderRadius: "12px" }} />
+            <CartesianGrid stroke="rgba(0,0,0,0.05)" vertical={false} />
+            <XAxis dataKey="day" stroke="rgb(var(--color-gray))" tick={{ fontSize: 11 }} />
+            <YAxis stroke="rgb(var(--color-gray))" tick={{ fontSize: 11 }} />
+            <Tooltip contentStyle={{ borderRadius: "10px", padding: "4px 8px" }} />
 
             <Line
               type="monotone"
               dataKey="value"
-              stroke="rgb(var(--color-muted)"
+              stroke="rgb(var(--color-primary))"
               strokeWidth={2}
               dot={(props) => {
                 const { cx, cy, index } = props;
@@ -47,9 +47,8 @@ export default function LearningCurve({ title = "Avancement du cours" }) {
                 if (index === lastIndex) {
                   return (
                     <>
-                     
-                      <circle cx={cx} cy={cy} r={7} fill="rgb(var(--color-purpel))" />
-                      <circle cx={cx} cy={cy} r={4} fill="rgb(var(--color-primary))" />
+                      <circle cx={cx} cy={cy} r={5} fill="rgb(var(--color-purple))" />
+                      <circle cx={cx} cy={cy} r={3} fill="rgb(var(--color-primary))" />
                     </>
                   );
                 }
@@ -57,9 +56,9 @@ export default function LearningCurve({ title = "Avancement du cours" }) {
                 return (
                   <Dot
                     {...props}
-                    r={4}
+                    r={3}
                     stroke="rgb(var(--color-primary))"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     fill="white"
                   />
                 );

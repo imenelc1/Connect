@@ -93,7 +93,7 @@ const navigate = useNavigate();
               variant="courseStart"
                 onClick={() => navigate(`/courses`)}
 
-              className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
+              className={`${buttonStyles[course.level]} !w-auto px-4 py-2 whitespace-nowrap`}
             >
               {labels.start}
             </Button>
