@@ -26,10 +26,9 @@ export default function Navbar() {
   const [collapsed, setCollapsed] = useState(false);
   const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
 
-useEffect(() => {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser && storedUser !== "undefined") {
-    try {
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
       const parsed = JSON.parse(storedUser);
       const userObj = parsed.user || parsed.utilisateur || parsed;
 
@@ -38,12 +37,8 @@ useEffect(() => {
         prenom: userObj.prenom || "",
         role: userObj.role || "",
       });
-    } catch (err) {
-      console.error("Erreur parsing JSON user:", err);
-      setUserData({ nom: "", prenom: "", role: "" });
     }
-  }
-}, []);
+  }, []);
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("sidebarChanged", { detail: collapsed }));
@@ -67,7 +62,7 @@ useEffect(() => {
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
     { href: "/mystudents", label: t("mystudents"), icon: Users },
-    { href: "/community", label: t("mycommunity"), icon: MessageCircle },
+    { href: "/mycommunity", label: t("mycommunity"), icon: MessageCircle },
     { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
   ];
 
@@ -87,20 +82,11 @@ useEffect(() => {
 
 const quizRoutes = [
   "/all-quizzes",
-   "/create-quiz",
-    "/preview"
 
 ];
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
-
- 
-  const isQuizRelated = quizRoutes.some((path) =>
-    location.pathname.startsWith(path)
-  );
-
-  const isSettingRelated = location.pathname.startsWith("/settings");
 
   return (
     <aside
@@ -157,18 +143,6 @@ const quizRoutes = [
     forceActive = true;
   }
 
-          // ⭐ QUIZ BUTTON
-          if (item.href === "/all-quizzes" && isQuizRelated) {
-            forceActive = true;
-          }
-
-          // ⭐ SETTINGS BUTTON
-          if (item.href === "/settings" && isSettingRelated) {
-            forceActive = true;
-          }
-
-
-
           return (
             <NavLink
               key={i}
@@ -208,7 +182,7 @@ const quizRoutes = [
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
               isActive
                 ? "bg-grad-1 text-white"
-                : "bg-card text-red hover:bg-red/20"
+                : "bg-card text-red-500 hover:bg-red-100"
             }`
           }
         >

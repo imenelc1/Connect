@@ -10,7 +10,7 @@ export default function Select({ label, name, value, onChange, options = [], err
         name={name}
         value={value}
         onChange={onChange}
-        className={`border rounded-2xl p-2 focus:outline-none focus:text-black text-black/50 ${
+        className={`border rounded-2xl p-2 focus:outline-none focus:text-black ${
           error ? "border-red-500" : "border-grayc"
         }`}
       >

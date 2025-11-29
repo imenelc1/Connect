@@ -193,11 +193,7 @@ const InstructorSignUp = () => {
 
     try {
       const res = await api.post("register/", payload);
-      // 🔥 Stocker le token
-localStorage.setItem("token", res.data.token);
-
-// 🔥 Stocker les infos utilisateur
-localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("user", JSON.stringify(res.data));
       toast.success("Inscription réussie !");
       // redirection
       setTimeout(() => {

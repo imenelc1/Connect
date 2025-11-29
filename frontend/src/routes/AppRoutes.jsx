@@ -11,10 +11,6 @@ import ExercisePreview from "../pages/ExercisePreview";
 import AllExercisesPage from "../pages/AllExercisesPage";
 import AllQuizzesPage from "../pages/AllQuizzesPage";
 import CoursInfo from "../pages/CoursInfo";
-import CommunityPage from "../pages/CommunityPage";
-import CreateQuiz from "../pages/CreateQuiz";
-import QuizPreview from "../pages/QuizPreview";
-import Setting from "../pages/Setting";
 
 export default function AppRoutes() {
   return (
@@ -23,7 +19,7 @@ export default function AppRoutes() {
         <Route path="/" element={<Acceuil />} />
         <Route path="/choice" element={<Choice />} />
 
-        {/* SIGNUP */}
+       {/* SIGNUP */}
         <Route path="/signup/instructor" element={<InstructorSignup />} />
         <Route path="/signup/student" element={<StudentSignup />} />
 
@@ -33,6 +29,10 @@ export default function AppRoutes() {
 
         {/* ALL COURSES */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
+         {/* ALL Exercises */}
+        <Route path="/all-exercises" element={<AllExercisesPage />} />
+        {/* ALL QUIZZES */}
+        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
 
         {/* ALL EXERCISES */}
         <Route path="/all-exercises" element={<AllExercisesPage />} />
@@ -40,19 +40,15 @@ export default function AppRoutes() {
         {/* ALL QUIZZES */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
 
-        {/* NEW */}
+        {/*new exercise*/}
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
 
-        {/* COURSE INFO */}
+        {/*new course*/}
         <Route path="/CoursInfo" element={<CoursInfo />} />
-        <Route path="/create-quiz" element={<CreateQuiz />} />
-        <Route path="/preview" element={<QuizPreview />} />
 
-        {/* COMMUNITY PAGE */}
-        <Route path="/community" element={<CommunityPage />} />
-        {/*settings*/}
-        <Route path="/settings" element={<Setting />} />
+
+
 
       </Routes>
     </BrowserRouter>

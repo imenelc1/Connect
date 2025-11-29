@@ -1,9 +1,9 @@
 {
   "allLevels": "All",
   "levels": {
-    "beginner": "Beginner",
-    "intermediate": "Intermediate",
-    "advanced": "Advanced"
+    "Débutant": "Beginner",
+    "Intermédiaire": "Intermediate",
+    "Avancé": "Advanced"
   },
   "status": {
     "all": "All",
@@ -11,10 +11,5 @@
     "notCompleted": "Not Completed"
   },
   "myCourses": "My Courses",
-  "allCourses": "All Courses",
-  "myExercises": "My Exercises",
-  "allExercises": "All Exercises",
-  "myQuizzes": "My Quizzes",
-  "allQuizzes": "All Quizzes"
-
+  "allCourses": "All Courses"
 }

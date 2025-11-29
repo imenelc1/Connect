@@ -20,8 +20,6 @@
   --color-blue:79 157 222;
   --color-purple:163 170 237;
   --color-pink:187 104 200;
-  --color-red: 240 80 80;
-
 
 
 
@@ -30,8 +28,7 @@
   --grad-2: linear-gradient(135deg, #4f9ede12, #FFFFFF);
   --grad-3: linear-gradient(135deg, #a3aaed40, #FFFFFF);
   --grad-4: linear-gradient(135deg, #ba68c815, #FFFFFF);
-  --grad-5: radial-gradient(circle at center, #d5dfe8, #ffffff);
-  --grad-7: linear-gradient(100deg, #989dc7, #bdc0ea, #9fccec);
+  --grad-5: radial-gradient(circle at center, #bad7f0, #ffffff);
 
 }
 
@@ -43,7 +40,7 @@
   --color-supp:79 157 222;
   --color-tertiary: 186 104 200; 
   --color-gray: 229 231 235;     /* #E5E7EB */
-  --color-bg: 30 41 57;          /* sombre */
+  --color-bg: 15 18 26;          /* sombre */
   --color-surface: 25 32 45;
   --color-text: 255 255 255;
   --color-yellow-code:192 180 44;
@@ -75,8 +72,6 @@
   .bg-grad-2 { background-image: var(--grad-2); }
   .bg-grad-3 { background-image: var(--grad-3); }
   .bg-grad-4 { background-image: var(--grad-4); }
-  .bg-grad-5 { background-image: var(--grad-5); }
-  .bg-grad-7 { background-image: var(--grad-7); }
 
   /* Dégradés DARK (même classe → change automatiquement) */
   .dark .bg-grad-1 { background-image: var(--grad-dark-1); }
