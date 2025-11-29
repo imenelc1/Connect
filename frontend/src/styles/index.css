@@ -22,6 +22,7 @@
   --color-pink:187 104 200;
   --color-red: 240 80 80;
 
+   --color-gray-light: 220 225 230; /* gris clair */
 
 
 
@@ -36,6 +37,7 @@
   --grad-8: linear-gradient(to bottom,#FFFFFF , #C3C8F4);
 
 
+--grad-all: linear-gradient(135deg, #4F9DDE, #BA68C8);
 }
 
 /* ---- Palette DARK ---- */
@@ -81,6 +83,7 @@
   .bg-grad-5 { background-image: var(--grad-5); }
   .bg-grad-7 { background-image: var(--grad-7); }
 
+  .bg-grad-all { background-image: var(--grad-all); }
   /* Dégradés DARK (même classe → change automatiquement) */
   .dark .bg-grad-1 { background-image: var(--grad-dark-1); }
   .dark .bg-grad-2 { background-image: var(--grad-dark-2); }

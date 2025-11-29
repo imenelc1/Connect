@@ -18,6 +18,9 @@ import Setting from "../pages/Setting";
 import Dashboardens from "../pages/dash-ens";
 import Dashboardetu from "../pages/dash-etu";
 
+import Badges from "../pages/Badges"; // Ajoutez cette lign
+  
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -58,6 +61,8 @@ export default function AppRoutes() {
         {/*dashboard*/}
         <Route path="/dashboard-ens" element={<Dashboardens />} />
         <Route path="/dashboard-etu" element={<Dashboardetu />} />
+        
+        <Route path="/badges" element={<Badges />} />
 
       </Routes>
     </BrowserRouter>

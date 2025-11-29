@@ -55,7 +55,7 @@ useEffect(() => {
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
-    { href: "/ranking", label: t("ranking"), icon: Award },
+    { href: "/badges", label: t("ranking"), icon: Award },
     { href: "/community", label: t("community"), icon: MessageCircle },
     { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
   ];
