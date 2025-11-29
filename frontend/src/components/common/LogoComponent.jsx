@@ -6,17 +6,17 @@ import ThemeContext from "../../context/ThemeContext";
 import LogoLight from "../../assets/LogoLight.svg";
 import LogoDark from "../../assets/LogoDark.svg";
 
-function LogoComponent() {
-  // Récupère l’état du thème appliqué (darkMode = true/false)
+function LogoComponent({ className = "" }) {
   const { darkMode } = useContext(ThemeContext);
 
   return (
     <img
       src={darkMode ? LogoDark : LogoLight}
       alt="Logo"
-      className="w-20 h-20 sm:w-28 sm:h-28 md:w-28 md:h-28 ml-4"
+      className={`w-20 h-20 sm:w-28 sm:h-28 md:w-28 md:h-28 lg:w-32 lg:h-32 ${className}`}
     />
   );
 }
+
 
 export default LogoComponent;

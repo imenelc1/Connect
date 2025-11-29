@@ -16,13 +16,18 @@
   --color-grisclair:165 165 165;   /* #a5a5a5*/
   --color-yellow-code: 192 180 44;
   --color-card: 255 255 255;
+  --color-nav:79 157 222;
+  --color-blue:79 157 222;
+  --color-purple:163 170 237;
+  --color-pink:187 104 200;
 
 
-  /* Dégradés LIGHT */
+
+    /* Dégradés LIGHT */
   --grad-1: linear-gradient(135deg, #4F9DDE, #2F4F70);
-  --grad-2: linear-gradient(135deg, #4F9DDE, #FFFFFF);
-  --grad-3: linear-gradient(135deg, #A3AAED, #FFFFFF);
-  --grad-4: linear-gradient(135deg, #BA68C8, #FFFFFF);
+  --grad-2: linear-gradient(135deg, #4f9ede12, #FFFFFF);
+  --grad-3: linear-gradient(135deg, #a3aaed40, #FFFFFF);
+  --grad-4: linear-gradient(135deg, #ba68c815, #FFFFFF);
   --grad-5: radial-gradient(circle at center, #bad7f0, #ffffff);
 
 }
@@ -42,12 +47,14 @@
   --color-title-card:47 79 112;
   --color-icons-about: 195 153 210;
   --color-card: 47 79 112;
+  --color-nav:255 255 255;
+  
 
   /* Dégradés DARK */
   --grad-dark-1: linear-gradient(135deg, #4F9DDE, #A3AAED);
-  --grad-dark-2: linear-gradient(135deg, #4F9DDE, #2F4F70);
-  --grad-dark-3: linear-gradient(135deg, #A3AAED, #2F4F70);
-  --grad-dark-4: linear-gradient(135deg, #BA68C8, #2F4F70);
+  --grad-dark-2: linear-gradient(135deg, #4f9ede8c, rgba(47, 79, 112, 0.459));
+  --grad-dark-3: linear-gradient(135deg, #a3aaed72, #2f4f7066);
+  --grad-dark-4: linear-gradient(135deg, #ba68c878, #2f4f70);
 }
 
 /* ---- Base ---- */
@@ -60,7 +67,7 @@
 
 @layer utilities {
 
-  /* Dégradés LIGHT */
+   /* Dégradés LIGHT */
   .bg-grad-1 { background-image: var(--grad-1); }
   .bg-grad-2 { background-image: var(--grad-2); }
   .bg-grad-3 { background-image: var(--grad-3); }
@@ -78,4 +85,27 @@
 }
 .dark .bg-grad-5 {
   background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
+}
+
+
+/* Fix autofill bleu */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 30px white inset !important; /* remplace le bleu par blanc */
+  -webkit-text-fill-color: rgb(172, 179, 194) !important;      /* garde le texte lisible */
+}
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown 0.15s ease-out;
 }

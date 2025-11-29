@@ -25,5 +25,11 @@
   "buttons": {
     "cancel": "Cancel",
     "save_next": "Save & Next"
+  },
+  "exercises": {
+    "info": "Exercise Info",
+    "preview": "Preview Exercise"
   }
+
 }
+

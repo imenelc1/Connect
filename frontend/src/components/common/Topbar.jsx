@@ -1,28 +1,37 @@
 import React from "react";
-import LogoLight from "../../assets/LogoLight.svg";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
-export default function Topbar({ rightButton }) {
+export default function Topbar({ steps = [], activeStep, setActiveStep, className = "" }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
   return (
-    <div className="flex items-center justify-between w-full px-6 py-4 bg-transparent">
-      
-      {/* LEFT — LOGO + Curriculum */}
-      <div className="flex items-center gap-4">
-        <img
-          src={LogoLight}
-          alt="logo"
-          className="w-10 h-10 object-contain"
-        />
-        <span className="text-[#2B3A67] font-semibold text-lg">
-          Curriculum
-        </span>
-      </div>
+    <div className={`w-full bg-card rounded-2xl shadow-md p-4 flex items-center justify-center ${className}`}>
+      {steps.map((step, index) => {
+        const isActive = activeStep === index + 1;
+        const Icon = step.icon;
 
-      {/* RIGHT — Custom Button (optional) */}
-      {rightButton && (
-        <button className="px-5 py-2 bg-primary text-white rounded-xl shadow text-sm">
-          {rightButton}
-        </button>
-      )}
+        return (
+          <div
+            key={index}
+            onClick={() => {
+              setActiveStep && setActiveStep(index + 1);
+              step.route && navigate(step.route); // <-- navigation ici
+            }}
+            className={`flex flex-col items-center gap-1 cursor-pointer ${activeStep < index + 1 ? "opacity-60" : ""}`}
+          >
+            <div className="flex items-center gap-2">
+              <Icon size={18} className={isActive ? "text-muted" : "text-grayc"} />
+              <span className={`font-semibold text-sm md:text-base ${isActive ? "text-muted" : "text-grayc"}`}>
+                {t(step.label)}
+              </span>
+            </div>
+
+            <div className={`w-20 h-[3px] rounded-full ${isActive ? "bg-muted" : "bg-transparent"}`}></div>
+          </div>
+        );
+      })}
     </div>
   );
 }

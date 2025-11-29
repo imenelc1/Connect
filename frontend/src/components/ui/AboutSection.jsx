@@ -33,8 +33,8 @@ export default function AboutSection() {
 
         {/* Mission */}
         <section className="vision-section flex items-start gap-6">
-          <div className="our w-[145px] h-[80px] rounded-xl flex items-center justify-center bg-gradient-to-t from-[#cce0f5] to-white mt-6">
-            <GiAbstract013 size={40} className="text-icons_about" />
+          <div className=" our w-[80px] h-[40px] md:w-[100px] md:h-[60px] rounded-xl flex items-center justify-center bg-gradient-to-t from-[#cce0f5] to-white mt-6">
+            <GiAbstract013 size={30} className="text-icons_about" />
           </div>
           <div>
             <h2 className="text-[1.8rem] font-semibold mb-4 bg-gradient-to-t from-[#314D91] to-[#4F9DDE] bg-clip-text text-transparent">
@@ -48,8 +48,8 @@ export default function AboutSection() {
 
         {/* Values / Valeurs */}
         <section className="vision-section flex items-start gap-6">
-          <div className="our w-[145px] h-[80px] rounded-xl flex items-center justify-center bg-gradient-to-t from-[#cce0f5] to-white mt-6">
-            <AiOutlineHeart size={40} className="text-icons_about" />
+          <div className=" our w-[80px] h-[40px] md:w-[100px] md:h-[60px] rounded-xl flex items-center justify-center bg-gradient-to-t from-[#cce0f5] to-white mt-6">
+            <AiOutlineHeart size={30} className="text-icons_about" />
           </div>
           <div>
             <h2 className="text-[1.8rem] font-semibold mb-4 bg-gradient-to-t from-[#314D91] to-[#4F9DDE] bg-clip-text text-transparent">
@@ -63,8 +63,8 @@ export default function AboutSection() {
 
         {/* Vision */}
         <section className="vision-section flex items-start gap-6">
-          <div className="our w-[145px] h-[80px] rounded-xl flex items-center justify-center bg-gradient-to-t from-[#cce0f5] to-white mt-6">
-            <AiOutlineBulb size={40} className="text-icons_about" />
+         <div className=" our w-[80px] h-[40px] md:w-[100px] md:h-[60px] rounded-xl flex items-center justify-center bg-gradient-to-t from-[#cce0f5] to-white mt-6">
+            <AiOutlineBulb size={30} className="text-icons_about" />
           </div>
           <div>
             <h2 className="text-[1.8rem] font-semibold mb-4 bg-gradient-to-t from-[#314D91] to-[#4F9DDE] bg-clip-text text-transparent">

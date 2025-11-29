@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 // Composants UI
 import Header from "../common/Header";
@@ -9,14 +10,11 @@ import IconeLogoComponent from "../common/IconeLogoComponent";
 // Icône d’envoi
 import { FaPaperPlane } from "react-icons/fa";
 
-// Navigation
-import { useNavigate } from "react-router-dom";
+
 
 // Traduction pour la page d’accueil
 import { useTranslation } from "react-i18next";
 
-// Styles globaux
-import "../../styles/index.css";
 
 export default function HeroSection() {
 
@@ -47,7 +45,7 @@ export default function HeroSection() {
             <Button
               variant="heroPrimary"
               onClick={() => navigate("/choice")}
-              className="px-6 sm:px-8 md:px-12 py-2 bg-grad-1 text-white rounded-xl shadow flex items-center gap-2"
+              className="px-6 sm:px-8 md:px-12 py-2 bg-grad-1 text-white rounded-xl shadow flex items-center gap-2 mb-2"
             >
               <FaPaperPlane size={16} />
               {t("acceuil.button_start")}
@@ -56,7 +54,7 @@ export default function HeroSection() {
             {/* Bouton : Voir comment ça marche */}
             <Button
               variant="heroOutline"
-              className="px-6 sm:px-8 md:px-12 py-2 border border-primary text-primary bg-white rounded-xl hover:bg-bg"
+              className="px-6 sm:px-8 md:px-12 py-2 border border-primary text-primary bg-white rounded-xl hover:bg-bg mb-2"
             >
               {t("acceuil.button_work")}
             </Button>
@@ -64,7 +62,7 @@ export default function HeroSection() {
         </div>
 
         {/* Logo / illustration à droite */}
-        <IconeLogoComponent size="w-40 h-40"/>
+        <IconeLogoComponent size="w-40 h-40" className="hidden md:block"/>
       </div>
     </header>
   );

@@ -10,9 +10,10 @@
   
     "title_part4": "C",
     "title_part5": "and Algorithms",
-     "p_heroS":"Empowering Students And Teachers To Learn, Teach, And Collaborate Around C Programming",
-        "button_start": "Get Started",
-        "button_work":"How It Works",
+    "p_heroS":"Empowering Students And Teachers To Learn, Teach, And Collaborate Around C Programming",
+    "button_start": "Get Started",
+    "button_work":"How It Works",
+    "create_account":"Create Account",
 
       
 
@@ -74,9 +75,9 @@
 
 
 
-     "copyright": "Copy right ©2025",
+     "copyright": "Copyright ©2025",
     "all_rights": "|| all right reserved",
-    "footer_policy": "Booking Policy"
+    "footer_policy": "Confidentiality Policy"
 
 
     }

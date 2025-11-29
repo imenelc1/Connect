@@ -24,8 +24,8 @@ export default function Button({
     primary: `${base} bg-grad-1 text-white hover:bg-sky-600`,
 
     ca: `${base} flex items-center space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-3
-         px-2 sm:px-3 md:px-7 lg:px-10 text-xs sm:text-sm lg:text-lg
-         bg-primary text-white rounded-full shadow-md hover:opacity-90`,
+         px-2 sm:px-3 md:px-7 lg:px-5 text-xs sm:text-sm lg:text-lg
+         bg-grad-1 text-white rounded-full shadow-md hover:opacity-90`,
 
     send: `${base} text-white`,
 
@@ -40,6 +40,11 @@ export default function Button({
     heroOutline: `${base} border border-[var(--color-primary)]
                   text-[var(--color-primary)] bg-white rounded-xl font-medium
                   hover:bg-[var(--color-bg)] px-12 py-2 transition`,
+    courseStart:`${base}
+      rounded-full px-2 py-2  hover:bg-grad-1 hover:text-surface transition-all shadow-sm"`,
+    createCourse :`${base} flex items-center gap-2
+      px-6 py-2 rounded-full bg-grad-3 text-white font-medium shadow-md
+      hover:opacity-90 transition-all`,
   };
 
   // Icônes automatiques selon le variant
@@ -60,11 +65,17 @@ export default function Button({
       // Variant "send" a une couleur spéciale définie inline
       style={variant === "send" ? { backgroundColor: "#4F9DDE" } : {}}
     >
-      {/* Icône automatique si elle existe */}
-      {icons[variant] && icons[variant]}
+     {icons[variant] && icons[variant]}
 
-      {/* Texte ou children */}
-      {text || children}
+      {/* Pour variant "ca" → cacher le texte en mobile */}
+      {variant === "ca" ? (
+        <span className="hidden sm:inline">
+          {text || children}
+        </span>
+      ) : (
+        text || children
+      )}
+
     </button>
   );
 }

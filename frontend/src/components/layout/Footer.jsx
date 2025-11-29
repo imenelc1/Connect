@@ -6,7 +6,7 @@ export default function Footer() {
   const { t } = useTranslation("acceuil");
 
   return (
-    <footer className="bg-surface py-4 flex flex-col md:flex-row items-center justify-between px-80 text-center">
+    <footer className="bg-surface py-4 flex flex-row  justify-between md:px-80 px-10 text-center">
       
       {/* Texte principal au centre */}
       <p className="text-supp text-center">

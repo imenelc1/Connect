@@ -29,9 +29,6 @@ function Choice() {
   // Hook de traduction
   const { t } = useTranslation();
 
-  // Récupération de la fonction permettant de changer le thème
-  const { toggleDarkMode } = useContext(ThemeContext);
-
   return (
     <div className="Choice flex flex-col h-screen bg-grad-5">
 
@@ -42,7 +39,6 @@ function Choice() {
         </header>
 
         {/* Bouton pour activer/désactiver le dark mode */}
-        <ThemeButton onClick={toggleDarkMode} />
       </div>
 
       {/* Contenu principal */}
@@ -63,7 +59,7 @@ function Choice() {
           {/* Choix : Instructeur */}
           <Button
             onClick={() => navigate("/signup/instructor")}
-            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-3 py-3"
+            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-6 py-4"
           >
             <UserRound /> {t("choice.instructor")}
           </Button>
@@ -71,7 +67,7 @@ function Choice() {
           {/* Choix : Étudiant */}
           <Button
             onClick={() => navigate("/signup/student")}
-            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-3 py-3"
+            className="shadow-md rounded-2xl font-semibold font-poppins bg-grad-1 text-white flex items-center justify-center gap-3 px-6 py-4"
           >
             <GraduationCap /> {t("choice.student")}
           </Button>

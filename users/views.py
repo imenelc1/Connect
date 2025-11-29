@@ -36,52 +36,67 @@ class RegisterView(generics.CreateAPIView):
             "user": data
         }, status=status.HTTP_201_CREATED)
 
-
-
 class LoginView(APIView):
-    def post(self, request):
-        email = request.data.get("adresse_email") or request.data.get("email")
-        password = request.data.get("mot_de_passe") or request.data.get("password")
+    """
+    Login role-aware pour étudiants et enseignants.
+    Frontend doit envoyer: email, password, role
+    """
 
+    def post(self, request):
+        # Récupération et normalisation des champs
+        email = (request.data.get("email") or request.data.get("adresse_email") or "").strip()
+        password = (request.data.get("password") or request.data.get("mot_de_passe") or "").strip()
+        role = (request.data.get("role") or "").strip().lower()  # normalisation en minuscule
+
+        # -----------------------------
+        # Vérification des champs
+        # -----------------------------
         if not email or not password:
-            return Response({"error": "Email et mot de passe requis"}, status=400)
+            return Response({"error": "Email et mot de passe requis."}, status=400)
+        if role not in ["etudiant", "enseignant"]:
+            return Response({"error": "Rôle requis (etudiant ou enseignant)."}, status=400)
 
         try:
             user = Utilisateur.objects.get(adresse_email=email)
 
-            if user.check_password(password):
-                role = None
-                role_data = {}
+            # Vérification du mot de passe
+            if not user.check_password(password):
+                return Response({"error": "Mot de passe incorrect."}, status=401)
 
-                if hasattr(user, "etudiant"):
-                    role = "etudiant"
-                    role_data = {
-                        "specialite": user.etudiant.specialite,
-                        "annee_etude": user.etudiant.annee_etude,
-                    }
-
-                elif hasattr(user, "enseignant"):
-                    role = "enseignant"
-                    role_data = {
-                        "grade": user.enseignant.grade,
-                    }
-
+            # -----------------------------
+            # Vérification du rôle
+            # -----------------------------
+            if role == "etudiant":
+                if not hasattr(user, "etudiant"):
+                    return Response({"error": "Accès réservé aux étudiants."}, status=403)
+                # ✅ Connexion réussie étudiant
                 return Response({
                     "message": "Connexion réussie",
                     "user_id": user.id_utilisateur,
                     "nom": user.nom,
                     "prenom": user.prenom,
                     "email": user.adresse_email,
-                    "role": role,
-                    **role_data
+                    "role": "etudiant",
+                    "specialite": user.etudiant.specialite,
+                    "annee_etude": user.etudiant.annee_etude,
                 }, status=200)
 
-            return Response({"error": "Mot de passe incorrect"}, status=401)
+            elif role == "enseignant":
+                if not hasattr(user, "enseignant"):
+                    return Response({"error": "Accès réservé aux enseignants."}, status=403)
+                # ✅ Connexion réussie enseignant
+                return Response({
+                    "message": "Connexion réussie",
+                    "user_id": user.id_utilisateur,
+                    "nom": user.nom,
+                    "prenom": user.prenom,
+                    "email": user.adresse_email,
+                    "role": "enseignant",
+                    "grade": user.enseignant.grade
+                }, status=200)
 
         except Utilisateur.DoesNotExist:
-            return Response({"error": "Utilisateur introuvable"}, status=404)
-
-
+            return Response({"error": "Utilisateur introuvable."}, status=404)
 class AdminRegisterView(generics.CreateAPIView):
     serializer_class = AdministrateurSerializer
 
