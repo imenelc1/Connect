@@ -2,8 +2,9 @@ import React from "react";
 import { ChevronLeft, ChevronDown, Search } from "lucide-react";
 import CoursesSidebar from "../components/ui/CourseSidebarItem";
 import CourseContent from "../components/ui/CourseContent";
+import { MdAutoAwesome } from "react-icons/md";
 import { useTranslation } from "react-i18next";
-import Mascotte from "../assets/6.svg"; // Import direct du SVG
+import Mascotte from "../assets/6.svg";
 
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
@@ -17,20 +18,26 @@ export default function Courses() {
   return (
     <div className="w-full bg-[#F4F8FF] flex flex-col items-center">
       {/* HEADER */}
-      <header className="w-full max-w-7xl flex items-center justify-between py-6 px-4">
+      <header className="w-full max-w-7xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-6 px-4">
+        
+        {/* Titre + Back */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white shadow rounded-full flex items-center justify-center border border-[#dce7ff] cursor-pointer">
             <ChevronLeft className="text-blue-600" size={22} />
           </div>
-          <h1 className="text-3xl font-bold text-[#1B3A60]">{t("title")}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#1B3A60]">
+            {t("title")}
+          </h1>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Section droite */}
+        <div className="flex flex-wrap items-center gap-3 md:gap-4">
+
           {/* Recherche */}
-          <div className="relative">
+          <div className="relative w-full sm:w-64 md:w-80">
             <input
               placeholder={t("search")}
-              className="w-80 pl-10 pr-4 py-2 rounded-full border border-[#C7D8F7] shadow-sm focus:outline-none"
+              className="w-full pl-10 pr-4 py-2 rounded-full border border-[#C7D8F7] shadow-sm focus:outline-none"
             />
             <Search
               size={18}
@@ -38,23 +45,28 @@ export default function Courses() {
             />
           </div>
 
-          {/* Bouton Assistant IA */}
-          <button className="bg-[#3A78F2] hover:bg-[#2d64cc] text-white px-5 py-2 rounded-xl shadow">
+          {/* Assistant IA */}
+          <button className="flex items-center gap-2 bg-[#3A78F2] hover:bg-[#2d64cc] text-white px-4 py-2 rounded-xl shadow w-full sm:w-auto">
+            <MdAutoAwesome size={20} />
             {t("assistant")}
           </button>
 
           {/* Mascotte */}
-          <img src={Mascotte} alt="Mascotte" className="w-10 h-10" />
+          <img
+            src={Mascotte}
+            alt="Mascotte"
+            className="w-10 h-10 hidden sm:block"
+          />
 
-          {/* Bouton Mes cours */}
-          <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border shadow text-[#1B3A60]">
+          {/* Mes cours */}
+          <button className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border shadow text-[#1B3A60] w-full sm:w-auto">
             {t("myCourses")} <ChevronDown size={18} />
           </button>
 
-          {/* Switch langue */}
+          {/* Langue */}
           <button
             onClick={toggleLanguage}
-            className="bg-[#F4F8FF] hover:bg-[#E0E7FF] text-[#1B3A60] px-4 py-2 rounded-xl border shadow"
+            className="bg-[#F4F8FF] hover:bg-[#E0E7FF] text-[#1B3A60] px-4 py-2 rounded-xl border shadow w-full sm:w-auto"
           >
             {i18n.language === "fr" ? "EN" : "FR"}
           </button>
@@ -62,9 +74,9 @@ export default function Courses() {
       </header>
 
       {/* MAIN GRID */}
-      <div className="w-full max-w-7xl flex items-start gap-8 px-4 pb-10">
+      <div className="w-full max-w-7xl flex flex-col lg:flex-row items-start gap-6 px-4 pb-10">
         <CoursesSidebar />
-        <CourseContent t={t} /> {/* Passe t pour traduire quiz & feedback */}
+        <CourseContent t={t} />
       </div>
     </div>
   );
