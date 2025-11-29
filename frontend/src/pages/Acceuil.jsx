@@ -5,8 +5,7 @@ import React from "react";
 import HeroSection from "../components/layout/HeroSection";
 import Footer from "../components/layout/Footer";
 import Body from "../components/layout/Body";
-import SpacesPage from "./Spaces";
-import MyStudents from "./MyStudents";
+
 
 export default function Acceuil() {
 
@@ -21,8 +20,7 @@ export default function Acceuil() {
 
       {/* Pied de page */}
       <Footer />
-     <SpacesPage/>
-         <MyStudents/>
+
     </div>
   );
 }
