@@ -13,18 +13,18 @@ export default function CoursesSidebarItem() {
   ];
 
   return (
-    <aside className="w-[280px] bg-white border border-[#D2E4FF] rounded-3xl p-4 space-y-4">
+    <aside className="w-[280px] bg-white border border-blue/20 rounded-3xl p-4 space-y-4">
       {courses.map((course, i) => (
         <div
           key={i}
           className={`p-4 rounded-2xl shadow-md border transition cursor-pointer ${
             course.active
-              ? "bg-gradient-to-br from-[#E6F3FF] to-[#BBD9FF] border-[#A3C7FF]"
-              : "bg-gradient-to-br from-[#F7FAFF] to-[#E8F1FF] border-[#DFE8FF]"
+              ? "bg-blue/10 border-blue text-blue"
+              : "bg-blue/5 border-blue/10"
           }`}
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-semibold text-[#203A60]">{course.title}</h2>
+            <h2 className="text-[15px] font-semibold">{course.title}</h2>
             {course.completed && <CheckCircle className="w-5 h-5 text-green-500" />}
           </div>
 
