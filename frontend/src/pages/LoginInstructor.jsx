@@ -63,6 +63,8 @@ const res = await api.post("login/", {
   password,
   role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
 });      console.log("Login API response:", res.data);
+ localStorage.setItem("access_token", res.data.token);  
+    localStorage.setItem("user", JSON.stringify(res.data.user));
       localStorage.setItem("user", JSON.stringify(res.data));
       toast.success("Connexion réussie !");
       window.location.href = "/all-courses";

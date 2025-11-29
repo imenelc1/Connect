@@ -22,10 +22,17 @@ class CoursSerializer(serializers.ModelSerializer):
         return f"{hours}h {minutes}m"
 
 
+
+class CoursSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Cours
+        fields = ['id_cours', 'titre_cour', 'niveau_cour', 'visibilite_cour', 'description', 'duration', 'utilisateur']
+
+
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = '__all__'
+        fields = ['id_section', 'cours', 'titre_section', 'ordre']
 
 class LeconSerializer(serializers.ModelSerializer):
     class Meta:

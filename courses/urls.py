@@ -1,5 +1,6 @@
+
 from django.urls import path
-from .views import CoursListCreateView, CoursDetailView, SectionListCreateView, LeconListCreateView, SectionDetailView, LeconDetailView
+from .views import CoursListCreateView, CreateSectionView,CreateCoursView, CoursDetailView, SectionListCreateView, LeconListCreateView, SectionDetailView, LeconDetailView
 from django.urls import path
 from .views import cours_list_api
 urlpatterns = [
@@ -9,7 +10,10 @@ urlpatterns = [
     path('sections/<int:pk>', SectionDetailView.as_view(), name='section-Detail'),  
     path('lecons/', LeconListCreateView.as_view(), name='lecon-list'),  
     path("api/cours/", cours_list_api, name="cours_api"),
-    path('lecons/<int:pk>', LeconDetailView.as_view(), name='lecon-Detail')            
+    path('lecons/<int:pk>', LeconDetailView.as_view(), name='lecon-Detail'),
+    path('create/', CreateCoursView.as_view(), name='create_cours'),
+    path('createSection/', CreateSectionView.as_view(), name='create_Section')            
+            
   
      
 ]
