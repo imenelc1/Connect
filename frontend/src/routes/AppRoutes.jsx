@@ -20,6 +20,7 @@ import Dashboardetu from "../pages/dash-etu";
 
 import Badges from "../pages/Badges"; // Ajoutez cette lign
   
+import Courses from "../pages/Courses";
 
 export default function AppRoutes() {
   return (
@@ -29,6 +30,7 @@ export default function AppRoutes() {
         <Route path="/choice" element={<Choice />} />
 
         {/* SIGNUP */}
+       {/* SIGNUP */}
         <Route path="/signup/instructor" element={<InstructorSignup />} />
         <Route path="/signup/student" element={<StudentSignup />} />
 
@@ -38,6 +40,10 @@ export default function AppRoutes() {
 
         {/* ALL COURSES */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
+         {/* ALL Exercises */}
+        <Route path="/all-exercises" element={<AllExercisesPage />} />
+        {/* ALL QUIZZES */}
+        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
 
         {/* ALL EXERCISES */}
         <Route path="/all-exercises" element={<AllExercisesPage />} />
@@ -63,6 +69,16 @@ export default function AppRoutes() {
         <Route path="/dashboard-etu" element={<Dashboardetu />} />
         
         <Route path="/badges" element={<Badges />} />
+        {/*new exercise*/}
+        <Route path="/new-exercise" element={<NewExercise />} />
+        <Route path="/exercise-preview" element={<ExercisePreview />} />
+         {/* courses */}
+          <Route path="/courses" element={<Courses />} />
+        {/*new course*/}
+        <Route path="/CoursInfo" element={<CoursInfo />} />
+
+
+
 
       </Routes>
     </BrowserRouter>

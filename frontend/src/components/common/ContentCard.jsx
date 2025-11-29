@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const levelStyles = {
   beginner: "bg-blue text-white",
@@ -21,6 +22,7 @@ const buttonStyles = {
 export default function ContentCard({ course, role, showProgress, className = "" }) {
   const { t } = useTranslation("contentPage");
   const location = useLocation();
+const navigate = useNavigate();
 
   // 👉 Determine automatiquement si on est sur la page cours, exercices ou quiz
   const pageType = location.pathname.includes("courses")
@@ -89,6 +91,8 @@ export default function ContentCard({ course, role, showProgress, className = ""
           ) : (
             <Button
               variant="courseStart"
+                onClick={() => navigate(`/courses`)}
+
               className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
             >
               {labels.start}

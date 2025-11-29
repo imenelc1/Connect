@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -211,3 +212,8 @@ class TentativeExerciceViewSet(viewsets.ModelViewSet):
             tentative.save()
             return Response({"status": "feedback added"})
         return Response({"error": "No feedback provided"}, status=400)
+=======
+from django.shortcuts import render
+
+# Create your views here.
+>>>>>>> origin/tinhinane

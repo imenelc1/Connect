@@ -30,6 +30,9 @@ import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
 
 import translationFRBadges from "./locales/badges/fr.json";
 import translationENBadges from "./locales/badges/en.json";
+import frCourses from "./locales/courses/fr-courses/translation.json";
+import enCourses from "./locales/courses/en-courses/translation.json";
+
 const resources = {
   fr: {
     translation: translationFR,
@@ -50,6 +53,7 @@ const resources = {
     Dashboard: translationFRDashboard,
     badges: translationFRBadges,
 
+    courses: frCourses,
 
   },
 
@@ -71,6 +75,7 @@ const resources = {
   setting: translationENSetting,
     Dashboard: translationENDashboard,
    badges: translationENBadges,
+    courses: enCourses,
   },
 };
 
