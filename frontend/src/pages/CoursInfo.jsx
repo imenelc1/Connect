@@ -18,6 +18,7 @@ export default function CoursePage() {
   const { t, i18n } = useTranslation("courseInfo");
   //  Ajout obligatoire pour que Topbar fonctionne !
   const [activeStep, setActiveStep] = useState(1);
+const [error, setError] = useState(null);
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
@@ -44,6 +45,8 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
  const handleSaveStep1 = async () => {
   const token = localStorage.getItem("access_token");
   const currentUserId = getCurrentUserId();
+console.log("token:", token);
+console.log("currentUserId:", currentUserId);
 
   if (!token || !currentUserId) {
     setError("Utilisateur non connecté");
@@ -125,6 +128,7 @@ const handleSaveStep2 = async (coursId, ordre) => {
       <div className="hidden lg:block w-64 min-h-screen">
         <Navbar />
       </div>
+
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
