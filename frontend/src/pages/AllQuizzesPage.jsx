@@ -81,11 +81,21 @@ const navigate = useNavigate();
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-      <UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
-        onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-      <div className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white text-gray-700 shadow-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 transition z-50">
-        <Bell size={22} strokeWidth={1.8} />
-      </div>
+     {/* Header Right Controls */}
+     <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+     
+       {/* Notification Icon */}
+       <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+                  <Bell size={16} />
+       </div>
+     
+       {/* User Circle */}
+       <UserCircle
+         initials={initials}
+         onToggleTheme={toggleDarkMode}
+         onChangeLang={(lang) => i18n.changeLanguage(lang)}
+       />
+     </div>
 
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"

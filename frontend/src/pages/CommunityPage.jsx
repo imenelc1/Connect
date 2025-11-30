@@ -51,6 +51,7 @@ const posts = [
     comments: []
   }
 ];
+const [showComments, setShowComments] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background">

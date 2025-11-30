@@ -69,7 +69,7 @@ const res = await api.post("login/", {
       console.log("Login API response:", res.data);
 
       toast.success("Connexion réussie !");
-      window.location.href = "/all-courses";
+      window.location.href = "/dashboard-ens";
 
     } catch (error) {
       const backend = error.response?.data;

@@ -155,7 +155,7 @@ export default function CourseContent({ t }) {
     <h3 className="text-xl font-bold text-muted mb-3">{t("yourFeedback")}</h3>
 
     <textarea
-      className="w-full h-48 border border-blue/20 rounded-2xl p-4 shadow-sm focus:outline-none"
+      className="w-full h-48 border border-blue/20 rounded-2xl p-4 shadow-sm focus:outline-none text-black/80"
       placeholder={t("feedbackPlaceholder")}
     ></textarea>
 

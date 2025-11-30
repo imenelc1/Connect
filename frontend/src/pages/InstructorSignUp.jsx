@@ -201,7 +201,7 @@ localStorage.setItem("user", JSON.stringify(res.data.user));
       toast.success("Inscription réussie !");
       // redirection
       setTimeout(() => {
-        window.location.href = "/all-courses";
+        window.location.href = "/dashboard-ens";
       }, 1200);
     } catch (err) {
       const apiErrors = err.response?.data;

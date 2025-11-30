@@ -136,7 +136,7 @@ if (/\d/.test(formData.fullname))
 
 
 toast.success("Inscription réussie !");
-navigate("/all-courses");
+navigate("/dashboard-etu");
 
     } catch (err) {
       const backend = err.response?.data;
