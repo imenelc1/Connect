@@ -14,11 +14,11 @@ export default function Cards({ icon, title, text, value, bg }) {
     >
       {/* Zone haute : texte + icône */}
       <div className="flex w-full justify-between">
-        <p className="text-grad-1 opacity-90 text-xl font-semibold leading-tight">
+        <p className="text-grad-2 opacity-90 text-xl font-semibold leading-tight">
           {t(text)}
         </p>
 
-        <div className="text-xl opacity-90 text-primary">
+        <div className="text-xl opacity-90 text-supp">
           {icon && React.cloneElement(icon, { size: 30 })}
         </div>
       </div>
@@ -27,7 +27,7 @@ export default function Cards({ icon, title, text, value, bg }) {
       <div className="flex w-full items-center justify-between">
         <div className="w-1 h-10 bg-grad-1 rounded-full opacity-50"></div>
 
-        <p className="text-5xl font-bold text-primary leading-none">
+        <p className="text-5xl font-bold text-muted leading-none">
           {value}
         </p>
       </div>

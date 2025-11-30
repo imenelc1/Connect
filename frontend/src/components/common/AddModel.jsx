@@ -48,7 +48,7 @@ export default function AddModal({
             <div key={index} className="flex flex-col gap-1">
 
               {/* Label en gras */}
-              <label className="font-semibold text-textc">
+              <label className="font-semibold text-black/50">
                 {field.label}
               </label>
 
@@ -64,7 +64,7 @@ export default function AddModal({
                   value={field.value}
                   onChange={field.onChange}
                   className="w-62 bg-gray-100 rounded-md px-3 py-2
-                             focus:outline-none focus:ring-2 focus:ring-primary"
+                             focus:outline-none focus:ring-2 focus:ring-primary text-black/80"
                 />
               )}
             </div>

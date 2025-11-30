@@ -39,7 +39,7 @@ export default function LearningCurve({ title = "Avancement du cours" }) {
             <Line
               type="monotone"
               dataKey="value"
-              stroke="rgb(var(--color-primary))"
+              stroke="rgb(var(--color-muted))"
               strokeWidth={2}
               dot={(props) => {
                 const { cx, cy, index } = props;

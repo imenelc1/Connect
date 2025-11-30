@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useContext } from "react";
 import { Search, Bell } from "lucide-react";
 import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
@@ -7,6 +7,9 @@ import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next"; // Pour support multilingue
+
+import ThemeContext from "../context/ThemeContext";
+
 
 export default function MyStudents() {
 
@@ -30,6 +33,9 @@ export default function MyStudents() {
     setModal(false);     // Ferme le modal après l’envoi
   };
 
+
+  const { toggleDarkMode } = useContext(ThemeContext);
+
   return (
     <div className="flex w-full">
 
@@ -42,14 +48,14 @@ export default function MyStudents() {
 
         {/* ========== HEADER ========== */}
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-3xl md:text-5xl font-semibold text-primary text-3d">
+          <h1 className="text-3xl md:text-5xl font-semibold text-muted text-3d">
             {t("myStudentsTitle")} {/* titre venant du fichier de traduction */}
           </h1>
 
           {/* Icônes à droite du header */}
           <div className="flex items-center gap-4">
             <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
-            <UserCircle initials="MH" /> {/* Avatar simple avec initiales */}
+            <UserCircle initials="MH" onToggleTheme={toggleDarkMode} /> {/* Avatar simple avec initiales */}
           </div>
         </div>
 
@@ -128,7 +134,7 @@ export default function MyStudents() {
               label: t("space"),
               // Menu déroulant pour choisir un espace
               element: (
-                <select value={space} onChange={e => setSpace(e.target.value)} className="w-full border rounded px-3 py-2">
+                <select value={space} onChange={e => setSpace(e.target.value)} className="w-full border rounded px-3 py-2 text-black/80">
                   <option value="UI/UX Class">{t("UIUXClass")}</option>
                   <option value="Mobile Design">{t("mobileDesign")}</option>
                   <option value="Web Development">{t("webDevelopment")}</option>

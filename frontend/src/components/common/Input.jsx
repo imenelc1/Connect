@@ -44,7 +44,7 @@ export default function Input({
       </div>
 
       {error && (
-        <p className="text-red-500 text-xs mt-1">
+        <p className="text-red text-xs mt-1">
           {error}
         </p>
       )}

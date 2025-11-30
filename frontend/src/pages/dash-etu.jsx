@@ -66,7 +66,7 @@ export default function Dashboardetu() {
       <div className="flex-1 pl-6 pr-3 sm:pl-8 sm:pr-5 md:pl-10 md:pr-6 lg:pl-12 lg:pr-8 space-y-4">
         {/* Header */}
          <header className="flex justify-between items-center gap-3">
-                <form className="flex-1 max-w-full lg:max-w-xs">
+                <form className="flex-1 max-w-full lg:max-w-xs ml-5">
                   <Input placeholder={t("Dashboard.Search")} icon={<Search size={16} />} />
                 </form>
         
@@ -98,14 +98,14 @@ export default function Dashboardetu() {
 
         {/* Quick stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-          <Cards text={t("Dashboard.AverageS")} value="68%" icon={<TrendingDown />} bg="bg-grad-6" />
-          <Cards text={t("Dashboard.Success")} value="68%" icon={<CircleCheckBig />} bg="bg-grad-8" />
-          <Cards text={t("Dashboard.AverageT")} value="4.2h" icon={<Book />} bg="bg-grad-6" />
-          <Cards text={t("Dashboard.ActiveC")} value="10" icon={<Clock3 />} bg="bg-grad-8" />
+          <Cards text={t("Dashboard.AverageS")} value="68%" icon={<TrendingDown />} bg="bg-grad-2" />
+          <Cards text={t("Dashboard.Success")} value="68%" icon={<CircleCheckBig />} bg="bg-grad-3" />
+          <Cards text={t("Dashboard.AverageT")} value="4.2h" icon={<Book />} bg="bg-grad-4" />
+          <Cards text={t("Dashboard.ActiveC")} value="10" icon={<Clock3 />} bg="bg-grad-2" />
         </div>
 
         {/* Progress bar */}
-        <div className="bg-white text-primary p-6 sm:p-10 rounded-2xl w-full shadow-lg">
+        <div className="bg-card text-primary p-6 sm:p-10 rounded-2xl w-full shadow-lg">
           <ProgressBar value={50} title={t("Dashboard.GlobalP")} />
         </div>
 

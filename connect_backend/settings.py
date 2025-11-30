@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     # Apps du projet
     'users',
     'courses',
+    'Exercices',
+    'Quiz',
     'forum',
     'ia',
     'dashboard',

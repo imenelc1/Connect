@@ -4,12 +4,12 @@ const ProgressBar = ({ value = 50, title = "Progression" }) => {
   return (
     <div className="w-full">
       {/* Titre */}
-      <p className="text-xl font-semibold mb-2 text-primary">{title}</p>
+      <p className="text-xl font-semibold mb-2 text-textc">{title}</p>
 
       {/* Barre */}
       <div className="w-full bg-gray-300 rounded-full h-4 relative">
         <div
-          className="h-4 rounded-full transition-all duration-300 bg-primary"
+          className="h-4 rounded-full transition-all duration-300 bg-blue"
           style={{ width: `${value}%` }}
         ></div>
 

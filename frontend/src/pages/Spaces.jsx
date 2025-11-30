@@ -48,7 +48,7 @@ export default function SpacesPage() {
             title: t("designSystemLibrary.title"),
             description: t("designSystemLibrary.description"),
             status: t("designSystemLibrary.status"),
-            bg: "bg-grad-2",
+            bg: "bg-grad-4",
         },
     ];
 
@@ -63,7 +63,7 @@ export default function SpacesPage() {
 
                 {/* ------- Titre & Bouton d'ajout ------- */}
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-primary">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted">
                         {t("spacesTitle")}
                     </h1>
 
@@ -120,7 +120,7 @@ export default function SpacesPage() {
                                 placeholder={t("fieldDescriptionPlaceholder")}
                                 value={spaceDesc}
                                 onChange={(e) => setSpaceDesc(e.target.value)}
-                                className="w-full bg-gray-100 dark:bg-gray-700 rounded-md px-3 py-2 
+                                className="w-full bg-grad-3 dark:bg-gray-700 rounded-md px-3 py-2 
                                           focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                                 rows={4}
                             />

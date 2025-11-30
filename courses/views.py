@@ -1,9 +1,49 @@
 from django.shortcuts import render
-
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 # Create your views here.
-from rest_framework import generics
-from .models import Cours, Section, Lecon, Exercice, Quiz, Question, Option
-from .serializers import CoursSerializer, SectionSerializer, LeconSerializer, ExerciceSerializer, QuizSerializer, QuestionSerializer, OptionSerializer
+from rest_framework import generics, viewsets, permissions
+from .models import Cours, Section, Lecon
+from .serializers import CoursSerializer, SectionSerializer, LeconSerializer, CoursSerializer1
+from users.jwt_auth import jwt_required
+from rest_framework.views import APIView
+
+class CreateCoursView(APIView):
+
+    @jwt_required
+    def post(self, request):
+        data = request.data.copy()
+        data["utilisateur"] = request.user_id  # 🟩 automatique, sécurisé
+
+        serializer = CoursSerializer1(data=data)
+
+        if serializer.is_valid():
+            cours = serializer.save()
+            return Response(CoursSerializer1(cours).data, status=201)
+
+        return Response(serializer.errors, status=400)
+
+class CreateSectionView(APIView):
+
+    @jwt_required
+    def post(self, request):
+        data = request.data.copy()
+        # on ne récupère pas l'utilisateur ici car Section est lié au cours
+        # il faut passer l'id du cours dans le payload
+        serializer = SectionSerializer(data=data)
+
+        if serializer.is_valid():
+            section = serializer.save()
+            return Response(SectionSerializer(section).data, status=201)
+
+        return Response(serializer.errors, status=400)
+
+@api_view(['GET'])
+def cours_list_api(request):
+    cours = Cours.objects.all()
+    serializer = CoursSerializer(cours, many=True)
+    return Response(serializer.data)
 
 # Liste + Création
 class CoursListCreateView(generics.ListCreateAPIView):
@@ -18,43 +58,21 @@ class CoursDetailView(generics.RetrieveUpdateDestroyAPIView):
 class SectionListCreateView(generics.ListCreateAPIView):
     queryset = Section.objects.all()
     serializer_class = SectionSerializer
-
+    
+# Détail, modification, suppression
+class SectionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Section.objects.all()
+    serializer_class = SectionSerializer
+    
+    
 class LeconListCreateView(generics.ListCreateAPIView):
     queryset = Lecon.objects.all()
     serializer_class = LeconSerializer
 
-class ExerciceListCreateView(generics.ListCreateAPIView):
-    queryset = Exercice.objects.all()
-    serializer_class = ExerciceSerializer
-
 # Détail, modification, suppression
-class ExerciceDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Exercice.objects.all()
-    serializer_class = ExerciceSerializer
+class LeconDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Lecon.objects.all()
+    serializer_class = LeconSerializer
 
-class QuizListCreateView(generics.ListCreateAPIView):
-    queryset = Quiz.objects.all()
-    serializer_class = QuizSerializer
 
-# Détail, modification, suppression
-class QuizDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Quiz.objects.all()
-    serializer_class = QuizSerializer
-
-class QuestionListCreateView(generics.ListCreateAPIView):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
-
-# Détail, modification, suppression
-class QuestionDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
-
-class OptionListCreateView(generics.ListCreateAPIView):
-    queryset = Option.objects.all()
-    serializer_class = OptionSerializer
-
-# Détail, modification, suppression
-class OptionDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Option.objects.all()
-    serializer_class = OptionSerializer
+""""""

@@ -40,7 +40,7 @@ const initials = user
   : "";
 
 useEffect(() => {
-  api.get("profile/")   // 🔥 grâce à ton interceptor, le token sera ajouté automatiquement
+  api.get("profile/")   //  le token sera ajouté automatiquement
     .then((res) => {
       setUser(res.data);
       console.log("Profil chargé :", res.data);
@@ -99,7 +99,7 @@ useEffect(() => {
       
       {/* Header */}
       <header className="flex justify-between items-center gap-3">
-        <form className="flex-1 max-w-full lg:max-w-xs">
+        <form className="flex-1 max-w-full lg:max-w-xs ml-5">
           <Input placeholder={t("Dashboard.Search")} icon={<Search size={16} />} />
         </form>
 
@@ -129,11 +129,11 @@ useEffect(() => {
       </div>
 
       {/* Quick stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Cards text="Average Student Progress" value="68%" icon={<TrendingDown size={18} />} bg="bg-grad-6" />
-        <Cards text="Success Rate" value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-8" />
-        <Cards text="Average time spent" value="4.2h" icon={<Book size={18} />} bg="bg-grad-6" />
-        <Cards text="Active Courses" value="10" icon={<Clock3 size={18} />} bg="bg-grad-8" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-textc">
+        <Cards text="Average Student Progress" value="68%" icon={<TrendingDown size={18}/>} bg="bg-grad-2"/>
+        <Cards text="Success Rate" value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-3" />
+        <Cards text="Average time spent" value="4.2h" icon={<Book size={18} />} bg="bg-grad-4" />
+        <Cards text="Active Courses" value="10" icon={<Clock3 size={18} />} bg="bg-grad-2" />
       </div>
 
       {/* Learning curve */}
@@ -146,10 +146,10 @@ useEffect(() => {
         
         {/* Quick actions */}
         <div>
-            <h2 className="text-xl text-primary font-bold mb-6">{t("Dashboard.Quick")}</h2>
+            <h2 className="text-xl text-muted font-bold mb-6">{t("Dashboard.Quick")}</h2>
 
             {/* Fond complètement opaque */}
-            <div className="bg-primary text-center text-white rounded-3xl  pl-6 shadow-lg">
+            <div className="bg-grad-1 text-center text-white rounded-3xl  pl-6 shadow-lg">
 
               <div className="flex flex-col">
 
@@ -201,7 +201,7 @@ useEffect(() => {
               labelStyle={{ fontSize: 12 }}
             >
               <Cell fill="rgb(var(--color-purple))" />
-              <Cell fill="rgb(var(--color-primary))" />
+              <Cell fill="rgb(var(--color-blue))" />
               <Cell fill="rgb(var(--color-pink))" />
             </Pie>
           </PieChart>

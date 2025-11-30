@@ -13,6 +13,7 @@
     "axios": "^1.13.2",
     "html-parse-stringify": "^3.0.1",
     "i18next": "^25.6.3",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.553.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
