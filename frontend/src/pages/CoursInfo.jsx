@@ -68,7 +68,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
     setCurrentCoursId(res.data.id_cours); // ou res.data.id selon ton serializer
 
     // Passer à l'étape suivante
-    setActiveStep(2);
+    //setActiveStep(2);
 
   } catch (err) {
     console.error("Erreur lors de la création :", err.response?.data || err.message);
@@ -114,6 +114,26 @@ const handleSaveStep2 = async (coursId, ordre) => {
 };
 
 
+const handleSaveAll = async () => {
+  try {
+    // 1) Sauvegarder étape 1 et récupérer l’ID du cours créé
+    await handleSaveStep1();
+
+    if (!currentCoursId) {
+      console.error("Cours ID non récupéré.");
+      return;
+    }
+
+    // 2) Sauvegarder étape 2 avec l’ID récupéré
+    await handleSaveStep2(currentCoursId, 1);
+
+    // 3) Passer à l’étape suivante
+    setActiveStep(3);
+
+  } catch (error) {
+    console.error("Erreur lors de l’enregistrement complet :", error);
+  }
+};
 
 
 
@@ -223,7 +243,7 @@ const handleSaveStep2 = async (coursId, ordre) => {
       </button>
       <button
         className="px-6 py-2 rounded-xl bg-grad-1 text-white font-medium"
-        onClick={handleSaveStep1}
+        onClick={() => setActiveStep(2)}
       >
         {t("course.save_next")}
       </button>
@@ -334,7 +354,7 @@ const handleSaveStep2 = async (coursId, ordre) => {
 
         <button
           className="px-8 py-2 rounded-xl bg-grad-1 text-white font-medium shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
-          onClick={() => handleSaveStep2(currentCoursId, 1)}
+          onClick={handleSaveAll}
         >
           {t("course.save_next")}
         </button>
