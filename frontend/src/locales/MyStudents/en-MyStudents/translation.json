@@ -1,0 +1,20 @@
+{
+  "myStudentsTitle": "My Students",
+  "searchStudentPlaceholder": "Search student...",
+  "createSpace": "+ Create Space",
+  "addStudent": "+ Add Student",
+  "addStudentTitle": "Add New Student",
+  "addStudentSubtitle": "Enter the student's information to add them to your class.",
+  "addStudentSubmit": "Add Student",
+  "addStudentCancel": "Cancel",
+  "email": "Email",
+  "emailPlaceholder": "ex: email@student.com",
+  "studentID": "Student ID",
+  "studentIDPlaceholder": "ST_00129",
+  "space": "Space",
+  "UIUXClass": "UI/UX Class",
+  "mobileDesign": "Mobile Design",
+  "webDevelopment": "Web Development",
+  "dataScience": "Data Science",
+  "active": "Active"
+}

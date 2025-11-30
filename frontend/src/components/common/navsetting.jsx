@@ -5,7 +5,7 @@ import ThemeContext from "../../context/ThemeContext";// Pour récupérer le mod
 // Composant NavSetting pour les onglets de la page Setting
 export default function NavSetting({ active = "profile", onChange }) {
    // Hook de traduction
-  const { t } = useTranslation("Setting");
+  const { t } = useTranslation("setting");
   // Définition des onglets avec leur id et texte traduit
   const tabs = [
     { id: "profile", label: t("Setting.Profile") },

@@ -46,59 +46,47 @@ export default function Navbar() {
 
   const studentLinks = [
     { href: "/", label: t("home"), icon: Home },
-    { href: "/dashboard", label: t("dashboard"), icon: Activity },
+    { href: "/dashboard-etu", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
-    { href: "/ranking", label: t("ranking"), icon: Award },
+    { href: "/badges", label: t("ranking"), icon: Award },
     { href: "/community", label: t("community"), icon: MessageCircle },
-    { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
+    { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },
   ];
 
   const teacherLinks = [
     { href: "/home", label: t("home"), icon: Home },
-    { href: "/dashboard", label: t("dashboard"), icon: Activity },
+    { href: "/dashboard-ens", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
-    { href: "/mystudents", label: t("mystudents"), icon: Users },
-    { href: "/mycommunity", label: t("mycommunity"), icon: MessageCircle },
-    { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
+    { href: "/my-students", label: t("mystudents"), icon: Users },
+    { href: "/community", label: t("mycommunity"), icon: MessageCircle },
+    { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },
   ];
 
   const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
 
-  // 🔥 Course pages matched
+  // 🔥 logique pour activer le bouton Courses dans toutes les pages liées aux cours
   const courseRoutes = [
-    "/CoursInfo",
-    "/Course",
-    "/EditCourse",
-    "/CreateCourse",
+    "/all-courses",
+  "/CoursInfo",
+
   ];
+  const exerciseRoutes = [
+  "/all-exercises",
+  "/new-exercise",
+  "/exercise-preview",
+];
+
+const quizRoutes = [
+  "/all-quizzes",
+
+];
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
-
-  // 🔥 Exercise pages matched
-  const exerciseRoutes = [
-    "/new-exercise",
-    "/exerciseInfo",
-    "/exercise",
-    "/edit-exercise",
-  ];
-  const isExerciseRelated = exerciseRoutes.some((path) =>
-    location.pathname.startsWith(path)
-  );
-
-  const quizRoutes = [
-    "/create-quiz",
-    "/preview"
-  ];
-  const isQuizRelated = quizRoutes.some((path) =>
-    location.pathname.startsWith(path)
-  );
-
-  const isSettingRelated = location.pathname.startsWith("/settings");
 
   return (
     <aside
@@ -143,27 +131,17 @@ export default function Navbar() {
         {links.map((item, i) => {
           let forceActive = false;
 
-          // ⭐ COURSE BUTTON
-          if (item.href === "/all-courses" && isCourseRelated) {
-            forceActive = true;
-          }
+          // ⭐ si c'est le bouton cours, on force active dans toutes les pages courses
+         if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
+   if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
 
-          // ⭐ EXERCISE BUTTON
-          if (item.href === "/all-exercises" && isExerciseRelated) {
-            forceActive = true;
-          }
-
-          // ⭐ QUIZ BUTTON
-          if (item.href === "/all-quizzes" && isQuizRelated) {
-            forceActive = true;
-          }
-
-          // ⭐ SETTINGS BUTTON
-          if (item.href === "/settings" && isSettingRelated) {
-            forceActive = true;
-          }
-
-
+  if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
+    forceActive = true;
+  }
 
           return (
             <NavLink
@@ -180,7 +158,7 @@ export default function Navbar() {
               <item.icon size={17} strokeWidth={1.5} />
               {!collapsed && <span className="ml-2">{item.label}</span>}
             </NavLink>
-          )
+          );
         })}
       </nav>
 
@@ -202,7 +180,9 @@ export default function Navbar() {
           to="/"
           className={({ isActive }) =>
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive ? "bg-grad-1 text-white" : "bg-card text-red-500 hover:bg-red-100"
+              isActive
+                ? "bg-grad-1 text-white"
+                : "bg-card text-red-500 hover:bg-red-100"
             }`
           }
         >

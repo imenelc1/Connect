@@ -9,7 +9,6 @@ import toast from "react-hot-toast";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FiGlobe,FiEye,FiEyeOff } from "react-icons/fi";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
-
 import Button from "../components/common/Button";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
@@ -62,8 +61,13 @@ const res = await api.post("login/", {
   email, 
   password,
   role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
-});      console.log("Login API response:", res.data);
-      localStorage.setItem("user", JSON.stringify(res.data));
+});     
+     console.log("Login API response:", res.data);
+      localStorage.setItem("token", res.data.token); // <- access, pas token
+
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      console.log("Login API response:", res.data);
+
       toast.success("Connexion réussie !");
       window.location.href = "/all-courses";
 
@@ -100,11 +104,7 @@ const res = await api.post("login/", {
       setErrorPassword("Erreur réseau");
     }
   };
-  //Permet de changer la langue (FR ↔ EN)
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-  };
+ 
   
   // Récupération de la fonction permettant de changer le thème
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -125,16 +125,7 @@ const res = await api.post("login/", {
       <LogoIconeComponent className="w-8 h-8 -ml-1" />
     </div>
 
-    {/* Actions */}
-    <div className="flex items-center gap-4">
-      <ThemeButton onClick={toggleDarkMode} />
-      <FiGlobe
-        size={20}
-        title="Changer la langue"
-        onClick={toggleLanguage}
-        className="cursor-pointer"
-      />
-    </div>
+   
   </div>
         
       {/* RESPONSIVE: AuthTabs avec margin top sur mobile */}
@@ -163,7 +154,7 @@ const res = await api.post("login/", {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errorEmail}
-            />
+              icon={<FaEnvelope size={16} className="text-grayc" />}            />
 
             <Input 
               label={t("login.password")}
@@ -173,15 +164,16 @@ const res = await api.post("login/", {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errorPassword}
+              icon={<FaLock size={16} className="text-grayc" />}
               rightIcon={
                 showPassword ? (
-                  <FiEyeOff
+                  <FaEyeOff
                     size={18}
                     onClick={() => setShowPassword(false)}
                     className="cursor-pointer text-grayc"
                   />
                 ) : (
-                  <FiEye
+                  <FaEye
                     size={18}
                     onClick={() => setShowPassword(true)}
                     className="cursor-pointer text-grayc"

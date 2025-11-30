@@ -9,6 +9,9 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
+import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 const quizzes = [
   {
     title: "Quiz Structures de Données",
@@ -40,6 +43,7 @@ export default function AllQuizzesPage() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allQuizzes");
+const navigate = useNavigate();
 
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
@@ -77,10 +81,9 @@ export default function AllQuizzesPage() {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-      <UserCircle initials={initials} />
-
+      <UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
+        onChangeLang={(lang) => i18n.changeLanguage(lang)} />
       <div className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white text-gray-700 shadow-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 transition z-50">
-        <ThemeButton onClick={toggleDarkMode} />
         <Bell size={22} strokeWidth={1.8} />
       </div>
 
@@ -96,13 +99,17 @@ export default function AllQuizzesPage() {
 
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
-            showCompletedFilter={userRole === "etudiant"}
-            onFilterChange={setFilterLevel}
-            activeFilter={filterLevel}
+            type="quizzes"
+  userRole={userRole}
+  onFilterChange={setFilterLevel}   // ✔️ correction
+  activeFilter={filterLevel}        // ✔️ correction
+  showCompletedFilter={userRole === "etudiant"}
           />
 
           {userRole === "enseignant" && (
             <Button variant="courseStart"
+            onClick={() => navigate("/create-quiz")}
+
              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all">
               <Plus size={18} />
               {t("createQuizBtn")}
@@ -115,10 +122,7 @@ export default function AllQuizzesPage() {
             <ContentCard
               key={idx}
               className={gradientMap[quiz.level]}
-              course={{
-                ...quiz,
-                level: t(`levels.${quiz.level}`),
-              }}
+              course={quiz}
               role={userRole}
               showProgress={userRole === "etudiant"}
             />

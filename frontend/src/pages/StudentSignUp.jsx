@@ -130,8 +130,11 @@ if (/\d/.test(formData.fullname))
 
     try {
       const res = await api.post("register/", payload);
+      console.log(res.data);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data));
 
-     localStorage.setItem("user", JSON.stringify(res.data));
+
 toast.success("Inscription réussie !");
 navigate("/all-courses");
 
@@ -187,16 +190,7 @@ navigate("/all-courses");
       <LogoIconeComponent className="w-8 h-8 -ml-1" />
     </div>
 
-    {/* Actions */}
-    <div className="flex items-center gap-4">
-      <ThemeButton onClick={toggleDarkMode} />
-      <FiGlobe
-        size={20}
-        title="Changer la langue"
-        onClick={toggleLanguage}
-        className="cursor-pointer"
-      />
-    </div>
+   
   </div>
 
       <AuthTabs

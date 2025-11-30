@@ -1,0 +1,25 @@
+{
+  "header": {
+    "title": "Votre parcours de réussite",
+    "subtitle": "Continuez comme ça ! Vous faites des merveilles 🎉",
+    "level": "Niveau 8"
+  },
+  "footer": {
+    "title": "Vous êtes en feu !",
+    "subtitle": "Travail incroyable, vous devenez un maître du code !"
+  },
+  "tabs": {
+    "all": "Tous les badges",
+    "progress": "Progrès",
+    "success": "Réussites",
+    "special": "Spéciaux"
+  },
+  "stats": {
+    "badges": "Badges",
+    "unlocked": "Débloqués",
+    "days": "Jours",
+    "streak": "Série en cours",
+    "xp": "XP",
+    "totalPoints": "Points totaux"
+  }
+}

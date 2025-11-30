@@ -1,0 +1,19 @@
+{
+  "title": "Courses",
+  "search": "Search...",
+  "assistant": "AI Assistant",
+  "myCourses": "My courses",
+  "chapterPrev": "Previous chapter",
+  "chapterNext": "Next chapter",
+  "readyQuiz": "Ready to test your knowledge?",
+  "quizDesc": "Take the chapter quiz to validate your understanding",
+  "startQuiz": "Start the quiz",
+  "rateCourse": "Rate the course out of 5:",
+  "send": "Send",
+
+  "feedback1": "Algorithms classes helped me develop my logic skills.",
+  "feedback2": "Practical exercises boosted my understanding of C.",
+  "feedback3": "Thanks to CONNECT, I passed my exams with excellent grades.",
+   "yourFeedback": "Your feedback",
+  "feedbackPlaceholder": "Share your comments, suggestions or remarks..."
+}

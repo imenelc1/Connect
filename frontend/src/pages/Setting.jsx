@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 // Styles globaux
 import "../styles/index.css";// Import des styles globaux
 import NavSetting from "../components/common/navsetting";
@@ -11,12 +11,14 @@ import { useContext } from "react";
 import Navbar from "../components/common/Navbar";
 import "../components/common/Navbar";
 import LogoComponent from "../components/common/LogoComponent";
+import axios from "../services/api";
+import api from "../services/api";
 
 
 
 export default function Setting() {
     // Hook de traduction
-    const { t, i18n } = useTranslation("Setting");
+    const { t, i18n } = useTranslation("setting");
     // un gestionnaire pour changer la langue
     const handleLanguageChange = (e) => {
         const lang = e.target.value;
@@ -26,6 +28,8 @@ export default function Setting() {
     const { darkMode, toggleDarkMode } = useContext(ThemeContext);
 
 
+const [user, setUser] = useState(null);
+const [loading, setLoading] = useState(true);
 
     const [activeTab, setActiveTab] = useState("profile");
     // Permet de changer la langue (FR ↔ EN)²
@@ -35,7 +39,34 @@ export default function Setting() {
     // };
 
 
+ useEffect(() => {
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found, cannot fetch profile");
+      setLoading(false);
+      return;
+    }
 
+    try {
+      const response = await api.get("profile/");
+      setUser(response.data);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchProfile();
+}, []);
+
+if (loading) {
+    return <div className="p-10 text-center text-textc">Loading...</div>;
+}
+if (!user) {
+    return <div className="p-10 text-center text-red-500">Cannot load user profile</div>;
+}
 
     return (
         // -------- GLOBAL LAYOUT --------
@@ -78,15 +109,15 @@ export default function Setting() {
                                 {/* Name + email + tag */}
                                 <div>
                                     <h2 className="text-lg sm:text-xl font-semibold text-textc whitespace-nowrap">
-                                        Sonia Benazzouz
+                                        {user?.nom} {user?.prenom}
                                     </h2>
 
                                     <p className="text-textc text-sm sm:text-base whitespace-nowrap">
-                                        mel@gmail.com
+                                        {user?.email}
                                     </p>
 
                                     <span className="inline-block mt-1 bg-secondary text-white text-xs px-3 py-1 rounded-full">
-                                        Professor
+                                        {user?.role === "enseignant" ? "Professor" : "Student"}
                                     </span>
                                 </div>
                             </div>
@@ -113,8 +144,8 @@ export default function Setting() {
                                     <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
                                         type="text"
+                                        defaultValue={`${user?.nom}`}
                                         className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
-                                        placeholder="Full Name"
                                     />
 
                                 </div>
@@ -125,10 +156,10 @@ export default function Setting() {
                                 <label className="text-textc smb-2"> {t("Profile.NickName")}</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input
+                                     <input
                                         type="text"
+                                        defaultValue={`${user?.prenom}`}
                                         className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
-                                        placeholder="Nick Name"
                                     />
                                 </div>
                             </div>
@@ -138,6 +169,7 @@ export default function Setting() {
                                 <label className="text-textc mb-2">{t("Profile.Datebirth")}</label>
                                 <input
                                     type="date"
+                                    defaultValue={user?.dateNaissance}
                                     className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/50"
                                 />
                             </div>
@@ -149,8 +181,8 @@ export default function Setting() {
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
                                         type="text"
+                                        defaultValue={user?.email}
                                         className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
-                                        placeholder="Email address"
                                     />
 
                                 </div>
@@ -162,27 +194,56 @@ export default function Setting() {
                                 <div className="relative">
                                     <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
-                                        type="text"
-                                        className=" w-full pl-10 bg-white  rounded-xl p-3 shadow-sm text-black/80"
-                                        placeholder="Registration number"
-                                    />
+                                            type="text"
+                                            defaultValue={user?.matricule}
+                                            className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
+                                        />
+
                                 </div>
                             </div>
 
-                            {/* Grade */}
-                            <div className="flex flex-col">
-                                <label className="text-textc mb-2">{t("Profile.Grade")}</label>
-                                <div className="relative">
-                                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <select className="w-full pl-10 bg-white  rounded-xl p-3 shadow-sm text-black/50">
-                                        <option>Grade</option>
-                                        <option>{t("Profile.Instructor")}</option>
-                                        <option>{t("Profile.Assistant")}</option>
-                                    </select>
+                            {/* ---- EXTRA FIELDS BASED ON ROLE ----*/}
+{user.role === "etudiant" && (
+    <>
+        {/* Specialité */}
+        <div className="flex flex-col">
+            <label className="text-textc mb-2">{t("Profile.Speciality")}</label>
+            <input
+                type="text"
+                defaultValue={user.specialite}
+                className="w-full bg-white rounded-xl p-3 shadow-sm text-black/80"
+            />
+        </div>
 
-                                </div>
+        {/* Année d'étude */}
+        <div className="flex flex-col">
+            <label className="text-textc mb-2">{t("Profile.StudyYear")}</label>
+            <input
+                type="text"
+                defaultValue={user.annee_etude}
+                className="w-full bg-white rounded-xl p-3 shadow-sm text-black/80"
+            />
+        </div>
+    </>
+)}
 
-                            </div>
+{user.role === "enseignant" && (
+    <>
+        {/* Grade */}
+        <div className="flex flex-col">
+            <label className="text-textc mb-2">{t("Profile.Grade")}</label>
+            <div className="relative">
+                <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                    type="text"
+                    defaultValue={user.grade}
+                    className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
+                />
+            </div>
+        </div>
+    </>
+)}
+
                         </div>
                     </div>
                 )}
@@ -315,11 +376,11 @@ export default function Setting() {
                         </div>
 
                         {/* DANGER ZONE */}
-                        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
+                        <div className="bg-red/10 border border-red rounded-2xl p-6 shadow-sm">
                             <div className="bg-white border  rounded-2xl p-6 shadow-sm">
 
-                                <h3 className="text-red-500 font-bold mb-3 flex items-center gap-2">
-                                    <span className="text-red-500 text-xl"><Trash /></span>
+                                <h3 className="text-red font-bold mb-3 flex items-center gap-2">
+                                    <span className="text-red text-xl"><Trash /></span>
                                     {t("Account.DangerZone")}
                                 </h3>
 
@@ -330,7 +391,7 @@ export default function Setting() {
                                 <Button
                                     variant="Setting"
                                     onClick={() => navigate("/")}
-                                     className="bg-red-500  hover:bg-red-600 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base w-[205px]"
+                                     className="bg-red  hover:bg-red/80 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base w-[205px]"
                                 >  {t("Account.DeleteAccount")}
                                 </Button>
                              

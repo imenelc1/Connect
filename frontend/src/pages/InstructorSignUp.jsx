@@ -193,7 +193,11 @@ const InstructorSignUp = () => {
 
     try {
       const res = await api.post("register/", payload);
-      localStorage.setItem("user", JSON.stringify(res.data));
+      // 🔥 Stocker le token
+localStorage.setItem("token", res.data.token);
+
+// 🔥 Stocker les infos utilisateur
+localStorage.setItem("user", JSON.stringify(res.data.user));
       toast.success("Inscription réussie !");
       // redirection
       setTimeout(() => {
@@ -246,16 +250,7 @@ const InstructorSignUp = () => {
       <LogoIconeComponent className="w-8 h-8 -ml-1" />
     </div>
 
-    {/* Actions */}
-    <div className="flex items-center gap-4">
-      <ThemeButton onClick={toggleDarkMode} />
-      <FiGlobe
-        size={20}
-        title="Changer la langue"
-        onClick={toggleLanguage}
-        className="cursor-pointer"
-      />
-    </div>
+    
   </div>
 
 

@@ -25,6 +25,9 @@ module.exports = {
         blue: "rgb(var(--color-blue) / <alpha-value>)",
         purple: "rgb(var(--color-purple) / <alpha-value>)",
         pink: "rgb(var(--color-pink) / <alpha-value>)",
+        red: "rgb(var(--color-red) / <alpha-value>)",
+
+         gray_light:"rgb(var(--color-gray-light) / <alpha-value>)",
 
         
       },
@@ -35,6 +38,8 @@ module.exports = {
         "grad-4": "var(--grad-4)",
         "grad-5": "var(--grad-5)",
         "grad-7": "var(--grad-7)",
+        "grad-6": "var(--grad-6)",
+        "grad-8": "var(--grad-8)",
         "grad-dark-1": "var(--grad-dark-1)",
         "grad-dark-2": "var(--grad-dark-2)",
         "grad-dark-3": "var(--grad-dark-3)",

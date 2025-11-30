@@ -50,10 +50,19 @@ const gradientMap = {
 
 
 export default function AllCoursesPage() {
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allcourses");
-const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+
+const storedUser = localStorage.getItem("user");
+
+// ⚠️ Si storedUser est null, vide ou "undefined", on renvoie null
+const userData =
+  storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+
+const userRole = userData?.role ?? null;
+const initials = userData
+  ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+  : "";
+
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
@@ -118,10 +127,11 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
         <ContentFilters
-          showCompletedFilter={userRole === "etudiant"}
-          onFilterChange={setFilterLevel}
-          activeFilter={filterLevel}
-          
+        type="courses"
+        userRole={userRole}                  // <-- corrige ici
+  activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
+  onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
+  showCompletedFilter={userRole === "etudiant"} // <- correct
         />
 
         {userRole === "enseignant" && (
@@ -143,10 +153,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
           <ContentCard
             key={idx}
             className={gradientMap[course.level] ?? "bg-grad-1"}
-            course={{
-              ...course,
-              level: t(`levels.${course.level}`) // <-- traduction du niveau
-            }}
+            course={course}
             role={userRole}
             showProgress={userRole === "etudiant"}
           />

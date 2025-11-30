@@ -29,9 +29,6 @@ function Choice() {
   // Hook de traduction
   const { t } = useTranslation();
 
-  // Récupération de la fonction permettant de changer le thème
-  const { toggleDarkMode } = useContext(ThemeContext);
-
   return (
     <div className="Choice flex flex-col h-screen bg-grad-5">
 
@@ -42,7 +39,6 @@ function Choice() {
         </header>
 
         {/* Bouton pour activer/désactiver le dark mode */}
-        <ThemeButton onClick={toggleDarkMode} />
       </div>
 
       {/* Contenu principal */}
