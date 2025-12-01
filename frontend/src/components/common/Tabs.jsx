@@ -1,10 +1,11 @@
 import Button from "./Button";
-
+import { useTranslation } from "react-i18next";
 export default function Tabs({ activeTab, setActiveTab }) {
+ const { t } = useTranslation("community");
   const tabs = [
-    { id: "recent", label: "Recent" },
-    { id: "popular", label: "Popular" },
-    { id: "myforums", label: "My forums" }
+    { id: "recent", label: t("tabs.recent") },
+    { id: "popular", label: t("tabs.popular") },
+    { id: "myforums", label: t("tabs.myforums") }
   ];
 
   return (

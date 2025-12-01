@@ -9,23 +9,26 @@ import Post from "../components/common/Post";
 import Button from "../components/common/Button";
 import ModernDropdown from "../components/common/ModernDropdown";
 import { Bell } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("recent");
   const userData = JSON.parse(localStorage.getItem("user"));
   const role = userData?.role;
+  const { t } = useTranslation("community");
 
   const forumOptions =
     role === "enseignant"
       ? [
-          { value: "all", label: "All forums" },
-          { value: "teacher-teacher", label: "Teacher ↔ Teacher" },
-          { value: "teacher-student", label: "Teacher ↔ Student" }
-        ]
+        { value: "all", label: "All forums" },
+        { value: "teacher-teacher", label: "Teacher ↔ Teacher" },
+        { value: "teacher-student", label: "Teacher ↔ Student" }
+      ]
       : [
-          { value: "all", label: "All forums" },
-          { value: "student-student", label: "Student ↔ Student" },
-          { value: "teacher-student", label: "Student ↔ Teacher" }
-        ];
+        { value: "all", label: "All forums" },
+        { value: "student-student", label: "Student ↔ Student" },
+        { value: "teacher-student", label: "Student ↔ Teacher" }
+      ];
 
   const [forumType, setForumType] = useState("all");
 
@@ -73,8 +76,8 @@ export default function CommunityPage() {
   const filteredPosts = activeTab === "popular"
     ? [...posts].sort((a, b) => b.likes - a.likes)
     : activeTab === "myforums"
-    ? posts.filter((p) => p.authorInitials === initials)
-    : posts;
+      ? posts.filter((p) => p.authorInitials === initials)
+      : posts;
 
   // -------------------------------
   // ✔ FILTRE SELON LE RÔLE (enseignant / étudiant)
@@ -128,33 +131,33 @@ export default function CommunityPage() {
       <Navbar />
       <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
 
-  {/* Notification Icon */}
-  <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
-    <Bell size={18} />
-  </div>
+        {/* Notification Icon */}
+        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+          <Bell size={18} />
+        </div>
 
-  {/* User Circle */}
-  <div className="flex items-center">
-    <UserCircle
-      initials={initials}
-      onToggleTheme={toggleDarkMode}
-      onChangeLang={(lang) => i18n.changeLanguage(lang)}
-    />
-  </div>
+        {/* User Circle */}
+        <div className="flex items-center">
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
+        </div>
 
-</div>
-      
+      </div>
+
       <div className="flex-1 ml-56 p-8 transition-all relative">
 
-        <h1 className="text-3xl font-bold mb-2 text-blue">Community</h1>
+        <h1 className="text-3xl font-bold mb-2 text-blue">{t("community.title")}</h1>
         <p className="mb-6 text-grayc">
-          Exchange with other instructors and share your experience
+          {t("community.subtitle")}
         </p>
 
         {/* WRITE POST */}
         <div className="bg-card shadow-lg rounded-3xl p-5 mb-6 border border-blue/20">
           <Input
-            placeholder="Share with the community..."
+            placeholder={t("community.placeholder")}
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
             className="bg-surface text-textc border border-blue/20 rounded-full px-5 py-3"
@@ -163,7 +166,7 @@ export default function CommunityPage() {
           <div className="flex justify-end mt-3">
             <Button
               variant="send"
-              text="Send"
+              text={t("community.send")}
               className="!w-auto px-6 py-2"
               onClick={handleSendPost}
             />
@@ -177,9 +180,13 @@ export default function CommunityPage() {
           <ModernDropdown
             value={forumType}
             onChange={setForumType}
-            options={forumOptions}
-            placeholder="Select forum type"
+            options={forumOptions.map(o => ({
+              ...o,
+              label: t(`forums.${o.value}`)
+            }))}
+            placeholder={t("forums.select")}
           />
+
         </div>
 
         {/* POSTS */}
