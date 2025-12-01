@@ -22,8 +22,7 @@ export default function Acceuil() {
 
       {/* Pied de page */}
       <Footer />
-      <MyStudents />
-    <CoursePage />
+    
     
 
     </div>

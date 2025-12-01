@@ -5,6 +5,19 @@ import Comment from "./Comment";
 export default function Post({ authorInitials, authorName, time, title, likes, comments }) {
   const [showComments, setShowComments] = useState(false);
 
+  // --- NOUVEAU : état local du like ---
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(likes);
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikeCount(prev => prev - 1);
+    } else {
+      setLikeCount(prev => prev + 1);
+    }
+    setIsLiked(prev => !prev);
+  };
+
   return (
     <div className="bg-grad-2 rounded-3xl p-6 shadow-md border border-blue/10">
 
@@ -26,9 +39,17 @@ export default function Post({ authorInitials, authorName, time, title, likes, c
       <div className="flex gap-6 mb-4">
 
         {/* Likes */}
-        <div className="flex items-center gap-1 cursor-pointer">
-          <Heart className="text-red fill-red" size={18} />
-          <span className="text-textc">{likes}</span>
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          onClick={handleLike}
+        >
+          <Heart
+            size={18}
+            className={`transition ${
+              isLiked ? "text-red fill-red" : "text-grayc"
+            }`}
+          />
+          <span className="text-textc">{likeCount}</span>
         </div>
 
         {/* Comments */}

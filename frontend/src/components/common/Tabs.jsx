@@ -1,3 +1,5 @@
+import Button from "./Button";
+
 export default function Tabs({ activeTab, setActiveTab }) {
   const tabs = [
     { id: "recent", label: "Recent" },
@@ -6,21 +8,15 @@ export default function Tabs({ activeTab, setActiveTab }) {
   ];
 
   return (
-    <div className="flex gap-3 mb-6">
+    <div className="flex justify-center gap-3 mb-6">
       {tabs.map((tab) => (
-        <button
+        <Button
           key={tab.id}
+          text={tab.label}
           onClick={() => setActiveTab(tab.id)}
-          className={`
-            px-5 py-2 rounded-full transition-all shadow 
-            ${activeTab === tab.id
-              ? "bg-blue text-white"
-              : "bg-surface text-textc border border-grayc/20"
-            }
-          `}
-        >
-          {tab.label}
-        </button>
+          variant={activeTab === tab.id ? "tabActive" : "tab"}
+          className="!w-auto"
+        />
       ))}
     </div>
   );

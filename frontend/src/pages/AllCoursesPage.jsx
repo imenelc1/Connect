@@ -105,17 +105,21 @@ const initials = userData
 <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
 
   {/* Notification Icon */}
-  <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-             <Bell size={16} />
+  <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+    <Bell size={18} />
   </div>
 
   {/* User Circle */}
-  <UserCircle
-    initials={initials}
-    onToggleTheme={toggleDarkMode}
-    onChangeLang={(lang) => i18n.changeLanguage(lang)}
-  />
+  <div className="flex items-center">
+    <UserCircle
+      initials={initials}
+      onToggleTheme={toggleDarkMode}
+      onChangeLang={(lang) => i18n.changeLanguage(lang)}
+    />
+  </div>
+
 </div>
+
 
 
       <main
