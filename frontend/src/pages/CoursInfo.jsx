@@ -20,10 +20,12 @@ export default function CoursePage() {
     i18n.changeLanguage(newLang);
   };
 
+
+  
   const courseSteps = [
     { label: t("course.basic_info"), icon: Monitor },
     { label: t("course.curriculum"), icon: BookOpenCheck },
-    { label: t("course.publish_title"), icon: CheckCircle },
+    { label: t("course.publish_title"), icon: CheckCircle }
   ];
 
   // State initial
