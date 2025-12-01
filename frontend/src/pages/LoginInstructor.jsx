@@ -182,6 +182,14 @@ localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garde
                 )
               }
             />
+            <div className="flex justify-end -mt-4">
+              <a
+                href="/forgot-password"
+                className="text-sm text-muted hover:underline"
+              >
+                {t("login.forgotPassword")}
+              </a>
+            </div>
 
          
             <p className="text-sm text-grayc text-center mt-4">

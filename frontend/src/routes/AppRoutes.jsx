@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Acceuil from "../pages/acceuil";
+import Acceuil from "../pages/Acceuil";
 import Choice from "../pages/Choice";
 import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
@@ -19,10 +19,12 @@ import Dashboardens from "../pages/dash-ens";
 import Dashboardetu from "../pages/dash-etu";
 
 import Badges from "../pages/Badges"; // Ajoutez cette lign
-  
+
 import Courses from "../pages/Courses";
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 export default function AppRoutes() {
   return (
@@ -32,7 +34,7 @@ export default function AppRoutes() {
         <Route path="/choice" element={<Choice />} />
 
         {/* SIGNUP */}
-       {/* SIGNUP */}
+        {/* SIGNUP */}
         <Route path="/signup/instructor" element={<InstructorSignup />} />
         <Route path="/signup/student" element={<StudentSignup />} />
 
@@ -42,7 +44,7 @@ export default function AppRoutes() {
 
         {/* ALL COURSES */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
-         {/* ALL Exercises */}
+        {/* ALL Exercises */}
         <Route path="/all-exercises" element={<AllExercisesPage />} />
         {/* ALL QUIZZES */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
@@ -69,19 +71,23 @@ export default function AppRoutes() {
         {/*dashboard*/}
         <Route path="/dashboard-ens" element={<Dashboardens />} />
         <Route path="/dashboard-etu" element={<Dashboardetu />} />
-        
+
         <Route path="/badges" element={<Badges />} />
         {/*new exercise*/}
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
-         {/* courses */}
-          <Route path="/courses" element={<Courses />} />
+        {/* courses */}
+        <Route path="/courses" element={<Courses />} />
         {/*new course*/}
         <Route path="/CoursInfo" element={<CoursInfo />} />
         {/* My Students */}
         <Route path="/my-students" element={<MyStudents />} />
         {/* Spaces */}
         <Route path="/spaces" element={<Spaces />} />
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
 
 
 
