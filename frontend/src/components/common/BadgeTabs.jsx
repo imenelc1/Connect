@@ -15,7 +15,7 @@ export default function BadgeTabs({ activeTab, setActiveTab }) {
 
   return (
     <section className="mb-6">
-      <div className="flex justify-center gap-40 flex-wrap text-sm font-medium">
+      <div className="flex justify-around flex-wrap text-sm font-medium">
         {tabs.map(({ key, label, icon }) => (
           <BadgeButton
             key={key}

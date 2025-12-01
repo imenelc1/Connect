@@ -65,8 +65,7 @@ export default function Cards2({
 
           {/* OPTIONAL PROGRESS BAR */}
 
-          {progress !== null && <ContentProgress value={progress} status={status} />}
-
+          {progress !== null &&  <ContentProgress value={progress} status={status} className="[&>div>div]:bg-blue" />}
 
 
           {/* If NO progress bar → show status alone */}

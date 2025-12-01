@@ -9,12 +9,16 @@ import ThemeButton from "../components/common/ThemeButton";
 import Select from "../components/common/Select";
 import { Globe } from "lucide-react";
 import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
+//import axios from "axios";
+import { getCurrentUserId } from "../hooks/useAuth";
+import api from "../services/courseService";
 
 
 export default function CoursePage() {
   const { t, i18n } = useTranslation("courseInfo");
   //  Ajout obligatoire pour que Topbar fonctionne !
   const [activeStep, setActiveStep] = useState(1);
+const [error, setError] = useState(null);
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
@@ -28,6 +32,94 @@ export default function CoursePage() {
   { label: t("course.curriculum"), icon: BookOpenCheck },
   { label: t("course.publish_title"), icon: CheckCircle },
 ];
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [duration, setDuration] = useState("");
+  const [level, setLevel] = useState("");
+ const [sections, setSections] = useState([]); // tableau des sections
+const [newSectionTitle, setNewSectionTitle] = useState(""); // titre temporaire pour la section
+const [currentCoursId, setCurrentCoursId] = useState(null);
+
+
+
+ const handleSaveStep1 = async () => {
+  const token = localStorage.getItem("access_token");
+  const currentUserId = getCurrentUserId();
+console.log("token:", token);
+console.log("currentUserId:", currentUserId);
+
+  if (!token || !currentUserId) {
+    setError("Utilisateur non connecté");
+    return;
+  }
+
+  // Créer le payload à envoyer
+  const payload = {
+    titre_cour: title,
+    description: description,
+    duration: duration + ":00",
+    niveau_cour: level,
+    utilisateur: currentUserId, // ID envoyé directement depuis React
+  };
+
+  try {
+    const res = await api.post("courses/create/", payload, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    console.log("Cours créé :", res.data);
+    setCurrentCoursId(res.data.id_cours); // ou res.data.id selon ton serializer
+
+    // Passer à l'étape suivante
+    setActiveStep(2);
+
+  } catch (err) {
+    console.error("Erreur lors de la création :", err.response?.data || err.message);
+    alert("Erreur lors de la création du cours");
+  }
+};
+
+const handleSaveStep2 = async (coursId, ordre) => {
+  const token = localStorage.getItem("access_token");
+  const currentUserId = getCurrentUserId();
+
+  if (!token || !currentUserId) {
+    setError("Utilisateur non connecté");
+    return;
+  }
+
+  if (!newSectionTitle.trim()) {
+    alert("Le titre de la section ne peut pas être vide");
+    return;
+  }
+
+  const payload = {
+    cours: coursId,
+    titre_section: newSectionTitle,
+    utilisateur: currentUserId,
+     ordre: ordre,
+  };
+
+  try {
+    const res = await api.post("courses/createSection/", payload, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    console.log("Section créée :", res.data);
+    // Réinitialiser le champ
+    setNewSectionTitle("");
+  } catch (err) {
+    console.error("Erreur création section :", err.response?.data || err.message);
+    alert("Erreur lors de la création de la section");
+  }
+
+  setActiveStep(3);
+};
+
+
+
+
+
 
 
   return (
@@ -36,6 +128,7 @@ export default function CoursePage() {
       <div className="hidden lg:block w-64 min-h-screen">
         <Navbar />
       </div>
+
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
@@ -76,6 +169,8 @@ export default function CoursePage() {
       <Input
         placeholder={t("course.course_title_placeholder")}
         className="text-black"
+         value={title}
+          onChange={(e) => setTitle(e.target.value)}
       />
     </div>
 
@@ -85,8 +180,10 @@ export default function CoursePage() {
         {t("course.course_topic")}
       </label>
       <textarea
-        className="w-full min-h-[180px] border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2 text-black"
+        className="w-full min-h-[180px] border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2"
         text-black="true"
+         value={description}
+          onChange={(e) => setDescription(e.target.value)}
         placeholder={t("course.course_topic_placeholder")}
       />
     </div>
@@ -97,14 +194,11 @@ export default function CoursePage() {
         <label className="font-medium mb-2">
           {t("course.duration")}
         </label>
-        <Select
+        <input
           className="w-full rounded-full border border-grayc px-5 py-3 bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-          options={[
-            { value: "", label: t("select.placeholder") },
-            { value: "day", label: t("select.day") },
-            { value: "week", label: t("select.week") },
-            { value: "month", label: t("select.month") },
-          ]}
+          value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+          type="time"
         />
       </div>
 
@@ -114,11 +208,13 @@ export default function CoursePage() {
         </label>
         <Select
           className="w-full rounded-full border border-grayc px-5 py-3 bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+          value={level}
+          onChange={(e) => setLevel(e.target.value)}
           options={[
             { value: "", label: t("select.placeholder") },
-            { value: "Beginner", label: t("select.Beginner") },
-            { value: "Intermediate", label: t("select.Intermediate") },
-            { value: "Advanced", label: t("select.Advanced") },
+            { value: "debutant", label: t("select.Beginner") },
+            { value: "intermediaire", label: t("select.Intermediate") },
+            { value: "avance", label: t("select.Advanced") },
           ]}
         />
       </div>
@@ -131,7 +227,7 @@ export default function CoursePage() {
       </button>
       <button
         className="px-6 py-2 rounded-xl bg-grad-1 text-white font-medium"
-        onClick={() => setActiveStep(2)}
+        onClick={handleSaveStep1}
       >
         {t("course.save_next")}
       </button>
@@ -163,8 +259,9 @@ export default function CoursePage() {
           </div>
 
           <Input
+            value={newSectionTitle}
+            onChange={(e) => setNewSectionTitle(e.target.value)}
             placeholder={t("course.section_title_placeholder")}
-            readOnly
             className="!bg-transparent !border-none px-2 text-textc font-medium"
           />
 
@@ -187,7 +284,6 @@ export default function CoursePage() {
 
             <Input
               value={t("course.lesson")}
-              readOnly
               className="!bg-transparent !border-none text-textc"
             />
 
@@ -208,7 +304,6 @@ export default function CoursePage() {
 
             <Input
               value={t("course.lesson")}
-              readOnly
               className="!bg-transparent !border-none text-textc"
             />
 
@@ -243,7 +338,7 @@ export default function CoursePage() {
 
         <button
           className="px-8 py-2 rounded-xl bg-grad-1 text-white font-medium shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
-          onClick={() => setActiveStep(3)}
+          onClick={() => handleSaveStep2(currentCoursId, 1)}
         >
           {t("course.save_next")}
         </button>

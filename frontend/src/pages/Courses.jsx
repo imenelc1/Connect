@@ -2,13 +2,12 @@ import React from "react";
 import { ChevronLeft, ChevronDown, Search } from "lucide-react";
 import CoursesSidebar from "../components/ui/CourseSidebarItem";
 import CourseContent from "../components/ui/CourseContent";
-import { MdAutoAwesome } from "react-icons/md";
 import { useTranslation } from "react-i18next";
-import Mascotte from "../assets/6.svg";
 import { useContext } from "react";
 import UserCircle from "../components/common/UserCircle";
-
 import ThemeContext from "../context/ThemeContext";
+import HeadMascotte from "../components/ui/HeadMascotte";
+import IaAssistant from "../components/ui/IaAssistant";
 
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
@@ -21,19 +20,25 @@ export default function Courses() {
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
+  const storedUser = localStorage.getItem("user");
+
+// Si storedUser est null, vide ou "undefined", on renvoie null
+const userData =
+  storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+
+const userRole = userData?.role ?? null;
+const initials = userData
+  ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+  : "";
+
+
   return (
     <div className="w-full bg-background flex flex-col items-center">
       {/* HEADER */}
-      <header className="w-full max-w-7xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-6 px-4">
-        <UserCircle onToggleTheme={toggleDarkMode}/>
-        
-        {/* Back + Title */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-muted shadow rounded-full flex items-center justify-center border border-blue/20 cursor-pointer">
-            <ChevronLeft className="text-blue" size={22} />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-muted">{t("title")}</h1>
-        </div>
+      <header className="w-full max-w-7xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-6 px-4">    
+        {/*Title */}
+      
+          <h1 className="text-2xl md:text-3xl font-bold text-muted ml-10">{t("title")}</h1>
 
         {/* Right section */}
         <div className="flex flex-wrap items-center gap-3 md:gap-4">
@@ -51,26 +56,23 @@ export default function Courses() {
           </div>
 
           {/* IA Assistant */}
-          <button className="flex items-center gap-2 bg-blue hover:bg-blue/90 text-white px-4 py-2 rounded-xl shadow w-full sm:w-auto">
-            <MdAutoAwesome size={20} />
-            {t("assistant")}
-          </button>
-
-          {/* Mascotte */}
-          <img src={Mascotte} alt="Mascotte" className="w-10 h-10 hidden sm:block" />
+         <div className="flex gap-2 ml-5">
+           <IaAssistant />
+           <HeadMascotte />
+         </div>
 
           {/* My Courses */}
           <button className="flex items-center gap-2  px-4 py-2 rounded-xl border shadow text-muted w-full sm:w-auto">
             {t("myCourses")} <ChevronDown size={18} />
           </button>
 
-          {/* Language */}
-          <button
-            onClick={toggleLanguage}
-            className="bg-white hover:bg-blue/10 text-blue px-4 py-2 rounded-xl border shadow w-full sm:w-auto"
-          >
-            {i18n.language === "fr" ? "EN" : "FR"}
-          </button>
+                  {/* User Circle */}
+              <UserCircle
+                initials={initials}
+                onToggleTheme={toggleDarkMode}
+                onChangeLang={(lang) => i18n.changeLanguage(lang)}
+              />
+
         </div>
       </header>
 

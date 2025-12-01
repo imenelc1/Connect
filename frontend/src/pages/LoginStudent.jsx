@@ -84,7 +84,7 @@ localStorage.setItem("user", JSON.stringify(userWithRole));
 localStorage.setItem("token", res.data.token);
 
       toast.success(t("login.success"));
-      navigate("/all-courses");
+      navigate("/dashboard-etu");
 
     } catch (error) {
   const backend = error.response?.data;

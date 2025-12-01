@@ -56,7 +56,7 @@ export default function Navbar() {
   ];
 
   const teacherLinks = [
-    { href: "/home", label: t("home"), icon: Home },
+    { href: "/", label: t("home"), icon: Home },
     { href: "/dashboard-ens", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
@@ -182,7 +182,7 @@ const quizRoutes = [
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
               isActive
                 ? "bg-grad-1 text-white"
-                : "bg-card text-red-500 hover:bg-red-100"
+                : "bg-card text-red hover:bg-red/20"
             }`
           }
         >

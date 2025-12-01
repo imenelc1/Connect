@@ -26,18 +26,22 @@ import { PieChart, Pie, Cell, Tooltip } from "recharts";
 export default function Dashboardens() {
   // Hook de traduction
   const { t, i18n } = useTranslation("Dashboard");
+  
   // Récupérer darkMode depuis ThemeContext
    const navigate = useNavigate();
    const storedUser = localStorage.getItem("user");
 
    const userData =
   storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-// Récupérer darkMode depuis ThemeContext
-  const { toggleDarkMode } = useContext(ThemeContext);
+
 const [user, setUser] = useState(null);
 const initials = user
   ? `${user.nom?.[0] || ""}${user.prenom?.[0] || ""}`.toUpperCase()
   : "";
+
+
+// Récupérer darkMode depuis ThemeContext
+  const { toggleDarkMode } = useContext(ThemeContext);
 
 useEffect(() => {
   api.get("profile/")   //  le token sera ajouté automatiquement
@@ -108,10 +112,12 @@ useEffect(() => {
             <Bell size={16} />
           </div>
 
-          <div className="w-7 h-7 flex items-center justify-center">
-            <UserCircle size={20} initials={initials} onToggleTheme={toggleDarkMode}
-              onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-          </div>
+                   {/* User Circle */}
+                <UserCircle
+                  initials={initials}
+                  onToggleTheme={toggleDarkMode}
+                  onChangeLang={(lang) => i18n.changeLanguage(lang)}
+                />
         </div>
       </header>
 

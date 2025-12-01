@@ -63,13 +63,14 @@ const res = await api.post("login/", {
   role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
 });     
      console.log("Login API response:", res.data);
-      localStorage.setItem("token", res.data.token); // <- access, pas token
+      localStorage.setItem("access_token", res.data.token); 
+localStorage.setItem("currentUserId", res.data.user.id_utilisateur);
+localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garder si utile
 
-      localStorage.setItem("user", JSON.stringify(res.data.user));
       console.log("Login API response:", res.data);
 
       toast.success("Connexion réussie !");
-      window.location.href = "/all-courses";
+      window.location.href = "/dashboard-ens";
 
     } catch (error) {
       const backend = error.response?.data;

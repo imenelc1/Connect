@@ -1,6 +1,6 @@
 export default function CommentReply({ userInitials, userName, time, text }) {
   return (
-    <div className="flex items-start gap-3 ml-6">
+    <div className="flex items-start gap-3 ml-6 mt-2">
       <div className="bg-grad-1 w-9 h-9 rounded-full text-white flex items-center justify-center font-semibold">
         {userInitials}
       </div>

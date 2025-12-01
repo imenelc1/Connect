@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useContext } from "react";
 import { useTranslation } from "react-i18next";
 
 import Navbar from "../components/common/Navbar";
@@ -7,12 +7,14 @@ import BadgeStats from "../components/common/BadgeStats";
 import BadgeTabs from "../components/common/BadgeTabs";
 import BadgeGrid from "../components/common/BadgeGrid";
 import BadgeFooter from "../components/common/BadgeFooter";
+import ThemeContext from "../context/ThemeContext";
+
 
 import { MdAutoAwesome } from "react-icons/md";
 
 // List of badges
 const badges = [
-  { title: "Course Explorer", desc: "Complete your first course", xp: "+50 XP", category: "progress", locked: false },
+  { title: "Course Explorer", desc: "Complete your first course", xp: "+50 XP", category: "progress", locked: false, variant:"purple" },
   { title: "Halfway There", desc: "Reach 50% completion in a course", xp: "+100 XP", category: "progress", locked: true },
   { title: "Dedicated Learner", desc: "Finish 3 full courses", xp: "+150 XP", category: "success", locked: true },
   { title: "Marathon Coder", desc: "Spend over 10 hours total studying courses", xp: "+200 XP", category: "success", locked: true },
@@ -62,7 +64,26 @@ const getBadgeIcon = (title) => {
 
 export default function Badges() {
   const [activeTab, setActiveTab] = useState("all");
-  const { t, i18n } = useTranslation("badges");
+ const { t, i18n } = useTranslation("courses");
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
+    localStorage.setItem("lang", newLang);
+  };
+
+  const { toggleDarkMode } = useContext(ThemeContext);
+
+  const storedUser = localStorage.getItem("user");
+
+// Si storedUser est null, vide ou "undefined", on renvoie null
+const userData =
+  storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+
+const userRole = userData?.role ?? null;
+const initials = userData
+  ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+  : "";
 
   const filteredBadges =
     activeTab === "all" ? badges : badges.filter((b) => b.category === activeTab);
@@ -75,34 +96,13 @@ export default function Badges() {
 
   return (
     <>
-      <Navbar />
-      <BadgeHeader />
+    <div className="bg-surface">
+           <Navbar />
+      
+           <BadgeHeader />
 
-      <main className="ml-0 lg:ml-64 p-6 pt-10 min-h-screen bg-grad-5 text-textc">
-        
-        {/* Language Switcher */}
-        <div className="flex justify-end mb-4 gap-2">
-          <button
-            onClick={() => i18n.changeLanguage("fr")}
-            className="px-3 py-1 rounded-md bg-primary text-white shadow"
-          >
-            FR
-          </button>
-          <button
-            onClick={() => i18n.changeLanguage("en")}
-            className="px-3 py-1 rounded-md bg-primary text-white shadow"
-          >
-            EN
-          </button>
-        </div>
-
-        {/* AI Assistant button */}
-        <div className="flex justify-end mb-4">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-white font-semibold shadow">
-            <MdAutoAwesome className="text-lg" />
-            AI Assistant
-          </button>
-        </div>
+          <main className="ml-0 lg:ml-64 p-6 pt-10 min-h-screen text-textc">
+      
 
         {/* Stats */}
         <BadgeStats
@@ -122,6 +122,7 @@ export default function Badges() {
         {/* Footer */}
         <BadgeFooter />
       </main>
+    </div>
     </>
   );
 }
