@@ -54,7 +54,7 @@ export default function AllCoursesPage() {
 
 const storedUser = localStorage.getItem("user");
 
-// ⚠️ Si storedUser est null, vide ou "undefined", on renvoie null
+//  Si storedUser est null, vide ou "undefined", on renvoie null
 const userData =
   storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
 
