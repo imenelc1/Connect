@@ -20,6 +20,15 @@ export default function Button({
 
   // Variants disponibles : chaque style correspond à un usage spécifique
   const variants = {
+    quizPrev: `${base.replace("w-full", "w-auto")} 
+    px-6 py-2 rounded-xl border border-gray-300 
+    bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text))] 
+    font-medium hover:opacity-80 disabled:opacity-50`,
+
+  quizNext: `${base.replace("w-full", "w-auto")} 
+    px-6 py-2 rounded-xl 
+    bg-[rgb(var(--color-primary))] text-white 
+    font-medium hover:opacity-90 disabled:opacity-50`,
     primary: `${base} bg-grad-1 text-white hover:bg-sky-600`,
 
     ca: `${base} flex items-center space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-3

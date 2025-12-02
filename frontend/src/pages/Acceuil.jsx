@@ -7,7 +7,6 @@ import Footer from "../components/layout/Footer";
 import Body from "../components/layout/Body";
 
 
-
 export default function Acceuil() {
 
   // Composant principal de la page d'accueil

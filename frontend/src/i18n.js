@@ -30,6 +30,8 @@ import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
 
 import translationFRBadges from "./locales/badges/fr.json";
 import translationENBadges from "./locales/badges/en.json";
+import translationFRquiz2 from "./locales/quiz2/fr.json";
+import translationENquiz2 from "./locales/quiz2/en.json"; 
 import frCourses from "./locales/courses/fr-courses/translation.json";
 import enCourses from "./locales/courses/en-courses/translation.json";
 import translationFRMyStudents from "./locales/MyStudents/fr-MyStudents/translation.json";
@@ -61,6 +63,7 @@ const resources = {
     community: translationnFRCommunity,
 
     courses: frCourses,
+    quiz2: translationFRquiz2,
 
   myStudents: translationFRMyStudents,
   Spaces:translationFRSpaces
@@ -87,6 +90,7 @@ const resources = {
     courses: enCourses,
     myStudents: translationENMyStudents,
      Spaces: translationENSpaces,
+     quiz2: translationENquiz2,
     community: translationnENCommunity
   },
 };
