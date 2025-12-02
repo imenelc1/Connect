@@ -1,0 +1,35 @@
+{
+  "login": {
+    "title": "Bienvenue sur",
+    "connect": "connect",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "or": "Ou",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signUp": "S'inscrire",
+    "signIn": "Se connecter",
+    "welcome": "Bienvenue, cher\nétudiant !",
+    "welcomeInstructor": "Bienvenue, cher\ninstructeur !",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetLinkSent": "Un lien de réinitialisation vous a été envoyé.",
+    "sending": "Envoi",
+    "sendLink": "Envoyer le lien",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordUpdated": "Mot de passe mis à jour avec succès !",
+    "updatePassword": "Mettre à jour le mot de passe",
+    "language": "Langue"
+  },
+  "errors": {
+    "emailRequired": "Email obligatoire",
+    "passwordRequired": "Mot de passe obligatoire",
+    "passwordLength": "Minimum 8 caractères",
+    "emailNotFound": "Adresse email inconnue",
+    "wrongPassword": "Mot de passe incorrect",
+    "networkError": "Erreur réseau"
+  },
+  "success": {
+    "login": "Connexion réussie !"
+  }
+}

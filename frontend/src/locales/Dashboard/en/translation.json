@@ -1,0 +1,25 @@
+
+{
+  "Dashboard": {
+    "Welcome": "Welcome back" ,
+    "Always ":"Always stay updated in your Instructor portal.",
+    "AverageS": "Average Student Progress",
+    "Success": "Success Rate",
+    "AverageT":"Average time spent",
+    "ActiveC":"Active Courses",
+    "coursep":"course progress",
+    "Quick":"Quick actions",
+    "CreateC":"Create a Course",
+    "Space":"Active My spaces",
+    "publish":"Publish an exercise",
+    "Stats":"Students Stats",
+    "Published":"Published",
+    "Draft":"Draft",
+    "quizzes":"Quizzes",
+    "ActivityF":"Activity Feed",
+    "GlobalP":"Global Progression",
+    "Search":"Search"
+
+
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "course": {
+    "basic_info": "Informations de Base",
+    "title": "Titre",
+    "course_title_placeholder": "Titre de votre cours",
+    "course_topic": "Sujet du cours",
+    "course_topic_placeholder": "Que sera principalement enseigné dans votre cours ?",
+    "duration": "Durée",
+    "duration_placeholder": "exemple 00:00:00",
+    "level": "Niveau du cours",
+    "cancel": "Annuler",
+    "save_next": "Enregistrer & Suivant",
+
+    "curriculum": "Curriculum du Cours",
+    "add_section": "Ajouter une section",
+    "section_title_placeholder": "Titre de la section",
+    "lesson": "Leçon",
+    "lesson_type": "Type de leçon",
+    "add_lesson": "Ajouter une leçon",
+    "back": "Retour",
+
+    "publish_title": "Publier le cours",
+    "publish_description": "→ Page finale ici."
+  },
+
+  "select": {
+    "placeholder": "Choisir une option",
+    "day": "Jour",
+    "week": "Semaine",
+    "month": "Mois",
+    "Beginner": "Débutant",
+    "Intermediate": "Intermédiaire",
+    "Advanced": "Avancé"
+  }
+}

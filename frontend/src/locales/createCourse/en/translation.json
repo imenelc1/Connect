@@ -1,0 +1,35 @@
+{
+  "course": {
+    "basic_info": "Basic Information",
+    "title": "Title",
+    "course_title_placeholder": "Your course title",
+    "course_topic": "Course Topic",
+    "course_topic_placeholder": "What is primarily taught in your course?",
+    "duration": "Duration",
+    "duration_placeholder": "example 00:00:00",
+    "level": "Course Level",
+    "cancel": "Cancel",
+    "save_next": "Save & Next",
+
+    "curriculum": "Course Curriculum",
+    "add_section": "Add Section",
+    "section_title_placeholder": "Section title",
+    "lesson": "Lesson",
+    "lesson_type": "Lesson Type",
+    "add_lesson": "Add Lesson",
+    "back": "Back",
+
+    "publish_title": "Publish Course",
+    "publish_description": "→ Final page here."
+  },
+
+  "select": {
+    "placeholder": "Select an option",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "Beginner": "Beginner",
+    "Intermediate": "Intermediate",
+    "Advanced": "Advanced"
+  }
+}

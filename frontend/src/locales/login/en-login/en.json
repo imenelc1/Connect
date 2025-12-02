@@ -1,0 +1,35 @@
+{
+  "login": {
+    "title": "Welcome to",
+    "connect": "connect",
+    "email": "Email address",
+    "password": "Password",
+    "or": "Or",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "signIn": "Sign in",
+    "welcome": "Welcome, dear\nstudent!",
+    "welcomeInstructor": "Welcome, dear\ninstructor!",
+    "forgotPassword": "Forgot password?",
+    "resetLinkSent": "A reset link has been sent to your email.",
+    "sending": "Sending",
+    "sendLink": "Send reset link",
+    "resetPassword": "Reset password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordUpdated": "Password updated successfully!",
+    "updatePassword": "Update Password",
+    "language": "Language"
+  },
+  "errors": {
+    "emailRequired": "Email required",
+    "passwordRequired": "Password required",
+    "passwordLength": "Minimum 8 characters",
+    "emailNotFound": "Email address not found",
+    "wrongPassword": "Incorrect password",
+    "networkError": "Network error"
+  },
+  "success": {
+    "login": "Login successful!"
+  }
+}
