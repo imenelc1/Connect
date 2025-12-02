@@ -1,40 +1,50 @@
 import { FaLock } from "react-icons/fa";
 
-const ICON_VARIANTS = {
-  blue: "bg-blue",
-  purple: "bg-purple",
-  pink: "bg-pink",
-};
-
-const CARD_VARIANTS = {
-  blue: "bg-grad-2",
-  purple: "bg-grad-3",
-  pink: "bg-grad-4",
+const CATEGORY_COLORS = {
+  progress: {
+    icon: "bg-blue",
+    card: "bg-grad-2",
+    xp: "text-blue border-blue bg-blue/10",
+  },
+  success: {
+    icon: "bg-purple",
+    card: "bg-grad-3",
+    xp: "text-purple border-purple bg-purple/10",
+  },
+  special: {
+    icon: "bg-pink",
+    card: "bg-grad-4",
+    xp: "text-pink border-pink bg-pink/10",
+  },
+  default: {
+    icon: "bg-blue",
+    card: "bg-grad-2",
+    xp: "text-blue border-blue bg-blue/10",
+  },
 };
 
 export default function BadgeGrid({ badges, getBadgeIcon }) {
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
       {badges.map((badge, i) => {
-        const iconColor = ICON_VARIANTS[badge.variant] || ICON_VARIANTS.blue;
-        const cardColor = CARD_VARIANTS[badge.variant] || CARD_VARIANTS.purple;
+        const colors = CATEGORY_COLORS[badge.category] || CATEGORY_COLORS.default;
 
         return (
           <div
             key={i}
-            className={`w-56 h-56 p-4 rounded-xl shadow-md flex flex-col items-center justify-center text-center transition 
+            className={`w-56 h-56 p-4 rounded-xl shadow-md flex flex-col items-center justify-center text-center transition
               ${
                 badge.locked
-                  ? "bg-grad-2 opacity-50 cursor-not-allowed"
-                  : `${cardColor} hover:scale-[1.02]`
+                  ? "bg-supp/30 opacity-50 cursor-not-allowed"
+                  : `${colors.card} hover:scale-[1.02]`
               }
             `}
           >
 
-            {/* -- Icône -- */}
+            {/* Icon */}
             <div
               className={`w-12 h-12 mb-3 flex rounded-xl items-center justify-center 
-                ${badge.locked ? "bg-white border border-gray-300 shadow-md shadow-gray-400" : iconColor}
+                ${badge.locked ? "bg-primary/30 border border-gray-300 shadow-md" : colors.icon}
               `}
             >
               {badge.locked ? (
@@ -50,11 +60,13 @@ export default function BadgeGrid({ badges, getBadgeIcon }) {
             <p className="text-xs text-grayc">{badge.desc}</p>
 
             <p
-              className={`mt-2 px-3 py-1 rounded-md text-xs font-medium border ${
-                badge.locked
-                  ? "text-red-500 border-red-300 bg-white"
-                  : "text-white border-secondary bg-primary"
-              }`}
+              className={`mt-2 px-3 py-1 rounded-md text-xs font-medium border 
+                ${
+                  badge.locked
+                    ? "text-black border-red-300 bg-white"
+                    : colors.xp
+                }
+              `}
             >
               {badge.locked ? "Locked" : badge.xp}
             </p>

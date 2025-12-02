@@ -7,7 +7,6 @@ export default function BadgeFooter() {
 
   return (
     <footer className="mt-10 p-6 text-center rounded-lg shadow bg-grad-3">
-      <MdAutoAwesome className="text-3xl text-primary mx-auto mb-3" />
       <h2 className="text-xl font-bold text-tertiary flex items-center justify-center gap-2">
         {t("footer.title")} <FaRocket />
       </h2>

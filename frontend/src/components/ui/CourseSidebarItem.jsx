@@ -2,7 +2,7 @@ import React from "react";
 import { CheckCircle } from "lucide-react";
 import ProgressBar from "./ProgressBar";
 
-export default function CoursesSidebarItem() {
+export default function CoursesSidebarItem({ mobileOpen = true }) {
   const courses = [
     { title: "Introduction au langage C", duration: "8 chapitres · 2h 30min", progress: 100, completed: true, active: true },
     { title: "Variables et types de données", duration: "8 chapitres · 2h 30min", progress: 40, completed: false, active: false },
@@ -13,7 +13,9 @@ export default function CoursesSidebarItem() {
   ];
 
   return (
-    <aside className="w-[280px] bg-card border border-blue/20 rounded-3xl p-4 space-y-4">
+    <aside
+      className={`w-full sm:w-[280px] bg-card border border-blue/20 rounded-3xl p-4 space-y-4`}
+    >
       {courses.map((course, i) => (
         <div
           key={i}
@@ -27,10 +29,8 @@ export default function CoursesSidebarItem() {
             <h2 className="text-[15px] font-semibold">{course.title}</h2>
             {course.completed && <CheckCircle className="w-5 h-5 text-purple" />}
           </div>
-
           <p className="text-xs text-grayc mt-1">{course.duration}</p>
-
-          <ProgressBar progress={course.progress} />
+          <ProgressBar progress={course.progress} title="" />
         </div>
       ))}
     </aside>

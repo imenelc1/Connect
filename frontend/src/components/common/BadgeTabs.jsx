@@ -15,7 +15,7 @@ export default function BadgeTabs({ activeTab, setActiveTab }) {
 
   return (
     <section className="mb-6">
-      <div className="flex justify-around flex-wrap text-sm font-medium">
+      <div className="grid grid-cols-2 sm:flex justify-around gap-2 text-sm font-medium">
         {tabs.map(({ key, label, icon }) => (
           <BadgeButton
             key={key}
@@ -23,6 +23,7 @@ export default function BadgeTabs({ activeTab, setActiveTab }) {
             onClick={() => setActiveTab(key)}
             icon={icon}
             label={label}
+            hideLabelOnSmall={true} // option pour cacher le texte si besoin
           />
         ))}
       </div>
