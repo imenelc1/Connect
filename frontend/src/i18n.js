@@ -24,6 +24,10 @@ import translationENContentPage from "./locales/contentPage/en/translation.json"
 import frCourses from "./locales/courses/fr-courses/translation.json";
 import enCourses from "./locales/courses/en-courses/translation.json";
 
+import enStartExercise from "./locales/CodeExercises/StartExercise/en-startexercise/translation.json";
+import frStartExercise from "./locales/CodeExercises/StartExercise/fr-startexercise/translation.json";
+
+
 const resources = {
   fr: {
     translation: translationFR,
@@ -40,6 +44,7 @@ const resources = {
     contentPage: translationFRContentPage,
     courseInfo: translationFRCourseInfo,
     courses: frCourses,
+    startExercise: frStartExercise,
 
   },
 
@@ -58,6 +63,7 @@ const resources = {
     contentPage: translationENContentPage,
     courseInfo: translationENCourseInfo,
     courses: enCourses,
+    startExercise: enStartExercise,
   },
 };
 

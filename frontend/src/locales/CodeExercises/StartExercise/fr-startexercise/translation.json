@@ -1,0 +1,52 @@
+{
+  "header": {
+    "title": "Exercises",
+    "subtitle": "Commençons l'exercice !"
+  },
+
+  "exerciseCard": {
+    "title": "Exercice 1",
+    "subtitle": "Somme de deux nombres",
+    "description": "Lire un entier et afficher s'il est pair ou impair."
+  },
+
+  "editor": {
+    "yourCode": "Votre code :",
+    "fileName": "main.c"
+  },
+
+  "buttons": {
+    "run": "Exécuter",
+    "stop": "Arrêter",
+    "debug": "Déboguer",
+    "reset": "Réinitialiser",
+    "sendSolution": "Envoyer la solution"
+  },
+
+  "tipCard": {
+    "title": "Astuce",
+    "message": "Testez votre code progressivement et utilisez printf pour déboguer."
+  },
+
+  "output": {
+    "title": "Sortie :",
+    "default": "Hello world!\nLe programme s'est terminé avec le code de sortie 0\nAppuyez sur ENTRÉE pour quitter la console."
+  },
+
+  "feedback": {
+    "title": "Comment trouvez-vous cet exercice ?",
+    "subtitle": "Votre avis nous aide à améliorer l’expérience d’apprentissage",
+
+    "labels": {
+      "veryEasy": "Très facile",
+      "moderate": "Modéré",
+      "veryDifficult": "Très difficile"
+    },
+
+    "tip": "💡 Pas de souci ! L’Assistant IA est là pour vous aider."
+  },
+
+  "assistant": {
+    "button":"Assistant IA"
+  }
+}

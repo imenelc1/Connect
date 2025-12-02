@@ -12,6 +12,9 @@ import AllExercisesPage from "../pages/AllExercisesPage";
 import AllQuizzesPage from "../pages/AllQuizzesPage";
 import CoursInfo from "../pages/CoursInfo";
 import Courses from "../pages/Courses";
+import StartExercise  from "../pages/StartExercise";
+import ExercisePage from "../pages/ExercisePage";
+
 
 export default function AppRoutes() {
   return (
@@ -48,6 +51,14 @@ export default function AppRoutes() {
           <Route path="/courses" element={<Courses />} />
         {/*new course*/}
         <Route path="/CoursInfo" element={<CoursInfo />} />
+         {/* START EXERCISES */}
+        <Route path="/start" element={<StartExercise />} />
+        <Route path="/solution" element={<ExercisePage />} />
+
+      
+        
+       
+       
 
 
 
