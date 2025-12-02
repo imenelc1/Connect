@@ -5,8 +5,7 @@ import React from "react";
 import HeroSection from "../components/layout/HeroSection";
 import Footer from "../components/layout/Footer";
 import Body from "../components/layout/Body";
-import MyStudents from "./MyStudents";
-import CoursePage from "./CoursInfo";
+
 
 
 export default function Acceuil() {
@@ -22,8 +21,7 @@ export default function Acceuil() {
 
       {/* Pied de page */}
       <Footer />
-      <MyStudents />
-    <CoursePage />
+    
     
 
     </div>
