@@ -26,7 +26,7 @@ export default function UserCircle({ initials, onToggleTheme }) {
   };
 
   return (
-    <div ref={menuRef} className="relative select-none">
+    <div ref={menuRef} className="relative select-none z-50">
 
       {/* Cercle utilisateur */}
       <div

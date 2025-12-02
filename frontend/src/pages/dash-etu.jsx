@@ -15,8 +15,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 // Traduction (i18next)
 import { useTranslation } from "react-i18next";
-
-import api from "../services/api";
+import ContentSearchBar from "../components/common/ContentSearchBar";import api from "../services/api";
 // Imports for pie chart
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
@@ -66,11 +65,9 @@ export default function Dashboardetu() {
       <div className="flex-1 pl-6 pr-3 sm:pl-8 sm:pr-5 md:pl-10 md:pr-6 lg:pl-12 lg:pr-8 space-y-4">
         {/* Header */}
          <header className="flex justify-between items-center gap-3">
-                <form className="flex-1 max-w-full lg:max-w-xs ml-5">
-                  <Input placeholder={t("Dashboard.Search")} icon={<Search size={16} />} />
-                </form>
+               <ContentSearchBar className="mt-3" />
         
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 mt-3">
                   <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
                     <Bell size={16} />
                   </div>

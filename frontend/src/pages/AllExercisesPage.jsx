@@ -105,7 +105,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
       >
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
+        <h1 className="text-2xl font-bold text-muted">{t("exercisesTitle")}</h1>
 
       </div>
         {/* Search */}

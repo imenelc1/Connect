@@ -128,11 +128,11 @@ const initials = userData
       >
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
+        <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
 
       </div>
         {/* Search */}
-        <ContentSearchBar />
+        <ContentSearchBar  />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
