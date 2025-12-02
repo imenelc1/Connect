@@ -1,6 +1,6 @@
 import { FiSend } from "react-icons/fi";
 import Input from "../components/common/Input";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import UserCircle from "../components/common/UserCircle";
 import { useContext, useState } from "react";
 import ThemeContext from "../context/ThemeContext";

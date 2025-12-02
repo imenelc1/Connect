@@ -1,7 +1,7 @@
 // Importation des composants et hooks nécessaires
 import React, { useState } from "react";
 import { Folder } from "lucide-react";          // Icône affichée dans la carte
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";

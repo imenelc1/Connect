@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import BadgeHeader from "../components/common/BadgeHeader";
 import BadgeStats from "../components/common/BadgeStats";
 import BadgeTabs from "../components/common/BadgeTabs";

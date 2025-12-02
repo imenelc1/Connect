@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Button from "../components/common/Button";
 import Cards from "../components/common/Cards-Dash";
 import { Search, TrendingDown, CircleCheckBig, Clock3, Book, CirclePlus, FolderPlus, Activity, Bell } from "lucide-react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import Input from "../components/common/Input";
 import Mascotte from "../components/common/Mascotte";
 import LearningCurve from "../components/common/LearningCurveEtu";

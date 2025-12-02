@@ -8,8 +8,8 @@ import { useTranslation } from "react-i18next";
 // Thème global (dark/light mode)
 import ThemeContext from "../context/ThemeContext";
 import { useContext } from "react";
-import Navbar from "../components/common/Navbar";
-import "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
+import "../components/common/NavBar";
 import LogoComponent from "../components/common/LogoComponent";
 import axios from "../services/api";
 import api from "../services/api";

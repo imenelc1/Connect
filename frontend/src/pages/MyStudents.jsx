@@ -1,6 +1,6 @@
 import React, { useState,useContext } from "react";
 import { Search, Bell } from "lucide-react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import Cards2 from "../components/common/Cards2";
 import AddModal from "../components/common/AddModel";
