@@ -1,6 +1,6 @@
 import React from "react";
 import Button from "./Button";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import "../../styles/index.css";
 import ContentProgress from "./ContentProgress";
 
@@ -79,7 +79,7 @@ export default function Cards2({
       {/* RIGHT ARROW */}
       {showArrow && (
         <Button className=" !w-9 !h-9 !p-0 !min-w-0 flex items-center justify-center">
-          <ArrowRight className="w-6 h-6" />
+          <ChevronRight size={16} className="w-6 h-6" />
         </Button>
       )}
     </div>

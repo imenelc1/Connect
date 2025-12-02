@@ -21,7 +21,7 @@ export default function CoursePage() {
   };
 
 
-  
+
   const courseSteps = [
     { label: t("course.basic_info"), icon: Monitor },
     { label: t("course.curriculum"), icon: BookOpenCheck },

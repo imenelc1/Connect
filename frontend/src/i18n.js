@@ -25,6 +25,8 @@ import translationFRMyStudents from "./locales/MyStudents/fr-MyStudents/translat
 import translationENMyStudents from "./locales/MyStudents/en-MyStudents/translation.json";
 import translationFRSpaces from "./locales/Spaces/fr-Spaces/translation.json";
 import translationENSpaces from "./locales/Spaces/en-Spaces/translation.json";
+import translationFRCourseDetails from "./locales/CourseDetails/fr_CourseDetails/translation.json";
+import translationENCourseDetails from "./locales/CourseDetails/en_CourseDetails/translation.json";
 
 const resources = {
   fr: {
@@ -42,7 +44,11 @@ const resources = {
     contentPage: translationFRContentPage,
     courseInfo: translationFRCourseInfo,
   myStudents: translationFRMyStudents,
-  Spaces:translationFRSpaces
+  Spaces:translationFRSpaces,
+   CourseDetails: translationFRCourseDetails,
+
+  
+
   },
 
   en: {
@@ -60,7 +66,8 @@ const resources = {
     contentPage: translationENContentPage,
     courseInfo: translationENCourseInfo,
     myStudents: translationENMyStudents,
-     Spaces: translationENSpaces
+     Spaces: translationENSpaces,
+      CourseDetails: translationENCourseDetails
   },
 };
 
