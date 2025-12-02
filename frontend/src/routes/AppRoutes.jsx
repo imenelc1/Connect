@@ -11,8 +11,19 @@ import ExercisePreview from "../pages/ExercisePreview";
 import AllExercisesPage from "../pages/AllExercisesPage";
 import AllQuizzesPage from "../pages/AllQuizzesPage";
 import CoursInfo from "../pages/CoursInfo";
+import CommunityPage from "../pages/CommunityPage";
+import CreateQuiz from "../pages/CreateQuiz";
+import QuizPreview from "../pages/QuizPreview";
+import Setting from "../pages/Setting";
 import Dashboardens from "../pages/dash-ens";
 import Dashboardetu from "../pages/dash-etu";
+
+import Badges from "../pages/Badges"; // Ajoutez cette lign
+  
+import Courses from "../pages/Courses";
+import MyStudents from "../pages/MyStudents";
+import Spaces from "../pages/Spaces";
+import StudentExercice from "../pages/exerciceStudent";
 
 export default function AppRoutes() {
   return (
@@ -21,6 +32,7 @@ export default function AppRoutes() {
         {/* <Route path="/" element={<Acceuil />} />
         <Route path="/choice" element={<Choice />} /> */}
 
+        {/* SIGNUP */}
        {/* SIGNUP */}
         {/* <Route path="/signup/instructor" element={<InstructorSignup />} />
         <Route path="/signup/student" element={<StudentSignup />} /> */}
@@ -42,18 +54,36 @@ export default function AppRoutes() {
         {/* ALL QUIZZES */}
         {/* <Route path="/all-quizzes" element={<AllQuizzesPage />} /> */}
 
-        {/*new exercise*/}
+        {/* NEW */}
         {/* <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} /> */}
 
+        {/* COURSE INFO */}
+        {/* <Route path="/CoursInfo" element={<CoursInfo />} />
+        <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route path="/preview" element={<QuizPreview />} /> */}
+
+        {/* COMMUNITY PAGE */}
+        {/* <Route path="/community" element={<CommunityPage />} /> */}
+        {/*settings*/}
+        {/* <Route path="/settings" element={<Setting />} /> */}
+        {/*dashboard*/}
+        {/* {/* <Route path="/dashboard-ens" element={<Dashboardens />} />
+        <Route path="/dashboard-etu" element={<Dashboardetu />} /> */}
+        
+        {/* <Route path="/badges" element={<Badges />} />  */}
+        {/*new exercise*/}
+        {/* <Route path="/new-exercise" element={<NewExercise />} />  */}
+        {/* <Route path="/exercise-preview" element={<ExercisePreview />} />
+         {/* courses */}
+          {/* <Route path="/courses" element={<Courses />} /> */}
         {/*new course*/}
         {/* <Route path="/CoursInfo" element={<CoursInfo />} /> */}
-
-        {/*Dashboard enseignant*/}
-        {/* <Route path="/" element={<Dashboardens />} /> */}
-        {/*Dashboard etudiant*/}
-        <Route path="/" element={<Dashboardetu />} />
-
+        {/* My Students */}
+        {/* <Route path="/my-students" element={<MyStudents />} /> */}
+        {/* Spaces */}
+        {/* <Route path="/spaces" element={<Spaces />} /> */}
+          <Route path="/" element={<StudentExercice />} />
 
 
 

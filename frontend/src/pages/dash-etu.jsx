@@ -16,18 +16,37 @@ import { useNavigate } from "react-router-dom";
 // Traduction (i18next)
 import { useTranslation } from "react-i18next";
 
-
+import api from "../services/api";
 // Imports for pie chart
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 
 export default function Dashboardetu() {
- 
 
- 
+
+
   const navigate = useNavigate();
+     const storedUser = localStorage.getItem("user");
+
   // Récupérer darkMode depuis ThemeContext
   const { toggleDarkMode } = useContext(ThemeContext);
   const { t } = useTranslation("Dashboard");
+  const userData =
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const [user, setUser] = useState(null);
+  const initials = user
+    ? `${user.nom?.[0] || ""}${user.prenom?.[0] || ""}`.toUpperCase()
+    : "";
+
+  useEffect(() => {
+    api.get("profile/")   // 🔥 grâce à ton interceptor, le token sera ajouté automatiquement
+      .then((res) => {
+        setUser(res.data);
+        console.log("Profil chargé :", res.data);
+      })
+      .catch((err) => {
+        console.error("Erreur profil :", err.response?.data || err);
+      });
+  }, []);
   const dat = [
     { title: "Emma Wilson completed Python Basics Quiz", date: "2nd of February", day: "Tuesday", time: "11:30 - 12:30" },
     { title: "James Lee submitted Loop Assignment", date: "3rd of February", day: "Wednesday", time: "11:30 - 12:30" },
@@ -38,60 +57,55 @@ export default function Dashboardetu() {
   return (
     <div className="flex min-h-screen bg-primary/10">
       {/* Sidebar */}
-        <div className={`flex-shrink-0 w-16 sm:w-20 md:w-56`}>
+      <div className={`flex-shrink-0 w-14 sm:w-16 md:w-48`}>
         <Navbar />
       </div>
 
 
       {/* Main content */}
- <div className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10 space-y-6">
+      <div className="flex-1 pl-6 pr-3 sm:pl-8 sm:pr-5 md:pl-10 md:pr-6 lg:pl-12 lg:pr-8 space-y-4">
         {/* Header */}
-        <header className="flex flex-row justify-between items-center w-full gap-4">
-          {/* Formulaire de recherche */}
-          <form className="flex-1 max-w-full lg:max-w-xs lg:ml-16">
-            <Input placeholder={t("Dashboard.Search")} icon={<Search />} />
-          </form>
-
-          {/* Notifications et avatar */}
-          <div className="flex items-center gap-4">
-            <div className="bg-bg w-8 h-8 rounded-full flex items-center justify-center">
-              <Bell size={20} />
-            </div>
-
-            <div className="w-8 h-8 flex items-center justify-center">
-              <UserCircle size={22} onToggleTheme={toggleDarkMode}
-                onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-            </div>
-          </div>
-        </header>
-
+         <header className="flex justify-between items-center gap-3">
+                <form className="flex-1 max-w-full lg:max-w-xs ml-5">
+                  <Input placeholder={t("Dashboard.Search")} icon={<Search size={16} />} />
+                </form>
+        
+                <div className="flex items-center gap-3">
+                  <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+                    <Bell size={16} />
+                  </div>
+        
+                  <div className="w-7 h-7 flex items-center justify-center">
+                    <UserCircle size={20} initials={initials} onToggleTheme={toggleDarkMode}
+                      onChangeLang={(lang) => i18n.changeLanguage(lang)} />
+                  </div>
+                </div>
+              </header>
 
         {/* Welcome banner */}
-        <div className=" relative bg-grad-1 text-white p-6 rounded-3xl shadow-lg flex flex-col lg:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col">
-            <span className=" absolute top-2 left-4 text-sm opacity-90 ">October 18, 2025</span>
-
-            <h1 className="text-2xl md:text-3xl font-bold ml-2">
-              {t("Dashboard.Welcome")} Melissa
-            </h1>
-
-            <p className="text-sm text-center opacity-90">{t("Dashboard.Alwaysp")}</p>
-          </div>
-
-          <Mascotte className="w-48 sm:w-60 lg:w-72" />
-        </div>
+         <div className="relative bg-grad-1 text-white p-4 rounded-2xl shadow-md flex flex-col lg:flex-row justify-between items-center gap-3">
+                <div className="flex flex-col">
+                  <span className="absolute top-1 left-3 text-xs opacity-90">October 18, 2025</span>
+                  <h1 className="text-xl font-bold">
+                    {t("Dashboard.Welcome")} {user ? `${user.nom} ${user.prenom}` : "..."}
+                  </h1>
+                  <p className="text-xs opacity-90">{t("Dashboard.Alwaysp")}</p>
+                </div>
+        
+                <Mascotte className="w-36 sm:w-44" />
+              </div>
 
 
         {/* Quick stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-          <Cards text={t("Dashboard.AverageS")} value="68%" icon={<TrendingDown />} bg="bg-grad-6" />
-          <Cards text={t("Dashboard.Success")} value="68%" icon={<CircleCheckBig />} bg="bg-grad-8" />
-          <Cards text={t("Dashboard.AverageT")} value="4.2h" icon={<Book />} bg="bg-grad-6" />
-          <Cards text={t("Dashboard.ActiveC")} value="10" icon={<Clock3 />} bg="bg-grad-8" />
+          <Cards text={t("Dashboard.AverageS")} value="68%" icon={<TrendingDown />} bg="bg-grad-2" />
+          <Cards text={t("Dashboard.Success")} value="68%" icon={<CircleCheckBig />} bg="bg-grad-3" />
+          <Cards text={t("Dashboard.AverageT")} value="4.2h" icon={<Book />} bg="bg-grad-4" />
+          <Cards text={t("Dashboard.ActiveC")} value="10" icon={<Clock3 />} bg="bg-grad-2" />
         </div>
 
         {/* Progress bar */}
-        <div className="bg-white text-primary p-6 sm:p-10 rounded-2xl w-full shadow-lg">
+        <div className="bg-card text-primary p-6 sm:p-10 rounded-2xl w-full shadow-lg">
           <ProgressBar value={50} title={t("Dashboard.GlobalP")} />
         </div>
 
@@ -103,9 +117,9 @@ export default function Dashboardetu() {
 
 
         {/* Activity feed */}
-        <div className="bg-card p-6 rounded-2xl w-full">
+        <div className="bg-card p-4 rounded-2xl w-full">
           <h2 className="text-xl font-bold text-gray mb-2">{t("Dashboard.ActivityF")} </h2>
-          <p className="text-grisclair text-sm mb-4">1st Feb Monday - 7th Feb Sunday</p>
+          <p className="text-grisclair text-xs mb-2">1st Feb Monday - 7th Feb Sunday</p>
           {dat.map((item, index) => (
             <NotificationItem
               key={index}

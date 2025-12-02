@@ -193,11 +193,15 @@ const InstructorSignUp = () => {
 
     try {
       const res = await api.post("register/", payload);
-      localStorage.setItem("user", JSON.stringify(res.data));
+      // 🔥 Stocker le token
+localStorage.setItem("token", res.data.token);
+
+// 🔥 Stocker les infos utilisateur
+localStorage.setItem("user", JSON.stringify(res.data.user));
       toast.success("Inscription réussie !");
       // redirection
       setTimeout(() => {
-        window.location.href = "/all-courses";
+        window.location.href = "/dashboard-ens";
       }, 1200);
     } catch (err) {
       const apiErrors = err.response?.data;

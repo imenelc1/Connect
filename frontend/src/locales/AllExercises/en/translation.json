@@ -1,0 +1,9 @@
+{
+  "exercisesTitle": "Exercises",
+  "createExerciseBtn": "Create a new Exercise",
+  "levels": {
+    "Débutant": "Beginner",
+    "Intermédiaire": "Intermediate",
+    "Avancé": "Advanced"
+  }
+}

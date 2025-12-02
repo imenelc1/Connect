@@ -1,0 +1,21 @@
+{
+  
+  "chapitrePrec":"Chapitre Précédent",
+  "ChapitreSuiv":"Chapitre suivant",
+  "title": "Cours",
+  "search": "Rechercher...",
+  "assistant": "Assistant IA",
+  "myCourses": "Mes cours",
+  "chapterPrev": "Chapitre précédent",
+  "chapterNext": "Chapitre suivant",
+  "readyQuiz": "Prêt à tester tes connaissances ?",
+  "quizDesc": "Passe le quiz de ce chapitre pour valider ta compréhension",
+  "startQuiz": "Commencer le quiz",
+  "rateCourse": "Évaluez le cours sur 5 :",
+  "send": "Envoyer",
+  "yourFeedback": "Vos feedback",
+  "feedbackPlaceholder": "Partagez vos commentaires, suggestions ou remarques...",
+  "feedback1": "Les cours d’algorithmique m’ont beaucoup aidé à développer ma logique.",
+  "feedback2": "Les exercices pratiques ont transformé ma compréhension du C.",
+  "feedback3": "Grâce à CONNECT, j’ai réussi mes examens avec d'excellentes notes."
+}

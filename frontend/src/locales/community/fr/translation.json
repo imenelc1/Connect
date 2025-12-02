@@ -1,0 +1,20 @@
+{
+  "community": {
+    "title": "Communauté",
+    "subtitle": "Échangez avec d'autres enseignants et partagez votre expérience",
+    "placeholder": "Partagez avec la communauté...",
+    "send": "Envoyer"
+  },
+  "tabs": {
+    "recent": "Récent",
+    "popular": "Populaire",
+    "myforums": "Mes forums"
+  },
+  "forums": {
+    "select": "Choisir un type de forum",
+    "all": "Tous les forums",
+    "teacher-teacher": "Enseignant ↔ Enseignant",
+    "teacher-student": "Enseignant ↔ Étudiant",
+    "student-student": "Étudiant ↔ Étudiant"
+  }
+}

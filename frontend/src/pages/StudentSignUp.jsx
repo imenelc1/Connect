@@ -130,10 +130,13 @@ if (/\d/.test(formData.fullname))
 
     try {
       const res = await api.post("register/", payload);
+      console.log(res.data);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data));
 
-     localStorage.setItem("user", JSON.stringify(res.data));
+
 toast.success("Inscription réussie !");
-navigate("/all-courses");
+navigate("/dashboard-etu");
 
     } catch (err) {
       const backend = err.response?.data;

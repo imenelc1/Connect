@@ -50,10 +50,19 @@ const gradientMap = {
 
 
 export default function AllCoursesPage() {
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allcourses");
-const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+
+const storedUser = localStorage.getItem("user");
+
+//  Si storedUser est null, vide ou "undefined", on renvoie null
+const userData =
+  storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+
+const userRole = userData?.role ?? null;
+const initials = userData
+  ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+  : "";
+
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
@@ -69,7 +78,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
     const handler = (e) => setSidebarCollapsed(e.detail);
     window.addEventListener("sidebarChanged", handler);
     return () => window.removeEventListener("sidebarChanged", handler);
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const resizeHandler = () => setWindowWidth(window.innerWidth);
@@ -92,15 +101,25 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-<UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
-  onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-<div
-  className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
-             text-gray-700 shadow-lg flex items-center justify-center 
-             cursor-pointer hover:bg-gray-100 transition z-50"
->
-  <Bell size={22} strokeWidth={1.8} />
+{/* Header Right Controls */}
+<div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+
+  {/* Notification Icon */}
+  <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+    <Bell size={18} />
+  </div>
+
+  {/* User Circle */}
+  <div className="flex items-center">
+    <UserCircle
+      initials={initials}
+      onToggleTheme={toggleDarkMode}
+      onChangeLang={(lang) => i18n.changeLanguage(lang)}
+    />
+  </div>
+
 </div>
+
 
 
       <main

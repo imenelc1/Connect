@@ -1,0 +1,45 @@
+{
+  "Setting": {
+    "Profile": "Profil",
+    "Preferences": "Préférences",
+    "Account": "Compte"
+  },
+  "Profile": {
+    "Editprofile":"Modifier profil",
+    "FullName": "Nom complet",
+    "NickName": "Pseudo",
+    "Datebirth": "Date de naissance",
+    "EmailAddress": "Adresse e-mail",
+    "RegistratioNumber": "Matricule",
+    "Grade": "Grade",
+    "Instructor": "Formateur",
+    "Assistant": "Assistant"
+  },
+ 
+  "Preferences": {
+    "Theme": "Thème",
+    "LightMode": "Mode lumière",
+    "Brightp": "Interface lumineuse et épurée",
+    "DarkMode": "Mode sombre",
+    "Easyp": "Agréable pour les yeux en faible luminosité",
+    "Language": "Langue",
+    "Selectp": "Sélectionnez votre langue préférée",
+    "French": "Français",
+    "English": "Anglais"
+  }, 
+  "Account": {
+    "Security": "Sécurité",
+    "CurrentPassword": "Mot de passe actuel",
+    "EnterCurrent": "Entrez le mot de passe actuel",
+    "NewPassword": "Nouveau mot de passe",
+    "EnterNew": "Entrez le nouveau mot de passe",
+    "ConfirmNewPassword": "Confirmer le nouveau mot de passe",
+    "EnterConfirm": "Entrez le mot de passe de confirmation",
+    "UpdatePass": "Mettre à jour ",
+    "DangerZone": "Zone de danger",
+    "HDelete": "Supprimer le compte",
+    "deleteP": "Supprimez définitivement votre compte et toutes les données. Cette action est irréversible.",
+    "DeleteAccount": "Supprimer "
+  }
+  
+}

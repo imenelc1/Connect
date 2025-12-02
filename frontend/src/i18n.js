@@ -21,8 +21,25 @@ import translationFRFilters from "./locales/Filters/fr/translation.json";
 import translationENFilters from "./locales/Filters/en/translation.json";
 import translationFRContentPage from "./locales/contentPage/fr/translation.json";
 import translationENContentPage from "./locales/contentPage/en/translation.json";
+import translationFRCreateQuiz from "./locales/fr-quiz/fr.json";
+import translationENCreateQuiz from "./locales/en-quiz/en.json"; 
+import translationFRSetting from "./locales/Settings/en-Setting/translation.json";
+import translationENSetting from "./locales/Settings/fr-Setting/translation.json";
 import translationENDashboard from "./locales/Dashboard/en/translation.json";
 import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
+
+import translationFRBadges from "./locales/badges/fr.json";
+import translationENBadges from "./locales/badges/en.json";
+import frCourses from "./locales/courses/fr-courses/translation.json";
+import enCourses from "./locales/courses/en-courses/translation.json";
+import translationFRMyStudents from "./locales/MyStudents/fr-MyStudents/translation.json";
+import translationENMyStudents from "./locales/MyStudents/en-MyStudents/translation.json";
+import translationFRSpaces from "./locales/Spaces/fr-Spaces/translation.json";
+import translationENSpaces from "./locales/Spaces/en-Spaces/translation.json";
+import translationnFRCommunity from "./locales/Community/fr/translation.json";
+import translationnENCommunity from "./locales/Community/en/translation.json";
+import translationnENexerciceStudent from "./locales/exerciceStudent/en/translation.json";
+import translationnFRexerciceStudent from "./locales/exerciceStudent/fr/translation.json";
 
 const resources = {
   fr: {
@@ -39,8 +56,17 @@ const resources = {
     filters: translationFRFilters,
     contentPage: translationFRContentPage,
     courseInfo: translationFRCourseInfo,
-    Dashboard: translationFRDashboard
+  createQuiz: translationFRCreateQuiz,
+  setting: translationFRSetting,
+    Dashboard: translationFRDashboard,
+    badges: translationFRBadges,
+    community: translationnFRCommunity,
 
+    courses: frCourses,
+
+  myStudents: translationFRMyStudents,
+  Spaces:translationFRSpaces,
+  exerciceStudent:translationnFRexerciceStudent
   },
 
   en: {
@@ -57,7 +83,15 @@ const resources = {
     filters: translationENFilters,
     contentPage: translationENContentPage,
     courseInfo: translationENCourseInfo,
-    Dashboard: translationENDashboard
+  createQuiz: translationENCreateQuiz,
+  setting: translationENSetting,
+    Dashboard: translationENDashboard,
+   badges: translationENBadges,
+    courses: enCourses,
+    myStudents: translationENMyStudents,
+     Spaces: translationENSpaces,
+    community: translationnENCommunity,
+    exerciceStudent:translationnENexerciceStudent
   },
 };
 
