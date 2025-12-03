@@ -43,6 +43,10 @@ import translationnENCommunity from "./locales/Community/en/translation.json";
 import translationnENexerciceStudent from "./locales/exerciceStudent/en/translation.json";
 import translationnFRexerciceStudent from "./locales/exerciceStudent/fr/translation.json";
 
+
+import translationENStartExo from "./locales/StartExercise/en-Exo/translation.json";
+import translationFRStartExo from  "./locales/StartExercise/fr-Exo/translation.json";
+
 const resources = {
   fr: {
     translation: translationFR,
@@ -70,7 +74,8 @@ const resources = {
   myStudents: translationFRMyStudents,
   Spaces:translationFRSpaces,
 
-  exerciceStudent:translationnFRexerciceStudent
+  exerciceStudent:translationnFRexerciceStudent,
+  startExercise: translationFRStartExo
   },
 
   en: {
@@ -96,7 +101,9 @@ const resources = {
      Spaces: translationENSpaces,
      quiz2: translationENquiz2,
     community: translationnENCommunity,
-    exerciceStudent:translationnENexerciceStudent
+    exerciceStudent:translationnENexerciceStudent,
+
+    startExercise:translationENStartExo
   },
 };
 
@@ -104,7 +111,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem("lang") || "fr",   // <── FIX ICI
+    lng: localStorage.getItem("lang") || "fr", 
     fallbackLng: "fr",
     interpolation: {
       escapeValue: false,

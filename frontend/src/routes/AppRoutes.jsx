@@ -28,6 +28,8 @@ import ResetPassword from "../pages/ResetPassword";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
 import { QuizPage2 } from "../pages/QuizPage2";
 import StudentExercice from "../pages/exerciceStudent";
+import StartExercise from "../pages/StartExercise";
+import ExercisePage from "../pages/ExercisePage";
 
 
 export default function AppRoutes() {
@@ -92,14 +94,12 @@ export default function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
-
-
-
-        <Route path="/quiz" element={<QuizPage2 />} />
         <Route path="/student-exercice" element={<StudentExercice />} />
 
 
-
+          <Route path="/quiz" element={<QuizPage2 />} />  
+          <Route path="/start-exercise" element={<StartExercise />} />
+          <Route path="/exercise-page" element={<ExercisePage />} />
 
       </Routes>
     </BrowserRouter>
