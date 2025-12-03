@@ -9,7 +9,16 @@
     "signUp": "S'inscrire",
     "signIn": "Se connecter",
     "welcome": "Bienvenue, cher\nétudiant !",
-    "welcomeInstructor": "Bienvenue, cher\ninstructeur !", 
+    "welcomeInstructor": "Bienvenue, cher\ninstructeur !",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetLinkSent": "Un lien de réinitialisation vous a été envoyé.",
+    "sending": "Envoi",
+    "sendLink": "Envoyer le lien",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordUpdated": "Mot de passe mis à jour avec succès !",
+    "updatePassword": "Mettre à jour le mot de passe",
     "language": "Langue"
   },
   "errors": {

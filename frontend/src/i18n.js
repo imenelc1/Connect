@@ -30,12 +30,20 @@ import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
 
 import translationFRBadges from "./locales/badges/fr.json";
 import translationENBadges from "./locales/badges/en.json";
+import translationFRquiz2 from "./locales/quiz2/fr.json";
+import translationENquiz2 from "./locales/quiz2/en.json"; 
 import frCourses from "./locales/courses/fr-courses/translation.json";
 import enCourses from "./locales/courses/en-courses/translation.json";
 import translationFRMyStudents from "./locales/MyStudents/fr-MyStudents/translation.json";
 import translationENMyStudents from "./locales/MyStudents/en-MyStudents/translation.json";
 import translationFRSpaces from "./locales/Spaces/fr-Spaces/translation.json";
 import translationENSpaces from "./locales/Spaces/en-Spaces/translation.json";
+import translationnFRCommunity from "./locales/Community/fr/translation.json";
+import translationnENCommunity from "./locales/Community/en/translation.json";
+
+
+import translationENStartExo from "./locales/StartExercise/en-Exo/translation.json";
+import translationFRStartExo from  "./locales/StartExercise/fr-Exo/translation.json";
 
 const resources = {
   fr: {
@@ -56,11 +64,15 @@ const resources = {
   setting: translationFRSetting,
     Dashboard: translationFRDashboard,
     badges: translationFRBadges,
+    community: translationnFRCommunity,
 
     courses: frCourses,
+    quiz2: translationFRquiz2,
 
   myStudents: translationFRMyStudents,
-  Spaces:translationFRSpaces
+  Spaces:translationFRSpaces,
+
+  startExercise: translationFRStartExo
   },
 
   en: {
@@ -83,7 +95,11 @@ const resources = {
    badges: translationENBadges,
     courses: enCourses,
     myStudents: translationENMyStudents,
-     Spaces: translationENSpaces
+     Spaces: translationENSpaces,
+     quiz2: translationENquiz2,
+    community: translationnENCommunity,
+
+    startExercise:translationENStartExo
   },
 };
 
@@ -91,7 +107,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem("lang") || "fr",   // <── FIX ICI
+    lng: localStorage.getItem("lang") || "fr", 
     fallbackLng: "fr",
     interpolation: {
       escapeValue: false,

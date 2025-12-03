@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Plus,Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -105,17 +105,21 @@ const initials = userData
 <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
 
   {/* Notification Icon */}
-  <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-             <Bell size={16} />
+  <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+    <Bell size={18} />
   </div>
 
   {/* User Circle */}
-  <UserCircle
-    initials={initials}
-    onToggleTheme={toggleDarkMode}
-    onChangeLang={(lang) => i18n.changeLanguage(lang)}
-  />
+  <div className="flex items-center">
+    <UserCircle
+      initials={initials}
+      onToggleTheme={toggleDarkMode}
+      onChangeLang={(lang) => i18n.changeLanguage(lang)}
+    />
+  </div>
+
 </div>
+
 
 
       <main
@@ -124,11 +128,11 @@ const initials = userData
       >
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
+        <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
 
       </div>
         {/* Search */}
-        <ContentSearchBar />
+        <ContentSearchBar  />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../../styles/index.css";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import IconeLogoComponent from "../common/IconeLogoComponent";
+import IconeLogoComponent from "./IconeLogoComponent";
 import {
   Settings,
   LogOut,

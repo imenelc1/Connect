@@ -6,6 +6,7 @@
     "course_topic": "Course Topic",
     "course_topic_placeholder": "What is primarily taught in your course?",
     "duration": "Duration",
+    "duration_placeholder": "example 00:00:00",
     "level": "Course Level",
     "cancel": "Cancel",
     "save_next": "Save & Next",

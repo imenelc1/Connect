@@ -1,0 +1,52 @@
+{
+  "header": {
+    "title": "Exercises",
+    "subtitle": "Let's start the exercise!"
+  },
+
+  "exerciseCard": {
+    "title": "Exercise 1",
+    "subtitle": "Sum of two numbers",
+    "description": "Read an integer and display whether it is even or odd."
+  },
+
+  "editor": {
+    "yourCode": "Your code:",
+    "fileName": "main.c"
+  },
+
+  "buttons": {
+    "run": "Run",
+    "stop": "Stop",
+    "debug": "Debug",
+    "reset": "Reset",
+    "sendSolution": "Send the solution"
+  },
+
+  "tipCard": {
+    "title": "Tip",
+    "message": "Test your code gradually and use printf to debug."
+  },
+
+  "output": {
+    "title": "Output:",
+    "default": "Hello world!\nProgram finished with exit code 0\nPress ENTER to exit console."
+  },
+
+  "feedback": {
+    "title": "How did you find this exercise?",
+    "subtitle": "Your feedback helps us improve the learning experience",
+
+    "labels": {
+      "veryEasy": "Very easy",
+      "moderate": "Moderate",
+      "veryDifficult": "Very difficult"
+    },
+
+    "tip": "💡 No worries! The AI Assistant is here to help you."
+  },
+
+  "assistant": {
+    "button": "AI Assistant"
+  }
+}

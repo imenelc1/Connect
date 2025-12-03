@@ -7,7 +7,7 @@ import UserCircle from "../components/common/UserCircle.jsx";
 import ThemeContext from "../context/ThemeContext.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import IaAssistant from "../components/ui/IaAssistant.jsx";
-
+import ContentSearchBar from "../components/common/ContentSearchBar.jsx";
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -23,7 +23,7 @@ export default function Courses() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="w-full bg-background flex flex-col items-center">
+    <div className="w-full bg-surface flex flex-col items-center">
 
       {/* HEADER */}
       <header className="w-full max-w-7xl flex flex-col gap-4 py-6 px-4 md:flex-row md:items-center md:justify-between">
@@ -36,12 +36,9 @@ export default function Courses() {
         {/* ROW MOBILE : SEARCH + CHAPITRES */}
         <div className="flex w-full items-center gap-3 sm:hidden">
           {/* SEARCH */}
-          <div className="relative flex-1">
-            <input
-              placeholder={t("search")}
-              className="w-full pl-10 pr-4 py-2 rounded-full border border-blue/30 shadow-sm"
-            />
-          </div>
+         
+            <ContentSearchBar />
+          
 
           {/* CHAPTER BUTTON */}
           <button

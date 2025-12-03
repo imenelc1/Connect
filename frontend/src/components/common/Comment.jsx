@@ -16,22 +16,26 @@ export default function Comment({ userInitials, userName, time, text, replies = 
           <span className="text-xs text-grayc">{time}</span>
         </div>
         <p className="text-grayc text-sm">{text}</p>
-        <div className="mt-2 flex gap-4 text-xs">
-          <button
-            className="text-blue font-medium"
-            onClick={() => setShowReplyInput(!showReplyInput)}
-          >
-            Answer
-          </button>
-          {replies.length > 0 && (
-            <button
-              className="text-grayc"
-              onClick={() => setShowReplies(!showReplies)}
-            >
-              {showReplies ? `hide ${replies.length} response(s)` : `show ${replies.length} response(s)`}
-            </button>
-          )}
-        </div>
+       <div className="mt-2 flex gap-4 text-xs font-medium">
+  <button
+    className="text-blue hover:underline"
+    onClick={() => setShowReplyInput(!showReplyInput)}
+  >
+    Answer
+  </button>
+
+  {replies.length > 0 && (
+    <button
+      className="text-grayc hover:underline"
+      onClick={() => setShowReplies(!showReplies)}
+    >
+      {showReplies
+        ? `hide ${replies.length} response(s)`
+        : `show ${replies.length} response(s)`}
+    </button>
+  )}
+</div>
+
 
         {/* Champ pour écrire une réponse */}
         {showReplyInput && (

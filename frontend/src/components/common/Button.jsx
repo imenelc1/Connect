@@ -20,6 +20,15 @@ export default function Button({
 
   // Variants disponibles : chaque style correspond à un usage spécifique
   const variants = {
+    quizPrev: `${base.replace("w-full", "w-auto")} 
+    px-6 py-2 rounded-xl border border-gray-300 
+    bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text))] 
+    font-medium hover:opacity-80 disabled:opacity-50`,
+
+  quizNext: `${base.replace("w-full", "w-auto")} 
+    px-6 py-2 rounded-xl 
+    bg-[rgb(var(--color-primary))] text-white 
+    font-medium hover:opacity-90 disabled:opacity-50`,
     primary: `${base} bg-grad-1 text-white hover:bg-sky-600`,
 
     ca: `${base} flex items-center space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-3
@@ -44,11 +53,16 @@ export default function Button({
     createCourse :`${base} flex items-center gap-2
       px-6 py-2 rounded-full bg-grad-3 text-white font-medium shadow-md
       hover:opacity-90 transition-all`,
-      tab: `${base} px-5 py-2 rounded-full transition-all shadow
-      bg-surface text-textc border border-grayc/20
-      hover:bg-gray`, // onglet inactif, exactement comme avant
+      tab: `flex items-center justify-center gap-2 px-5 py-2 rounded-full 
+      transition-all shadow bg-surface text-textc border border-grayc/20
+      hover:bg-gray`,
 
-tabActive: `${base} px-5 py-2 rounded-full shadow bg-blue text-white`, // onglet actif
+tabActive: `flex items-center justify-center gap-2 px-5 py-2 rounded-full
+      shadow bg-blue text-white`,
+
+share: `${base} w-full h-14 bg-card border border-blue/20 shadow-sm rounded-full flex items-center px-6 text-grayc font-medium hover:bg-surface transition`,
+ 
+
 
   };
 

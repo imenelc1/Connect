@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -102,7 +102,7 @@ const navigate = useNavigate();
         style={{ marginLeft: sidebarWidth }}
       >
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{t("quizzesTitle")}</h1>
+          <h1 className="text-2xl font-bold text-muted">{t("quizzesTitle")}</h1>
         </div>
 
         <ContentSearchBar />

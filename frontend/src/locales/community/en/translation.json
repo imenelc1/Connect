@@ -1,0 +1,20 @@
+{
+  "community": {
+    "title": "Community",
+    "subtitle": "Exchange with other instructors and share your experience",
+    "placeholder": "Share with the community...",
+    "send": "Send"
+  },
+  "tabs": {
+    "recent": "Recent",
+    "popular": "Popular",
+    "myforums": "My Forums"
+  },
+  "forums": {
+    "select": "Select forum type",
+    "all": "All forums",
+    "teacher-teacher": "Teacher ↔ Teacher",
+    "teacher-student": "Teacher ↔ Student",
+    "student-student": "Student ↔ Student"
+  }
+}

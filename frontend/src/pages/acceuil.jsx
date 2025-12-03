@@ -20,6 +20,8 @@ export default function Acceuil() {
 
       {/* Pied de page */}
       <Footer />
+    
+    
 
     </div>
   );
