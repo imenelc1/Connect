@@ -12,11 +12,12 @@ import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
 import IaAssistant from "../components/ui/IaAssistant";
 
-import NavBar from "../components/common/Navbar";
+import NavBar from "../components/common/NavBar";
 import Mascotte from "../assets/6.svg";
 import AssistantIA from "../pages/AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
+  import axios from "axios";
 
 export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
@@ -24,6 +25,8 @@ export default function StartExercise() {
   const [openAssistant, setOpenAssistant] = useState(false);
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
+  const [output, setOutput] = useState("Aucune sortie pour le moment...");
+  const [isRunning, setIsRunning] = useState(false);
 
   const [userCode, setUserCode] = useState(`#include <stdio.h>
 #include <stdlib.h>
@@ -44,6 +47,28 @@ int main() {
     i18n.changeLanguage(newLang);
     localStorage.setItem("lang", newLang);
   };
+
+  const runCode = async () => {
+    setIsRunning(true);
+    setOutput("Exécution en cours...");
+
+    try {
+      const response = await axios.post(
+        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+        {
+          source_code: userCode,
+          language_id: 49, // 49 = C (gcc)
+        }
+      );
+
+      setOutput(response.data.stdout || response.data.stderr || "Aucune sortie");
+    } catch (error) {
+      setOutput("Erreur lors de l'exécution du code");
+    }
+
+    setIsRunning(false);
+  };
+
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
@@ -79,8 +104,8 @@ int main() {
           </div>
 
           <div className="flex gap-3 ml-[450px]">
-           <IaAssistant/>
-           <HeadMascotte/>
+            <IaAssistant />
+            <HeadMascotte />
           </div>
 
           {/* User Circle */}
@@ -98,7 +123,7 @@ int main() {
           className="w-full p-6 rounded-2xl shadow-card borde"
           style={{
             backgroundImage: "var(--grad-2)",
-           
+
           }}
         >
           <p className="font-semibold text-muted text-[20px] ">
@@ -143,8 +168,9 @@ int main() {
         <div className="flex flex-wrap justify-center gap-6 mt-8 mb-10">
           <ActionButton
             icon={<Play size={18} />}
-            label={t("buttons.run")}
+            label={isRunning ? "Exécution..." : t("buttons.run")}
             bg="var(--grad-button)"
+            onClick={runCode}
           />
 
           <ActionButton
@@ -198,11 +224,10 @@ int main() {
         </p>
 
         <div className="rounded-2xl p-6 text-white shadow-strong  text-[15px] leading-7 mb-14 bg-output">
-          {t("output.default")
-            .split("\n")
-            .map((line, i) => (
-              <div key={i}>{line}</div>
-            ))}
+          {output.split("\n").map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
+
         </div>
 
         {/* SEND SOLUTION */}
@@ -239,11 +264,10 @@ int main() {
                   onClick={() => setRating(i)}
                   className={`cursor-pointer text-transparent bg-clip-text drop-shadow ${getStarGradient(
                     i
-                  )} ${
-                    (hover || rating) >= i
-                      ? "opacity-100 scale-110"
-                      : "opacity-40"
-                  } transition-all duration-150`}
+                  )} ${(hover || rating) >= i
+                    ? "opacity-100 scale-110"
+                    : "opacity-40"
+                    } transition-all duration-150`}
                 >
                   ★
                 </span>
@@ -297,9 +321,10 @@ int main() {
   );
 }
 
-function ActionButton({ icon, label, bg, text = "white" }) {
+function ActionButton({ icon, label, bg, text = "white", onClick }) {
   return (
     <button
+      onClick={onClick}
       className="px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-card hover:opacity-90 transition font-medium text-sm md:text-base"
       style={{ backgroundImage: bg, color: text }}
     >
