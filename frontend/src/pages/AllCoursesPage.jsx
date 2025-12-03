@@ -11,6 +11,8 @@ import i18n from "../i18n";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
+import { getCurrentUserId } from "../hooks/useAuth";
+
 
 
 
@@ -23,24 +25,30 @@ const gradientMap = {
 
 
 export default function AllCoursesPage() {
+ const token = localStorage.getItem("access_token");
+    const currentUserId = getCurrentUserId();
+    const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
+
   const [courses, setCourses] = useState([]);
 useEffect(() => {
   fetch("http://localhost:8000/api/courses/api/cours")
     .then(res => res.json())
     .then(data => {
+      
       const formatted = data.map(c => ({
+        id:c.id_cours,
         title: c.titre_cour,
         description: c.description,
         level: c.niveau_cour_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
         //levelLabel: t(`levels.${c.niveau_cour_label}`),
         duration: c.duration_readable,
-        author: c.utilisateur,
-        initials: c.utilisateur
+        author: c.utilisateur_name,
+        initials: c.utilisateur_name
     .split(" ")
     .map(n => n[0])
     .join("")
     .toUpperCase(),
-        isMine: true
+        isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
       }));
       setCourses(formatted);
     })
@@ -60,6 +68,30 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+const handleDeleteCourse = async (courseId) => {
+  const confirmDelete = window.confirm("Tu es sûr de supprimer ce cours ?");
+  if (!confirmDelete) return;
+
+  // Appel API
+  try {
+    await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Mise à jour du state
+    setCourses(prev => prev.filter(c => c.id !== courseId));
+  } catch (err) {
+    console.error("Erreur suppression :", err);
+    alert("Erreur lors de la suppression");
+  }
+};
+
+
+
 
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
@@ -143,6 +175,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
             course={course}
             role={userRole}
             showProgress={userRole === "etudiant"}
+            onDelete={handleDeleteCourse} 
           />
         ))}
       </div>

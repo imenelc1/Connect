@@ -8,6 +8,7 @@ import ThemeContext from "../context/ThemeContext";
 import Select from "../components/common/Select";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
+import { getCurrentUserId } from "../hooks/useAuth";
 import { FileText, Activity, CheckCircle } from "lucide-react";
 export default function NewExercise() {
   const navigate = useNavigate();
@@ -20,13 +21,19 @@ export default function NewExercise() {
     i18n.changeLanguage(newLang);
   };
 
-  const [formData, setFormData] = useState({
+  const [title, setTitle] = useState("");
+  const [statement, setStatment] = useState("");
+  const [level, setLevel] = useState("");
+  const [category, setCategory] = useState("");
+  const [cours, setCours] = useState("");
+  const [currentCoursId, setCurrentCoursId] = useState(null);
+
+  /*const [formData, setFormData] = useState({
     title: "",
     statement: "",
     category: "",
-    duration: "",
     level: "",
-  });
+  });*/
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -82,8 +89,8 @@ export default function NewExercise() {
             type="text"
             name="title"
             placeholder={t("form.title_placeholder")}
-            value={formData.title}
-            onChange={handleChange}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full rounded-full border border-grayc
                        px-5 py-3 shadow-sm focus:outline-none
                        focus:ring-2 focus:ring-primary mb-6 bg-secondary/10"
@@ -96,8 +103,8 @@ export default function NewExercise() {
           <textarea
             name="statement"
             placeholder={t("form.statement_placeholder")}
-            value={formData.statement}
-            onChange={handleChange}
+            value={statement}
+            onChange={(e) => setStatment(e.target.value)}
             rows={6}
             className="w-full rounded-3xl border border-grayc
                        px-5 py-3 shadow-sm focus:outline-none
@@ -105,16 +112,16 @@ export default function NewExercise() {
           />
 
           {/* GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
 
             {/* CATEGORY */}
             <div>
               <label className="block text-textc font-semibold mb-2">
                 {t("form.category_label")}
               </label>
-              <Select 
+              <select 
                 name="category"
-                value={formData.category}
+                value={category}
                 onChange={handleChange}
                 className="w-full rounded-full border border-grayc
                            px-5 py-3 bg-background shadow-sm focus:outline-none
@@ -128,26 +135,7 @@ export default function NewExercise() {
               } />
             </div>
 
-            {/* DURATION */}
-            <div>
-              <label className="block text-textc font-semibold mb-2">
-                {t("form.duration_label")}
-              </label>
-              <Select
-                name="duration"
-                value={formData.duration}
-                onChange={handleChange}
-                className="w-full rounded-full border border-grayc
-                           px-5 py-3 bg-background shadow-sm focus:outline-none
-                           focus:ring-2 focus:ring-primary"
-                options={[
-                  { value: "", label: t("select.placeholder") },
-                  { value: "day", label: t("select.day") },
-                  { value: "week", label: t("select.week") },
-                  { value: "month", label: t("select.month") },
-                ]}
-              />
-            </div>
+          
 
             {/* LEVEL */}
             <div>
@@ -156,16 +144,36 @@ export default function NewExercise() {
               </label>
               <Select
                 name="level"
-                value={formData.level}
+                value={level}
                 onChange={handleChange}
                 className="w-full rounded-full border border-grayc
                            px-5 py-3 bg-background shadow-sm focus:outline-none
                            focus:ring-2 focus:ring-primary"
                 options={[
                   { value: "", label: t("select.placeholder") },
-                  { value: "beginner", label: t("select.beginner") },
-                  { value: "intermediate", label: t("select.intermediate") },
-                  { value: "advanced", label: t("select.advanced") },
+                  { value: "debutant", label: t("select.beginner") },
+                  { value: "intermediaire", label: t("select.intermediate") },
+                  { value: "avance", label: t("select.advanced") },
+                ]}
+              />
+            </div>
+            {/* COURS */}
+            <div>
+              <label className="block text-textc font-semibold mb-2">
+                {t("form.cours")}
+              </label>
+              <Select
+                name="cours"
+                value={cours}
+                onChange={handleChange}
+                className="w-full rounded-full border border-grayc
+                           px-5 py-3 bg-background shadow-sm focus:outline-none
+                           focus:ring-2 focus:ring-primary"
+                options={[
+                  { value: "", label: t("select.placeholder") },
+                  { value: "debutant", label: t("select.beginner") },
+                  { value: "intermediaire", label: t("select.intermediate") },
+                  { value: "avance", label: t("select.advanced") },
                 ]}
               />
             </div>

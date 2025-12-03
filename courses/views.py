@@ -24,6 +24,8 @@ class CreateCoursView(APIView):
 
         return Response(serializer.errors, status=400)
 
+
+
 class CreateSectionView(APIView):
 
     @jwt_required
@@ -38,6 +40,34 @@ class CreateSectionView(APIView):
             return Response(SectionSerializer(section).data, status=201)
 
         return Response(serializer.errors, status=400)
+
+@api_view(['DELETE'])
+def delete_cours(request, pk):
+    
+    
+    try:
+        cours = Cours.objects.get(pk=pk)
+        cours.delete()
+        return Response({"message": "deleted"}, status=204)
+    except Cours.DoesNotExist:
+        return Response({"error": "not found"}, status=404)
+
+
+class CreateLeconView(APIView):
+
+    @jwt_required
+    def post(self, request):
+        data = request.data.copy()
+        # on ne récupère pas l'utilisateur ici car Section est lié au cours
+        # il faut passer l'id du cours dans le payload
+        serializer = LeconSerializer(data=data)
+
+        if serializer.is_valid():
+            section = serializer.save()
+            return Response(LeconSerializer(section).data, status=201)
+
+        return Response(serializer.errors, status=400)
+
 
 @api_view(['GET'])
 def cours_list_api(request):

@@ -37,6 +37,7 @@ export default function ContentFilters({
   };
 
   const current = labels[type];
+  
 
   return (
     <div className="w-full flex justify-center mt-8">

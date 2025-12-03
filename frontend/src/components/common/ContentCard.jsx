@@ -18,7 +18,7 @@ const buttonStyles = {
   Avancé: "bg-pink text-white",
 };
 
-export default function ContentCard({ course, role, showProgress, className = "" }) {
+export default function ContentCard({ course, role, showProgress, className = "", onDelete }) {
   const { t } = useTranslation("contentPage");
   const location = useLocation();
 
@@ -100,7 +100,7 @@ export default function ContentCard({ course, role, showProgress, className = ""
         {role === "enseignant" && course.isMine && (
           <div className="flex gap-2 ml-4">
             <FiEdit size={18} className="cursor-pointer text-grayc hover:text-primary" />
-            <FiTrash2 size={18} className="cursor-pointer text-grayc hover:text-red-500" />
+            <FiTrash2 size={18} className="cursor-pointer text-grayc hover:text-red-500" onClick={() => onDelete(course.id)}/>
           </div>
         )}
       </div>

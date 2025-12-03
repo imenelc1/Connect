@@ -9,34 +9,52 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
-const quizzes = [
-  {
-    title: "Quiz Structures de Données",
-    description: "Testez vos connaissances sur les piles, files, arbres et graphes.",
-    level: "beginner",
-    duration: "20 questions",
-    author: "Dr. Farid",
-    initials: "F.D",
-    isMine: true,
-  },
-  {
-    title: "Quiz Algorithmique Avancée",
-    description: "Un quiz difficile basé sur optimisation et complexité.",
-    level: "advanced",
-    duration: "25 questions",
-    author: "Dr. Benali",
-    initials: "B.A",
-    isMine: false,
-  },
-];
+import { getCurrentUserId } from "../hooks/useAuth";
+
+
 
 const gradientMap = {
-  beginner: "bg-grad-2",
-  intermediate: "bg-grad-3",
-  advanced: "bg-grad-4",
+  Débutant: "bg-grad-2",
+  Intermédiaire: "bg-grad-3",
+  Avancé: "bg-grad-4",
 };
 
+
 export default function AllQuizzesPage() {
+  const token = localStorage.getItem("access_token");
+  const currentUserId = getCurrentUserId();
+const [quizzes, setQuizzez] = useState([]);
+
+
+useEffect(() => {
+  fetch("http://localhost:8000/api/quiz/api/quiz/")
+    .then(res => res.json())
+    .then(data => {
+      const formatted = data.map(c => ({
+        id:c.exercice?.id_exercice,
+        title: c.exercice?.titre_exo,
+        description: c.exercice?.enonce,
+        level: c.exercice?.niveau_exercice_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
+        //levelLabel: t(`levels.${c.niveau_cour_label}`),
+        duration: c.exercice?.duration_readable,
+        author: c.exercice?.utilisateur_name,
+        initials: c.exercice?.utilisateur_name
+    .split(" ")
+    .map(n => n[0])
+    .join("")
+    .toUpperCase(),
+        isMine: c.exercice?.utilisateur === currentUserId //NEWDED GHR ISMINE //
+      }));
+      setQuizzez(formatted);
+    })
+    .catch(err => console.error("Erreur chargement quiz :", err));
+}, []);
+
+
+
+
+
+
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allQuizzes");
@@ -51,6 +69,28 @@ export default function AllQuizzesPage() {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+const handleDeleteQuiz = async (exoId) => {
+  const confirmDelete = window.confirm("Tu es sûr de supprimer cet exercice?");
+  if (!confirmDelete) return;
+
+  // Appel API
+  try {
+    await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Mise à jour du state
+    setQuizzez(prev => prev.filter(c => c.id !== exoId));
+  } catch (err) {
+    console.error("Erreur suppression :", err);
+    alert("Erreur lors de la suppression");
+  }
+};
+
+
 
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
@@ -120,6 +160,7 @@ export default function AllQuizzesPage() {
               course={quiz}
               role={userRole}
               showProgress={userRole === "etudiant"}
+              onDelete={handleDeleteQuiz}
             />
           ))}
         </div>

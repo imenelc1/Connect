@@ -10,6 +10,8 @@ import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUserId } from "../hooks/useAuth";
+import api from "../services/courseService";
 
 
 
@@ -22,6 +24,8 @@ const gradientMap = {
 
 
 export default function AllCoursesPage() {
+  const token = localStorage.getItem("access_token");
+  const currentUserId = getCurrentUserId();
 
 const [exercises, setExercice] = useState([]);
 useEffect(() => {
@@ -29,6 +33,7 @@ useEffect(() => {
     .then(res => res.json())
     .then(data => {
       const formatted = data.map(c => ({
+        id: c.id_exercice,
         title: c.titre_exo,
         level: c.niveau_exercice_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
         //levelLabel: t(`levels.${c.niveau_cour_label}`),
@@ -36,13 +41,13 @@ useEffect(() => {
         //cours: c.cours,
         description: c.enonce,
         //categorie: c.categorie,
-        author: c.utilisateur,
-        initials: c.utilisateur
+        author: c.utilisateur_name,
+        initials: c.utilisateur_name
     .split(" ")
     .map(n => n[0])
     .join("")
     .toUpperCase(),
-        isMine: true
+        isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
       }));
       setExercice(formatted);
     })
@@ -65,6 +70,28 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+const handleDeleteExo = async (exoId) => {
+  const confirmDelete = window.confirm("Tu es sûr de supprimer cet exercice?");
+  if (!confirmDelete) return;
+
+  // Appel API
+  try {
+    await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // Mise à jour du state
+    setExercice(prev => prev.filter(c => c.id !== exoId));
+  } catch (err) {
+    console.error("Erreur suppression :", err);
+    alert("Erreur lors de la suppression");
+  }
+};
+
 
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
@@ -149,6 +176,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
 
             role={userRole}
             showProgress={userRole === "etudiant"}
+            onDelete={handleDeleteExo}
           />
         ))}
       </div>
