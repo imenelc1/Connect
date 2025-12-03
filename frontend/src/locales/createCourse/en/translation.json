@@ -20,7 +20,15 @@
     "back": "Back",
 
     "publish_title": "Publish Course",
-    "publish_description": "→ Final page here."
+    "publish_description": "→ Final page here.",
+
+    "text":"text",
+     "example":"example",
+     "image":"image",
+    "section_description_placeholder":"Course description",
+     "lesson_title":"Lesson title",
+     "lesson_content":"Content of the lesson"
+
   },
 
   "select": {

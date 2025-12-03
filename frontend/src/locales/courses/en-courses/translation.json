@@ -17,5 +17,9 @@
   "feedback2": "Practical exercises boosted my understanding of C.",
   "feedback3": "Thanks to CONNECT, I passed my exams with excellent grades.",
    "yourFeedback": "Your feedback",
-  "feedbackPlaceholder": "Share your comments, suggestions or remarks..."
+  "feedbackPlaceholder": "Share your comments, suggestions or remarks...",
+
+   "text":"text"
+
+
 }

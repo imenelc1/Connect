@@ -10,6 +10,13 @@
     "level": "Niveau du cours",
     "cancel": "Annuler",
     "save_next": "Enregistrer & Suivant",
+    "text":"text",
+     "example":"exemple",
+     "image":"image",
+     "section_description_placeholder":"La description du cours",
+     "lesson_title":"Titre de la leçon",
+     "lesson_content":"Contenu de la leçon",
+
 
     "curriculum": "Curriculum du Cours",
     "add_section": "Ajouter une section",

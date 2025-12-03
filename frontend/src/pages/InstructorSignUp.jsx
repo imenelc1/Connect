@@ -197,7 +197,18 @@ const InstructorSignUp = () => {
 localStorage.setItem("token", res.data.token);
 
 // 🔥 Stocker les infos utilisateur
-localStorage.setItem("user", JSON.stringify(res.data.user));
+localStorage.setItem(
+  "user",
+  JSON.stringify({
+    nom: res.data.user.nom,
+    prenom: res.data.user.prenom,
+    id_utilisateur: res.data.user.id_utilisateur,
+    adresse_email: res.data.user.adresse_email,
+    matricule: res.data.user.matricule,
+    role: res.data.role,      // ⭐ AJOUT IMPORTANT
+    token: res.data.token     // facultatif mais utile
+  })
+);
       toast.success("Inscription réussie !");
       // redirection
       setTimeout(() => {

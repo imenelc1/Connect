@@ -203,7 +203,6 @@ export function QuizPage2() {
             variant="quizPrev"
             disabled={currentQuestion === 0}
           />
-
           <Button
             text={`${t("next")} >`}
             onClick={nextQuestion}

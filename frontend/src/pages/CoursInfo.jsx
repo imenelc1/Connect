@@ -1,23 +1,23 @@
 import React, { useState, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
 import { Trash2, ChevronUp } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
-import ThemeButton from "../components/common/ThemeButton";
 import Select from "../components/common/Select";
-import { Globe } from "lucide-react";
+import { FolderPlus } from "lucide-react";
 import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
-//import axios from "axios";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService";
+import { toast } from "react-hot-toast";
+
+import ModernDropdown from "../components/common/ModernDropdown";
+import UserCircle from "../components/common/UserCircle";
 
 export default function CoursePage() {
   const { t, i18n } = useTranslation("courseInfo");
   const [activeStep, setActiveStep] = useState(1);
-const [error, setError] = useState(null);
-
   const { toggleDarkMode } = useContext(ThemeContext);
 
   const toggleLanguage = () => {
@@ -26,198 +26,279 @@ const [error, setError] = useState(null);
   };
 
   const courseSteps = [
-  { label: t("course.basic_info"), icon: Monitor },
-  { label: t("course.curriculum"), icon: BookOpenCheck },
-  { label: t("course.publish_title"), icon: CheckCircle },
-];
+    { label: t("course.basic_info"), icon: Monitor },
+    { label: t("course.curriculum"), icon: BookOpenCheck },
+    { label: t("course.publish_title"), icon: CheckCircle },
+  ];
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [level, setLevel] = useState("");
-const [newSectionTitle, setNewSectionTitle] = useState(""); // titre temporaire pour la section
-const [currentCoursId, setCurrentCoursId] = useState(null);
+  const [currentCoursId, setCurrentCoursId] = useState(null);
 
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userRole = userData?.user?.role ?? userData?.role;
 
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
- const handleSaveStep1 = async () => {
-  const token = localStorage.getItem("access_token");
-  const currentUserId = getCurrentUserId();
-console.log("token:", token);
-console.log("currentUserId:", currentUserId);
-
-  if (!token || !currentUserId) {
-    setError("Utilisateur non connecté");
-    return;
-  }
-
-  // Créer le payload à envoyer
-  const payload = {
-    titre_cour: title,
-    description: description,
-    duration: duration + ":00",
-    niveau_cour: level,
-    utilisateur: currentUserId, // ID envoyé directement depuis React
-  };
-
-  try {
-    const res = await api.post("courses/create/", payload, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    console.log("Cours créé :", res.data);
-    setCurrentCoursId(res.data.id_cours); // ou res.data.id selon ton serializer
-
-    // Passer à l'étape suivante
-    setActiveStep(2);
-
-  } catch (err) {
-    console.error("Erreur lors de la création :", err.response?.data || err.message);
-    alert("Erreur lors de la création du cours");
-  }
-};
-
-const handleSaveStep2 = async (coursId, ordre) => {
-  const token = localStorage.getItem("access_token");
-  const currentUserId = getCurrentUserId();
-
-  if (!token || !currentUserId) {
-    setError("Utilisateur non connecté");
-    return;
-  }
-
-  if (!newSectionTitle.trim()) {
-    alert("Le titre de la section ne peut pas être vide");
-    return;
-  }
-
-  const payload = {
-    cours: coursId,
-    titre_section: newSectionTitle,
-    utilisateur: currentUserId,
-     ordre: ordre,
-  };
-
-  try {
-    const res = await api.post("courses/createSection/", payload, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    console.log("Section créée :", res.data);
-    // Réinitialiser le champ
-    setNewSectionTitle("");
-  } catch (err) {
-    console.error("Erreur création section :", err.response?.data || err.message);
-    alert("Erreur lors de la création de la section");
-  }
-
-  setActiveStep(3);
-};
-
-
-
-
-
-
-  // State initial
   const [sections, setSections] = useState([
     {
       id: 1,
+      title: "",
+      description: "", // ⭐ AJOUTÉ
       open: true,
-      lessons: [{ id: 1, title: "" }],
+      lessons: [{ id: 1, title: "", content: "" }], // ⭐ AJOUTÉ
     },
   ]);
 
-  // Ajouter section
+  // --- Gestion des sections et leçons ---
   const addSection = () => {
     setSections((prev) => [
       ...prev,
       {
         id: Date.now(),
+        title: "",
         open: true,
-        lessons: [{ id: Date.now(), title: t("course.lesson") }],
+        lessons: [{ id: Date.now(), title: "" }],
       },
     ]);
   };
 
-  // Toggle section
   const toggleSection = (id) => {
     setSections((prev) =>
-      prev.map((section) =>
-        section.id === id ? { ...section, open: !section.open } : section
-      )
+      prev.map((s) => (s.id === id ? { ...s, open: !s.open } : s))
     );
   };
 
-  // Ajouter leçon
+  const updateSectionTitle = (id, newTitle) => {
+    setSections((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, title: newTitle } : s))
+    );
+  };
+
+  const updateSectionDescription = (id, newDesc) => {
+    setSections((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, description: newDesc } : s))
+    );
+  };
+
   const addLessonToSection = (sectionId) => {
     setSections((prev) =>
-      prev.map((section) =>
-        section.id === sectionId
-          ? {
-            ...section,
-            lessons: [
-              ...section.lessons,
-              { id: Date.now(), title: "" },
-            ],
-          }
-          : section
+      prev.map((s) =>
+        s.id === sectionId
+          ? { ...s, lessons: [...s.lessons, { id: Date.now(), title: "" }] }
+          : s
       )
     );
   };
 
-  // Modifier titre leçon
   const updateLessonTitle = (sectionId, lessonId, newTitle) => {
     setSections((prev) =>
-      prev.map((section) =>
-        section.id === sectionId
+      prev.map((s) =>
+        s.id === sectionId
           ? {
-            ...section,
-            lessons: section.lessons.map((lesson) =>
-              lesson.id === lessonId ? { ...lesson, title: newTitle } : lesson
-            ),
-          }
-          : section
+              ...s,
+              lessons: s.lessons.map((l) =>
+                l.id === lessonId ? { ...l, title: newTitle } : l
+              ),
+            }
+          : s
       )
     );
   };
 
-  // Supprimer section
-  const removeSection = (id) => {
-    setSections((prev) => prev.filter((section) => section.id !== id));
+  const updateLessonContent = (sectionId, lessonId, newContent) => {
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              lessons: s.lessons.map((l) =>
+                l.id === lessonId ? { ...l, content: newContent } : l
+              ),
+            }
+          : s
+      )
+    );
   };
 
-  // Supprimer leçon
+  const removeSection = (id) => {
+    setSections((prev) => prev.filter((s) => s.id !== id));
+  };
+
   const removeLesson = (sectionId, lessonId) => {
     setSections((prev) =>
-      prev.map((section) =>
-        section.id === sectionId
-          ? {
-            ...section,
-            lessons: section.lessons.filter((l) => l.id !== lessonId),
-          }
-          : section
+      prev.map((s) =>
+        s.id === sectionId
+          ? { ...s, lessons: s.lessons.filter((l) => l.id !== lessonId) }
+          : s
       )
     );
   };
+
+  // --- Sauvegarde ---
+  const handleSaveStep1 = async () => {
+    const token = localStorage.getItem("access_token");
+    const currentUserId = getCurrentUserId();
+
+    if (!token || !currentUserId) {
+      alert("Utilisateur non connecté");
+      return null;
+    }
+
+    try {
+      const res = await api.post(
+        "courses/create/",
+        {
+          titre_cour: title,
+          description,
+          duration,
+          niveau_cour: level,
+          utilisateur: currentUserId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const coursId = res.data.id_cours;
+      setCurrentCoursId(coursId);
+      return coursId;
+    } catch (err) {
+      console.error(
+        "Erreur création cours :",
+        err.response?.data || err.message
+      );
+      alert("Erreur lors de la création du cours");
+      return null;
+    }
+  };
+
+const handleSaveAllSections = async (courseId) => {
+  const token = localStorage.getItem("access_token");
+  const currentUserId = getCurrentUserId();
+
+  try {
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+
+      // --- Création section ---
+      const sectionResponse = await api.post(
+        "courses/createSection/",
+        {
+          cours: courseId,
+          titre_section: section.title || `Section ${i + 1}`, // titre par défaut
+          description: section.description || "",
+          ordre: i + 1,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // ⚠️ Récupérer l'ID correct envoyé par le backend
+      const sectionId = sectionResponse.data.id;
+
+      // --- Création des leçons ---
+      for (let j = 0; j < section.lessons.length; j++) {
+        const lesson = section.lessons[j];
+
+        const lessonTitle = lesson.title || `Leçon ${j + 1}`;
+        const lessonContent = lesson.content || "";
+        const lessonType = lesson.type || "text";
+
+        if (lessonType === "image" && lesson.imageFile) {
+          const formData = new FormData();
+          formData.append("section", sectionId);
+          formData.append("titre_lecon", lessonTitle);
+          formData.append("contenu_lecon", lessonContent);
+          formData.append("utilisateur", currentUserId);
+          formData.append("type_lecon", "image");
+          formData.append("ordre", j + 1);
+          formData.append("image_lecon", lesson.imageFile);
+
+          await api.post("courses/createLesson/", formData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          continue;
+        }
+
+        await api.post(
+          "courses/createLesson/",
+          {
+            section: sectionId,          // ⚠️ obligatoire
+            titre_lecon: lessonTitle,
+            contenu_lecon: lessonContent,
+            utilisateur: currentUserId,
+            type_lecon: lessonType,
+            ordre: j + 1,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+    }
+
+    toast.success("Sections et leçons enregistrées !");
+    setActiveStep(3);
+  } catch (err) {
+    console.error("Erreur création sections/leçons :", err.response?.data || err);
+    toast.error("Erreur lors de l’enregistrement.");
+  }
+};
+
+
+
+
+  const handleLessonImageUpload = (sectionId, lessonId, file) => {
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              lessons: s.lessons.map((l) =>
+                l.id === lessonId
+                  ? {
+                      ...l,
+                      imageFile: file,
+                      preview: URL.createObjectURL(file),
+                    }
+                  : l
+              ),
+            }
+          : s
+      )
+    );
+  };
+
+  const handleSaveAll = async () => {
+  try {
+    const coursId = await handleSaveStep1();
+    if (!coursId) return;
+
+    await handleSaveAllSections(coursId); // ✅ passe le bon id
+    setActiveStep(3);
+  } catch (error) {
+    console.error("Erreur lors de l'enregistrement complet :", error);
+  }
+};
+
 
   return (
     <div className="w-full min-h-screen flex bg-primary/5">
-      {/* Sidebar */}
       <div className="hidden lg:block w-64 min-h-screen">
         <Navbar />
       </div>
 
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
-        <div className="w-full flex justify-between items-center mb-4">
-          <ThemeButton onClick={toggleDarkMode} />
-          <div onClick={toggleLanguage}>
-            <Globe size={16} />
-          </div>
+        <div className="flex justify-end">
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
         </div>
 
-        {/* Top bar */}
         <Topbar
           steps={courseSteps}
           activeStep={activeStep}
@@ -225,14 +306,12 @@ const handleSaveStep2 = async (coursId, ordre) => {
           className="flex justify-between"
         />
 
-        {/* STEP 1 : BASIC INFO */}
+        {/* STEP 1 */}
         {activeStep === 1 && (
           <div className="w-full bg-grad-2 rounded-2xl shadow-md p-6 lg:p-10">
             <h2 className="text-2xl font-semibold mb-6 text-grad-1">
               {t("course.basic_info")}
             </h2>
-
-            {/* Title */}
             <div className="flex flex-col mb-6">
               <label className="font-medium mb-2 textc">
                 {t("course.title")}
@@ -240,48 +319,46 @@ const handleSaveStep2 = async (coursId, ordre) => {
               <Input
                 placeholder={t("course.course_title_placeholder")}
                 className="text-black"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
               />
             </div>
-
-            {/* Topic */}
             <div className="flex flex-col mb-6">
               <label className="font-medium mb-2">
                 {t("course.course_topic")}
               </label>
               <textarea
                 className="w-full min-h-[180px] border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2"
-                text-black="true"
                 placeholder={t("course.course_topic_placeholder")}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-
-            {/* Duration & Level */}
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
               <div className="flex flex-col ">
                 <Input
                   label={t("course.duration")}
                   placeholder={t("course.duration_placeholder")}
                   className="w-full "
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
                 />
               </div>
-
               <div className="flex flex-col">
-                <label className="font-medium mb-2">
-                  {t("course.level")}
-                </label>
+                <label className="font-medium mb-2">{t("course.level")}</label>
                 <Select
                   className="w-full rounded-full border border-grayc px-5 py-3 bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  value={level}
+                  onChange={(e) => setLevel(e.target.value)}
                   options={[
                     { value: "", label: t("select.placeholder") },
-                    { value: "Beginner", label: t("select.Beginner") },
-                    { value: "Intermediate", label: t("select.Intermediate") },
-                    { value: "Advanced", label: t("select.Advanced") },
+                    { value: "debutant", label: t("select.Beginner") },
+                    { value: "intermediaire", label: t("select.Intermediate") },
+                    { value: "avance", label: t("select.Advanced") },
                   ]}
                 />
               </div>
             </div>
-
-            {/* Buttons */}
             <div className="flex justify-between mt-10 ">
               <button className="px-6 py-2 rounded-xl border border-secondary font-medium bg-white shadow-sm transition text-black/50">
                 {t("course.cancel")}
@@ -296,11 +373,10 @@ const handleSaveStep2 = async (coursId, ordre) => {
           </div>
         )}
 
-        {/* STEP 2 : CURRICULUM */}
+        {/* STEP 2 */}
         {activeStep === 2 && (
-          <div className="w-full p-6">
+          <div className="w-full p-5">
             <div className="mt-6 relative bg-gradient-to-br from-grad-2/60 to-grad-2 rounded-2xl backdrop-blur-xl shadow-xl p-6 lg:p-10 border border-white/10">
-              {/* Add Section */}
               <div className="absolute right-8 top-8">
                 <button
                   className="px-6 py-2 rounded-xl bg-grad-1 text-white shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
@@ -309,108 +385,182 @@ const handleSaveStep2 = async (coursId, ordre) => {
                   + {t("course.add_section")}
                 </button>
               </div>
-
               <h1 className="text-3xl font-semibold mb-6 tracking-tight text-textc">
                 {t("course.curriculum")}
               </h1>
 
-              {/* Sections dynamiques */}
               {sections.map((section, index) => (
                 <div
                   key={section.id}
                   className="bg-surface backdrop-blur-xl rounded-2xl p-5 shadow-inner border border-white/20 transition hover:border-primary/30 mb-6"
                 >
-                  <div className="flex items-center gap-4 mb-4 bg-transparent">
-                    <div className="w-9 h-9 flex items-center justify-center rounded-full bg-grad-1 text-white font-semibold">
-                      {index + 1}
-                    </div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex flex-col w-full gap-4">
+                      <div className="flex flex-col-2 ">
+                        <div className="w-9 h-9 flex items-center justify-center rounded-full bg-grad-1 text-white font-semibold">
+                          {index + 1}
+                        </div>
 
-                    <Input
-                      placeholder={t("course.section_title_placeholder")}
-                      className="!bg-transparent !border-none px-2 text-textc font-medium"
-                    />
-
-                    <div className="ml-auto flex items-center gap-2 text-muted">
-                      <button
-                        className="hover:text-primary transition-transform"
-                        onClick={() => toggleSection(section.id)}
-                      >
-                        <ChevronUp
-                          size={20}
-                          strokeWidth={1.7}
-                          className={`transition-transform duration-300 ${section.open ? "" : "rotate-180"
-                            }`}
-                        />
-                      </button>
-
-                      <button
-                        className="hover:text-red-500 transition-colors"
-                        onClick={() => removeSection(section.id)}
-                      >
-                        <Trash2 size={20} strokeWidth={1.7} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {section.open && (
-                    <div className="space-y-3">
-                      {section.lessons.map((lesson, index) => (
-                        <div
-                          key={lesson.id}
-                          className="flex items-center gap-4 rounded-xl p-4 bg-grad-3 border border-gray-200/50 shadow-sm hover:shadow-md transition-all"
-                        >
-                          <div className="text-sm font-medium w-6 text-textc">
-                            {index + 1}.
-                          </div>
-
+                        <div className="flex">
                           <Input
-                            value={lesson.title || t("course.lesson")}
+                            value={section.title}
                             onChange={(e) =>
-                              updateLessonTitle(
-                                section.id,
-                                lesson.id,
-                                e.target.value
-                              )
+                              updateSectionTitle(section.id, e.target.value)
                             }
-                            className="!bg-transparent !border-none text-textc"
+                            placeholder={t("course.section_title_placeholder")}
+                            className="!bg-transparent !border-none px-2 text-textc font-medium"
                           />
-
-                          <div className="flex items-center gap-3 ml-auto">
-                            <Select
-                              options={[
-                                {
-                                  value: "type",
-                                  label: t("course.lesson_type"),
-                                },
-                              ]}
-                            />
+                          <div className="flex ml-[500px]">
                             <button
-                              onClick={() =>
-                                removeLesson(section.id, lesson.id)
-                              }
-                              className="text-gray-400 hover:text-red-500 transition-colors"
+                              className="hover:text-primary transition-transform"
+                              onClick={() => toggleSection(section.id)}
                             >
-                              <Trash2 size={20} strokeWidth={1.8} />
+                              <ChevronUp
+                                size={20}
+                                strokeWidth={1.7}
+                                className={`transition-transform duration-300 ${
+                                  section.open ? "" : "rotate-180"
+                                }`}
+                              />
+                            </button>
+                            <button
+                              className="hover:text-red-500 transition-colors"
+                              onClick={() => removeSection(section.id)}
+                            >
+                              <Trash2 size={20} strokeWidth={1.7} />
                             </button>
                           </div>
                         </div>
-                      ))}
-
-                      {/* Add Lesson */}
-                      <div className="flex justify-center mt-5">
-                        <button
-                          onClick={() => addLessonToSection(section.id)}
-                          className="w-1/2 rounded-xl border py-2 bg-primary text-white font-medium hover:bg-primary/90 transition"
-                        >
-                          + {t("course.add_lesson")}
-                        </button>
                       </div>
+                      <textarea
+                        className="w-full mt-2 min-h-[80px] border border-gray-300 rounded-xl p-3"
+                        placeholder={t(
+                          "course.section_description_placeholder"
+                        )}
+                        value={section.description}
+                        onChange={(e) =>
+                          updateSectionDescription(section.id, e.target.value)
+                        }
+                      />
                     </div>
-                  )}
+                    <div className="flex items-center gap-2 text-muted"></div>
+                  </div>
+
+{section.open &&
+  section.lessons.map((lesson, idx) => (
+    <div
+      key={lesson.id}
+      className="flex flex-col gap-2 rounded-xl p-4 bg-grad-3 border border-gray-200/50 shadow-sm hover:shadow-md transition-all mb-4"
+    >
+      <div className="flex items-center gap-3">
+        <div className="text-sm font-medium w-6 text-textc">{idx + 1}.</div>
+        <Input
+          placeholder={t("course.lesson_title")}
+          value={lesson.title}
+          onChange={(e) =>
+            updateLessonTitle(section.id, lesson.id, e.target.value)
+          }
+          className="!bg-transparent !border-none text-textc flex-1"
+        />
+        <div className="flex ml-[270px] gap-4">
+          <ModernDropdown
+            value={lesson.type}
+            placeholder={"type"}
+            onChange={(value) =>
+              setSections((prev) =>
+                prev.map((s) =>
+                  s.id === section.id
+                    ? {
+                        ...s,
+                        lessons: s.lessons.map((l) =>
+                          l.id === lesson.id ? { ...l, type: value } : l
+                        ),
+                      }
+                    : s
+                )
+              )
+            }
+            options={[
+              { value: "text", label: t("course.text") },
+              { value: "image", label: t("course.image") },
+              { value: "example", label: t("course.example") },
+            ]}
+          />
+
+          <button
+            onClick={() => removeLesson(section.id, lesson.id)}
+            className="text-gray-400 hover:text-red-500 transition-colors"
+          >
+            <Trash2 size={20} strokeWidth={1.8} />
+          </button>
+        </div>
+      </div>
+
+      {/* --- Rendu conditionnel selon le type --- */}
+      {lesson.type === "text" && (
+        <textarea
+          className="w-full min-h-[100px] border border-gray-300 rounded-xl p-3"
+          placeholder={t("course.lesson_content")}
+          value={lesson.content}
+          onChange={(e) =>
+            updateLessonContent(section.id, lesson.id, e.target.value)
+          }
+        />
+      )}
+
+      {lesson.type === "example" && (
+        <textarea
+          className="w-full min-h-[100px] border border-gray-300 rounded-xl p-3"
+          placeholder={t("course.lesson_content")}
+          value={lesson.content}
+          onChange={(e) =>
+            updateLessonContent(section.id, lesson.id, e.target.value)
+          }
+        />
+      )}
+
+      {lesson.type === "image" && (
+        <div className="flex flex-col gap-2">
+          <label
+            htmlFor={`file-${section.id}-${lesson.id}`}
+            className="cursor-pointer w-40 h-40 bg-gray-100 rounded-xl flex items-center justify-center border border-dashed hover:bg-gray-200 transition"
+          >
+            {lesson.preview ? (
+              <img
+                src={lesson.preview}
+                alt="preview"
+                className="w-full h-full object-cover rounded-xl"
+              />
+            ) : (
+             <FolderPlus/>
+            )}
+          </label>
+          <input
+            id={`file-${section.id}-${lesson.id}`}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) =>
+              handleLessonImageUpload(section.id, lesson.id, e.target.files[0])
+            }
+          />
+        </div>
+      )}
+    </div>
+  ))}
+
+
+                  <div className="flex justify-center mt-2">
+                    <button
+                      onClick={() => addLessonToSection(section.id)}
+                      className="w-1/2 rounded-xl border py-2 bg-primary text-white font-medium hover:bg-primary/90 transition"
+                    >
+                      + {t("course.add_lesson")}
+                    </button>
+                  </div>
                 </div>
               ))}
 
-              {/* Bottom Buttons */}
               <div className="mt-10 flex items-center justify-between">
                 <button
                   className="px-8 py-2 rounded-xl bg-white dark:bg-white/10 shadow-sm font-medium text-black/60 dark:text-white/70 hover:shadow-md transition"
@@ -418,10 +568,9 @@ const handleSaveStep2 = async (coursId, ordre) => {
                 >
                   {t("course.back")}
                 </button>
-
                 <button
                   className="px-8 py-2 rounded-xl bg-grad-1 text-white font-medium shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
-                  onClick={() => setActiveStep(3)}
+                  onClick={handleSaveAll}
                 >
                   {t("course.save_next")}
                 </button>
@@ -430,7 +579,7 @@ const handleSaveStep2 = async (coursId, ordre) => {
           </div>
         )}
 
-        {/* STEP 3 : PUBLISH */}
+        {/* STEP 3 */}
         {activeStep === 3 && (
           <div className="w-full bg-white rounded-2xl shadow-md p-6">
             <h2 className="text-xl font-semibold">Publish Course</h2>

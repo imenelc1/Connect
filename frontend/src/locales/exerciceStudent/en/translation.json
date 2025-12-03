@@ -1,0 +1,18 @@
+
+{
+  "exerciceStudent": {
+    "AvarageG": "Average Grade" ,
+    "Submission":"Submission Rate",
+    "Completed": "Completed",
+    "Feedback":"Feedback",
+    "submit":"Submit Feedback",
+     "exercice":"Exercise",
+     "Progression":"Progress",
+     "Submitted":"Submitted solution",
+     "Solution":"Solution",
+     "Edit":"Edit",
+     "Send":"Send feedback",
+     "Pending":"Pending",
+     "Reviewect":"Reviewect"
+  }
+}

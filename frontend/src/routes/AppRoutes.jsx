@@ -18,7 +18,7 @@ import Setting from "../pages/Setting";
 import Dashboardens from "../pages/dash-ens";
 import Dashboardetu from "../pages/dash-etu";
 
-import Badges from "../pages/Badges";
+import Badges from "../pages/Badges"; // Ajoutez cette lign
 
 import Courses from "../pages/Courses";
 import MyStudents from "../pages/MyStudents";
@@ -27,9 +27,11 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
 import { QuizPage2 } from "../pages/QuizPage2";
+import StudentExercice from "../pages/exerciceStudent";
 import StartExercise from "../pages/StartExercise";
 import ExercisePage from "../pages/ExercisePage";
-
+import CourseDetails from "../pages/CourseDetails.jsx";
+import SubmittedExercise from "../pages/SubmittedExercise.jsx";
 
 export default function AppRoutes() {
   return (
@@ -93,12 +95,14 @@ export default function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
-
+        <Route path="/student-exercice" element={<StudentExercice />} />
 
 
           <Route path="/quiz" element={<QuizPage2 />} />  
-          <Route path="start-exercise" element={<StartExercise />} />
-          <Route path="exercise-page" element={<ExercisePage />} />
+          <Route path="/start-exercise" element={<StartExercise />} />
+          <Route path="/exercise-page" element={<ExercisePage />} />
+          <Route path="/course-details" element={<CourseDetails />} />
+          <Route path="/submitted-exercise" element={<SubmittedExercise />} />
 
       </Routes>
     </BrowserRouter>

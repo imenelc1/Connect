@@ -6,6 +6,7 @@ export default function Input({
   rightIcon, 
   error, 
   className = "",   // <-- ajouter ici
+  
   ...props 
 }) {
 

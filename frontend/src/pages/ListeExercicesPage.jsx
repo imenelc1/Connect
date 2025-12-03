@@ -7,6 +7,7 @@ import HeadMascotte from "../components/ui/HeadMascotte";
 import IaAssistant from "../components/ui/IaAssistant";
 import UserCircle from "../components/common/UserCircle";
 import ThemeContext from "../context/ThemeContext";
+import { useNavigate } from "react-router-dom";
 
 // -------------------------------
 // 1. Exercices stockés en CONSTANTE
@@ -31,8 +32,9 @@ const LEVEL_GRADIENT = {
 export default function ExercisesPage() {
 
   const { toggleDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
 
- const storedUser = localStorage.getItem("user");
+  const storedUser = localStorage.getItem("user");
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
 
@@ -46,35 +48,35 @@ export default function ExercisesPage() {
     <div className="w-full min-h-screen bg-surface">
 
       {/* ================= HEADER ================= */}
-<header className="w-full bg-surface py-6 px-6 shadow-sm">
+      <header className="w-full bg-surface py-6 px-6 shadow-sm">
 
-  <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-4">
 
-    {/* LEFT : Back + Exercises */}
-    <div className="flex items-center gap-2">
-     
+          {/* LEFT : Back + Exercises */}
+          <div className="flex items-center gap-2">
 
-      <h1 className="text-xl md:text-2xl font-semibold text-blue">
-        Exercises
-      </h1>
-    </div>
 
-   
+            <h1 className="text-xl md:text-2xl font-semibold text-blue">
+              Exercises
+            </h1>
+          </div>
 
-    {/* RIGHT SECTION */}
-    <div className="flex items-center gap-4">
-      <div className="hidden md:block w-96">
-        <ContentSearchBar />
-      </div>
 
-      <IaAssistant />
-      <HeadMascotte />
-      <UserCircle initials={initials} onToggleTheme={toggleDarkMode} />
-    </div>
 
-  </div>
+          {/* RIGHT SECTION */}
+          <div className="flex items-center gap-4">
+            <div className="hidden md:block w-96">
+              <ContentSearchBar />
+            </div>
 
-</header>
+            <IaAssistant />
+            <HeadMascotte />
+            <UserCircle initials={initials} onToggleTheme={toggleDarkMode} />
+          </div>
+
+        </div>
+
+      </header>
 
 
       {/* ================= LAYOUT ================= */}
@@ -125,10 +127,12 @@ export default function ExercisesPage() {
                 </div>
 
                 <Button
-  variant="courseStart"
-  text="Do the exercise"
-  className="mt-4 px-6 h-9 text-sm bg-blue text-white rounded-full mx-auto block !w-fit"
-/>
+                  variant="courseStart"
+                  text="Do the exercise"
+                  className="mt-4 px-6 h-9 text-sm bg-blue text-white rounded-full mx-auto block !w-fit"
+                  onClick={() => navigate(`/start-exercise/${ex.id}`)}
+                />
+
 
 
               </div>
