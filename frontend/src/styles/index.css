@@ -2,9 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ------------------------------ */
-/*         🎨 PALETTE LIGHT       */
-/* ------------------------------ */
+/* ---- Palette LIGHT (RGB converted) ---- */
 :root {
   --color-primary: 79 157 222;   /* #4F9DDE */
   --color-muted: 79 157 222; 
@@ -12,186 +10,113 @@
   --color-supp:163 170 237;
   --color-tertiary: 186 104 200; /* #BA68C8 */
   --color-gray: 153 161 175;     /* #99A1AF */
-
   --color-bg: 255 255 255;       /* #FFFFFF */
-  --color-surface: 245 247 250;
-  --color-text: 10 10 10;
-
+  --color-surface: 245 247 250;  /* léger */
+  --color-text: 10 10 10;        /* #0A0A0A */
+  --color-grisclair:165 165 165;   /* #a5a5a5*/
+  --color-yellow-code: 192 180 44;
+  --color-card: 255 255 255;
+  --color-nav:79 157 222;
   --color-blue:79 157 222;
   --color-purple:163 170 237;
   --color-pink:187 104 200;
-
-  --color-grisclair:165 165 165;
-  --color-gray-light: 220 225 230;
   --color-red: 240 80 80;
 
-  --color-yellow-code: 192 180 44;
+   --color-gray-light: 220 225 230; /* gris clair */
 
-  --color-card: 255 255 255;
-  --color-nav:79 157 222;
 
-  /* --------- Dégradés LIGHT --------- */
+
+    /* Dégradés LIGHT */
   --grad-1: linear-gradient(135deg, #4F9DDE, #2F4F70);
   --grad-2: linear-gradient(135deg, #4f9ede12, #FFFFFF);
   --grad-3: linear-gradient(135deg, #a3aaed40, #FFFFFF);
   --grad-4: linear-gradient(135deg, #ba68c815, #FFFFFF);
   --grad-5: radial-gradient(circle at center, #d5dfe8, #ffffff);
-
-  --grad-code-bg: linear-gradient(135deg, #0d1a28, #1c2d44);
-  --grad-output: linear-gradient(135deg, #7bb5e6, #3a6ea5);
-  --grad-button: linear-gradient(135deg, #4F9DDE, #2F4F70);
-
-  --grad-rating: linear-gradient(90deg,#b8c0ff,#bde0fe,#cdb4db);
-
-  --grad-6: linear-gradient(to bottom ,#FFFFFF,#bbd8f1);
   --grad-7: linear-gradient(100deg, #989dc7, #bdc0ea, #9fccec);
+ --grad-6: linear-gradient(to bottom ,#FFFFFF,#bbd8f1);
   --grad-8: linear-gradient(to bottom,#FFFFFF , #C3C8F4);
 
-  --grad-all: linear-gradient(135deg, #4F9DDE, #BA68C8);
 
-  /* ombres */
-  --shadow-card: 0 8px 20px rgba(0,0,0,0.08);
-  --shadow-strong: 0 10px 30px rgba(0,0,0,0.15);
+--grad-all: linear-gradient(135deg, #4F9DDE, #BA68C8);
 }
 
-/* ------------------------------ */
-/*         🌙 PALETTE DARK        */
-/* ------------------------------ */
+/* ---- Palette DARK ---- */
 .dark {
   --color-primary: 47 79 112;  
   --color-muted: 255 255 255;
-
-  --color-secondary: 30 41 57;
+  --color-secondary: 30 41 57;    /* #1E2939 */
   --color-supp:79 157 222;
-
   --color-tertiary: 186 104 200; 
-
-  --color-gray: 229 231 235;
-
-  --color-bg: 30 41 57;
+  --color-gray: 229 231 235;     /* #E5E7EB */
+  --color-bg: 30 41 57;          /* sombre */
   --color-surface: 25 32 45;
   --color-text: 255 255 255;
-
   --color-yellow-code:192 180 44;
-
   --color-title-card:47 79 112;
   --color-icons-about: 195 153 210;
   --color-card: 47 79 112;
   --color-nav:255 255 255;
+  
 
   /* Dégradés DARK */
   --grad-dark-1: linear-gradient(135deg, #4F9DDE, #A3AAED);
   --grad-dark-2: linear-gradient(135deg, #4f9ede8c, rgba(47, 79, 112, 0.459));
   --grad-dark-3: linear-gradient(135deg, #a3aaed72, #2f4f7066);
   --grad-dark-4: linear-gradient(135deg, #ba68c878, #2f4f70);
-
-  --grad-code-bg: linear-gradient(135deg,#0a1623,#102133);
-  --grad-output: linear-gradient(135deg,#20436b,#10223a);
-
-  --shadow-card: 0 8px 30px rgba(0,0,0,0.5);
 }
 
-/* ------------------------------ */
-/*              BASE              */
-/* ------------------------------ */
+/* ---- Base ---- */
 @layer base {
   body {
     background: rgb(var(--color-bg));
     color: rgb(var(--color-text));
-    font-family: "Inter", sans-serif;
   }
 }
 
-/* ------------------------------ */
-/*         UTILITIES              */
-/* ------------------------------ */
 @layer utilities {
+
+   /* Dégradés LIGHT */
   .bg-grad-1 { background-image: var(--grad-1); }
   .bg-grad-2 { background-image: var(--grad-2); }
   .bg-grad-3 { background-image: var(--grad-3); }
   .bg-grad-4 { background-image: var(--grad-4); }
   .bg-grad-5 { background-image: var(--grad-5); }
-  .bg-grad-6 { background-image: var(--grad-6); }
   .bg-grad-7 { background-image: var(--grad-7); }
-  .bg-grad-8 { background-image: var(--grad-8); }
 
   .bg-grad-all { background-image: var(--grad-all); }
-
+  /* Dégradés DARK (même classe → change automatiquement) */
   .dark .bg-grad-1 { background-image: var(--grad-dark-1); }
   .dark .bg-grad-2 { background-image: var(--grad-dark-2); }
   .dark .bg-grad-3 { background-image: var(--grad-dark-3); }
   .dark .bg-grad-4 { background-image: var(--grad-dark-4); }
 
-  .shadow-card { box-shadow: var(--shadow-card); }
-  .shadow-strong { box-shadow: var(--shadow-strong); }
-
-  .bg-code { background-image: var(--grad-code-bg); }
-  .bg-output { background-image: var(--grad-output); }
-  .bg-rating { background-image: var(--grad-rating); }
-
-
-  
-    /* ------------------------------ */
-  /*       ⭐ STAR COLORS           */
-  /* ------------------------------ */
-
-  /* Very Easy (les 2 premières étoiles) */
-  .star-very-easy {
-    background-image: linear-gradient(135deg, #4F9DDE, #A3AAED); 
-    -webkit-background-clip: text;
-    color: transparent;
-  }
-
-  /* Moderate (étoiles 3 et 4) */
-  .star-moderate {
-    background-image: linear-gradient(135deg, #A3AAED, #9FCCEC);
-    -webkit-background-clip: text;
-    color: transparent;
-  }
-
-  /* Difficult (étoile 5) */
-  .star-difficult {
-    background-image: linear-gradient(135deg, #BA68C8, #7E3AAE);
-    -webkit-background-clip: text;
-    color: transparent;
-  }
-  /* ------------------------------ */
-/*      LABEL COLORS (same as stars) */
-/* ------------------------------ */
-
-/* Very Easy */
-.label-very-easy {
-  background-image: linear-gradient(135deg, #4F9DDE, #A3AAED);
-  -webkit-background-clip: text;
-  color: transparent;
 }
-
-/* Moderate */
-.label-moderate {
-  background-image: linear-gradient(135deg, #A3AAED, #9FCCEC);
-  -webkit-background-clip: text;
-  color: transparent;
+.bg-grad-5 {
+  background-image: radial-gradient(circle at center, #bad7f0, #ffffff);
 }
-
-/* Very Difficult */
-.label-very-difficult {
-  background-image: linear-gradient(135deg, #BA68C8, #7E3AAE);
-  -webkit-background-clip: text;
-  color: transparent;
+.dark .bg-grad-5 {
+  background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
 }
 
 
+/* Fix autofill bleu */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 30px white inset !important; /* remplace le bleu par blanc */
+  -webkit-text-fill-color: rgb(172, 179, 194) !important;      /* garde le texte lisible */
 }
-
-/* Fix autofill bleu Chrome */
-input:-webkit-autofill {
-  box-shadow: 0 0 0 30px white inset !important;
-  -webkit-text-fill-color: rgb(172, 179, 194) !important;
-}
-
-/* Animation dropdown */
 @keyframes dropdown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.animate-dropdown { animation: dropdown 0.15s ease-out; }
+
+.animate-dropdown {
+  animation: dropdown 0.15s ease-out;
+}
