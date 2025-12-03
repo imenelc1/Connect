@@ -29,6 +29,7 @@ class Cours(models.Model):
 
 class Section(models.Model):
     id_section = models.AutoField(primary_key=True)
+    description = models.TextField(blank=True, null=True, default="")
     cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
     titre_section = models.CharField(max_length=255)
     ordre = models.IntegerField()

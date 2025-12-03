@@ -14,7 +14,7 @@ urlpatterns = [
     path('create/', CreateCoursView.as_view(), name='create_cours'),
     path("cours/<int:pk>/delete/", delete_cours),    
     path('createSection/', CreateSectionView.as_view(), name='create_Section') ,      
-    path('createLecon/', CreateLeconView.as_view(), name='create_Lecon')            
+     path('createLesson/', CreateLeconView.as_view(), name='create_lesson'),        
      
             
   

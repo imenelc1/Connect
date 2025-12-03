@@ -24,19 +24,22 @@ class CreateCoursView(APIView):
 
         return Response(serializer.errors, status=400)
 
+
+
 class CreateSectionView(APIView):
 
     @jwt_required
     def post(self, request):
         data = request.data.copy()
-        # on ne récupère pas l'utilisateur ici car Section est lié au cours
-        # il faut passer l'id du cours dans le payload
         serializer = SectionSerializer(data=data)
-
         if serializer.is_valid():
             section = serializer.save()
-            return Response(SectionSerializer(section).data, status=201)
-
+            return Response({
+                'id': section.id_section,  # 🟢 ID pour le front
+                'titre_section': section.titre_section,
+                'description': section.description,
+                'ordre': section.ordre
+            }, status=201)
         return Response(serializer.errors, status=400)
 
 @api_view(['DELETE'])
@@ -56,15 +59,38 @@ class CreateLeconView(APIView):
     @jwt_required
     def post(self, request):
         data = request.data.copy()
-        # on ne récupère pas l'utilisateur ici car Section est lié au cours
-        # il faut passer l'id du cours dans le payload
+
+        # --- Assurer que l'utilisateur est renseigné ---
+        data["utilisateur"] = request.user_id
+
+        # --- Champs obligatoires ---
+        if "section" not in data or not data["section"]:
+            return Response({"section": "Ce champ est obligatoire."}, status=400)
+        
+        # Vérifier que la section existe
+        try:
+            section = Section.objects.get(pk=data["section"])
+        except Section.DoesNotExist:
+            return Response({"section": "Section introuvable."}, status=404)
+
+        # Valeurs par défaut
+        if "type_lecon" not in data or not data["type_lecon"]:
+            data["type_lecon"] = "text"
+        if "contenu_lecon" not in data:
+            data["contenu_lecon"] = ""
+        if "ordre" not in data or not data["ordre"]:
+            data["ordre"] = 1
+
         serializer = LeconSerializer(data=data)
-
         if serializer.is_valid():
-            section = serializer.save()
-            return Response(LeconSerializer(section).data, status=201)
+            lecon = serializer.save()
+            return Response(LeconSerializer(lecon).data, status=201)
+        else:
+            # 🔹 Debug: afficher les erreurs dans la console
+            print("Erreur création leçon :", serializer.errors)
+            return Response(serializer.errors, status=400)
 
-        return Response(serializer.errors, status=400)
+
 
 
 @api_view(['GET'])
@@ -103,3 +129,4 @@ class LeconDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LeconSerializer
 
 
+""""""

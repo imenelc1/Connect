@@ -32,7 +32,8 @@ class CoursSerializer1(serializers.ModelSerializer):
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = ['id_section', 'cours', 'titre_section', 'ordre']
+        fields = ['id_section', 'cours', 'titre_section', 'description', 'ordre']
+
 
 class LeconSerializer(serializers.ModelSerializer):
     class Meta:

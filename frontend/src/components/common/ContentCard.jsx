@@ -2,7 +2,7 @@ import React from "react";
 import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 

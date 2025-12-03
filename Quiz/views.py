@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from Exercices.models import Exercice
+from exercices.models import Exercice
 
 # Create your views here.
 from rest_framework import generics

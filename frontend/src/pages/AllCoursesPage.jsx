@@ -22,8 +22,6 @@ const gradientMap = {
   Avancé: "bg-grad-4",
 };
 
-
-
 export default function AllCoursesPage() {
   const token = localStorage.getItem("access_token");
   const currentUserId = getCurrentUserId();
@@ -32,32 +30,35 @@ export default function AllCoursesPage() {
   const [courses, setCourses] = useState([]);
   useEffect(() => {
     fetch("http://localhost:8000/api/courses/api/cours")
-      .then(res => res.json())
-      .then(data => {
-
-        const formatted = data.map(c => ({
+      .then((res) => res.json())
+      .then((data) => {
+        const formatted = data.map((c) => ({
           id: c.id_cours,
           title: c.titre_cour,
           description: c.description,
-          level: c.niveau_cour_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
+          level: c.niveau_cour_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
           //levelLabel: t(`levels.${c.niveau_cour_label}`),
           duration: c.duration_readable,
           author: c.utilisateur_name,
           initials: c.utilisateur_name
             .split(" ")
-            .map(n => n[0])
+            .map((n) => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
+          isMine: c.utilisateur === currentUserId, //NEWDED GHR ISMINE //
         }));
         setCourses(formatted);
       })
-      .catch(err => console.error("Erreur chargement cours :", err));
+      .catch((err) => console.error("Erreur chargement cours :", err));
   }, []);
+
+  
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allcourses");
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
@@ -75,15 +76,18 @@ export default function AllCoursesPage() {
 
     // Appel API
     try {
-      await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await fetch(
+        `http://localhost:8000/api/courses/cours/${courseId}/delete/`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       // Mise à jour du state
-      setCourses(prev => prev.filter(c => c.id !== courseId));
+      setCourses((prev) => prev.filter((c) => c.id !== courseId));
     } catch (err) {
       console.error("Erreur suppression :", err);
       alert("Erreur lors de la suppression");
@@ -156,9 +160,9 @@ export default function AllCoursesPage() {
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
           <ContentFilters
             type="courses"
-            userRole={userRole}                  // <-- corrige ici
-            activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
-            onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
+            userRole={userRole} // <-- corrige ici
+            activeFilter={filterLevel} // <- tu utilises filterLevel, pas activeFilter
+            onFilterChange={setFilterLevel} // <- tu as setFilterLevel
             showCompletedFilter={userRole === "etudiant"} // <- correct
           />
 
@@ -172,11 +176,15 @@ export default function AllCoursesPage() {
               {t("createCourseBtn")}
             </Button>
           )}
-
         </div>
 
         {/* Cards */}
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
+          }}
+        >
           {filteredCourses.map((course, idx) => (
             <ContentCard
               key={idx}
