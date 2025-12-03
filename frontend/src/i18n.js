@@ -40,6 +40,8 @@ import translationFRSpaces from "./locales/Spaces/fr-Spaces/translation.json";
 import translationENSpaces from "./locales/Spaces/en-Spaces/translation.json";
 import translationnFRCommunity from "./locales/Community/fr/translation.json";
 import translationnENCommunity from "./locales/Community/en/translation.json";
+import translationnENexerciceStudent from "./locales/exerciceStudent/en/translation.json";
+import translationnFRexerciceStudent from "./locales/exerciceStudent/fr/translation.json";
 
 const resources = {
   fr: {
@@ -66,7 +68,9 @@ const resources = {
     quiz2: translationFRquiz2,
 
   myStudents: translationFRMyStudents,
-  Spaces:translationFRSpaces
+  Spaces:translationFRSpaces,
+
+  exerciceStudent:translationnFRexerciceStudent
   },
 
   en: {
@@ -91,7 +95,8 @@ const resources = {
     myStudents: translationENMyStudents,
      Spaces: translationENSpaces,
      quiz2: translationENquiz2,
-    community: translationnENCommunity
+    community: translationnENCommunity,
+    exerciceStudent:translationnENexerciceStudent
   },
 };
 

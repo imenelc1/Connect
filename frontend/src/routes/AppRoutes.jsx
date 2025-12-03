@@ -27,6 +27,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
 import { QuizPage2 } from "../pages/QuizPage2";
+import StudentExercice from "../pages/exerciceStudent";
 
 
 export default function AppRoutes() {
@@ -94,7 +95,9 @@ export default function AppRoutes() {
 
 
 
-          <Route path="/quiz" element={<QuizPage2 />} />
+        <Route path="/quiz" element={<QuizPage2 />} />
+        <Route path="/student-exercice" element={<StudentExercice />} />
+
 
 
 
