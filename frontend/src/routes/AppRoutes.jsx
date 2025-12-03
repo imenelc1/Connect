@@ -30,7 +30,8 @@ import { QuizPage2 } from "../pages/QuizPage2";
 import StudentExercice from "../pages/exerciceStudent";
 import StartExercise from "../pages/StartExercise";
 import ExercisePage from "../pages/ExercisePage";
-
+import CourseDetails from "../pages/CourseDetails.jsx";
+import SubmittedExercise from "../pages/SubmittedExercise.jsx";
 
 export default function AppRoutes() {
   return (
@@ -100,6 +101,8 @@ export default function AppRoutes() {
           <Route path="/quiz" element={<QuizPage2 />} />  
           <Route path="/start-exercise" element={<StartExercise />} />
           <Route path="/exercise-page" element={<ExercisePage />} />
+          <Route path="/course-details" element={<CourseDetails />} />
+          <Route path="/submitted-exercise" element={<SubmittedExercise />} />
 
       </Routes>
     </BrowserRouter>

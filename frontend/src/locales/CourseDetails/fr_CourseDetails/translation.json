@@ -1,0 +1,39 @@
+{
+  "backToSpaces": "Retour aux espaces",
+  "courseTitle": "Mobile Design Patterns",
+  "courseSubtitle": "Apprenez les fondamentaux du design mobile",
+  "students": "Étudiants",
+  "topbar": {
+    "course": "Cours",
+    "quizzes": "Quiz",
+    "exercises": "Exercices"
+  },
+  "coursesTitle": "Cours",
+  "addCourse": "Ajouter un cours",
+  "createdOn": "Créé le",
+  "sections": {
+    "intro": {
+      "title": "Introduction aux design patterns",
+      "desc": "Design patterns mobiles"
+    },
+    "basics": {
+      "title": "Notions de base des design patterns",
+      "desc": "Design patterns mobiles"
+    },
+    "advanced": {
+      "title": "Design patterns avancés",
+      "desc": "Design patterns mobiles"
+    }
+  },
+  "quizzesTitle": "Quiz",
+  "quizzesSubtitle": "La liste des quiz apparaîtra ici...",
+  "exercisesTitle": "Exercices",
+  "exercisesSubtitle": "La liste des exercices apparaîtra ici...",
+  "addSectionTitle": "Ajouter une section",
+  "addSectionSubtitle": "Ajoutez une nouvelle section au cours Mobile Design Patterns",
+  "createSection": "Créer une section",
+  "sectionTitleLabel": "Titre de la section",
+  "sectionTitlePlaceholder": "Ex. : Introduction au design mobile",
+  "sectionDescriptionLabel": "Description",
+  "sectionDescriptionPlaceholder": "Décrivez ce que les étudiants apprendront"
+}

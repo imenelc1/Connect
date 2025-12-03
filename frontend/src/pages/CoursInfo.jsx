@@ -25,6 +25,8 @@ const [error, setError] = useState(null);
     i18n.changeLanguage(newLang);
   };
 
+
+
   const courseSteps = [
   { label: t("course.basic_info"), icon: Monitor },
   { label: t("course.curriculum"), icon: BookOpenCheck },
