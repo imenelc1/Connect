@@ -4,15 +4,15 @@ from .models import Cours, Section, Lecon
 
 class CoursSerializer(serializers.ModelSerializer):
     niveau_cour_label = serializers.CharField(source='get_niveau_cour_display', read_only=True)
-    utilisateur = serializers.SerializerMethodField()
+    utilisateur_name = serializers.SerializerMethodField()
     duration_readable = serializers.SerializerMethodField()
 
     class Meta:
         model = Cours
         fields = ['id_cours', 'titre_cour', 'niveau_cour', 'niveau_cour_label',
-                  'description', 'duration', 'duration_readable', 'utilisateur']
+                  'description', 'duration', 'duration_readable', 'utilisateur_name', 'utilisateur']
 
-    def get_utilisateur(self, obj):
+    def get_utilisateur_name(self, obj):
         return f"{obj.utilisateur.nom} {obj.utilisateur.prenom}"
 
     def get_duration_readable(self, obj):

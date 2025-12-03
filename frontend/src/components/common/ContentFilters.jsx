@@ -11,6 +11,7 @@ export default function ContentFilters({
 }) {
   const { t } = useTranslation("filters");
   const levels = ["ALL", "beginner", "intermediate", "advanced"];
+
   
   const [completedStatus, setCompletedStatus] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
@@ -37,6 +38,7 @@ export default function ContentFilters({
   };
 
   const current = labels[type];
+  
 
   return (
     <div className="w-full flex justify-center mt-8">

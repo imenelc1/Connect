@@ -29,7 +29,6 @@ export default function LoginStudent() {
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
-
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
     i18n.changeLanguage(newLang);
