@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ChevronLeft } from "lucide-react";
 
 import NavBar from "../components/common/Navbar";
-import Mascotte from "../assets/6.svg";
+import Mascotte from "../assets/head_mascotte.svg";
 import AssistantIA from "./AssistantIA";
 
 export default function ExercisePage() {

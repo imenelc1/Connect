@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X, Send } from "lucide-react";
-import Mascotte from "../assets/6.svg";
+import Mascotte from "../assets/head_mascotte.svg";
 
 export default function AssistantIA({ onClose: parentOnClose }) {
   const [visible, setVisible] = useState(true);
@@ -197,4 +197,4 @@ export default function AssistantIA({ onClose: parentOnClose }) {
       </div>
     </div>
   );
-}
+} 

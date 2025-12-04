@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Play,
   Square,
@@ -13,7 +13,6 @@ import HeadMascotte from "../components/ui/HeadMascotte";
 import IaAssistant from "../components/ui/IaAssistant";
 
 import NavBar from "../components/common/NavBar";
-import Mascotte from "../assets/6.svg";
 import AssistantIA from "../pages/AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
@@ -83,116 +82,118 @@ int main() {
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
 
+
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    
+
+useEffect(() => {
+  const handler = (e) => setSidebarCollapsed(e.detail);
+  window.addEventListener("sidebarChanged", handler);
+  return () => window.removeEventListener("sidebarChanged", handler);
+}, []);
+
+const sidebarWidth = sidebarCollapsed ?  -200: -50;
+
   return (
-    <div className="flex bg-[rgb(var(--color-surface))] min-h-screen">
-      {/* NAVBAR PC */}
-      <div className="hidden lg:block">
-        <NavBar />
+<div
+  className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0"
+  style={{ marginLeft: sidebarWidth }}
+>
+
+  {/* NAVBAR PC */}
+  <div className="hidden lg:block">
+    <NavBar />
+  </div>
+
+  {/* CONTENT */}
+  <div className="flex-1 p-4 md:p-8 lg:ml-72 transition-all duration-300 ml-10">
+    {/* HEADER */}
+    <div className="flex flex-col md:flex-row md:items-center mb-10 gap-6 md:gap-0">
+      <div className="flex-1">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-muted mb-2">
+          {t("header.title")}
+        </h1>
+        <p className="text-[rgb(var(--color-text))] text-lg md:text-xl opacity-80">
+          {t("header.subtitle")}
+        </p>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 lg:ml-72 p-4 md:p-8">
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row  md:items-center mb-10">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-muted mb-2">
-              {t("header.title")}
-            </h1>
-            <p className="text-[rgb(var(--color-text))] text-lg md:text-xl opacity-80">
-              {t("header.subtitle")}
-            </p>
-          </div>
+      <div className="flex gap-3 items-center md:ml-auto  ml-[280px] -mt-20 md:mt-0">
+        <IaAssistant/>
+        <HeadMascotte/>
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+        />
+      </div>
+    </div>
 
-          <div className="flex gap-3 ml-[450px]">
-            <IaAssistant />
-            <HeadMascotte />
-          </div>
+    {/* EXERCISE CARD */}
+    <div className="w-full p-6 rounded-2xl bg-grad-3 mb-6 md:mb-10">
+      <p className="font-semibold text-muted text-[20px]">
+        {t("exerciseCard.title")}
+        <span className="font-normal text-[rgb(var(--color-text))] ml-3 opacity-70">
+          {t("exerciseCard.subtitle")}
+        </span>
+      </p>
+      <p className="mt-3 text-muted text-sm md:text-base">
+        {t("exerciseCard.description")}
+      </p>
+    </div>
 
-          {/* User Circle */}
-          <div className="flex items-center ml-5">
-            <UserCircle
-              initials={initials}
-              onToggleTheme={toggleDarkMode}
-              onChangeLang={(lang) => i18n.changeLanguage(lang)}
-            />
-          </div>
+    {/* CODE EDITOR */}
+    <p className="text-lg md:text-xl font-semibold mb-4">
+      {t("editor.yourCode")}
+    </p>
+
+    <div className="rounded-2xl overflow-hidden shadow-strong mb-10">
+      <div className="h-11 flex items-center justify-between px-5 border-b border-[rgb(var(--color-gray-light))] bg-[rgb(var(--color-gray-light))]">
+        <span className="font-medium text-sm text-black opacity-70">
+          {t("editor.fileName")}
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+          <span className="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
+          <span className="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
         </div>
+      </div>
 
-        {/* EXERCISE CARD */}
-        <div
-          className="w-full p-6 rounded-2xl shadow-card borde"
-          style={{
-            backgroundImage: "var(--grad-2)",
+      <textarea
+        value={userCode}
+        onChange={(e) => setUserCode(e.target.value)}
+        className="bg-code p-7 font-mono text-white text-[15px] leading-7 min-h-[360px] w-full outline-none resize-none text-textc"
+        spellCheck="false"
+      />
+    </div>
 
-          }}
-        >
-          <p className="font-semibold text-muted text-[20px] ">
-            {t("exerciseCard.title")}
-            <span className="font-normal text-[rgb(var(--color-text))] ml-3 opacity-70">
-              {t("exerciseCard.subtitle")}
-            </span>
-          </p>
+    {/* ACTION BUTTONS */}
+    <div className="flex flex-wrap justify-center gap-4 mt-8 mb-10">
+      <ActionButton
+        icon={<Play size={18} />}
+        label={isRunning ? "Exécution..." : t("buttons.run")}
+        bg="var(--grad-button)"
+        onClick={runCode}
+      />
+      <ActionButton
+        icon={<Square size={18} />}
+        label={t("buttons.stop")}
+        bg="linear-gradient(135deg,#ba68c8ff)"
+        text="white"
+      />
+      <ActionButton
+        icon={<Bug size={18} />}
+        label={t("buttons.debug")}
+        bg="linear-gradient(135deg,#A3AAED,#6A76E0)"
+      />
+      <ActionButton
+        icon={<RotateCw size={18} />}
+        label={t("buttons.reset")}
+        bg="linear-gradient(135deg,#FFFFFF,#DCE1F5)"
+        text="rgb(var(--color-text))"
+      />
+    </div>
 
-          <p className="mt-3 text-muted text-sm md:text-base">
-            {t("exerciseCard.description")}
-          </p>
-        </div>
-
-        {/* CODE EDITOR */}
-        <p className="text-lg md:text-xl font-semibold text- mt-10 mb-4" >
-          {t("editor.yourCode")}
-        </p>
-
-        <div className="rounded-2xl overflow-hidden shadow-strong mb-10">
-          <div className="h-11 flex items-center justify-between px-5 border-b border-[rgb(var(--color-gray-light))] bg-[rgb(var(--color-gray-light))]">
-            <span className="font-medium text-sm text-black opacity-70">
-              {t("editor.fileName")}
-            </span>
-
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-              <span className="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
-              <span className="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
-            </div>
-          </div>
-
-          <textarea
-            value={userCode}
-            onChange={(e) => setUserCode(e.target.value)}
-            className="bg-code p-7 font-mono text-white text-[15px] leading-7 min-h-[360px] w-full outline-none resize-none bg-grad-2 text-textc "
-            spellCheck="false"
-          />
-        </div>
-
-        {/* ACTION BUTTONS */}
-        <div className="flex flex-wrap justify-center gap-6 mt-8 mb-10">
-          <ActionButton
-            icon={<Play size={18} />}
-            label={isRunning ? "Exécution..." : t("buttons.run")}
-            bg="var(--grad-button)"
-            onClick={runCode}
-          />
-
-          <ActionButton
-            icon={<Square size={18} />}
-            label={t("buttons.stop")}
-            bg="linear-gradient(135deg,#ba68c8ff)"
-            text="white"
-          />
-
-          <ActionButton
-            icon={<Bug size={18} />}
-            label={t("buttons.debug")}
-            bg="linear-gradient(135deg,#A3AAED,#6A76E0)"
-          />
-
-          <ActionButton
-            icon={<RotateCw size={18} />}
-            label={t("buttons.reset")}
-            bg="linear-gradient(135deg,#FFFFFF,#DCE1F5)"
-            text="rgb(var(--color-text))"
-          />
-        </div>
 
         {/* TIP CARD */}
         <div
@@ -242,14 +243,13 @@ int main() {
 
         {/* FEEDBACK */}
         <div
-          className="p-8 rounded-2xl shadow-card border mb-24"
-          style={{ backgroundImage: "var(--grad-8)" }}
+          className="p-8 rounded-2xl shadow-card border mb-24 bg-grad-8"
         >
-          <p className="font-semibold text-[rgb(var(--color-primary))] text-lg mb-1">
+          <p className="font-semibold text-primary text-lg mb-1 ">
             {t("feedback.title")}
           </p>
 
-          <p className="text-[rgb(var(--color-gray))] text-sm mb-8">
+          <p className="text-primary text-sm mb-8">
             {t("feedback.subtitle")}
           </p>
 
@@ -276,7 +276,7 @@ int main() {
 
             {/* LABELS COLORES */}
             <div className="flex justify-between w-full text-sm font-medium mt-2">
-              <span className="w-24 text-left label-very-easy">
+              <span className="w-24 text-left label-very-easy ">
                 {t("feedback.labels.veryEasy")}
               </span>
 
@@ -290,7 +290,7 @@ int main() {
             </div>
           </div>
 
-          <p className="text-[rgb(var(--color-gray))] text-sm flex items-center gap-2">
+          <p className="text-primary text-sm flex items-center gap-2">
             {t("feedback.tip")}
           </p>
         </div>
