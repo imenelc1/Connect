@@ -5,42 +5,59 @@
     "Account": "Account"
   },
   "Profile": {
-    "Editprofile":"Edit profile",
     "FullName": "Full Name",
-    "NickName": "Nick Name",
-    "Datebirth": "Date of birth",
-    "EmailAddress": "Email address",
+    "NickName": "First Name",
+    "Datebirth": "Date of Birth",
+    "EmailAddress": "Email Address",
     "RegistratioNumber": "Registration Number",
+    "Speciality": "Specialty",
+    "StudyYear": "Study Year",
     "Grade": "Grade",
-    "Instructor": "Instructor",
-    "Assistant": "Assistant",
-    "SaveChanges": "Save Changes"
+    "Editprofile": "Edit Profile",
+    "SaveChanges": "Save Changes",
+    "Role": {
+      "Professor": "Professor",
+      "Student": "Student"
+    }
   },
-  
-
   "Preferences": {
     "Theme": "Theme",
     "LightMode": "Light Mode",
-    "Brightp": "Bright and clean interface",
     "DarkMode": "Dark Mode",
-    "Easyp": "Easy on the eyes in low light",
+    "Brightp": "Brighter and clear",
+    "Easyp": "Easier on the eyes",
     "Language": "Language",
     "Selectp": "Select your preferred language",
     "French": "French",
     "English": "English"
-  },"Account": {
+  },
+  "Account": {
     "Security": "Security",
     "CurrentPassword": "Current Password",
-    "EnterCurrent": "Enter current password",
     "NewPassword": "New Password",
-    "EnterNew": "Enter new password",
     "ConfirmNewPassword": "Confirm New Password",
-    "EnterConfirm": "Enter confirm password",
     "UpdatePass": "Update Password",
     "DangerZone": "Danger Zone",
-    "HDelete": "Delete ",
-    "deleteP": "Permanently delete your account and all data. This action cannot be undone.",
+    "HDelete": "Delete your account",
+    "deleteP": "This action is irreversible. All your data will be lost.",
     "DeleteAccount": "Delete Account"
+  },
+  "Errors": {
+    "PasswordRequired": "Password is required",
+    "PasswordMin8": "Password must be at least 8 characters",
+    "PasswordsMismatch": "Passwords do not match",
+    "EmailRequired": "Email is required",
+    "EmailInvalid": "Invalid email format",
+    "PasswordUpdateSuccess": "Password updated successfully!",
+    "PasswordUpdateFailed": "Failed to update password",
+    "ProfileLoadFailed": "Cannot load user profile"
+  },
+  "Global": {
+    "Loading": "Loading..."
+  },
+  "Placeholders": {
+    "CurrentPassword": "Enter current password",
+    "NewPassword": "Enter new password",
+    "ConfirmPassword": "Confirm new password"
   }
-  
 }

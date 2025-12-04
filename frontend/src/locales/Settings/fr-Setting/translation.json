@@ -1,46 +1,63 @@
 {
-  "Setting": {
+   "Setting": {
     "Profile": "Profil",
     "Preferences": "Préférences",
     "Account": "Compte"
   },
   "Profile": {
-    "Editprofile":"Modifier profil",
     "FullName": "Nom complet",
-    "NickName": "Pseudo",
+    "NickName": "Prénom",
     "Datebirth": "Date de naissance",
     "EmailAddress": "Adresse e-mail",
-    "RegistratioNumber": "Matricule",
+    "RegistratioNumber": "Numéro d'inscription",
+    "Speciality": "Spécialité",
+    "StudyYear": "Année d'étude",
     "Grade": "Grade",
-    "Instructor": "Formateur",
-    "Assistant": "Assistant",
-    "SaveChanges": "Enregistrer les modifications"
+    "Editprofile": "Modifier le profil",
+    "SaveChanges": "Sauvegarder les modifications",
+    "Role": {
+      "Professor": "Professeur",
+      "Student": "Étudiant"
+    }
   },
- 
   "Preferences": {
     "Theme": "Thème",
-    "LightMode": "Mode lumière",
-    "Brightp": "Interface lumineuse et épurée",
+    "LightMode": "Mode clair",
     "DarkMode": "Mode sombre",
-    "Easyp": "Agréable pour les yeux en faible luminosité",
+    "Brightp": "Plus lumineux et clair",
+    "Easyp": "Plus facile pour les yeux",
     "Language": "Langue",
     "Selectp": "Sélectionnez votre langue préférée",
     "French": "Français",
     "English": "Anglais"
-  }, 
+  },
   "Account": {
     "Security": "Sécurité",
     "CurrentPassword": "Mot de passe actuel",
-    "EnterCurrent": "Entrez le mot de passe actuel",
     "NewPassword": "Nouveau mot de passe",
-    "EnterNew": "Entrez le nouveau mot de passe",
     "ConfirmNewPassword": "Confirmer le nouveau mot de passe",
-    "EnterConfirm": "Entrez le mot de passe de confirmation",
-    "UpdatePass": "Mettre à jour ",
+    "UpdatePass": "Mettre à jour le mot de passe",
     "DangerZone": "Zone de danger",
-    "HDelete": "Supprimer le compte",
-    "deleteP": "Supprimez définitivement votre compte et toutes les données. Cette action est irréversible.",
-    "DeleteAccount": "Supprimer "
+    "HDelete": "Supprimer votre compte",
+    "deleteP": "Cette action est irréversible. Tous vos données seront perdues.",
+    "DeleteAccount": "Supprimer le compte"
+  },
+  "Errors": {
+    "PasswordRequired": "Mot de passe obligatoire",
+    "PasswordMin8": "Le mot de passe doit contenir au moins 8 caractères",
+    "PasswordsMismatch": "Les mots de passe ne correspondent pas",
+    "EmailRequired": "Email obligatoire",
+    "EmailInvalid": "Format d'email invalide",
+    "PasswordUpdateSuccess": "Mot de passe mis à jour avec succès !",
+    "PasswordUpdateFailed": "Erreur lors de la mise à jour du mot de passe",
+    "ProfileLoadFailed": "Impossible de charger le profil utilisateur"
+  },
+  "Global": {
+    "Loading": "Chargement..."
+  },
+  "Placeholders": {
+    "CurrentPassword": "Entrez votre mot de passe actuel",
+    "NewPassword": "Entrez le nouveau mot de passe",
+    "ConfirmPassword": "Confirmez le nouveau mot de passe"
   }
-  
 }

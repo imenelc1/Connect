@@ -1,7 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 from .models import Utilisateur, Etudiant, Enseignant, Administrateur
 from .serializers import UtilisateurSerializer, EtudiantSerializer, EnseignantSerializer, AdministrateurSerializer
 import jwt
@@ -164,3 +165,31 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user  # ✅ maintenant c'est toujours un objet Utilisateur
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticatedJWT]  # JWT custom
+
+    def put(self, request):
+        user = request.user  # objet Utilisateur
+        current_password = request.data.get("currentPassword")
+        new_password = request.data.get("newPassword")
+        confirm_password = request.data.get("confirmPassword")
+
+        # Vérification mot de passe actuel
+        if not user.check_password(current_password):
+            return Response({"currentPassword": ["Mot de passe actuel incorrect"]}, status=400)
+
+        # Vérification nouveau mot de passe (minimum 8 caractères)
+        if len(new_password) < 8:
+            return Response({"newPassword": ["Le mot de passe doit contenir au moins 8 caractères"]}, status=400)
+
+        # Vérification correspondance
+        if new_password != confirm_password:
+            return Response({"confirmPassword": ["Les mots de passe ne correspondent pas"]}, status=400)
+
+        # Mise à jour
+        user.set_password(new_password)
+        user.save()
+
+        return Response({"detail": "Mot de passe mis à jour avec succès"}, status=200)
