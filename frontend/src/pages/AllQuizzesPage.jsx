@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -23,32 +23,32 @@ const gradientMap = {
 export default function AllQuizzesPage() {
   const token = localStorage.getItem("access_token");
   const currentUserId = getCurrentUserId();
-const [quizzes, setQuizzez] = useState([]);
+  const [quizzes, setQuizzez] = useState([]);
 
 
-useEffect(() => {
-  fetch("http://localhost:8000/api/quiz/api/quiz/")
-    .then(res => res.json())
-    .then(data => {
-      const formatted = data.map(c => ({
-        id:c.exercice?.id_exercice,
-        title: c.exercice?.titre_exo,
-        description: c.exercice?.enonce,
-        level: c.exercice?.niveau_exercice_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
-        //levelLabel: t(`levels.${c.niveau_cour_label}`),
-        duration: c.exercice?.duration_readable,
-        author: c.exercice?.utilisateur_name,
-        initials: c.exercice?.utilisateur_name
-    .split(" ")
-    .map(n => n[0])
-    .join("")
-    .toUpperCase(),
-        isMine: c.exercice?.utilisateur === currentUserId //NEWDED GHR ISMINE //
-      }));
-      setQuizzez(formatted);
-    })
-    .catch(err => console.error("Erreur chargement quiz :", err));
-}, []);
+  useEffect(() => {
+    fetch("http://localhost:8000/api/quiz/api/quiz/")
+      .then(res => res.json())
+      .then(data => {
+        const formatted = data.map(c => ({
+          id: c.exercice?.id_exercice,
+          title: c.exercice?.titre_exo,
+          description: c.exercice?.enonce,
+          level: c.exercice?.niveau_exercice_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
+          //levelLabel: t(`levels.${c.niveau_cour_label}`),
+          duration: c.exercice?.duration_readable,
+          author: c.exercice?.utilisateur_name,
+          initials: c.exercice?.utilisateur_name
+            .split(" ")
+            .map(n => n[0])
+            .join("")
+            .toUpperCase(),
+          isMine: c.exercice?.utilisateur === currentUserId //NEWDED GHR ISMINE //
+        }));
+        setQuizzez(formatted);
+      })
+      .catch(err => console.error("Erreur chargement quiz :", err));
+  }, []);
 
 
 
@@ -69,26 +69,26 @@ useEffect(() => {
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-const handleDeleteQuiz = async (exoId) => {
-  const confirmDelete = window.confirm("Tu es sûr de supprimer cet exercice?");
-  if (!confirmDelete) return;
+  const handleDeleteQuiz = async (exoId) => {
+    const confirmDelete = window.confirm("Tu es sûr de supprimer cet exercice?");
+    if (!confirmDelete) return;
 
-  // Appel API
-  try {
-    await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    // Appel API
+    try {
+      await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    // Mise à jour du state
-    setQuizzez(prev => prev.filter(c => c.id !== exoId));
-  } catch (err) {
-    console.error("Erreur suppression :", err);
-    alert("Erreur lors de la suppression");
-  }
-};
+      // Mise à jour du state
+      setQuizzez(prev => prev.filter(c => c.id !== exoId));
+    } catch (err) {
+      console.error("Erreur suppression :", err);
+      alert("Erreur lors de la suppression");
+    }
+  };
 
 
 
@@ -117,11 +117,20 @@ const handleDeleteQuiz = async (exoId) => {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-      <UserCircle initials={initials} />
+      {/* Header Right Controls */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
 
-      <div className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white text-gray-700 shadow-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 transition z-50">
-        <ThemeButton onClick={toggleDarkMode} />
-        <Bell size={22} strokeWidth={1.8} />
+        {/* Notification Icon */}
+        <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+          <Bell size={16} />
+        </div>
+
+        {/* User Circle */}
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+        />
       </div>
 
       <main
@@ -129,7 +138,7 @@ const handleDeleteQuiz = async (exoId) => {
         style={{ marginLeft: sidebarWidth }}
       >
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{t("quizzesTitle")}</h1>
+          <h1 className="text-2xl font-bold text-muted">{t("quizzesTitle")}</h1>
         </div>
 
         <ContentSearchBar />
@@ -137,15 +146,17 @@ const handleDeleteQuiz = async (exoId) => {
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
             type="quizzes"
-  userRole={userRole}
-  onFilterChange={setFilterLevel}   // ✔️ correction
-  activeFilter={filterLevel}        // ✔️ correction
-  showCompletedFilter={userRole === "etudiant"}
+            userRole={userRole}
+            onFilterChange={setFilterLevel}   // ✔️ correction
+            activeFilter={filterLevel}        // ✔️ correction
+            showCompletedFilter={userRole === "etudiant"}
           />
 
           {userRole === "enseignant" && (
             <Button variant="courseStart"
-             className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all">
+              onClick={() => navigate("/create-quiz")}
+
+              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all">
               <Plus size={18} />
               {t("createQuizBtn")}
             </Button>

@@ -6,13 +6,14 @@ export default function Input({
   rightIcon, 
   error, 
   className = "",   // <-- ajouter ici
+  
   ...props 
 }) {
 
   return (
     <div className="flex flex-col mb-4 appearance-none text-secondary">
 
-      <label className="mb-1 font-semibold text-grayc">
+      <label className="mb-1 font-semibold text-textc">
         {label}
       </label>
 
@@ -44,7 +45,7 @@ export default function Input({
       </div>
 
       {error && (
-        <p className="text-red-500 text-xs mt-1">
+        <p className="text-red text-xs mt-1">
           {error}
         </p>
       )}

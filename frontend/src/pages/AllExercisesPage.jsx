@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -27,39 +27,39 @@ export default function AllCoursesPage() {
   const token = localStorage.getItem("access_token");
   const currentUserId = getCurrentUserId();
 
-const [exercises, setExercice] = useState([]);
-useEffect(() => {
-  fetch("http://localhost:8000/api/exercices/api/exo")
-    .then(res => res.json())
-    .then(data => {
-      const formatted = data.map(c => ({
-        id: c.id_exercice,
-        title: c.titre_exo,
-        level: c.niveau_exercice_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
-        //levelLabel: t(`levels.${c.niveau_cour_label}`),
-        //duration: c.duration_readable,
-        //cours: c.cours,
-        description: c.enonce,
-        //categorie: c.categorie,
-        author: c.utilisateur_name,
-        initials: c.utilisateur_name
-    .split(" ")
-    .map(n => n[0])
-    .join("")
-    .toUpperCase(),
-        isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
-      }));
-      setExercice(formatted);
-    })
-    .catch(err => console.error("Erreur chargement exercices :", err));
-}, []);
+  const [exercises, setExercice] = useState([]);
+  useEffect(() => {
+    fetch("http://localhost:8000/api/exercices/api/exo")
+      .then(res => res.json())
+      .then(data => {
+        const formatted = data.map(c => ({
+          id: c.id_exercice,
+          title: c.titre_exo,
+          level: c.niveau_exercice_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
+          //levelLabel: t(`levels.${c.niveau_cour_label}`),
+          //duration: c.duration_readable,
+          //cours: c.cours,
+          description: c.enonce,
+          //categorie: c.categorie,
+          author: c.utilisateur_name,
+          initials: c.utilisateur_name
+            .split(" ")
+            .map(n => n[0])
+            .join("")
+            .toUpperCase(),
+          isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
+        }));
+        setExercice(formatted);
+      })
+      .catch(err => console.error("Erreur chargement exercices :", err));
+  }, []);
 
 
 
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allExercises");
-const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
@@ -71,26 +71,26 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-const handleDeleteExo = async (exoId) => {
-  const confirmDelete = window.confirm("Tu es sûr de supprimer cet exercice?");
-  if (!confirmDelete) return;
+  const handleDeleteExo = async (exoId) => {
+    const confirmDelete = window.confirm("Tu es sûr de supprimer cet exercice?");
+    if (!confirmDelete) return;
 
-  // Appel API
-  try {
-    await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    // Appel API
+    try {
+      await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    // Mise à jour du state
-    setExercice(prev => prev.filter(c => c.id !== exoId));
-  } catch (err) {
-    console.error("Erreur suppression :", err);
-    alert("Erreur lors de la suppression");
-  }
-};
+      // Mise à jour du state
+      setExercice(prev => prev.filter(c => c.id !== exoId));
+    } catch (err) {
+      console.error("Erreur suppression :", err);
+      alert("Erreur lors de la suppression");
+    }
+  };
 
 
   useEffect(() => {
@@ -120,16 +120,21 @@ const handleDeleteExo = async (exoId) => {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-<UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
-  onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-<div
-  className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
-             text-gray-700 shadow-lg flex items-center justify-center 
-             cursor-pointer hover:bg-gray-100 transition z-50"
->
-  <Bell size={22} strokeWidth={1.8} />
-</div>
+      {/* Header Right Controls */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
 
+        {/* Notification Icon */}
+        <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+          <Bell size={16} />
+        </div>
+
+        {/* User Circle */}
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+        />
+      </div>
 
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"
@@ -137,49 +142,49 @@ const handleDeleteExo = async (exoId) => {
       >
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
+          <h1 className="text-2xl font-bold text-muted">{t("exercisesTitle")}</h1>
 
-      </div>
+        </div>
         {/* Search */}
         <ContentSearchBar />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
-        <ContentFilters
-        type="exercises"
-        userRole={userRole}                  // <-- corrige ici
-  activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
-  onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
-  showCompletedFilter={userRole === "etudiant"} // <- correct
-        />
+          <ContentFilters
+            type="exercises"
+            userRole={userRole}                  // <-- corrige ici
+            activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
+            onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
+            showCompletedFilter={userRole === "etudiant"} // <- correct
+          />
 
-        {userRole === "enseignant" && (
-          <Button
-            variant="courseStart"
-            className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
-            onClick={() => navigate("/new-exercise")}
-          >
-            <Plus size={18} />
-            {t("createExerciseBtn")}
-          </Button>
-        )}
+          {userRole === "enseignant" && (
+            <Button
+              variant="courseStart"
+              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
+              onClick={() => navigate("/new-exercise")}
+            >
+              <Plus size={18} />
+              {t("createExerciseBtn")}
+            </Button>
+          )}
 
-      </div>
+        </div>
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-        {filteredexercises.map((exercise, idx) => (
-          <ContentCard
-            key={idx}
-            className={gradientMap[exercise.level] ?? "bg-grad-1"}
-            course={exercise}
+          {filteredexercises.map((exercise, idx) => (
+            <ContentCard
+              key={idx}
+              className={gradientMap[exercise.level] ?? "bg-grad-1"}
+              course={exercise}
 
-            role={userRole}
-            showProgress={userRole === "etudiant"}
-            onDelete={handleDeleteExo}
-          />
-        ))}
-      </div>
+              role={userRole}
+              showProgress={userRole === "etudiant"}
+              onDelete={handleDeleteExo}
+            />
+          ))}
+        </div>
       </main>
     </div>
   );

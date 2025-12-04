@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../../styles/index.css";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import IconeLogoComponent from "../common/IconeLogoComponent";
+import IconeLogoComponent from "./IconeLogoComponent";
 import {
   Settings,
   LogOut,
@@ -46,24 +46,24 @@ export default function Navbar() {
 
   const studentLinks = [
     { href: "/", label: t("home"), icon: Home },
-    { href: "/dashboard", label: t("dashboard"), icon: Activity },
+    { href: "/dashboard-etu", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
-    { href: "/ranking", label: t("ranking"), icon: Award },
+    { href: "/badges", label: t("ranking"), icon: Award },
     { href: "/community", label: t("community"), icon: MessageCircle },
-    { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
+    { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },
   ];
 
   const teacherLinks = [
-    { href: "/home", label: t("home"), icon: Home },
-    { href: "/dashboard", label: t("dashboard"), icon: Activity },
+    { href: "/", label: t("home"), icon: Home },
+    { href: "/dashboard-ens", label: t("dashboard"), icon: Activity },
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
-    { href: "/mystudents", label: t("mystudents"), icon: Users },
-    { href: "/mycommunity", label: t("mycommunity"), icon: MessageCircle },
-    { href: "/myspaces", label: t("myspaces"), icon: LayoutGrid },
+    { href: "/my-students", label: t("mystudents"), icon: Users },
+    { href: "/community", label: t("mycommunity"), icon: MessageCircle },
+    { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },
   ];
 
   const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
@@ -182,7 +182,7 @@ const quizRoutes = [
             `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
               isActive
                 ? "bg-grad-1 text-white"
-                : "bg-card text-red-500 hover:bg-red-100"
+                : "bg-card text-red hover:bg-red/20"
             }`
           }
         >

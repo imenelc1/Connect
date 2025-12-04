@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/common/Navbar";
-import { Plus,Bell } from "lucide-react";
+import Navbar from "../components/common/NavBar";
+import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
 import ContentFilters from "../components/common/ContentFilters";
@@ -22,42 +22,43 @@ const gradientMap = {
   Avancé: "bg-grad-4",
 };
 
-
-
 export default function AllCoursesPage() {
- const token = localStorage.getItem("access_token");
-    const currentUserId = getCurrentUserId();
-    const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
+  const token = localStorage.getItem("access_token");
+  const currentUserId = getCurrentUserId();
+  const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
 
   const [courses, setCourses] = useState([]);
-useEffect(() => {
-  fetch("http://localhost:8000/api/courses/api/cours")
-    .then(res => res.json())
-    .then(data => {
-      
-      const formatted = data.map(c => ({
-        id:c.id_cours,
-        title: c.titre_cour,
-        description: c.description,
-        level: c.niveau_cour_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
-        //levelLabel: t(`levels.${c.niveau_cour_label}`),
-        duration: c.duration_readable,
-        author: c.utilisateur_name,
-        initials: c.utilisateur_name
-    .split(" ")
-    .map(n => n[0])
-    .join("")
-    .toUpperCase(),
-        isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
-      }));
-      setCourses(formatted);
-    })
-    .catch(err => console.error("Erreur chargement cours :", err));
-}, []);
-    const userData = JSON.parse(localStorage.getItem("user"));
+  useEffect(() => {
+    fetch("http://localhost:8000/api/courses/api/cours")
+      .then((res) => res.json())
+      .then((data) => {
+        const formatted = data.map((c) => ({
+          id: c.id_cours,
+          title: c.titre_cour,
+          description: c.description,
+          level: c.niveau_cour_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
+          //levelLabel: t(`levels.${c.niveau_cour_label}`),
+          duration: c.duration_readable,
+          author: c.utilisateur_name,
+          initials: c.utilisateur_name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase(),
+          isMine: c.utilisateur === currentUserId, //NEWDED GHR ISMINE //
+        }));
+        setCourses(formatted);
+      })
+      .catch((err) => console.error("Erreur chargement cours :", err));
+  }, []);
+
+  
+  const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allcourses");
-const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
@@ -69,26 +70,29 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-const handleDeleteCourse = async (courseId) => {
-  const confirmDelete = window.confirm("Tu es sûr de supprimer ce cours ?");
-  if (!confirmDelete) return;
+  const handleDeleteCourse = async (courseId) => {
+    const confirmDelete = window.confirm("Tu es sûr de supprimer ce cours ?");
+    if (!confirmDelete) return;
 
-  // Appel API
-  try {
-    await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    // Appel API
+    try {
+      await fetch(
+        `http://localhost:8000/api/courses/cours/${courseId}/delete/`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    // Mise à jour du state
-    setCourses(prev => prev.filter(c => c.id !== courseId));
-  } catch (err) {
-    console.error("Erreur suppression :", err);
-    alert("Erreur lors de la suppression");
-  }
-};
+      // Mise à jour du state
+      setCourses((prev) => prev.filter((c) => c.id !== courseId));
+    } catch (err) {
+      console.error("Erreur suppression :", err);
+      alert("Erreur lors de la suppression");
+    }
+  };
 
 
 
@@ -120,15 +124,24 @@ const handleDeleteCourse = async (courseId) => {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-<UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
-  onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-<div
-  className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
-             text-gray-700 shadow-lg flex items-center justify-center 
-             cursor-pointer hover:bg-gray-100 transition z-50"
->
-  <Bell size={22} strokeWidth={1.8} />
-</div>
+      {/* Header Right Controls */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
+        {/* Notification Icon */}
+        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+          <Bell size={18} />
+        </div>
+
+        {/* User Circle */}
+        <div className="flex items-center">
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
+        </div>
+
+      </div>
+
 
 
       <main
@@ -137,48 +150,52 @@ const handleDeleteCourse = async (courseId) => {
       >
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
+          <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
 
-      </div>
+        </div>
         {/* Search */}
         <ContentSearchBar />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
-        <ContentFilters
-        type="courses"
-        userRole={userRole}                  // <-- corrige ici
-  activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
-  onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
-  showCompletedFilter={userRole === "etudiant"} // <- correct
-        />
+          <ContentFilters
+            type="courses"
+            userRole={userRole} // <-- corrige ici
+            activeFilter={filterLevel} // <- tu utilises filterLevel, pas activeFilter
+            onFilterChange={setFilterLevel} // <- tu as setFilterLevel
+            showCompletedFilter={userRole === "etudiant"} // <- correct
+          />
 
-        {userRole === "enseignant" && (
-          <Button
-            variant="courseStart"
-            className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
-            onClick={() => navigate("/CoursInfo")}
-          >
-            <Plus size={18} />
-            {t("createCourseBtn")}
-          </Button>
-        )}
-
-      </div>
+          {userRole === "enseignant" && (
+            <Button
+              variant="courseStart"
+              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
+              onClick={() => navigate("/CoursInfo")}
+            >
+              <Plus size={18} />
+              {t("createCourseBtn")}
+            </Button>
+          )}
+        </div>
 
         {/* Cards */}
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-        {filteredCourses.map((course, idx) => (
-          <ContentCard
-            key={idx}
-            className={gradientMap[course.level] ?? "bg-grad-1"}
-            course={course}
-            role={userRole}
-            showProgress={userRole === "etudiant"}
-            onDelete={handleDeleteCourse} 
-          />
-        ))}
-      </div>
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
+          }}
+        >
+          {filteredCourses.map((course, idx) => (
+            <ContentCard
+              key={idx}
+              className={gradientMap[course.level] ?? "bg-grad-1"}
+              course={course}
+              role={userRole}
+              showProgress={userRole === "etudiant"}
+              onDelete={handleDeleteCourse}
+            />
+          ))}
+        </div>
       </main>
     </div>
   );

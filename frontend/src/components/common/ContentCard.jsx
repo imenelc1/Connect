@@ -35,6 +35,11 @@ export default function ContentCard({ course, role, showProgress, className = ""
     continue: t(`continue${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
     restart: t(`restart${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
   };
+const levelKeyMap = {
+  Débutant: "beginner",
+  Intermédiaire: "intermediate",
+  Avancé: "advanced"
+};
 
   return (
     <div className={` shadow-md p-6 rounded-2xl flex flex-col justify-between h-full
@@ -48,7 +53,8 @@ export default function ContentCard({ course, role, showProgress, className = ""
         <div className="flex justify-between items-start">
           <h2 className="font-semibold text-lg">{course.title}</h2>
           <span className={`px-3 py-1 text-xs rounded-full ${levelStyles[course.level]}`}>
-             {t(`levels.${course.level}`)}
+             {t(`levels.${levelKeyMap[course.level]}`)}
+
           </span>
         </div>
 

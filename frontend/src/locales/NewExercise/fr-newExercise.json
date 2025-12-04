@@ -11,8 +11,7 @@
 
     "category_label": "Catégorie",
     "duration_label": "Durée",
-    "level_label": "Niveau",
-    "cours": "Cours"
+    "level_label": "Niveau"
   },
   "select": {
     "placeholder": "Sélectionner",
