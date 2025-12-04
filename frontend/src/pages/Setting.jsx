@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 // Styles globaux
 import "../styles/index.css";// Import des styles globaux
 import NavSetting from "../components/common/navsetting";
@@ -13,7 +13,7 @@ import "../components/common/NavBar";
 import LogoComponent from "../components/common/LogoComponent";
 import axios from "../services/api";
 import api from "../services/api";
-
+import UserCircle from "../components/common/UserCircle";
 
 
 export default function Setting() {
@@ -28,10 +28,12 @@ export default function Setting() {
     const { darkMode, toggleDarkMode } = useContext(ThemeContext);
 
 
-const [user, setUser] = useState(null);
-const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const [activeTab, setActiveTab] = useState("profile");
+    const [isEditing, setIsEditing] = useState(false);
+
     // Permet de changer la langue (FR ↔ EN)²
     // const toggleLanguage = () => {
     //     const newLang = i18n.language === "fr" ? "en" : "fr";
@@ -39,45 +41,49 @@ const [loading, setLoading] = useState(true);
     // };
 
 
- useEffect(() => {
-  const fetchProfile = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("No token found, cannot fetch profile");
-      setLoading(false);
-      return;
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                console.error("No token found, cannot fetch profile");
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await api.get("profile/");
+                setUser(response.data);
+                
+            } catch (error) {
+
+                console.error("Error loading profile:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    if (loading) {
+        return <div className="p-10 text-center text-textc">Loading...</div>;
+    }
+    if (!user) {
+        return <div className="p-10 text-center text-red-500">Cannot load user profile</div>;
     }
 
-    try {
-      const response = await api.get("profile/");
-      setUser(response.data);
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProfile();
-}, []);
-
-if (loading) {
-    return <div className="p-10 text-center text-textc">Loading...</div>;
-}
-if (!user) {
-    return <div className="p-10 text-center text-red-500">Cannot load user profile</div>;
-}
+    const initials = `${user.nom?.[0] || ""}${user.prenom?.[0] || ""}`.toUpperCase();
 
     return (
         // -------- GLOBAL LAYOUT --------
         <div className="  flex w-full md:flex-row min-h-screen">
-           
+
 
 
             {/* Sidebar : cachée sur mobile, visible sur large écrans */}
             <div className="hidden lg:block w-64 ">
-                
-                
+
+
                 <Navbar />
             </div>
 
@@ -96,15 +102,17 @@ if (!user) {
 
 
                         {/* PROFILE HEADER */}
+                        {/* PROFILE HEADER */}
                         <div className="flex flex-col md:flex-row md:items-center gap-6 mb-12">
 
-                            {/* Avatar + infos sur une seule ligne */}
-                            <div className="flex items-center gap-4 sm:whitespace-nowrap">
+                            {/* Avatar + Name */}
+                            <div className="flex items-center gap-4">
 
-                                {/* Avatar */}
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-grad-7 text-white flex items-center justify-center text-2xl sm:text-3xl font-bold">
-                                    M.H
-                                </div>
+                                <UserCircle
+                                    initials={initials}
+                                    onToggleTheme={toggleDarkMode}
+                                    onChangeLang={(lang) => i18n.changeLanguage(lang)}
+                                />
 
                                 {/* Name + email + tag */}
                                 <div>
@@ -120,18 +128,22 @@ if (!user) {
                                         {user?.role === "enseignant" ? "Professor" : "Student"}
                                     </span>
                                 </div>
+
                             </div>
 
                             {/* Edit button */}
                             <div className="md:ml-auto">
-
                                 <Button
                                     variant="Setting"
-                                    className="bg-grad-7 hover:bg-sky-600 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base"
-                                >  <Pen />{t("Profile.Editprofile")}
+                                    onClick={() => setIsEditing(!isEditing)}
+                                    className="bg-grad-7 hover:bg-sky-600 text-white font-xl px-4"
+                                >
+                                    <Pen />
+                                    {isEditing ? t("Profile.SaveChanges") : t("Profile.Editprofile")}
                                 </Button>
                             </div>
                         </div>
+
 
 
                         {/* -------- FORM -------- */}
@@ -145,7 +157,9 @@ if (!user) {
                                     <input
                                         type="text"
                                         defaultValue={`${user?.nom}`}
-                                        className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
+                                        disabled={!isEditing}
+                                        className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                                     />
 
                                 </div>
@@ -156,10 +170,12 @@ if (!user) {
                                 <label className="text-textc smb-2"> {t("Profile.NickName")}</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                     <input
+                                    <input
                                         type="text"
                                         defaultValue={`${user?.prenom}`}
-                                        className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
+                                        disabled={!isEditing}
+                                        className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                                     />
                                 </div>
                             </div>
@@ -169,8 +185,10 @@ if (!user) {
                                 <label className="text-textc mb-2">{t("Profile.Datebirth")}</label>
                                 <input
                                     type="date"
-                                    defaultValue={user?.dateNaissance}
-                                    className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/50"
+                                    defaultValue={user.date_naissance}
+                                    disabled={!isEditing}
+                                    className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/50 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                                 />
                             </div>
 
@@ -181,8 +199,10 @@ if (!user) {
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
                                         type="text"
-                                        defaultValue={user?.email}
-                                        className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
+                                        defaultValue={user.adresse_email}
+                                        disabled={!isEditing}
+                                        className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                                     />
 
                                 </div>
@@ -194,55 +214,63 @@ if (!user) {
                                 <div className="relative">
                                     <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
-                                            type="text"
-                                            defaultValue={user?.matricule}
-                                            className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
-                                        />
+                                        type="text"
+                                        defaultValue={user?.matricule}
+                                        disabled={!isEditing}
+                                        className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                                    />
 
                                 </div>
                             </div>
 
                             {/* ---- EXTRA FIELDS BASED ON ROLE ----*/}
-{user.role === "etudiant" && (
-    <>
-        {/* Specialité */}
-        <div className="flex flex-col">
-            <label className="text-textc mb-2">{t("Profile.Speciality")}</label>
-            <input
-                type="text"
-                defaultValue={user.specialite}
-                className="w-full bg-white rounded-xl p-3 shadow-sm text-black/80"
-            />
-        </div>
+                            {user.role === "etudiant" && (
+                                <>
+                                    {/* Specialité */}
+                                    <div className="flex flex-col">
+                                        <label className="text-textc mb-2">{t("Profile.Speciality")}</label>
+                                        <input
+                                            type="text"
+                                            defaultValue={user.specialite}
+                                            disabled={!isEditing}
+                                            className={`w-full bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                                        />
+                                    </div>
 
-        {/* Année d'étude */}
-        <div className="flex flex-col">
-            <label className="text-textc mb-2">{t("Profile.StudyYear")}</label>
-            <input
-                type="text"
-                defaultValue={user.annee_etude}
-                className="w-full bg-white rounded-xl p-3 shadow-sm text-black/80"
-            />
-        </div>
-    </>
-)}
+                                    {/* Année d'étude */}
+                                    <div className="flex flex-col">
+                                        <label className="text-textc mb-2">{t("Profile.StudyYear")}</label>
+                                        <input
+                                            type="text"
+                                            defaultValue={user.annee_etude}
+                                            disabled={!isEditing}
+                                            className={`w-full bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                                        />
+                                    </div>
+                                </>
+                            )}
 
-{user.role === "enseignant" && (
-    <>
-        {/* Grade */}
-        <div className="flex flex-col">
-            <label className="text-textc mb-2">{t("Profile.Grade")}</label>
-            <div className="relative">
-                <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                    type="text"
-                    defaultValue={user.grade}
-                    className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
-                />
-            </div>
-        </div>
-    </>
-)}
+                            {user.role === "enseignant" && (
+                                <>
+                                    {/* Grade */}
+                                    <div className="flex flex-col">
+                                        <label className="text-textc mb-2">{t("Profile.Grade")}</label>
+                                        <div className="relative">
+                                            <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                            <input
+                                                type="text"
+                                                defaultValue={user.grade}
+                                                disabled={!isEditing}
+                                                className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
 
                         </div>
                     </div>
@@ -391,10 +419,10 @@ if (!user) {
                                 <Button
                                     variant="Setting"
                                     onClick={() => navigate("/")}
-                                     className="bg-red  hover:bg-red/80 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base w-[205px]"
+                                    className="bg-red  hover:bg-red/80 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base w-[205px]"
                                 >  {t("Account.DeleteAccount")}
                                 </Button>
-                             
+
 
 
 

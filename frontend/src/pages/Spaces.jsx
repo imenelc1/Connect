@@ -1,4 +1,6 @@
 // Importation des composants et hooks nécessaires
+// LORSQU'IL CLIQUE SUR LE CHEVRON ON LE REDIRIGE VERS LA PAGE COURSEDETAILS
+
 import React, { useState } from "react";
 import { Folder } from "lucide-react";          // Icône affichée dans la carte
 import Navbar from "../components/common/NavBar";
@@ -6,6 +8,7 @@ import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { useTranslation } from "react-i18next"; // Permet la traduction du texte via i18n
+import { useNavigate } from "react-router-dom";
 
 import "../styles/index.css";                  // Styles globaux
 
@@ -31,16 +34,16 @@ export default function SpacesPage() {
     const spaces = [
         {
             id: 1,
-            title: t("mobileDesignPatterns.title"),
-            description: t("mobileDesignPatterns.description"),
-            status: t("mobileDesignPatterns.status"),
+            title: "Mobile Design Patterns",
+            description: "Learn mobile design fundamentals",
+             date: "12/01/2025",
             bg: "bg-grad-2",
         },
         {
             id: 2,
-            title: t("uxCaseStudies.title"),
-            description: t("uxCaseStudies.description"),
-            status: t("uxCaseStudies.status"),
+            title: "UX Case Studies",
+            description: "Deep dive into UX successes",
+            date: "12/05/2025",
             bg: "bg-grad-3",
         },
         {
@@ -51,6 +54,9 @@ export default function SpacesPage() {
             bg: "bg-grad-4",
         },
     ];
+
+    const navigate = useNavigate();
+
 
     return (
         <div className="flex w-full min-h-screen bg-surface">
@@ -89,8 +95,10 @@ export default function SpacesPage() {
                                 }
                                 title={item.title}
                                 description={item.description}
-                                status={item.status}
+                                status={`${t("created")} ${item.date}`}
                                 showArrow={true}  // Affiche une flèche (souvent pour "voir plus")
+                                  // ⬇️ AJOUT ICI : redirection quand on clique sur la flèche
+    onArrowClick={() => navigate("/CourseDetails")}
                             />
                         </div>
                     ))}
@@ -104,6 +112,7 @@ export default function SpacesPage() {
                 title={t("modalTitle")}
                 subtitle={t("modalSubtitle")}
                 submitLabel={t("modalSubmit")}
+                cancelLabel={t("modalCancel")}
 
                 // Champs affichés dans le modal
                 fields={[

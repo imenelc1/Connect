@@ -23,8 +23,8 @@ import translationFRContentPage from "./locales/contentPage/fr/translation.json"
 import translationENContentPage from "./locales/contentPage/en/translation.json";
 import translationFRCreateQuiz from "./locales/fr-quiz/fr.json";
 import translationENCreateQuiz from "./locales/en-quiz/en.json"; 
-import translationFRSetting from "./locales/Settings/en-Setting/translation.json";
-import translationENSetting from "./locales/Settings/fr-Setting/translation.json";
+import translationFRSetting from "./locales/Settings/fr-Setting/translation.json";
+import translationENSetting from "./locales/Settings/en-Setting/translation.json";
 import translationENDashboard from "./locales/Dashboard/en/translation.json";
 import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
 
@@ -48,6 +48,9 @@ import translationENStartExo from "./locales/StartExercise/en-Exo/translation.js
 import translationFRStartExo from  "./locales/StartExercise/fr-Exo/translation.json";
 import translationFRCourseDetails from "./locales/CourseDetails/fr_CourseDetails/translation.json";
 import translationENCourseDetails from "./locales/CourseDetails/en_CourseDetails/translation.json";
+
+import translationFRSubmittedExercise from "./locales/SubmittedExo/fr-SubExo/translation.json";
+import translationENSubmittedExercise from "./locales/SubmittedExo/en-SubExo/translation.json";
 
 const resources = {
   fr: {
@@ -79,8 +82,12 @@ const resources = {
   exerciceStudent:translationnFRexerciceStudent,
   startExercise: translationFRStartExo,
    CourseDetails: translationFRCourseDetails,
+    myStudents: translationFRMyStudents,
+    Spaces: translationFRSpaces,
+    CourseDetails: translationFRCourseDetails,
+    SubmittedExercise: translationFRSubmittedExercise,
 
-  
+
 
   },
 
@@ -110,7 +117,11 @@ const resources = {
     exerciceStudent:translationnENexerciceStudent,
 
     startExercise:translationENStartExo,
-      CourseDetails: translationENCourseDetails
+      CourseDetails: translationENCourseDetails,
+    Spaces: translationENSpaces,
+    CourseDetails: translationENCourseDetails,
+    SubmittedExercise: translationENSubmittedExercise,
+
   },
 };
 

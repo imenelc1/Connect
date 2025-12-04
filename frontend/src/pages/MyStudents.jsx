@@ -7,6 +7,8 @@ import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next"; // Pour support multilingue
+import { useNavigate } from "react-router-dom";
+
 
 import ThemeContext from "../context/ThemeContext";
 
@@ -35,6 +37,8 @@ export default function MyStudents() {
 
 
   const { toggleDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
+
 
   return (
     <div className="flex w-full">
@@ -77,7 +81,7 @@ export default function MyStudents() {
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto lg:ml-auto">
 
             {/* Bouton créer un espace */}
-            <Button className="!px-6 !py-2 w-full sm:w-auto">
+            <Button className="!px-6 !py-2 w-full sm:w-auto" onClick={() => navigate("/Spaces")}>
               {t("createSpace")}
             </Button>
 
@@ -102,7 +106,8 @@ export default function MyStudents() {
               title={st.name}
               description={st.course}
               progress={st.progress} // barre de progression d'avancement
-              status={`${t("active")} ${st.lastActive}`} // ex : "Active 3h ago"
+              status={`${t("active")} ${t("lastActive", { time: st.lastActive })}`}
+        
               className={`${st.bg} rounded-xl shadow-md border p-6`}
             />
           ))}

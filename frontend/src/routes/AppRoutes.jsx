@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Acceuil from "../pages/acceuil";
+import Acceuil from "../pages/Acceuil.jsx";
 import Choice from "../pages/Choice";
 import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
@@ -97,13 +97,17 @@ export default function AppRoutes() {
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
         <Route path="/student-exercice" element={<StudentExercice />} />
 
-
           <Route path="/quiz" element={<QuizPage2 />} />  
           <Route path="/start-exercise" element={<StartExercise />} />
           <Route path="/exercise-page" element={<ExercisePage />} />
           <Route path="/course-details" element={<CourseDetails />} />
           <Route path="/submitted-exercise" element={<SubmittedExercise />} />
 
+
+        {/* Course details */}
+        <Route path="/CourseDetails" element={<CourseDetails />} />
+        {/* Students */}
+        <Route path="/MyStudents" element={<MyStudents />} />
       </Routes>
     </BrowserRouter>
   );

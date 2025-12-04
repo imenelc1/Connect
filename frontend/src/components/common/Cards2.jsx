@@ -29,6 +29,7 @@ export default function Cards2({
   status = "",
   showArrow = true,
   className = "",
+  onArrowClick = null,   // ⬅️ AJOUT ICI
 }) {
   return (
     <div className={`flex justify-between w-full p-4 ${className} min-w-0`}>
@@ -77,7 +78,7 @@ export default function Cards2({
 
       {/* RIGHT ARROW */}
       {showArrow && (
-        <Button className=" !w-9 !h-9 !p-0 !min-w-0 flex items-center justify-center">
+        <Button className=" !w-9 !h-9 !p-0 !min-w-0 flex items-center justify-center" onClick={onArrowClick} >
           <ChevronRight size={16} className="w-6 h-6" />
         </Button>
       )}

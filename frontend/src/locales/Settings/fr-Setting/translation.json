@@ -13,7 +13,8 @@
     "RegistratioNumber": "Matricule",
     "Grade": "Grade",
     "Instructor": "Formateur",
-    "Assistant": "Assistant"
+    "Assistant": "Assistant",
+    "SaveChanges": "Enregistrer les modifications"
   },
  
   "Preferences": {
