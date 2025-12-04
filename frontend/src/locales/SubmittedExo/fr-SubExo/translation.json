@@ -1,0 +1,12 @@
+{
+  "exerciseTitle": "Exercice 1",
+  "showDetails": "Afficher les détails",
+  "student": "Étudiant",
+  "submitted": "Remis",
+  "language": "Langage",
+  "difficulty": "Difficulté",
+  "submittedCode": "Code soumis",
+  "expectedOutput": "Sortie attendue",
+  "actualOutput": "Sortie obtenue",
+  "teacherFeedback": "Retour de l’enseignant"
+}

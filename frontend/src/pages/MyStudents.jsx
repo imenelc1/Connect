@@ -7,6 +7,8 @@ import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next"; // Pour support multilingue
+import { useNavigate } from "react-router-dom";
+
 
 export default function MyStudents() {
 
@@ -29,6 +31,9 @@ export default function MyStudents() {
     e.preventDefault();  // Empêche le refresh de la page
     setModal(false);     // Ferme le modal après l’envoi
   };
+
+  const navigate = useNavigate();
+
 
   return (
     <div className="flex w-full">
@@ -71,7 +76,7 @@ export default function MyStudents() {
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto lg:ml-auto">
 
             {/* Bouton créer un espace */}
-            <Button className="!px-6 !py-2 w-full sm:w-auto">
+            <Button className="!px-6 !py-2 w-full sm:w-auto" onClick={() => navigate("/Spaces")}>
               {t("createSpace")}
             </Button>
 
@@ -96,7 +101,8 @@ export default function MyStudents() {
               title={st.name}
               description={st.course}
               progress={st.progress} // barre de progression d'avancement
-              status={`${t("active")} ${st.lastActive}`} // ex : "Active 3h ago"
+              status={`${t("active")} ${t("lastActive", { time: st.lastActive })}`}
+        
               className={`${st.bg} rounded-xl shadow-md border p-6`}
             />
           ))}
@@ -128,11 +134,11 @@ export default function MyStudents() {
               label: t("space"),
               // Menu déroulant pour choisir un espace
               element: (
-                <select value={space} onChange={e => setSpace(e.target.value)} className="w-full border rounded px-3 py-2">
-                  <option value="UI/UX Class">{t("UIUXClass")}</option>
-                  <option value="Mobile Design">{t("mobileDesign")}</option>
-                  <option value="Web Development">{t("webDevelopment")}</option>
-                  <option value="Data Science">{t("dataScience")}</option>
+                <select onChange={e => setSpace(e.target.value)} className="w-full border rounded px-3 py-2">
+                  <option >mobile design</option>
+                  <option >ux/ui</option>
+                  <option >web development</option>
+                  <option >data science</option>
                 </select>
               )
             }

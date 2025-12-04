@@ -9,7 +9,7 @@ export default function AddModal({
   subtitle,      // sous-titre
   fields = [],   // tableau d'inputs dynamiques
   submitLabel,   // texte du bouton submit
-  cancelLabel = "Cancel", // texte du bouton cancel
+  cancelLabel, // texte du bouton cancel
   onSubmit       // fonction appelée lors du submit
 }) {
 
@@ -20,7 +20,7 @@ export default function AddModal({
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-3">
       <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl relative">
 
-        {/* ✖ Bouton de fermeture (en haut à droite) */}
+        {/*  Bouton de fermeture (en haut à droite) */}
         <button
           onClick={onClose}
           className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-xl"
@@ -28,7 +28,7 @@ export default function AddModal({
           ✕
         </button>
 
-        {/* 🏷️ En-tête du modal */}
+        {/*  En-tête du modal */}
         <h2 className="text-lg font-semibold mb-1 text-primary">{title}</h2>
         <p className="text-sm text-textc mb-4">{subtitle}</p>
 
@@ -36,7 +36,7 @@ export default function AddModal({
         <form className="space-y-5" onSubmit={onSubmit}>
 
           {/*
-            🔁 Génération dynamique des champs
+             Génération dynamique des champs
             Chaque élément du tableau "fields" contient :
             - label
             - placeholder

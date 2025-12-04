@@ -6,8 +6,6 @@ import HeroSection from "../components/layout/HeroSection";
 import Footer from "../components/layout/Footer";
 import Body from "../components/layout/Body";
 
-
-
 export default function Acceuil() {
 
   // Composant principal de la page d'accueil
@@ -21,7 +19,7 @@ export default function Acceuil() {
 
       {/* Pied de page */}
       <Footer />
-        
+
 
     </div>
   );

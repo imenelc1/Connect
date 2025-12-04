@@ -11,13 +11,13 @@ import { BookOpen, NotebookPen, FileCheck, ArrowLeft, Users } from "lucide-react
 import { useTranslation } from "react-i18next";
 
 export default function CourseDetails() {
-  const { t } = useTranslation("CourseDetails"); // <-- namespace CourseDetails
-
+  const { t } = useTranslation("CourseDetails"); // namespace CourseDetails
   const navigate = useNavigate();
+
   const [activeStep, setActiveStep] = useState(1);
   const [openModal, setOpenModal] = useState(false);
-  const [sectionTitle, setSectionTitle] = useState("");
-  const [sectionDescription, setSectionDescription] = useState("");
+  const [courseTitle, setCourseTitle] = useState("");
+  const [courseDescription, setCourseDescription] = useState("");
 
   const courseSteps = [
     { label: t("topbar.course"), icon: BookOpen },
@@ -26,26 +26,29 @@ export default function CourseDetails() {
   ];
 
   const numberOfStudents = 34;
-  const [sections, setSections] = useState([
-    { id: 1, title: t("sections.intro.title"), description: t("sections.intro.desc"), bg: "bg-grad-2", date: "12/01/2025" },
-    { id: 2, title: t("sections.basics.title"), description: t("sections.basics.desc"), bg: "bg-grad-3", date: "12/05/2025" },
-    { id: 3, title: t("sections.advanced.title"), description: t("sections.advanced.desc"), bg: "bg-grad-4", date: "12/10/2025" },
+
+  // Liste des cours
+  const [courses, setCourses] = useState([
+    { id: 1, title: "Introduction to Design Patterns", description: "Mobile design patterns", bg: "bg-grad-2", date: "12/01/2025" },
+    { id: 2, title: "Design Patterns Basics", description: "Mobile design patterns", bg: "bg-grad-3", date: "12/05/2025" },
+    { id: 3, title: "Advanced Patterns", description: "Mobile design patterns", bg: "bg-grad-4", date: "12/10/2025" },
   ]);
 
-  const handleAddSection = (e) => {
+  // Ajouter un nouveau cours
+  const handleAddCourse = (e) => {
     e.preventDefault();
-    setSections([
-      ...sections,
+    setCourses([
+      ...courses,
       {
         id: Date.now(),
-        title: sectionTitle,
-        description: sectionDescription,
+        title: courseTitle,
+        description: courseDescription,
         bg: "bg-grad-5",
         date: new Date().toLocaleDateString(),
       },
     ]);
-    setSectionTitle("");
-    setSectionDescription("");
+    setCourseTitle("");
+    setCourseDescription("");
     setOpenModal(false);
   };
 
@@ -53,6 +56,8 @@ export default function CourseDetails() {
     <div className="flex w-full">
       <Navbar className="hidden lg:block" />
       <main className="lg:ml-64 w-full min-h-screen px-6 py-6 bg-bg">
+
+        {/* Bouton retour */}
         <div className="flex flex-col gap-6 mb-6">
           <button
             className="text-primary/60 font-medium hover:underline w-max flex items-center gap-1"
@@ -63,8 +68,8 @@ export default function CourseDetails() {
 
           <div className="flex justify-between items-start sm:items-center gap-4">
             <div className="flex flex-col gap-2">
-              <h2 className="text-4xl font-semibold text-primary">{t("courseTitle")}</h2>
-              <p className="text-textc/75 text-m">{t("courseSubtitle")}</p>
+              <h2 className="text-4xl font-semibold text-primary">Mobile Design Patterns</h2>
+              <p className="text-textc/75 text-m">Learn mobile design fundamentals</p>
             </div>
 
             <div className="flex items-center gap-1 bg-primary/10 text-primary font-semibold px-4 py-2 rounded-md text-sm">
@@ -75,6 +80,7 @@ export default function CourseDetails() {
 
         <Topbar steps={courseSteps} activeStep={activeStep} setActiveStep={setActiveStep} className="mb-6 flex justify-between" />
 
+        {/* Affichage selon l'étape active */}
         {activeStep === 1 && (
           <div>
             <div className="flex justify-between items-center mb-4">
@@ -89,12 +95,12 @@ export default function CourseDetails() {
             </div>
 
             <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-              {sections.map((section) => (
+              {courses.map((course) => (
                 <Cards2
-                  key={section.id}
+                  key={course.id}
                   icon={
                     <UserCircle
-                      initials={section.title
+                      initials={course.title
                         .split(" ")
                         .map((w) => w[0])
                         .join("")
@@ -102,11 +108,11 @@ export default function CourseDetails() {
                     />
                   }
                   roundedIcon={true}
-                  title={section.title}
-                  description={section.description}
-                  progress={section.progress}
-                  status={`${t("createdOn")} ${section.date}`}
-                  className={`${section.bg} rounded-xl shadow-md border p-6`}
+                  title={course.title}
+                  description={course.description}
+                  progress={course.progress}
+                  status={`${t("createdOn")} ${course.date}`}
+                  className={`${course.bg} rounded-xl shadow-md border p-6`}
                 />
               ))}
             </div>
@@ -115,34 +121,36 @@ export default function CourseDetails() {
 
         {activeStep === 2 && (
           <div>
-            <h2 className="text-3xl font-semibold mb-4">{t("quizzesTitle")}</h2>
-            <p className="text-textc/80">{t("quizzesSubtitle")}</p>
+            <h2 className="text-3xl font-regular mb-4">{t("quizzesTitle")}</h2>
+            <p className="text-textc/80"></p>
           </div>
         )}
 
         {activeStep === 3 && (
           <div>
-            <h2 className="text-3xl font-semibold mb-4">{t("exercisesTitle")}</h2>
-            <p className="text-textc/80">{t("exercisesSubtitle")}</p>
+            <h2 className="text-3xl font-regular mb-4">{t("exercisesTitle")}</h2>
+            <p className="text-textc/80"></p>
           </div>
         )}
 
+        {/* Modal d’ajout de cours */}
         <AddModal
           open={openModal}
           onClose={() => setOpenModal(false)}
-          title={t("addSectionTitle")}
-          subtitle={t("addSectionSubtitle")}
-          submitLabel={t("createSection")}
-          onSubmit={handleAddSection}
+          title={t("addCourseTitle")}
+          subtitle={t("addCourseSubtitle")}
+          submitLabel={t("createCourse")}
+          cancelLabel={t("cancel")}
+          onSubmit={handleAddCourse}
           fields={[
-            { label: t("sectionTitleLabel"), placeholder: t("sectionTitlePlaceholder"), value: sectionTitle, onChange: (e) => setSectionTitle(e.target.value) },
+            { label: t("courseTitleLabel"), placeholder: t("courseTitlePlaceholder"), value: courseTitle, onChange: (e) => setCourseTitle(e.target.value) },
             {
-              label: t("sectionDescriptionLabel"),
+              label: t("courseDescriptionLabel"),
               element: (
                 <textarea
-                  placeholder={t("sectionDescriptionPlaceholder")}
-                  value={sectionDescription}
-                  onChange={(e) => setSectionDescription(e.target.value)}
+                  placeholder={t("courseDescriptionPlaceholder")}
+                  value={courseDescription}
+                  onChange={(e) => setCourseDescription(e.target.value)}
                   className="w-full bg-gray-100 dark:bg-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                   rows={4}
                 />

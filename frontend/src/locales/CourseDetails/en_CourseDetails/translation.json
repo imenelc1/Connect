@@ -1,8 +1,7 @@
 {
   "backToSpaces": "Back to Spaces",
-  "courseTitle": "Mobile Design Patterns",
-  "courseSubtitle": "Learn mobile design fundamentals",
   "students": "Students",
+  "cancel": "Cancel",
   "topbar": {
     "course": "Course",
     "quizzes": "Quizzes",
@@ -11,29 +10,12 @@
   "coursesTitle": "Courses",
   "addCourse": "Add Course",
   "createdOn": "Created on",
-  "sections": {
-    "intro": {
-      "title": "Introduction to Design Patterns",
-      "desc": "Mobile design patterns"
-    },
-    "basics": {
-      "title": "Design Patterns Basics",
-      "desc": "Mobile design patterns"
-    },
-    "advanced": {
-      "title": "Advanced Patterns",
-      "desc": "Mobile design patterns"
-    }
-  },
-  "quizzesTitle": "Quizzes",
-  "quizzesSubtitle": "List of quizzes will appear here...",
-  "exercisesTitle": "Exercises",
-  "exercisesSubtitle": "List of exercises will appear here...",
-  "addSectionTitle": "Add Section",
-  "addSectionSubtitle": "Add a new section to the Mobile Design Patterns course",
-  "createSection": "Create Section",
-  "sectionTitleLabel": "Section Title",
-  "sectionTitlePlaceholder": "e.g., Introduction to Mobile Design",
-  "sectionDescriptionLabel": "Description",
-  "sectionDescriptionPlaceholder": "Describe what students will learn"
+  "addCourseTitle": "Add Course",
+  "addCourseSubtitle": "Add a new course to Mobile Design Patterns",
+  "createCourse": "Create Course",
+  "courseTitleLabel": "Course Title",
+  "courseTitlePlaceholder": "e.g. Introduction to Mobile Design",
+  "courseDescriptionLabel": "Description",
+  "courseDescriptionPlaceholder": "Describe what students will learn",
+  "quizzesTitle": "Quizzes"
 }
