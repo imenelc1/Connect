@@ -5,7 +5,7 @@ import { MessageCircle, Globe } from "lucide-react";
 import { MdAutoAwesome } from "react-icons/md";
 
 import NavBar from "../components/common/NavBar";
-import Mascotte from "../assets/6.svg";
+import Mascotte from "../assets/head_mascotte.svg";
 import AssistantIA from "./AssistantIA";
 
 export default function ExercisePage() {
