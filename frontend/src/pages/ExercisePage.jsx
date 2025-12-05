@@ -197,7 +197,7 @@ export default function ExercisePage() {
               <MessageCircle size={16} strokeWidth={1.7} />
             </div>
             <span className="text-xs sm:text-sm text-[rgb(var(--color-primary))] font-medium">
-              {t("ask_help")}
+              {t("need_help")}
             </span>
           </button>
         </div>
