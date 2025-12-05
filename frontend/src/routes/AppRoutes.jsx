@@ -103,6 +103,11 @@ export default function AppRoutes() {
           <Route path="/course-details" element={<CourseDetails />} />
           <Route path="/submitted-exercise" element={<SubmittedExercise />} />
 
+         <Route path="/forgot-password" element={<ForgotPassword />} />
+         <Route path="/reset-password" element={<ResetPassword />} />
+         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
+         <Route path="/student-exercice" element={<StudentExercice />} />
+        
 
         {/* Course details */}
         <Route path="/CourseDetails" element={<CourseDetails />} />

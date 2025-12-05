@@ -144,6 +144,7 @@ export default function AllCoursesPage() {
 
 
 
+
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"
         style={{ marginLeft: sidebarWidth }}
@@ -154,7 +155,7 @@ export default function AllCoursesPage() {
 
         </div>
         {/* Search */}
-        <ContentSearchBar />
+        <ContentSearchBar  />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">

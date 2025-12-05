@@ -195,7 +195,6 @@ export default function Setting() {
         <div className="  flex w-full md:flex-row min-h-screen">
 
 
-
             {/* Sidebar : cachée sur mobile, visible sur large écrans */}
             <div className="hidden lg:block w-64 ">
 
@@ -241,7 +240,6 @@ export default function Setting() {
                                         {user?.role === "enseignant" ? "Professor" : "Student"}
                                     </span>
                                 </div>
-
                             </div>
 
                             {/* Edit button */}
@@ -263,7 +261,6 @@ export default function Setting() {
 
                             </div>
                         </div>
-
 
 
                         {/* -------- FORM -------- */}
