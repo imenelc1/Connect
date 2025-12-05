@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import SideNavbar from "../components/common/Navbar";
+import SideNavbar from "../components/common/NavBar";
 import { Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
@@ -101,7 +101,7 @@ export default function NewExercise() {
             rows={6}
             className="w-full rounded-3xl border border-grayc
                        px-5 py-3 shadow-sm focus:outline-none
-                       focus:ring-2 focus:ring-primary mb-10 resize-none shadow-sm text-black bg-secondary/10"
+                       focus:ring-2 focus:ring-primary mb-10 resize-none shadow-sm text-textc bg-grad-3 bg-transparent"
           />
 
           {/* GRID */}

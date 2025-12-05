@@ -21,12 +21,37 @@ import translationFRFilters from "./locales/Filters/fr/translation.json";
 import translationENFilters from "./locales/Filters/en/translation.json";
 import translationFRContentPage from "./locales/contentPage/fr/translation.json";
 import translationENContentPage from "./locales/contentPage/en/translation.json";
+import translationFRCreateQuiz from "./locales/fr-quiz/fr.json";
+import translationENCreateQuiz from "./locales/en-quiz/en.json"; 
+import translationFRSetting from "./locales/Settings/en-Setting/translation.json";
+import translationENSetting from "./locales/Settings/fr-Setting/translation.json";
+import translationENDashboard from "./locales/Dashboard/en/translation.json";
+import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
+
+import translationFRBadges from "./locales/badges/fr.json";
+import translationENBadges from "./locales/badges/en.json";
+import translationFRquiz2 from "./locales/quiz2/fr.json";
+import translationENquiz2 from "./locales/quiz2/en.json"; 
 import frCourses from "./locales/courses/fr-courses/translation.json";
 import enCourses from "./locales/courses/en-courses/translation.json";
+import translationFRMyStudents from "./locales/MyStudents/fr-MyStudents/translation.json";
+import translationENMyStudents from "./locales/MyStudents/en-MyStudents/translation.json";
+import translationFRSpaces from "./locales/Spaces/fr-Spaces/translation.json";
+import translationENSpaces from "./locales/Spaces/en-Spaces/translation.json";
+import translationnFRCommunity from "./locales/Community/fr/translation.json";
+import translationnENCommunity from "./locales/Community/en/translation.json";
+import translationnENexerciceStudent from "./locales/exerciceStudent/en/translation.json";
+import translationnFRexerciceStudent from "./locales/exerciceStudent/fr/translation.json";
 
-import enStartExercise from "./locales/CodeExercises/StartExercise/en-startexercise/translation.json";
-import frStartExercise from "./locales/CodeExercises/StartExercise/fr-startexercise/translation.json";
 
+
+import translationENStartExo from "./locales/StartExercise/en-Exo/translation.json";
+import translationFRStartExo from  "./locales/StartExercise/fr-Exo/translation.json";
+import translationFRCourseDetails from "./locales/CourseDetails/fr_CourseDetails/translation.json";
+import translationENCourseDetails from "./locales/CourseDetails/en_CourseDetails/translation.json";
+
+import translationFRExercisePage from "./locales/exercisepage/fr-exercisepage/translation.json";
+import translationENExercisePage from "./locales/exercisepage/en-exercisepage/translation.json";
 
 const resources = {
   fr: {
@@ -43,8 +68,24 @@ const resources = {
     filters: translationFRFilters,
     contentPage: translationFRContentPage,
     courseInfo: translationFRCourseInfo,
+  createQuiz: translationFRCreateQuiz,
+  setting: translationFRSetting,
+    Dashboard: translationFRDashboard,
+    badges: translationFRBadges,
+    community: translationnFRCommunity,
+
     courses: frCourses,
-    startExercise: frStartExercise,
+    quiz2: translationFRquiz2,
+
+  myStudents: translationFRMyStudents,
+  Spaces:translationFRSpaces,
+
+  exerciceStudent:translationnFRexerciceStudent,
+  startExercise: translationFRStartExo,
+   CourseDetails: translationFRCourseDetails,
+
+   exercisePage: translationFRExercisePage,
+  
 
   },
 
@@ -62,8 +103,22 @@ const resources = {
     filters: translationENFilters,
     contentPage: translationENContentPage,
     courseInfo: translationENCourseInfo,
+  createQuiz: translationENCreateQuiz,
+  setting: translationENSetting,
+    Dashboard: translationENDashboard,
+   badges: translationENBadges,
     courses: enCourses,
-    startExercise: enStartExercise,
+    myStudents: translationENMyStudents,
+     Spaces: translationENSpaces,
+     quiz2: translationENquiz2,
+    community: translationnENCommunity,
+    exerciceStudent:translationnENexerciceStudent,
+
+    startExercise:translationENStartExo,
+      CourseDetails: translationENCourseDetails,
+
+      exercisePage: translationENExercisePage,
+
   },
 };
 
@@ -71,7 +126,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem("lang") || "fr",   // <── FIX ICI
+    lng: localStorage.getItem("lang") || "fr", 
     fallbackLng: "fr",
     interpolation: {
       escapeValue: false,

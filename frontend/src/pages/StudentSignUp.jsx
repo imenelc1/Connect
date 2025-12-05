@@ -130,10 +130,24 @@ if (/\d/.test(formData.fullname))
 
     try {
       const res = await api.post("register/", payload);
+      console.log(res.data);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem(
+  "user",
+  JSON.stringify({
+    nom: res.data.user.nom,
+    prenom: res.data.user.prenom,
+    id_utilisateur: res.data.user.id_utilisateur,
+    adresse_email: res.data.user.adresse_email,
+    matricule: res.data.user.matricule,
+    role: res.data.role,      // ⭐ AJOUT IMPORTANT
+    token: res.data.token     // facultatif mais utile
+  })
+);
 
-     localStorage.setItem("user", JSON.stringify(res.data));
+
 toast.success("Inscription réussie !");
-navigate("/all-courses");
+navigate("/dashboard-etu");
 
     } catch (err) {
       const backend = err.response?.data;

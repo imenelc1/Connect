@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -9,6 +9,9 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
+import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 const quizzes = [
   {
     title: "Quiz Structures de Données",
@@ -40,6 +43,7 @@ export default function AllQuizzesPage() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allQuizzes");
+const navigate = useNavigate();
 
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
@@ -77,19 +81,28 @@ export default function AllQuizzesPage() {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-      <UserCircle initials={initials} />
-
-      <div className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white text-gray-700 shadow-lg flex items-center justify-center cursor-pointer hover:bg-gray-100 transition z-50">
-        <ThemeButton onClick={toggleDarkMode} />
-        <Bell size={22} strokeWidth={1.8} />
-      </div>
+     {/* Header Right Controls */}
+     <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+     
+       {/* Notification Icon */}
+       <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+                  <Bell size={16} />
+       </div>
+     
+       {/* User Circle */}
+       <UserCircle
+         initials={initials}
+         onToggleTheme={toggleDarkMode}
+         onChangeLang={(lang) => i18n.changeLanguage(lang)}
+       />
+     </div>
 
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"
         style={{ marginLeft: sidebarWidth }}
       >
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">{t("quizzesTitle")}</h1>
+          <h1 className="text-2xl font-bold text-muted">{t("quizzesTitle")}</h1>
         </div>
 
         <ContentSearchBar />
@@ -105,6 +118,8 @@ export default function AllQuizzesPage() {
 
           {userRole === "enseignant" && (
             <Button variant="courseStart"
+            onClick={() => navigate("/create-quiz")}
+
              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all">
               <Plus size={18} />
               {t("createQuizBtn")}

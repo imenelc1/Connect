@@ -11,5 +11,9 @@
     "notCompleted": "Non terminés"
   },
   "myCourses": "Mes cours",
-  "allCourses": "Tous les cours"
+  "allCourses": "Tous les cours",
+  "myExercises": "Mes exercices",
+  "allExercises": "Tous les exercices",
+  "myQuizzes": "Mes quiz",
+  "allQuizzes": "Tous les quiz"
 }

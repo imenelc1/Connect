@@ -1,0 +1,19 @@
+
+{
+  "exerciceStudent": {
+    "AvarageG": "Note moyenne" ,
+    "Submission":"Taux de soumission",
+    "Completed": "Complété",
+    "Feedback":"Retour",
+    "submit":"Envoyer le Retour",
+    "exercice":"Exercice",
+    "Progression":"Progression",
+    "Submitted":"Solution soumise",
+     "Solution":"Solution",
+     "Edit":"Modifier",
+     "Send":"Envoyer des retours",
+     "Pending":"En attente",
+     "Reviewect":"Réviser"
+  
+  }
+}

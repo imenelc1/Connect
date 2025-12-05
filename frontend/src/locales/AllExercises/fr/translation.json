@@ -1,0 +1,11 @@
+{
+  "exercisesTitle": "Exercices",
+  "createExerciseBtn": "Créer un nouvel exercice",
+  "searchPlaceholder": "Rechercher...",
+  "levels": {
+    "Débutant": "Débutant",
+    "Intermédiaire": "Intermédiaire",
+    "Avancé": "Avancé"
+  }
+
+}

@@ -10,6 +10,15 @@
     "signIn": "Sign in",
     "welcome": "Welcome, dear\nstudent!",
     "welcomeInstructor": "Welcome, dear\ninstructor!",
+    "forgotPassword": "Forgot password?",
+    "resetLinkSent": "A reset link has been sent to your email.",
+    "sending": "Sending",
+    "sendLink": "Send reset link",
+    "resetPassword": "Reset password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordUpdated": "Password updated successfully!",
+    "updatePassword": "Update Password",
     "language": "Language"
   },
   "errors": {

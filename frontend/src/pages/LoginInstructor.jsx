@@ -9,7 +9,6 @@ import toast from "react-hot-toast";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FiGlobe,FiEye,FiEyeOff } from "react-icons/fi";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
-
 import Button from "../components/common/Button";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
@@ -62,10 +61,16 @@ const res = await api.post("login/", {
   email, 
   password,
   role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
-});      console.log("Login API response:", res.data);
-      localStorage.setItem("user", JSON.stringify(res.data));
+});     
+     console.log("Login API response:", res.data);
+      localStorage.setItem("access_token", res.data.token); 
+localStorage.setItem("currentUserId", res.data.user.id_utilisateur);
+localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garder si utile
+
+      console.log("Login API response:", res.data);
+
       toast.success("Connexion réussie !");
-      window.location.href = "/all-courses";
+      window.location.href = "/dashboard-ens";
 
     } catch (error) {
       const backend = error.response?.data;
@@ -150,7 +155,7 @@ const res = await api.post("login/", {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errorEmail}
-            />
+              icon={<FaEnvelope size={16} className="text-grayc" />}            />
 
             <Input 
               label={t("login.password")}
@@ -160,15 +165,16 @@ const res = await api.post("login/", {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errorPassword}
+              icon={<FaLock size={16} className="text-grayc" />}
               rightIcon={
                 showPassword ? (
-                  <FiEyeOff
+                  <FaEyeOff
                     size={18}
                     onClick={() => setShowPassword(false)}
                     className="cursor-pointer text-grayc"
                   />
                 ) : (
-                  <FiEye
+                  <FaEye
                     size={18}
                     onClick={() => setShowPassword(true)}
                     className="cursor-pointer text-grayc"
@@ -176,6 +182,14 @@ const res = await api.post("login/", {
                 )
               }
             />
+            <div className="flex justify-end -mt-4">
+              <a
+                href="/forgot-password"
+                className="text-sm text-muted hover:underline"
+              >
+                {t("login.forgotPassword")}
+              </a>
+            </div>
 
          
             <p className="text-sm text-grayc text-center mt-4">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -83,16 +83,21 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-<UserCircle initials={initials}  onToggleTheme={toggleDarkMode}
-  onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-<div
-  className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
-             text-gray-700 shadow-lg flex items-center justify-center 
-             cursor-pointer hover:bg-gray-100 transition z-50"
->
-  <Bell size={22} strokeWidth={1.8} />
-</div>
+{/* Header Right Controls */}
+<div className="fixed top-6 right-6 flex items-center gap-4 z-50">
 
+  {/* Notification Icon */}
+  <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+             <Bell size={16} />
+  </div>
+
+  {/* User Circle */}
+  <UserCircle
+    initials={initials}
+    onToggleTheme={toggleDarkMode}
+    onChangeLang={(lang) => i18n.changeLanguage(lang)}
+  />
+</div>
 
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"
@@ -100,7 +105,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
       >
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
+        <h1 className="text-2xl font-bold text-muted">{t("exercisesTitle")}</h1>
 
       </div>
         {/* Search */}
@@ -109,7 +114,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
         <ContentFilters
-        type="courses"
+        type="exercises"
         userRole={userRole}                  // <-- corrige ici
   activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
   onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
