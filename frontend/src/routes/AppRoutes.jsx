@@ -32,6 +32,9 @@ import StartExercise from "../pages/StartExercise";
 import ExercisePage from "../pages/ExercisePage";
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
+import ProgressExercice from "../pages/ProgressionExo";
+import ProgressStudent from "../pages/ProgressionStudent";
+
 
 export default function AppRoutes() {
   return (
@@ -91,11 +94,15 @@ export default function AppRoutes() {
         <Route path="/my-students" element={<MyStudents />} />
         {/* Spaces */}
         <Route path="/spaces" element={<Spaces />} />
+         <Route path="/progressExercice" element={<ProgressExercice/>} />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
         <Route path="/student-exercice" element={<StudentExercice />} />
+        <Route path="/progressStudent" element={<ProgressStudent/>} />
+
+        {/* QUIZ AND EXERCISE PAGES */}
 
           <Route path="/quiz" element={<QuizPage2 />} />  
           <Route path="/start-exercise" element={<StartExercise />} />

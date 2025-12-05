@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import { getCurrentUserId } from "../hooks/useAuth";
 
+import { useNavigate } from "react-router-dom";
 
 
 const gradientMap = {
