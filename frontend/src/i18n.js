@@ -40,6 +40,10 @@ import translationnFRCommunity from "./locales/Community/fr/translation.json";
 import translationnENCommunity from "./locales/Community/en/translation.json";
 import translationnENexerciceStudent from "./locales/exerciceStudent/en/translation.json";
 import translationnFRexerciceStudent from "./locales/exerciceStudent/fr/translation.json";
+import translationnENProgressExercice from "./locales/ProgressionExo/en/translation.json";
+import translationnFRProgressExercice from "./locales/ProgressionExo/fr/translation.json";
+import translationnENProgressStudent from "./locales/ProgressionStudent/en/translation.json";
+import translationnFRProgressStudent from "./locales/ProgressionStudent/fr/translation.json";
 
 const resources = {
   fr: {
@@ -66,7 +70,9 @@ const resources = {
 
   myStudents: translationFRMyStudents,
   Spaces:translationFRSpaces,
-  exerciceStudent:translationnFRexerciceStudent
+  exerciceStudent:translationnFRexerciceStudent,
+  ProgressExercice:translationnFRProgressExercice,
+  ProgressStudent:translationnFRProgressStudent
   },
 
   en: {
@@ -91,7 +97,9 @@ const resources = {
     myStudents: translationENMyStudents,
      Spaces: translationENSpaces,
     community: translationnENCommunity,
-    exerciceStudent:translationnENexerciceStudent
+   ProgressExercice:translationnENexerciceStudent,
+     ProgressExercice:translationnENProgressExercice, 
+     ProgressStudent:translationnENProgressStudent
   },
 };
 

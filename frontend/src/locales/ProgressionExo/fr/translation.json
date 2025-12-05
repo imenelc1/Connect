@@ -1,0 +1,21 @@
+{
+  "ProgressExercice": {
+       "AvarageG": "Note moyenne" ,
+    "Submission":"Taux de soumission",
+    
+    "Completed": "Complété",
+     "exercice":"Exercice",
+     "Progression":"Progression",
+    "completedexo": "Exercices terminés",
+    "courses": "Cours",
+    "Weekly": "Taux de soumission hebdomadaire",
+    "grade":"Progression des notes au fil du temps",
+    "performance":"Informations sur les performances",
+    "positive":"Tendance positive",
+     "positivep1":"Les élèves se sont améliorés de ",
+    "positivep2":"Des points ont été marqués ces dernières semaines. Continuez à encourager ces progrès !" 
+    , "joined":"Rejoint le",
+    "Submitted":" Soumis le"
+   
+  }
+}

@@ -24,6 +24,8 @@ import Courses from "../pages/Courses";
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import StudentExercice from "../pages/exerciceStudent";
+import ProgressExercice from "../pages/ProgressionExo";
+import ProgressStudent from "../pages/ProgressionStudent";
 
 export default function AppRoutes() {
   return (
@@ -83,7 +85,10 @@ export default function AppRoutes() {
         {/* <Route path="/my-students" element={<MyStudents />} /> */}
         {/* Spaces */}
         {/* <Route path="/spaces" element={<Spaces />} /> */}
-          <Route path="/" element={<StudentExercice />} />
+          {/* <Route path="/exerciceStudent" element={<StudentExercice />} /> */}
+          <Route path="/" element={<ProgressExercice/>} />
+          {/* <Route path="/" element={<ProgressStudent/>} />  */}
+
 
 
 
