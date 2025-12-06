@@ -24,10 +24,13 @@ module.exports = {
         nav: "rgb(var(--color-nav) / <alpha-value>)",
         blue: "rgb(var(--color-blue) / <alpha-value>)",
         purple: "rgb(var(--color-purple) / <alpha-value>)",
+        
         pink: "rgb(var(--color-pink) / <alpha-value>)",
+        pink_clair: "rgb(var(--color-pink-clair) / <alpha-value>)",
         red: "rgb(var(--color-red) / <alpha-value>)",
 
          gray_light:"rgb(var(--color-gray-light) / <alpha-value>)",
+            blue_primary_light: "rgb(var(--color-blue-primary-light) / <alpha-value>)",
 
         
       },

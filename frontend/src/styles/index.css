@@ -19,10 +19,13 @@
   --color-nav:79 157 222;
   --color-blue:79 157 222;
   --color-purple:163 170 237;
-  --color-pink:187 104 200;
+ --color-pink:187 104 200;
+ --color-pink-clair:245 220 245;
+ 
   --color-red: 240 80 80;
 
    --color-gray-light: 220 225 230; /* gris clair */
+     --color-blue-primary-light: 240 245 253; /* #C8E1F5, bleu primaire très clair */
 
 
 
@@ -56,6 +59,8 @@
   --color-icons-about: 195 153 210;
   --color-card: 47 79 112;
   --color-nav:255 255 255;
+ 
+    
   
 
   /* Dégradés DARK */
