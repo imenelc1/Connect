@@ -7,7 +7,6 @@ import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
-import i18n from "../i18n";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
@@ -118,27 +117,35 @@ export default function AllCoursesPage() {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-      <UserCircle
+
+      <main
+        className="flex-1 p-4 md:p-8 transition-all duration-300"
+        style={{ marginLeft: sidebarWidth }}
+      >
+
+      <div className="flex justify-end">
+          <UserCircle
         initials={initials}
         onToggleTheme={toggleDarkMode}
         onChangeLang={(lang) => i18n.changeLanguage(lang)}
       />
+      </div>
+
       <div
-        className="fixed top-6 right-[88px] w-12 h-12 rounded-full bg-white 
+
+        className="fixed top-8 right-[88px] w-12 h-12 rounded-full bg-white 
              text-gray-700 shadow-lg flex items-center justify-center 
              cursor-pointer hover:bg-gray-100 transition z-50"
       >
         <Bell size={22} strokeWidth={1.8} />
       </div>
 
-      <main
-        className="flex-1 p-4 md:p-8 transition-all duration-300"
-        style={{ marginLeft: sidebarWidth }}
-      >
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
         </div>
+
+        
         {/* Search */}
         <ContentSearchBar />
 

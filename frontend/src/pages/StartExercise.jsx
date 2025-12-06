@@ -168,7 +168,7 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
     </div>
 
     {/* ACTION BUTTONS */}
-    <div className="flex flex-wrap justify-center gap-4 mt-8 mb-10">
+    <div className="flex flex-col-[2] md:flex-row md:flex-wrap justify-center gap-2 md:gap-5 mt-8 mb-10">
       <ActionButton
         icon={<Play size={18} />}
         label={isRunning ? "Exécution..." : t("buttons.run")}
@@ -189,7 +189,7 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
       <ActionButton
         icon={<RotateCw size={18} />}
         label={t("buttons.reset")}
-        bg="linear-gradient(135deg,#FFFFFF,#DCE1F5)"
+        bg="linear-gradient(#FFFFFF,#A3AAED,#A3AAED)"
         text="rgb(var(--color-text))"
       />
     </div>
@@ -197,8 +197,7 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
 
         {/* TIP CARD */}
         <div
-          className="p-6 rounded-2xl border shadow-card mb-12"
-          style={{ backgroundImage: "var(--grad-3)" }}
+          className="p-6 rounded-2xl border  mb-12 bg-grad-3"
         >
           <div className="flex items-start gap-4">
             <div

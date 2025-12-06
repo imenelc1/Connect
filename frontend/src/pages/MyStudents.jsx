@@ -7,6 +7,8 @@ import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next"; // Pour support multilingue
+import { useNavigate } from "react-router-dom";
+import ContentSearchBar from "../components/common/ContentSearchBar";
 
 import ThemeContext from "../context/ThemeContext";
 
@@ -35,6 +37,8 @@ export default function MyStudents() {
 
 
   const { toggleDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
+
 
   return (
     <div className="flex w-full">
@@ -44,7 +48,7 @@ export default function MyStudents() {
       <Navbar className="hidden lg:block" />
 
       {/* Zone principale de la page */}
-      <main className="lg:ml-60 w-full min-h-screen px-4 sm:px-6 py-6 bg-bg">
+      <main className="lg:ml-60 w-full min-h-screen px-4 sm:px-6 py-6 bg-surface">
 
         {/* ========== HEADER ========== */}
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -64,20 +68,15 @@ export default function MyStudents() {
 
           {/* Champ de recherche étudiant */}
           <div className="relative flex-1 min-w-[280px] lg:min-w-[450px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 
-              text-blue-500 w-5 h-5" />
-            <input
-              type="text"
-              placeholder={t("searchStudentPlaceholder")}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border focus:ring-2 focus:ring-primary"
-            />
+            <ContentSearchBar placeholder={t("searchStudents")} />
+
           </div>
 
           {/* Boutons à droite = ajout espace / ajout étudiant */}
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto lg:ml-auto">
 
             {/* Bouton créer un espace */}
-            <Button className="!px-6 !py-2 w-full sm:w-auto">
+            <Button className="!px-6 !py-2 w-full sm:w-auto" onClick={() => navigate("/Spaces")}>
               {t("createSpace")}
             </Button>
 
@@ -102,7 +101,8 @@ export default function MyStudents() {
               title={st.name}
               description={st.course}
               progress={st.progress} // barre de progression d'avancement
-              status={`${t("active")} ${st.lastActive}`} // ex : "Active 3h ago"
+              status={`${t("active")} ${t("lastActive", { time: st.lastActive })}`}
+        
               className={`${st.bg} rounded-xl shadow-md border p-6`}
             />
           ))}
