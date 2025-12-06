@@ -11,15 +11,21 @@ import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService";
 import { toast } from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+  
+
 
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
 
-export default function CoursePage() {
+export default function CourseUpdate() {
   const { t, i18n } = useTranslation("courseInfo");
   const [activeStep, setActiveStep] = useState(1);
   const { toggleDarkMode } = useContext(ThemeContext);
 
+const navigate = useNavigate();
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
     i18n.changeLanguage(newLang);
@@ -30,7 +36,7 @@ export default function CoursePage() {
     { label: t("course.curriculum"), icon: BookOpenCheck },
     { label: t("course.publish_title"), icon: CheckCircle },
   ];
-
+  const { id: coursId } = useParams();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
@@ -39,6 +45,50 @@ export default function CoursePage() {
 
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
+
+
+ useEffect(() => {
+    if (!coursId) return;
+
+    const fetchCourse = async () => {
+      const token = localStorage.getItem("access_token");
+      try {
+        const res = await api.get(`courses/courses/${coursId}/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = res.data;
+        setTitle(data.titre_cour);
+        setDescription(data.description);
+        setDuration(data.duration);
+        setLevel(data.niveau_cour);
+
+        const fetchedSections = (data.sections || []).map((sec) => ({
+          id: sec.id_section,
+          title: sec.titre_section,
+          description: sec.description || "",
+          open: true,
+          lessons: (sec.lecons || []).map((lec) => ({
+            id: lec.id_lecon,
+            title: lec.titre_lecon,
+            content: lec.contenu_lecon,
+            type: lec.type_lecon,
+            preview: lec.type_lecon === "image"
+  ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
+  : null
+          })),
+        }));
+
+        setSections(fetchedSections);
+      } catch (err) {
+        console.error("Erreur chargement cours :", err.response?.data || err);
+      }
+    };
+
+    fetchCourse();
+  }, [coursId]);
+
+
 
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
@@ -58,10 +108,10 @@ export default function CoursePage() {
     setSections((prev) => [
       ...prev,
       {
-        id: Date.now(),
+        id: null,
         title: "",
         open: true,
-        lessons: [{ id: Date.now(), title: "" }],
+        lessons: [{ id: null, title: "" }],
       },
     ]);
   };
@@ -85,10 +135,11 @@ export default function CoursePage() {
   };
 
   const addLessonToSection = (sectionId) => {
+   
     setSections((prev) =>
       prev.map((s) =>
         s.id === sectionId
-          ? { ...s, lessons: [...s.lessons, { id: Date.now(), title: "" }] }
+          ? { ...s, lessons: [...s.lessons, { id: null, title: "" }] }
           : s
       )
     );
@@ -124,11 +175,41 @@ export default function CoursePage() {
     );
   };
 
-  const removeSection = (id) => {
-    setSections((prev) => prev.filter((s) => s.id !== id));
-  };
+  const removeSection = async (id) => {
 
-  const removeLesson = (sectionId, lessonId) => {
+     const confirmDelete = window.confirm("Tu es sûr de supprimer cette section ?");
+    if (!confirmDelete) return;
+  const token = localStorage.getItem("access_token");
+
+  try {
+    // Appel API pour supprimer la section
+    await api.delete(`courses/sections/${id}/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // Puis mettre à jour le state
+    setSections((prev) => prev.filter((s) => s.id !== id));
+
+    toast.success("Section supprimée avec succès !");
+  } catch (err) {
+    console.error("Erreur suppression section :", err.response?.data || err.message);
+    toast.error("Impossible de supprimer la section.");
+  }
+};
+
+
+ const removeLesson = async (sectionId, lessonId) => {
+     const confirmDelete = window.confirm("Tu es sûr de supprimer cette leçon?");
+    if (!confirmDelete) return;
+  const token = localStorage.getItem("access_token");
+
+  try {
+    // Appel API pour supprimer la leçon
+    await api.delete(`courses/lecons/${lessonId}/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // Puis mettre à jour le state
     setSections((prev) =>
       prev.map((s) =>
         s.id === sectionId
@@ -136,105 +217,16 @@ export default function CoursePage() {
           : s
       )
     );
-  };
 
-  // --- Sauvegarde ---
-  const handleSaveStep1 = async () => {
-    const token = localStorage.getItem("access_token");
-    const currentUserId = getCurrentUserId();
-
-    if (!token || !currentUserId) {
-      alert("Utilisateur non connecté");
-      return null;
-    }
-
-    try {
-      const res = await api.post(
-        "courses/create/",
-        {
-          titre_cour: title,
-          description,
-          duration,
-          niveau_cour: level,
-          utilisateur: currentUserId,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const coursId = res.data.id_cours;
-      setCurrentCoursId(coursId);
-      return coursId;
-    } catch (err) {
-      console.error(
-        "Erreur création cours :",
-        err.response?.data || err.message
-      );
-      alert("Erreur lors de la création du cours");
-      return null;
-    }
-  };
-
- const handleSaveAllSections = async (courseId) => {
-  const token = localStorage.getItem("access_token");
-  const currentUserId = getCurrentUserId();
-
-  try {
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
-
-      // --- Création section ---
-      const sectionResponse = await api.post(
-        "courses/createSection/",
-        {
-          cours: courseId,
-          titre_section: section.title || `Section ${i + 1}`,
-          description: section.description || "",
-          ordre: i + 1,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const sectionId = sectionResponse.data.id;
-
-      // --- Création des leçons ---
-      for (let j = 0; j < section.lessons.length; j++) {
-        const lesson = section.lessons[j];
-
-        const lessonTitle = lesson.title || `Leçon ${j + 1}`;
-        const lessonContent = lesson.content || "";
-        const lessonType = lesson.type || "text";
-
-        const formData = new FormData();
-        formData.append("section", sectionId);
-        formData.append("titre_lecon", lessonTitle);
-        formData.append("contenu_lecon", lessonContent);
-        formData.append("utilisateur", currentUserId);
-        formData.append("type_lecon", lessonType);
-        formData.append("ordre", j + 1);
-
-        // Ajouter le fichier uniquement si type = image
-        if (lessonType === "image" && lesson.imageFile) {
-          formData.append("image_lecon", lesson.imageFile);
-        }
-
-        await api.post("courses/createLesson/", formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      }
-    }
-
-    toast.success("Sections et leçons enregistrées !");
-    setActiveStep(3);
+    toast.success("Leçon supprimée avec succès !");
   } catch (err) {
-    console.error("Erreur création sections/leçons :", err.response?.data || err);
-    toast.error("Erreur lors de l’enregistrement.");
+    console.error("Erreur suppression leçon :", err.response?.data || err.message);
+    toast.error("Impossible de supprimer la leçon.");
   }
 };
 
-
-
+  // --- Sauvegarde ---
+  
 
 
   const handleLessonImageUpload = (sectionId, lessonId, file) => {
@@ -258,17 +250,99 @@ export default function CoursePage() {
     );
   };
 
-  const handleSaveAll = async () => {
-    try {
-      const coursId = await handleSaveStep1();
-      if (!coursId) return;
+  
+const handleSaveCourse = async (coursId) => {
+  const currentUserId = getCurrentUserId();
+  const token = localStorage.getItem("access_token");
 
-      await handleSaveAllSections(coursId); // ✅ passe le bon id
-      setActiveStep(3);
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement complet :", error);
+  try {
+    // --- Étape 1 : Mettre à jour le cours ---
+    await api.put(
+      `courses/${coursId}/`,
+      {
+        utilisateur: currentUserId,
+        titre_cour: title,
+        description,
+        duration,
+        niveau_cour: level,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // --- Étape 2 : Créer / Mettre à jour toutes les sections d'abord ---
+    for (const section of sections) {
+      if (!section.id) {
+        const resSection = await api.post(
+          "courses/createSection/",
+          {
+            titre_section: section.title,
+            description: section.description,
+            ordre: sections.indexOf(section) + 1,
+            cours: coursId,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        section.id = resSection.data.id;
+      } else {
+        await api.put(
+          `courses/sections/${section.id}/`,
+          {
+            titre_section: section.title,
+            description: section.description,
+            ordre: sections.indexOf(section) + 1,
+            cours: coursId,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
     }
-  };
+
+    // --- Étape 3 : Créer / Mettre à jour toutes les leçons ---
+    for (const section of sections) {
+      const sectionId = section.id;
+
+      for (const lesson of section.lessons) {
+        const ordre = section.lessons.indexOf(lesson) + 1;
+
+       
+          // FormData pour image
+          const formData = new FormData();
+          formData.append("section", sectionId);
+          formData.append("titre_lecon", lesson.title);
+          formData.append("type_lecon", lesson.type);
+          formData.append("ordre", ordre);
+          formData.append("contenu_lecon", lesson.content);
+           if (lesson.type === "image" && lesson.imageFile) {
+          formData.append("image_lecon", lesson.imageFile);}
+          
+
+          if (lesson.id) {
+            await api.put(`courses/Lesson/${lesson.id}/`, formData, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          } else {
+            const resLesson = await api.post("courses/createLesson/", formData, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            lesson.id = resLesson.data.id_lecon;
+          }
+          continue;
+        }
+
+        
+      
+    }
+
+    toast.success("Cours mis à jour avec succès !");
+    setActiveStep(3)
+  } catch (err) {
+    console.error("Erreur mise à jour :", err.response?.data || err.message);
+    toast.error("Erreur lors de la mise à jour du cours.");
+  }
+};
+
+
+
 
 
   return (
@@ -343,8 +417,10 @@ export default function CoursePage() {
               </div>
             </div>
             <div className="flex justify-between mt-10 ">
-              <button className="px-6 py-2 rounded-xl border border-secondary font-medium bg-white shadow-sm transition text-black/50">
+              <button className="px-6 py-2 rounded-xl border border-secondary font-medium bg-white shadow-sm transition text-black/50"
+               onClick={() => navigate("/all-courses")}>
                 {t("course.cancel")}
+                
               </button>
               <button
                 className="px-6 py-2 rounded-xl bg-grad-1 text-white font-medium"
@@ -552,7 +628,7 @@ export default function CoursePage() {
                 </button>
                 <button
                   className="px-8 py-2 rounded-xl bg-grad-1 text-white font-medium shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
-                  onClick={handleSaveAll}
+                    onClick={()=>handleSaveCourse(coursId)}
                 >
                   {t("course.save_next")}
                 </button>

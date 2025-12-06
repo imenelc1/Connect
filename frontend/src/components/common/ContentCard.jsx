@@ -3,7 +3,7 @@ import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 const levelStyles = {
@@ -40,6 +40,16 @@ const levelKeyMap = {
   Intermédiaire: "intermediate",
   Avancé: "advanced"
 };
+
+
+
+
+  const navigate = useNavigate();
+
+  const handleEdit = () => {
+    navigate(`/courses/edit/${course.id}`);
+  };
+
 
   return (
     <div className={` shadow-md p-6 rounded-2xl flex flex-col justify-between h-full
@@ -105,7 +115,7 @@ const levelKeyMap = {
         {/* Actions enseignant */}
         {role === "enseignant" && course.isMine && (
           <div className="flex gap-2 ml-4">
-            <FiEdit size={18} className="cursor-pointer text-grayc hover:text-primary" />
+            <FiEdit size={18} className="cursor-pointer text-grayc hover:text-primary"  onClick={handleEdit} />
             <FiTrash2 size={18} className="cursor-pointer text-grayc hover:text-red-500" onClick={() => onDelete(course.id)}/>
           </div>
         )}

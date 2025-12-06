@@ -62,10 +62,21 @@ export default function AllCoursesPage() {
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const filteredCourses =
-    filterLevel === "ALL"
+
+
+let filteredCourses = 
+
+// 1️⃣ Filtrer par niveau
+ filterLevel === "ALL"
       ? courses
       : courses.filter((course) => course.level === filterLevel);
+
+// 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
+if (userRole === "enseignant" && categoryFilter === "mine") {
+  filteredCourses = filteredCourses.filter((course) => course.isMine);
+}
+
+
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -159,12 +170,15 @@ export default function AllCoursesPage() {
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
           <ContentFilters
-            type="courses"
-            userRole={userRole} // <-- corrige ici
-            activeFilter={filterLevel} // <- tu utilises filterLevel, pas activeFilter
-            onFilterChange={setFilterLevel} // <- tu as setFilterLevel
-            showCompletedFilter={userRole === "etudiant"} // <- correct
-          />
+  type="courses"
+  userRole={userRole}
+  activeFilter={filterLevel}
+  onFilterChange={setFilterLevel}
+  categoryFilter={categoryFilter}        // ← bien passer le state
+  setCategoryFilter={setCategoryFilter}
+  showCompletedFilter={userRole === "etudiant"}
+/>
+
 
           {userRole === "enseignant" && (
             <Button

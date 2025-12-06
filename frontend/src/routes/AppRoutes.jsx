@@ -32,6 +32,8 @@ import StartExercise from "../pages/StartExercise";
 import ExercisePage from "../pages/ExercisePage";
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
+import CourseUpdate from "../pages/CourseUpdate";
+import CoursePage from "../pages/CoursInfo";
 
 export default function AppRoutes() {
   return (
@@ -70,6 +72,9 @@ export default function AppRoutes() {
         <Route path="/CoursInfo" element={<CoursInfo />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/preview" element={<QuizPreview />} />
+
+        {/* UPDATES*/}
+        <Route path="/courses/edit/:id" element={<CourseUpdate />} />
 
         {/* COMMUNITY PAGE */}
         <Route path="/community" element={<CommunityPage />} />

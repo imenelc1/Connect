@@ -32,7 +32,7 @@ class CoursSerializer1(serializers.ModelSerializer):
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = ['id_section', 'cours', 'titre_section', 'ordre']
+        fields = ['id_section', 'cours', 'titre_section', 'ordre' , 'description']
 
 class LeconSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,3 +42,56 @@ class LeconSerializer(serializers.ModelSerializer):
 """
 
 """
+
+
+class LessonSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Lecon
+        fields = ['id_lecon', 'titre_lecon', 'contenu_lecon', 'type_lecon']
+
+
+
+class SectionSerializer1(serializers.ModelSerializer):
+    lecons = LessonSerializer1(many=True)  # ⚡ nested
+
+    class Meta:
+        model = Section
+        fields = ['id_section', 'titre_section', 'description', 'lecons']
+        
+    
+    
+class CourseSerializer2(serializers.ModelSerializer):
+    sections = SectionSerializer1(many=True)  # ⚡ nested
+
+    class Meta:
+        model = Cours
+        fields = ['id_cours', 'titre_cour', 'description', 'duration', 'niveau_cour', 'sections']
+        
+        
+        
+
+
+
+
+
+class LeconNestedSerializer(serializers.ModelSerializer):
+    id_lecon = serializers.IntegerField(required=False)
+    
+    class Meta:
+        model = Lecon
+        fields = ['id_lecon', 'titre_lecon', 'contenu_lecon', 'type_lecon', 'ordre']
+
+class SectionNestedSerializer(serializers.ModelSerializer):
+    id_section = serializers.IntegerField(required=False)
+    lecons = LeconNestedSerializer(many=True)
+    
+    class Meta:
+        model = Section
+        fields = ['id_section', 'titre_section', 'description', 'ordre', 'lecons']
+
+class CourseUpdateSerializer(serializers.ModelSerializer):
+    sections = SectionNestedSerializer(many=True)
+    
+    class Meta:
+        model = Cours
+        fields = ['id_cours', 'titre_cour', 'description', 'duration', 'niveau_cour', 'sections']
