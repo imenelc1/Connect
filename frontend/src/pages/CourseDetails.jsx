@@ -180,7 +180,7 @@ export default function CourseDetails() {
               <Button
                 variant="primary"
                 onClick={() => setOpenModal(true)}
-                className="w-[160px] mr-35"
+                className="w-[150px] mr-35"
               >
                 + {t("addCourse")}
               </Button>
