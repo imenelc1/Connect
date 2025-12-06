@@ -10,7 +10,8 @@ export default function Topbar({ steps = [], activeStep, setActiveStep, classNam
     <div className={`w-full bg-card rounded-2xl shadow-md p-4 flex items-center justify-center ${className}`}>
       {steps.map((step, index) => {
         const isActive = activeStep === index + 1;
-        const Icon = step.icon;
+        const Icon = step.icon || (() => <div />);
+
 
         return (
           <div

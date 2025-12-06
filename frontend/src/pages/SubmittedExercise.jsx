@@ -1,11 +1,9 @@
 
 import { useTranslation } from "react-i18next";
-
 import React, { useState } from "react";
 import Navbar from "../components/common/NavBar";
 import InfoCard from "../components/common/InfoCard";
 import { User, MessageCircle, File } from "lucide-react";
-import "../styles/index.css";
 
 export default function   SubmittedExercise() {
     const { t } = useTranslation("SubmittedExercise");

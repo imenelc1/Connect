@@ -7,7 +7,6 @@ import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
-import i18n from "../i18n";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
@@ -154,6 +153,8 @@ export default function AllCoursesPage() {
           <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
 
         </div>
+
+        
         {/* Search */}
         <ContentSearchBar  />
 

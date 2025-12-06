@@ -5,7 +5,7 @@ export default function ContentProgress({ value = 0, className = "" }) {
     <div className={`mt-4 w-full ${className}`}>
       <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-blue rounded-full transition-all "
+          className="h-full bg-blue rounded-full transition-all"
           style={{ width: `${value}%` }}
         ></div>
       </div>
