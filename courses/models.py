@@ -29,14 +29,14 @@ class Cours(models.Model):
 
 class Section(models.Model):
     id_section = models.AutoField(primary_key=True)
-    description = models.TextField(blank=True, null=True, default="")
-    cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
+    cours = models.ForeignKey(Cours, related_name="sections", on_delete=models.CASCADE)
     titre_section = models.CharField(max_length=255)
     ordre = models.IntegerField()
+    description = models.TextField(blank=True, null=True, default="")
 
 class Lecon(models.Model):
     id_lecon = models.AutoField(primary_key=True)
-    section = models.ForeignKey(Section, on_delete=models.CASCADE)
+    section = models.ForeignKey(Section, related_name="lecons", on_delete=models.CASCADE)
     titre_lecon = models.CharField(max_length=255)
     contenu_lecon = models.TextField()
     type_lecon = models.CharField(max_length=50)

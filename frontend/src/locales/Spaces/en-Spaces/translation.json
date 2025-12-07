@@ -4,23 +4,10 @@
   "modalTitle": "Create New Space",
   "modalSubtitle": "Fill the information to create a space",
   "modalSubmit": "Add Space",
+  "modalCancel": " Cancel",
   "fieldSpaceName": "Space Name",
   "fieldSpaceNamePlaceholder": "Enter space name",
   "fieldDescription": "Description",
   "fieldDescriptionPlaceholder": "Enter space description",
-  "mobileDesignPatterns": {
-    "title": "Mobile Design Patterns",
-    "description": "Learn mobile design fundamentals",
-    "status": "Created on 15/01/2024"
-  },
-  "uxCaseStudies": {
-    "title": "UX Case Studies",
-    "description": "Deep dive into UX successes",
-    "status": "Created on 20/01/2024"
-  },
-  "designSystemLibrary": {
-    "title": "Design System Library",
-    "description": "Centralized UI components",
-    "status": "Created on 25/01/2024"
-  }
+  "created": "Created on "
 }

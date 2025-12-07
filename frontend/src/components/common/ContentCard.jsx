@@ -3,7 +3,7 @@ import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 
 const levelStyles = {
@@ -35,6 +35,21 @@ export default function ContentCard({ course, role, showProgress, className = ""
     continue: t(`continue${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
     restart: t(`restart${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
   };
+const levelKeyMap = {
+  Débutant: "beginner",
+  Intermédiaire: "intermediate",
+  Avancé: "advanced"
+};
+
+
+
+
+  const navigate = useNavigate();
+
+  const handleEdit = () => {
+    navigate(`/courses/edit/${course.id}`);
+  };
+
 
   return (
     <div className={` shadow-md p-6 rounded-2xl flex flex-col justify-between h-full
@@ -48,7 +63,8 @@ export default function ContentCard({ course, role, showProgress, className = ""
         <div className="flex justify-between items-start">
           <h2 className="font-semibold text-lg">{course.title}</h2>
           <span className={`px-3 py-1 text-xs rounded-full ${levelStyles[course.level]}`}>
-             {t(`levels.${course.level}`)}
+             {t(`levels.${levelKeyMap[course.level]}`)}
+
           </span>
         </div>
 
@@ -99,7 +115,7 @@ export default function ContentCard({ course, role, showProgress, className = ""
         {/* Actions enseignant */}
         {role === "enseignant" && course.isMine && (
           <div className="flex gap-2 ml-4">
-            <FiEdit size={18} className="cursor-pointer text-grayc hover:text-primary" />
+            <FiEdit size={18} className="cursor-pointer text-grayc hover:text-primary"  onClick={handleEdit} />
             <FiTrash2 size={18} className="cursor-pointer text-grayc hover:text-red-500" onClick={() => onDelete(course.id)}/>
           </div>
         )}

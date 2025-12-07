@@ -7,6 +7,6 @@ urlpatterns = [
     path("api/exo/", Exercice_list_api, name="Exercice_api"),
     path('create/', CreateExoView.as_view(), name='create_exercice'),
     path('<int:pk>/', ExerciceDetailView.as_view(), name='Exercice-detail'),
-    path("exercice/<int:pk>/delete/", delete_exercice)   
+    path("Exercice/<int:pk>/delete/", delete_exercice)   
 
 ]

@@ -22,34 +22,43 @@ export default function SpacesPage() {
   const [spaceDesc, setSpaceDesc] = useState("");
   const [spaces, setSpaces] = useState([]);
 
-
-  
   useEffect(() => {
-  getSpaces()
-    .then((data) => {
-      console.log("GET /spaces response:", data);
+    getSpaces()
+      .then((data) => {
+        console.log("GET /spaces response:", data);
 
-      // Si DRF paginé
-      const spacesArray = Array.isArray(data.results)
-        ? data.results
-        : Array.isArray(data)
-        ? data
-        : [];
+        // Si DRF paginé
+        const spacesArray = Array.isArray(data.results)
+          ? data.results
+          : Array.isArray(data)
+          ? data
+          : [];
 
-      // On mappe pour avoir le même format partout
-      const formatted = spacesArray.map((s) => ({
-        id_space: s.id_space,
-        nom_space: s.nom_space,
-        description: s.description,
-        date_creation: s.date_creation,
-      }));
+        // On mappe pour avoir le même format partout
+        const formatted = spacesArray.map((s) => ({
+          id_space: s.id_space,
+          nom_space: s.nom_space,
+          description: s.description,
+          date_creation: s.date_creation,
+        }));
 
-      setSpaces(formatted);
-    })
-    .catch((err) => console.error("Erreur getSpaces:", err));
-}, []);
+        setSpaces(formatted);
+      })
+      .catch((err) => console.error("Erreur getSpaces:", err));
+  }, []);
 
+  useEffect(() => {
+    fetchSpaces();
+  }, []);
 
+  const fetchSpaces = () => {
+    getSpaces()
+      .then((data) => {
+        const array = Array.isArray(data) ? data : data.results || [];
+        setSpaces(array);
+      })
+      .catch((err) => console.error("Erreur getSpaces:", err));
+  };
 
   // --- Création d'un espace ---
   const handleSubmit = (e) => {
@@ -72,6 +81,7 @@ export default function SpacesPage() {
         setOpen(false);
         setSpaceName("");
         setSpaceDesc("");
+        fetchSpaces();
       })
       .catch((err) => console.error("Erreur createSpace:", err));
   };
@@ -84,7 +94,10 @@ export default function SpacesPage() {
           {t("spacesTitle")}
         </h1>
         <div className="flex items-center gap-4">
-          <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
+          <Bell
+            className="w-5 h-5 text-gray-600 cursor-pointer"
+            fill="currentColor"
+          />
           <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
         </div>
       </div>
@@ -110,7 +123,10 @@ export default function SpacesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
             {Array.isArray(spaces) && spaces.length > 0 ? (
               spaces.map((item) => (
-                <div key={item.id_space} className="rounded-xl shadow p-2 bg-grad-3">
+                <div
+                  key={item.id_space}
+                  className="rounded-xl shadow p-2 bg-grad-3"
+                >
                   <Cards2
                     icon={
                       <div className="w-12 h-12 flex items-center justify-center bg-grad-1 rounded-md text-white">
@@ -119,9 +135,13 @@ export default function SpacesPage() {
                     }
                     title={item.nom_space || "No title"}
                     description={item.description || ""}
-                    status={`${t("created")} ${new Date(item.date_creation).toLocaleDateString()}`}
+                    status={`${t("created")} ${new Date(
+                      item.date_creation
+                    ).toLocaleDateString()}`}
                     showArrow={true}
-                    onArrowClick={() => navigate(`/CourseDetails/${item.id_space}`)}
+                    onArrowClick={() =>
+                      navigate(`/CourseDetails/${item.id_space}`)
+                    }
                   />
                 </div>
               ))

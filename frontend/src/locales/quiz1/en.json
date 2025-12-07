@@ -1,0 +1,17 @@
+{
+  "titre": "Loops Quiz",
+  "slogan": "Take the challenge! 🏆",
+  "desc1": "This quiz tests your understanding of loops",
+  "desc2": "in programming. Answer the following questions to",
+  "desc3": "test your knowledge.",
+  "niveau": "Advanced",
+  "minutes": "minutes",
+  "points": "points",
+  "nombreQuestions": "Number of questions",
+  "questions": "questions",
+  "dureeEstimee": "Estimated duration",
+  "pointsTotaux": "Total points",
+  "start": "Let's start! 🚀",
+  "back": "Back to menu",
+  "testTranslation": "This is a translation test"
+}

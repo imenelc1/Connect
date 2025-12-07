@@ -16,7 +16,7 @@ import NavBar from "../components/common/NavBar";
 import AssistantIA from "../pages/AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
-  import axios from "axios";
+import axios from "axios";
 
 export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
@@ -68,16 +68,12 @@ int main() {
     setIsRunning(false);
   };
 
-
   const { toggleDarkMode } = useContext(ThemeContext);
 
   const storedUser = localStorage.getItem("user");
-
-  //  Si storedUser est null, vide ou "undefined", on renvoie null
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
 
-  const userRole = userData?.role ?? null;
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
@@ -96,7 +92,7 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
 
   return (
 <div
-  className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0"
+  className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
   style={{ marginLeft: sidebarWidth }}
 >
 
@@ -201,13 +197,13 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
         >
           <div className="flex items-start gap-4">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0"
               style={{ backgroundImage: "var(--grad-button)" }}
             >
               <MdAutoAwesome size={22} />
             </div>
 
-            <div>
+            <div className="flex-1">
               <div className="font-semibold text-muted text-[15px]">
                 {t("tipCard.title")}
               </div>
@@ -223,17 +219,16 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
           {t("output.title")}
         </p>
 
-        <div className="rounded-2xl p-6 text-white shadow-strong  text-[15px] leading-7 mb-14 bg-output">
+        <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
           {output.split("\n").map((line, i) => (
             <div key={i}>{line}</div>
           ))}
-
         </div>
 
         {/* SEND SOLUTION */}
-        <div className="flex justify-center mb-16">
+        <div className="flex justify-center mb-10">
           <button
-            className="px-10 py-3 rounded-xl text-white font-semibold shadow-card hover:opacity-90 transition"
+            className="px-8 md:px-10 py-2.5 md:py-3 rounded-xl text-white font-semibold shadow-card hover:opacity-90 transition"
             style={{ backgroundImage: "var(--grad-button)" }}
           >
             {t("buttons.sendSolution")}
@@ -253,8 +248,8 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
           </p>
 
           {/* ⭐ STARS */}
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
-            <div className="flex gap-3 text-3xl">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 mb-4">
+            <div className="flex gap-3 text-2xl md:text-3xl">
               {[1, 2, 3, 4, 5].map((i) => (
                 <span
                   key={i}
@@ -263,17 +258,14 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
                   onClick={() => setRating(i)}
                   className={`cursor-pointer text-transparent bg-clip-text drop-shadow ${getStarGradient(
                     i
-                  )} ${(hover || rating) >= i
-                    ? "opacity-100 scale-110"
-                    : "opacity-40"
-                    } transition-all duration-150`}
+                  )} ${(hover || rating) >= i ? "opacity-100 scale-110" : "opacity-40"} transition-all duration-150`}
                 >
                   ★
                 </span>
               ))}
             </div>
 
-            {/* LABELS COLORES */}
+            {/* LABELS */}
             <div className="flex justify-between w-full text-sm font-medium mt-2">
               <span className="w-24 text-left label-very-easy ">
                 {t("feedback.labels.veryEasy")}
@@ -295,10 +287,10 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
         </div>
 
         {/* HELP BUTTON */}
-        <div className="flex justify-center mt-10 mb-16">
+        <div className="flex justify-center mb-16">
           <button
             onClick={() => setOpenAssistant(true)}
-            className="flex items-center gap-3 px-6 py-2.5 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
+            className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
           >
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgb(var(--color-gray-light))]">
               <MessageCircle
@@ -324,7 +316,7 @@ function ActionButton({ icon, label, bg, text = "white", onClick }) {
   return (
     <button
       onClick={onClick}
-      className="px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-card hover:opacity-90 transition font-medium text-sm md:text-base"
+      className="flex items-center gap-2 px-3 md:px-5 py-2 rounded-xl shadow-card hover:opacity-90 transition font-medium text-sm md:text-base"
       style={{ backgroundImage: bg, color: text }}
     >
       {icon}

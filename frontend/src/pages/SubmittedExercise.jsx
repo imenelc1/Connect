@@ -5,7 +5,6 @@ import Navbar from "../components/common/NavBar";
 import InfoCard from "../components/common/InfoCard";
 import { User, MessageCircle, File } from "lucide-react";
 
-
 export default function   SubmittedExercise() {
     const { t } = useTranslation("SubmittedExercise");
 

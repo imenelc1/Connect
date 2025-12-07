@@ -1,0 +1,19 @@
+{
+  "ProgressExercice": {
+     "AvarageG": "Average Grade" ,
+    "Submission":"Submission Rate",
+    "Completed": "Completed",
+     "exercice":"Exercise",
+     "Progression":"Progress",
+    "completedexo": "Completed Exercises",
+    "courses": "Courses",
+    "Weekly": "Weekly Submission Rate",
+    "grade":"Grade Progression Over Time",
+    "performance":"Performance Insights",
+    "positive":"Positive Trend",
+    "positivep1":"The students has improved by ",
+    "positivep2":"points over the past weeks.Keep encouraging this progress!" ,
+    "joined":"Joined on",
+     "Submitted":"Submitted on"
+  }
+}

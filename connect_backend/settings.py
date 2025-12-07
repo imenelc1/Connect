@@ -41,8 +41,8 @@ INSTALLED_APPS = [
     # Apps du projet
     'users',
     'courses',
-    'Exercices',
-    'Quiz',
+    'exercices',
+    'quiz',
     'forum',
     'ia',
     'dashboard',
@@ -175,7 +175,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.Utilisateur'
-
-# Media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = BASE_DIR 

@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Acceuil from "../pages/Acceuil";
+import Acceuil from "../pages/Acceuil.jsx";
 import Choice from "../pages/Choice";
 import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
@@ -32,6 +32,13 @@ import StartExercise from "../pages/StartExercise";
 import ExercisePage from "../pages/ExercisePage";
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
+import ProgressExercice from "../pages/ProgressionExo";
+import ProgressStudent from "../pages/ProgressionStudent";
+import QuizPage1 from '../pages/QuizPage1';
+import QuizRecapPage from '../pages/QuizRecapPage';
+
+import CourseUpdate from "../pages/CourseUpdate";
+import CoursePage from "../pages/CoursInfo";
 
 export default function AppRoutes() {
   return (
@@ -71,6 +78,9 @@ export default function AppRoutes() {
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/preview" element={<QuizPreview />} />
 
+        {/* UPDATES*/}
+        <Route path="/courses/edit/:id" element={<CourseUpdate />} />
+
         {/* COMMUNITY PAGE */}
         <Route path="/community" element={<CommunityPage />} />
         {/*settings*/}
@@ -91,19 +101,30 @@ export default function AppRoutes() {
         <Route path="/my-students" element={<MyStudents />} />
         {/* Spaces */}
         <Route path="/spaces" element={<Spaces />} />
-
+         <Route path="/progressExercice" element={<ProgressExercice/>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
         <Route path="/student-exercice" element={<StudentExercice />} />
+        <Route path="/progressStudent" element={<ProgressStudent/>} />
 
+        {/* QUIZ AND EXERCISE PAGES */}
 
           <Route path="/quiz" element={<QuizPage2 />} />  
           <Route path="/start-exercise" element={<StartExercise />} />
           <Route path="/exercise-page" element={<ExercisePage />} />
           <Route path="/course-details" element={<CourseDetails />} />
           <Route path="/submitted-exercise" element={<SubmittedExercise />} />
+          <Route path="/quiz1" element={<QuizPage1 />} />
+          <Route path="/quiz" element={<QuizPage2 />} />
+          <Route path="/quiz3" element={<QuizRecapPage />} />
 
+        
+
+        {/* Course details */}
+        <Route path="/CourseDetails" element={<CourseDetails />} />
+        {/* Students */}
+        <Route path="/MyStudents" element={<MyStudents />} />
       </Routes>
     </BrowserRouter>
   );

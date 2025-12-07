@@ -10,31 +10,29 @@ const api = axios.create({
   withCredentials: false,
 });
 
-/**
- * 🛡️ ROUTES PUBLIQUES (AUCUN TOKEN)
- * Ce sont les routes d'inscription et de connexion.
- */
+// ★ Fonction nécessaire pour auth.js
+export const setAuthToken = (token) => {
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common["Authorization"];
+  }
+};
+
+// Routes publiques
 const PUBLIC_ROUTES = ["register", "login"];
 
-/**
- * 🎯 Interceptor PRO :
- * N'ajoute un token que si :
- *   - il existe,
- *   - la route n'est pas publique.
- */
 api.interceptors.request.use((config) => {
-  const isPublic = PUBLIC_ROUTES.some((route) =>
-    config.url.includes(route)
-  );
+  const path = config.url.replace(/^\//, "").replace(/\/$/, "");
+
+  const isPublic = PUBLIC_ROUTES.includes(path);
 
   if (!isPublic) {
     const token = localStorage.getItem("token");
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
   } else {
-    // 🔥 On supprime toute trace de token si route publique
     delete config.headers.Authorization;
   }
 

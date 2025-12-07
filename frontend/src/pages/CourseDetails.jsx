@@ -1,8 +1,8 @@
 // COMPLETE CourseDetails.jsx with teacher course selection in modal
 
 import React, { useState, useContext } from "react";
-import Navbar from "../components/common/Navbar";
-import Topbar from "../components/common/Topbar";
+import Navbar from "../components/common/NavBar";
+import Topbar from "../components/common/TopBar";
 import AddModal from "../components/common/AddModel";
 import Button from "../components/common/Button";
 import ContentSearchBar from "../components/common/ContentSearchBar";
@@ -160,6 +160,7 @@ export default function CourseDetails() {
           className="my-6 flex justify-between items-center"
         />
 
+        {/* Affichage selon l'étape active */}
         {activeStep === 1 && (
           <>
             <ContentFilters
@@ -214,6 +215,7 @@ export default function CourseDetails() {
         {activeStep === 2 && <h2 className="text-3xl text-textc/90">{t("quizzesTitle")}</h2>}
         {activeStep === 3 && <h2 className="text-3xl text-textc/90">{t("exercisesTitle")}</h2>}
 
+        {/* Modal d’ajout de cours */}
         <AddModal
           open={openModal}
           onClose={() => setOpenModal(false)}

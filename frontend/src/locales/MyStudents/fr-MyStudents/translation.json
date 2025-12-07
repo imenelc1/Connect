@@ -12,9 +12,6 @@
   "studentID": "ID Étudiant",
   "studentIDPlaceholder": "ST_00129",
   "space": "Espace",
-  "UIUXClass": "Classe UI/UX",
-  "mobileDesign": "Mobile Design",
-  "webDevelopment": "Développement Web",
-  "dataScience": "Data Science",
-  "active": "Actif"
+  "active": "Actif",
+  "lastActive": "il y a {{time}}"
 }

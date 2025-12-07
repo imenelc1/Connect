@@ -22,16 +22,23 @@ import translationENFilters from "./locales/Filters/en/translation.json";
 import translationFRContentPage from "./locales/contentPage/fr/translation.json";
 import translationENContentPage from "./locales/contentPage/en/translation.json";
 import translationFRCreateQuiz from "./locales/fr-quiz/fr.json";
-import translationENCreateQuiz from "./locales/en-quiz/en.json"; 
-import translationFRSetting from "./locales/Settings/en-Setting/translation.json";
-import translationENSetting from "./locales/Settings/fr-Setting/translation.json";
+import translationENCreateQuiz from "./locales/en-quiz/en.json";
+import translationFRSetting from "./locales/Settings/fr-Setting/translation.json";
+import translationENSetting from "./locales/Settings/en-Setting/translation.json";
 import translationENDashboard from "./locales/Dashboard/en/translation.json";
 import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
 
 import translationFRBadges from "./locales/badges/fr.json";
 import translationENBadges from "./locales/badges/en.json";
+import translationFRQuiz1 from "./locales/quiz1/fr.json";
+import translationENQuiz1 from "./locales/quiz1/en.json";
+
 import translationFRquiz2 from "./locales/quiz2/fr.json";
 import translationENquiz2 from "./locales/quiz2/en.json"; 
+
+import translationFRrecquiz from "./locales/recquiz/fr.json";
+import translationENrecquiz from "./locales/recquiz/en.json";
+
 import frCourses from "./locales/courses/fr-courses/translation.json";
 import enCourses from "./locales/courses/en-courses/translation.json";
 import translationFRMyStudents from "./locales/MyStudents/fr-MyStudents/translation.json";
@@ -42,12 +49,21 @@ import translationnFRCommunity from "./locales/Community/fr/translation.json";
 import translationnENCommunity from "./locales/Community/en/translation.json";
 import translationnENexerciceStudent from "./locales/exerciceStudent/en/translation.json";
 import translationnFRexerciceStudent from "./locales/exerciceStudent/fr/translation.json";
+import translationnENProgressExercice from "./locales/ProgressionExo/en/translation.json";
+import translationnFRProgressExercice from "./locales/ProgressionExo/fr/translation.json";
+import translationnENProgressStudent from "./locales/ProgressionStudent/en/translation.json";
+import translationnFRProgressStudent from "./locales/ProgressionStudent/fr/translation.json";
 
 
 import translationENStartExo from "./locales/StartExercise/en-Exo/translation.json";
-import translationFRStartExo from  "./locales/StartExercise/fr-Exo/translation.json";
+import translationFRStartExo from "./locales/StartExercise/fr-Exo/translation.json";
 import translationFRCourseDetails from "./locales/CourseDetails/fr_CourseDetails/translation.json";
 import translationENCourseDetails from "./locales/CourseDetails/en_CourseDetails/translation.json";
+
+import translationFRSubmittedExercise from "./locales/SubmittedExo/fr-SubExo/translation.json";
+import translationENSubmittedExercise from "./locales/SubmittedExo/en-SubExo/translation.json";
+import translationFRExercisePage from "./locales/exercisepage/fr-exercisepage/translation.json";
+import translationENExercisePage from "./locales/exercisepage/en-exercisepage/translation.json";
 
 const resources = {
   fr: {
@@ -64,24 +80,37 @@ const resources = {
     filters: translationFRFilters,
     contentPage: translationFRContentPage,
     courseInfo: translationFRCourseInfo,
-  createQuiz: translationFRCreateQuiz,
-  setting: translationFRSetting,
+    createQuiz: translationFRCreateQuiz,
+    setting: translationFRSetting,
     Dashboard: translationFRDashboard,
     badges: translationFRBadges,
     community: translationnFRCommunity,
 
     courses: frCourses,
+    quiz1: translationFRQuiz1,
     quiz2: translationFRquiz2,
+    quiz3:translationFRrecquiz,
 
-  myStudents: translationFRMyStudents,
-  Spaces:translationFRSpaces,
+   
 
-  exerciceStudent:translationnFRexerciceStudent,
-  startExercise: translationFRStartExo,
-   CourseDetails: translationFRCourseDetails,
+    myStudents: translationFRMyStudents,
+    Spaces: translationFRSpaces,
 
-  
+    exerciceStudent: translationnFRexerciceStudent,
+    startExercise: translationFRStartExo,
+    CourseDetails: translationFRCourseDetails,
+    myStudents: translationFRMyStudents,
+    Spaces: translationFRSpaces,
+    CourseDetails: translationFRCourseDetails,
+    SubmittedExercise: translationFRSubmittedExercise,
 
+
+
+    exercisePage: translationFRExercisePage,
+
+
+    ProgressExercice: translationnFRProgressExercice,
+    ProgressStudent: translationnFRProgressStudent
   },
 
   en: {
@@ -98,19 +127,30 @@ const resources = {
     filters: translationENFilters,
     contentPage: translationENContentPage,
     courseInfo: translationENCourseInfo,
-  createQuiz: translationENCreateQuiz,
-  setting: translationENSetting,
+    createQuiz: translationENCreateQuiz,
+    setting: translationENSetting,
     Dashboard: translationENDashboard,
-   badges: translationENBadges,
+    badges: translationENBadges,
     courses: enCourses,
     myStudents: translationENMyStudents,
-     Spaces: translationENSpaces,
-     quiz2: translationENquiz2,
+    Spaces: translationENSpaces,
+    quiz2: translationENquiz2,
     community: translationnENCommunity,
-    exerciceStudent:translationnENexerciceStudent,
+    exerciceStudent: translationnENexerciceStudent,
 
-    startExercise:translationENStartExo,
-      CourseDetails: translationENCourseDetails
+    startExercise: translationENStartExo,
+    CourseDetails: translationENCourseDetails,
+    Spaces: translationENSpaces,
+    CourseDetails: translationENCourseDetails,
+    SubmittedExercise: translationENSubmittedExercise,
+
+    exercisePage: translationENExercisePage,
+
+    ProgressExercice: translationnENProgressExercice,
+    ProgressStudent: translationnENProgressStudent,
+
+     quiz3:translationENrecquiz,
+    community: translationnENCommunity
   },
 };
 
@@ -118,7 +158,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem("lang") || "fr", 
+    lng: localStorage.getItem("lang") || "fr",
     fallbackLng: "fr",
     interpolation: {
       escapeValue: false,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -7,10 +7,14 @@ import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
+import i18n from "../i18n";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
 import { getCurrentUserId } from "../hooks/useAuth";
+
+
+
 
 const gradientMap = {
   Débutant: "bg-grad-2",
@@ -58,10 +62,21 @@ export default function AllCoursesPage() {
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const filteredCourses =
-    filterLevel === "ALL"
+
+
+let filteredCourses = 
+
+// 1️⃣ Filtrer par niveau
+ filterLevel === "ALL"
       ? courses
       : courses.filter((course) => course.level === filterLevel);
+
+// 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
+if (userRole === "enseignant" && categoryFilter === "mine") {
+  filteredCourses = filteredCourses.filter((course) => course.isMine);
+}
+
+
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -90,6 +105,9 @@ export default function AllCoursesPage() {
     }
   };
 
+
+
+
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
     window.addEventListener("sidebarChanged", handler);
@@ -117,47 +135,50 @@ export default function AllCoursesPage() {
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
+      {/* Header Right Controls */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
+        {/* Notification Icon */}
+        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+          <Bell size={18} />
+        </div>
+
+        {/* User Circle */}
+        <div className="flex items-center">
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
+        </div>
+
+      </div>
+
+
 
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"
         style={{ marginLeft: sidebarWidth }}
       >
-
-      <div className="flex justify-end">
-          <UserCircle
-        initials={initials}
-        onToggleTheme={toggleDarkMode}
-        onChangeLang={(lang) => i18n.changeLanguage(lang)}
-      />
-      </div>
-
-      <div
-
-        className="fixed top-8 right-[88px] w-12 h-12 rounded-full bg-white 
-             text-gray-700 shadow-lg flex items-center justify-center 
-             cursor-pointer hover:bg-gray-100 transition z-50"
-      >
-        <Bell size={22} strokeWidth={1.8} />
-      </div>
-
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl font-bold">{t("coursesTitle")}</h1>
-        </div>
+          <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
 
-        
+        </div>
         {/* Search */}
         <ContentSearchBar />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
           <ContentFilters
-            type="courses"
-            userRole={userRole} // <-- corrige ici
-            activeFilter={filterLevel} // <- tu utilises filterLevel, pas activeFilter
-            onFilterChange={setFilterLevel} // <- tu as setFilterLevel
-            showCompletedFilter={userRole === "etudiant"} // <- correct
-          />
+  type="courses"
+  userRole={userRole}
+  activeFilter={filterLevel}
+  onFilterChange={setFilterLevel}
+  categoryFilter={categoryFilter}        // ← bien passer le state
+  setCategoryFilter={setCategoryFilter}
+  showCompletedFilter={userRole === "etudiant"}
+/>
+
 
           {userRole === "enseignant" && (
             <Button
