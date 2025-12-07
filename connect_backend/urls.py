@@ -5,7 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
-
+    path('api/', include('forum.urls')), 
     path('api/users/', include('users.urls')),
     path('api/courses/', include('courses.urls')),
     path('api/exercices/', include('exercices.urls')),
@@ -14,6 +14,8 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/spaces/', include('spaces.urls')),
+
+
 ]
 
 if settings.DEBUG:
