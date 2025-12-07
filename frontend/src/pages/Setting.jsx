@@ -10,7 +10,6 @@ import ThemeContext from "../context/ThemeContext";
 import { useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import "../components/common/NavBar";
-
 import api from "../services/api";
 import UserCircle from "../components/common/UserCircle";
 import toast, { Toaster } from "react-hot-toast";

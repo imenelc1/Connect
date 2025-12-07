@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import AuthTabs from "../components/common/AuthTabs";
-import Button from "../components/common/Button";
+import Button from "../components/common/Button.jsx";
 import Input from "../components/common/Input";
 import Mascotte from "../components/common/Mascotte.jsx";
 import api from "../services/api";

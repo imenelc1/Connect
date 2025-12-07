@@ -7,6 +7,7 @@ import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
+import i18n from "../i18n";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
@@ -61,10 +62,21 @@ export default function AllCoursesPage() {
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const filteredCourses =
-    filterLevel === "ALL"
+
+
+let filteredCourses = 
+
+// 1️⃣ Filtrer par niveau
+ filterLevel === "ALL"
       ? courses
       : courses.filter((course) => course.level === filterLevel);
+
+// 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
+if (userRole === "enseignant" && categoryFilter === "mine") {
+  filteredCourses = filteredCourses.filter((course) => course.isMine);
+}
+
+
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -143,7 +155,6 @@ export default function AllCoursesPage() {
 
 
 
-
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"
         style={{ marginLeft: sidebarWidth }}
@@ -153,20 +164,21 @@ export default function AllCoursesPage() {
           <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
 
         </div>
-
-        
         {/* Search */}
-        <ContentSearchBar  />
+        <ContentSearchBar />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
           <ContentFilters
-            type="courses"
-            userRole={userRole} // <-- corrige ici
-            activeFilter={filterLevel} // <- tu utilises filterLevel, pas activeFilter
-            onFilterChange={setFilterLevel} // <- tu as setFilterLevel
-            showCompletedFilter={userRole === "etudiant"} // <- correct
-          />
+  type="courses"
+  userRole={userRole}
+  activeFilter={filterLevel}
+  onFilterChange={setFilterLevel}
+  categoryFilter={categoryFilter}        // ← bien passer le state
+  setCategoryFilter={setCategoryFilter}
+  showCompletedFilter={userRole === "etudiant"}
+/>
+
 
           {userRole === "enseignant" && (
             <Button

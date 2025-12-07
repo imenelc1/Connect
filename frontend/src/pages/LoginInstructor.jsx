@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { FiGlobe,FiEye,FiEyeOff } from "react-icons/fi";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
-import Button from "../components/common/Button";
+import Button from "../components/common/Button.jsx";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
 import ThemeContext from "../context/ThemeContext";

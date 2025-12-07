@@ -92,7 +92,7 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
 
   return (
 <div
-  className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0"
+  className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
   style={{ marginLeft: sidebarWidth }}
 >
 

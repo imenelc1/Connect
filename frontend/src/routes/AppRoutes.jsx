@@ -37,6 +37,8 @@ import ProgressStudent from "../pages/ProgressionStudent";
 import QuizPage1 from '../pages/QuizPage1';
 import QuizRecapPage from '../pages/QuizRecapPage';
 
+import CourseUpdate from "../pages/CourseUpdate";
+import CoursePage from "../pages/CoursInfo";
 
 export default function AppRoutes() {
   return (
@@ -76,6 +78,9 @@ export default function AppRoutes() {
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/preview" element={<QuizPreview />} />
 
+        {/* UPDATES*/}
+        <Route path="/courses/edit/:id" element={<CourseUpdate />} />
+
         {/* COMMUNITY PAGE */}
         <Route path="/community" element={<CommunityPage />} />
         {/*settings*/}
@@ -97,7 +102,6 @@ export default function AppRoutes() {
         {/* Spaces */}
         <Route path="/spaces" element={<Spaces />} />
          <Route path="/progressExercice" element={<ProgressExercice/>} />
-
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />

@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import Input from "../components/common/Input";
-import Button from "../components/common/Button";
+import Button from "../components/common/Button.jsx";
 import AuthTabs from "../components/common/AuthTabs";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
 import Mascotte from "../components/common/Mascotte.jsx";
@@ -202,13 +202,14 @@ localStorage.setItem(
   JSON.stringify({
     nom: res.data.user.nom,
     prenom: res.data.user.prenom,
-    id_utilisateur: res.data.user.id_utilisateur,
+    id_utilisateur: res.data.user.id_utilisateur, // important
     adresse_email: res.data.user.adresse_email,
     matricule: res.data.user.matricule,
-    role: res.data.role,      // ⭐ AJOUT IMPORTANT
-    token: res.data.token     // facultatif mais utile
+    role: res.data.role,
+    token: res.data.token
   })
 );
+
       toast.success("Inscription réussie !");
       // redirection
       setTimeout(() => {

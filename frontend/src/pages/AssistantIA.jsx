@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X, Send } from "lucide-react";
 import Mascotte from "../assets/head_mascotte.svg";
+import { getAIAnswer } from "../services/iaService";
 
 export default function AssistantIA({ onClose: parentOnClose }) {
   const [visible, setVisible] = useState(true);
@@ -10,7 +11,7 @@ export default function AssistantIA({ onClose: parentOnClose }) {
       from: "bot",
       text:
         "Bonjour ! Je suis votre assistant IA. Je peux vous aider avec votre exercice en C. Posez-moi vos questions !",
-      time: "20:16",
+      time: "Maintenant",
     },
   ]);
 
@@ -32,7 +33,6 @@ export default function AssistantIA({ onClose: parentOnClose }) {
   const drag = (e) => {
     pos.current.x = e.clientX - pos.current.offsetX;
     pos.current.y = e.clientY - pos.current.offsetY;
-
     windowRef.current.style.transform = `translate(${pos.current.x}px, ${pos.current.y}px)`;
   };
 
@@ -69,26 +69,27 @@ export default function AssistantIA({ onClose: parentOnClose }) {
     setMessages((m) => [...m, userMsg]);
   };
 
-  const handleSend = () => {
+  // --- HANDLE SEND (LocalAI) ---
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     sendUserMessage(input);
     setInput("");
     setLoading(true);
 
-    setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        {
-          id: Date.now() + 1,
-          from: "bot",
-          text:
-            "Merci pour votre question ! Pouvez-vous préciser ce que vous souhaitez faire en C ?",
-          time: "Maintenant",
-        },
-      ]);
-      setLoading(false);
-    }, 900);
+    const aiResponse = await getAIAnswer(input);
+
+    setMessages((m) => [
+      ...m,
+      {
+        id: Date.now() + 1,
+        from: "bot",
+        text: aiResponse,
+        time: "Maintenant",
+      },
+    ]);
+
+    setLoading(false);
   };
 
   const handleKeyDown = (e) => {
@@ -197,4 +198,4 @@ export default function AssistantIA({ onClose: parentOnClose }) {
       </div>
     </div>
   );
-} 
+}
