@@ -4,8 +4,6 @@ import Navbar from "../components/common/NavBar";
 import UserCircle from "../components/common/UserCircle";
 import { useContext, useState, useEffect, useRef } from "react";
 import ThemeContext from "../context/ThemeContext";
-import Tabs from "../components/common/Tabs";
-import Post from "../components/common/Post";
 import Button from "../components/common/Button";
 import ModernDropdown from "../components/common/ModernDropdown";
 import { Bell, Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
@@ -24,6 +22,15 @@ export default function CommunityPage() {
   const [loadingMessages, setLoadingMessages] = useState({});
   const [postingMessage, setPostingMessage] = useState({});
   const [likingMessageId, setLikingMessageId] = useState(null);
+  
+  // NOUVEAUX ÉTATS POUR LES COMMENTAIRES ET LE FORMULAIRE
+  const [newComments, setNewComments] = useState({});
+  const [postingComment, setPostingComment] = useState({});
+  const [expandedComments, setExpandedComments] = useState({});
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPostContent, setNewPostContent] = useState("");
+  
   const navigate = useNavigate();
   const { t } = useTranslation("community");
   
@@ -70,7 +77,141 @@ export default function CommunityPage() {
 
   const [forumType, setForumType] = useState("all");
   const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState("");
+
+  // ========== FONCTIONS POUR LES COMMENTAIRES ==========
+  
+  // Fonction pour afficher/masquer les commentaires d'un message
+  const toggleMessageComments = (messageId) => {
+    setExpandedComments(prev => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  };
+  
+  // Fonction pour poster un commentaire sur un message
+  const handlePostComment = async (messageId, forumId) => {
+    const commentContent = newComments[messageId]?.trim();
+    
+    if (!commentContent || !token) {
+      alert("Écrivez quelque chose avant d'envoyer");
+      return;
+    }
+    
+    setPostingComment(prev => ({ ...prev, [messageId]: true }));
+    
+    try {
+      console.log("📤 Envoi commentaire message:", messageId);
+      const response = await fetch(`${API_URL}/messages/${messageId}/comments/create/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contenu_comm: commentContent
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erreur ${response.status}`);
+      }
+      
+      const newComment = await response.json();
+      console.log("✅ Commentaire posté:", newComment);
+      
+      // Mettre à jour l'état des messages avec le nouveau commentaire
+      setMessages(prev => {
+        const forumMessages = prev[forumId] || [];
+        const updatedMessages = forumMessages.map(msg => {
+          if (msg.id_message === messageId) {
+            const updatedCommentaires = [...(msg.commentaires || []), newComment];
+            return {
+              ...msg,
+              commentaires: updatedCommentaires,
+              nombre_commentaires: updatedCommentaires.length
+            };
+          }
+          return msg;
+        });
+        return { ...prev, [forumId]: updatedMessages };
+      });
+      
+      // Réinitialiser le champ de commentaire
+      setNewComments(prev => ({ ...prev, [messageId]: "" }));
+      
+      // Développer automatiquement les commentaires après envoi
+      setExpandedComments(prev => ({ ...prev, [messageId]: true }));
+      
+    } catch (error) {
+      console.error("❌ Erreur envoi commentaire:", error);
+      alert("Erreur lors de l'envoi du commentaire: " + error.message);
+    } finally {
+      setPostingComment(prev => ({ ...prev, [messageId]: false }));
+    }
+  };
+  
+  // Fonction pour supprimer un commentaire
+  const handleDeleteComment = async (commentId, messageId, forumId) => {
+    if (!token) {
+      alert("Connectez-vous pour supprimer");
+      return;
+    }
+    
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) {
+      return;
+    }
+    
+    setDeletingCommentId(commentId);
+    
+    try {
+      const response = await fetch(`${API_URL}/comments/${commentId}/delete/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        // Mettre à jour l'état local
+        setMessages(prev => {
+          const forumMessages = prev[forumId] || [];
+          const updatedMessages = forumMessages.map(msg => {
+            if (msg.id_message === messageId && msg.commentaires) {
+              const updatedCommentaires = msg.commentaires.filter(c => c.id_commentaire !== commentId);
+              return {
+                ...msg,
+                commentaires: updatedCommentaires,
+                nombre_commentaires: updatedCommentaires.length
+              };
+            }
+            return msg;
+          });
+          return { ...prev, [forumId]: updatedMessages };
+        });
+        
+        // Mettre à jour aussi le compteur dans la liste des messages
+        setPosts(prev => prev.map(post => {
+          if (post.id === forumId) {
+            return {
+              ...post,
+              commentsCount: Math.max(0, (post.commentsCount || 0) - 1)
+            };
+          }
+          return post;
+        }));
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert("Erreur lors de la suppression: " + (errorData.error || `Erreur ${response.status}`));
+      }
+    } catch (error) {
+      console.error("❌ Erreur réseau suppression commentaire:", error);
+      alert("Erreur réseau lors de la suppression");
+    } finally {
+      setDeletingCommentId(null);
+    }
+  };
 
   // Fonction pour liker un message
   const handleLikeMessage = async (messageId, forumId) => {
@@ -202,7 +343,14 @@ export default function CommunityPage() {
       const messagesData = await response.json();
       console.log("✅ Messages chargés:", messagesData.length);
       
-      setMessages(prev => ({ ...prev, [forumId]: messagesData }));
+      // S'assurer que chaque message a un tableau commentaires
+      const messagesWithComments = messagesData.map(msg => ({
+        ...msg,
+        commentaires: msg.commentaires || [],
+        nombre_commentaires: msg.nombre_commentaires || (msg.commentaires?.length || 0)
+      }));
+      
+      setMessages(prev => ({ ...prev, [forumId]: messagesWithComments }));
       
       setPosts(prev => prev.map(post => 
         post.id === forumId 
@@ -262,15 +410,17 @@ export default function CommunityPage() {
       const newMessage = await response.json();
       console.log("✅ Message posté:", newMessage);
       
-      const messageWithLike = {
+      const messageWithLikeAndComments = {
         ...newMessage,
         user_has_liked: false,
-        nombre_likes: 0
+        nombre_likes: 0,
+        commentaires: [],
+        nombre_commentaires: 0
       };
       
       setMessages(prev => ({
         ...prev,
-        [forumId]: [...(prev[forumId] || []), messageWithLike]
+        [forumId]: [...(prev[forumId] || []), messageWithLikeAndComments]
       }));
       
       setPosts(prev => prev.map(post => 
@@ -377,9 +527,10 @@ export default function CommunityPage() {
     }
   }, [token, role, userId, API_URL]);
 
+  // MODIFIÉ : Créer un forum avec un message initial
   const handleCreatePost = async () => {
-    if (!newPost.trim() || !token) {
-      alert("Écrivez quelque chose avant de publier");
+    if (!newPostTitle.trim() || !newPostContent.trim() || !token) {
+      alert("Veuillez remplir le titre et le contenu avant de publier");
       return;
     }
 
@@ -391,7 +542,8 @@ export default function CommunityPage() {
     setIsCreatingPost(true);
     try {
       const forumData = {
-        titre_forum: newPost,
+        titre_forum: newPostTitle,
+        contenu_message: newPostContent, // Envoyé comme premier message
         type: forumTypeToCreate
       };
 
@@ -405,10 +557,14 @@ export default function CommunityPage() {
       });
 
       if (!response.ok) {
-        throw new Error(`Erreur: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Erreur: ${response.status}`);
       }
 
       const createdForum = await response.json();
+      
+      // Charger immédiatement les messages du nouveau forum
+      await loadForumMessages(createdForum.id_forum);
       
       const newForum = {
         id: createdForum.id_forum,
@@ -420,16 +576,24 @@ export default function CommunityPage() {
         userHasLiked: false,
         type: createdForum.type,
         isMine: true,
-        commentsCount: 0
+        commentsCount: 1 // Le premier message compte comme un "commentaire"
       };
 
       setPosts(prev => [newForum, ...prev]);
-      setNewPost("");
-      alert("Forum créé !");
+      setNewPostTitle("");
+      setNewPostContent("");
+      
+      // Développer automatiquement le nouveau forum
+      setExpandedForums(prev => ({
+        ...prev,
+        [createdForum.id_forum]: true
+      }));
+      
+      alert("Forum créé avec votre message initial !");
       
     } catch (error) {
       console.error("Erreur création forum:", error);
-      alert("Erreur lors de la création");
+      alert("Erreur lors de la création: " + error.message);
     } finally {
       setIsCreatingPost(false);
     }
@@ -663,15 +827,36 @@ export default function CommunityPage() {
           </p>
         </header>
 
+        {/* MODIFIÉ : Formulaire avec titre et contenu séparés */}
         <div className="bg-card rounded-3xl p-5 mb-8 border border-blue/20">
-          <Input
-            placeholder="De quoi voulez-vous discuter ?"
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !isCreatingPost && handleCreatePost()}
-            className="bg-surface border border-blue/20 rounded-full px-5 py-3 mb-4"
-            disabled={isCreatingPost}
-          />
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Titre du forum *
+            </label>
+            <Input
+              placeholder="Donnez un titre à votre discussion"
+              value={newPostTitle}
+              onChange={(e) => setNewPostTitle(e.target.value)}
+              className="bg-surface border border-blue/20 rounded-xl px-5 py-3 font-semibold"
+              disabled={isCreatingPost}
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Votre message initial *
+            </label>
+            <textarea
+              placeholder="Écrivez votre message... (ce sera le premier message du forum)"
+              value={newPostContent}
+              onChange={(e) => setNewPostContent(e.target.value)}
+              className="w-full bg-surface border border-blue/20 rounded-xl px-5 py-3 h-40 resize-none"
+              disabled={isCreatingPost}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Ce message sera le point de départ de la discussion
+            </p>
+          </div>
           
           {role === "enseignant" ? (
             <div className="mb-4">
@@ -740,7 +925,7 @@ export default function CommunityPage() {
               text={isCreatingPost ? "Publication..." : "Publier"}
               className="!w-auto px-6 py-2"
               onClick={handleCreatePost}
-              disabled={isCreatingPost || !newPost.trim() || (role === "enseignant" && !forumTypeToCreate)}
+              disabled={isCreatingPost || !newPostTitle.trim() || !newPostContent.trim() || (role === "enseignant" && !forumTypeToCreate)}
               icon={isCreatingPost ? <Loader className="animate-spin ml-2" size={16} /> : <FiSend className="ml-2" />}
             />
           </div>
@@ -817,12 +1002,43 @@ export default function CommunityPage() {
                   </div>
                   {post.isMine && (
                     <span className="px-3 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                      Votre post
+                      Votre forum
                     </span>
                   )}
                 </div>
                 
-                <p className="mb-4 text-gray-800">{post.title}</p>
+                {/* Titre du forum */}
+                <h2 className="text-xl font-bold mb-3 text-gray-800 border-b pb-2">
+                  {post.title}
+                </h2>
+                
+                {/* Aperçu du premier message (contenu initial) */}
+                {messages[post.id]?.[0] && !expandedForums[post.id] && (
+                  <div className="mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 rounded-full bg-blue/20 flex items-center justify-center text-sm font-bold">
+                        {`${messages[post.id][0].utilisateur_prenom?.[0] || ""}${messages[post.id][0].utilisateur_nom?.[0] || ""}`.toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium">
+                            {messages[post.id][0].utilisateur_prenom} {messages[post.id][0].utilisateur_nom}
+                          </span>
+                          <span className="text-xs text-grayc">
+                            {formatTimeAgo(messages[post.id][0].date_publication)}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 line-clamp-3">{messages[post.id][0].contenu_message}</p>
+                        <button 
+                          onClick={() => toggleForumMessages(post.id)}
+                          className="text-blue-600 text-sm mt-2 hover:underline"
+                        >
+                          Voir la discussion complète...
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center space-x-6">
@@ -845,7 +1061,7 @@ export default function CommunityPage() {
                       className="flex items-center space-x-2 text-grayc hover:text-blue transition-colors"
                     >
                       <FiMessageSquare size={18} />
-                      <span>{post.commentsCount} commentaire{post.commentsCount !== 1 ? 's' : ''}</span>
+                      <span>{post.commentsCount} message{post.commentsCount !== 1 ? 's' : ''}</span>
                       {expandedForums[post.id] ? (
                         <ChevronUp size={16} />
                       ) : (
@@ -927,7 +1143,88 @@ export default function CommunityPage() {
                                       )}
                                     </div>
                                   </div>
+                                  
                                   <p className="mt-2 text-gray-700">{message.contenu_message}</p>
+                                  
+                                  {/* SECTION COMMENTAIRES DU MESSAGE */}
+                                  <div className="mt-4">
+                                    {/* Bouton pour voir les commentaires */}
+                                    <button
+                                      onClick={() => toggleMessageComments(message.id_message)}
+                                      className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600 mb-2"
+                                    >
+                                      <MessageSquare size={14} />
+                                      <span>{message.nombre_commentaires || 0} commentaire{message.nombre_commentaires !== 1 ? 's' : ''}</span>
+                                      {expandedComments[message.id_message] ? (
+                                        <ChevronUp size={12} />
+                                      ) : (
+                                        <ChevronDown size={12} />
+                                      )}
+                                    </button>
+                                    
+                                    {/* Commentaires développés */}
+                                    {expandedComments[message.id_message] && (
+                                      <div className="ml-2 border-l-2 border-gray-200 pl-4">
+                                        {/* Liste des commentaires existants */}
+                                        <div className="space-y-3 mb-4">
+                                          {message.commentaires?.map(comment => (
+                                            <div key={comment.id_commentaire} className="bg-gray-100 rounded p-3">
+                                              <div className="flex justify-between items-start">
+                                                <div className="flex items-center gap-2">
+                                                  <div className="w-6 h-6 rounded-full bg-blue/20 flex items-center justify-center text-xs font-bold">
+                                                    {`${comment.utilisateur_prenom?.[0] || ""}${comment.utilisateur_nom?.[0] || ""}`.toUpperCase()}
+                                                  </div>
+                                                  <span className="font-medium text-sm">
+                                                    {comment.utilisateur_prenom} {comment.utilisateur_nom}
+                                                  </span>
+                                                  <span className="text-xs text-gray-500">
+                                                    {formatTimeAgo(comment.date_commpub)}
+                                                  </span>
+                                                </div>
+                                                {comment.utilisateur === userId && (
+                                                  <button
+                                                    onClick={() => handleDeleteComment(comment.id_commentaire, message.id_message, post.id)}
+                                                    disabled={deletingCommentId === comment.id_commentaire}
+                                                    className="text-red-400 hover:text-red-600 text-xs disabled:opacity-50"
+                                                  >
+                                                    {deletingCommentId === comment.id_commentaire ? (
+                                                      <Loader className="h-3 w-3 animate-spin" />
+                                                    ) : (
+                                                      <Trash2 size={12} />
+                                                    )}
+                                                  </button>
+                                                )}
+                                              </div>
+                                              <p className="mt-2 text-sm text-gray-700">{comment.contenu_comm}</p>
+                                            </div>
+                                          ))}
+                                        </div>
+                                        
+                                        {/* Formulaire pour nouveau commentaire */}
+                                        <div className="flex items-center gap-2">
+                                          <Input
+                                            placeholder="Écrire un commentaire..."
+                                            value={newComments[message.id_message] || ""}
+                                            onChange={(e) => setNewComments(prev => ({ ...prev, [message.id_message]: e.target.value }))}
+                                            onKeyPress={(e) => e.key === 'Enter' && !postingComment[message.id_message] && handlePostComment(message.id_message, post.id)}
+                                            className="flex-1 text-sm bg-white border border-gray-300 rounded-full px-3 py-1.5"
+                                            disabled={postingComment[message.id_message]}
+                                          />
+                                          <button
+                                            onClick={() => handlePostComment(message.id_message, post.id)}
+                                            disabled={postingComment[message.id_message] || !newComments[message.id_message]?.trim()}
+                                            className="bg-blue-500 text-white p-1.5 rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                          >
+                                            {postingComment[message.id_message] ? (
+                                              <Loader className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                              <Send size={14} />
+                                            )}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -937,14 +1234,14 @@ export default function CommunityPage() {
                       ) : (
                         <div className="text-center py-8 text-grayc">
                           <MessageSquare className="mx-auto h-12 w-12 text-gray-300 mb-2" />
-                          <p>Aucun commentaire encore. Soyez le premier à commenter !</p>
+                          <p>Aucun message encore. Soyez le premier à participer !</p>
                         </div>
                       )}
                     </div>
                     
                     <div className="flex items-center space-x-2">
                       <Input
-                        placeholder="Écrivez votre commentaire..."
+                        placeholder="Écrivez votre réponse..."
                         value={newMessages[post.id] || ""}
                         onChange={(e) => setNewMessages(prev => ({ ...prev, [post.id]: e.target.value }))}
                         onKeyPress={(e) => e.key === 'Enter' && !postingMessage[post.id] && handlePostMessage(post.id)}

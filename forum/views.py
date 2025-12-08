@@ -16,13 +16,25 @@ def list_forums(request):
     return Response(serializer.data)
 
 
+# forum/views.py
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def create_forum(request):
-    """Crée un nouveau forum"""
+    """Crée un nouveau forum AVEC le premier message"""
     serializer = ForumSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        serializer.save(utilisateur=request.user)
+        forum = serializer.save(utilisateur=request.user)
+        
+        # Créer automatiquement le premier message avec le contenu
+        contenu_message = request.data.get('contenu_message', '')
+        if contenu_message:
+            Message.objects.create(
+                forum=forum,
+                utilisateur=request.user,
+                contenu_message=contenu_message
+            )
+        
+        # Retourner le forum avec ses données complètes
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -3,11 +3,13 @@ from django.db import models
 from users.models import Utilisateur
 
 
+# forum/models.py
 class Forum(models.Model):
     id_forum = models.AutoField(primary_key=True)
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, null=True, blank=True)
     type = models.CharField(max_length=50)
     titre_forum = models.CharField(max_length=255)
+    contenu_forum = models.TextField()  # NOUVEAU CHAMP
     date_creation = models.DateTimeField(auto_now_add=True)
    
     class Meta:
