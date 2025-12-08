@@ -88,3 +88,13 @@ class SpaceEtudiantListView(generics.ListAPIView):
         user = self.request.user
         # Récupérer tous les étudiants des espaces de ce prof
         return SpaceEtudiant.objects.select_related('etudiant', 'space').filter(space__utilisateur=user)
+    
+
+class MySpacesStudentView(generics.ListAPIView):
+    serializer_class = SpaceSerializer
+    permission_classes = [IsAuthenticatedJWT]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Space.objects.filter(spaceetudiant__etudiant=user)
+

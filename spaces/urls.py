@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
     CreateSpaceView,
+    MySpacesStudentView,
     SpaceListView,
     SpaceDetailView
 )
@@ -12,5 +13,6 @@ urlpatterns = [
     path("<int:pk>/", SpaceDetailView.as_view(), name="space-detail"),
     path("add_student/", AddStudentToSpaceView.as_view(), name="add-student-to-space"),
     path("students/", SpaceEtudiantListView.as_view(), name="space-etudiant-list"),
+    path('my-spaces/', MySpacesStudentView.as_view(), name='my-spaces'),
 
 ]

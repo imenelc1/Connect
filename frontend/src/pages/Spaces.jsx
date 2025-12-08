@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -11,79 +11,71 @@ import UserCircle from "../components/common/UserCircle";
 import { Folder, Bell } from "lucide-react";
 
 import { getSpaces, createSpace } from "../services/spacesService";
+import { getMySpaces } from "../services/studentSpacesService";
 
 export default function SpacesPage() {
   const { t } = useTranslation("Spaces");
   const { toggleDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
 
+  const storedUser = localStorage.getItem("user");
+  const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
+  const initialRole = parsedUser?.role === "enseignant" ? "prof" : "student";
+
+  const [role, setRole] = useState(initialRole);
+  const [spaces, setSpaces] = useState([]);
   const [open, setOpen] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const [spaceDesc, setSpaceDesc] = useState("");
-  const [spaces, setSpaces] = useState([]);
 
+  // -------------------------
+  // Fetch des espaces selon rôle
+  // -------------------------
   useEffect(() => {
-    getSpaces()
-      .then((data) => {
-        console.log("GET /spaces response:", data);
-
-        // Si DRF paginé
-        const spacesArray = Array.isArray(data.results)
-          ? data.results
-          : Array.isArray(data)
-          ? data
-          : [];
-
-        // On mappe pour avoir le même format partout
-        const formatted = spacesArray.map((s) => ({
-          id_space: s.id_space,
-          nom_space: s.nom_space,
-          description: s.description,
-          date_creation: s.date_creation,
-        }));
-
-        setSpaces(formatted);
-      })
-      .catch((err) => console.error("Erreur getSpaces:", err));
-  }, []);
-
-  useEffect(() => {
+    const fetchSpaces = async () => {
+      try {
+        if (role === "prof") {
+          const data = await getSpaces();
+          setSpaces(Array.isArray(data) ? data : data.results || []);
+        } else {
+          const data = await getMySpaces();
+          setSpaces(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        console.error("Erreur fetchSpaces:", err);
+      }
+    };
+    console.log("ROLE DETECTED:", role);
     fetchSpaces();
-  }, []);
+  }, [role]);
 
-  const fetchSpaces = () => {
-    getSpaces()
-      .then((data) => {
-        const array = Array.isArray(data) ? data : data.results || [];
-        setSpaces(array);
-      })
-      .catch((err) => console.error("Erreur getSpaces:", err));
-  };
-
-  // --- Création d'un espace ---
-  const handleSubmit = (e) => {
+  // -------------------------
+  // Création d'un espace (prof uniquement)
+  // -------------------------
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!spaceName) return;
 
-    const data = { nom_space: spaceName, description: spaceDesc };
+    try {
+      const data = { nom_space: spaceName, description: spaceDesc };
+      const res = await createSpace(data);
 
-    createSpace(data)
-      .then((res) => {
-        if (res.data) {
-          const newSpace = {
-            id_space: res.data.id_space,
-            nom_space: res.data.nom_space,
-            description: res.data.description,
-            date_creation: res.data.date_creation,
-          };
-          setSpaces((prev) => [...prev, newSpace]);
-        }
-        setOpen(false);
-        setSpaceName("");
-        setSpaceDesc("");
-        fetchSpaces();
-      })
-      .catch((err) => console.error("Erreur createSpace:", err));
+      if (res) {
+        const newSpace = {
+          id_space: res.id_space,
+          nom_space: res.nom_space,
+          description: res.description,
+          date_creation: res.date_creation,
+        };
+        setSpaces((prev) => [...prev, newSpace]);
+      }
+      setOpen(false);
+      setSpaceName("");
+      setSpaceDesc("");
+    } catch (err) {
+      console.error("Erreur createSpace:", err);
+    }
   };
 
   return (
@@ -91,7 +83,7 @@ export default function SpacesPage() {
       {/* Header */}
       <div className="flex justify-between items-center w-full mb-6">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted ml-[250px]">
-          {t("spacesTitle")}
+          {role === "prof" ? t("spacesTitle") : t("mySpacesTitle")}
         </h1>
         <div className="flex items-center gap-4">
           <Bell
@@ -108,20 +100,22 @@ export default function SpacesPage() {
 
         {/* Contenu principal */}
         <div className="flex-1 p-4 sm:p-6 ml-0 lg:ml-56 transition-all duration-300">
-          {/* Bouton Ajouter un espace */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
-            <Button
-              variant="primary"
-              className="!px-4 !py-2 !text-white !w-auto ml-auto whitespace-nowrap"
-              onClick={() => setOpen(true)}
-            >
-              {t("createSpaceButton")}
-            </Button>
-          </div>
+          {/* Bouton Ajouter un espace (prof seulement) */}
+          {role === "prof" && (
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+              <Button
+                variant="primary"
+                className="!px-4 !py-2 !text-white !w-auto ml-auto whitespace-nowrap"
+                onClick={() => setOpen(true)}
+              >
+                {t("createSpaceButton")}
+              </Button>
+            </div>
+          )}
 
           {/* Liste des espaces */}
           <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-            {Array.isArray(spaces) && spaces.length > 0 ? (
+            {spaces.length > 0 ? (
               spaces.map((item) => (
                 <div
                   key={item.id_space}
@@ -135,9 +129,13 @@ export default function SpacesPage() {
                     }
                     title={item.nom_space || "No title"}
                     description={item.description || ""}
-                    status={`${t("created")} ${new Date(
-                      item.date_creation
-                    ).toLocaleDateString()}`}
+                    status={
+                      role === "prof"
+                        ? `${t("created")} ${new Date(
+                            item.date_creation
+                          ).toLocaleDateString()}`
+                        : ""
+                    }
                     showArrow={true}
                     onArrowClick={() =>
                       navigate(`/CourseDetails/${item.id_space}`)
@@ -146,42 +144,46 @@ export default function SpacesPage() {
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">{t("noSpacesMessage")}</p>
+              <p className="text-gray-500">
+                {role === "prof" ? t("noSpacesMessage") : t("noStudentSpaces")}
+              </p>
             )}
           </div>
         </div>
 
-        {/* Modal d'ajout */}
-        <AddModal
-          open={open}
-          onClose={() => setOpen(false)}
-          title={t("modalTitle")}
-          subtitle={t("modalSubtitle")}
-          submitLabel={t("modalSubmit")}
-          cancelLabel={t("modalCancel")}
-          fields={[
-            {
-              label: t("fieldSpaceName"),
-              placeholder: t("fieldSpaceNamePlaceholder"),
-              value: spaceName,
-              onChange: (e) => setSpaceName(e.target.value),
-            },
-            {
-              label: t("fieldDescription"),
-              element: (
-                <textarea
-                  placeholder={t("fieldDescriptionPlaceholder")}
-                  value={spaceDesc}
-                  onChange={(e) => setSpaceDesc(e.target.value)}
-                  className="w-full bg-grad-3 dark:bg-gray-700 rounded-md px-3 py-2
+        {/* Modal d'ajout espace (prof uniquement) */}
+        {role === "prof" && (
+          <AddModal
+            open={open}
+            onClose={() => setOpen(false)}
+            title={t("modalTitle")}
+            subtitle={t("modalSubtitle")}
+            submitLabel={t("modalSubmit")}
+            cancelLabel={t("modalCancel")}
+            fields={[
+              {
+                label: t("fieldSpaceName"),
+                placeholder: t("fieldSpaceNamePlaceholder"),
+                value: spaceName,
+                onChange: (e) => setSpaceName(e.target.value),
+              },
+              {
+                label: t("fieldDescription"),
+                element: (
+                  <textarea
+                    placeholder={t("fieldDescriptionPlaceholder")}
+                    value={spaceDesc}
+                    onChange={(e) => setSpaceDesc(e.target.value)}
+                    className="w-full bg-grad-3 dark:bg-gray-700 rounded-md px-3 py-2
                              focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  rows={4}
-                />
-              ),
-            },
-          ]}
-          onSubmit={handleSubmit}
-        />
+                    rows={4}
+                  />
+                ),
+              },
+            ]}
+            onSubmit={handleSubmit}
+          />
+        )}
       </div>
     </div>
   );
