@@ -1,9 +1,11 @@
+// CommunityPage.jsx - Version finale avec le même UserCircle
 import { FiSend, FiMessageSquare } from "react-icons/fi";
 import Input from "../components/common/Input";
 import Navbar from "../components/common/NavBar";
-import UserCircle from "../components/common/UserCircle";
+import UserCircle from "../components/common/UserCircle"; // Utilisez votre composant existant
 import { useContext, useState, useEffect, useRef } from "react";
 import ThemeContext from "../context/ThemeContext";
+import Tabs from "../components/common/Tabs";
 import Button from "../components/common/Button";
 import ModernDropdown from "../components/common/ModernDropdown";
 import { Bell, Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
@@ -78,9 +80,8 @@ export default function CommunityPage() {
   const [forumType, setForumType] = useState("all");
   const [posts, setPosts] = useState([]);
 
-  // ========== FONCTIONS POUR LES COMMENTAIRES ==========
+  // ========== FONCTIONS ==========
   
-  // Fonction pour afficher/masquer les commentaires d'un message
   const toggleMessageComments = (messageId) => {
     setExpandedComments(prev => ({
       ...prev,
@@ -88,7 +89,6 @@ export default function CommunityPage() {
     }));
   };
   
-  // Fonction pour poster un commentaire sur un message
   const handlePostComment = async (messageId, forumId) => {
     const commentContent = newComments[messageId]?.trim();
     
@@ -100,7 +100,6 @@ export default function CommunityPage() {
     setPostingComment(prev => ({ ...prev, [messageId]: true }));
     
     try {
-      console.log("📤 Envoi commentaire message:", messageId);
       const response = await fetch(`${API_URL}/messages/${messageId}/comments/create/`, {
         method: 'POST',
         headers: {
@@ -118,9 +117,7 @@ export default function CommunityPage() {
       }
       
       const newComment = await response.json();
-      console.log("✅ Commentaire posté:", newComment);
       
-      // Mettre à jour l'état des messages avec le nouveau commentaire
       setMessages(prev => {
         const forumMessages = prev[forumId] || [];
         const updatedMessages = forumMessages.map(msg => {
@@ -137,10 +134,7 @@ export default function CommunityPage() {
         return { ...prev, [forumId]: updatedMessages };
       });
       
-      // Réinitialiser le champ de commentaire
       setNewComments(prev => ({ ...prev, [messageId]: "" }));
-      
-      // Développer automatiquement les commentaires après envoi
       setExpandedComments(prev => ({ ...prev, [messageId]: true }));
       
     } catch (error) {
@@ -151,7 +145,6 @@ export default function CommunityPage() {
     }
   };
   
-  // Fonction pour supprimer un commentaire
   const handleDeleteComment = async (commentId, messageId, forumId) => {
     if (!token) {
       alert("Connectez-vous pour supprimer");
@@ -174,7 +167,6 @@ export default function CommunityPage() {
       });
       
       if (response.ok) {
-        // Mettre à jour l'état local
         setMessages(prev => {
           const forumMessages = prev[forumId] || [];
           const updatedMessages = forumMessages.map(msg => {
@@ -191,7 +183,6 @@ export default function CommunityPage() {
           return { ...prev, [forumId]: updatedMessages };
         });
         
-        // Mettre à jour aussi le compteur dans la liste des messages
         setPosts(prev => prev.map(post => {
           if (post.id === forumId) {
             return {
@@ -213,10 +204,7 @@ export default function CommunityPage() {
     }
   };
 
-  // Fonction pour liker un message
   const handleLikeMessage = async (messageId, forumId) => {
-    console.log("🎯 CLIC LIKE MESSAGE - Message:", messageId);
-    
     if (!token) {
       alert("Connectez-vous pour liker");
       return;
@@ -232,7 +220,6 @@ export default function CommunityPage() {
       return;
     }
 
-    // Optimistic update
     const newLikedState = !message.user_has_liked;
     const newLikesCount = newLikedState ? (message.nombre_likes || 0) + 1 : (message.nombre_likes || 0) - 1;
     
@@ -258,14 +245,10 @@ export default function CommunityPage() {
           'Content-Type': 'application/json'
         }
       });
-
-      console.log("📥 Réponse like message:", response.status);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("❌ Erreur like message:", errorData);
         
-        // Rollback
         setMessages(prev => {
           const forumMessages = prev[forumId] || [];
           const updatedMessages = forumMessages.map(msg => 
@@ -283,7 +266,6 @@ export default function CommunityPage() {
         alert("Erreur lors du like: " + (errorData.error || `Erreur ${response.status}`));
       } else {
         const data = await response.json();
-        console.log("✅ Message liké:", data);
         
         setMessages(prev => {
           const forumMessages = prev[forumId] || [];
@@ -328,7 +310,6 @@ export default function CommunityPage() {
     setLoadingMessages(prev => ({ ...prev, [forumId]: true }));
     
     try {
-      console.log("📥 Chargement messages forum:", forumId);
       const response = await fetch(`${API_URL}/forums/${forumId}/messages/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -341,9 +322,7 @@ export default function CommunityPage() {
       }
       
       const messagesData = await response.json();
-      console.log("✅ Messages chargés:", messagesData.length);
       
-      // S'assurer que chaque message a un tableau commentaires
       const messagesWithComments = messagesData.map(msg => ({
         ...msg,
         commentaires: msg.commentaires || [],
@@ -390,7 +369,6 @@ export default function CommunityPage() {
     setPostingMessage(prev => ({ ...prev, [forumId]: true }));
     
     try {
-      console.log("📤 Envoi message forum:", forumId);
       const response = await fetch(`${API_URL}/forums/${forumId}/messages/create/`, {
         method: 'POST',
         headers: {
@@ -408,7 +386,6 @@ export default function CommunityPage() {
       }
       
       const newMessage = await response.json();
-      console.log("✅ Message posté:", newMessage);
       
       const messageWithLikeAndComments = {
         ...newMessage,
@@ -472,7 +449,6 @@ export default function CommunityPage() {
       }
       
       try {
-        console.log("📥 Chargement des forums...");
         const response = await fetch(`${API_URL}/forums/`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -485,7 +461,6 @@ export default function CommunityPage() {
         }
         
         const forums = await response.json();
-        console.log("✅ Forums chargés:", forums.length);
         
         const filteredForums = forums.filter(forum => {
           if (role === "enseignant") {
@@ -510,7 +485,6 @@ export default function CommunityPage() {
           comments: []
         }));
         
-        console.log("📊 Forums transformés:", transformedForums);
         setPosts(transformedForums);
         setError("");
       } catch (error) {
@@ -527,7 +501,6 @@ export default function CommunityPage() {
     }
   }, [token, role, userId, API_URL]);
 
-  // MODIFIÉ : Créer un forum avec un message initial
   const handleCreatePost = async () => {
     if (!newPostTitle.trim() || !newPostContent.trim() || !token) {
       alert("Veuillez remplir le titre et le contenu avant de publier");
@@ -543,7 +516,7 @@ export default function CommunityPage() {
     try {
       const forumData = {
         titre_forum: newPostTitle,
-        contenu_message: newPostContent, // Envoyé comme premier message
+        contenu_message: newPostContent,
         type: forumTypeToCreate
       };
 
@@ -563,7 +536,6 @@ export default function CommunityPage() {
 
       const createdForum = await response.json();
       
-      // Charger immédiatement les messages du nouveau forum
       await loadForumMessages(createdForum.id_forum);
       
       const newForum = {
@@ -576,14 +548,13 @@ export default function CommunityPage() {
         userHasLiked: false,
         type: createdForum.type,
         isMine: true,
-        commentsCount: 1 // Le premier message compte comme un "commentaire"
+        commentsCount: 1
       };
 
       setPosts(prev => [newForum, ...prev]);
       setNewPostTitle("");
       setNewPostContent("");
       
-      // Développer automatiquement le nouveau forum
       setExpandedForums(prev => ({
         ...prev,
         [createdForum.id_forum]: true
@@ -600,8 +571,6 @@ export default function CommunityPage() {
   };
 
   const handleLike = async (forumId) => {
-    console.log("🎯 CLIC LIKE - Forum:", forumId);
-    
     if (!token) {
       alert("Connectez-vous pour liker");
       return;
@@ -620,7 +589,6 @@ export default function CommunityPage() {
     ));
 
     try {
-      console.log("📤 Envoi requête like...");
       const response = await fetch(`${API_URL}/forums/${forumId}/like/`, {
         method: 'POST',
         headers: {
@@ -628,12 +596,9 @@ export default function CommunityPage() {
           'Content-Type': 'application/json'
         }
       });
-
-      console.log("📥 Réponse:", response.status);
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("❌ Erreur serveur:", errorData);
         
         setPosts(prev => prev.map(p => 
           p.id === forumId 
@@ -643,7 +608,6 @@ export default function CommunityPage() {
         alert("Erreur lors du like: " + (errorData.error || "Erreur inconnue"));
       } else {
         const data = await response.json();
-        console.log("✅ Réponse serveur:", data);
         
         setPosts(prev => prev.map(p => 
           p.id === forumId 
@@ -669,8 +633,6 @@ export default function CommunityPage() {
   };
 
   const handleDeleteForum = async (forumId) => {
-    console.log("🗑️ CLIC SUPPRESSION - Forum:", forumId);
-    
     if (!token) {
       alert("Connectez-vous pour supprimer");
       return;
@@ -687,7 +649,6 @@ export default function CommunityPage() {
     setPosts(prev => prev.filter(post => post.id !== forumId));
 
     try {
-      console.log("📤 Envoi requête suppression...");
       const response = await fetch(`${API_URL}/forums/${forumId}/delete/`, {
         method: 'DELETE',
         headers: {
@@ -695,22 +656,15 @@ export default function CommunityPage() {
           'Content-Type': 'application/json'
         }
       });
-
-      console.log("📥 Réponse suppression:", response.status);
-      console.log("URL appelée:", `${API_URL}/forums/${forumId}/delete/`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("❌ Erreur suppression:", errorData);
         
         if (postToDelete) {
           setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
         }
         
         alert("Erreur lors de la suppression: " + (errorData.error || `Erreur ${response.status}`));
-      } else {
-        const data = await response.json().catch(() => ({}));
-        console.log("✅ Forum supprimé:", data.message || "Succès");
       }
     } catch (error) {
       console.error("❌ Erreur réseau suppression:", error);
@@ -748,19 +702,6 @@ export default function CommunityPage() {
       case "teacher-student": return "Tous";
       case "student-student": return "Étudiants";
       default: return type;
-    }
-  };
-
-  const getForumTypeClasses = (type) => {
-    switch(type) {
-      case "teacher-teacher": 
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "teacher-student": 
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "student-student": 
-        return "bg-green-100 text-green-800 border-green-200";
-      default: 
-        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -805,10 +746,14 @@ export default function CommunityPage() {
     <div className="flex min-h-screen bg-background">
       <Navbar />
       
+      {/* MÊME USER CIRCLE QUE L'AUTRE PAGE */}
       <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        {/* Notification Icon */}
         <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
           <Bell size={18} />
         </div>
+
+        
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
@@ -821,14 +766,14 @@ export default function CommunityPage() {
 
       <div className="flex-1 ml-56 p-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Communauté</h1>
+          <h1 className="text-3xl font-bold mb-2 text-blue">{t("community.title")}</h1>
           <p className="mb-6 text-grayc">
-            Échangez et collaborez avec la communauté
+            {t("community.subtitle") || "Échangez et collaborez avec la communauté"}
           </p>
         </header>
 
-        {/* MODIFIÉ : Formulaire avec titre et contenu séparés */}
-        <div className="bg-card rounded-3xl p-5 mb-8 border border-blue/20">
+        {/* Formulaire de création de forum */}
+        <div className="bg-card shadow-lg rounded-3xl p-5 mb-6 border border-blue/20">
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Titre du forum *
@@ -837,7 +782,7 @@ export default function CommunityPage() {
               placeholder="Donnez un titre à votre discussion"
               value={newPostTitle}
               onChange={(e) => setNewPostTitle(e.target.value)}
-              className="bg-surface border border-blue/20 rounded-xl px-5 py-3 font-semibold"
+              className="bg-surface text-textc border border-blue/20 rounded-xl px-5 py-3 font-semibold"
               disabled={isCreatingPost}
             />
           </div>
@@ -850,7 +795,7 @@ export default function CommunityPage() {
               placeholder="Écrivez votre message... (ce sera le premier message du forum)"
               value={newPostContent}
               onChange={(e) => setNewPostContent(e.target.value)}
-              className="w-full bg-surface border border-blue/20 rounded-xl px-5 py-3 h-40 resize-none"
+              className="w-full bg-surface text-textc border border-blue/20 rounded-xl px-5 py-3 h-40 resize-none"
               disabled={isCreatingPost}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -912,14 +857,7 @@ export default function CommunityPage() {
             </div>
           )}
           
-          <div className="flex justify-between items-center mt-4">
-            <div className="text-sm text-grayc">
-              Posté par <span className="font-semibold">{initials}</span>
-              <span className="ml-2 px-2 py-1 text-xs bg-blue/10 text-blue rounded">
-                {role === "enseignant" ? "Enseignant" : "Étudiant"}
-              </span>
-            </div>
-            
+          <div className="flex justify-end mt-4">
             <Button
               variant="send"
               text={isCreatingPost ? "Publication..." : "Publier"}
@@ -931,40 +869,23 @@ export default function CommunityPage() {
           </div>
         </div>
 
-        <div className="mb-6">
-          <div className="flex border-b border-gray-200">
-            {["recent", "popular", "myforums"].map(tab => (
-              <button
-                key={tab}
-                className={`flex items-center px-4 py-2 text-sm font-medium ${
-                  activeTab === tab
-                    ? "border-b-2 border-blue text-blue"
-                    : "text-grayc hover:text-blue"
-                }`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab === "recent" ? "Récent" : 
-                 tab === "popular" ? "Populaire" : "Mes forums"}
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Tabs */}
+        <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <div className="flex justify-between items-center mb-8">
-          <div className="text-sm text-grayc">
-            {isLoading ? "Chargement..." : 
-             `${finalPosts.length} forum${finalPosts.length > 1 ? 's' : ''}`}
-          </div>
-          
+        <div className="flex justify-end mt-4">
           <ModernDropdown
             value={forumType}
             onChange={setForumType}
-            options={forumOptions}
-            placeholder="Filtrer par type"
+            options={forumOptions.map(o => ({
+              ...o,
+              label: t(`forums.${o.value}`) || o.label
+            }))}
+            placeholder={t("forums.select") || "Filtrer par type"}
             disabled={isLoading}
           />
         </div>
 
+        {/* Posts */}
         <div className="space-y-6">
           {isLoading ? (
             <div className="flex justify-center py-12">
@@ -983,6 +904,7 @@ export default function CommunityPage() {
           ) : (
             finalPosts.map((post) => (
               <div key={post.id} className="bg-card rounded-2xl p-6 shadow-lg border border-blue/20 hover:border-blue/40 transition-colors">
+                {/* Header du forum */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-blue/20 flex items-center justify-center font-bold">
@@ -994,7 +916,13 @@ export default function CommunityPage() {
                         <p className="text-sm text-grayc">
                           {formatTimeAgo(post.time)}
                         </p>
-                        <span className={`px-2 py-1 text-xs rounded border ${getForumTypeClasses(post.type)}`}>
+                        <span className={`px-2 py-1 text-xs rounded border ${
+                          post.type === "teacher-teacher" 
+                            ? "bg-purple-100 text-purple-800 border-purple-200"
+                            : post.type === "teacher-student"
+                            ? "bg-blue-100 text-blue-800 border-blue-200"
+                            : "bg-green-100 text-green-800 border-green-200"
+                        }`}>
                           {getForumTypeLabel(post.type)}
                         </span>
                       </div>
@@ -1012,7 +940,7 @@ export default function CommunityPage() {
                   {post.title}
                 </h2>
                 
-                {/* Aperçu du premier message (contenu initial) */}
+                {/* Aperçu du premier message */}
                 {messages[post.id]?.[0] && !expandedForums[post.id] && (
                   <div className="mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <div className="flex items-start space-x-3">
@@ -1040,6 +968,7 @@ export default function CommunityPage() {
                   </div>
                 )}
                 
+                {/* Actions du forum */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center space-x-6">
                     <button 
@@ -1091,6 +1020,7 @@ export default function CommunityPage() {
                   )}
                 </div>
                 
+                {/* Section messages (développée) */}
                 {expandedForums[post.id] && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <div className="mb-4 max-h-96 overflow-y-auto pr-2">
@@ -1135,20 +1065,13 @@ export default function CommunityPage() {
                                           {message.nombre_likes || 0}
                                         </span>
                                       </button>
-                                      
-                                      {message.utilisateur === userId && (
-                                        <button className="text-red-400 hover:text-red-600 text-xs">
-                                          <Trash2 size={12} />
-                                        </button>
-                                      )}
                                     </div>
                                   </div>
                                   
                                   <p className="mt-2 text-gray-700">{message.contenu_message}</p>
                                   
-                                  {/* SECTION COMMENTAIRES DU MESSAGE */}
+                                  {/* Commentaires du message */}
                                   <div className="mt-4">
-                                    {/* Bouton pour voir les commentaires */}
                                     <button
                                       onClick={() => toggleMessageComments(message.id_message)}
                                       className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600 mb-2"
@@ -1162,10 +1085,9 @@ export default function CommunityPage() {
                                       )}
                                     </button>
                                     
-                                    {/* Commentaires développés */}
                                     {expandedComments[message.id_message] && (
                                       <div className="ml-2 border-l-2 border-gray-200 pl-4">
-                                        {/* Liste des commentaires existants */}
+                                        {/* Liste des commentaires */}
                                         <div className="space-y-3 mb-4">
                                           {message.commentaires?.map(comment => (
                                             <div key={comment.id_commentaire} className="bg-gray-100 rounded p-3">
@@ -1239,6 +1161,7 @@ export default function CommunityPage() {
                       )}
                     </div>
                     
+                    {/* Formulaire pour nouveau message */}
                     <div className="flex items-center space-x-2">
                       <Input
                         placeholder="Écrivez votre réponse..."
