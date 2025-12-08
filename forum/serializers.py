@@ -1,6 +1,7 @@
 # forum/serializers.py
 from rest_framework import serializers
-from .models import Forum, Message, Commentaire, Like
+from .models import Forum, Message, Commentaire, Like, MessageLike
+
 
 class ForumSerializer(serializers.ModelSerializer):
     utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
@@ -8,7 +9,7 @@ class ForumSerializer(serializers.ModelSerializer):
     nombre_messages = serializers.SerializerMethodField()
     nombre_likes = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()
-    
+   
     class Meta:
         model = Forum
         fields = [
@@ -24,17 +25,16 @@ class ForumSerializer(serializers.ModelSerializer):
             'user_has_liked'
         ]
         read_only_fields = ('utilisateur', 'date_creation')
-    
+   
     def get_nombre_messages(self, obj):
         return obj.messages.count()
-    
+   
     def get_nombre_likes(self, obj):
         return obj.likes.count()
-    
+   
     def get_user_has_liked(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            # Vérifier si l'utilisateur connecté a liké ce forum
             return obj.likes.filter(utilisateur=request.user).exists()
         return False
 
@@ -43,7 +43,9 @@ class MessageSerializer(serializers.ModelSerializer):
     utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
     utilisateur_prenom = serializers.CharField(source='utilisateur.prenom', read_only=True)
     nombre_commentaires = serializers.SerializerMethodField()
-    
+    nombre_likes = serializers.SerializerMethodField()  # NOUVEAU
+    user_has_liked = serializers.SerializerMethodField()  # NOUVEAU
+   
     class Meta:
         model = Message
         fields = [
@@ -54,18 +56,29 @@ class MessageSerializer(serializers.ModelSerializer):
             'utilisateur_prenom',
             'contenu_message',
             'date_publication',
-            'nombre_commentaires'
+            'nombre_commentaires',
+            'nombre_likes',  # NOUVEAU
+            'user_has_liked'  # NOUVEAU
         ]
         read_only_fields = ('forum', 'utilisateur', 'date_publication')
-    
+   
     def get_nombre_commentaires(self, obj):
         return obj.commentaires.count()
+   
+    def get_nombre_likes(self, obj):  # NOUVELLE MÉTHODE
+        return obj.likes.count()
+   
+    def get_user_has_liked(self, obj):  # NOUVELLE MÉTHODE
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(utilisateur=request.user).exists()
+        return False
 
 
 class CommentaireSerializer(serializers.ModelSerializer):
     utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
     utilisateur_prenom = serializers.CharField(source='utilisateur.prenom', read_only=True)
-    
+   
     class Meta:
         model = Commentaire
         fields = [
@@ -84,4 +97,11 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
         fields = ['id_like', 'forum', 'utilisateur', 'date_liker']
+        read_only_fields = ('date_liker',)
+
+
+class MessageLikeSerializer(serializers.ModelSerializer):  # NOUVEAU SERIALIZER
+    class Meta:
+        model = MessageLike
+        fields = ['id', 'message', 'utilisateur', 'date_liker']
         read_only_fields = ('date_liker',)

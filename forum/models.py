@@ -2,16 +2,17 @@
 from django.db import models
 from users.models import Utilisateur
 
+
 class Forum(models.Model):
     id_forum = models.AutoField(primary_key=True)
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, null=True, blank=True)
     type = models.CharField(max_length=50)
     titre_forum = models.CharField(max_length=255)
     date_creation = models.DateTimeField(auto_now_add=True)
-    
+   
     class Meta:
         ordering = ['-date_creation']
-    
+   
     def __str__(self):
         return f"{self.titre_forum} ({self.type})"
 
@@ -22,12 +23,24 @@ class Message(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     contenu_message = models.TextField()
     date_publication = models.DateTimeField(auto_now_add=True)
-    
+   
     class Meta:
         ordering = ['date_publication']
-    
+   
     def __str__(self):
         return f"Message {self.id_message} - {self.utilisateur.email[:20]}"
+
+
+class MessageLike(models.Model):  # NOUVEAU MODÈLE
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='likes')
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    date_liker = models.DateTimeField(auto_now_add=True)
+   
+    class Meta:
+        unique_together = ('message', 'utilisateur')
+   
+    def __str__(self):
+        return f"MessageLike {self.id} - Message {self.message.id_message}"
 
 
 class Commentaire(models.Model):
@@ -36,10 +49,10 @@ class Commentaire(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='commentaires')
     date_commpub = models.DateTimeField(auto_now_add=True)
     contenu_comm = models.TextField()
-    
+   
     class Meta:
         ordering = ['date_commpub']
-    
+   
     def __str__(self):
         return f"Commentaire {self.id_commentaire} - {self.utilisateur.email[:20]}"
 
@@ -48,9 +61,9 @@ class Like(models.Model):
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE, related_name='likes')
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     date_liker = models.DateTimeField(auto_now_add=True)
-    
+   
     class Meta:
         unique_together = ('forum', 'utilisateur')
-    
+   
     def __str__(self):
         return f"Like {self.id} - Forum {self.forum.id_forum}"

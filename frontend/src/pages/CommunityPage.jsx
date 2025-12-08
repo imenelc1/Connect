@@ -1,14 +1,14 @@
-import { FiSend } from "react-icons/fi";
+import { FiSend, FiMessageSquare } from "react-icons/fi";
 import Input from "../components/common/Input";
 import Navbar from "../components/common/NavBar";
 import UserCircle from "../components/common/UserCircle";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
 import ThemeContext from "../context/ThemeContext";
 import Tabs from "../components/common/Tabs";
 import Post from "../components/common/Post";
 import Button from "../components/common/Button";
 import ModernDropdown from "../components/common/ModernDropdown";
-import { Bell, Loader, Heart } from "lucide-react";
+import { Bell, Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
@@ -17,35 +17,37 @@ export default function CommunityPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [error, setError] = useState("");
+  const [deletingForumId, setDeletingForumId] = useState(null);
+  const [expandedForums, setExpandedForums] = useState({});
+  const [messages, setMessages] = useState({});
+  const [newMessages, setNewMessages] = useState({});
+  const [loadingMessages, setLoadingMessages] = useState({});
+  const [postingMessage, setPostingMessage] = useState({});
+  const [likingMessageId, setLikingMessageId] = useState(null);
   const navigate = useNavigate();
   const { t } = useTranslation("community");
   
-  // Récupération de l'utilisateur
   const userData = JSON.parse(localStorage.getItem("user")) || {};
   const token = localStorage.getItem("access") || localStorage.getItem("token");
   const role = userData?.role;
   const userId = userData?.user_id;
   
-  // NOUVEAU : État pour le type de forum à créer
+  const messagesEndRef = useRef(null);
+  
   const [forumTypeToCreate, setForumTypeToCreate] = useState("");
   
-  // URL de l'API
   const API_URL = window.location.hostname === "localhost" 
     ? "http://localhost:8000/api" 
     : "/api";
 
-  // Définir le type par défaut selon le rôle
   useEffect(() => {
     if (role === "enseignant") {
-      // Enseignant peut choisir entre teacher-teacher et teacher-student
       setForumTypeToCreate("teacher-teacher");
     } else {
-      // Étudiant peut seulement créer student-student
       setForumTypeToCreate("student-student");
     }
   }, [role]);
 
-  // Redirection si non connecté
   useEffect(() => {
     if (!userData || !token) {
       navigate("/login");
@@ -55,7 +57,6 @@ export default function CommunityPage() {
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
   const { toggleDarkMode } = useContext(ThemeContext);
 
-  // Options de filtre selon le rôle
   const forumOptions = [
     { value: "all", label: t("forums.all") || "All forums" },
     { value: "teacher-teacher", label: t("forums.teacher-teacher") || "Teacher ↔ Teacher" },
@@ -71,7 +72,223 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
 
-  // Fonction pour rafraîchir l'état d'un forum
+  // Fonction pour liker un message
+  const handleLikeMessage = async (messageId, forumId) => {
+    console.log("🎯 CLIC LIKE MESSAGE - Message:", messageId);
+    
+    if (!token) {
+      alert("Connectez-vous pour liker");
+      return;
+    }
+
+    setLikingMessageId(messageId);
+
+    const currentMessages = messages[forumId] || [];
+    const message = currentMessages.find(m => m.id_message === messageId);
+    
+    if (!message) {
+      setLikingMessageId(null);
+      return;
+    }
+
+    // Optimistic update
+    const newLikedState = !message.user_has_liked;
+    const newLikesCount = newLikedState ? (message.nombre_likes || 0) + 1 : (message.nombre_likes || 0) - 1;
+    
+    setMessages(prev => {
+      const forumMessages = prev[forumId] || [];
+      const updatedMessages = forumMessages.map(msg => 
+        msg.id_message === messageId
+          ? { 
+              ...msg, 
+              nombre_likes: newLikesCount, 
+              user_has_liked: newLikedState 
+            }
+          : msg
+      );
+      return { ...prev, [forumId]: updatedMessages };
+    });
+
+    try {
+      const response = await fetch(`${API_URL}/messages/${messageId}/like/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log("📥 Réponse like message:", response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Erreur like message:", errorData);
+        
+        // Rollback
+        setMessages(prev => {
+          const forumMessages = prev[forumId] || [];
+          const updatedMessages = forumMessages.map(msg => 
+            msg.id_message === messageId
+              ? { 
+                  ...msg, 
+                  nombre_likes: message.nombre_likes || 0, 
+                  user_has_liked: message.user_has_liked || false 
+                }
+              : msg
+          );
+          return { ...prev, [forumId]: updatedMessages };
+        });
+        
+        alert("Erreur lors du like: " + (errorData.error || `Erreur ${response.status}`));
+      } else {
+        const data = await response.json();
+        console.log("✅ Message liké:", data);
+        
+        setMessages(prev => {
+          const forumMessages = prev[forumId] || [];
+          const updatedMessages = forumMessages.map(msg => 
+            msg.id_message === messageId
+              ? { 
+                  ...msg, 
+                  nombre_likes: data.likes_count || newLikesCount, 
+                  user_has_liked: data.user_has_liked || newLikedState 
+                }
+              : msg
+          );
+          return { ...prev, [forumId]: updatedMessages };
+        });
+      }
+    } catch (error) {
+      console.error("❌ Erreur réseau like message:", error);
+      
+      setMessages(prev => {
+        const forumMessages = prev[forumId] || [];
+        const updatedMessages = forumMessages.map(msg => 
+          msg.id_message === messageId
+            ? { 
+                ...msg, 
+                nombre_likes: message.nombre_likes || 0, 
+                user_has_liked: message.user_has_liked || false 
+              }
+            : msg
+        );
+        return { ...prev, [forumId]: updatedMessages };
+      });
+      
+      alert("Erreur réseau lors du like");
+    } finally {
+      setLikingMessageId(null);
+    }
+  };
+
+  const loadForumMessages = async (forumId) => {
+    if (!token || !forumId) return;
+    
+    setLoadingMessages(prev => ({ ...prev, [forumId]: true }));
+    
+    try {
+      console.log("📥 Chargement messages forum:", forumId);
+      const response = await fetch(`${API_URL}/forums/${forumId}/messages/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const messagesData = await response.json();
+      console.log("✅ Messages chargés:", messagesData.length);
+      
+      setMessages(prev => ({ ...prev, [forumId]: messagesData }));
+      
+      setPosts(prev => prev.map(post => 
+        post.id === forumId 
+          ? { ...post, commentsCount: messagesData.length }
+          : post
+      ));
+      
+    } catch (error) {
+      console.error("❌ Erreur chargement messages:", error);
+      setMessages(prev => ({ ...prev, [forumId]: [] }));
+    } finally {
+      setLoadingMessages(prev => ({ ...prev, [forumId]: false }));
+    }
+  };
+
+  const toggleForumMessages = async (forumId) => {
+    const isExpanded = expandedForums[forumId];
+    
+    if (!isExpanded && !messages[forumId]) {
+      await loadForumMessages(forumId);
+    }
+    
+    setExpandedForums(prev => ({
+      ...prev,
+      [forumId]: !isExpanded
+    }));
+  };
+
+  const handlePostMessage = async (forumId) => {
+    const messageContent = newMessages[forumId]?.trim();
+    
+    if (!messageContent || !token) {
+      alert("Écrivez quelque chose avant d'envoyer");
+      return;
+    }
+    
+    setPostingMessage(prev => ({ ...prev, [forumId]: true }));
+    
+    try {
+      console.log("📤 Envoi message forum:", forumId);
+      const response = await fetch(`${API_URL}/forums/${forumId}/messages/create/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contenu_message: messageContent
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erreur ${response.status}`);
+      }
+      
+      const newMessage = await response.json();
+      console.log("✅ Message posté:", newMessage);
+      
+      const messageWithLike = {
+        ...newMessage,
+        user_has_liked: false,
+        nombre_likes: 0
+      };
+      
+      setMessages(prev => ({
+        ...prev,
+        [forumId]: [...(prev[forumId] || []), messageWithLike]
+      }));
+      
+      setPosts(prev => prev.map(post => 
+        post.id === forumId 
+          ? { ...post, commentsCount: (post.commentsCount || 0) + 1 }
+          : post
+      ));
+      
+      setNewMessages(prev => ({ ...prev, [forumId]: "" }));
+      
+    } catch (error) {
+      console.error("❌ Erreur envoi message:", error);
+      alert("Erreur lors de l'envoi du message: " + error.message);
+    } finally {
+      setPostingMessage(prev => ({ ...prev, [forumId]: false }));
+    }
+  };
+
   const refreshForumState = async (forumId) => {
     if (!token || !forumId) return;
     
@@ -96,7 +313,6 @@ export default function CommunityPage() {
     }
   };
 
-  // Chargement des forums depuis l'API
   useEffect(() => {
     const fetchForums = async () => {
       if (!token) {
@@ -121,7 +337,6 @@ export default function CommunityPage() {
         const forums = await response.json();
         console.log("✅ Forums chargés:", forums.length);
         
-        // FILTRAGE selon le rôle
         const filteredForums = forums.filter(forum => {
           if (role === "enseignant") {
             return forum.type !== "student-student";
@@ -130,23 +345,20 @@ export default function CommunityPage() {
           }
         });
         
-        // TRANSFORMATION avec les données correctes
-        // Dans le useEffect de chargement des forums - CORRECTION
-const transformedForums = filteredForums.map(forum => ({
-  id: forum.id_forum,
-  authorInitials: `${forum.utilisateur_nom?.[0] || ""}${forum.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
-  authorName: `${forum.utilisateur_prenom || ""} ${forum.utilisateur_nom || ""}`,
-  time: forum.date_creation,
-  title: forum.titre_forum,
-  likes: forum.nombre_likes || 0,
-  commentsCount: forum.nombre_messages || 0,
-  type: forum.type || (role === "enseignant" ? "teacher-teacher" : "student-student"),
-  userHasLiked: forum.user_has_liked || false,
-  forumData: forum,
-  // CORRECTION : Utiliser forum.utilisateur (qui est l'ID de l'utilisateur)
-  isMine: forum.utilisateur === userId, // forum.utilisateur est déjà l'ID
-  comments: []
-}));
+        const transformedForums = filteredForums.map(forum => ({
+          id: forum.id_forum,
+          authorInitials: `${forum.utilisateur_nom?.[0] || ""}${forum.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
+          authorName: `${forum.utilisateur_prenom || ""} ${forum.utilisateur_nom || ""}`,
+          time: forum.date_creation,
+          title: forum.titre_forum,
+          likes: forum.nombre_likes || 0,
+          commentsCount: forum.nombre_messages || 0,
+          type: forum.type || (role === "enseignant" ? "teacher-teacher" : "student-student"),
+          userHasLiked: forum.user_has_liked || false,
+          forumData: forum,
+          isMine: forum.utilisateur === userId,
+          comments: []
+        }));
         
         console.log("📊 Forums transformés:", transformedForums);
         setPosts(transformedForums);
@@ -165,14 +377,12 @@ const transformedForums = filteredForums.map(forum => ({
     }
   }, [token, role, userId, API_URL]);
 
-  // Création d'un nouveau forum
   const handleCreatePost = async () => {
     if (!newPost.trim() || !token) {
       alert("Écrivez quelque chose avant de publier");
       return;
     }
 
-    // Validation pour les enseignants
     if (role === "enseignant" && !forumTypeToCreate) {
       alert("Veuillez sélectionner à qui s'adresse ce forum");
       return;
@@ -210,7 +420,7 @@ const transformedForums = filteredForums.map(forum => ({
         userHasLiked: false,
         type: createdForum.type,
         isMine: true,
-        comments: []
+        commentsCount: 0
       };
 
       setPosts(prev => [newForum, ...prev]);
@@ -225,7 +435,6 @@ const transformedForums = filteredForums.map(forum => ({
     }
   };
 
-  // Gestion des likes - VERSION CORRIGÉE
   const handleLike = async (forumId) => {
     console.log("🎯 CLIC LIKE - Forum:", forumId);
     
@@ -234,22 +443,18 @@ const transformedForums = filteredForums.map(forum => ({
       return;
     }
 
-    // Trouver le post actuel
     const post = posts.find(p => p.id === forumId);
     if (!post) return;
 
-    // Optimistic update IMMÉDIAT
     const newLikedState = !post.userHasLiked;
     const newLikesCount = newLikedState ? post.likes + 1 : post.likes - 1;
     
-    // Mettre à jour l'état local IMMÉDIATEMENT
     setPosts(prev => prev.map(p => 
       p.id === forumId 
         ? { ...p, likes: newLikesCount, userHasLiked: newLikedState }
         : p
     ));
 
-    // Envoyer au serveur
     try {
       console.log("📤 Envoi requête like...");
       const response = await fetch(`${API_URL}/forums/${forumId}/like/`, {
@@ -266,7 +471,6 @@ const transformedForums = filteredForums.map(forum => ({
         const errorData = await response.json();
         console.error("❌ Erreur serveur:", errorData);
         
-        // ANNULER si erreur serveur
         setPosts(prev => prev.map(p => 
           p.id === forumId 
             ? { ...p, likes: post.likes, userHasLiked: post.userHasLiked }
@@ -277,7 +481,6 @@ const transformedForums = filteredForums.map(forum => ({
         const data = await response.json();
         console.log("✅ Réponse serveur:", data);
         
-        // Mettre à jour avec les données réelles du serveur
         setPosts(prev => prev.map(p => 
           p.id === forumId 
             ? { 
@@ -288,12 +491,10 @@ const transformedForums = filteredForums.map(forum => ({
             : p
         ));
         
-        // Rafraîchir l'état pour être sûr
         refreshForumState(forumId);
       }
     } catch (error) {
       console.error("❌ Erreur réseau:", error);
-      // Annuler si erreur réseau
       setPosts(prev => prev.map(p => 
         p.id === forumId 
           ? { ...p, likes: post.likes, userHasLiked: post.userHasLiked }
@@ -303,7 +504,63 @@ const transformedForums = filteredForums.map(forum => ({
     }
   };
 
-  // Fonction pour formater la date
+  const handleDeleteForum = async (forumId) => {
+    console.log("🗑️ CLIC SUPPRESSION - Forum:", forumId);
+    
+    if (!token) {
+      alert("Connectez-vous pour supprimer");
+      return;
+    }
+
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce forum ? Cette action est irréversible.")) {
+      return;
+    }
+
+    setDeletingForumId(forumId);
+
+    const postToDelete = posts.find(p => p.id === forumId);
+    
+    setPosts(prev => prev.filter(post => post.id !== forumId));
+
+    try {
+      console.log("📤 Envoi requête suppression...");
+      const response = await fetch(`${API_URL}/forums/${forumId}/delete/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log("📥 Réponse suppression:", response.status);
+      console.log("URL appelée:", `${API_URL}/forums/${forumId}/delete/`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Erreur suppression:", errorData);
+        
+        if (postToDelete) {
+          setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
+        }
+        
+        alert("Erreur lors de la suppression: " + (errorData.error || `Erreur ${response.status}`));
+      } else {
+        const data = await response.json().catch(() => ({}));
+        console.log("✅ Forum supprimé:", data.message || "Succès");
+      }
+    } catch (error) {
+      console.error("❌ Erreur réseau suppression:", error);
+      
+      if (postToDelete) {
+        setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
+      }
+      
+      alert("Erreur réseau lors de la suppression");
+    } finally {
+      setDeletingForumId(null);
+    }
+  };
+
   const formatTimeAgo = (dateString) => {
     if (!dateString) return "récemment";
     
@@ -321,7 +578,6 @@ const transformedForums = filteredForums.map(forum => ({
     return date.toLocaleDateString();
   };
 
-  // Fonction pour obtenir le label du type de forum
   const getForumTypeLabel = (type) => {
     switch(type) {
       case "teacher-teacher": return "Enseignants";
@@ -331,7 +587,6 @@ const transformedForums = filteredForums.map(forum => ({
     }
   };
 
-  // Fonction pour obtenir les classes CSS selon le type
   const getForumTypeClasses = (type) => {
     switch(type) {
       case "teacher-teacher": 
@@ -345,30 +600,26 @@ const transformedForums = filteredForums.map(forum => ({
     }
   };
 
-  // Filtrage des posts
   const getFilteredPosts = () => {
     let filtered = [...posts];
 
-    // Filtre par type
     if (forumType !== "all") {
       filtered = filtered.filter(post => post.type === forumType);
     }
 
-    // Filtre par onglet
     switch (activeTab) {
       case "popular":
         return filtered.sort((a, b) => b.likes - a.likes);
       case "myforums":
         return filtered.filter(post => post.isMine)
           .sort((a, b) => new Date(b.time) - new Date(a.time));
-      default: // recent
+      default:
         return filtered.sort((a, b) => new Date(b.time) - new Date(a.time));
     }
   };
 
   const finalPosts = getFilteredPosts();
 
-  // Si pas connecté
   if (!userData || !token) {
     return (
       <div className="flex min-h-screen bg-background items-center justify-center">
@@ -390,7 +641,6 @@ const transformedForums = filteredForums.map(forum => ({
     <div className="flex min-h-screen bg-background">
       <Navbar />
       
-      {/* Header */}
       <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
         <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
           <Bell size={18} />
@@ -405,7 +655,6 @@ const transformedForums = filteredForums.map(forum => ({
         />
       </div>
 
-      {/* Contenu principal */}
       <div className="flex-1 ml-56 p-8">
         <header className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Communauté</h1>
@@ -414,7 +663,6 @@ const transformedForums = filteredForums.map(forum => ({
           </p>
         </header>
 
-        {/* Formulaire création */}
         <div className="bg-card rounded-3xl p-5 mb-8 border border-blue/20">
           <Input
             placeholder="De quoi voulez-vous discuter ?"
@@ -425,7 +673,6 @@ const transformedForums = filteredForums.map(forum => ({
             disabled={isCreatingPost}
           />
           
-          {/* NOUVEAU : Sélecteur de type de forum */}
           {role === "enseignant" ? (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -499,7 +746,6 @@ const transformedForums = filteredForums.map(forum => ({
           </div>
         </div>
 
-        {/* Onglets */}
         <div className="mb-6">
           <div className="flex border-b border-gray-200">
             {["recent", "popular", "myforums"].map(tab => (
@@ -519,7 +765,6 @@ const transformedForums = filteredForums.map(forum => ({
           </div>
         </div>
 
-        {/* Filtres */}
         <div className="flex justify-between items-center mb-8">
           <div className="text-sm text-grayc">
             {isLoading ? "Chargement..." : 
@@ -535,7 +780,6 @@ const transformedForums = filteredForums.map(forum => ({
           />
         </div>
 
-        {/* Liste des posts */}
         <div className="space-y-6">
           {isLoading ? (
             <div className="flex justify-center py-12">
@@ -554,7 +798,6 @@ const transformedForums = filteredForums.map(forum => ({
           ) : (
             finalPosts.map((post) => (
               <div key={post.id} className="bg-card rounded-2xl p-6 shadow-lg border border-blue/20 hover:border-blue/40 transition-colors">
-                {/* En-tête */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-blue/20 flex items-center justify-center font-bold">
@@ -579,13 +822,10 @@ const transformedForums = filteredForums.map(forum => ({
                   )}
                 </div>
                 
-                {/* Contenu */}
                 <p className="mb-4 text-gray-800">{post.title}</p>
                 
-                {/* Actions */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center space-x-6">
-                    {/* Bouton Like CORRIGÉ */}
                     <button 
                       onClick={() => handleLike(post.id)}
                       className="flex items-center space-x-2 text-grayc hover:text-red-500 transition-colors"
@@ -600,20 +840,131 @@ const transformedForums = filteredForums.map(forum => ({
                       </span>
                     </button>
                     
-                    {/* Bouton Comment */}
-                    <button className="flex items-center space-x-2 text-grayc hover:text-blue">
-                      <span>💬</span>
-                      <span>{post.commentsCount} commentaires</span>
+                    <button 
+                      onClick={() => toggleForumMessages(post.id)}
+                      className="flex items-center space-x-2 text-grayc hover:text-blue transition-colors"
+                    >
+                      <FiMessageSquare size={18} />
+                      <span>{post.commentsCount} commentaire{post.commentsCount !== 1 ? 's' : ''}</span>
+                      {expandedForums[post.id] ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      )}
                     </button>
                   </div>
                   
-                  {/* Bouton Delete */}
                   {post.isMine && (
-                    <button className="text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition-colors">
-                      Supprimer
+                    <button 
+                      onClick={() => handleDeleteForum(post.id)}
+                      disabled={deletingForumId === post.id}
+                      className="text-red-500 hover:text-red-700 px-3 py-1 rounded hover:bg-red-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {deletingForumId === post.id ? (
+                        <>
+                          <Loader className="h-4 w-4 animate-spin" />
+                          Suppression...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 size={16} />
+                          Supprimer
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
+                
+                {expandedForums[post.id] && (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="mb-4 max-h-96 overflow-y-auto pr-2">
+                      {loadingMessages[post.id] ? (
+                        <div className="flex justify-center py-8">
+                          <Loader className="animate-spin" size={20} />
+                        </div>
+                      ) : messages[post.id]?.length > 0 ? (
+                        <div className="space-y-4">
+                          {messages[post.id].map((message) => (
+                            <div key={message.id_message} className="bg-gray-50 rounded-lg p-4">
+                              <div className="flex items-start space-x-3">
+                                <div className="w-8 h-8 rounded-full bg-blue/20 flex items-center justify-center text-sm font-bold">
+                                  {`${message.utilisateur_prenom?.[0] || ""}${message.utilisateur_nom?.[0] || ""}`.toUpperCase()}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <span className="font-medium">
+                                        {message.utilisateur_prenom} {message.utilisateur_nom}
+                                      </span>
+                                      <span className="text-xs text-grayc ml-2">
+                                        {formatTimeAgo(message.date_publication)}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <button 
+                                        onClick={() => handleLikeMessage(message.id_message, post.id)}
+                                        disabled={likingMessageId === message.id_message}
+                                        className="flex items-center space-x-1 text-grayc hover:text-red-500 transition-colors disabled:opacity-50"
+                                      >
+                                        {likingMessageId === message.id_message ? (
+                                          <Loader className="h-3 w-3 animate-spin" />
+                                        ) : (
+                                          <Heart 
+                                            size={14} 
+                                            fill={message.user_has_liked ? "#ef4444" : "none"} 
+                                            color={message.user_has_liked ? "#ef4444" : "#6b7280"} 
+                                          />
+                                        )}
+                                        <span className={`text-xs ${message.user_has_liked ? "text-red-500 font-semibold" : ""}`}>
+                                          {message.nombre_likes || 0}
+                                        </span>
+                                      </button>
+                                      
+                                      {message.utilisateur === userId && (
+                                        <button className="text-red-400 hover:text-red-600 text-xs">
+                                          <Trash2 size={12} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <p className="mt-2 text-gray-700">{message.contenu_message}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <div ref={messagesEndRef} />
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-grayc">
+                          <MessageSquare className="mx-auto h-12 w-12 text-gray-300 mb-2" />
+                          <p>Aucun commentaire encore. Soyez le premier à commenter !</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        placeholder="Écrivez votre commentaire..."
+                        value={newMessages[post.id] || ""}
+                        onChange={(e) => setNewMessages(prev => ({ ...prev, [post.id]: e.target.value }))}
+                        onKeyPress={(e) => e.key === 'Enter' && !postingMessage[post.id] && handlePostMessage(post.id)}
+                        className="flex-1 bg-white border border-gray-300 rounded-full px-4 py-2"
+                        disabled={postingMessage[post.id]}
+                      />
+                      <button
+                        onClick={() => handlePostMessage(post.id)}
+                        disabled={postingMessage[post.id] || !newMessages[post.id]?.trim()}
+                        className="bg-blue text-white p-2 rounded-full hover:bg-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {postingMessage[post.id] ? (
+                          <Loader className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <Send size={18} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}

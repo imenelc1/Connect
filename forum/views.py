@@ -2,7 +2,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Forum, Message, Commentaire, Like
+from .models import Forum, Message, Commentaire, Like, MessageLike
 from .serializers import ForumSerializer, MessageSerializer, CommentaireSerializer
 from users.jwt_helpers import IsAuthenticatedJWT
 
@@ -53,7 +53,7 @@ def delete_forum(request, forum_id):
     )
 
 
-# ========== LIKES ==========
+# ========== LIKES FORUM ==========
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def like_forum(request, forum_id):
@@ -96,11 +96,63 @@ def check_user_like(request, forum_id):
         return Response({
             'forum_id': forum_id,
             'user_has_liked': has_liked,
-            'likes_count': forum.likes.count()  # CORRECTION : Utiliser .count()
+            'likes_count': forum.likes.count()
         }, status=status.HTTP_200_OK)
     except Forum.DoesNotExist:
         return Response(
             {'error': 'Forum introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+# ========== LIKES MESSAGE ==========
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedJWT])
+def like_message(request, message_id):
+    """Like/Unlike un message (commentaire)"""
+    try:
+        message = Message.objects.get(pk=message_id)
+    except Message.DoesNotExist:
+        return Response(
+            {'error': 'Message introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    like_exists = MessageLike.objects.filter(message=message, utilisateur=request.user).exists()
+    
+    if like_exists:
+        MessageLike.objects.filter(message=message, utilisateur=request.user).delete()
+        action = "unliked"
+    else:
+        MessageLike.objects.create(message=message, utilisateur=request.user)
+        action = "liked"
+    
+    likes_count = MessageLike.objects.filter(message=message).count()
+    
+    return Response({
+        'message': f'Message {action} avec succès',
+        'likes_count': likes_count,
+        'user_has_liked': not like_exists,
+        'action': action
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def check_user_message_like(request, message_id):
+    """Vérifie si l'utilisateur a liké un message"""
+    try:
+        message = Message.objects.get(pk=message_id)
+        has_liked = MessageLike.objects.filter(message=message, utilisateur=request.user).exists()
+        
+        return Response({
+            'message_id': message_id,
+            'user_has_liked': has_liked,
+            'likes_count': message.likes.count()
+        }, status=status.HTTP_200_OK)
+    except Message.DoesNotExist:
+        return Response(
+            {'error': 'Message introuvable'}, 
             status=status.HTTP_404_NOT_FOUND
         )
 
