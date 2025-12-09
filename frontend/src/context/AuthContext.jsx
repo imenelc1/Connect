@@ -4,11 +4,11 @@ import { jwtDecode } from "jwt-decode";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-
   const [user, setUser] = useState(null);
 
+  // Charger la session si un token existe
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
 
     if (token) {
       try {
@@ -17,19 +17,19 @@ export function AuthProvider({ children }) {
         setUser({
           id: payload.user_id,
           role: payload.role,
-          username: payload.username,
           email: payload.email,
         });
 
       } catch (err) {
         console.error("TOKEN INVALID → logout auto");
-        localStorage.removeItem("access_token");
+        localStorage.removeItem("token");
+        setUser(null);
       }
     }
   }, []);
 
   const logout = () => {
-    localStorage.removeItem("access_token");
+    localStorage.removeItem("token");
     setUser(null);
   };
 

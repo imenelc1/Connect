@@ -12,12 +12,17 @@ def jwt_authenticate(request):
         raise exceptions.AuthenticationFailed('Token manquant')
 
     try:
-        token = auth_header.split(' ')[1]
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        user = Utilisateur.objects.get(id_utilisateur=payload['user_id'])
-        return user, payload
-    except (jwt.ExpiredSignatureError, jwt.DecodeError, Utilisateur.DoesNotExist):
-        raise exceptions.AuthenticationFailed('Token invalide')
+      token = auth_header.split(' ')[1]
+      payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+      user = Utilisateur.objects.get(id_utilisateur=payload['user_id'])
+      return user, payload
+    except jwt.ExpiredSignatureError:
+      raise exceptions.AuthenticationFailed('Token expiré')
+    except jwt.DecodeError:
+      raise exceptions.AuthenticationFailed('Token invalide')
+    except Utilisateur.DoesNotExist:
+      raise exceptions.AuthenticationFailed('Utilisateur introuvable')
+
 
 def jwt_required(view_func):
     @wraps(view_func)

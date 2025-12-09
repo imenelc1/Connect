@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from .models import Utilisateur, Etudiant, Enseignant, Administrateur
+from .models import Utilisateur, Etudiant, Enseignant, Administrateur, PasswordResetToken
 from .serializers import UtilisateurSerializer, EtudiantSerializer, EnseignantSerializer, AdministrateurSerializer
 import jwt
 from django.conf import settings
@@ -11,6 +11,10 @@ from datetime import datetime, timedelta
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import ProfileSerializer
 from .jwt_helpers import jwt_required, IsAuthenticatedJWT
+from django.core.mail import send_mail
+import uuid
+from django.core.mail import send_mail
+
 # -----------------------------
 # Constantes JWT manquantes
 # -----------------------------
@@ -193,3 +197,61 @@ class ChangePasswordView(APIView):
         user.save()
 
         return Response({"detail": "Mot de passe mis à jour avec succès"}, status=200)
+
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email requis"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = Utilisateur.objects.get(adresse_email=email)
+        except Utilisateur.DoesNotExist:
+            return Response({"error": "Utilisateur introuvable"}, status=status.HTTP_404_NOT_FOUND)
+
+        token = PasswordResetToken.objects.create(user=user)
+        reset_link = f"http://localhost:5173/reset-password?token={token.token}"
+
+        # envoyer email
+        send_mail(
+            "Réinitialisation de mot de passe",
+            f"Cliquer sur ce lien pour réinitialiser votre mot de passe : {reset_link}",
+            "no-reply@platform.com",
+            [email],
+            fail_silently=False,
+        )
+
+        return Response({"message": "Lien de réinitialisation envoyé"})
+    
+class ResetPasswordView(APIView):
+    def post(self, request):
+        token_str = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        if not token_str or not new_password:
+            return Response({"error": "Token et nouveau mot de passe requis"}, status=400)
+
+        try:
+            token_obj = PasswordResetToken.objects.get(token=token_str)
+        except PasswordResetToken.DoesNotExist:
+            return Response({"error": "Token invalide"}, status=400)
+
+        if not token_obj.is_valid():
+            return Response({"error": "Token expiré"}, status=400)
+
+        user = token_obj.user
+        user.set_password(new_password)
+        user.save()
+
+        token_obj.delete()  # empêche réutilisation
+
+        return Response({"message": "Mot de passe mis à jour avec succès"})
+   
+def send_reset_email(user_email, token):
+    reset_link = f"http://localhost:5173/reset-password?token={token}"
+    send_mail(
+        "Réinitialisation de mot de passe",
+        f"Cliquer sur ce lien pour réinitialiser votre mot de passe : {reset_link}",
+        "no-reply@platform.com",
+        [user_email],
+        fail_silently=False,
+    )
