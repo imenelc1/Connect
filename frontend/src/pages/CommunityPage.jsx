@@ -797,69 +797,82 @@ export default function CommunityPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Votre message initial *
             </label>
-            <textarea
-              placeholder="Écrivez votre message... (ce sera le premier message du forum)"
-              value={newPostContent}
-              onChange={(e) => setNewPostContent(e.target.value)}
-              className="w-full bg-surface text-textc border border-blue/20 rounded-xl px-5 py-3 h-40 resize-none"
-              disabled={isCreatingPost}
-            />
+          <textarea
+  placeholder="Écrivez votre message..."
+  value={newPostContent}
+  onChange={(e) => setNewPostContent(e.target.value)}
+  className="w-full bg-white text-textc border border-grayc/20 rounded-xl px-5 py-3 h-40 resize-none
+             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+  disabled={isCreatingPost}
+/>
+
+
+            
             <p className="text-xs text-gray-500 mt-1">
               Ce message sera le point de départ de la discussion
             </p>
           </div>
           
-          {role === "enseignant" ? (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Publier pour :
-              </label>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  type="button"
-                  onClick={() => setForumTypeToCreate("teacher-teacher")}
-                  className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all ${
-                    forumTypeToCreate === "teacher-teacher"
-                      ? "bg-purple-50 text-purple-700 border-purple-500"
-                      : "bg-gray-50 text-gray-700 border-gray-200 hover:border-purple-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="text-left">
-                      <div className="font-medium">Aux enseignants</div>
-                      <div className="text-xs mt-1">Seulement entre enseignants</div>
-                    </div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setForumTypeToCreate("teacher-student")}
-                  className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all ${
-                    forumTypeToCreate === "teacher-student"
-                      ? "bg-blue-50 text-blue-700 border-blue-500"
-                      : "bg-gray-50 text-gray-700 border-gray-200 hover:border-blue-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="text-left">
-                      <div className="font-medium">Aux étudiants</div>
-                      <div className="text-xs mt-1">Étudiants & enseignants</div>
-                    </div>
-                  </div>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-4 p-3 bg-primary rounded-xl border border-green-200">
-              <div className="flex items-center gap-2">
-                <span className="text-green-600">👨‍🎓</span>
-                <div>
-                  <p className="text-sm font-medium text-green-700">Forum étudiant</p>
-                  <p className="text-xs text-green-600">Ce forum sera visible uniquement par les étudiants</p>
-                </div>
-              </div>
-            </div>
-          )}
+  {role === "enseignant" ? (
+  <div className="mb-4">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Publier pour :
+    </label>
+
+    <div className="flex flex-col sm:flex-row gap-3">
+
+      {/* Enseignant → Enseignant */}
+      <Button
+        type="button"
+        variant={
+          forumTypeToCreate === "teacher-teacher"
+            ? "tabActive"  
+            : "tab"        
+        }
+        onClick={() => setForumTypeToCreate("teacher-teacher")}
+        className="w-full justify-start"
+      >
+        <div className="text-left">
+          <div className="font-medium">Aux enseignants</div>
+          <div className="text-xs mt-1 opacity-80">
+            Seulement entre enseignants
+          </div>
+        </div>
+      </Button>
+
+      {/* Enseignant → Étudiants */}
+      <Button
+        type="button"
+        variant={
+          forumTypeToCreate === "teacher-student"
+            ? "tabActive"   // ✅ actif
+            : "tab"         // ✅ inactif
+        }
+        onClick={() => setForumTypeToCreate("teacher-student")}
+        className="w-full justify-start"
+      >
+        <div className="text-left">
+          <div className="font-medium">Aux étudiants</div>
+          <div className="text-xs mt-1 opacity-80">
+            Étudiants & enseignants
+          </div>
+        </div>
+      </Button>
+
+    </div>
+  </div>
+) : (
+  <div className="mb-4 p-4 bg-green-50 rounded-xl border border-green-200">
+    <p className="text-sm font-medium text-green-700">
+      Forum étudiant
+    </p>
+    <p className="text-xs text-green-600 mt-1">
+      Ce forum sera visible uniquement par les étudiants
+    </p>
+  </div>
+)}
+
+
           
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-grayc">
@@ -1001,7 +1014,9 @@ export default function CommunityPage() {
                     <button 
                       onClick={() => handleDeleteForum(post.id)}
                       disabled={deletingForumId === post.id}
-                      className="text-red-500 hover:text-red-700 px-3 py-1 rounded hover:bg-red-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 border border-red-500 text-red-700 
+             hover:bg-red-100 hover:border-red-600 hover:text-red-800 transition-colors 
+             disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >
                       {deletingForumId === post.id ? (
                         <>
@@ -1011,7 +1026,7 @@ export default function CommunityPage() {
                       ) : (
                         <>
                           <Trash2 size={16} />
-                          Supprimer
+                          Supprimer le forum
                         </>
                       )}
                     </button>
@@ -1090,12 +1105,12 @@ export default function CommunityPage() {
                                           />
                                         )}
                                         <span className={`text-xs ${message.user_has_liked ? "text-red-500 font-semibold" : ""}`}>
-                                          {message.nombre_likes || 0}
+                                          {message.nombre_likes || 0} {message.nombre_likes === 1 ? 'like' : 'likes'}
                                         </span>
                                       </button>
                                       
                                       {message.utilisateur === userId && (
-                                        <button className="text-red-400 hover:text-red-600 text-xs">
+                                        <button className="text-red-400 hover:text-red-600 text-xs px-2 py-1 hover:bg-red-50 rounded transition-colors">
                                           <Trash2 size={12} />
                                         </button>
                                       )}
