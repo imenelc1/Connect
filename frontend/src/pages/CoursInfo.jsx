@@ -11,11 +11,12 @@ import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService";
 import { toast } from "react-hot-toast";
-
+import { useNavigate } from "react-router-dom";
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
-
 export default function CoursePage() {
+  const navigate = useNavigate();
+
   const { t, i18n } = useTranslation("courseInfo");
   const [activeStep, setActiveStep] = useState(1);
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -35,6 +36,8 @@ export default function CoursePage() {
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [level, setLevel] = useState("");
+  const [courseVisibility, setCourseVisibility] = useState("public"); // default
+
   const [currentCoursId, setCurrentCoursId] = useState(null);
 
   const userData = JSON.parse(localStorage.getItem("user"));
@@ -157,6 +160,7 @@ export default function CoursePage() {
           duration,
           niveau_cour: level,
           utilisateur: currentUserId,
+          visibilite_cour: courseVisibility === "private" ? false : true
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -264,7 +268,8 @@ export default function CoursePage() {
       if (!coursId) return;
 
       await handleSaveAllSections(coursId); // ✅ passe le bon id
-      setActiveStep(3);
+    navigate("/all-courses");
+
     } catch (error) {
       console.error("Erreur lors de l'enregistrement complet :", error);
     }
@@ -341,6 +346,18 @@ export default function CoursePage() {
                   ]}
                 />
               </div>
+              <div className="flex flex-col mt-4">
+  <label className="font-medium mb-2">{t("course.visibility")}</label>
+  <Select
+    className="w-full rounded-full border border-grayc px-5 py-3 bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+    value={courseVisibility}
+    onChange={(e) => setCourseVisibility(e.target.value)}
+    options={[
+      { value: "public", label: t("course.public") },
+      { value: "private", label: t("course.private") },
+    ]}
+  />
+</div>
             </div>
             <div className="flex justify-between mt-10 ">
               <button className="px-6 py-2 rounded-xl border border-secondary font-medium bg-white shadow-sm transition text-black/50">
@@ -552,7 +569,7 @@ export default function CoursePage() {
                 </button>
                 <button
                   className="px-8 py-2 rounded-xl bg-grad-1 text-white font-medium shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
-                  onClick={handleSaveAll}
+                  onClick={() => setActiveStep(3)}
                 >
                   {t("course.save_next")}
                 </button>
@@ -562,11 +579,109 @@ export default function CoursePage() {
         )}
 
         {/* STEP 3 */}
-        {activeStep === 3 && (
-          <div className="w-full bg-white rounded-2xl shadow-md p-6">
-            <h2 className="text-xl font-semibold">Publish Course</h2>
+     {activeStep === 3 && (
+  <div className="w-full flex flex-col items-center gap-10">
+
+    {/* ---------- RÉSUMÉ INFOS GÉNÉRALES ---------- */}
+    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
+      <h2 className="text-2xl font-semibold mb-4 text-primary">
+        {t("course.summary")}
+      </h2>
+
+      <div className="space-y-3 text-gray-700">
+        <p>
+          <strong>{t("course.title")} :</strong> {title}
+        </p>
+        <p>
+          <strong>{t("course.course_topic")} :</strong> {description}
+        </p>
+        <p>
+          <strong>{t("course.duration")} :</strong> {duration}
+        </p>
+        <p>
+          <strong>{t("course.level")} :</strong> {level}
+        </p>
+         <p>
+          <strong>{t("course.courseVisibility")} :</strong> {courseVisibility}
+        </p>
+      </div>
+    </div>
+
+    {/* ---------- RÉSUMÉ SECTIONS + LEÇONS ---------- */}
+    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
+      <h3 className="text-xl font-semibold mb-6 text-primary">
+        {t("course.curriculum")}
+      </h3>
+
+      {sections.map((section, sectionIndex) => (
+        <div key={section.id} className="mb-6 pb-4 border-b border-gray-200">
+          
+          <h4 className="text-lg font-semibold text-gray-800">
+            {sectionIndex + 1}. {section.title || t("course.untitled_section")}
+          </h4>
+
+          {section.description && (
+            <p className="text-sm text-gray-500 mt-1">{section.description}</p>
+          )}
+
+          {/* Leçons */}
+          <div className="mt-4 pl-4 space-y-3">
+            {section.lessons.map((lesson, lessonIndex) => (
+              <div key={lesson.id} className="bg-gray-50 p-3 rounded-lg border">
+
+                <p className="font-medium text-gray-800">
+                  {lessonIndex + 1}. {lesson.title || t("course.untitled_lesson")}
+                </p>
+
+                {/* type */}
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                  {lesson.type}
+                </span>
+
+                {/* Texte ou exemple */}
+                {(lesson.type === "text" || lesson.type === "example") && (
+                  <p className="text-sm text-gray-600 mt-2 whitespace-pre-line">
+                    {lesson.content || t("course.no_content")}
+                  </p>
+                )}
+
+                {/* Image */}
+                {lesson.type === "image" && lesson.preview && (
+                  <img
+                    src={lesson.preview}
+                    alt="Lesson visual"
+                    className="w-48 mt-2 rounded-xl border object-cover"
+                  />
+                )}
+              </div>
+            ))}
           </div>
-        )}
+        </div>
+      ))}
+    </div>
+
+    {/* ---------- Boutons ---------- */}
+    <div className="flex justify-between items-center mt-10 max-w-xl w-full mx-auto">
+      <button
+        className="px-6 py-2 bg-[#DDE7FF] text-gray-700 rounded-xl text-sm shadow"
+        onClick={() => setActiveStep(2)}
+      >
+         {t("course.back")}
+      </button>
+
+      <div className="flex gap-3">
+        
+
+        <button className="px-6 py-2 bg-primary text-white rounded-xl text-sm shadow hover:bg-grad-1"  onClick={handleSaveAll}>
+          {t("course.save_publier")}
+        </button>
+      </div>
+    </div>
+  
+
+  </div>
+)}
+
       </div>
     </div>
   );

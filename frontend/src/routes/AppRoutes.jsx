@@ -21,6 +21,8 @@ import Dashboardetu from "../pages/dash-etu";
 import Badges from "../pages/Badges"; // Ajoutez cette lign
 
 import Courses from "../pages/Courses";
+import Courses1 from "../pages/Courses1";
+
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import ForgotPassword from "../pages/ForgotPassword";
@@ -89,7 +91,8 @@ export default function AppRoutes() {
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
         {/* courses */}
-        <Route path="/courses" element={<Courses />} />
+        <Route path="/Seecourses/:id" element={<Courses />} />
+
         {/*new course*/}
         <Route path="/CoursInfo" element={<CoursInfo />} />
         {/* My Students */}

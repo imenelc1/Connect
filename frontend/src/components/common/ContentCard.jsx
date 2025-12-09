@@ -51,6 +51,9 @@ const levelKeyMap = {
   };
 
 
+  const SeeCourse = () => {
+    navigate(`/Seecourses/${course.id}`);
+  };
   return (
     <div className={` shadow-md p-6 rounded-2xl flex flex-col justify-between h-full
     transition-all duration-300 ease-out
@@ -106,6 +109,7 @@ const levelKeyMap = {
             <Button
               variant="courseStart"
               className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
+              onClick={SeeCourse}
             >
               {labels.start}
             </Button>
