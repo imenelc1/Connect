@@ -22,6 +22,10 @@ export default function Button({
   // Variants disponibles : chaque style correspond à un usage spécifique
   const variants = {
     primary: `${base} bg-grad-1 text-white hover:bg-sky-600`,
+  mediumPlus: `${base.replace("w-full", "")
+                    .replace("py-2", "py-2.5")
+                    .replace("rounded-full", "rounded-md")}
+               text-sm px-4 py-2 transition`,
 
     ca: `${base} flex items-center space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-3
          px-2 sm:px-3 md:px-7 lg:px-5 text-xs sm:text-sm lg:text-lg
@@ -40,9 +44,9 @@ export default function Button({
     heroOutline: `${base} border border-[var(--color-primary)]
                   text-[var(--color-primary)] bg-white rounded-xl font-medium
                   hover:bg-[var(--color-bg)] px-12 py-2 transition`,
-    courseStart:`${base}
+    courseStart: `${base}
       rounded-full px-2 py-2  hover:bg-grad-1 hover:text-surface transition-all shadow-sm"`,
-    createCourse :`${base} flex items-center gap-2
+    createCourse: `${base} flex items-center gap-2
       px-6 py-2 rounded-full bg-grad-3 text-white font-medium shadow-md
       hover:opacity-90 transition-all`,
   };
@@ -65,7 +69,7 @@ export default function Button({
       // Variant "send" a une couleur spéciale définie inline
       style={variant === "send" ? { backgroundColor: "#4F9DDE" } : {}}
     >
-     {icons[variant] && icons[variant]}
+      {icons[variant] && icons[variant]}
 
       {/* Pour variant "ca" → cacher le texte en mobile */}
       {variant === "ca" ? (

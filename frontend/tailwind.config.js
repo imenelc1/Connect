@@ -25,6 +25,7 @@ module.exports = {
         blue: "rgb(var(--color-blue) / <alpha-value>)",
         purple: "rgb(var(--color-purple) / <alpha-value>)",
         pink: "rgb(var(--color-pink) / <alpha-value>)",
+        secondary2:"rgb(var(--color-secondary2))"
 
         
       },

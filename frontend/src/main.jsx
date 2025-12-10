@@ -9,14 +9,14 @@ import "./i18n";
 import { ErrorBoundary } from "./components/common/ErrorBoundary.jsx";
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-      <ErrorBoundary>  
+      <ErrorBoundary>   
       <  ThemeProvider>
         <DarkModeHandler />
         <App />
       </ThemeProvider>
     
 
- </ErrorBoundary>  
+ </ErrorBoundary>   
 
   </React.StrictMode>
 );

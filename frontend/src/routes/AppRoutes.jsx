@@ -15,6 +15,7 @@ import SubmittedExercise from "../pages/SubmittedExercise"
 import SpacesPage from "../pages/Spaces";
 import CourseDetails from "../pages/CourseDetails"
 import MyStudents from "../pages/MyStudents";
+import SubmittedExercises from "../pages/SubmittedExercises";
 
 export default function AppRoutes() {
   return (
@@ -53,6 +54,11 @@ export default function AppRoutes() {
 
         {/* Submitted Exercise */}
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
+ {/* Submitted Exercises le general */}
+        <Route path="/SubmittedExos" element={<SubmittedExercises />} />
+
+        
+
 
         {/* Spaces*/}
         <Route path="/Spaces" element={<SpacesPage />} />

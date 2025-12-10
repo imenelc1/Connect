@@ -36,10 +36,7 @@ int main() {
         feedback: "Excellent work! Your solution is clean and efficient. Good use of the modulo operator."
     });
 
-    // 🔹 Fonction pour modifier le feedback
-    const handleFeedbackChange = (e) => {
-        setExerciseData({ ...exerciseData, feedback: e.target.value });
-    };
+    
 
     return (
         <div className="flex bg-background min-h-screen">
@@ -116,95 +113,3 @@ int main() {
 
 
 
-// import React, { useState } from "react";
-// import Navbar from "../components/common/Navbar";
-// import InfoCard from "../components/common/InfoCard";
-// import { User, MessageCircle, File } from "lucide-react";
-// import "../styles/index.css";
-
-// export default function ConnectExercisePage() {
-//     const [exerciseData, setExerciseData] = useState({
-//         title: "Exercise 1: Sum of Two Numbers",
-//         student: "John Doe",
-//         submittedDate: "11/06/2024",
-//         status: "Reviewed",
-//         description: "Read an integer and display whether it is even or odd.",
-//         language: "C",
-//         difficulty: "Very easy",
-//         code: `#include<stdio.h> 
-// int main() {
-//   int number;
-//   printf("Enter an integer: ");
-//   scanf("%d", &number);
-//   if (number % 2 == 0)
-//       printf("%d is even", number);
-//   else
-//       printf("%d is odd", number);
-//   return 0;
-// }`,
-//         expectedOutput: "Enter an integer: \n5\n5 is odd",
-//         actualOutput: "Enter an integer: \n5\n5 is odd",
-//         feedback: "Excellent work! Your solution is clean and efficient. Good use of the modulo operator."
-//     });
-
-//     return (
-//         <div className="flex bg-background min-h-screen">
-//             <Navbar />
-
-//             <main className="flex-1 ml-16 md:ml-56 p-6 transition-all">
-
-//                 <InfoCard exercise={exerciseData} />
-
-//                 <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
-
-//                     {/* Conteneur principal du code avec bordure bleu clair */}
-//                     <div className="p-4 rounded-2xl border border-blue-200 shadow-lg">
-                        
-//                         {/* Conteneur interne pour le code (textarea noir) */}
-//                         <div className="rounded-xl overflow-hidden shadow-inner mt-2">
-//                             <div className="h-11 flex items-center justify-between px-5 border-b border-blue-100 bg-blue-50">
-//                                 <span className="font-medium text-sm text-textc opacity-70">
-//                                     Code.c
-//                                 </span>
-//                             </div>
-
-//                             <textarea
-//                                 value={exerciseData.code}
-//                                 onChange={(e) => setExerciseData({ ...exerciseData, code: e.target.value })}
-//                                 className="bg-black p-6 font-mono text-white text-[15px] leading-7 min-h-[360px] w-full outline-none resize-none"
-//                                 spellCheck="false"
-//                             />
-//                         </div>
-//                     </div>
-
-//                     {/* Outputs côte à côte */}
-//                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-//                         <div className="bg-card p-4 rounded-xl border border-primary/65">
-//                             <h3 className="font-semibold mb-2">Expected Output</h3>
-//                             <div className="bg-surface p-3 rounded text-sm text-textc">
-//                                 <pre className="whitespace-pre-wrap">{exerciseData.expectedOutput}</pre>
-//                             </div>
-//                         </div>
-
-//                         <div className="bg-card p-4 rounded-xl border border-primary/65">
-//                             <h3 className="font-semibold mb-2">Actual Output</h3>
-//                             <div className="bg-primary/30 p-3 rounded text-sm text-textc">
-//                                 <pre className="whitespace-pre-wrap">{exerciseData.actualOutput}</pre>
-//                             </div>
-//                         </div>
-//                     </div>
-
-//                     {/* Teacher Feedback */}
-//                     <div className="bg-primary/10 p-4 rounded-2xl shadow-lg flex items-start gap-2">
-//                         <MessageCircle size={20} className="text-primary mt-1" />
-//                         <div>
-//                             <h2 className="text-lg font-semibold mb-1">Teacher Feedback</h2>
-//                             <p className="text-sm text-textc">{exerciseData.feedback}</p>
-//                         </div>
-//                     </div>
-
-//                 </div>
-//             </main>
-//         </div>
-//     );
-// }
