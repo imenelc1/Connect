@@ -21,7 +21,6 @@ import Dashboardetu from "../pages/dash-etu";
 import Badges from "../pages/Badges"; // Ajoutez cette lign
 
 import Courses from "../pages/Courses";
-import Courses1 from "../pages/Courses1";
 
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
