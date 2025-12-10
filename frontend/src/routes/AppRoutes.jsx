@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./ProtectedRoute.jsx";
 
 // Pages publiques
 import Acceuil from "../pages/Acceuil.jsx";
@@ -11,7 +10,7 @@ import LoginStudent from "../pages/LoginStudent";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 
-// Pages privées (protégées)
+// Pages privées (désormais accessibles directement)
 import Dashboardens from "../pages/dash-ens";
 import Dashboardetu from "../pages/dash-etu";
 import Setting from "../pages/Setting";
@@ -27,8 +26,6 @@ import CourseUpdate from "../pages/CourseUpdate";
 import CommunityPage from "../pages/CommunityPage";
 import Badges from "../pages/Badges";
 import Courses from "../pages/Courses";
-import Courses1 from "../pages/Courses1";
-
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
@@ -68,285 +65,44 @@ export default function AppRoutes() {
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* ------------------------- */}
-        {/*       ROUTES PROTÉGÉES   */}
+        {/*       ROUTES SANS PROTECTION   */}
         {/* ------------------------- */}
-        <Route
-          path="/dashboard-ens"
-          element={
-            <ProtectedRoute>
-              <Dashboardens />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/dashboard-ens" element={<Dashboardens />} />
+        <Route path="/dashboard-etu" element={<Dashboardetu />} />
+        <Route path="/settings" element={<Setting />} />
+        <Route path="/all-courses" element={<AllCoursesPage />} />
+        <Route path="/all-exercises" element={<AllExercisesPage />} />
+        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
+        <Route path="/new-exercise" element={<NewExercise />} />
+        <Route path="/exercise-preview" element={<ExercisePreview />} />
+        <Route path="/CoursInfo" element={<CoursInfo />} />
+        <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route path="/preview" element={<QuizPreview />} />
+        <Route path="/courses/edit/:id" element={<CourseUpdate />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/badges" element={<Badges />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/my-students" element={<MyStudents />} />
+        <Route path="/spaces" element={<Spaces />} />
+        <Route path="/ListeExercices" element={<ListeExercicesPage />} />
+        <Route path="/student-exercice" element={<StudentExercice />} />
+        <Route path="/progressExercice" element={<ProgressExercice />} />
+        <Route path="/progressStudent" element={<ProgressStudent />} />
+        <Route path="/quiz1" element={<QuizPage1 />} />
+        <Route path="/quiz" element={<QuizPage2 />} />
+        <Route path="/quiz3" element={<QuizRecapPage />} />
+        <Route path="/start-exercise" element={<StartExercise />} />
+        <Route path="/exercise-page" element={<ExercisePage />} />
+        <Route path="/course-details" element={<CourseDetails />} />
+        <Route path="/submitted-exercise" element={<SubmittedExercise />} />
+        <Route path="/SubmittedExo" element={<SubmittedExercise />} />
+        <Route path="/SubmittedExos" element={<SubmittedExercises />} />
 
-        <Route
-          path="/dashboard-etu"
-          element={
-            <ProtectedRoute>
-              <Dashboardetu />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Setting />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/all-courses"
-          element={
-            <ProtectedRoute>
-              <AllCoursesPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/all-exercises"
-          element={
-            <ProtectedRoute>
-              <AllExercisesPage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* QUIZ AND EXERCISE PAGES */}
-
-        <Route
-          path="/SubmittedExo"
-          element={
-            <ProtectedRoute>
-              <SubmittedExercise />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/SubmittedExos"
-          element={
-            <ProtectedRoute>
-              <SubmittedExercises />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/all-quizzes"
-          element={
-            <ProtectedRoute>
-              <AllQuizzesPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/new-exercise"
-          element={
-            <ProtectedRoute>
-              <NewExercise />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/exercise-preview"
-          element={
-            <ProtectedRoute>
-              <ExercisePreview />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/CoursInfo"
-          element={
-            <ProtectedRoute>
-              <CoursInfo />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/create-quiz"
-          element={
-            <ProtectedRoute>
-              <CreateQuiz />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/preview"
-          element={
-            <ProtectedRoute>
-              <QuizPreview />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/courses/edit/:id"
-          element={
-            <ProtectedRoute>
-              <CourseUpdate />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/community"
-          element={
-            <ProtectedRoute>
-              <CommunityPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/badges"
-          element={
-            <ProtectedRoute>
-              <Badges />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/courses"
-          element={
-            <ProtectedRoute>
-              <Courses />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/my-students"
-          element={
-            <ProtectedRoute>
-              <MyStudents />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/spaces"
-          element={
-            <ProtectedRoute>
-              <Spaces />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/ListeExercices"
-          element={
-            <ProtectedRoute>
-              <ListeExercicesPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/student-exercice"
-          element={
-            <ProtectedRoute>
-              <StudentExercice />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/progressExercice"
-          element={
-            <ProtectedRoute>
-              <ProgressExercice />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/progressStudent"
-          element={
-            <ProtectedRoute>
-              <ProgressStudent />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/quiz1"
-          element={
-            <ProtectedRoute>
-              <QuizPage1 />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/quiz"
-          element={
-            <ProtectedRoute>
-              <QuizPage2 />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/quiz3"
-          element={
-            <ProtectedRoute>
-              <QuizRecapPage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/start-exercise"
-          element={
-            <ProtectedRoute>
-              <StartExercise />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/exercise-page"
-          element={
-            <ProtectedRoute>
-              <ExercisePage />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/course-details"
-          element={
-            <ProtectedRoute>
-              <CourseDetails />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/submitted-exercise"
-          element={
-            <ProtectedRoute>
-              <SubmittedExercise />
-            </ProtectedRoute>
-          }
-        />
-
-        
-
-        {/* Course details */}
-       <Route path="/CourseDetails/:id" element={<CourseDetails />} />
-        {/* Students */}
+        {/* Routes avec paramètres */}
+        <Route path="/CourseDetails/:id" element={<CourseDetails />} />
+        <Route path="/Seecourses/:id" element={<Courses />} />
         <Route path="/MyStudents" element={<MyStudents />} />
+
       </Routes>
     </BrowserRouter>
   );

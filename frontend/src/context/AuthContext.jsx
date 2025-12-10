@@ -1,53 +1,52 @@
+
 import { createContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import * as jwtDecode from "jwt-decode";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // 🔹 pour gérer le chargement initial
 
-  // Charger la session au démarrage
+  // 🔹 Charger la session au démarrage
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
 
-    if (token) {
+    if (token && userData) {
       try {
-        const payload = jwtDecode(token);
-
-        setUser({
-          id: payload.user_id,
-          role: payload.role,
-          email: payload.email,
-        });
-
+        // Vérifie que le token est encore valide (optionnel)
+        const payload = jwtDecode.default(token); // ✅ utiliser .default
+        // ⚠️ Ici on ne lit plus email depuis le token car il n’existe pas
+        setUser(JSON.parse(userData));
       } catch (err) {
-        console.error("TOKEN INVALID → logout auto");
+        console.error("Token invalide → logout automatique");
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         setUser(null);
       }
     }
+
+    setLoading(false);
   }, []);
 
-  // 👉 Fonction login (manquante dans ton code)
-  const loginUser = (token) => {
+  // 🔹 Fonction login
+  const loginUser = (token, userData) => {
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
 
-    const payload = jwtDecode(token);
-
-    setUser({
-      id: payload.user_id,
-      role: payload.role,
-      email: payload.email,
-    });
+    setUser(userData);
   };
 
+  // 🔹 Fonction logout
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loginUser, logout }}>
+    <AuthContext.Provider value={{ user, loginUser, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

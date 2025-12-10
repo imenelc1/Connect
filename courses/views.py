@@ -203,4 +203,3 @@ class CourseDetailView(generics.RetrieveAPIView):
     serializer_class = CourseSerializer2
     lookup_field = "pk"
     
-

@@ -32,26 +32,30 @@ export default function AllCoursesPage() {
     fetch("http://localhost:8000/api/exercices/api/exo")
       .then(res => res.json())
       .then(data => {
+        if (!Array.isArray(data)) {
+          console.error("Data récupérée n'est pas un tableau :", data);
+          setExercice([]); // sécurité
+          return;
+        }
         const formatted = data.map(c => ({
           id: c.id_exercice,
           title: c.titre_exo,
-          level: c.niveau_exercice_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
-          //levelLabel: t(`levels.${c.niveau_cour_label}`),
-          //duration: c.duration_readable,
-          //cours: c.cours,
+          level: c.niveau_exercice_label,
           description: c.enonce,
-          //categorie: c.categorie,
           author: c.utilisateur_name,
           initials: c.utilisateur_name
             .split(" ")
             .map(n => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
+          isMine: c.utilisateur === currentUserId
         }));
         setExercice(formatted);
       })
-      .catch(err => console.error("Erreur chargement exercices :", err));
+      .catch(err => {
+        console.error("Erreur chargement exercices :", err);
+        setExercice([]);
+      });
   }, []);
 
 
@@ -162,7 +166,7 @@ export default function AllCoursesPage() {
             <Button
               variant="courseStart"
               className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
-              onClick={() => navigate("/new-exercise")}
+              onClick={() => navigate("/ListeExercices")}
             >
               <Plus size={18} />
               {t("createExerciseBtn")}
@@ -173,17 +177,18 @@ export default function AllCoursesPage() {
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-          {filteredexercises.map((exercise, idx) => (
+          {filteredexercises?.map((exercise, idx) => (
             <ContentCard
               key={idx}
               className={gradientMap[exercise.level] ?? "bg-grad-1"}
               course={exercise}
-
+              type="exercise"
               role={userRole}
               showProgress={userRole === "etudiant"}
               onDelete={handleDeleteExo}
             />
           ))}
+
         </div>
       </main>
     </div>

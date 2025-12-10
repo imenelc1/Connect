@@ -69,13 +69,16 @@ export default function LoginInstructor() {
       });
       console.log("Login API response:", res.data);
        const userWithRole = {
-        ...res.data.user,
-        role: res.data.role || res.data.user.role
-      };
+      user_id: res.data.user.user_id,
+      nom: res.data.user.nom,
+      prenom: res.data.user.prenom,
+      email: res.data.user.email,
+      role: res.data.user.role,
+    };
 
       localStorage.setItem("user", JSON.stringify(userWithRole));
 
-      loginUser(res.data.token);
+      loginUser(res.data.token, userWithRole); 
 
 
       localStorage.setItem("currentUserId", res.data.user.id_utilisateur);
