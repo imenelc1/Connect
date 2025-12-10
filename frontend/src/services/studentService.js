@@ -1,20 +1,23 @@
-// services/studentService.js
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/",
+  baseURL: "http://localhost:8000/api/spaces/",
 });
 
-const token = localStorage.getItem("access_token");
-const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
+// Ajouter un étudiant à un espace
 export const createStudent = async (data) => {
-  const res = await api.post("spaces/add_student/", data, { headers });
+  const token = localStorage.getItem("token");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  const res = await api.post("add_student/", data, { headers });
   return res.data;
 };
 
+// Récupérer tous les étudiants par espace
 export const getSpacesStudents = async () => {
-  const res = await api.get("spaces/students/", { headers });
+  const token = localStorage.getItem("token");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const res = await api.get("students/", { headers });
   return res.data;
 };
 

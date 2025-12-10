@@ -113,6 +113,7 @@ export default function AppRoutes() {
           }
         />
 
+        {/* QUIZ AND EXERCISE PAGES */}
 
         <Route
           path="/SubmittedExo"
@@ -338,6 +339,12 @@ export default function AppRoutes() {
           }
         />
 
+        
+
+        {/* Course details */}
+       <Route path="/CourseDetails/:id" element={<CourseDetails />} />
+        {/* Students */}
+        <Route path="/MyStudents" element={<MyStudents />} />
       </Routes>
     </BrowserRouter>
   );

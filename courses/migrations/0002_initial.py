@@ -23,11 +23,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='section',
             name='cours',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courses.cours'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sections', to='courses.cours'),
         ),
         migrations.AddField(
             model_name='lecon',
             name='section',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courses.section'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lecons', to='courses.section'),
         ),
     ]

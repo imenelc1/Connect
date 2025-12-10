@@ -8,7 +8,7 @@ import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
-import { Bell } from "lucide-react";
+import { Bell, ChevronRight } from "lucide-react";
 
 import { getSpacesStudents, createStudent } from "../services/studentService";
 import { getSpaces } from "../services/spacesService";
@@ -22,40 +22,43 @@ export default function MyStudents() {
   const [studentsList, setStudentsList] = useState([]);
   const [modal, setModal] = useState(false);
   const [email, setEmail] = useState("");
-  const [studentID, setStudentID] = useState("");
   const [space, setSpace] = useState("");
 
-  // --- Récupération des espaces ---
-  useEffect(() => {
-    getSpaces()
-      .then((data) => {
-        const array = Array.isArray(data.results)
-          ? data.results
-          : Array.isArray(data)
-          ? data
-          : [];
-        setSpacesList(array);
-      })
-      .catch((err) => console.error("Erreur getSpaces:", err));
-  }, []);
-
-  // --- Récupération des étudiants ---
+  // -----------------------------
+  // Récupérer les étudiants + espaces
+  // -----------------------------
   const fetchStudents = () => {
     getSpacesStudents()
       .then((data) => {
-        const array = Array.isArray(data.results)
-          ? data.results
-          : Array.isArray(data)
-          ? data
-          : [];
+        const array = Array.isArray(data) ? data : [];
 
-        // mapping avec nested serializer
-        const formatted = array.map((st) => ({
-          id: st.id,
-          prenom: st.etudiant?.prenom || "",
-          nom: st.etudiant?.nom || "",
-          spaceName: st.space?.nom_space || "Espace inconnu",
-          progress: st.progress || 0,
+        const studentsMap = {};
+
+        array.forEach((st) => {
+          const id = st.etudiant?.id_utilisateur || st.id;
+          const prenom = st.etudiant?.prenom || st.etudiant_prenom || "";
+          const nom = st.etudiant?.nom || st.etudiant_nom || "";
+          const spaceName =
+            st.space?.nom_space || st.space_nom || "Espace inconnu";
+
+          if (!studentsMap[id]) {
+            studentsMap[id] = {
+              id,
+              prenom,
+              nom,
+              spaces: [spaceName],
+              progress: st.progress || 0,
+            };
+          } else {
+            if (!studentsMap[id].spaces.includes(spaceName)) {
+              studentsMap[id].spaces.push(spaceName);
+            }
+          }
+        });
+
+        const formatted = Object.values(studentsMap).map((st) => ({
+          ...st,
+          spaceName: st.spaces.join(", "),
         }));
 
         setStudentsList(formatted);
@@ -63,37 +66,57 @@ export default function MyStudents() {
       .catch((err) => console.error("Erreur getStudents:", err));
   };
 
+  const fetchSpaces = () => {
+    getSpaces()
+      .then((data) => {
+        setSpacesList(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => console.error("Erreur getSpaces:", err));
+  };
+
   useEffect(() => {
     fetchStudents();
+    fetchSpaces();
   }, []);
 
-  // --- Ajout étudiant ---
-  const handleSubmit = (e) => {
+  // -----------------------------
+  // Ajout étudiant
+  // -----------------------------
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !studentID || !space) return;
+    if (!email || !space) return;
 
-    const data = { email, student_id: studentID, space_id: space };
+    try {
+      await createStudent({ email, space_id: space });
 
-    createStudent(data)
-      .then(() => {
-        setModal(false);
-        setEmail("");
-        setStudentID("");
-        setSpace("");
-        fetchStudents(); // rafraîchir la liste
-      })
-      .catch((err) => console.error("Erreur createStudent:", err));
+      setModal(false);
+      setEmail("");
+      setSpace("");
+
+      // Rafraîchir
+      fetchStudents();
+      fetchSpaces();
+    } catch (err) {
+      console.error("Erreur createStudent:", err);
+      alert(
+        err.response?.data?.error ||
+          "Une erreur est survenue lors de l'ajout de l'étudiant"
+      );
+    }
   };
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-surface">
       {/* Header */}
-      <div className="flex justify-between items-center w-full mb-6 pl-4 lg:pl-60">
+      <div className="flex justify-between items-center w-full m-5 pl-4 lg:pl-60">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted">
           {t("myStudentsTitle")}
         </h1>
-        <div className="flex items-center gap-4">
-          <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
+        <div className="flex items-center gap-4 mr-8">
+          <Bell
+            className="w-5 h-5 text-gray-600 cursor-pointer"
+            fill="currentColor"
+          />
           <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
         </div>
       </div>
@@ -101,17 +124,9 @@ export default function MyStudents() {
       <div className="flex w-full">
         <Navbar />
 
-        <div className="flex-1 p-4 sm:p-6 ml-0 lg:ml-60 transition-all duration-300">
+        <div className="flex-1 p-4 sm:p-6 ml-0 mt-5 lg:ml-60 transition-all duration-300">
           {/* Boutons */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
-            <Button
-              variant="primary"
-              className="!px-4 !py-2 !text-white !w-auto ml-auto whitespace-nowrap"
-              onClick={() => navigate("/Spaces")}
-            >
-              {t("createSpace")}
-            </Button>
-
+          <div className="flex flex-col sm:flex-row justify-end sm:items-center gap-4 mb-6">
             <Button
               variant="primary"
               className="!px-4 !py-2 !w-auto"
@@ -124,25 +139,69 @@ export default function MyStudents() {
           {/* Liste des étudiants */}
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {studentsList.length > 0 ? (
-              studentsList.map((st, i) => (
-                <Cards2
-                  key={i}
-                  icon={<UserCircle initials={(st.prenom[0] || "") + (st.nom[0] || "")} />}
-                  title={`${st.prenom} ${st.nom}`}
-                  description={st.spaceName}
-                  progress={st.progress}
-                  status="Actif"
-                  className="bg-grad-2 rounded-xl shadow-md border p-6"
-                />
-              ))
+              studentsList.map((st, index) => {
+                const gradients = ["bg-grad-2", "bg-grad-3", "bg-grad-4"];
+                const randomGrad = gradients[index % gradients.length];
+
+                return (
+                  <div
+                    key={st.id}
+                    className={`p-6 rounded-2xl shadow-lg border border-white/10 ${randomGrad}
+                      transition-transform duration-300 hover:scale-[1.03] hover:shadow-2xl`}
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="flex gap-[220px]">
+                        <div className="flex gap-5">
+                          <UserCircle
+                            initials={(st.prenom[0] || "") + (st.nom[0] || "")}
+                            className="w-14 h-14"
+                          />
+
+                          <h2 className="font-semibold text-lg text-textc">
+                            {st.prenom} {st.nom}
+                          </h2>
+                        </div>
+
+                        {/* RIGHT ARROW */}
+
+                        <Button className=" !w-9 !h-9 !p-0 !min-w-0 flex items-center justify-center">
+                          <ChevronRight size={16} className="w-6 h-6" />
+                        </Button>
+                      </div>
+
+                      <div></div>
+                    </div>
+
+                    {/* Badges espaces */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {st.spaces.map((sp, i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc backdrop-blur-sm"
+                        >
+                          {sp}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="w-full h-3 bg-grayc/20 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-black rounded-full"
+                        style={{ width: `${st.progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })
             ) : (
-              <p className="text-gray-500">{t("noStudentsMessage")}</p>
+              <p className="text-grayc">{t("noStudentsMessage")}</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Modal d’ajout */}
+      {/* Modal */}
       <AddModal
         open={modal}
         onClose={() => setModal(false)}
@@ -157,12 +216,6 @@ export default function MyStudents() {
             placeholder: t("emailPlaceholder"),
             value: email,
             onChange: (e) => setEmail(e.target.value),
-          },
-          {
-            label: t("studentID"),
-            placeholder: t("studentIDPlaceholder"),
-            value: studentID,
-            onChange: (e) => setStudentID(e.target.value),
           },
           {
             label: t("space"),
