@@ -40,6 +40,7 @@ import ProgressStudent from "../pages/ProgressionStudent";
 import { QuizPage2 } from "../pages/QuizPage2";
 import QuizPage1 from "../pages/QuizPage1";
 import QuizRecapPage from "../pages/QuizRecapPage";
+import SubmittedExercises from "../pages/SubmittedExercises";
 
 export default function AppRoutes() {
   return (
@@ -108,6 +109,24 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <AllExercisesPage />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/SubmittedExo"
+          element={
+            <ProtectedRoute>
+              <SubmittedExercise />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/SubmittedExos"
+          element={
+            <ProtectedRoute>
+              <SubmittedExercises />
             </ProtectedRoute>
           }
         />

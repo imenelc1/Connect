@@ -13,7 +13,7 @@ import LogoComponent from "../components/common/LogoComponent";
 import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
-
+import AuthContext from "../context/AuthContext.jsx";
 export default function LoginStudent() {
   const [activeTab] = useState("signin");
   const navigate = useNavigate();
@@ -24,6 +24,7 @@ export default function LoginStudent() {
   const [showPassword, setShowPassword] = useState(false);
   const [userRole, setUserRole] = useState("");
 
+const { loginUser } = useContext(AuthContext);
 
   const { t, i18n } = useTranslation("login");
 
@@ -80,7 +81,8 @@ export default function LoginStudent() {
       };
 
       localStorage.setItem("user", JSON.stringify(userWithRole));
-      localStorage.setItem("token", res.data.token);
+      loginUser(res.data.token);
+
 
       toast.success(t("login.success"));
       navigate("/dashboard-etu");

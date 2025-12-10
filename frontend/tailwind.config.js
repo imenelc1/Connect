@@ -24,6 +24,8 @@ module.exports = {
         nav: "rgb(var(--color-nav) / <alpha-value>)",
         blue: "rgb(var(--color-blue) / <alpha-value>)",
         purple: "rgb(var(--color-purple) / <alpha-value>)",
+        pink: "rgb(var(--color-pink) / <alpha-value>)",
+        secondary2:"rgb(var(--color-secondary2))",
 
         pink: "rgb(var(--color-pink) / <alpha-value>)",
         pink_clair: "rgb(var(--color-pink-clair) / <alpha-value>)",

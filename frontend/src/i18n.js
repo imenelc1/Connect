@@ -64,6 +64,8 @@ import translationFRSubmittedExercise from "./locales/SubmittedExo/fr-SubExo/tra
 import translationENSubmittedExercise from "./locales/SubmittedExo/en-SubExo/translation.json";
 import translationFRExercisePage from "./locales/exercisepage/fr-exercisepage/translation.json";
 import translationENExercisePage from "./locales/exercisepage/en-exercisepage/translation.json";
+import translationFRSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-fr/translation.json";
+import translationENSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-en/translation.json";
 
 const resources = {
   fr: {
@@ -104,6 +106,7 @@ const resources = {
     CourseDetails: translationFRCourseDetails,
     SubmittedExercise: translationFRSubmittedExercise,
 
+    SubmittedExercises: translationFRSubmittedExercises,
 
 
     exercisePage: translationFRExercisePage,
@@ -150,7 +153,8 @@ const resources = {
     ProgressStudent: translationnENProgressStudent,
 
      quiz3:translationENrecquiz,
-    community: translationnENCommunity
+    community: translationnENCommunity,
+    SubmittedExercises: translationENSubmittedExercises
   },
 };
 
