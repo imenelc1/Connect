@@ -11,13 +11,10 @@ import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService";
 import { toast } from "react-hot-toast";
-<<<<<<< HEAD
-import { useEffect } from "react";
-=======
 import { useNavigate } from "react-router-dom";
->>>>>>> origin/back_coursExoQuiz_Chahla
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
+import { useEffect } from "react";
 export default function CoursePage() {
   const navigate = useNavigate();
 
@@ -250,18 +247,11 @@ export default function CoursePage() {
       const coursId = await handleSaveStep1();
       if (!coursId) return;
 
-<<<<<<< HEAD
-      await handleSaveAllSections(coursId);
-      setActiveStep(3);
-    } catch (err) {
-      console.error("Erreur lors de l'enregistrement complet :", err);
-=======
       await handleSaveAllSections(coursId); // ✅ passe le bon id
     navigate("/all-courses");
 
     } catch (error) {
       console.error("Erreur lors de l'enregistrement complet :", error);
->>>>>>> origin/back_coursExoQuiz_Chahla
     }
   };
   
