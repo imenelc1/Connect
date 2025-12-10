@@ -27,6 +27,8 @@ import CourseUpdate from "../pages/CourseUpdate";
 import CommunityPage from "../pages/CommunityPage";
 import Badges from "../pages/Badges";
 import Courses from "../pages/Courses";
+import Courses1 from "../pages/Courses1";
+
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
