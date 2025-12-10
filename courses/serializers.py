@@ -56,7 +56,7 @@ class SectionSerializer1(serializers.ModelSerializer):
 
     class Meta:
         model = Section
-        fields = ['id_section', 'titre_section', 'description', 'lecons']
+        fields = ['id_section', 'titre_section', 'description', 'lecons', 'ordre']
         
     
     
