@@ -50,11 +50,12 @@ export default function CommunityPage() {
     ? "http://localhost:8000/api" 
     : "/api";
 
+  // Définir le type de forum par défaut selon le rôle
   useEffect(() => {
     if (role === "enseignant") {
-      setForumTypeToCreate("teacher-teacher");
+      setForumTypeToCreate("teacher-student"); // Par défaut : enseignant → étudiant
     } else {
-      setForumTypeToCreate("student-student");
+      setForumTypeToCreate("student-teacher"); // Par défaut : étudiant → enseignant
     }
   }, [role]);
 
@@ -68,15 +69,20 @@ export default function CommunityPage() {
   const { toggleDarkMode } = useContext(ThemeContext);
 
   const forumOptions = [
-    { value: "all", label: t("forums.all") || "All forums" },
-    { value: "teacher-teacher", label: t("forums.teacher-teacher") || "Teacher ↔ Teacher" },
-    { value: "teacher-student", label: t("forums.teacher-student") || "Teacher ↔ Student" },
-    { value: "student-student", label: t("forums.student-student") || "Student ↔ Student" }
-  ].filter(opt => 
-    role === "enseignant" 
-      ? opt.value !== "student-student" 
-      : opt.value !== "teacher-teacher"
-  );
+    { value: "all", label: t("forums.all") || "Tous les forums" },
+    { value: "teacher-teacher", label: t("forums.teacher-teacher") || "Enseignants ↔ Enseignants" },
+    { value: "teacher-student", label: t("forums.teacher-student") || "Enseignant → Étudiant" },
+    { value: "student-student", label: t("forums.student-student") || "Étudiants ↔ Étudiants" },
+    { value: "student-teacher", label: t("forums.student-teacher") || "Étudiant → Enseignant" }
+  ].filter(opt => {
+    if (role === "enseignant") {
+      // Enseignants : tout sauf student-student et student-teacher
+      return opt.value !== "student-student" && opt.value !== "student-teacher";
+    } else {
+      // Étudiants : tout sauf teacher-teacher et teacher-student
+      return opt.value !== "teacher-teacher" && opt.value !== "teacher-student";
+    }
+  });
 
   const [forumType, setForumType] = useState("all");
   const [posts, setPosts] = useState([]);
@@ -463,10 +469,13 @@ export default function CommunityPage() {
         
         const forums = await response.json();
         
+        // Filtrage selon le rôle
         const filteredForums = forums.filter(forum => {
           if (role === "enseignant") {
+            // Enseignants voient : teacher-teacher, teacher-student, student-teacher
             return forum.type !== "student-student";
           } else {
+            // Étudiants voient : student-student, student-teacher, teacher-student
             return forum.type !== "teacher-teacher";
           }
         });
@@ -479,7 +488,7 @@ export default function CommunityPage() {
           title: forum.titre_forum,
           likes: forum.nombre_likes || 0,
           commentsCount: forum.nombre_messages || 0,
-          type: forum.type || (role === "enseignant" ? "teacher-teacher" : "student-student"),
+          type: forum.type || (role === "enseignant" ? "teacher-student" : "student-teacher"),
           userHasLiked: forum.user_has_liked || false,
           forumData: forum,
           isMine: forum.utilisateur === userId,
@@ -506,8 +515,19 @@ export default function CommunityPage() {
       return;
     }
 
-    if (role === "enseignant" && !forumTypeToCreate) {
-      return;
+    // Confirmation selon le type de forum
+    if (role === "enseignant" && forumTypeToCreate === "teacher-student") {
+      const confirm = window.confirm(
+        "Ce forum sera visible uniquement par les étudiants. Continuer ?"
+      );
+      if (!confirm) return;
+    }
+    
+    if (role === "etudiant" && forumTypeToCreate === "student-teacher") {
+      const confirm = window.confirm(
+        "Ce forum sera visible uniquement par les enseignants. Continuer ?"
+      );
+      if (!confirm) return;
     }
 
     setIsCreatingPost(true);
@@ -681,9 +701,10 @@ export default function CommunityPage() {
 
   const getForumTypeLabel = (type) => {
     switch(type) {
-      case "teacher-teacher": return "Enseignants";
-      case "teacher-student": return "Tous";
-      case "student-student": return "Étudiants";
+      case "teacher-teacher": return "Enseignants ↔ Enseignants";
+      case "teacher-student": return "Enseignant → Étudiants";
+      case "student-student": return "Étudiants ↔ Étudiants";
+      case "student-teacher": return "Étudiant → Enseignants";
       default: return type;
     }
   };
@@ -696,6 +717,8 @@ export default function CommunityPage() {
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "student-student": 
         return "bg-green-100 text-green-800 border-green-200";
+      case "student-teacher":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default: 
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -799,66 +822,79 @@ export default function CommunityPage() {
             </p>
           </div>
           
-  {role === "enseignant" ? (
-  <div className="mb-4">
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Publier pour :
-    </label>
-
-    <div className="flex flex-col sm:flex-row gap-3">
-
-      {/* Enseignant → Enseignant */}
-      <Button
-        type="button"
-        variant={
-          forumTypeToCreate === "teacher-teacher"
-            ? "tabActive"  
-            : "tab"        
-        }
-        onClick={() => setForumTypeToCreate("teacher-teacher")}
-        className="w-full justify-start"
-      >
-        <div className="text-left">
-          <div className="font-medium">Aux enseignants</div>
-          <div className="text-xs mt-1 opacity-80">
-            Seulement entre enseignants
+          {/* Section de sélection du type de forum */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Publier pour :
+            </label>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Options pour ENSEIGNANTS */}
+              {role === "enseignant" && (
+                <>
+                  <Button
+                    type="button"
+                    variant={forumTypeToCreate === "teacher-teacher" ? "tabActive" : "tab"}
+                    onClick={() => setForumTypeToCreate("teacher-teacher")}
+                    className="w-full justify-start"
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">Aux enseignants</div>
+                      <div className="text-xs mt-1 opacity-80">
+                        Seulement entre enseignants
+                      </div>
+                    </div>
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant={forumTypeToCreate === "teacher-student" ? "tabActive" : "tab"}
+                    onClick={() => setForumTypeToCreate("teacher-student")}
+                    className="w-full justify-start"
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">Aux étudiants</div>
+                      <div className="text-xs mt-1 opacity-80">
+                        Seulement pour les étudiants
+                      </div>
+                    </div>
+                  </Button>
+                </>
+              )}
+              
+              {/* Options pour ÉTUDIANTS */}
+              {role === "etudiant" && (
+                <>
+                  <Button
+                    type="button"
+                    variant={forumTypeToCreate === "student-student" ? "tabActive" : "tab"}
+                    onClick={() => setForumTypeToCreate("student-student")}
+                    className="w-full justify-start"
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">Aux étudiants</div>
+                      <div className="text-xs mt-1 opacity-80">
+                        Seulement entre étudiants
+                      </div>
+                    </div>
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant={forumTypeToCreate === "student-teacher" ? "tabActive" : "tab"}
+                    onClick={() => setForumTypeToCreate("student-teacher")}
+                    className="w-full justify-start"
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">Aux enseignants</div>
+                      <div className="text-xs mt-1 opacity-80">
+                        Seulement pour les enseignants
+                      </div>
+                    </div>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      </Button>
-
-      {/* Enseignant → Étudiants */}
-      <Button
-        type="button"
-        variant={
-          forumTypeToCreate === "teacher-student"
-            ? "tabActive"   // ✅ actif
-            : "tab"         // ✅ inactif
-        }
-        onClick={() => setForumTypeToCreate("teacher-student")}
-        className="w-full justify-start"
-      >
-        <div className="text-left">
-          <div className="font-medium">Aux étudiants</div>
-          <div className="text-xs mt-1 opacity-80">
-            Étudiants & enseignants
-          </div>
-        </div>
-      </Button>
-
-    </div>
-  </div>
-) : (
-  <div className="mb-4 p-4 bg-green-50 rounded-xl border border-green-200">
-    <p className="text-sm font-medium text-green-700">
-      Forum étudiant
-    </p>
-    <p className="text-xs text-green-600 mt-1">
-      Ce forum sera visible uniquement par les étudiants
-    </p>
-  </div>
-)}
-
-
           
           <div className="flex justify-between items-center mt-4">
             <div className="text-sm text-grayc">
@@ -873,7 +909,7 @@ export default function CommunityPage() {
               text={isCreatingPost ? "Publication..." : t("community.send")}
               className="!w-auto px-6 py-2"
               onClick={handleCreatePost}
-              disabled={isCreatingPost || !newPostTitle.trim() || !newPostContent.trim() || (role === "enseignant" && !forumTypeToCreate)}
+              disabled={isCreatingPost || !newPostTitle.trim() || !newPostContent.trim()}
               icon={isCreatingPost ? <Loader className="animate-spin ml-2" size={16} /> : <FiSend className="ml-2" />}
             />
           </div>
@@ -928,6 +964,12 @@ export default function CommunityPage() {
                         <span className={`px-2 py-1 text-xs rounded border ${getForumTypeClasses(post.type)}`}>
                           {getForumTypeLabel(post.type)}
                         </span>
+                        {/* Badge supplémentaire pour les questions directionnelles */}
+                        {post.type === "student-teacher" && (
+                          <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded border border-yellow-200">
+                            Question d'étudiant
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
