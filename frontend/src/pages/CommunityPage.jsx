@@ -17,6 +17,7 @@ export default function CommunityPage() {
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [error, setError] = useState("");
   const [deletingForumId, setDeletingForumId] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [expandedForums, setExpandedForums] = useState({});
   const [messages, setMessages] = useState({});
   const [newMessages, setNewMessages] = useState({});
@@ -29,6 +30,7 @@ export default function CommunityPage() {
   const [postingComment, setPostingComment] = useState({});
   const [expandedComments, setExpandedComments] = useState({});
   const [deletingCommentId, setDeletingCommentId] = useState(null);
+  const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState(null);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
   
@@ -109,7 +111,6 @@ export default function CommunityPage() {
     const commentContent = newComments[messageId]?.trim();
     
     if (!commentContent || !token) {
-      alert("Écrivez quelque chose avant d'envoyer");
       return;
     }
     
@@ -154,7 +155,7 @@ export default function CommunityPage() {
       setExpandedComments(prev => ({ ...prev, [messageId]: true }));
       
     } catch (error) {
-      alert("Erreur lors de l'envoi du commentaire: " + error.message);
+      console.error("Erreur lors de l'envoi du commentaire:", error);
     } finally {
       setPostingComment(prev => ({ ...prev, [messageId]: false }));
     }
@@ -162,11 +163,6 @@ export default function CommunityPage() {
   
   const handleDeleteComment = async (commentId, messageId, forumId) => {
     if (!token) {
-      alert("Connectez-vous pour supprimer");
-      return;
-    }
-    
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) {
       return;
     }
     
@@ -209,18 +205,18 @@ export default function CommunityPage() {
         }));
       } else {
         const errorData = await response.json().catch(() => ({}));
-        alert("Erreur lors de la suppression: " + (errorData.error || `Erreur ${response.status}`));
+        console.error("Erreur lors de la suppression:", errorData.error || `Erreur ${response.status}`);
       }
     } catch (error) {
-      alert("Erreur réseau lors de la suppression");
+      console.error("Erreur réseau lors de la suppression:", error);
     } finally {
       setDeletingCommentId(null);
+      setShowDeleteCommentConfirm(null);
     }
   };
 
   const handleLikeMessage = async (messageId, forumId) => {
     if (!token) {
-      alert("Connectez-vous pour liker");
       return;
     }
 
@@ -276,7 +272,7 @@ export default function CommunityPage() {
           return { ...prev, [forumId]: updatedMessages };
         });
         
-        alert("Erreur lors du like: " + (errorData.error || `Erreur ${response.status}`));
+        console.error("Erreur lors du like:", errorData.error || `Erreur ${response.status}`);
       } else {
         const data = await response.json();
         setMessages(prev => {
@@ -308,7 +304,7 @@ export default function CommunityPage() {
         return { ...prev, [forumId]: updatedMessages };
       });
       
-      alert("Erreur réseau lors du like");
+      console.error("Erreur réseau lors du like:", error);
     } finally {
       setLikingMessageId(null);
     }
@@ -370,7 +366,6 @@ export default function CommunityPage() {
     const messageContent = newMessages[forumId]?.trim();
     
     if (!messageContent || !token) {
-      alert("Écrivez quelque chose avant d'envoyer");
       return;
     }
     
@@ -416,7 +411,7 @@ export default function CommunityPage() {
       setNewMessages(prev => ({ ...prev, [forumId]: "" }));
       
     } catch (error) {
-      alert("Erreur lors de l'envoi du message: " + error.message);
+      console.error("Erreur lors de l'envoi du message:", error);
     } finally {
       setPostingMessage(prev => ({ ...prev, [forumId]: false }));
     }
@@ -508,12 +503,10 @@ export default function CommunityPage() {
 
   const handleCreatePost = async () => {
     if (!newPostTitle.trim() || !newPostContent.trim() || !token) {
-      alert("Veuillez remplir le titre et le contenu avant de publier");
       return;
     }
 
     if (role === "enseignant" && !forumTypeToCreate) {
-      alert("Veuillez sélectionner à qui s'adresse ce forum");
       return;
     }
 
@@ -564,10 +557,8 @@ export default function CommunityPage() {
         [createdForum.id_forum]: true
       }));
       
-      alert("Forum créé avec votre message initial !");
-      
     } catch (error) {
-      alert("Erreur lors de la création: " + error.message);
+      console.error("Erreur lors de la création:", error);
     } finally {
       setIsCreatingPost(false);
     }
@@ -575,7 +566,6 @@ export default function CommunityPage() {
 
   const handleLike = async (forumId) => {
     if (!token) {
-      alert("Connectez-vous pour liker");
       return;
     }
 
@@ -607,7 +597,7 @@ export default function CommunityPage() {
             ? { ...p, likes: post.likes, userHasLiked: post.userHasLiked }
             : p
         ));
-        alert("Erreur lors du like: " + (errorData.error || "Erreur inconnue"));
+        console.error("Erreur lors du like:", errorData.error || "Erreur inconnue");
       } else {
         const data = await response.json();
         setPosts(prev => prev.map(p => 
@@ -628,22 +618,17 @@ export default function CommunityPage() {
           ? { ...p, likes: post.likes, userHasLiked: post.userHasLiked }
           : p
       ));
-      alert("Erreur réseau lors du like");
+      console.error("Erreur réseau lors du like:", error);
     }
   };
 
   const handleDeleteForum = async (forumId) => {
     if (!token) {
-      alert("Connectez-vous pour supprimer");
-      return;
-    }
-
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce forum ? Cette action est irréversible.")) {
       return;
     }
 
     setDeletingForumId(forumId);
-
+    
     const postToDelete = posts.find(p => p.id === forumId);
     
     setPosts(prev => prev.filter(post => post.id !== forumId));
@@ -663,16 +648,17 @@ export default function CommunityPage() {
           setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
         }
         
-        alert("Erreur lors de la suppression: " + (errorData.error || `Erreur ${response.status}`));
+        console.error("Erreur lors de la suppression:", errorData.error || `Erreur ${response.status}`);
       }
     } catch (error) {
       if (postToDelete) {
         setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
       }
       
-      alert("Erreur réseau lors de la suppression");
+      console.error("Erreur réseau lors de la suppression:", error);
     } finally {
       setDeletingForumId(null);
+      setShowDeleteConfirm(null);
     }
   };
 
@@ -1011,25 +997,59 @@ export default function CommunityPage() {
                   </div>
                   
                   {post.isMine && (
-                    <button 
-                      onClick={() => handleDeleteForum(post.id)}
-                      disabled={deletingForumId === post.id}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 border border-red-500 text-red-700 
-             hover:bg-red-100 hover:border-red-600 hover:text-red-800 transition-colors 
-             disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                    >
-                      {deletingForumId === post.id ? (
-                        <>
-                          <Loader className="h-4 w-4 animate-spin" />
-                          Suppression...
-                        </>
-                      ) : (
-                        <>
-                          <Trash2 size={16} />
-                          Supprimer le forum
-                        </>
+                    <div className="relative">
+                      <button 
+                        onClick={() => setShowDeleteConfirm(post.id)}
+                        disabled={deletingForumId === post.id}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 border border-red-500 text-red-700 
+               hover:bg-red-100 hover:border-red-600 hover:text-red-800 transition-colors 
+               disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                      >
+                        {deletingForumId === post.id ? (
+                          <>
+                            <Loader className="h-4 w-4 animate-spin" />
+                            Suppression...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 size={16} />
+                            Supprimer le forum
+                          </>
+                        )}
+                      </button>
+                      
+                      {/* Popup de confirmation */}
+                      {showDeleteConfirm === post.id && (
+                        <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-red-200 p-4 z-10">
+                          <div className="flex items-start gap-3 mb-4">
+                            <div className="bg-red-100 p-2 rounded-full">
+                              <Trash2 className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-800">Supprimer ce forum ?</h4>
+                              <p className="text-sm text-gray-600 mt-1">
+                                Cette action est irréversible. Tous les messages et commentaires seront supprimés.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex justify-end gap-3">
+                            <button
+                              onClick={() => setShowDeleteConfirm(null)}
+                              className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                              Annuler
+                            </button>
+                            <button
+                              onClick={() => handleDeleteForum(post.id)}
+                              disabled={deletingForumId === post.id}
+                              className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                            >
+                              {deletingForumId === post.id ? 'Suppression...' : 'Supprimer'}
+                            </button>
+                          </div>
+                        </div>
                       )}
-                    </button>
+                    </div>
                   )}
                 </div>
                 
@@ -1110,9 +1130,39 @@ export default function CommunityPage() {
                                       </button>
                                       
                                       {message.utilisateur === userId && (
-                                        <button className="text-red-400 hover:text-red-600 text-xs px-2 py-1 hover:bg-red-50 rounded transition-colors">
-                                          <Trash2 size={12} />
-                                        </button>
+                                        <div className="relative">
+                                          <button 
+                                            onClick={() => setShowDeleteCommentConfirm(message.id_message)}
+                                            className="text-red-400 hover:text-red-600 text-xs px-2 py-1 hover:bg-red-50 rounded transition-colors"
+                                          >
+                                            <Trash2 size={12} />
+                                          </button>
+                                          
+                                          {showDeleteCommentConfirm === message.id_message && (
+                                            <div className="absolute top-full right-0 mt-1 w-64 bg-white rounded-lg shadow-lg border border-red-200 p-3 z-10">
+                                              <p className="text-sm text-gray-700 mb-3">
+                                                Supprimer ce message ?
+                                              </p>
+                                              <div className="flex justify-end gap-2">
+                                                <button
+                                                  onClick={() => setShowDeleteCommentConfirm(null)}
+                                                  className="px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
+                                                >
+                                                  Annuler
+                                                </button>
+                                                <button
+                                                  onClick={() => {
+                                                    // Ici vous devriez appeler une fonction pour supprimer le message
+                                                    setShowDeleteCommentConfirm(null);
+                                                  }}
+                                                  className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                                                >
+                                                  Supprimer
+                                                </button>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
                                       )}
                                     </div>
                                   </div>
@@ -1152,17 +1202,41 @@ export default function CommunityPage() {
                                                   </span>
                                                 </div>
                                                 {comment.utilisateur === userId && (
-                                                  <button
-                                                    onClick={() => handleDeleteComment(comment.id_commentaire, message.id_message, post.id)}
-                                                    disabled={deletingCommentId === comment.id_commentaire}
-                                                    className="text-red-400 hover:text-red-600 text-xs disabled:opacity-50"
-                                                  >
-                                                    {deletingCommentId === comment.id_commentaire ? (
-                                                      <Loader className="h-3 w-3 animate-spin" />
-                                                    ) : (
-                                                      <Trash2 size={12} />
+                                                  <div className="relative">
+                                                    <button
+                                                      onClick={() => setShowDeleteCommentConfirm(`comment_${comment.id_commentaire}`)}
+                                                      disabled={deletingCommentId === comment.id_commentaire}
+                                                      className="text-red-400 hover:text-red-600 text-xs disabled:opacity-50"
+                                                    >
+                                                      {deletingCommentId === comment.id_commentaire ? (
+                                                        <Loader className="h-3 w-3 animate-spin" />
+                                                      ) : (
+                                                        <Trash2 size={12} />
+                                                      )}
+                                                    </button>
+                                                    
+                                                    {showDeleteCommentConfirm === `comment_${comment.id_commentaire}` && (
+                                                      <div className="absolute top-full right-0 mt-1 w-64 bg-white rounded-lg shadow-lg border border-red-200 p-3 z-10">
+                                                        <p className="text-sm text-gray-700 mb-3">
+                                                          Supprimer ce commentaire ?
+                                                        </p>
+                                                        <div className="flex justify-end gap-2">
+                                                          <button
+                                                            onClick={() => setShowDeleteCommentConfirm(null)}
+                                                            className="px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
+                                                          >
+                                                            Annuler
+                                                          </button>
+                                                          <button
+                                                            onClick={() => handleDeleteComment(comment.id_commentaire, message.id_message, post.id)}
+                                                            className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                                                          >
+                                                            Supprimer
+                                                          </button>
+                                                        </div>
+                                                      </div>
                                                     )}
-                                                  </button>
+                                                  </div>
                                                 )}
                                               </div>
                                               <p className="mt-2 text-sm text-textc">{comment.contenu_comm}</p>
