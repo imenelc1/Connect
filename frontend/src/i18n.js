@@ -99,9 +99,6 @@ const resources = {
     exerciceStudent: translationnFRexerciceStudent,
     startExercise: translationFRStartExo,
     CourseDetails: translationFRCourseDetails,
-    myStudents: translationFRMyStudents,
-    Spaces: translationFRSpaces,
-    CourseDetails: translationFRCourseDetails,
     SubmittedExercise: translationFRSubmittedExercise,
 
 
@@ -140,8 +137,6 @@ const resources = {
 
     startExercise: translationENStartExo,
     CourseDetails: translationENCourseDetails,
-    Spaces: translationENSpaces,
-    CourseDetails: translationENCourseDetails,
     SubmittedExercise: translationENSubmittedExercise,
 
     exercisePage: translationENExercisePage,
@@ -150,7 +145,6 @@ const resources = {
     ProgressStudent: translationnENProgressStudent,
 
      quiz3:translationENrecquiz,
-    community: translationnENCommunity
   },
 };
 

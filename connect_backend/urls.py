@@ -3,6 +3,8 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.conf import settings
 from django.conf.urls.static import static
+
+from spaces.views import my_courses
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -14,6 +16,8 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/spaces/', include('spaces.urls')),
+
+    path('api/my-courses/', my_courses, name='my-courses'), 
 ]
 
 if settings.DEBUG:

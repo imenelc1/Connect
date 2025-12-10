@@ -113,7 +113,7 @@ export default function AppRoutes() {
           <Route path="/quiz" element={<QuizPage2 />} />  
           <Route path="/start-exercise" element={<StartExercise />} />
           <Route path="/exercise-page" element={<ExercisePage />} />
-          <Route path="/course-details" element={<CourseDetails />} />
+      
           <Route path="/submitted-exercise" element={<SubmittedExercise />} />
           <Route path="/quiz1" element={<QuizPage1 />} />
           <Route path="/quiz" element={<QuizPage2 />} />
@@ -122,7 +122,7 @@ export default function AppRoutes() {
         
 
         {/* Course details */}
-        <Route path="/CourseDetails" element={<CourseDetails />} />
+       <Route path="/CourseDetails/:id" element={<CourseDetails />} />
         {/* Students */}
         <Route path="/MyStudents" element={<MyStudents />} />
       </Routes>

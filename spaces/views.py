@@ -1,10 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
+from rest_framework.decorators import api_view, permission_classes
 
+from courses.models import Cours
+from courses.serializers import CoursSerializer
 from users.models import Utilisateur
-from .models import Space, SpaceEtudiant
+from .models import Space, SpaceCour, SpaceEtudiant
 from .serializers import (
+    SpaceCourSerializer,
     SpaceSerializer,
     SpaceEtudiantCreateSerializer,
     SpaceEtudiantDisplaySerializer
@@ -97,4 +101,40 @@ class MySpacesStudentView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Space.objects.filter(spaceetudiant__etudiant=user)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def my_courses(request):
+    prof = request.user
+    courses = Cours.objects.filter(utilisateur=prof)
+    serializer = CoursSerializer(courses, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticatedJWT])
+def space_courses(request, space_id):
+    try:
+        space = Space.objects.get(id_space=space_id)
+    except Space.DoesNotExist:
+        return Response({"error": "Space not found"}, status=404)
+
+    if request.method == "GET":
+        courses = SpaceCour.objects.filter(space=space)
+        serializer = SpaceCourSerializer(courses, many=True)
+        return Response(serializer.data)
+
+    elif request.method == "POST":
+        cours_id = request.data.get("cours")
+        if not cours_id:
+            return Response({"error": "cours field required"}, status=400)
+        try:
+            cours = Cours.objects.get(id_cours=cours_id)
+        except Cours.DoesNotExist:
+            return Response({"error": "Cours not found"}, status=404)
+
+        space_cour, created = SpaceCour.objects.get_or_create(space=space, cours=cours)
+        serializer = SpaceCourSerializer(space_cour)
+        return Response(serializer.data, status=201 if created else 200)
+
 

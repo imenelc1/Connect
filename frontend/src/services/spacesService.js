@@ -33,5 +33,14 @@ export const deleteSpace = async (id) => {
   return res.data;
 };
 
-export default { createSpace, getSpaces, updateSpace, deleteSpace };
-// export default
+export const getSpaceDetails = (id) =>
+  api.get(`/spaces/${id}`).then((res) => res.data);
+
+export const getSpaceCourses = (id) =>
+  api.get(`/spaces/${id}/courses`).then((res) => res.data);
+
+export const getSpaceStudents = (id) =>
+  api.get(`/spaces/${id}/students`).then((res) => res.data);
+
+
+export default { createSpace, getSpaces, updateSpace, deleteSpace, getSpaceDetails, getSpaceCourses, getSpaceStudents};
