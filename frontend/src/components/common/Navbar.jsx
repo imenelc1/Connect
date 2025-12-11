@@ -3,6 +3,9 @@ import "../../styles/index.css";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import IconeLogoComponent from "./IconeLogoComponent";
+import { useContext } from "react";
+import AuthContext from "../../context/AuthContext";
+
 import {
   Settings,
   LogOut,
@@ -25,6 +28,7 @@ export default function Navbar() {
 
   const [collapsed, setCollapsed] = useState(false);
   const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -71,19 +75,19 @@ export default function Navbar() {
   // 🔥 logique pour activer le bouton Courses dans toutes les pages liées aux cours
   const courseRoutes = [
     "/all-courses",
-  "/CoursInfo",
+    "/CoursInfo",
 
   ];
   const exerciseRoutes = [
-  "/all-exercises",
-  "/new-exercise",
-  "/exercise-preview",
-];
+    "/all-exercises",
+    "/new-exercise",
+    "/exercise-preview",
+  ];
 
-const quizRoutes = [
-  "/all-quizzes",
+  const quizRoutes = [
+    "/all-quizzes",
 
-];
+  ];
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
@@ -132,26 +136,25 @@ const quizRoutes = [
           let forceActive = false;
 
           // ⭐ si c'est le bouton cours, on force active dans toutes les pages courses
-         if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
-    forceActive = true;
-  }
-   if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
-    forceActive = true;
-  }
+          if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
 
-  if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
-    forceActive = true;
-  }
+          if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
 
           return (
             <NavLink
               key={i}
               to={item.href}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-xl text-sm transition-all ${
-                  isActive || forceActive
-                    ? "bg-grad-1 border-primary text-white"
-                    : "bg-card border-surface text-nav hover:bg-grad-2"
+                `flex items-center px-3 py-2 rounded-xl text-sm transition-all ${isActive || forceActive
+                  ? "bg-grad-1 border-primary text-white"
+                  : "bg-card border-surface text-nav hover:bg-grad-2"
                 }`
               }
             >
@@ -167,8 +170,7 @@ const quizRoutes = [
         <NavLink
           to="/settings"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
+            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
             }`
           }
         >
@@ -176,19 +178,17 @@ const quizRoutes = [
           {!collapsed && <span>{t("settings")}</span>}
         </NavLink>
 
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive
-                ? "bg-grad-1 text-white"
-                : "bg-card text-red hover:bg-red/20"
-            }`
-          }
+        <button
+          onClick={() => {
+            logout();     // <-- supprime le token + user
+            window.location.href = "/"; // <-- redirige proprement
+          }}
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red hover:bg-red/20 transition-colors"
         >
           <LogOut size={17} strokeWidth={1.5} />
           {!collapsed && <span>{t("logout")}</span>}
-        </NavLink>
+        </button>
+
       </div>
     </aside>
   );

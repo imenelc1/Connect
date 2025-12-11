@@ -53,7 +53,7 @@ export default function ContentFilters({
             <button
               key={lvl}
               onClick={() => onFilterChange(lvl)}
-              className={`px-4 py-1.5 transition-all duration-300 rounded-full ${
+              className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm${
                 lvl === activeFilter
                   ? "text-white bg-primary shadow-md"
                   : "text-primary/70 hover:text-primary"

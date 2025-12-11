@@ -17,7 +17,7 @@ router.register(r'badges', BadgeViewSet, basename='badge')
 router.register(r'tentatives', TentativeExerciceViewSet, basename='tentative')
 router.register(r'analyses', AnalyseViewSet, basename='analyse')
 router.register(r'quizzes', QuizViewSet, basename='quiz')
-router.register(r'exercices', ExerciceViewSet, basename='exercice')
+router.register(r'exercices', ExerciceViewSet, basename='Exercice')
 router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 
 

@@ -1,27 +1,49 @@
-import api, { setAuthToken } from "./api";
+import { createContext, useState, useEffect } from "react";
 
-export async function registerStudent(payload) {
-  // payload doit être mappé aux champs Django (voir plus bas)
-  return api.post("register/", payload);
+const AuthContext = createContext();
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    // Récupération sécurisée du user
+    const storedUser = localStorage.getItem("user");
+    let parsedUser = null;
+
+    try {
+      parsedUser = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+    } catch (err) {
+      console.error("Erreur JSON du user :", err);
+      localStorage.removeItem("user");
+    }
+
+    setUser(parsedUser);
+
+    // Récupération du token
+    const t = localStorage.getItem("token");
+    if (t) setToken(t);
+  }, []);
+
+  const loginUser = (token, userData) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
+    setToken(token);
+    setUser(userData);
+  };
+
+  const logoutUser = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setToken(null);
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, loginUser, logoutUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export async function loginUser(payload) {
-  // backend renvoie token si tu utilises JWT custom ; sinon adapte
-  return api.post("login/", payload);
-}
-
-export function saveToken(token) {
-  localStorage.setItem("token", token);
-  setAuthToken(token);
-}
-
-export function loadToken() {
-  const t = localStorage.getItem("token");
-  setAuthToken(t);
-  return t;
-}
-
-export function logout() {
-  localStorage.removeItem("token");
-  setAuthToken(null);
-}
+export default AuthContext;

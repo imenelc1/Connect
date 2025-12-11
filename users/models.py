@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.contrib.auth.hashers import make_password, check_password
-
+from django.utils import timezone
+import uuid
 
 class UtilisateurManager(BaseUserManager):
     def create_user(self, adresse_email, mot_de_passe=None, **extra_fields):
@@ -71,3 +72,12 @@ class Administrateur(models.Model):
 
     def __str__(self):
         return self.email_admin
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey("Utilisateur", on_delete=models.CASCADE)
+    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def is_valid(self):
+        # Token valable 24h
+        return (timezone.now() - self.created_at).total_seconds() < 3600 * 24

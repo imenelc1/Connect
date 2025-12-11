@@ -20,7 +20,12 @@
     "month": "Month",
     "beginner": "Beginner",
     "intermediate": "Intermediate",
-    "advanced": "Advanced"
+    "advanced": "Advanced",
+    "placeholder2": "Select a category",
+    "code": "Code",
+    "question_cours": "Course's questions",
+    "private":"private",
+    "public":"public"
   },
   "buttons": {
     "cancel": "Cancel",
@@ -28,7 +33,9 @@
   },
   "exercises": {
     "info": "Exercise Info",
-    "preview": "Preview Exercise"
+    "preview": "Preview Exercise",
+    "visibility": "visibility"
+
   }
 
 }

@@ -2,7 +2,7 @@ import { jwtDecode } from "jwt-decode";
 
 export function getCurrentUserId() {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
     if (!token) return null;
 
     const payload = jwtDecode(token);
@@ -14,7 +14,7 @@ export function getCurrentUserId() {
 
 export function getCurrentUserRole() {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("token");
     if (!token) return null;
 
     const payload = jwtDecode(token);

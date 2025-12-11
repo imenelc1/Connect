@@ -10,19 +10,11 @@ const api = axios.create({
   withCredentials: false,
 });
 
-// ★ Fonction nécessaire pour auth.js
-export const setAuthToken = (token) => {
-  if (token) {
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  } else {
-    delete api.defaults.headers.common["Authorization"];
-  }
-};
-
-// Routes publiques
+// Routes publiques (pas de token)
 const PUBLIC_ROUTES = ["register", "login"];
 
 api.interceptors.request.use((config) => {
+  // Nettoyage du chemin → retire / au début et / à la fin
   const path = config.url.replace(/^\//, "").replace(/\/$/, "");
 
   const isPublic = PUBLIC_ROUTES.includes(path);

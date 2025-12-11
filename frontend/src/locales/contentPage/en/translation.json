@@ -26,6 +26,12 @@
 
 "startCourse": "Start the course",
 "startExercise": "Start the exercise",
-"startQuiz": "Start the quiz"
+"startQuiz": "Start the quiz",
+
+"checkCourse": "Check the course",
+"checkExercise": "Check the exercise",
+"checkQuiz": "Check the quiz"
+
+
 
 }

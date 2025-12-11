@@ -23,7 +23,7 @@ const gradientMap = {
 };
 
 export default function AllCoursesPage() {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
   const currentUserId = getCurrentUserId();
   const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
 
@@ -52,29 +52,28 @@ export default function AllCoursesPage() {
       .catch((err) => console.error("Erreur chargement cours :", err));
   }, []);
 
-  
+
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allcourses");
-  const initials = `${userData?.nom?.[0] || ""}${
-    userData?.prenom?.[0] || ""
-  }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
+    }`.toUpperCase();
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
 
 
-let filteredCourses = 
+  let filteredCourses =
 
-// 1️⃣ Filtrer par niveau
- filterLevel === "ALL"
+    // 1️⃣ Filtrer par niveau
+    filterLevel === "ALL"
       ? courses
       : courses.filter((course) => course.level === filterLevel);
 
-// 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
-if (userRole === "enseignant" && categoryFilter === "mine") {
-  filteredCourses = filteredCourses.filter((course) => course.isMine);
-}
+  // 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
+  if (userRole === "enseignant" && categoryFilter === "mine") {
+    filteredCourses = filteredCourses.filter((course) => course.isMine);
+  }
 
 
 
@@ -170,14 +169,14 @@ if (userRole === "enseignant" && categoryFilter === "mine") {
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
           <ContentFilters
-  type="courses"
-  userRole={userRole}
-  activeFilter={filterLevel}
-  onFilterChange={setFilterLevel}
-  categoryFilter={categoryFilter}        // ← bien passer le state
-  setCategoryFilter={setCategoryFilter}
-  showCompletedFilter={userRole === "etudiant"}
-/>
+            type="courses"
+            userRole={userRole}
+            activeFilter={filterLevel}
+            onFilterChange={setFilterLevel}
+            categoryFilter={categoryFilter}        // ← bien passer le state
+            setCategoryFilter={setCategoryFilter}
+            showCompletedFilter={userRole === "etudiant"}
+          />
 
 
           {userRole === "enseignant" && (

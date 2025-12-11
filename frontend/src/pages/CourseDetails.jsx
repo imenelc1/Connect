@@ -38,7 +38,6 @@ export default function SpaceDetails() {
   const [myCourses, setMyCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const [categoryFilter, setCategoryFilter] = useState("all");
   const [activeStep, setActiveStep] = useState(1);
   const [openModal, setOpenModal] = useState(false);
 
@@ -53,6 +52,16 @@ export default function SpaceDetails() {
     Intermédiaire: "bg-grad-3",
     Avancé: "bg-grad-4",
   };
+
+  // Déterminer pageType selon la topbar active
+  const pageType =
+    activeStep === 1
+      ? "course"
+      : activeStep === 2
+      ? "quiz"
+      : activeStep === 3
+      ? "exercise"
+      : "course"; // fallback
 
   // --- fetch space details ---
   useEffect(() => {
@@ -143,17 +152,16 @@ export default function SpaceDetails() {
 
   // --- filtered courses ---
   const filteredCourses = spaceCourses
-    .filter((c) => filterLevel === "ALL" || c.level === filterLevel)
-    .filter(
-      (c) => userRole !== "enseignant" || categoryFilter !== "mine" || c.isMine
-    )
-    .filter((c) => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  .filter((c) => filterLevel === "ALL" || c.level === filterLevel)
+  .filter((c) => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
 
   return (
     <div className="flex w-full bg-surface min-h-screen">
       <Navbar />
-      <main className="lg:ml-64 w-full min-h-screen px-6 py-6 bg-bg">
-        {/* Back + User */}
+
+      <main className="flex-1 p-6 lg:ml-64 bg-bg min-h-screen">
+        {/* Header: back + user */}
         <div className="flex justify-between items-center mb-6">
           <button
             className="text-muted font-medium hover:underline flex items-center gap-1"
@@ -173,8 +181,8 @@ export default function SpaceDetails() {
           </div>
         </div>
 
-        {/* Space Info + Students */}
-        <div className="flex justify-between items-start mb-2">
+        {/* Space Info + search */}
+        <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
           <h2 className="text-4xl font-semibold text-muted">{spaceName}</h2>
           <div className="w-full md:w-[400px]">
             <ContentSearchBar
@@ -187,25 +195,23 @@ export default function SpaceDetails() {
           </div>
         </div>
 
-        {/* Steps */}
         <Topbar
+          className="flex justify-between"
           steps={steps}
           activeStep={activeStep}
-          setActiveStep={setActiveStep}
-          className="my-6 flex justify-between items-center"
+          onStepChange={(step) => setActiveStep(step)}
         />
 
         {/* Filters + Add Button */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <ContentFilters
-            type="courses"
-            userRole={userRole}
-            activeFilter={filterLevel}
-            onFilterChange={setFilterLevel}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            showCompletedFilter={false}
-          />
+     <ContentFilters
+  type="courses"
+  userRole={userRole}
+  activeFilter={filterLevel}
+  onFilterChange={setFilterLevel}
+  showCompletedFilter={userRole === "etudiant"} // garde uniquement filtre niveau ou terminé
+/>
+
 
           {userRole === "enseignant" && (
             <Button
@@ -219,26 +225,44 @@ export default function SpaceDetails() {
           )}
         </div>
 
-        {/* Courses List */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Courses Grid */}
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${
+              window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
+            }, minmax(0, 1fr))`,
+          }}
+        >
           {filteredCourses.map((course) => (
             <ContentCard
               key={course.id}
               course={{
                 ...course,
                 initials:
-                  course.author?.[0] + course.author?.split(" ")[1]?.[0] || "",
+                  course.author?.[0] +
+                  (course.author?.split(" ")[1]?.[0] || ""),
                 duration: course.date ? "Created on " + course.date : "",
-                isMine: course.isMine,
-                progress: 0,
               }}
               role={userRole}
-              showProgress={false}
+              showProgress={userRole === "etudiant"}
+              type={pageType} // <- ici
               className={gradientMap[course.level] ?? "bg-grad-1"}
               onDelete={(id) =>
                 setSpaceCourses(spaceCourses.filter((c) => c.id !== id))
               }
-              onClick={() => navigate(`/courses/${course.id}`)}
+              onClick={() => {
+                if (userRole === "etudiant") {
+                  if (pageType === "course")
+                    navigate(`/courses/${course.id}/start`);
+                  else if (pageType === "quiz")
+                    navigate(`/quizzes/${course.id}/start`);
+                  else if (pageType === "exercise")
+                    navigate(`/exercises/${course.id}/start`);
+                } else {
+                  navigate(`/courses/${course.id}`);
+                }
+              }}
             />
           ))}
         </div>

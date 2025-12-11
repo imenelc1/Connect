@@ -8,6 +8,12 @@ import ThemeContext from "../context/ThemeContext.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import IaAssistant from "../components/ui/IaAssistant.jsx";
 import ContentSearchBar from "../components/common/ContentSearchBar.jsx";
+import api from "../services/courseService";
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+
+import { getCurrentUserId } from "../hooks/useAuth";
+
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -21,6 +27,69 @@ export default function Courses() {
     : "";
 
   const [collapsed, setCollapsed] = useState(false);
+
+  const { id: coursId } = useParams();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [duration, setDuration] = useState("");
+  const [level, setLevel] = useState("");
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+const [sections, setSections] = useState([
+    {
+      id: 1,
+      title: "",
+      description: "", // ⭐ AJOUTÉ
+      open: true,
+      ordre:"",
+      lessons: [{ id: 1, title: "", content: "" }], // ⭐ AJOUTÉ
+    },
+  ]);
+
+useEffect(() => {
+    if (!coursId) return;
+
+    const fetchCourse = async () => {
+      const token = localStorage.getItem("access_token");
+      try {
+        const res = await api.get(`courses/courses/${coursId}/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = res.data;
+        setTitle(data.titre_cour);
+        setDescription(data.description);
+        setDuration(data.duration);
+        setLevel(data.niveau_cour);
+
+        const fetchedSections = (data.sections || []).map((sec) => ({
+          id: sec.id_section,
+          title: sec.titre_section,
+          description: sec.description || "",
+          open: true,
+          ordre: sec.ordre,
+          lessons: (sec.lecons || []).map((lec) => ({
+            id: lec.id_lecon,
+            title: lec.titre_lecon,
+            content: lec.contenu_lecon,
+            type: lec.type_lecon,
+            preview: lec.type_lecon === "image"
+  ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
+  : null
+          })),
+        }));
+
+        setSections(fetchedSections);
+      } catch (err) {
+        console.error("Erreur chargement cours :", err.response?.data || err);
+      }
+    };
+
+    fetchCourse();
+  }, [coursId]);
+  console.log( coursId,title,+"niii //", description);
+
+
+
 
   return (
     <div className="w-full bg-surface flex flex-col items-center">
@@ -76,11 +145,21 @@ export default function Courses() {
       <div className="w-full max-w-7xl px-4 pb-10 flex flex-col lg:flex-row gap-6 relative">
         {/* SIDEBAR */}
         <div className={`${collapsed ? "hidden lg:block" : "block"}`}>
-          <CoursesSidebarItem />
+          
+<CoursesSidebarItem
+  sections={sections}
+  currentSectionIndex={currentSectionIndex}
+  setCurrentSectionIndex={setCurrentSectionIndex}
+/>
         </div>
 
         {/* CONTENT */}
-        <CourseContent t={t} />
+       
+<CourseContent
+  course={{ title, description, level, duration, sections }}
+  currentSectionIndex={currentSectionIndex}
+  setCurrentSectionIndex={setCurrentSectionIndex}
+/>
       </div>
     </div>
   );

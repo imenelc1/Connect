@@ -64,6 +64,8 @@ import translationFRSubmittedExercise from "./locales/SubmittedExo/fr-SubExo/tra
 import translationENSubmittedExercise from "./locales/SubmittedExo/en-SubExo/translation.json";
 import translationFRExercisePage from "./locales/exercisepage/fr-exercisepage/translation.json";
 import translationENExercisePage from "./locales/exercisepage/en-exercisepage/translation.json";
+import translationFRSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-fr/translation.json";
+import translationENSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-en/translation.json";
 
 const resources = {
   fr: {
@@ -99,8 +101,12 @@ const resources = {
     exerciceStudent: translationnFRexerciceStudent,
     startExercise: translationFRStartExo,
     CourseDetails: translationFRCourseDetails,
+    myStudents: translationFRMyStudents,
+    Spaces: translationFRSpaces,
+    CourseDetails: translationFRCourseDetails,
     SubmittedExercise: translationFRSubmittedExercise,
 
+    SubmittedExercises: translationFRSubmittedExercises,
 
 
     exercisePage: translationFRExercisePage,
@@ -137,6 +143,8 @@ const resources = {
 
     startExercise: translationENStartExo,
     CourseDetails: translationENCourseDetails,
+    Spaces: translationENSpaces,
+    CourseDetails: translationENCourseDetails,
     SubmittedExercise: translationENSubmittedExercise,
 
     exercisePage: translationENExercisePage,
@@ -145,6 +153,8 @@ const resources = {
     ProgressStudent: translationnENProgressStudent,
 
      quiz3:translationENrecquiz,
+    community: translationnENCommunity,
+    SubmittedExercises: translationENSubmittedExercises
   },
 };
 

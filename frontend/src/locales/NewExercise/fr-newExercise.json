@@ -20,7 +20,12 @@
     "month": "Mois",
     "beginner": "Débutant",
     "intermediate": "Intermédiaire",
-    "advanced": "Avancé"
+    "advanced": "Avancé",
+    "placeholder2": "Sélectionner une catégorie",
+    "code": "Code",
+    "question_cours": "Question de cours",
+    "private":"privé",
+    "public":"public"
   },
   "buttons": {
     "cancel": "Annuler",
@@ -28,6 +33,7 @@
   },
   "exercises": {
     "info": "Informations sur l'exercice",
-    "preview": "Aperçu de l'exercice"
+    "preview": "Aperçu de l'exercice",
+    "visibility": "visibilité"
   }
 }

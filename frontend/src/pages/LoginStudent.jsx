@@ -13,7 +13,7 @@ import LogoComponent from "../components/common/LogoComponent";
 import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
-
+import AuthContext from "../context/AuthContext.jsx";
 export default function LoginStudent() {
   const [activeTab] = useState("signin");
   const navigate = useNavigate();
@@ -24,6 +24,7 @@ export default function LoginStudent() {
   const [showPassword, setShowPassword] = useState(false);
   const [userRole, setUserRole] = useState("");
 
+  const { loginUser } = useContext(AuthContext);
 
   const { t, i18n } = useTranslation("login");
 
@@ -68,27 +69,27 @@ export default function LoginStudent() {
       const res = await api.post("login/", {
         email,
         password,
-        role: "etudiant" // <-- Obligatoire pour que le backend sache que c'est un étudiant
+        role: "etudiant", // OBLIGATOIRE
       });
-      console.log(res.data)
-      console.log(" LOGIN SUCCESS:", res.data); // <---- IMPORTANT
 
-      // Combine user + role pour être sûr que role est présent
       const userWithRole = {
-        ...res.data.user,
-        role: res.data.role || res.data.user.role
+        user_id: res.data.user.user_id,
+        nom: res.data.user.nom,
+        prenom: res.data.user.prenom,
+        email: res.data.user.email,
+        role: res.data.user.role,
       };
 
       localStorage.setItem("user", JSON.stringify(userWithRole));
-      localStorage.setItem("token", res.data.token);
+
+      loginUser(res.data.token, userWithRole);
 
       toast.success(t("login.success"));
       navigate("/dashboard-etu");
-
     } catch (error) {
       const backend = error.response?.data;
 
-      // 🔥 SI BACKEND RENVOIE UN MESSAGE GÉNÉRAL (CAS 403, 401, etc.)
+      // SI BACKEND RENVOIE UN MESSAGE GÉNÉRAL (CAS 403, 401, etc.)
       if (typeof backend?.detail === "string") {
         setErrorPassword(backend.detail);
         toast.error(backend.detail);
@@ -113,7 +114,9 @@ export default function LoginStudent() {
         };
 
         Object.keys(backend).forEach((key) => {
-          const val = Array.isArray(backend[key]) ? backend[key][0] : backend[key];
+          const val = Array.isArray(backend[key])
+            ? backend[key][0]
+            : backend[key];
           const target = mapKey[key] || key;
 
           if (target === "email") setErrorEmail(val);
@@ -127,15 +130,12 @@ export default function LoginStudent() {
       setErrorPassword("Erreur réseau");
       toast.error("Erreur réseau");
     }
-
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-surface px-4 sm:px-0 pb-50">
-
       {/* Header */}
       <div className="flex w-full mb-4 items-center justify-between px-4 pt-12">
-
         {/* Logo normal (grand) — visible seulement md+ */}
         <div className="hidden md:block">
           <LogoComponent className="-mt-10 ml-20" />
@@ -145,10 +145,7 @@ export default function LoginStudent() {
         <div className="block md:hidden">
           <LogoIconeComponent className="w-8 h-8 -ml-1" />
         </div>
-
-
       </div>
-
 
       <AuthTabs
         role={userRole || "student"}
@@ -158,9 +155,7 @@ export default function LoginStudent() {
         className="mt-20 sm:mt-0"
       />
 
-
       <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[500px]  bg-card rounded-3xl shadow-lg overflow-hidden relative mt-5 mb-5">
-
         {/* FORM */}
         <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:m-10 bg-card">
           <h2 className="text-2xl font-semibold text-center mb-6">
@@ -169,7 +164,6 @@ export default function LoginStudent() {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-
             <Input
               label={t("login.email")}
               value={email}
@@ -189,9 +183,17 @@ export default function LoginStudent() {
               error={errorPassword}
               rightIcon={
                 showPassword ? (
-                  <FiEyeOff size={18} onClick={() => setShowPassword(false)} className="cursor-pointer" />
+                  <FiEyeOff
+                    size={18}
+                    onClick={() => setShowPassword(false)}
+                    className="cursor-pointer"
+                  />
                 ) : (
-                  <FiEye size={18} onClick={() => setShowPassword(true)} className="cursor-pointer" />
+                  <FiEye
+                    size={18}
+                    onClick={() => setShowPassword(true)}
+                    className="cursor-pointer"
+                  />
                 )
               }
             />
@@ -203,7 +205,6 @@ export default function LoginStudent() {
                 {t("login.forgotPassword")}
               </a>
             </div>
-
 
             <Button text={t("login.signIn")} type="submit" />
 
@@ -218,7 +219,6 @@ export default function LoginStudent() {
 
         {/* MASCOTTE - RESPONSIVE */}
         <div className="w-full lg:w-1/2 -relative flex items-center justify-center bg-card h-80 lg:h-auto mt-6 lg:mt-0 H-auto hidden lg:block">
-
           {/* RESPONSIVE: Bulle floue taille adaptative */}
           <div
             className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full blur-3xl"
@@ -226,7 +226,7 @@ export default function LoginStudent() {
               background: "rgba(52,144,220,0.6)",
               top: "50%",
               left: "70%",
-              transform: "translate(-50%, -50%)"
+              transform: "translate(-50%, -50%)",
             }}
           />
 
@@ -236,13 +236,17 @@ export default function LoginStudent() {
               {t("login.welcome")}
             </p>
             <div className="absolute -top-5 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow bg-white">
-              <span className="text-[#4F9DDE] text-[20px] font-bold">&lt;&gt;</span>
+              <span className="text-[#4F9DDE] text-[20px] font-bold">
+                &lt;&gt;
+              </span>
             </div>
           </div>
-
         </div>
 
-        <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-20 mr-10 " />
+        <Mascotte
+          width="w-48 sm:w-60 lg:w-58"
+          className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-20 mr-10 "
+        />
       </div>
     </div>
   );

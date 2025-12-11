@@ -9,7 +9,7 @@ import api from "../services/api";
 
 import LogoComponent from "../components/common/LogoComponent";
 
-import { 
+import {
   FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge,
   FaCalendarAlt, FaLock, FaEnvelope, FaUser, FaGraduationCap
 } from "react-icons/fa";
@@ -193,28 +193,23 @@ const InstructorSignUp = () => {
 
     try {
       const res = await api.post("register/", payload);
-      // 🔥 Stocker le token
-localStorage.setItem("token", res.data.token);
 
-// 🔥 Stocker les infos utilisateur
-localStorage.setItem(
-  "user",
-  JSON.stringify({
-    nom: res.data.user.nom,
-    prenom: res.data.user.prenom,
-    id_utilisateur: res.data.user.id_utilisateur, // important
-    adresse_email: res.data.user.adresse_email,
-    matricule: res.data.user.matricule,
-    role: res.data.role,
-    token: res.data.token
-  })
-);
+      // stocker le token
+      localStorage.setItem("token", res.data.token);
+
+      // mettre à jour le contexte Auth
+      loginUser(res.data.token);
+
+      // stocker les infos utilisateur si besoin
+      const userWithRole = {
+        ...res.data.user,
+        role: res.data.role || res.data.user.role
+      };
+      localStorage.setItem("user", JSON.stringify(userWithRole));
 
       toast.success("Inscription réussie !");
-      // redirection
-      setTimeout(() => {
-        window.location.href = "/dashboard-ens";
-      }, 1200);
+      navigate("/dashboard-ens"); // ✅ navigation via react-router
+
     } catch (err) {
       const apiErrors = err.response?.data;
 
@@ -247,40 +242,40 @@ localStorage.setItem(
     i18n.changeLanguage(newLang);
   };
 
-    return (
+  return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4 pt-12">
-  {/* Header */}
-  <div className="flex w-full mb-4 items-center justify-between px-4">
+      {/* Header */}
+      <div className="flex w-full mb-4 items-center justify-between px-4">
 
-    {/* Logo normal (grand) — visible seulement md+ */}
-    <div className="hidden md:block">
-      <LogoComponent className="-mt-10 ml-20" />
-    </div>
+        {/* Logo normal (grand) — visible seulement md+ */}
+        <div className="hidden md:block">
+          <LogoComponent className="-mt-10 ml-20" />
+        </div>
 
-    {/* Petit logo — visible seulement sur mobile */}
-    <div className="block md:hidden">
-      <LogoIconeComponent className="w-8 h-8 -ml-1" />
-    </div>
+        {/* Petit logo — visible seulement sur mobile */}
+        <div className="block md:hidden">
+          <LogoIconeComponent className="w-8 h-8 -ml-1" />
+        </div>
 
-    
-  </div>
+
+      </div>
 
 
 
 
       <AuthTabs
-          role="instructor"
-          active="signup"
-          tab1Label={t("login.signIn")}
-          tab2Label={t("login.signUp")}
-          className="mt-20 sm:mt-0"
+        role="instructor"
+        active="signup"
+        tab1Label={t("login.signIn")}
+        tab2Label={t("login.signUp")}
+        className="mt-20 sm:mt-0"
       />
 
       <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card rounded-3xl shadow-lg overflow-hidden relative mt-2">
         {/* Formulaire */}
         <div className="w-full md:w-1/2 p-10">
-         <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
-            <form className="space-y-4" onSubmit={handleSubmit}>
+          <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
               <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
@@ -298,19 +293,19 @@ localStorage.setItem(
             </div>
 
             <Select label={t("rank")} name="rank" value={formData.rank} onChange={handleChange} placeholder={t("rank")} options={[
-                    { value: "Prof", label: "Professor" },
-                    { value: "maitre conf", label: "Maitre de conférences" },
-                    { value: "maitre ass", label: "maitre assistant" },
-                  ]} />
+              { value: "Prof", label: "Professor" },
+              { value: "maitre conf", label: "Maitre de conférences" },
+              { value: "maitre ass", label: "maitre assistant" },
+            ]} />
             <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
-              <p className="text-sm text-grayc text-center mt-4">
-                          {t("alreadyHaveAccount")}{" "}
-                          <a href="/login/student" className="text-muted font-medium hover:underline">
-                            {t("signIn")}
-                          </a>
-                        </p>
-            
-                       
+            <p className="text-sm text-grayc text-center mt-4">
+              {t("alreadyHaveAccount")}{" "}
+              <a href="/login/student" className="text-muted font-medium hover:underline">
+                {t("signIn")}
+              </a>
+            </p>
+
+
           </form>
         </div>
 
@@ -326,7 +321,7 @@ localStorage.setItem(
           </div>
 
           <div className="absolute w-56 md:w-72 h-56 md:h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "45%", left: "50%", transform: "translate(-50%, -50%)" }} />
-           <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-10 right-20 h-58 z-10 mt-40 mr-10 " />
+          <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-10 right-20 h-58 z-10 mt-40 mr-10 " />
         </div>
 
       </div>
