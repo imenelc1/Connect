@@ -8,7 +8,8 @@ import Select from "../components/common/Select";
 import api from "../services/api";
 
 import LogoComponent from "../components/common/LogoComponent";
-
+import { useNavigate } from "react-router-dom";
+import AuthContext from "../context/AuthContext.jsx";
 import {
   FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge,
   FaCalendarAlt, FaLock, FaEnvelope, FaUser, FaGraduationCap
@@ -20,7 +21,7 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import ThemeButton from "../components/common/ThemeButton";
-
+import ModernDropdown from "../components/common/ModernDropdown.jsx";
 const InstructorSignUp = () => {
   const [formData, setFormData] = useState({
     nickname: "",
@@ -37,6 +38,8 @@ const InstructorSignUp = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+const navigate = useNavigate();
+const { loginUser } = useContext(AuthContext);
 
   // mapping backend -> frontend
   const fieldMap = {
@@ -277,8 +280,9 @@ const InstructorSignUp = () => {
           <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
               <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
+
+              <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
             </div>
 
             <Input label={t("email")} name="email" type="email" value={formData.email} onChange={handleChange} placeholder={t("email")} icon={<FaEnvelope />} error={errors.email} />
@@ -292,11 +296,17 @@ const InstructorSignUp = () => {
               <Input label={t("regnumber")} name="regnumber" value={formData.regnumber} onChange={handleChange} placeholder={t("regnumber")} icon={<FaIdBadge />} error={errors.regnumber} />
             </div>
 
-            <Select label={t("rank")} name="rank" value={formData.rank} onChange={handleChange} placeholder={t("rank")} options={[
-              { value: "Prof", label: "Professor" },
-              { value: "maitre conf", label: "Maitre de conférences" },
-              { value: "maitre ass", label: "maitre assistant" },
-            ]} />
+            <ModernDropdown
+              value={formData.rank}
+              onChange={(val) => setFormData({ ...formData, rank: val })}
+              options={[
+                { value: "Prof", label: "Professor" },
+                { value: "maitre conf", label: "Maitre de conférences" },
+                { value: "maitre ass", label: "Maitre assistant" }
+              ]}
+              placeholder={t("rank")}
+            />
+
             <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
             <p className="text-sm text-grayc text-center mt-4">
               {t("alreadyHaveAccount")}{" "}

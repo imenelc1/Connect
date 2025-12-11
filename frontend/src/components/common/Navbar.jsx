@@ -35,7 +35,9 @@ export default function Navbar() {
 
   try {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+
+    // 🔥 Empêcher le crash si la valeur est "undefined" ou vide
+    if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
       const parsed = JSON.parse(storedUser);
       userObj = parsed.user || parsed.utilisateur || parsed;
     }
@@ -49,7 +51,6 @@ export default function Navbar() {
     role: userObj.role || "",
   });
 }, []);
-
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("sidebarChanged", { detail: collapsed }));
