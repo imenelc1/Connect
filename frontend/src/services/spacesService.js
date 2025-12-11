@@ -43,4 +43,6 @@ export const getSpaceStudents = (id) =>
   api.get(`/spaces/${id}/students`).then((res) => res.data);
 
 
+
+
 export default { createSpace, getSpaces, updateSpace, deleteSpace, getSpaceDetails, getSpaceCourses, getSpaceStudents};

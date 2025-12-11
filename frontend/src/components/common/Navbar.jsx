@@ -31,18 +31,25 @@ export default function Navbar() {
   const { logout } = useContext(AuthContext);
 
   useEffect(() => {
+  let userObj = { nom: "", prenom: "", role: "" };
+
+  try {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsed = JSON.parse(storedUser);
-      const userObj = parsed.user || parsed.utilisateur || parsed;
-
-      setUserData({
-        nom: userObj.nom || "",
-        prenom: userObj.prenom || "",
-        role: userObj.role || "",
-      });
+      userObj = parsed.user || parsed.utilisateur || parsed;
     }
-  }, []);
+  } catch (err) {
+    console.error("Erreur parsing user JSON:", err);
+  }
+
+  setUserData({
+    nom: userObj.nom || "",
+    prenom: userObj.prenom || "",
+    role: userObj.role || "",
+  });
+}, []);
+
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("sidebarChanged", { detail: collapsed }));

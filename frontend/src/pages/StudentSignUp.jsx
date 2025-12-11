@@ -19,6 +19,8 @@ import ThemeContext from "../context/ThemeContext";
 import ThemeButton from "../components/common/ThemeButton";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../context/AuthContext.jsx";
+import ModernDropdown from "../components/common/ModernDropdown.jsx";
 
 
 
@@ -27,6 +29,7 @@ export default function StudentSignUp() {
   const { t, i18n } = useTranslation("signup");
   const { toggleDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
+  const { loginUser } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     nickname: "",
@@ -181,7 +184,16 @@ export default function StudentSignUp() {
       toast.error("Erreur réseau");
     }
   };
-
+  const fieldOptions = [
+    { value: "math", label: "Mathematics" },
+    { value: "cs", label: "Computer Science" },
+    { value: "ST", label: "Science and Technology" },
+  ];
+  const yearOptions = [
+    { value: "L1", label: "L1" }, { value: "L2", label: "L2" }, { value: "L3", label: "L3" }, { value: "Ing1", label: "Ing1" }, { value: "Ing2", label: "Ing2" }, { value: "Ing3", label: "Ing3" }, { value: "Ing4", label: "Ing4" }, { value: "M1", label: "M1" }, { value: "M2", label: "M2" }
+  ];
+  const selectedField = fieldOptions.find(o => o.value === formData.field) || null;
+  const selectedYear = yearOptions.find(o => o.value === formData.year) || null;
   const toggleLanguage = () =>
     i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
 
@@ -234,40 +246,35 @@ export default function StudentSignUp() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                label={t("field")}
-                name="field"
+              <ModernDropdown
                 value={formData.field}
-                onChange={handleChange}
+
+                onChange={(value) => {
+                  setFormData(prev => ({ ...prev, field: value }));
+                  setErrors(prev => ({ ...prev, field: "" }));
+                }}
+
+                options={fieldOptions}
                 placeholder={t("selectField")}
                 icon={<FaLayerGroup />}
-                options={[
-                  { value: "math", label: "Mathematics" },
-                  { value: "cs", label: "Computer Science" },
-                  { value: "ST", label: "Science and Technology" },
-                ]}
                 error={errors.field}
               />
 
-              <Select
-                label={t("year")}
-                name="year"
+              <ModernDropdown
                 value={formData.year}
-                onChange={handleChange}
+
+                onChange={(value) => {
+                  setFormData(prev => ({ ...prev, year: value }));
+                  setErrors(prev => ({ ...prev, year: "" }));
+                }}
+
+                options={yearOptions}
                 placeholder={t("selectYear")}
-                options={[
-                  { value: "L1", label: "L1" },
-                  { value: "L2", label: "L2" },
-                  { value: "L3", label: "L3" },
-                  { value: "Ing1", label: "Ing1" },
-                  { value: "Ing2", label: "Ing2" },
-                  { value: "Ing3", label: "Ing3" },
-                  { value: "Ing4", label: "Ing4" },
-                  { value: "M1", label: "M1" },
-                  { value: "M2", label: "M2" },
-                ]}
+                icon={<FaCalendarCheck />}
                 error={errors.year}
               />
+
+
             </div>
 
             <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>

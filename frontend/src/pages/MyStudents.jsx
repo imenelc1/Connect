@@ -4,13 +4,12 @@ import { useTranslation } from "react-i18next";
 
 import ThemeContext from "../context/ThemeContext";
 import Navbar from "../components/common/NavBar";
-import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
 import { Bell, ChevronRight } from "lucide-react";
 
-import { getSpacesStudents, createStudent } from "../services/studentService";
+import { getSpacesStudents, createStudent, removeStudent } from "../services/studentService";
 import { getSpaces } from "../services/spacesService";
 
 export default function MyStudents() {
@@ -31,15 +30,14 @@ export default function MyStudents() {
     getSpacesStudents()
       .then((data) => {
         const array = Array.isArray(data) ? data : [];
-
         const studentsMap = {};
 
         array.forEach((st) => {
           const id = st.etudiant?.id_utilisateur || st.id;
-          const prenom = st.etudiant?.prenom || st.etudiant_prenom || "";
-          const nom = st.etudiant?.nom || st.etudiant_nom || "";
-          const spaceName =
-            st.space?.nom_space || st.space_nom || "Espace inconnu";
+          const prenom = st.etudiant?.prenom || "";
+          const nom = st.etudiant?.nom || "";
+          const spaceName = st.space?.nom_space || "Espace inconnu";
+          const spaceId = st.space?.id_space || st.space_id;
 
           if (!studentsMap[id]) {
             studentsMap[id] = {
@@ -47,11 +45,13 @@ export default function MyStudents() {
               prenom,
               nom,
               spaces: [spaceName],
+              spacesIds: [spaceId],
               progress: st.progress || 0,
             };
           } else {
             if (!studentsMap[id].spaces.includes(spaceName)) {
               studentsMap[id].spaces.push(spaceName);
+              studentsMap[id].spacesIds.push(spaceId);
             }
           }
         });
@@ -88,19 +88,36 @@ export default function MyStudents() {
 
     try {
       await createStudent({ email, space_id: space });
-
+      alert("Étudiant ajouté avec succès !");
       setModal(false);
       setEmail("");
       setSpace("");
-
-      // Rafraîchir
       fetchStudents();
       fetchSpaces();
     } catch (err) {
       console.error("Erreur createStudent:", err);
       alert(
         err.response?.data?.error ||
-          "Une erreur est survenue lors de l'ajout de l'étudiant"
+        "Une erreur est survenue lors de l'ajout de l'étudiant"
+      );
+    }
+  };
+
+  // -----------------------------
+  // Supprimer un étudiant
+  // -----------------------------
+  const handleRemove = async (studentId, spaceId) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer cet étudiant de cet espace ?")) return;
+
+    try {
+      await removeStudent(studentId, spaceId);
+      alert("Étudiant supprimé avec succès !");
+      fetchStudents();
+    } catch (err) {
+      console.error("Erreur removeStudent:", err);
+      alert(
+        err.response?.data?.error ||
+        "Une erreur est survenue lors de la suppression"
       );
     }
   };
@@ -113,10 +130,7 @@ export default function MyStudents() {
           {t("myStudentsTitle")}
         </h1>
         <div className="flex items-center gap-4 mr-8">
-          <Bell
-            className="w-5 h-5 text-gray-600 cursor-pointer"
-            fill="currentColor"
-          />
+          <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
           <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
         </div>
       </div>
@@ -156,30 +170,29 @@ export default function MyStudents() {
                             initials={(st.prenom[0] || "") + (st.nom[0] || "")}
                             className="w-14 h-14"
                           />
-
                           <h2 className="font-semibold text-lg text-textc">
                             {st.prenom} {st.nom}
                           </h2>
                         </div>
 
                         {/* RIGHT ARROW */}
-
-                        <Button className=" !w-9 !h-9 !p-0 !min-w-0 flex items-center justify-center">
+                        <Button className="!w-9 !h-9 !p-0 !min-w-0 flex items-center justify-center">
                           <ChevronRight size={16} className="w-6 h-6" />
                         </Button>
                       </div>
-
-                      <div></div>
                     </div>
 
                     {/* Badges espaces */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {st.spaces.map((sp, i) => (
-                        <span
-                          key={i}
-                          className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc backdrop-blur-sm"
-                        >
-                          {sp}
+                      {st.spaces.map((spName, i) => (
+                        <span key={i} className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2">
+                          {spName}
+                          <button
+                            onClick={() => handleRemove(st.id, st.spacesIds[i])}
+                            className="text-red-500 font-bold"
+                          >
+                            ✕
+                          </button>
                         </span>
                       ))}
                     </div>

@@ -26,6 +26,10 @@
 
 "startCourse": "Commencer le cours",
 "startExercise": "Commencer l’exercice",
-"startQuiz": "Commencer le quiz"
+"startQuiz": "Commencer le quiz",
+
+"checkCourse": "Consulter le cours",
+"checkExercise": "Consulter l'exercice",
+"checkQuiz": "Consulter le quiz"
 
 }

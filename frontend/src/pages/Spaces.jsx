@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
+import { FiTrash2 } from "react-icons/fi";
 import ThemeContext from "../context/ThemeContext";
 import Navbar from "../components/common/NavBar";
 import Cards2 from "../components/common/Cards2";
@@ -10,8 +10,10 @@ import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
 import { Folder, Bell } from "lucide-react";
 
-import { getSpaces, createSpace } from "../services/spacesService";
+import { getSpaces, createSpace, deleteSpace } from "../services/spacesService";
 import { getMySpaces } from "../services/studentSpacesService";
+
+import toast from "react-hot-toast";
 
 export default function SpacesPage() {
   const { t } = useTranslation("Spaces");
@@ -55,7 +57,20 @@ export default function SpacesPage() {
   // -------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!spaceName) return;
+
+    if (!spaceName) {
+      toast.error(t("spaceNameRequired"));
+      return;
+    }
+
+    // Vérification doublon
+    const exists = spaces.some(
+      (s) => s.nom_space.toLowerCase() === spaceName.trim().toLowerCase()
+    );
+    if (exists) {
+      toast.error(t("spaceNameExists")); // message si nom déjà pris
+      return;
+    }
 
     try {
       const data = { nom_space: spaceName, description: spaceDesc };
@@ -69,12 +84,29 @@ export default function SpacesPage() {
           date_creation: res.date_creation,
         };
         setSpaces((prev) => [...prev, newSpace]);
+        toast.success(t("spaceCreated"));
       }
+
       setOpen(false);
       setSpaceName("");
       setSpaceDesc("");
     } catch (err) {
       console.error("Erreur createSpace:", err);
+      toast.error(t("spaceCreationFailed"));
+    }
+  };
+
+  const handleDeleteSpace = async (id_space) => {
+    const confirmDelete = window.confirm(t("confirmDeleteSpace"));
+    if (!confirmDelete) return;
+
+    try {
+      await deleteSpace(id_space); // appel API pour supprimer
+      setSpaces((prev) => prev.filter((s) => s.id_space !== id_space)); // mise à jour frontend
+      toast.success(t("spaceDeleted"));
+    } catch (err) {
+      console.error("Erreur deleteSpace:", err);
+      toast.error(t("spaceDeleteFailed"));
     }
   };
 
@@ -140,6 +172,18 @@ export default function SpacesPage() {
                     onArrowClick={() =>
                       navigate(`/CourseDetails/${item.id_space}`)
                     }
+                    extraActions={
+  role === "prof" && (   // <-- condition ajoutée
+    <div className="">
+      <FiTrash2
+        size={18}
+        className="cursor-pointer text-grayc hover:text-red-500 mt-20 ml-5"
+        onClick={() => handleDeleteSpace(item.id_space)}
+        title={t("deleteSpace")}
+      />
+    </div>
+  )
+}
                   />
                 </div>
               ))
