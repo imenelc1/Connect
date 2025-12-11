@@ -22,10 +22,11 @@ export default function HeaderLinks() {
   };
 
   const links = [
-    { name: t("acceuil.home") },
-    { name: t("acceuil.about") },
-    { name: t("acceuil.features") },
+    { name: t("acceuil.home"), target: "top" },
+    { name: t("acceuil.about"), target: "about" },
+    { name: t("acceuil.features"), target: "features" },
   ];
+
 
   // 🔥 Chemin Dashboard selon rôle
   const dashboardLink =
@@ -40,6 +41,10 @@ export default function HeaderLinks() {
         {links.map((link, index) => (
           <button
             key={index}
+            onClick={() => {
+              const section = document.getElementById(link.target);
+              section?.scrollIntoView({ behavior: "smooth" });
+            }}
             className="hover:text-primary transition font-medium whitespace-nowrap"
           >
             {link.name}
