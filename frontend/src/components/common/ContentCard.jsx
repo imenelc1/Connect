@@ -23,7 +23,6 @@ const initialsBgMap = {
   Avancé: "bg-pink",
 };
 
-
 export default function ContentCard({ course, role, showProgress, type, className = "", onDelete }) {
   const { t } = useTranslation("contentPage");
   const location = useLocation();
@@ -51,27 +50,25 @@ export default function ContentCard({ course, role, showProgress, type, classNam
   };
 
   const handleStart = () => {
-    if (pageType === "exercise") {
-      navigate(`/ListeExercices`);
-    } else {
-      navigate(`/Seecourses/${course.id}`);
-    }
+    if (pageType === "exercise") navigate(`/ListeExercices`);
+    else navigate(`/Seecourses/${course.id}`);
   };
 
-  // --- nouveau : label dynamique selon rôle et progression ---
   const getButtonLabel = () => {
     if (role === "etudiant") {
-      if (course.progress > 0) return t("continueCourse"); // déjà commencé
+      if (course.progress > 0) return t("continueCourse");
       if (pageType === "course") return t("startCourse");
       if (pageType === "exercise") return t("startExercise");
       if (pageType === "quiz") return t("startQuiz");
     } else {
-      // prof
+      // rôle professeur
       if (pageType === "course") return t("checkCourse");
       if (pageType === "exercise") return t("checkExercise");
       if (pageType === "quiz") return t("checkQuiz");
     }
   };
+
+  
 
   return (
     <div
@@ -94,25 +91,28 @@ export default function ContentCard({ course, role, showProgress, type, classNam
         {/* Auteur + durée */}
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-2">
-           <div className={`w-8 h-8 rounded-full ${initialsBgMap[course.level] ?? "bg-primary"} text-white flex items-center justify-center`}>
-  {course.initials}
-</div>
-
+            <div
+              className={`w-8 h-8 rounded-full ${initialsBgMap[course.level] ?? "bg-primary"} text-white flex items-center justify-center`}
+            >
+              {course.initials}
+            </div>
             <span className="text-sm">{course.author}</span>
           </div>
           <span className="text-xs text-gray-400">{course.duration}</span>
         </div>
 
         {/* Progress */}
-        {showProgress && <ContentProgress value={course.progress ?? 0} className="mt-3" />}
+      {showProgress && <ContentProgress value={course.progress ?? 0} className="mt-3" />}
+
+
       </div>
 
       {/* Footer */}
       <div className="mt-4 flex items-center justify-between">
         {(role === "etudiant" || role === "enseignant") && (
-          <Button 
+          <Button
             variant="courseStart"
-            className={`${buttonStyles[course.level]} !w-auto px-4 py-2 bg-buttonStyles`}
+            className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
             onClick={handleStart}
           >
             {getButtonLabel()}

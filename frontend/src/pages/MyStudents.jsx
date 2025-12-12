@@ -164,19 +164,19 @@ export default function MyStudents() {
                       transition-transform duration-300 hover:scale-[1.03] hover:shadow-2xl`}
                   >
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="flex gap-[220px]">
+                      <div className="flex gap-[150px]">
                         <div className="flex gap-5">
                           <UserCircle
                             initials={(st.prenom[0] || "") + (st.nom[0] || "")}
                             className="w-14 h-14"
                           />
-                          <h2 className="font-semibold text-lg text-textc">
+                          <h2 className="font-semibold text-lg text-textc whitespace-nowrap">
                             {st.prenom} {st.nom}
                           </h2>
                         </div>
 
                         {/* RIGHT ARROW */}
-                        <Button className="!w-9 !h-9 !p-0 !min-w-0 flex items-center justify-center">
+                        <Button className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10">
                           <ChevronRight size={16} className="w-6 h-6" />
                         </Button>
                       </div>

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'dashboard',
     'feedback',
     'spaces',
+    'badges',
     # API et CORS
     'rest_framework',
     'corsheaders',

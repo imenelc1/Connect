@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
@@ -8,12 +8,10 @@ import ContentSearchBar from "../components/common/ContentSearchBar";
 import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
 import i18n from "../i18n";
-import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
 import { getCurrentUserId } from "../hooks/useAuth";
-
-
+import progressionService from "../services/progressionService";
 
 
 const gradientMap = {
@@ -23,11 +21,15 @@ const gradientMap = {
 };
 
 export default function AllCoursesPage() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("access_token");
   const currentUserId = getCurrentUserId();
-  const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
-
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [courses, setCourses] = useState([]);
+  const [courseProgress, setCourseProgress] = useState(0);
+  const navigate = useNavigate();
+  const { t } = useTranslation("allcourses");
+  const { toggleDarkMode } = useContext(ThemeContext);
+
   useEffect(() => {
     fetch("http://localhost:8000/api/courses/api/cours")
       .then((res) => res.json())
@@ -36,8 +38,7 @@ export default function AllCoursesPage() {
           id: c.id_cours,
           title: c.titre_cour,
           description: c.description,
-          level: c.niveau_cour_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
-          //levelLabel: t(`levels.${c.niveau_cour_label}`),
+          level: c.niveau_cour_label,
           duration: c.duration_readable,
           author: c.utilisateur_name,
           initials: c.utilisateur_name
@@ -45,67 +46,43 @@ export default function AllCoursesPage() {
             .map((n) => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId, //NEWDED GHR ISMINE //
+          isMine: c.utilisateur === currentUserId,
         }));
         setCourses(formatted);
       })
       .catch((err) => console.error("Erreur chargement cours :", err));
-  }, []);
-
+  }, [currentUserId]);
 
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
-  const { t } = useTranslation("allcourses");
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
-    }`.toUpperCase();
-  const navigate = useNavigate();
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-
-
   let filteredCourses =
-
-    // 1️⃣ Filtrer par niveau
     filterLevel === "ALL"
       ? courses
       : courses.filter((course) => course.level === filterLevel);
 
-  // 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
   if (userRole === "enseignant" && categoryFilter === "mine") {
     filteredCourses = filteredCourses.filter((course) => course.isMine);
   }
-
-
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const handleDeleteCourse = async (courseId) => {
-    const confirmDelete = window.confirm("Tu es sûr de supprimer ce cours ?");
-    if (!confirmDelete) return;
-
-    // Appel API
+    if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
     try {
-      await fetch(
-        `http://localhost:8000/api/courses/cours/${courseId}/delete/`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Mise à jour du state
+      await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setCourses((prev) => prev.filter((c) => c.id !== courseId));
     } catch (err) {
       console.error("Erreur suppression :", err);
       alert("Erreur lors de la suppression");
     }
   };
-
-
-
 
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
@@ -120,65 +97,84 @@ export default function AllCoursesPage() {
   }, []);
 
   const sidebarWidth = sidebarCollapsed ? 60 : 240;
-
-  // Définition dynamique du nombre de colonnes
   const getGridCols = () => {
-    if (windowWidth < 640) return 1; // mobile
-    if (windowWidth < 1024) return 2; // tablette
-    if (sidebarCollapsed) return 3; // desktop sidebar fermé
-    return 3; // desktop sidebar ouvert (fixé pour garder taille ancienne version)
+    if (windowWidth < 640) return 1;
+    if (windowWidth < 1024) return 2;
+    return 3;
   };
 
-  const { toggleDarkMode } = useContext(ThemeContext);
+  useEffect(() => {
+  const fetchProgress = async () => {
+    try {
+      const data = await progressionService.getCoursesProgress();
+      console.log("Progression des cours :", data);
+      const formatted = data.map((c) => ({
+        id: c.id_cours,
+        title: c.titre_cour,
+        description: c.description,
+        level: c.niveau_cour_label,
+        duration: c.duration_readable,
+        author: c.utilisateur_name,
+        initials: c.utilisateur_name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase(),
+        isMine: c.utilisateur === currentUserId,
+        progress: c.progress ?? 0,
+      }));
+      setCourses(formatted);
+    } catch (err) {
+      console.error("Erreur chargement cours :", err);
+    }
+  };
+  fetchProgress();
+}, [currentUserId]);
+
+const handleCompleteLesson = async (lessonId) => {
+  try {
+    const data = await progressionService.completeLesson(lessonId);
+    setCourses((prev) =>
+      prev.map((c) =>
+        c.id === data.cours_id ? { ...c, progress: data.avancement_cours } : c
+      )
+    );
+  } catch (err) {
+    console.error("Erreur completion leçon :", err);
+    alert("Impossible de compléter la leçon");
+  }
+};
+
+
 
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-      {/* Header Right Controls */}
       <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
-        {/* Notification Icon */}
         <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
           <Bell size={18} />
         </div>
-
-        {/* User Circle */}
-        <div className="flex items-center">
-          <UserCircle
-            initials={initials}
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
-          />
-        </div>
-
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+        />
       </div>
-
-
-
-      <main
-        className="flex-1 p-4 md:p-8 transition-all duration-300"
-        style={{ marginLeft: sidebarWidth }}
-      >
-        {/* Top */}
+      <main className="flex-1 p-4 md:p-8 transition-all duration-300" style={{ marginLeft: sidebarWidth }}>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
-
         </div>
-        {/* Search */}
         <ContentSearchBar />
-
-        {/* Filters */}
-        <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
+        <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
             type="courses"
             userRole={userRole}
             activeFilter={filterLevel}
             onFilterChange={setFilterLevel}
-            categoryFilter={categoryFilter}        // ← bien passer le state
+            categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
             showCompletedFilter={userRole === "etudiant"}
           />
-
-
           {userRole === "enseignant" && (
             <Button
               variant="courseStart"
@@ -190,23 +186,19 @@ export default function AllCoursesPage() {
             </Button>
           )}
         </div>
-
-        {/* Cards */}
-        <div
-          className="grid gap-6"
-          style={{
-            gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
-          }}
-        >
+        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredCourses.map((course, idx) => (
-            <ContentCard
-              key={idx}
-              className={gradientMap[course.level] ?? "bg-grad-1"}
-              course={course}
-              role={userRole}
-              showProgress={userRole === "etudiant"}
-              onDelete={handleDeleteCourse}
-            />
+         <ContentCard
+  key={idx}
+  className={gradientMap[course.level] ?? "bg-grad-1"}
+  course={course} // <- on ne touche pas à course.progress
+  role={userRole}
+  showProgress={userRole === "etudiant"}
+  onDelete={handleDeleteCourse}
+  onCompleteLesson={() => handleCompleteLesson(course.id)}
+/>
+
+
           ))}
         </div>
       </main>
