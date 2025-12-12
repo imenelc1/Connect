@@ -16,9 +16,8 @@ export function AuthProvider({ children }) {
     if (token && userData) {
       try {
         // Vérifie que le token est encore valide (optionnel)
-        const payload = jwtDecode.default(token); // ✅ utiliser .default
-        // ⚠️ Ici on ne lit plus email depuis le token car il n’existe pas
         setUser(JSON.parse(userData));
+
       } catch (err) {
         console.error("Token invalide → logout automatique");
         localStorage.removeItem("token");

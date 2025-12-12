@@ -7,7 +7,8 @@ from .views import (
     my_courses,
     AddStudentToSpaceView,
     SpaceEtudiantListView,
-    space_courses
+    space_courses,
+    remove_student_from_space
 )
 
 urlpatterns = [
@@ -18,6 +19,8 @@ urlpatterns = [
     path("students/", SpaceEtudiantListView.as_view(), name="space-etudiant-list"),
     path("my-spaces/", MySpacesStudentView.as_view(), name="my-spaces"),
     path("<int:space_id>/courses/", space_courses),
+    path('remove_student/<int:student_id>/', remove_student_from_space.as_view(), name='remove-student')
+
 
 
 ]

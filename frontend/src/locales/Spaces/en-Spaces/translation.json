@@ -9,5 +9,6 @@
   "fieldSpaceNamePlaceholder": "Enter space name",
   "fieldDescription": "Description",
   "fieldDescriptionPlaceholder": "Enter space description",
-  "created": "Created on "
+  "created": "Created on ",
+  "mySpacesTitle":"My Spaces"
 }

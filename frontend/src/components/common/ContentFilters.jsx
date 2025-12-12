@@ -9,17 +9,14 @@ export default function ContentFilters({
   userRole,
   type = "courses",
   categoryFilter,
-  setCategoryFilter
-  // NEW ➜ "courses" | "exercises" | "quizzes"
-
+  setCategoryFilter,
+  hideCategoryFilter = false // <-- Nouvelle prop pour cacher le filtre catégorie
 }) {
   const { t } = useTranslation("filters");
   const levels = ["ALL", "Débutant", "Intermédiaire", "Avancé"];
 
-
   const [completedStatus, setCompletedStatus] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
-
 
   // TEXTES DYNAMIQUES SELON LE TYPE
   const labels = {
@@ -42,7 +39,6 @@ export default function ContentFilters({
 
   const current = labels[type];
 
-
   return (
     <div className="w-full flex justify-center mt-8">
       <div className="flex items-center gap-4 flex-wrap">
@@ -53,7 +49,8 @@ export default function ContentFilters({
             <button
               key={lvl}
               onClick={() => onFilterChange(lvl)}
-              className={`px-4 py-1.5 transition-all duration-300 rounded-full ${lvl === activeFilter
+              className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm${
+                lvl === activeFilter
                   ? "text-white bg-primary shadow-md"
                   : "text-primary/70 hover:text-primary"
                 }`}
@@ -77,8 +74,8 @@ export default function ContentFilters({
           />
         )}
 
-        {/* CATÉGORIE : DYNAMIQUE SELON type */}
-        {(userRole === "enseignant" || userRole === "etudiant") && (
+        {/* CATÉGORIE : cachée si hideCategoryFilter est true */}
+        {!hideCategoryFilter && (userRole === "enseignant" || userRole === "etudiant") && (
           <ModernDropdown
             value={categoryFilter}
             onChange={setCategoryFilter}
@@ -90,6 +87,7 @@ export default function ContentFilters({
           />
 
         )}
+
       </div>
     </div>
   );

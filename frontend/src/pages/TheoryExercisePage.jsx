@@ -8,10 +8,13 @@ import NavBar from "../components/common/NavBar";
 import Mascotte from "../assets/head_mascotte.svg";
 import AssistantIA from "./AssistantIA";
 
+
 export default function ExercisePage() {
   const [openAssistant, setOpenAssistant] = useState(false);
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
+  const [answer, setAnswer] = useState("");
+
 
   const { t, i18n } = useTranslation("exercisePage");
 
@@ -91,29 +94,23 @@ export default function ExercisePage() {
 
         {/* SECTION TITLE */}
         <h2 className="text-lg sm:text-xl font-semibold text-[rgb(var(--color-primary))] mb-3">
-          Your solution
+          {t("your_solution")}
         </h2>
 
-        {/* CODE EDITOR */}
-        <div className="rounded-2xl overflow-hidden shadow-strong w-full mb-10">
-          <div className="bg-[rgb(var(--color-gray-light))] h-10 sm:h-11 flex items-center justify-between px-4 sm:px-5 border-b border-[rgb(var(--color-gray))]">
-            <span className="font-medium text-xs sm:text-sm text-[rgb(var(--color-text))] opacity-70">
-              main.c
-            </span>
+       {/* MODERN ANSWER AREA - Théorie */}
+<div className="relative w-full mb-10">
+  <textarea
+    value={answer}
+    onChange={(e) => setAnswer(e.target.value)}
+    placeholder={t("write_here")}
+    className="w-full min-h-[150px] sm:min-h-[200px] md:min-h-[250px] p-5 rounded-2xl border border-gray-300 bg-white text-[rgb(var(--color-text))] text-base sm:text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:shadow-md resize-none transition-all duration-200 hover:shadow-md"
+  />
 
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 bg-red-500 rounded-full"></span>
-              <span className="w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
-              <span className="w-2.5 h-2.5 bg-green-500 rounded-full"></span>
-            </div>
-          </div>
-
-          <textarea
-            defaultValue={`#include <stdio.h>\n#include <stdlib.h>\n\nint main() {\n  printf("Hello world!\\n");\n  return 0;\n}`}
-            className="bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text))] p-5 sm:p-7 font-mono text-[13px] sm:text-[14px] md:text-[15px] leading-6 sm:leading-7 min-h-[180px] sm:min-h-[250px] md:min-h-[300px] w-full outline-none resize-none"
-            spellCheck="false"
-          />
-        </div>
+  {/* Counter in top-right corner */}
+  <div className="absolute top-2 right-4 text-xs text-gray-400">
+    {answer.length} / 1000 | {answer.split("\n").length} {t("lines")}
+  </div>
+</div>
 
         {/* TIP BLOCK */}
         <div className="border border-[rgb(var(--color-gray-light))] bg-[rgb(var(--grad-7))] shadow-card rounded-xl px-4 sm:px-5 md:px-6 py-4 mt-10 mb-12">

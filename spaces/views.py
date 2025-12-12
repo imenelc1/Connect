@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
-
+from django.views.decorators.csrf import csrf_exempt
 from courses.models import Cours
 from courses.serializers import CoursSerializer
 from users.models import Utilisateur
@@ -138,3 +138,23 @@ def space_courses(request, space_id):
         return Response(serializer.data, status=201 if created else 200)
 
 
+class remove_student_from_space(APIView):
+    permission_classes = [IsAuthenticatedJWT]  # ton JWT
+    authentication_classes = []  # JWT gère l'auth
+
+    @csrf_exempt  # ← ignore CSRF
+    def delete(self, request, student_id):
+        space_id = request.query_params.get("space_id")
+        if not space_id:
+            return Response({"error": "space_id requis"}, status=400)
+
+        try:
+            space_etudiant = SpaceEtudiant.objects.get(
+                etudiant_id=student_id,
+                space_id=space_id,
+                space__utilisateur=request.user
+            )
+            space_etudiant.delete()
+            return Response({"success": "Étudiant supprimé"}, status=200)
+        except SpaceEtudiant.DoesNotExist:
+            return Response({"error": "Relation non trouvée"}, status=404)

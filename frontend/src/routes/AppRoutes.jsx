@@ -30,15 +30,17 @@ import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
 import StudentExercice from "../pages/exerciceStudent";
-import StartExercise from "../pages/StartExercise";
-import ExercisePage from "../pages/ExercisePage";
+import CodeExercisePage from '../pages/CodeExercisePage';
+import TheoryExercisePage from '../pages/TheoryExercisePage';
+
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
 import ProgressExercice from "../pages/ProgressionExo";
 import ProgressStudent from "../pages/ProgressionStudent";
-import { QuizPage2 } from "../pages/QuizPage2";
-import QuizPage1 from "../pages/QuizPage1";
-import QuizRecapPage from "../pages/QuizRecapPage";
+import QuizIntroPage from '../pages/QuizIntroPage';
+import QuizTakePage from '../pages/QuizTakePage';
+import QuizSummaryPage from '../pages/QuizSummaryPage';
+
 import SubmittedExercises from "../pages/SubmittedExercises";
 
 export default function AppRoutes() {
@@ -88,13 +90,12 @@ export default function AppRoutes() {
         <Route path="/student-exercice" element={<StudentExercice />} />
         <Route path="/progressExercice" element={<ProgressExercice />} />
         <Route path="/progressStudent" element={<ProgressStudent />} />
-        <Route path="/quiz1" element={<QuizPage1 />} />
-        <Route path="/quiz" element={<QuizPage2 />} />
-        <Route path="/quiz3" element={<QuizRecapPage />} />
-        <Route path="/start-exercise" element={<StartExercise />} />
-        <Route path="/exercise-page" element={<ExercisePage />} />
+        <Route path="/quizIntro" element={<QuizIntroPage />} />
+        <Route path="/quizTake" element={<QuizTakePage />} />
+        <Route path="/quizSummary" element={<QuizSummaryPage />} />
+        <Route path="/codeExo" element={<CodeExercisePage />} />
+        <Route path="/theoryExo" element={<TheoryExercisePage />} />
         <Route path="/course-details" element={<CourseDetails />} />
-        <Route path="/submitted-exercise" element={<SubmittedExercise />} />
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
 

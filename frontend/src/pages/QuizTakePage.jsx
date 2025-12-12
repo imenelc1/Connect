@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 
-export function QuizPage2() {
+export default function QuizPage2() {
   const { t, i18n } = useTranslation("quiz2");
 
   const quiz = {
