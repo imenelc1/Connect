@@ -5,13 +5,12 @@
   "form": {
     "title_label": "Title",
     "title_placeholder": "Your exercise title",
-
     "statement_label": "Exercise statement",
     "statement_placeholder": "Write the instructions for your exercise...",
-
     "category_label": "Category",
     "duration_label": "Duration",
-    "level_label": "Level"
+    "level_label": "Level",
+    "cours": "Course"
   },
   "select": {
     "placeholder": "Select",
@@ -24,18 +23,27 @@
     "placeholder2": "Select a category",
     "code": "Code",
     "question_cours": "Course's questions",
-    "private":"private",
-    "public":"public"
+    "private": "Private",
+    "public": "Public"
   },
   "buttons": {
     "cancel": "Cancel",
-    "save_next": "Save & Next"
+    "save_next": "Save & Next",
+    "previous": "Previous",
+    "save_draft": "Save as draft",
+    "publish": "Publish Exercise"
   },
   "exercises": {
     "info": "Exercise Info",
     "preview": "Preview Exercise",
-    "visibility": "visibility"
-
+    "visibility": "Visibility"
+  },
+  "course": {
+    "summary_title": "Exercise Summary",
+    "title": "Title",
+    "course_topic": "Statement",
+    "level": "Level",
+    "courseVisibility": "Visibility",
+    "course_selected": "Selected course"
   }
-
 }

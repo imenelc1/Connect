@@ -17,19 +17,24 @@ module.exports = {
         background: "rgb(var(--color-bg) / <alpha-value>)",
         surface: "rgb(var(--color-surface) / <alpha-value>)",
         textc: "rgb(var(--color-text) / <alpha-value>)",
-        yellowc: "rgb(var(--color-yellow-code))" ,
+        yellowc: "rgb(var(--color-yellow-code))",
         card_title: "rgb(var(--color-title-card))",
         icons_about: "rgb(var(--color-icons-about))",
         card: "rgb(var(--color-card) / <alpha-value>)",
         nav: "rgb(var(--color-nav) / <alpha-value>)",
         blue: "rgb(var(--color-blue) / <alpha-value>)",
         purple: "rgb(var(--color-purple) / <alpha-value>)",
+
         pink: "rgb(var(--color-pink) / <alpha-value>)",
+        pink_clair: "rgb(var(--color-pink-clair) / <alpha-value>)",
         red: "rgb(var(--color-red) / <alpha-value>)",
+        gray_light: "rgb(var(--color-gray-light) / <alpha-value>)",
+        code: "rgb(var(--color-code) / <alpha-value>)",
+        green: "rgb(var(--color-green) / <alpha-value>)",
+        blue_primary_light: "rgb(var(--color-blue-primary-light) / <alpha-value>)",
 
-         gray_light:"rgb(var(--color-gray-light) / <alpha-value>)",
 
-        
+
       },
       backgroundImage: {
         "grad-1": "var(--grad-1)",

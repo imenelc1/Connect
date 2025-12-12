@@ -32,26 +32,30 @@ export default function AllCoursesPage() {
     fetch("http://localhost:8000/api/exercices/api/exo")
       .then(res => res.json())
       .then(data => {
+        if (!Array.isArray(data)) {
+          console.error("Data récupérée n'est pas un tableau :", data);
+          setExercice([]); // sécurité
+          return;
+        }
         const formatted = data.map(c => ({
           id: c.id_exercice,
           title: c.titre_exo,
-          level: c.niveau_exercice_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
-          //levelLabel: t(`levels.${c.niveau_cour_label}`),
-          //duration: c.duration_readable,
-          //cours: c.cours,
+          level: c.niveau_exercice_label,
           description: c.enonce,
-          //categorie: c.categorie,
           author: c.utilisateur_name,
           initials: c.utilisateur_name
             .split(" ")
             .map(n => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
+          isMine: c.utilisateur === currentUserId
         }));
         setExercice(formatted);
       })
-      .catch(err => console.error("Erreur chargement exercices :", err));
+      .catch(err => {
+        console.error("Erreur chargement exercices :", err);
+        setExercice([]);
+      });
   }, []);
 
 
@@ -63,10 +67,7 @@ export default function AllCoursesPage() {
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const filteredexercises =
-    filterLevel === "ALL"
-      ? exercises
-      : exercises.filter((exercise) => exercise.level === filterLevel);
+  const [ownerFilter, setOwnerFilter] = useState("mine");
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -114,6 +115,20 @@ export default function AllCoursesPage() {
     if (sidebarCollapsed) return 3; // desktop sidebar fermé
     return 3; // desktop sidebar ouvert (fixé pour garder taille ancienne version)
   };
+  const filteredexercises = exercises.filter(ex => {
+    // Filtre par niveau
+    if (filterLevel !== "ALL" && ex.level !== filterLevel) return false;
+
+    // Filtre par propriétaire / visibilité
+    if (ownerFilter === "mine") {
+      return ex.isMine; // Tous les exercices de l'utilisateur connecté
+    } else {
+      // "all" → afficher publics + ceux que je possède (même privés)
+      return ex.visibilite_exo || ex.isMine;
+    }
+  });
+
+
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
@@ -152,11 +167,14 @@ export default function AllCoursesPage() {
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
           <ContentFilters
             type="exercises"
-            userRole={userRole}                  // <-- corrige ici
-            activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
-            onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
-            showCompletedFilter={userRole === "etudiant"} // <- correct
+            userRole={userRole}
+            activeFilter={filterLevel}
+            onFilterChange={setFilterLevel}
+            showCompletedFilter={userRole === "etudiant"}
+            categoryFilter={ownerFilter}       // <-- ici
+            setCategoryFilter={setOwnerFilter} // <-- ici
           />
+
 
           {userRole === "enseignant" && (
             <Button
@@ -173,17 +191,18 @@ export default function AllCoursesPage() {
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-          {filteredexercises.map((exercise, idx) => (
+          {filteredexercises?.map((exercise, idx) => (
             <ContentCard
               key={idx}
               className={gradientMap[exercise.level] ?? "bg-grad-1"}
               course={exercise}
-
+              type="exercise"
               role={userRole}
               showProgress={userRole === "etudiant"}
               onDelete={handleDeleteExo}
             />
           ))}
+
         </div>
       </main>
     </div>

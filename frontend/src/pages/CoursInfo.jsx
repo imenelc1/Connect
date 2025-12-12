@@ -14,12 +14,52 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
+import { useEffect } from "react";
 export default function CoursePage() {
   const navigate = useNavigate();
 
   const { t, i18n } = useTranslation("courseInfo");
-  const [activeStep, setActiveStep] = useState(1);
   const { toggleDarkMode } = useContext(ThemeContext);
+
+  // --- Auth States ---
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [token, setToken] = useState(null);
+
+  // --- Read localStorage ONCE ---
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const rawUserData = localStorage.getItem("user");
+
+    if (!storedToken || !rawUserData) {
+      window.location.replace("/login/instructor");
+      return;
+    }
+
+    try {
+      const parsedUser = JSON.parse(rawUserData);
+      setToken(storedToken);
+      setUserData(parsedUser);
+      setIsAuthenticated(true);
+    } catch (e) {
+      window.location.replace("/login/instructor");
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
+
+
+
+  // user data
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
+    }`.toUpperCase();
+  const currentUserId = userData?.id_utilisateur;
+  const userRole = userData?.role;
+
+
+  // --- Step management ---
+  const [activeStep, setActiveStep] = useState(1);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
@@ -31,7 +71,24 @@ export default function CoursePage() {
     { label: t("course.curriculum"), icon: BookOpenCheck },
     { label: t("course.publish_title"), icon: CheckCircle },
   ];
+  const [hours, setHours] = useState("00");
+  const [minutes, setMinutes] = useState("00");
+  const [seconds, setSeconds] = useState("00");
+  useEffect(() => {
+    setDuration(`${hours}:${minutes}:${seconds}`);
+  }, [hours, minutes, seconds]);
+  const hourOptions = [...Array(13)].map((_, i) => ({
+    value: String(i).padStart(2, "0"),
+    label: `${i} h`,
+  }));
 
+  const minuteSecondOptions = [...Array(12)].map((_, i) => ({
+    value: String(i * 5).padStart(2, "0"),
+    label: `${i * 5} min`
+  }));
+
+
+  // --- Course info ---
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
@@ -40,86 +97,84 @@ export default function CoursePage() {
 
   const [currentCoursId, setCurrentCoursId] = useState(null);
 
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const userRole = userData?.user?.role ?? userData?.role;
-
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
-    }`.toUpperCase();
-
+  // --- Sections & lessons ---
   const [sections, setSections] = useState([
     {
       id: 1,
       title: "",
-      description: "", // ⭐ AJOUTÉ
+      description: "",
       open: true,
-      lessons: [{ id: 1, title: "", content: "" }], // ⭐ AJOUTÉ
+      lessons: [{ id: 1, title: "", content: "" }],
     },
   ]);
 
-  // --- Gestion des sections et leçons ---
+  // --- Section management ---
   const addSection = () => {
-    setSections((prev) => [
+    setSections(prev => [
       ...prev,
-      {
-        id: Date.now(),
-        title: "",
-        open: true,
-        lessons: [{ id: Date.now(), title: "" }],
-      },
+      { id: Date.now(), title: "", description: "", open: true, lessons: [{ id: Date.now(), title: "" }] },
     ]);
   };
 
-  const toggleSection = (id) => {
-    setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, open: !s.open } : s))
-    );
+  const toggleSection = id => {
+    setSections(prev => prev.map(s => s.id === id ? { ...s, open: !s.open } : s));
   };
 
   const updateSectionTitle = (id, newTitle) => {
-    setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, title: newTitle } : s))
-    );
+    setSections(prev => prev.map(s => s.id === id ? { ...s, title: newTitle } : s));
   };
 
   const updateSectionDescription = (id, newDesc) => {
-    setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, description: newDesc } : s))
-    );
+    setSections(prev => prev.map(s => s.id === id ? { ...s, description: newDesc } : s));
   };
 
-  const addLessonToSection = (sectionId) => {
-    setSections((prev) =>
-      prev.map((s) =>
-        s.id === sectionId
-          ? { ...s, lessons: [...s.lessons, { id: Date.now(), title: "" }] }
-          : s
-      )
+  const removeSection = id => {
+    setSections(prev => prev.filter(s => s.id !== id));
+  };
+
+  // --- Lesson management ---
+  const addLessonToSection = sectionId => {
+    setSections(prev =>
+      prev.map(s => s.id === sectionId ? { ...s, lessons: [...s.lessons, { id: Date.now(), title: "", content: "" }] } : s)
     );
   };
 
   const updateLessonTitle = (sectionId, lessonId, newTitle) => {
-    setSections((prev) =>
-      prev.map((s) =>
+    setSections(prev =>
+      prev.map(s =>
         s.id === sectionId
-          ? {
-            ...s,
-            lessons: s.lessons.map((l) =>
-              l.id === lessonId ? { ...l, title: newTitle } : l
-            ),
-          }
+          ? { ...s, lessons: s.lessons.map(l => l.id === lessonId ? { ...l, title: newTitle } : l) }
           : s
       )
     );
   };
 
   const updateLessonContent = (sectionId, lessonId, newContent) => {
-    setSections((prev) =>
-      prev.map((s) =>
+    setSections(prev =>
+      prev.map(s =>
+        s.id === sectionId
+          ? { ...s, lessons: s.lessons.map(l => l.id === lessonId ? { ...l, content: newContent } : l) }
+          : s
+      )
+    );
+  };
+
+  const removeLesson = (sectionId, lessonId) => {
+    setSections(prev =>
+      prev.map(s =>
+        s.id === sectionId ? { ...s, lessons: s.lessons.filter(l => l.id !== lessonId) } : s
+      )
+    );
+  };
+
+  const handleLessonImageUpload = (sectionId, lessonId, file) => {
+    setSections(prev =>
+      prev.map(s =>
         s.id === sectionId
           ? {
             ...s,
-            lessons: s.lessons.map((l) =>
-              l.id === lessonId ? { ...l, content: newContent } : l
+            lessons: s.lessons.map(l =>
+              l.id === lessonId ? { ...l, imageFile: file, preview: URL.createObjectURL(file) } : l
             ),
           }
           : s
@@ -127,30 +182,8 @@ export default function CoursePage() {
     );
   };
 
-  const removeSection = (id) => {
-    setSections((prev) => prev.filter((s) => s.id !== id));
-  };
-
-  const removeLesson = (sectionId, lessonId) => {
-    setSections((prev) =>
-      prev.map((s) =>
-        s.id === sectionId
-          ? { ...s, lessons: s.lessons.filter((l) => l.id !== lessonId) }
-          : s
-      )
-    );
-  };
-
-  // --- Sauvegarde ---
+  // --- Save course & sections ---
   const handleSaveStep1 = async () => {
-    const token = localStorage.getItem("access_token");
-    const currentUserId = getCurrentUserId();
-
-    if (!token || !currentUserId) {
-      alert("Utilisateur non connecté");
-      return null;
-    }
-
     try {
       const res = await api.post(
         "courses/create/",
@@ -164,102 +197,65 @@ export default function CoursePage() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
       const coursId = res.data.id_cours;
       setCurrentCoursId(coursId);
       return coursId;
     } catch (err) {
-      console.error(
-        "Erreur création cours :",
-        err.response?.data || err.message
-      );
-      alert("Erreur lors de la création du cours");
+      console.error("Erreur création cours :", err.response?.data || err.message);
+      toast.error("Erreur lors de la création du cours");
       return null;
     }
   };
 
- const handleSaveAllSections = async (courseId) => {
-  const token = localStorage.getItem("access_token");
-  const currentUserId = getCurrentUserId();
+  const handleSaveAllSections = async courseId => {
+    try {
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
 
-  try {
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
-
-      // --- Création section ---
-      const sectionResponse = await api.post(
-        "courses/createSection/",
-        {
-          cours: courseId,
-          titre_section: section.title || `Section ${i + 1}`,
-          description: section.description || "",
-          ordre: i + 1,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const sectionId = sectionResponse.data.id;
-
-      // --- Création des leçons ---
-      for (let j = 0; j < section.lessons.length; j++) {
-        const lesson = section.lessons[j];
-
-        const lessonTitle = lesson.title || `Leçon ${j + 1}`;
-        const lessonContent = lesson.content || "";
-        const lessonType = lesson.type || "text";
-
-        const formData = new FormData();
-        formData.append("section", sectionId);
-        formData.append("titre_lecon", lessonTitle);
-        formData.append("contenu_lecon", lessonContent);
-        formData.append("utilisateur", currentUserId);
-        formData.append("type_lecon", lessonType);
-        formData.append("ordre", j + 1);
-
-        // Ajouter le fichier uniquement si type = image
-        if (lessonType === "image" && lesson.imageFile) {
-          formData.append("image_lecon", lesson.imageFile);
-        }
-
-        await api.post("courses/createLesson/", formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+        // Création section
+        const sectionRes = await api.post(
+          "courses/createSection/",
+          {
+            cours: courseId,
+            titre_section: section.title || `Section ${i + 1}`,
+            description: section.description || "",
+            ordre: i + 1,
           },
-        });
-      }
-    }
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-    toast.success("Sections et leçons enregistrées !");
-    setActiveStep(3);
-  } catch (err) {
-    console.error("Erreur création sections/leçons :", err.response?.data || err);
-    toast.error("Erreur lors de l’enregistrement.");
-  }
-};
+        const sectionId = sectionRes.data.id;
 
+        // Création leçons
+        for (let j = 0; j < section.lessons.length; j++) {
+          const lesson = section.lessons[j];
+          const lessonType = lesson.type || "text";
 
+          const formData = new FormData();
+          formData.append("section", sectionId);
+          formData.append("titre_lecon", lesson.title || `Leçon ${j + 1}`);
+          formData.append("contenu_lecon", lesson.content || "");
+          formData.append("utilisateur", currentUserId);
+          formData.append("type_lecon", lessonType);
+          formData.append("ordre", j + 1);
 
-
-
-  const handleLessonImageUpload = (sectionId, lessonId, file) => {
-    setSections((prev) =>
-      prev.map((s) =>
-        s.id === sectionId
-          ? {
-            ...s,
-            lessons: s.lessons.map((l) =>
-              l.id === lessonId
-                ? {
-                  ...l,
-                  imageFile: file,
-                  preview: URL.createObjectURL(file),
-                }
-                : l
-            ),
+          if (lessonType === "image" && lesson.imageFile) {
+            formData.append("image_lecon", lesson.imageFile);
           }
-          : s
-      )
-    );
+
+          await api.post("courses/createLesson/", formData, {
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+          });
+        }
+      }
+
+      toast.success("Sections et leçons enregistrées !");
+      setActiveStep(3);
+    } catch (err) {
+      console.error("Erreur création sections/leçons :", err.response?.data || err);
+      toast.error("Erreur lors de l’enregistrement.");
+    }
   };
 
   const handleSaveAll = async () => {
@@ -268,16 +264,26 @@ export default function CoursePage() {
       if (!coursId) return;
 
       await handleSaveAllSections(coursId); // ✅ passe le bon id
-    navigate("/all-courses");
+      navigate("/all-courses");
 
     } catch (error) {
       console.error("Erreur lors de l'enregistrement complet :", error);
     }
   };
 
+  if (authLoading) {
+    return <div style={{ padding: 20 }}>Checking authentication...</div>;
+  }
+
+  // --- Security check ---
+  if (!isAuthenticated || !userData) {
+    return <div style={{ padding: 20 }}>Not authenticated...</div>;
+  }
+
 
   return (
     <div className="w-full min-h-screen flex bg-primary/5">
+
       <div className="hidden lg:block w-64 min-h-screen">
         <Navbar />
       </div>
@@ -323,41 +329,57 @@ export default function CoursePage() {
               />
             </div>
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div className="flex flex-col ">
-                <Input
-                  label={t("course.duration")}
-                  placeholder={t("course.duration_placeholder")}
-                  className="w-full "
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                />
+              <div className="flex flex-col">
+                <label className="font-medium mb-2">{t("course.duration")}</label>
+                <div className="flex gap-2">
+                  <ModernDropdown
+                    value={hours}
+                    onChange={setHours}
+                    options={hourOptions}
+                    placeholder="Heures"
+                  />
+                  <ModernDropdown
+                    value={minutes}
+                    onChange={setMinutes}
+                    options={minuteSecondOptions.map(o => ({ ...o, label: `${o.value} min` }))}
+                    placeholder="Minutes"
+                  />
+                  <ModernDropdown
+                    value={seconds}
+                    onChange={setSeconds}
+                    options={minuteSecondOptions.map(o => ({ ...o, label: `${o.value} s` }))}
+                    placeholder="Secondes"
+                  />
+                </div>
               </div>
+
               <div className="flex flex-col">
                 <label className="font-medium mb-2">{t("course.level")}</label>
-                <Select
-                  className="w-full rounded-full border border-grayc px-5 py-3 bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                <ModernDropdown
                   value={level}
-                  onChange={(e) => setLevel(e.target.value)}
+                  onChange={(v) => setLevel(v)}
+                  placeholder={t("select.placeholder")}
                   options={[
-                    { value: "", label: t("select.placeholder") },
                     { value: "debutant", label: t("select.Beginner") },
                     { value: "intermediaire", label: t("select.Intermediate") },
                     { value: "avance", label: t("select.Advanced") },
                   ]}
                 />
+
               </div>
               <div className="flex flex-col mt-4">
-  <label className="font-medium mb-2">{t("course.visibility")}</label>
-  <Select
-    className="w-full rounded-full border border-grayc px-5 py-3 bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-    value={courseVisibility}
-    onChange={(e) => setCourseVisibility(e.target.value)}
-    options={[
-      { value: "public", label: t("course.public") },
-      { value: "private", label: t("course.private") },
-    ]}
-  />
-</div>
+                <label className="font-medium mb-2">{t("course.visibility")}</label>
+                <ModernDropdown
+                  value={courseVisibility}
+                  onChange={(v) => setCourseVisibility(v)}
+                  placeholder={t("course.visibility")}
+                  options={[
+                    { value: "public", label: t("course.public") },
+                    { value: "private", label: t("course.private") },
+                  ]}
+                />
+
+              </div>
             </div>
             <div className="flex justify-between mt-10 ">
               <button className="px-6 py-2 rounded-xl border border-secondary font-medium bg-white shadow-sm transition text-black/50">
@@ -579,108 +601,108 @@ export default function CoursePage() {
         )}
 
         {/* STEP 3 */}
-     {activeStep === 3 && (
-  <div className="w-full flex flex-col items-center gap-10">
+        {activeStep === 3 && (
+          <div className="w-full flex flex-col items-center gap-10">
 
-    {/* ---------- RÉSUMÉ INFOS GÉNÉRALES ---------- */}
-    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
-      <h2 className="text-2xl font-semibold mb-4 text-primary">
-        {t("course.summary")}
-      </h2>
+            {/* ---------- RÉSUMÉ INFOS GÉNÉRALES ---------- */}
+            <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
+              <h2 className="text-2xl font-semibold mb-4 text-primary">
+                {t("course.summary")}
+              </h2>
 
-      <div className="space-y-3 text-gray-700">
-        <p>
-          <strong>{t("course.title")} :</strong> {title}
-        </p>
-        <p>
-          <strong>{t("course.course_topic")} :</strong> {description}
-        </p>
-        <p>
-          <strong>{t("course.duration")} :</strong> {duration}
-        </p>
-        <p>
-          <strong>{t("course.level")} :</strong> {level}
-        </p>
-         <p>
-          <strong>{t("course.courseVisibility")} :</strong> {courseVisibility}
-        </p>
-      </div>
-    </div>
-
-    {/* ---------- RÉSUMÉ SECTIONS + LEÇONS ---------- */}
-    <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
-      <h3 className="text-xl font-semibold mb-6 text-primary">
-        {t("course.curriculum")}
-      </h3>
-
-      {sections.map((section, sectionIndex) => (
-        <div key={section.id} className="mb-6 pb-4 border-b border-gray-200">
-          
-          <h4 className="text-lg font-semibold text-gray-800">
-            {sectionIndex + 1}. {section.title || t("course.untitled_section")}
-          </h4>
-
-          {section.description && (
-            <p className="text-sm text-gray-500 mt-1">{section.description}</p>
-          )}
-
-          {/* Leçons */}
-          <div className="mt-4 pl-4 space-y-3">
-            {section.lessons.map((lesson, lessonIndex) => (
-              <div key={lesson.id} className="bg-gray-50 p-3 rounded-lg border">
-
-                <p className="font-medium text-gray-800">
-                  {lessonIndex + 1}. {lesson.title || t("course.untitled_lesson")}
+              <div className="space-y-3 text-gray-700">
+                <p>
+                  <strong>{t("course.title")} :</strong> {title}
                 </p>
-
-                {/* type */}
-                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                  {lesson.type}
-                </span>
-
-                {/* Texte ou exemple */}
-                {(lesson.type === "text" || lesson.type === "example") && (
-                  <p className="text-sm text-gray-600 mt-2 whitespace-pre-line">
-                    {lesson.content || t("course.no_content")}
-                  </p>
-                )}
-
-                {/* Image */}
-                {lesson.type === "image" && lesson.preview && (
-                  <img
-                    src={lesson.preview}
-                    alt="Lesson visual"
-                    className="w-48 mt-2 rounded-xl border object-cover"
-                  />
-                )}
+                <p>
+                  <strong>{t("course.course_topic")} :</strong> {description}
+                </p>
+                <p>
+                  <strong>{t("course.duration")} :</strong> {duration}
+                </p>
+                <p>
+                  <strong>{t("course.level")} :</strong> {level}
+                </p>
+                <p>
+                  <strong>{t("course.courseVisibility")} :</strong> {courseVisibility}
+                </p>
               </div>
-            ))}
+            </div>
+
+            {/* ---------- RÉSUMÉ SECTIONS + LEÇONS ---------- */}
+            <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
+              <h3 className="text-xl font-semibold mb-6 text-primary">
+                {t("course.curriculum")}
+              </h3>
+
+              {sections.map((section, sectionIndex) => (
+                <div key={section.id} className="mb-6 pb-4 border-b border-gray-200">
+
+                  <h4 className="text-lg font-semibold text-gray-800">
+                    {sectionIndex + 1}. {section.title || t("course.untitled_section")}
+                  </h4>
+
+                  {section.description && (
+                    <p className="text-sm text-gray-500 mt-1">{section.description}</p>
+                  )}
+
+                  {/* Leçons */}
+                  <div className="mt-4 pl-4 space-y-3">
+                    {section.lessons.map((lesson, lessonIndex) => (
+                      <div key={lesson.id} className="bg-gray-50 p-3 rounded-lg border">
+
+                        <p className="font-medium text-gray-800">
+                          {lessonIndex + 1}. {lesson.title || t("course.untitled_lesson")}
+                        </p>
+
+                        {/* type */}
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                          {lesson.type}
+                        </span>
+
+                        {/* Texte ou exemple */}
+                        {(lesson.type === "text" || lesson.type === "example") && (
+                          <p className="text-sm text-gray-600 mt-2 whitespace-pre-line">
+                            {lesson.content || t("course.no_content")}
+                          </p>
+                        )}
+
+                        {/* Image */}
+                        {lesson.type === "image" && lesson.preview && (
+                          <img
+                            src={lesson.preview}
+                            alt="Lesson visual"
+                            className="w-48 mt-2 rounded-xl border object-cover"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* ---------- Boutons ---------- */}
+            <div className="flex justify-between items-center mt-10 max-w-xl w-full mx-auto">
+              <button
+                className="px-6 py-2 bg-[#DDE7FF] text-gray-700 rounded-xl text-sm shadow"
+                onClick={() => setActiveStep(2)}
+              >
+                {t("course.back")}
+              </button>
+
+              <div className="flex gap-3">
+
+
+                <button className="px-6 py-2 bg-primary text-white rounded-xl text-sm shadow hover:bg-grad-1" onClick={handleSaveAll}>
+                  {t("course.save_publier")}
+                </button>
+              </div>
+            </div>
+
+
           </div>
-        </div>
-      ))}
-    </div>
-
-    {/* ---------- Boutons ---------- */}
-    <div className="flex justify-between items-center mt-10 max-w-xl w-full mx-auto">
-      <button
-        className="px-6 py-2 bg-[#DDE7FF] text-gray-700 rounded-xl text-sm shadow"
-        onClick={() => setActiveStep(2)}
-      >
-         {t("course.back")}
-      </button>
-
-      <div className="flex gap-3">
-        
-
-        <button className="px-6 py-2 bg-primary text-white rounded-xl text-sm shadow hover:bg-grad-1"  onClick={handleSaveAll}>
-          {t("course.save_publier")}
-        </button>
-      </div>
-    </div>
-  
-
-  </div>
-)}
+        )}
 
       </div>
     </div>

@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import { getCurrentUserId } from "../hooks/useAuth";
 
+import { useNavigate } from "react-router-dom";
 
 
 const gradientMap = {
@@ -58,6 +59,7 @@ export default function AllQuizzesPage() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allQuizzes");
+const navigate = useNavigate();
 
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 

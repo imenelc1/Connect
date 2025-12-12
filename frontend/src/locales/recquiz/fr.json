@@ -1,0 +1,20 @@
+{
+  "title": "Récapitulatif Quiz",
+  "congrats": "Félicitations !",
+  "youScored": "Vous avez obtenu",
+  "points": "points",
+  "outOf": "sur",
+  "minutes": "minutes",
+  "point": "point",
+  "recap": "Récapitulatif des réponses",
+  "yourAnswer": "Votre réponse",
+    "correctAnswer": "Bonne réponse",
+  "backMenu": "Retour au menu",
+  "reset": "Réinitialiser",
+  "levels": {
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé"
+  },
+  "levelKey": "advanced"
+}
