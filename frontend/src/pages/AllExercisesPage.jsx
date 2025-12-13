@@ -10,51 +10,89 @@ import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUserId } from "../hooks/useAuth";
+import api from "../services/courseService";
 
-const exercises = [
-  {
-    title: "Exercice sur les Arbres Binaires",
-    description: "Résolvez des problèmes sur les arbres binaires, AVL, et parcours.",
-    level: "intermediate",
-    duration: "45 min",
-    author: "Dr. Farid",
-    initials: "F.D",
-    isMine: true,
-  },
-  {
-    title: "Exercice Programmation Dynamique",
-    description: "Apprenez à formuler et résoudre des problèmes classiques de DP.",
-    level: "advanced",
-    duration: "1h 10 min",
-    author: "Dr. Benali",
-    initials: "B.A",
-    isMine: false,
-  },
-];
+
 
 const gradientMap = {
-  beginner: "bg-grad-2",
-  intermediate: "bg-grad-3",
-  advanced: "bg-grad-4",
+  Débutant: "bg-grad-2",
+  Intermédiaire: "bg-grad-3",
+  Avancé: "bg-grad-4",
 };
 
 
 
 export default function AllCoursesPage() {
+  const token = localStorage.getItem("access_token");
+  const currentUserId = getCurrentUserId();
+
+  const [exercises, setExercice] = useState([]);
+  useEffect(() => {
+    fetch("http://localhost:8000/api/exercices/api/exo")
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data)) {
+          console.error("Data récupérée n'est pas un tableau :", data);
+          setExercice([]); // sécurité
+          return;
+        }
+        const formatted = data.map(c => ({
+          id: c.id_exercice,
+          title: c.titre_exo,
+          level: c.niveau_exercice_label,
+          description: c.enonce,
+          author: c.utilisateur_name,
+          initials: c.utilisateur_name
+            .split(" ")
+            .map(n => n[0])
+            .join("")
+            .toUpperCase(),
+          isMine: c.utilisateur === currentUserId
+        }));
+        setExercice(formatted);
+      })
+      .catch(err => {
+        console.error("Erreur chargement exercices :", err);
+        setExercice([]);
+      });
+  }, []);
+
+
+
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
-  const { t } = useTranslation("allcourses");
-const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const { t } = useTranslation("allExercises");
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const filteredexercises =
-    filterLevel === "ALL"
-      ? exercises
-      : exercises.filter((exercise) => exercise.level === filterLevel);
+  const [ownerFilter, setOwnerFilter] = useState("mine");
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  const handleDeleteExo = async (exoId) => {
+    const confirmDelete = window.confirm("Tu es sûr de supprimer cet exercice?");
+    if (!confirmDelete) return;
+
+    // Appel API
+    try {
+      await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Mise à jour du state
+      setExercice(prev => prev.filter(c => c.id !== exoId));
+    } catch (err) {
+      console.error("Erreur suppression :", err);
+      alert("Erreur lors de la suppression");
+    }
+  };
+
 
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
@@ -77,27 +115,41 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
     if (sidebarCollapsed) return 3; // desktop sidebar fermé
     return 3; // desktop sidebar ouvert (fixé pour garder taille ancienne version)
   };
+  const filteredexercises = exercises.filter(ex => {
+    // Filtre par niveau
+    if (filterLevel !== "ALL" && ex.level !== filterLevel) return false;
+
+    // Filtre par propriétaire / visibilité
+    if (ownerFilter === "mine") {
+      return ex.isMine; // Tous les exercices de l'utilisateur connecté
+    } else {
+      // "all" → afficher publics + ceux que je possède (même privés)
+      return ex.visibilite_exo || ex.isMine;
+    }
+  });
+
+
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
   return (
     <div className="flex bg-surface min-h-screen">
       <Navbar />
-{/* Header Right Controls */}
-<div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+      {/* Header Right Controls */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
 
-  {/* Notification Icon */}
-  <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-             <Bell size={16} />
-  </div>
+        {/* Notification Icon */}
+        <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+          <Bell size={16} />
+        </div>
 
-  {/* User Circle */}
-  <UserCircle
-    initials={initials}
-    onToggleTheme={toggleDarkMode}
-    onChangeLang={(lang) => i18n.changeLanguage(lang)}
-  />
-</div>
+        {/* User Circle */}
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+        />
+      </div>
 
       <main
         className="flex-1 p-4 md:p-8 transition-all duration-300"
@@ -105,48 +157,53 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toU
       >
         {/* Top */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-muted">{t("exercisesTitle")}</h1>
+          <h1 className="text-2xl font-bold text-muted">{t("exercisesTitle")}</h1>
 
-      </div>
+        </div>
         {/* Search */}
         <ContentSearchBar />
 
         {/* Filters */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
-        <ContentFilters
-        type="exercises"
-        userRole={userRole}                  // <-- corrige ici
-  activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
-  onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
-  showCompletedFilter={userRole === "etudiant"} // <- correct
-        />
+          <ContentFilters
+            type="exercises"
+            userRole={userRole}
+            activeFilter={filterLevel}
+            onFilterChange={setFilterLevel}
+            showCompletedFilter={userRole === "etudiant"}
+            categoryFilter={ownerFilter}       // <-- ici
+            setCategoryFilter={setOwnerFilter} // <-- ici
+          />
 
-        {userRole === "enseignant" && (
-          <Button
-            variant="courseStart"
-            className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
-            onClick={() => navigate("/new-exercise")}
-          >
-            <Plus size={18} />
-            {t("createExerciseBtn")}
-          </Button>
-        )}
 
-      </div>
+          {userRole === "enseignant" && (
+            <Button
+              variant="courseStart"
+              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
+              onClick={() => navigate("/new-exercise")}
+            >
+              <Plus size={18} />
+              {t("createExerciseBtn")}
+            </Button>
+          )}
+
+        </div>
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-        {filteredexercises.map((course, idx) => (
-          <ContentCard
-            key={idx}
-            className={gradientMap[course.level] ?? "bg-grad-1"}
-            course={course}
+          {filteredexercises?.map((exercise, idx) => (
+            <ContentCard
+              key={idx}
+              className={gradientMap[exercise.level] ?? "bg-grad-1"}
+              course={exercise}
+              type="exercise"
+              role={userRole}
+              showProgress={userRole === "etudiant"}
+              onDelete={handleDeleteExo}
+            />
+          ))}
 
-            role={userRole}
-            showProgress={userRole === "etudiant"}
-          />
-        ))}
-      </div>
+        </div>
       </main>
     </div>
   );

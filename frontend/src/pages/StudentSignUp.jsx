@@ -19,6 +19,8 @@ import ThemeContext from "../context/ThemeContext";
 import ThemeButton from "../components/common/ThemeButton";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../context/AuthContext.jsx";
+import ModernDropdown from "../components/common/ModernDropdown.jsx";
 
 
 
@@ -26,7 +28,8 @@ export default function StudentSignUp() {
 
   const { t, i18n } = useTranslation("signup");
   const { toggleDarkMode } = useContext(ThemeContext);
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { loginUser } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     nickname: "",
@@ -50,10 +53,10 @@ const navigate = useNavigate();
     setFormData(prev => ({ ...prev, [name]: value }));
     setErrors(prev => ({ ...prev, [name]: "" }));
     if (name === "nickname" && /\d/.test(value))
-  setErrors(prev => ({ ...prev, nickname: "Le nom ne peut pas contenir de chiffres" }));
+      setErrors(prev => ({ ...prev, nickname: "Le nom ne peut pas contenir de chiffres" }));
 
-if (name === "fullname" && /\d/.test(value))
-  setErrors(prev => ({ ...prev, fullname: "Le prénom ne peut pas contenir de chiffres" }));
+    if (name === "fullname" && /\d/.test(value))
+      setErrors(prev => ({ ...prev, fullname: "Le prénom ne peut pas contenir de chiffres" }));
 
 
     if (name === "password" && value.length < 8)
@@ -70,10 +73,10 @@ if (name === "fullname" && /\d/.test(value))
     if (!formData.nickname) newErrors.nickname = "Champ obligatoire";
     if (!formData.fullname) newErrors.fullname = "Champ obligatoire";
     if (/\d/.test(formData.nickname))
-  newErrors.nickname = "Le nom ne peut pas contenir de chiffres";
+      newErrors.nickname = "Le nom ne peut pas contenir de chiffres";
 
-if (/\d/.test(formData.fullname))
-  newErrors.fullname = "Le prénom ne peut pas contenir de chiffres";
+    if (/\d/.test(formData.fullname))
+      newErrors.fullname = "Le prénom ne peut pas contenir de chiffres";
 
 
     if (!formData.email)
@@ -130,24 +133,23 @@ if (/\d/.test(formData.fullname))
 
     try {
       const res = await api.post("register/", payload);
-      console.log(res.data);
+
+      // stocker le token
       localStorage.setItem("token", res.data.token);
+
+      // mettre à jour le contexte Auth
+      loginUser(res.data.token);
+
+      // stocker les infos utilisateur si besoin
       localStorage.setItem(
-  "user",
-  JSON.stringify({
-    nom: res.data.user.nom,
-    prenom: res.data.user.prenom,
-    id_utilisateur: res.data.user.id_utilisateur,
-    adresse_email: res.data.user.adresse_email,
-    matricule: res.data.user.matricule,
-    role: res.data.role,      // ⭐ AJOUT IMPORTANT
-    token: res.data.token     // facultatif mais utile
-  })
-);
-
-
-toast.success("Inscription réussie !");
-navigate("/dashboard-etu");
+        "user",
+        JSON.stringify({
+          ...res.data.user,
+          role: res.data.role || res.data.user.role
+        })
+      );
+      toast.success("Inscription réussie !");
+      navigate("/dashboard-etu");
 
     } catch (err) {
       const backend = err.response?.data;
@@ -182,40 +184,49 @@ navigate("/dashboard-etu");
       toast.error("Erreur réseau");
     }
   };
-
+  const fieldOptions = [
+    { value: "math", label: "Mathematics" },
+    { value: "cs", label: "Computer Science" },
+    { value: "ST", label: "Science and Technology" },
+  ];
+  const yearOptions = [
+    { value: "L1", label: "L1" }, { value: "L2", label: "L2" }, { value: "L3", label: "L3" }, { value: "Ing1", label: "Ing1" }, { value: "Ing2", label: "Ing2" }, { value: "Ing3", label: "Ing3" }, { value: "Ing4", label: "Ing4" }, { value: "M1", label: "M1" }, { value: "M2", label: "M2" }
+  ];
+  const selectedField = fieldOptions.find(o => o.value === formData.field) || null;
+  const selectedYear = yearOptions.find(o => o.value === formData.year) || null;
   const toggleLanguage = () =>
     i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
 
-   return (
+  return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-4 pt-12">
-       {/* Header */}
-  <div className="flex w-full mb-4 items-center justify-between px-4 md:-mt-10">
+      {/* Header */}
+      <div className="flex w-full mb-4 items-center justify-between px-4 md:-mt-10">
 
-    {/* Logo normal (grand) — visible seulement md+ */}
-    <div className="hidden md:block">
-      <LogoComponent className="-mt-10 ml-20" />
-    </div>
+        {/* Logo normal (grand) — visible seulement md+ */}
+        <div className="hidden md:block">
+          <LogoComponent className="-mt-10 ml-20" />
+        </div>
 
-    {/* Petit logo — visible seulement sur mobile */}
-    <div className="block md:hidden">
-      <LogoIconeComponent className="w-8 h-8 -ml-1" />
-    </div>
+        {/* Petit logo — visible seulement sur mobile */}
+        <div className="block md:hidden">
+          <LogoIconeComponent className="w-8 h-8 -ml-1" />
+        </div>
 
-   
-  </div>
+
+      </div>
 
       <AuthTabs
-          role="student"
-          active="signup"
-          tab1Label={t("login.signIn")}
-          tab2Label={t("login.signUp")}
-          className="mt-20 sm:mt-0"
+        role="student"
+        active="signup"
+        tab1Label={t("login.signIn")}
+        tab2Label={t("login.signUp")}
+        className="mt-20 sm:mt-0"
       />
 
       <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[650px] bg-card rounded-3xl shadow-lg overflow-hidden relative mt-2">
         {/* Formulaire */}
         <div className="w-full md:w-1/2 p-10">
-         <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
+          <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -235,51 +246,46 @@ navigate("/dashboard-etu");
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                  label={t("field")}
-                  name="field"
-                  value={formData.field}
-                  onChange={handleChange}
-                  placeholder={t("selectField")}
-                  icon={<FaLayerGroup />}
-                  options={[
-                    { value: "math", label: "Mathematics" },
-                    { value: "cs", label: "Computer Science" },
-                    { value: "ST", label: "Science and Technology" },
-                  ]}
-                  error={errors.field}
-                />
+              <ModernDropdown
+                value={formData.field}
 
-              <Select
-                  label={t("year")}
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  placeholder={t("selectYear")}
-                  options={[
-                    { value: "L1", label: "L1" },
-                    { value: "L2", label: "L2" },
-                    { value: "L3", label: "L3" },
-                    { value: "Ing1", label: "Ing1" },
-                    { value: "Ing2", label: "Ing2" },
-                    { value: "Ing3", label: "Ing3" },
-                    { value: "Ing4", label: "Ing4" },
-                    { value: "M1", label: "M1" },
-                    { value: "M2", label: "M2" },
-                  ]}
-  error={errors.year}
-/>
+                onChange={(value) => {
+                  setFormData(prev => ({ ...prev, field: value }));
+                  setErrors(prev => ({ ...prev, field: "" }));
+                }}
+
+                options={fieldOptions}
+                placeholder={t("selectField")}
+                icon={<FaLayerGroup />}
+                error={errors.field}
+              />
+
+              <ModernDropdown
+                value={formData.year}
+
+                onChange={(value) => {
+                  setFormData(prev => ({ ...prev, year: value }));
+                  setErrors(prev => ({ ...prev, year: "" }));
+                }}
+
+                options={yearOptions}
+                placeholder={t("selectYear")}
+                icon={<FaCalendarCheck />}
+                error={errors.year}
+              />
+
+
             </div>
-           
+
             <Button type="submit" variant="primary"><FaPaperPlane className="inline mr-2" /> {t("signUp")}</Button>
-              <p className="text-sm text-grayc text-center mt-4">
+            <p className="text-sm text-grayc text-center mt-4">
               {t("alreadyHaveAccount")}{" "}
               <a href="/login/student" className="text-muted font-medium hover:underline">
                 {t("signIn")}
               </a>
             </p>
 
-           
+
           </form>
         </div>
 

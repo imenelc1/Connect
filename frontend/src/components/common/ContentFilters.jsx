@@ -7,15 +7,19 @@ export default function ContentFilters({
   onFilterChange,
   activeFilter,
   userRole,
-  type = "courses" // NEW ➜ "courses" | "exercises" | "quizzes"
+  type = "courses",
+  categoryFilter,
+  setCategoryFilter
+  // NEW ➜ "courses" | "exercises" | "quizzes"
+
 }) {
   const { t } = useTranslation("filters");
-  const levels = ["ALL", "beginner", "intermediate", "advanced"];
-  
+  const levels = ["ALL", "Débutant", "Intermédiaire", "Avancé"];
+
+
   const [completedStatus, setCompletedStatus] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
 
-  const [categoryFilter, setCategoryFilter] = useState("");
 
   // TEXTES DYNAMIQUES SELON LE TYPE
   const labels = {
@@ -38,6 +42,7 @@ export default function ContentFilters({
 
   const current = labels[type];
 
+
   return (
     <div className="w-full flex justify-center mt-8">
       <div className="flex items-center gap-4 flex-wrap">
@@ -48,11 +53,10 @@ export default function ContentFilters({
             <button
               key={lvl}
               onClick={() => onFilterChange(lvl)}
-              className={`px-4 py-1.5 transition-all duration-300 rounded-full ${
-                lvl === activeFilter
+              className={`px-4 py-1.5 transition-all duration-300 rounded-full ${lvl === activeFilter
                   ? "text-white bg-primary shadow-md"
                   : "text-primary/70 hover:text-primary"
-              }`}
+                }`}
             >
               {lvl === "ALL" ? t("allLevels") : t(`levels.${lvl}`)}
             </button>
@@ -84,6 +88,7 @@ export default function ContentFilters({
               { value: "all", label: current.all },
             ]}
           />
+
         )}
       </div>
     </div>

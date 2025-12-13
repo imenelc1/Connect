@@ -54,7 +54,7 @@ export default function CardsSection() {
   ];
 
   return (
-    <section className="py-20">
+    <section id="features" className="py-20">
       {/* Titre principal */}
       <h2 className="text-center text-3xl font-bold text-textc">
         {t("acceuil.whyChoose")}

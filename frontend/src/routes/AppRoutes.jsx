@@ -1,108 +1,115 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Acceuil from "../pages/Acceuil";
+
+// Pages publiques
+import Acceuil from "../pages/Acceuil.jsx";
 import Choice from "../pages/Choice";
 import StudentSignup from "../pages/StudentSignUp";
 import InstructorSignup from "../pages/InstructorSignUp";
 import LoginInstructor from "../pages/LoginInstructor";
 import LoginStudent from "../pages/LoginStudent";
-import AllCoursesPage from "../pages/AllCoursesPage";
-import NewExercise from "../pages/NewExercice";
-import ExercisePreview from "../pages/ExercisePreview";
-import AllExercisesPage from "../pages/AllExercisesPage";
-import AllQuizzesPage from "../pages/AllQuizzesPage";
-import CoursInfo from "../pages/CoursInfo";
-import CommunityPage from "../pages/CommunityPage";
-import CreateQuiz from "../pages/CreateQuiz";
-import QuizPreview from "../pages/QuizPreview";
-import Setting from "../pages/Setting";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
+
+// Pages privées (désormais accessibles directement)
 import Dashboardens from "../pages/dash-ens";
 import Dashboardetu from "../pages/dash-etu";
-
-import Badges from "../pages/Badges"; // Ajoutez cette lign
-
+import Setting from "../pages/Setting";
+import AllCoursesPage from "../pages/AllCoursesPage";
+import AllExercisesPage from "../pages/AllExercisesPage";
+import AllQuizzesPage from "../pages/AllQuizzesPage";
+import NewExercise from "../pages/NewExercice";
+import ExercisePreview from "../pages/ExercisePreview";
+import CoursInfo from "../pages/CoursInfo";
+import CreateQuiz from "../pages/CreateQuiz";
+import QuizPreview from "../pages/QuizPreview";
+import CourseUpdate from "../pages/CourseUpdate";
+import CommunityPage from "../pages/CommunityPage";
+import Badges from "../pages/Badges";
 import Courses from "../pages/Courses";
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
-import ForgotPassword from "../pages/ForgotPassword";
-import ResetPassword from "../pages/ResetPassword";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
-import { QuizPage2 } from "../pages/QuizPage2";
 import StudentExercice from "../pages/exerciceStudent";
 import StartExercise from "../pages/StartExercise";
 import ExercisePage from "../pages/ExercisePage";
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
+import ProgressExercice from "../pages/ProgressionExo";
+import ProgressStudent from "../pages/ProgressionStudent";
+import { QuizPage2 } from "../pages/QuizPage2";
+import QuizPage1 from "../pages/QuizPage1";
+import QuizRecapPage from "../pages/QuizRecapPage";
+import SubmittedExercises from "../pages/SubmittedExercises";
+
+// Page admin 
+ import ValidationCourses from "../pages/ValidationCourses";
+  import Dashboard from "../pages/Dashboard"
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* ------------------------- */}
+        {/*       ROUTES PUBLIQUES    */}
+        {/* ------------------------- */}
         <Route path="/" element={<Acceuil />} />
         <Route path="/choice" element={<Choice />} />
 
-        {/* SIGNUP */}
-        {/* SIGNUP */}
+        {/* Signup */}
         <Route path="/signup/instructor" element={<InstructorSignup />} />
         <Route path="/signup/student" element={<StudentSignup />} />
 
-        {/* LOGIN */}
+        {/* Login */}
         <Route path="/login/instructor" element={<LoginInstructor />} />
         <Route path="/login/student" element={<LoginStudent />} />
 
-        {/* ALL COURSES */}
+        {/* Password reset */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* ------------------------- */}
+        {/*       ROUTES SANS PROTECTION   */}
+        {/* ------------------------- */}
+        <Route path="/dashboard-ens" element={<Dashboardens />} />
+        <Route path="/dashboard-etu" element={<Dashboardetu />} />
+        <Route path="/settings" element={<Setting />} />
         <Route path="/all-courses" element={<AllCoursesPage />} />
-        {/* ALL Exercises */}
         <Route path="/all-exercises" element={<AllExercisesPage />} />
-        {/* ALL QUIZZES */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
-
-        {/* ALL EXERCISES */}
-        <Route path="/all-exercises" element={<AllExercisesPage />} />
-
-        {/* ALL QUIZZES */}
-        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
-
-        {/* NEW */}
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
-
-        {/* COURSE INFO */}
         <Route path="/CoursInfo" element={<CoursInfo />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/preview" element={<QuizPreview />} />
-
-        {/* COMMUNITY PAGE */}
+        <Route path="/courses/edit/:id" element={<CourseUpdate />} />
         <Route path="/community" element={<CommunityPage />} />
-        {/*settings*/}
-        <Route path="/settings" element={<Setting />} />
-        {/*dashboard*/}
-        <Route path="/dashboard-ens" element={<Dashboardens />} />
-        <Route path="/dashboard-etu" element={<Dashboardetu />} />
-
         <Route path="/badges" element={<Badges />} />
-        {/*new exercise*/}
-        <Route path="/new-exercise" element={<NewExercise />} />
-        <Route path="/exercise-preview" element={<ExercisePreview />} />
-        {/* courses */}
         <Route path="/courses" element={<Courses />} />
-        {/*new course*/}
-        <Route path="/CoursInfo" element={<CoursInfo />} />
-        {/* My Students */}
         <Route path="/my-students" element={<MyStudents />} />
-        {/* Spaces */}
         <Route path="/spaces" element={<Spaces />} />
+        <Route path="/ListeExercices" element={<ListeExercicesPage />} />
+        <Route path="/student-exercice" element={<StudentExercice />} />
+        <Route path="/progressExercice" element={<ProgressExercice />} />
+        <Route path="/progressStudent" element={<ProgressStudent />} />
+        <Route path="/quiz1" element={<QuizPage1 />} />
+        <Route path="/quiz" element={<QuizPage2 />} />
+        <Route path="/quiz3" element={<QuizRecapPage />} />
+        <Route path="/start-exercise" element={<StartExercise />} />
+        <Route path="/exercise-page" element={<ExercisePage />} />
+        <Route path="/course-details" element={<CourseDetails />} />
+        <Route path="/submitted-exercise" element={<SubmittedExercise />} />
+        <Route path="/SubmittedExo" element={<SubmittedExercise />} />
+        <Route path="/SubmittedExos" element={<SubmittedExercises />} />
 
-         <Route path="/forgot-password" element={<ForgotPassword />} />
-         <Route path="/reset-password" element={<ResetPassword />} />
-         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
-         <Route path="/student-exercice" element={<StudentExercice />} />
-        
+        {/* Routes avec paramètres */}
+        <Route path="/CourseDetails/:id" element={<CourseDetails />} />
+        <Route path="/Seecourses/:id" element={<Courses />} />
+        <Route path="/MyStudents" element={<MyStudents />} />
 
-          <Route path="/quiz" element={<QuizPage2 />} />  
-          <Route path="/start-exercise" element={<StartExercise />} />
-          <Route path="/exercise-page" element={<ExercisePage />} />
-          <Route path="/course-details" element={<CourseDetails />} />
-          <Route path="/submitted-exercise" element={<SubmittedExercise />} />
+        {/* admin */}
+        <Route path ="ValidationCourses" element ={<ValidationCourses></ValidationCourses>}></Route>
+        <Route path="/Dashboard" element={<Dashboard/>} />
 
       </Routes>
     </BrowserRouter>

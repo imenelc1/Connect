@@ -1,19 +1,22 @@
 
 import { useState } from "react";
 import AuthTabs from "../components/common/AuthTabs";
-import Input from "../components/common/Input"; 
+import Input from "../components/common/Input";
 import Mascotte from "../components/common/Mascotte.jsx";
 import LogoComponent from "../components/common/LogoComponent";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { FiGlobe,FiEye,FiEyeOff } from "react-icons/fi";
+import { FiGlobe, FiEye, FiEyeOff } from "react-icons/fi";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
-import Button from "../components/common/Button";
+import Button from "../components/common/Button.jsx";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
 import ThemeContext from "../context/ThemeContext";
 import ThemeButton from "../components/common/ThemeButton";
+import AuthContext from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 export default function LoginInstructor() {
   //  États pour les champs
   const [email, setEmail] = useState("");
@@ -25,7 +28,9 @@ export default function LoginInstructor() {
 
   //  Toggle visibilité mot de passe
   const [showPassword, setShowPassword] = useState(false);
-    const { t, i18n } = useTranslation("login");
+  const { t, i18n } = useTranslation("login");
+  const { loginUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   //  Soumission du formulaire
   const handleSubmit = async (e) => {
@@ -57,20 +62,32 @@ export default function LoginInstructor() {
 
     // --- Appel API ---
     try {
-const res = await api.post("login/", { 
-  email, 
-  password,
-  role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
-});     
-     console.log("Login API response:", res.data);
-      localStorage.setItem("access_token", res.data.token); 
-localStorage.setItem("currentUserId", res.data.user.id_utilisateur);
-localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garder si utile
+      const res = await api.post("login/", {
+        email,
+        password,
+        role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
+      });
+      console.log("Login API response:", res.data);
+       const userWithRole = {
+      user_id: res.data.user.user_id,
+      nom: res.data.user.nom,
+      prenom: res.data.user.prenom,
+      email: res.data.user.email,
+      role: res.data.user.role,
+    };
+
+      localStorage.setItem("user", JSON.stringify(userWithRole));
+
+      loginUser(res.data.token, userWithRole); 
+
+
+      localStorage.setItem("currentUserId", res.data.user.id_utilisateur);
+      localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garder si utile
 
       console.log("Login API response:", res.data);
 
       toast.success("Connexion réussie !");
-      window.location.href = "/dashboard-ens";
+      navigate("/dashboard-ens");
 
     } catch (error) {
       const backend = error.response?.data;
@@ -105,41 +122,41 @@ localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garde
       setErrorPassword("Erreur réseau");
     }
   };
- 
-  
+
+
   // Récupération de la fonction permettant de changer le thème
   const { toggleDarkMode } = useContext(ThemeContext);
-    return (
+  return (
     // RESPONSIVE: Padding horizontal sur mobile
     <div className="flex flex-col items-center justify-center min-h-screen bg-surface px-4 sm:px-0 pb-50">
-      
-                {/* Header */}
-  <div className="flex w-full mb-4 items-center justify-between px-4 pt-12">
 
-    {/* Logo normal (grand) — visible seulement md+ */}
-    <div className="hidden md:block">
-      <LogoComponent className="-mt-10 ml-20" />
-    </div>
+      {/* Header */}
+      <div className="flex w-full mb-4 items-center justify-between px-4 pt-12">
 
-    {/* Petit logo — visible seulement sur mobile */}
-    <div className="block md:hidden">
-      <LogoIconeComponent className="w-8 h-8 -ml-1" />
-    </div>
+        {/* Logo normal (grand) — visible seulement md+ */}
+        <div className="hidden md:block">
+          <LogoComponent className="-mt-10 ml-20" />
+        </div>
 
-   
-  </div>
-        
+        {/* Petit logo — visible seulement sur mobile */}
+        <div className="block md:hidden">
+          <LogoIconeComponent className="w-8 h-8 -ml-1" />
+        </div>
+
+
+      </div>
+
       {/* RESPONSIVE: AuthTabs avec margin top sur mobile */}
-       <AuthTabs
-          role="instructor"
-          active="signin"
-          tab1Label={t("login.signIn")}
-          tab2Label={t("login.signUp")}
-          className="mt-23 sm:mt-0"
+      <AuthTabs
+        role="instructor"
+        active="signin"
+        tab1Label={t("login.signIn")}
+        tab2Label={t("login.signUp")}
+        className="mt-23 sm:mt-0"
       />
-       
+
       {/* RESPONSIVE: Conteneur principal - colonne sur mobile, ligne sur desktop */}
-     <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[500px]  bg-card rounded-3xl shadow-lg overflow-hidden relative mt-5 mb-5">
+      <div className="flex flex-col lg:flex-row w-full max-w-[1000px] min-h-[500px]  bg-card rounded-3xl shadow-lg overflow-hidden relative mt-5 mb-5">
 
         {/* FORMULAIRE - RESPONSIVE: Largeur 100% sur mobile, 1/2 sur desktop */}
         <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:p-10 0 bg-card">
@@ -155,9 +172,9 @@ localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garde
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errorEmail}
-              icon={<FaEnvelope size={16} className="text-grayc" />}            />
+              icon={<FaEnvelope size={16} className="text-grayc" />} />
 
-            <Input 
+            <Input
               label={t("login.password")}
               name="password"
               placeholder={t("login.password")}
@@ -191,7 +208,7 @@ localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garde
               </a>
             </div>
 
-         
+
             <p className="text-sm text-grayc text-center mt-4">
               {t("login.noAccount")}{" "}
               <a href="/signup/instructor" className="text-muted font-medium hover:underline">
@@ -238,7 +255,7 @@ localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garde
           />
 
           {/* RESPONSIVE: Mascotte taille adaptative */}
-           <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-20 mr-10 " />
+          <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-20 mr-10 " />
         </div>
 
       </div>

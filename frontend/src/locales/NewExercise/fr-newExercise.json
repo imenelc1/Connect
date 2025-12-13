@@ -4,14 +4,13 @@
   },
   "form": {
     "title_label": "Titre",
-    "title_placeholder": "Titre de l'exercice",
-
+    "title_placeholder": "Titre de votre exercice",
     "statement_label": "Énoncé de l'exercice",
-    "statement_placeholder": "Écrivez les instructions de l'exercice...",
-
+    "statement_placeholder": "Écrivez les instructions de votre exercice...",
     "category_label": "Catégorie",
     "duration_label": "Durée",
-    "level_label": "Niveau"
+    "level_label": "Niveau",
+    "cours": "Cours"
   },
   "select": {
     "placeholder": "Sélectionner",
@@ -20,14 +19,31 @@
     "month": "Mois",
     "beginner": "Débutant",
     "intermediate": "Intermédiaire",
-    "advanced": "Avancé"
+    "advanced": "Avancé",
+    "placeholder2": "Sélectionner une catégorie",
+    "code": "Code",
+    "question_cours": "Questions du cours",
+    "private": "Privé",
+    "public": "Public"
   },
   "buttons": {
     "cancel": "Annuler",
-    "save_next": "Suivant"
+    "save_next": "Enregistrer & Suivant",
+    "previous": "Précédent",
+    "save_draft": "Enregistrer comme brouillon",
+    "publish": "Publier l'exercice"
   },
   "exercises": {
     "info": "Informations sur l'exercice",
-    "preview": "Aperçu de l'exercice"
+    "preview": "Aperçu de l'exercice",
+    "visibility": "Visibilité"
+  },
+  "course": {
+    "summary_title": "Résumé de l'exercice",
+    "title": "Titre",
+    "course_topic": "Énoncé",
+    "level": "Niveau",
+    "courseVisibility": "Visibilité",
+    "course_selected": "Cours sélectionné"
   }
 }

@@ -1,9 +1,9 @@
 {
   "allLevels": "All",
   "levels": {
-    "beginner": "Beginner",
-    "intermediate": "Intermediate",
-    "advanced": "Advanced"
+    "Débutant": "Beginner",
+    "Intermédiaire": "Intermediate",
+    "Avancé": "Advanced"
   },
   "status": {
     "all": "All",

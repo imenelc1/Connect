@@ -1,0 +1,23 @@
+{
+  "title": "Validation des cours",
+  "subtitle": "Gérer les cours soumis par les instructeurs",
+
+  "tabs": {
+    "pending": "En attente",
+    "approved": "Approuvés",
+    "rejected": "Rejetés"
+  },
+
+  "empty": "Aucun cours dans cette catégorie.",
+
+  "labels": {
+    "instructor": "Par",
+    "submitted": "Soumis le"
+  },
+
+  "buttons": {
+    "inspect": "Examiner",
+    "approve": "Approuver",
+    "reject": "Rejeter"
+  }
+}

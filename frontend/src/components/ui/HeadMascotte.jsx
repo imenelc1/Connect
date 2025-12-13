@@ -1,4 +1,4 @@
-import Mascotte from "../../assets/6.svg"
+import Mascotte from "../../assets/head_mascotte.svg"
 
 export default function HeadMascotte() {
     return (
