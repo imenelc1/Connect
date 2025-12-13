@@ -13,8 +13,10 @@ import UserCircle from "../components/common/UserCircle";
 import ModernDropdown from "../components/common/ModernDropdown";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService"; // Make sure your API helper is here
+import { useParams } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
-export default function NewExercise() {
+export default function UpdateExercice() {
   const [activeStep, setActiveStep] = useState(1);
 
   const navigate = useNavigate();
@@ -27,11 +29,11 @@ export default function NewExercise() {
   };
 
   // Form state
+  const { id: coursId } = useParams();
   const [title, setTitle] = useState("");
   const [statement, setStatement] = useState("");
   const [level, setLevel] = useState("");
   const [category, setCategory] = useState("");
-  const [cours, setCours] = useState("");
   const [courseVisibility, setCourseVisibility] = useState("public"); // default
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const userData = JSON.parse(localStorage.getItem("user"));
@@ -40,6 +42,33 @@ export default function NewExercise() {
 
   const currentUserId = getCurrentUserId();
 
+useEffect(() => {
+    if (!coursId) return;
+
+    const fetchCourse = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await api.get(`exercices/${coursId}/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = res.data;
+        setTitle(data.titre_exo);
+        setStatement(data.enonce);
+        setLevel(data.niveau_exo);
+        setSelectedCourseId(data.cours);
+        setCategory(data.categorie);
+        setCourseVisibility(data.visibilite_exo_label);
+        
+
+        
+      } catch (err) {
+        console.error("Erreur chargement exercice :", err.response?.data || err);
+      }
+    };
+
+    fetchCourse();
+  }, [coursId]);
 
 
   const [courses, setCourses] = useState([]);
@@ -70,7 +99,7 @@ export default function NewExercise() {
   ];
 
   // Save step 1
-  const handleSaveStep1 = async () => {
+  const handleSaveStep1 = async (coursId) => {
     const token = localStorage.getItem("token");
     const currentUserId = getCurrentUserId();
 
@@ -79,15 +108,11 @@ export default function NewExercise() {
       return null;
     }
 
-    // Vérification avant envoi
-    /*ù if (!title || !statement || !level || !category || !selectedCourseId) {
-       alert("Veuillez remplir tous les champs obligatoires et sélectionner un cours.");
-       return null;
-     }*/
+ 
 
     try {
-      const res = await api.post(
-        "exercices/create/",
+      const res = await api.put(
+       `exercices/${coursId}/`,
         {
           titre_exo: title,
           enonce: statement,
@@ -99,13 +124,14 @@ export default function NewExercise() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+        toast.success("exercice mis à jour avec succès !");
 
       const exoId = res.data.id_exercice;
       navigate("/all-exercises");
       return exoId;
     } catch (err) {
-      console.error("Erreur création cours :", err.response?.data || err.message);
-      alert("Erreur lors de la création de l'exercice");
+      console.error("Erreur mise à jour:", err.response?.data || err.message);
+      alert("Erreur lors de la mise à jour de l'exercice");
       return null;
     }
   };
@@ -305,14 +331,14 @@ export default function NewExercise() {
               <div className="flex gap-3">
                 <button
                   className="px-6 py-2 bg-white border border-sky-300 text-gray-700 rounded-xl text-sm shadow"
-                  onClick={handleSaveStep1} // sauvegarde en draft
+                  onClick={() => handleSaveStep1(coursId)}  // sauvegarde en draft
                 >
                   {t("buttons.save_draft")}
                 </button>
 
                 <button
                   className="px-6 py-2 bg-primary text-white rounded-xl text-sm shadow hover:bg-grad-1"
-                  onClick={handleSaveStep1} // publication
+                  onClick={() => handleSaveStep1(coursId)}  // publication
                 >
                   {t("buttons.publish")}
                 </button>

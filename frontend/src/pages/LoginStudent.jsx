@@ -14,7 +14,7 @@ import ThemeButton from "../components/common/ThemeButton";
 
 import api from "../services/api";
 import toast from "react-hot-toast";
-import ThemeContext from "../context/ThemeContext";
+import ThemeContext from "../context/ThemeContext.jsx";
 import AuthContext from "../context/AuthContext.jsx";
 
 export default function LoginStudent() {

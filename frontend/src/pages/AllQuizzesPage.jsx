@@ -64,10 +64,28 @@ const navigate = useNavigate();
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const filteredList =
+  /*const filteredList =
+    filterLevel === "ALL"
+      ? quizzes
+      : quizzes.filter((q) => q.level === filterLevel);*/
+
+  const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
+
+ let filteredList =
+
+    // 1️⃣ Filtrer par niveau
     filterLevel === "ALL"
       ? quizzes
       : quizzes.filter((q) => q.level === filterLevel);
+
+  // 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
+  if (userRole === "enseignant" && categoryFilter === "mine") {
+    filteredList = filteredList.filter((q) => q.isMine);
+  }
+
+
+
+
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -150,7 +168,9 @@ const navigate = useNavigate();
             type="quizzes"
             userRole={userRole}
             onFilterChange={setFilterLevel}   // ✔️ correction
-            activeFilter={filterLevel}        // ✔️ correction
+            activeFilter={filterLevel}  
+            categoryFilter={categoryFilter}        // ← bien passer le state
+            setCategoryFilter={setCategoryFilter}      // ✔️ correction
             showCompletedFilter={userRole === "etudiant"}
           />
 

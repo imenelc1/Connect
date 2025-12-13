@@ -10,7 +10,7 @@ import UserCircle from "../components/common/UserCircle";
 import i18n from "../i18n";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import ThemeContext from "../context/ThemeContext";
+import ThemeContext from "../context/ThemeContext.jsx";
 import { getCurrentUserId } from "../hooks/useAuth";
 
 

@@ -40,13 +40,25 @@ export default function ContentCard({ course, role, showProgress, type, classNam
   };
 
   const handleEdit = () => {
-    if (pageType === "course") navigate(`/courses/edit/${course.id}`);
-    else navigate(`/ListeExercices/${course.id}`);
+    if (pageType === "course"){
+      navigate(`/courses/edit/${course.id}`);
+    } 
+    else {
+      if (pageType === "exercise"){
+        navigate(`/exercices/edit/${course.id}`);
+      }
+      else{
+        navigate(`/ListeExercices/${course.id}`);
+      }
+    } 
   };
+  const seeExo=()=>{
+    navigate(`/ListeExercices/${course.id}`);
+  }
 
  const handleStart = () => {
   if (pageType === "exercise") {
-    navigate(`/ListeExercices`); // <- juste la page existante
+    navigate(`/ListeExercices/${course.id}`); // <- juste la page existante
   } else {
     navigate(`/Seecourses/${course.id}`);
   }
@@ -87,30 +99,59 @@ export default function ContentCard({ course, role, showProgress, type, classNam
 
       {/* Footer */}
       <div className="mt-4 flex items-center justify-between">
-        {(role === "etudiant" || role === "enseignant") && (
-          course.progress > 0 ? (
-            <div className="flex gap-2">
-              <Button variant="heroPrimary" className="!w-auto px-4 py-2">{labels.continue}</Button>
-              <Button variant="heroOutline" className="!w-auto px-4 py-2">{labels.restart}</Button>
-            </div>
-          ) : (
-            <Button
-              variant="courseStart"
-              className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
-              onClick={handleStart}
-            >
-              {labels.start}
-            </Button>
-          )
+  {(role === "etudiant" || role === "enseignant") && (
+    course.progress > 0 ? (
+      <div className="flex gap-2">
+        <Button variant="heroPrimary" className="!w-auto px-4 py-2">
+          {labels.continue}
+        </Button>
+        <Button variant="heroOutline" className="!w-auto px-4 py-2">
+          {labels.restart}
+        </Button>
+      </div>
+    ) : (
+      <div className="flex gap-2">
+
+        {/* 🔹 Bouton Start */}
+        <Button
+          variant="courseStart"
+          className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
+          onClick={handleStart}
+        >
+          {labels.start}
+        </Button>
+
+        {/* 🔹 Bouton Voir exercice (affiché uniquement si pageType === "courses") */}
+        {pageType === "course" && (
+          <Button
+            variant="courseStart"
+            className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
+            onClick={seeExo}
+          >
+            Voir exercice
+          </Button>
         )}
 
-        {role === "enseignant" && course.isMine && (
-          <div className="flex gap-2 ml-4">
-            <FiEdit size={18} className="cursor-pointer text-grayc hover:text-primary" onClick={handleEdit} />
-            <FiTrash2 size={18} className="cursor-pointer text-grayc hover:text-red-500" onClick={() => onDelete(course.id)} />
-          </div>
-        )}
       </div>
+    )
+  )}
+
+  {role === "enseignant" && course.isMine && (
+    <div className="flex gap-2 ml-4">
+      <FiEdit
+        size={18}
+        className="cursor-pointer text-grayc hover:text-primary"
+        onClick={handleEdit}
+      />
+      <FiTrash2
+        size={18}
+        className="cursor-pointer text-grayc hover:text-red-500"
+        onClick={() => onDelete(course.id)}
+      />
+    </div>
+  )}
+</div>
+
     </div>
   );
 }

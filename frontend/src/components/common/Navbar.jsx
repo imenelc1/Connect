@@ -4,7 +4,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import IconeLogoComponent from "./IconeLogoComponent";
 import { useContext } from "react";
-import AuthContext from "../../context/AuthContext";
+import AuthContext from "../../context/AuthContext.jsx";
 
 import {
   Settings,

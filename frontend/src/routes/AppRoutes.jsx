@@ -40,6 +40,7 @@ import { QuizPage2 } from "../pages/QuizPage2";
 import QuizPage1 from "../pages/QuizPage1";
 import QuizRecapPage from "../pages/QuizRecapPage";
 import SubmittedExercises from "../pages/SubmittedExercises";
+import UpdateExercice from "../pages/UpdateExercice.jsx";
 
 export default function AppRoutes() {
   return (
@@ -79,12 +80,13 @@ export default function AppRoutes() {
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/preview" element={<QuizPreview />} />
         <Route path="/courses/edit/:id" element={<CourseUpdate />} />
+        <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/badges" element={<Badges />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/my-students" element={<MyStudents />} />
         <Route path="/spaces" element={<Spaces />} />
-        <Route path="/ListeExercices" element={<ListeExercicesPage />} />
+        <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
         <Route path="/student-exercice" element={<StudentExercice />} />
         <Route path="/progressExercice" element={<ProgressExercice />} />
         <Route path="/progressStudent" element={<ProgressStudent />} />
@@ -97,6 +99,8 @@ export default function AppRoutes() {
         <Route path="/submitted-exercise" element={<SubmittedExercise />} />
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
+        <Route path="/start-exercise/:exerciceId" element={<StartExercise />} />
+
 
         {/* Routes avec paramètres */}
         <Route path="/CourseDetails/:id" element={<CourseDetails />} />

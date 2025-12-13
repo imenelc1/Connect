@@ -51,7 +51,7 @@ const navigate = useNavigate();
     if (!coursId) return;
 
     const fetchCourse = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("token");
       try {
         const res = await api.get(`courses/courses/${coursId}/`, {
           headers: { Authorization: `Bearer ${token}` },
