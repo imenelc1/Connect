@@ -12,6 +12,7 @@ import { ArrowLeft, Users, Bell, BookOpen, NotebookPen, FileCheck, Plus } from "
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import toast from "react-hot-toast";
+import { getCoursesProgress } from "../../src/services/progressionService";
 
 export default function SpaceDetails() {
   const { id } = useParams();
@@ -68,31 +69,41 @@ export default function SpaceDetails() {
       .catch((err) => console.error("Failed to load space details:", err));
   }, [id]);
 
-  // --- fetch space courses ---
+  // --- fetch all courses with progress ---
   useEffect(() => {
-    if (!id) return;
-    fetch(`http://127.0.0.1:8000/api/spaces/${id}/courses/`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const formatted = (data || [])
-          .filter((sc) => sc.cours)
-          .map((sc) => ({
-            id: sc.cours.id_cours,
-            title: sc.cours.titre_cour || "",
-            description: sc.cours.description || "",
-            level: sc.cours.niveau_cour_label || "",
-            author: sc.cours.utilisateur_name || "",
-            date: sc.cours.date_ajout || "",
-            isMine: sc.cours.utilisateur_id === userData?.id,
-          }));
-        setSpaceCourses(formatted);
-      })
-      .catch((err) => console.error("Failed to fetch space courses:", err));
-  }, [id, userData?.id]);
+    getCoursesProgress()
+      .then((allCourses) => {
+        // Filter only courses of this space
+        // Assumption: spaceCoursesIds come from backend via space details API
+        fetch(`http://127.0.0.1:8000/api/spaces/${id}/courses/`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        })
+          .then((res) => res.json())
+          .then((spaceData) => {
+            const spaceCoursesIds = (spaceData || [])
+              .filter((sc) => sc.cours)
+              .map((sc) => sc.cours.id_cours);
 
-  // --- fetch all courses of the prof ---
+            const formatted = allCourses
+              .filter((c) => spaceCoursesIds.includes(c.id_cours))
+              .map((c) => ({
+                id: c.id_cours,
+                title: c.titre_cour,
+                description: c.description,
+                level: c.niveau_cour_label,
+                author: c.utilisateur_name,
+                date: c.date_ajout,
+                progress: c.progress ?? 0,
+                isMine: c.utilisateur === userData?.id,
+              }));
+
+            setSpaceCourses(formatted);
+          });
+      })
+      .catch((err) => console.error("Failed to fetch courses with progress:", err));
+  }, [id]);
+
+  // --- fetch all my courses for the "Add" modal ---
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/api/my-courses/`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -115,7 +126,7 @@ export default function SpaceDetails() {
   const handleAddCourse = (courseId) => {
     if (!courseId) return;
 
-    const alreadyAdded = spaceCourses.some(c => c.id === courseId);
+    const alreadyAdded = spaceCourses.some((c) => c.id === courseId);
     if (alreadyAdded) {
       toast.error(t("courseAlreadyAdded"));
       return;
@@ -143,6 +154,7 @@ export default function SpaceDetails() {
             level: newCourse.cours.niveau_cour_label,
             author: newCourse.cours.utilisateur_name,
             date: newCourse.cours.date_ajout,
+            progress: 0,
             isMine: true,
           },
         ]);

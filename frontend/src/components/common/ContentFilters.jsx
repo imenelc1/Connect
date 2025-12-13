@@ -45,7 +45,7 @@ export default function ContentFilters({
       <div className="flex items-center gap-4 flex-wrap">
 
         {/* NIVEAUX */}
-        <div className="flex bg-primary/20 rounded-full px-6 py-2 gap-4 font-semibold shadow-inner text-sm">
+        <div className="flex bg-primary/50 rounded-full px-6 py-2 gap-4 font-semibold shadow-inner text-sm">
           {levels.map((lvl) => (
             <button
               key={lvl}

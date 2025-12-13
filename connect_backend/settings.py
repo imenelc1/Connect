@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'dashboard',
     'feedback',
     'spaces',
+    'badges',
     # API et CORS
     'rest_framework',
     'corsheaders',
@@ -65,13 +66,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-     "http://127.0.0.1:5173",
-     "http://localhost:5173",
-     
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -156,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        # Ne mets pas SimpleJWT ici si tu veux ton propre token
+        
     ],
 }
 

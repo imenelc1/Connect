@@ -23,8 +23,21 @@ const initialsBgMap = {
   Avancé: "bg-pink",
 };
 
+const progressColorMap = {
+  Débutant: "bg-blue",
+  Intermédiaire: "bg-purple",
+  Avancé: "bg-pink",
+};
 
-export default function ContentCard({ course, role, showProgress, type, className = "", onDelete }) {
+
+export default function ContentCard({
+  course,
+  role,
+  showProgress,
+  type,
+  className = "",
+  onDelete,
+}) {
   const { t } = useTranslation("contentPage");
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,34 +52,24 @@ export default function ContentCard({ course, role, showProgress, type, classNam
       ? "exercise"
       : "quiz");
 
-  const levelKeyMap = {
-    Débutant: "beginner",
-    Intermédiaire: "intermediate",
-    Avancé: "advanced",
-  };
-
   const handleEdit = () => {
     if (pageType === "course") navigate(`/courses/edit/${course.id}`);
     else navigate(`/ListeExercices/${course.id}`);
   };
 
   const handleStart = () => {
-    if (pageType === "exercise") {
-      navigate(`/ListeExercices`);
-    } else {
-      navigate(`/Seecourses/${course.id}`);
-    }
+    if (pageType === "exercise") navigate(`/ListeExercices`);
+    else navigate(`/Seecourses/${course.id}`);
   };
 
-  // --- nouveau : label dynamique selon rôle et progression ---
   const getButtonLabel = () => {
     if (role === "etudiant") {
-      if (course.progress > 0) return t("continueCourse"); // déjà commencé
+      if (course.progress > 0) return t("continueCourse");
       if (pageType === "course") return t("startCourse");
       if (pageType === "exercise") return t("startExercise");
       if (pageType === "quiz") return t("startQuiz");
     } else {
-      // prof
+      // rôle professeur
       if (pageType === "course") return t("checkCourse");
       if (pageType === "exercise") return t("checkExercise");
       if (pageType === "quiz") return t("checkQuiz");
@@ -83,8 +86,12 @@ export default function ContentCard({ course, role, showProgress, type, classNam
         {/* Header */}
         <div className="flex justify-between items-start">
           <h2 className="font-semibold text-lg">{course.title}</h2>
-          <span className={`px-3 py-1 text-xs rounded-full ${levelStyles[course.level]}`}>
-            {t(`levels.${levelKeyMap[course.level]}`)}
+          <span
+            className={`px-3 py-1 text-xs rounded-full ${
+              levelStyles[course.level]
+            }`}
+          >
+            {t(`levels.${course.level}`)}
           </span>
         </div>
 
@@ -94,25 +101,30 @@ export default function ContentCard({ course, role, showProgress, type, classNam
         {/* Auteur + durée */}
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-2">
-           <div className={`w-8 h-8 rounded-full ${initialsBgMap[course.level] ?? "bg-primary"} text-white flex items-center justify-center`}>
-  {course.initials}
-</div>
-
+            <div
+              className={`w-8 h-8 rounded-full ${
+                initialsBgMap[course.level]
+              } text-white flex items-center justify-center`}
+            >
+              {course.initials}
+            </div>
             <span className="text-sm">{course.author}</span>
           </div>
           <span className="text-xs text-gray-400">{course.duration}</span>
         </div>
 
         {/* Progress */}
-        {showProgress && <ContentProgress value={course.progress ?? 0} className="mt-3" />}
+        {showProgress && (
+          <ContentProgress value={course.progress ?? 0} className="mt-3" color={progressColorMap[course.level]}/>
+        )}
       </div>
 
       {/* Footer */}
       <div className="mt-4 flex items-center justify-between">
         {(role === "etudiant" || role === "enseignant") && (
-          <Button 
+          <Button
             variant="courseStart"
-            className={`${buttonStyles[course.level]} !w-auto px-4 py-2 bg-buttonStyles`}
+            className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
             onClick={handleStart}
           >
             {getButtonLabel()}

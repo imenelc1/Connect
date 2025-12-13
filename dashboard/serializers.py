@@ -1,29 +1,30 @@
 from rest_framework import serializers
-from .models import Badge, GagnerBadge, ProgressionCours, TentativeExercice, Analyse
+
+from courses.models import Cours
+from .models import LeconComplete, ProgressionCours, TentativeExercice
+
+class LeconCompleteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LeconComplete
+        fields = '__all__'
 
 class ProgressionCoursSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgressionCours
-        fields = '__all__'
-
-class TentativeExerciceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TentativeExercice
-        fields = '__all__'
-
-class AnalyseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Analyse
-        fields = '__all__'
-
-class BadgeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Badge
-        fields = ['id', 'nom', 'description', 'icone', 'condition']
-
-class GagnerBadgeSerializer(serializers.ModelSerializer):
-    badge = BadgeSerializer(read_only=True)  # nested serializer pour info du badge
+        fields = ['utilisateur', 'cours', 'avancement_cours', 'temps_passe']
+        
+class CoursSerializer(serializers.ModelSerializer):
+    niveau_cour_label = serializers.CharField(source='niveau_cour.label', read_only=True)
 
     class Meta:
-        model = GagnerBadge
-        fields = ['badge', 'date_obtention']
+        model = Cours
+        fields = ['id', 'titre_cour', 'description', 'niveau_cour_label', 'utilisateur_name', 'duration_readable']
+
+
+class CoursProgressSerializer(serializers.ModelSerializer):
+    progress = serializers.FloatField(source='avancement_cours')
+    cours = CoursSerializer(read_only=True)
+
+    class Meta:
+        model = ProgressionCours
+        fields = ['cours', 'progress']
