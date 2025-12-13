@@ -164,8 +164,8 @@ export default function SpacesPage() {
                     status={
                       role === "prof"
                         ? `${t("created")} ${new Date(
-                            item.date_creation
-                          ).toLocaleDateString()}`
+                          item.date_creation
+                        ).toLocaleDateString()}`
                         : ""
                     }
                     showArrow={true}
@@ -173,17 +173,17 @@ export default function SpacesPage() {
                       navigate(`/CourseDetails/${item.id_space}`)
                     }
                     extraActions={
-  role === "prof" && (   // <-- condition ajoutée
-    <div className="">
-      <FiTrash2
-        size={18}
-        className="cursor-pointer text-grayc hover:text-red-500 mt-20 ml-5"
-        onClick={() => handleDeleteSpace(item.id_space)}
-        title={t("deleteSpace")}
-      />
-    </div>
-  )
-}
+                      role === "prof" && (   // <-- condition ajoutée
+                        <div className="">
+                          <FiTrash2
+                            size={18}
+                            className="cursor-pointer text-grayc hover:text-red-500 mt-20 ml-5"
+                            onClick={() => handleDeleteSpace(item.id_space)}
+                            title={t("deleteSpace")}
+                          />
+                        </div>
+                      )
+                    }
                   />
                 </div>
               ))

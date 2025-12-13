@@ -42,6 +42,10 @@ import QuizTakePage from '../pages/QuizTakePage';
 import QuizSummaryPage from '../pages/QuizSummaryPage';
 
 import SubmittedExercises from "../pages/SubmittedExercises";
+import QuizManagement from "../pages/QuizManagement";
+import ExercisesManagement from "../pages/ExerciseManagement";
+import CoursesManagement from "../pages/CourseManagement";
+
 
 export default function AppRoutes() {
   return (
@@ -103,7 +107,15 @@ export default function AppRoutes() {
         <Route path="/CourseDetails/:id" element={<CourseDetails />} />
         <Route path="/Seecourses/:id" element={<Courses />} />
         <Route path="/MyStudents" element={<MyStudents />} />
+        {/* quiz management */}
+        <Route path="/QuizManagement" element={<QuizManagement />} />
 
+        {/* exercise management */}
+        <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
+
+{/* course management */}
+    <Route path="/CourseManagement" element={<CoursesManagement />} />
+   
       </Routes>
     </BrowserRouter>
   );

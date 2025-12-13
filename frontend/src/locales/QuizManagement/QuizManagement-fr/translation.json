@@ -1,0 +1,30 @@
+{
+    "title": "Gestion des Quiz",
+    "subtitle": "Créer et gérer les quiz du cours",
+    "searchPlaceholder": "Rechercher des quiz...",
+    "stats": {
+        "questions": "Questions",
+        "attempts": "Tentatives",
+        "avgScore": "Score Moyen"
+    },
+    "createButton": "+ Ajouter Quiz",
+    "modal": {
+        "createTitle": "Créer un nouveau quiz",
+        "createSubtitle": "Remplissez le formulaire pour ajouter un nouveau quiz",
+        "editTitle": "Modifier le quiz",
+        "editSubtitle": "Mettez à jour ",
+        "submitCreate": "Ajouter le Quiz",
+        "submitEdit": "Mettre à jour",
+        "cancel": "Annuler",
+        "fields": {
+            "title": {
+                "label": "Titre du Quiz",
+                "placeholder": "Entrez le titre du quiz"
+            },
+            "description": {
+                "label": "Chapitre",
+                "placeholder": "Entrez le nom du chapitre"
+            }
+        }
+    }
+}
