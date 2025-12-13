@@ -27,3 +27,11 @@ class TentativeExercice(models.Model):
     temps_passe = models.DurationField()
     reponse = models.TextField()
     feedback = models.TextField(blank=True, null=True)
+
+class SessionDuration(models.Model):
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    duration = models.IntegerField(default=0)  # durée en secondes
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.utilisateur.USERNAME_FIELD} - {self.duration}s"

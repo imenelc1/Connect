@@ -13,7 +13,6 @@ import ThemeContext from "../context/ThemeContext";
 import { getCurrentUserId } from "../hooks/useAuth";
 import progressionService from "../services/progressionService";
 
-
 const gradientMap = {
   Débutant: "bg-grad-2",
   Intermédiaire: "bg-grad-3",
@@ -30,32 +29,12 @@ export default function AllCoursesPage() {
   const { t } = useTranslation("allcourses");
   const { toggleDarkMode } = useContext(ThemeContext);
 
-  useEffect(() => {
-    fetch("http://localhost:8000/api/courses/api/cours")
-      .then((res) => res.json())
-      .then((data) => {
-        const formatted = data.map((c) => ({
-          id: c.id_cours,
-          title: c.titre_cour,
-          description: c.description,
-          level: c.niveau_cour_label,
-          duration: c.duration_readable,
-          author: c.utilisateur_name,
-          initials: c.utilisateur_name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase(),
-          isMine: c.utilisateur === currentUserId,
-        }));
-        setCourses(formatted);
-      })
-      .catch((err) => console.error("Erreur chargement cours :", err));
-  }, [currentUserId]);
-
+  
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
   let filteredCourses =
@@ -73,10 +52,13 @@ export default function AllCoursesPage() {
   const handleDeleteCourse = async (courseId) => {
     if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
     try {
-      await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await fetch(
+        `http://localhost:8000/api/courses/cours/${courseId}/delete/`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setCourses((prev) => prev.filter((c) => c.id !== courseId));
     } catch (err) {
       console.error("Erreur suppression :", err);
@@ -103,11 +85,14 @@ export default function AllCoursesPage() {
     return 3;
   };
 
-  useEffect(() => {
+ useEffect(() => {
   const fetchProgress = async () => {
     try {
       const data = await progressionService.getCoursesProgress();
-      console.log("Progression des cours :", data);
+      console.log(
+  data.map((c) => c.niveau_cour_label)
+);
+
       const formatted = data.map((c) => ({
         id: c.id_cours,
         title: c.titre_cour,
@@ -116,36 +101,36 @@ export default function AllCoursesPage() {
         duration: c.duration_readable,
         author: c.utilisateur_name,
         initials: c.utilisateur_name
-          .split(" ")
+          ?.split(" ")
           .map((n) => n[0])
           .join("")
           .toUpperCase(),
         isMine: c.utilisateur === currentUserId,
         progress: c.progress ?? 0,
       }));
+
       setCourses(formatted);
     } catch (err) {
       console.error("Erreur chargement cours :", err);
     }
   };
+
   fetchProgress();
 }, [currentUserId]);
 
-const handleCompleteLesson = async (lessonId) => {
-  try {
-    const data = await progressionService.completeLesson(lessonId);
-    setCourses((prev) =>
-      prev.map((c) =>
-        c.id === data.cours_id ? { ...c, progress: data.avancement_cours } : c
-      )
-    );
-  } catch (err) {
-    console.error("Erreur completion leçon :", err);
-    alert("Impossible de compléter la leçon");
-  }
-};
-
-
+  const handleCompleteLesson = async (lessonId) => {
+    try {
+      const data = await progressionService.completeLesson(lessonId);
+      setCourses((prev) =>
+        prev.map((c) =>
+          c.id === data.cours_id ? { ...c, progress: data.avancement_cours } : c
+        )
+      );
+    } catch (err) {
+      console.error("Erreur completion leçon :", err);
+      alert("Impossible de compléter la leçon");
+    }
+  };
 
   return (
     <div className="flex bg-surface min-h-screen">
@@ -160,7 +145,10 @@ const handleCompleteLesson = async (lessonId) => {
           onChangeLang={(lang) => i18n.changeLanguage(lang)}
         />
       </div>
-      <main className="flex-1 p-4 md:p-8 transition-all duration-300" style={{ marginLeft: sidebarWidth }}>
+      <main
+        className="flex-1 p-4 md:p-8 transition-all duration-300"
+        style={{ marginLeft: sidebarWidth }}
+      >
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
         </div>
@@ -186,19 +174,22 @@ const handleCompleteLesson = async (lessonId) => {
             </Button>
           )}
         </div>
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
+          }}
+        >
           {filteredCourses.map((course, idx) => (
-         <ContentCard
-  key={idx}
-  className={gradientMap[course.level] ?? "bg-grad-1"}
-  course={course} // <- on ne touche pas à course.progress
-  role={userRole}
-  showProgress={userRole === "etudiant"}
-  onDelete={handleDeleteCourse}
-  onCompleteLesson={() => handleCompleteLesson(course.id)}
-/>
-
-
+            <ContentCard
+              key={idx}
+              className={gradientMap[course.level]}
+              course={course}
+              role={userRole}
+              showProgress={userRole === "etudiant"}
+              onDelete={handleDeleteCourse}
+              onCompleteLesson={() => handleCompleteLesson(course.id)}
+            />
           ))}
         </div>
       </main>

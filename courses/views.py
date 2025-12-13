@@ -218,18 +218,28 @@ class CoursesWithProgressView(APIView):
         courses = Cours.objects.all()
         data = []
 
+        # Mapping pour normaliser les niveaux
+        NIVEAUX_MAP = {
+            "debutant": "Débutant",
+            "intermediaire": "Intermédiaire",
+            "avance": "Avancé",
+        }
+
         for course in courses:
             progress_obj = ProgressionCours.objects.filter(utilisateur=user, cours=course).first()
             progress = progress_obj.avancement_cours if progress_obj else 0.0
+
+            niveau_raw = getattr(course, 'niveau_cour', None)
+            niveau_label = NIVEAUX_MAP.get(str(niveau_raw).lower(), "Débutant") if niveau_raw else "Débutant"
 
             data.append({
                 "id_cours": course.id_cours,
                 "titre_cour": course.titre_cour,
                 "description": course.description,
-                "niveau_cour_label": getattr(course, 'niveau_label', 'Débutant'),
+                "niveau_cour_label": niveau_label,
                 "utilisateur": course.utilisateur.id_utilisateur,
                 "utilisateur_name": course.utilisateur.nom,
-                "duration_readable": getattr(course, 'get_duration_display', lambda: "")(),
+                "duration_readable": course.get_duration_display() if hasattr(course, 'get_duration_display') else "",
                 "progress": progress
             })
 

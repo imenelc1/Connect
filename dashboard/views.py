@@ -3,10 +3,11 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from courses.models import Cours, Lecon
 from users.jwt_auth import IsAuthenticatedJWT
-from .models import LeconComplete, ProgressionCours
+from .models import LeconComplete, ProgressionCours, SessionDuration
+from django.views.decorators.csrf import csrf_exempt
 
 
 @api_view(['POST'])
@@ -43,3 +44,41 @@ def complete_lesson(request, lecon_id):
     pc.save()
 
     return Response({"progress": avancement})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def active_courses_count(request):
+    user = request.user
+    count = ProgressionCours.objects.filter(utilisateur=user, avancement_cours__gt=0).count()
+    return Response({"active_courses": count})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedJWT])
+def add_session(request):
+    user = request.user
+    duration = request.data.get("duration", 0)
+    if duration <= 0:
+        return Response({"error": "Invalid duration"}, status=400)
+    SessionDuration.objects.create(utilisateur=user, duration=duration)
+    return Response({"message": "Session added successfully"})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def average_time(request):
+    avg_duration = SessionDuration.objects.filter(utilisateur=request.user).aggregate(avg=Avg('duration'))['avg'] or 0
+    return Response({"average_duration": avg_duration})
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def global_progress(request):
+    user = request.user
+    # récupérer tous les cours actifs
+    courses = ProgressionCours.objects.filter(utilisateur=user)
+    if not courses.exists():
+        return Response({"global_progress": 0})
+
+    total = sum(course.avancement_cours for course in courses)
+    global_progress = round(total / courses.count())
+    return Response({"global_progress": global_progress})

@@ -14,6 +14,7 @@ from .serializers import (
     SpaceEtudiantDisplaySerializer
 )
 from users.jwt_auth import IsAuthenticatedJWT, jwt_required
+from django.db.models import Q
 
 # --- Création d'un espace ---
 class CreateSpaceView(APIView):
@@ -39,14 +40,18 @@ class SpaceListView(generics.ListAPIView):
         return Space.objects.filter(utilisateur=user)
 
 # --- Détail / Update / Delete d'un espace ---
-class SpaceDetailView(generics.RetrieveUpdateDestroyAPIView):
+class SpaceDetailView(generics.RetrieveAPIView):
     serializer_class = SpaceSerializer
     permission_classes = [IsAuthenticatedJWT]
-    lookup_field = 'id_space'
+    lookup_field = "id_space"
 
     def get_queryset(self):
         user = self.request.user
-        return Space.objects.filter(utilisateur=user)
+
+        return Space.objects.filter(
+            Q(utilisateur=user) |                # prof (créateur)
+            Q(spaceetudiant__etudiant=user)      # étudiant inscrit
+        ).distinct()
 
 # --- Ajouter un étudiant à un espace ---
 class AddStudentToSpaceView(APIView):

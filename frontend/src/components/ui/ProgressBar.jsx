@@ -1,6 +1,6 @@
 import React from "react";
 
-const ProgressBar = ({ value = 50, title = "Progression" }) => {
+const ProgressBar = ({ value, title = "Progression" }) => {
   return (
     <div className="w-full group relative">
       {/* Titre */}
