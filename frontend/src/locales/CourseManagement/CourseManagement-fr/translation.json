@@ -1,0 +1,33 @@
+{
+  "title": "Gestion des cours",
+  "description": "Gérez tous vos cours ici.",
+  "addCourseButton": "+ Ajouter un cours",
+  "searchPlaceholder": "Rechercher un cours...",
+  "submissions": "{{count}} étudiants",
+  "difficulty": {
+    "Beginner": "Débutant",
+    "Intermediate": "Intermédiaire",
+    "Advanced": "Avancé"
+  },
+  "modal": {
+    "create": {
+      "title": "Créer un cours",
+      "subtitle": "Remplissez les informations pour ajouter un cours.",
+      "submit": "Enregistrer le cours",
+      "cancel": "Annuler"
+    },
+    "edit": {
+      "title": "Modifier le cours",
+      "subtitle": "Modifiez les informations du cours.",
+      "submit": "Mettre à jour",
+      "cancel": "Annuler"
+    }
+  },
+  "field": {
+    "title": "Titre",
+    "titlePlaceholder": "Titre du cours",
+    "category": "Catégorie",
+    "categoryPlaceholder": "Catégorie",
+    "difficulty": "Niveau"
+  }
+}

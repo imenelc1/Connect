@@ -1,0 +1,33 @@
+{
+  "title": "Courses Management",
+  "description": "Manage all your courses from here.",
+  "addCourseButton": "+ Add Course",
+  "searchPlaceholder": "Search courses...",
+  "submissions": "{{count}} students",
+  "difficulty": {
+    "Beginner": "Beginner",
+    "Intermediate": "Intermediate",
+    "Advanced": "Advanced"
+  },
+  "modal": {
+    "create": {
+      "title": "Create Course",
+      "subtitle": "Fill in the details to add a new course.",
+      "submit": "Save Course",
+      "cancel": "Cancel"
+    },
+    "edit": {
+      "title": "Edit Course",
+      "subtitle": "Modify the course details.",
+      "submit": "Update",
+      "cancel": "Cancel"
+    }
+  },
+  "field": {
+    "title": "Title",
+    "titlePlaceholder": "Course title",
+    "category": "Category",
+    "categoryPlaceholder": "Category",
+    "difficulty": "Level"
+  }
+}

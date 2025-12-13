@@ -32,6 +32,19 @@ import translationFRSubmittedExercise from "./locales/SubmittedExo/fr-SubExo/tra
 import translationENSubmittedExercise from "./locales/SubmittedExo/en-SubExo/translation.json";
 import translationFRSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-fr/translation.json";
 import translationENSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-en/translation.json";
+import translationFRQuizManagement from "./locales/QuizManagement/QuizManagement-fr/translation.json";
+import translationENQuizManagement from "./locales/QuizManagement/QuizManagement-en/translation.json";
+
+import translationFRExerciseManagement from "./locales/ExerciseManagement/ExerciseManagement-fr/translation.json";
+import translationENExerciseManagement from "./locales/ExerciseManagement/ExerciseManagement-en/translation.json";
+
+import translationFRCourseManagement from "./locales/CourseManagement/CourseManagement-fr/translation.json";
+import translationENCourseManagement from "./locales/CourseManagement/CourseManagement-en/translation.json";
+
+
+
+
+
 
 const resources = {
   fr: {
@@ -53,7 +66,10 @@ const resources = {
     CourseDetails: translationFRCourseDetails,
     SubmittedExercise: translationFRSubmittedExercise,
 
-    SubmittedExercises: translationFRSubmittedExercises
+    SubmittedExercises: translationFRSubmittedExercises,
+    QuizManagement: translationFRQuizManagement,
+    ExerciseManagement: translationFRExerciseManagement,
+    CoursesManagement: translationFRCourseManagement
 
 
   },
@@ -76,7 +92,12 @@ const resources = {
     Spaces: translationENSpaces,
     CourseDetails: translationENCourseDetails,
     SubmittedExercise: translationENSubmittedExercise,
-    SubmittedExercises: translationENSubmittedExercises
+    SubmittedExercises: translationENSubmittedExercises,
+    QuizManagement: translationENQuizManagement,
+    ExerciseManagement: translationENExerciseManagement,
+    CoursesManagement: translationENCourseManagement
+
+
   },
 };
 

@@ -36,7 +36,7 @@ export default function SpacesPage() {
             id: 1,
             title: "Mobile Design Patterns",
             description: "Learn mobile design fundamentals",
-             date: "12/01/2025",
+            date: "12/01/2025",
             bg: "bg-grad-2",
         },
         {
@@ -97,8 +97,8 @@ export default function SpacesPage() {
                                 description={item.description}
                                 status={`${t("created")} ${item.date}`}
                                 showArrow={true}  // Affiche une flèche (souvent pour "voir plus")
-                                  // ⬇️ AJOUT ICI : redirection quand on clique sur la flèche
-    onArrowClick={() => navigate("/CourseDetails")}
+                                // ⬇️ AJOUT ICI : redirection quand on clique sur la flèche
+                                onArrowClick={() => navigate("/CourseDetails")}
                             />
                         </div>
                     ))}

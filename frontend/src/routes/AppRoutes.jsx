@@ -16,6 +16,10 @@ import SpacesPage from "../pages/Spaces";
 import CourseDetails from "../pages/CourseDetails"
 import MyStudents from "../pages/MyStudents";
 import SubmittedExercises from "../pages/SubmittedExercises";
+import QuizManagement from "../pages/QuizManagement";
+import ExercisesManagement from "../pages/ExerciseManagement";
+import CoursesManagement from "../pages/CourseManagement";
+
 
 export default function AppRoutes() {
   return (
@@ -67,6 +71,15 @@ export default function AppRoutes() {
         <Route path="/CourseDetails" element={<CourseDetails />} />
         {/* Students */}
         <Route path="/MyStudents" element={<MyStudents />} />
+        {/* quiz management */}
+        <Route path="/QuizManagement" element={<QuizManagement />} />
+
+        {/* exercise management */}
+        <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
+
+{/* course management */}
+    <Route path="/CourseManagement" element={<CoursesManagement />} />
+   
       </Routes>
     </BrowserRouter>
   );

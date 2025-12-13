@@ -64,7 +64,7 @@ export default function MyStudents() {
           {/* Champ de recherche étudiant */}
           <div className="relative flex-1 min-w-[280px] lg:min-w-[450px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 
-              text-blue-500 w-5 h-5" />
+              text-primary w-5 h-5" />
             <input
               type="text"
               placeholder={t("searchStudentPlaceholder")}
@@ -102,7 +102,7 @@ export default function MyStudents() {
               description={st.course}
               progress={st.progress} // barre de progression d'avancement
               status={`${t("active")} ${t("lastActive", { time: st.lastActive })}`}
-        
+
               className={`${st.bg} rounded-xl shadow-md border p-6`}
             />
           ))}
