@@ -11,11 +11,15 @@ import AssistantIA from "../pages/AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
 import Editor from "@monaco-editor/react";
-
 export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const { exerciceId } = useParams(); // Récupération de l'ID de l'exercice
+  const [exercise, setExercise] = useState(null);
+  const [loadingExercise, setLoadingExercise] = useState(true);
 
   const [openAssistant, setOpenAssistant] = useState(false);
   const [rating, setRating] = useState(0);
@@ -23,6 +27,7 @@ export default function StartExercise() {
   const [output, setOutput] = useState("Aucune sortie pour le moment...");
   const [isRunning, setIsRunning] = useState(false);
   const controllerRef = useRef(null);
+
 
   const [userCode, setUserCode] = useState(`#include <stdio.h>
 #include <stdlib.h>
@@ -40,18 +45,14 @@ int main() {
 }`;
   const resetCode = () => setUserCode(defaultCode);
 
-  const { toggleDarkMode } = useContext(ThemeContext);
-
   const storedUser = localStorage.getItem("user");
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
     window.addEventListener("sidebarChanged", handler);
@@ -60,7 +61,32 @@ int main() {
 
   const sidebarWidth = sidebarCollapsed ? -200 : -50;
 
-  const runCode = async () => {
+  // ------------------- FETCH EXERCISE -------------------
+  useEffect(() => {
+    console.log("URL appelée :", `http://localhost:8000/api/exercices/${exerciceId}/`);
+    console.log("${exerciceId}/");
+    if (!exerciceId) return;
+    console.log("URL appelée :", `http://localhost:8000/api/exercices/${exerciceId}/`);
+    const fetchExercise = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
+       
+
+        if (!response.ok) throw new Error("Erreur lors de la récupération de l'exercice");
+        const data = await response.json();
+        setExercise(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingExercise(false);
+      }
+    };
+
+    fetchExercise();
+  }, [exerciceId]);
+
+  // ------------------- CODE EXECUTION -------------------
+   const runCode = async () => {
     setIsRunning(true);
     setOutput("Exécution en cours...");
 
@@ -117,6 +143,13 @@ int main() {
     setIsRunning(false);
   };
 
+
+  const switchLang = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
+    localStorage.setItem("lang", newLang);
+  };
+
   return (
     <div
       className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
@@ -127,21 +160,20 @@ int main() {
         <NavBar />
       </div>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 p-4 md:p-8 lg:ml-72 ml-10 transition-all">
-
+      {/* CONTENT */}
+      <div className="flex-1 p-4 md:p-8 lg:ml-72 transition-all duration-300 ml-10">
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center mb-10 gap-6">
+        <div className="flex flex-col md:flex-row md:items-center mb-10 gap-6 md:gap-0">
           <div className="flex-1">
             <h1 className="text-3xl md:text-4xl font-extrabold text-muted mb-2">
               {t("header.title")}
             </h1>
-            <p className="text-lg md:text-xl opacity-80 text-[rgb(var(--color-text))]">
+            <p className="text-[rgb(var(--color-text))] text-lg md:text-xl opacity-80">
               {t("header.subtitle")}
             </p>
           </div>
 
-          <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0">
+          <div className="flex gap-3 items-center md:ml-auto  ml-[280px] -mt-20 md:mt-0">
             <IaAssistant />
             <HeadMascotte />
             <UserCircle
@@ -152,23 +184,26 @@ int main() {
           </div>
         </div>
 
-        {/* EXERCISE CARD */}
-        <div className="w-full p-6 rounded-2xl bg-grad-3 mb-10">
-          <p className="font-semibold text-muted text-[20px]">
-            {t("exerciseCard.title")}
-            <span className="font-normal opacity-70 ml-3 text-[rgb(var(--color-text))]">
-              {t("exerciseCard.subtitle")}
-            </span>
-          </p>
-          <p className="mt-3 text-muted opacity-80">
-            {t("exerciseCard.description")}
-          </p>
-        </div>
+        {/* ----------------- EXERCISE CARD ----------------- */}
+       <div className="w-full p-6 rounded-2xl bg-grad-3 mb-6 md:mb-10">
+  {exercise ? (
+    <>
+      <p className="font-semibold text-muted text-[20px]">
+       Exercice: {exercise.titre_exo}
+      </p>
+      <p className="mt-3 text-muted text-sm md:text-base">
+        {exercise.enonce}
+      </p>
+    </>
+  ) : (
+    <p className="text-red-500 text-sm">
+      Impossible de charger l'exercice.
+    </p>
+  )}
+</div>
 
-        {/* CODE EDITOR */}
-        <p className="text-lg md:text-xl font-semibold mb-4">
-          {t("editor.yourCode")}
-        </p>
+
+
 
         <div className="relative rounded-2xl overflow-hidden shadow-lg mb-10 bg-[#0d1117]">
 
@@ -200,7 +235,7 @@ int main() {
 
         </div>
 
-        {/* ACTION BUTTONS */}
+       {/* ACTION BUTTONS */}
         <div className="flex flex-wrap justify-center gap-4 mb-10">
           <ActionButton
             icon={<Play size={18} />}
@@ -232,75 +267,34 @@ int main() {
           />
         </div>
 
-        {/* OUTPUT */}
+        {/* ----------------- OUTPUT ----------------- */}
         <p className="text-lg md:text-xl font-semibold text-muted mb-3">
           {t("output.title")}
         </p>
 
-        <div className="rounded-2xl p-6 text-white shadow-strong mb-10 bg-output">
+        <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
           {output.split("\n").map((line, i) => (
             <div key={i}>{line}</div>
           ))}
         </div>
 
-        {/* FEEDBACK */}
-        <div className="p-8 rounded-2xl shadow-card border mb-24 bg-grad-8">
-          <p className="font-semibold text-primary text-lg mb-1">
-            {t("feedback.title")}
-          </p>
-          <p className="text-primary text-sm mb-8">
-            {t("feedback.subtitle")}
-          </p>
-
-          {/* Stars */}
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-4">
-            <div className="flex gap-3 text-3xl">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <span
-                  key={i}
-                  onMouseEnter={() => setHover(i)}
-                  onMouseLeave={() => setHover(0)}
-                  onClick={() => setRating(i)}
-                  className={`cursor-pointer text-transparent bg-clip-text drop-shadow ${getStarGradient(
-                    i
-                  )} ${(hover || rating) >= i ? "opacity-100 scale-110" : "opacity-40"} transition-all`}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-
-            <div className="flex justify-between w-full text-sm font-medium">
-              <span className="w-24 text-left label-very-easy">
-                {t("feedback.labels.veryEasy")}
-              </span>
-              <span className="w-24 text-center label-moderate">
-                {t("feedback.labels.moderate")}
-              </span>
-              <span className="w-24 text-right label-very-difficult">
-                {t("feedback.labels.veryDifficult")}
-              </span>
-            </div>
-          </div>
-
-          <p className="text-primary text-sm flex items-center gap-2">
-            {t("feedback.tip")}
-          </p>
-        </div>
-
-        {/* HELP BUTTON */}
+        {/* ----------------- ASSISTANT IA ----------------- */}
         <div className="flex justify-center mb-16">
           <button
             onClick={() => setOpenAssistant(true)}
-            className="flex items-center gap-3 px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
+            className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
           >
-            <div className="w-8 h-8 rounded-full flex items-center justify-center border bg-white">
-              <MessageCircle size={18} className="text-[rgb(var(--color-primary))]" />
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgb(var(--color-gray-light))]">
+              <MessageCircle
+                size={18}
+                strokeWidth={1.7}
+                className="text-[rgb(var(--color-primary))]"
+              />
             </div>
 
-            <span className="text-[rgb(var(--color-primary))] font-medium">
+            <div className="text-[rgb(var(--color-primary))] font-medium">
               Besoin d'aide ? Discutez avec l'Assistant IA
-            </span>
+            </div>
           </button>
         </div>
       </div>
@@ -310,11 +304,12 @@ int main() {
   );
 }
 
+// ----------------- ACTION BUTTON -----------------
 function ActionButton({ icon, label, bg, text = "white", onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 px-5 py-2 rounded-xl shadow-card hover:opacity-90 transition font-medium"
+      className="flex items-center gap-2 px-3 md:px-5 py-2 rounded-xl shadow-card hover:opacity-90 transition font-medium text-sm md:text-base"
       style={{ backgroundImage: bg, color: text }}
     >
       {icon}

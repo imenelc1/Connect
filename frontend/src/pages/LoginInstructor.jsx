@@ -12,7 +12,7 @@ import LogoIconeComponent from "../components/common/IconeLogoComponent";
 import Button from "../components/common/Button.jsx";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
-import ThemeContext from "../context/ThemeContext";
+import ThemeContext from "../context/ThemeContext.jsx";
 import ThemeButton from "../components/common/ThemeButton";
 import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";

@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from exercices.models import Exercice
+from rest_framework.views import APIView
+from users.jwt_auth import jwt_required
 
 # Create your views here.
 from rest_framework import generics
@@ -43,3 +44,15 @@ def Quiz_list_api(request):
     serializer = QuizSerializer1(quiz, many=True)
     return Response(serializer.data)
 
+
+"""
+class CreateQuizView(APIView):
+    @jwt_required
+    def post (self, request):
+        data=request.data.copy()
+        serializer=QuizSerializer(data=data)
+        if serializer.is_valid():
+            quiz=serializer.save()
+            return Response(QuizSerializer(quiz).data, status=201)
+        return Response(serializer.errors, status=400)
+"""
