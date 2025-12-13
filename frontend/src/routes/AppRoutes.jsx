@@ -47,7 +47,7 @@ import ExercisesManagement from "../pages/ExerciseManagement";
 import CoursesManagement from "../pages/CourseManagement";
  import ValidationCourses from "../pages/ValidationCourses";
   import Dashboard from "../pages/Dashboard"
-
+import AdminLogin from "../pages/AdminLogin.jsx";
 
 export default function AppRoutes() {
   return (
@@ -117,10 +117,12 @@ export default function AppRoutes() {
 
         {/* admin */}
         <Route path ="ValidationCourses" element ={<ValidationCourses></ValidationCourses>}></Route>
-        <Route path="/Dashboard" element={<Dashboard/>} />
+        <Route path="/Dashboard-admin" element={<Dashboard/>} />
 
 {/* course management */}
     <Route path="/CourseManagement" element={<CoursesManagement />} />
+    <Route path="/admin/login" element={<AdminLogin />} />
+
    
       </Routes>
     </BrowserRouter>

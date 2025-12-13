@@ -14,7 +14,10 @@ import {
   Users,
   Award,
   Clipboard,
+  ClipboardList,
   Activity,
+  FileQuestion,
+  GraduationCap,
   MessageCircle,
   FileText,
   ChevronLeft,
@@ -31,26 +34,26 @@ export default function Navbar() {
   const { logout } = useContext(AuthContext);
 
   useEffect(() => {
-  let userObj = { nom: "", prenom: "", role: "" };
+    let userObj = { nom: "", prenom: "", role: "" };
 
-  try {
-    const storedUser = localStorage.getItem("user");
+    try {
+      const storedUser = localStorage.getItem("user");
 
-    // 🔥 Empêcher le crash si la valeur est "undefined" ou vide
-    if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
-      const parsed = JSON.parse(storedUser);
-      userObj = parsed.user || parsed.utilisateur || parsed;
+      // 🔥 Empêcher le crash si la valeur est "undefined" ou vide
+      if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
+        const parsed = JSON.parse(storedUser);
+        userObj = parsed.user || parsed.utilisateur || parsed;
+      }
+    } catch (err) {
+      console.error("Erreur parsing user JSON:", err);
     }
-  } catch (err) {
-    console.error("Erreur parsing user JSON:", err);
-  }
 
-  setUserData({
-    nom: userObj.nom || "",
-    prenom: userObj.prenom || "",
-    role: userObj.role || "",
-  });
-}, []);
+    setUserData({
+      nom: userObj.nom || "",
+      prenom: userObj.prenom || "",
+      role: userObj.role || "",
+    });
+  }, []);
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("sidebarChanged", { detail: collapsed }));
@@ -77,8 +80,26 @@ export default function Navbar() {
     { href: "/community", label: t("mycommunity"), icon: MessageCircle },
     { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },
   ];
+  const adminLinks = [
+    { href: "/", label: t("home"), icon: Home },
+    { href: "/Dashboard-admin", label: t("dashboard"), icon: Activity },
+    { href: "/CourseManagement", label: t("courses"), icon: BookOpen },
+    { href: "/ExerciseManagement", label: t("exercises"), icon: ClipboardList },
+    { href: "/QuizManagement", label: t("quizzes"), icon: FileQuestion },
+    { href: "/students", label: t("students"), icon: Users },
+    { href: "/instructors", label: t("instructors"), icon: GraduationCap },
+    { href: "/spaces", label: t("spaces"), icon: LayoutGrid },
+    { href: "/badges", label: t("badges"), icon: Award },
+    { href: "/forms", label: t("forms"), icon: FileText },
+  ];
 
-  const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
+  const links =
+    userData.role === "admin"
+      ? adminLinks
+      : userData.role === "enseignant"
+        ? teacherLinks
+        : studentLinks;
+
 
   // 🔥 logique pour activer le bouton Courses dans toutes les pages liées aux cours
   const courseRoutes = [
@@ -129,8 +150,9 @@ export default function Navbar() {
         {!collapsed && (
           <div className="flex flex-col leading-tight ml-2 -mt-1">
             <span className="text-textc font-semibold text-xs capitalize">
-              {userData.role}
+              {t(userData.role)}
             </span>
+
             <span className="text-grayc text-[11px]">
               {userData.nom} {userData.prenom}
             </span>
