@@ -45,6 +45,8 @@ import SubmittedExercises from "../pages/SubmittedExercises";
 import QuizManagement from "../pages/QuizManagement";
 import ExercisesManagement from "../pages/ExerciseManagement";
 import CoursesManagement from "../pages/CourseManagement";
+ import ValidationCourses from "../pages/ValidationCourses";
+  import Dashboard from "../pages/Dashboard"
 
 
 export default function AppRoutes() {
@@ -112,6 +114,10 @@ export default function AppRoutes() {
 
         {/* exercise management */}
         <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
+
+        {/* admin */}
+        <Route path ="ValidationCourses" element ={<ValidationCourses></ValidationCourses>}></Route>
+        <Route path="/Dashboard" element={<Dashboard/>} />
 
 {/* course management */}
     <Route path="/CourseManagement" element={<CoursesManagement />} />

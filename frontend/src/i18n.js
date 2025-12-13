@@ -80,6 +80,12 @@ import translationENCourseManagement from "./locales/CourseManagement/CourseMana
 
 
 
+import translationFRValidationCourses from "./locales/ValidationCourses/fr-validationcourses/translation.json";
+import translationENValidationCourses from "./locales/ValidationCourses/en-validationcourses/translation.json";
+
+
+import translationENDashboardAdmin from "./locales/DashboardAdmin/en-dashboardadmin/translation.json";
+import translationFRDashboardAdmin from "./locales/DashboardAdmin/fr-dashboardadmin/translation.json";
 const resources = {
   fr: {
     translation: translationFR,
@@ -126,7 +132,9 @@ const resources = {
     exercisePage: translationFRExercisePage,
 
     ProgressExercice: translationnFRProgressExercice,
-    ProgressStudent: translationnFRProgressStudent
+    ProgressStudent: translationnFRProgressStudent,
+     ValidationCourses: translationFRValidationCourses,
+    DashboardAdmin: translationFRDashboardAdmin,
   },
 
   en: {
@@ -170,7 +178,9 @@ const resources = {
     SubmittedExercises: translationENSubmittedExercises,
     QuizManagement: translationENQuizManagement,
     ExerciseManagement: translationENExerciseManagement,
-    CoursesManagement: translationENCourseManagement
+    CoursesManagement: translationENCourseManagement,
+      ValidationCourses: translationENValidationCourses,
+    DashboardAdmin: translationENDashboardAdmin,
 
 
   },
