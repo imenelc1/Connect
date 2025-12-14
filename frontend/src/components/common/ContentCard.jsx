@@ -58,9 +58,13 @@ export default function ContentCard({ course, role, showProgress, type, classNam
 
  const handleStart = () => {
   if (pageType === "exercise") {
-    navigate(`/ListeExercices/${course.id}`); // <- juste la page existante
+    navigate(`/start-exercise/${course.id}`); // <- juste la page existante
   } else {
-    navigate(`/Seecourses/${course.id}`);
+    if(pageType === "quiz"){
+      navigate(`/quiz1/${course.id}`)
+      
+    }else{navigate(`/Seecourses/${course.id}`);}
+    
   }
 };
 
@@ -90,7 +94,13 @@ export default function ContentCard({ course, role, showProgress, type, classNam
             </div>
             <span className="text-sm">{course.author}</span>
           </div>
-          <span className="text-xs text-gray-400">{course.duration}</span>
+         <span className="text-xs text-gray-400">
+  {pageType === "quiz" && course.duration
+    ? `${course.duration} min`
+    : pageType !== "quiz"
+    ? course.duration
+    : null}
+</span>
         </div>
 
         {/* Progress */}

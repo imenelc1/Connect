@@ -90,10 +90,9 @@ export default function AppRoutes() {
         <Route path="/student-exercice" element={<StudentExercice />} />
         <Route path="/progressExercice" element={<ProgressExercice />} />
         <Route path="/progressStudent" element={<ProgressStudent />} />
-        <Route path="/quiz1" element={<QuizPage1 />} />
-        <Route path="/quiz" element={<QuizPage2 />} />
+        <Route path="/quiz1/:exerciceId" element={<QuizPage1 />} />
+        <Route path="/quiz/:exerciceId" element={<QuizPage2 />} />
         <Route path="/quiz3" element={<QuizRecapPage />} />
-        <Route path="/start-exercise" element={<StartExercise />} />
         <Route path="/exercise-page" element={<ExercisePage />} />
         <Route path="/course-details" element={<CourseDetails />} />
         <Route path="/submitted-exercise" element={<SubmittedExercise />} />

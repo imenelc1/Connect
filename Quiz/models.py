@@ -15,9 +15,9 @@ class Question(models.Model):
     texte_qst = models.TextField()
     reponse_correcte = models.CharField(max_length=255)
     score = models.FloatField()
-    exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE)
+    exercice = models.ForeignKey(Exercice, related_name="questions" ,on_delete=models.CASCADE)
 
 class Option(models.Model):
     id_option = models.AutoField(primary_key=True)
     texte_option = models.CharField(max_length=255)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name="options", on_delete=models.CASCADE)

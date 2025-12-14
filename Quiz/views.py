@@ -45,6 +45,12 @@ def Quiz_list_api(request):
     return Response(serializer.data)
 
 
+
+@api_view(['GET'])
+def Quiz_api(request, exercice_id):
+    quiz = Quiz.objects.filter(exercice_id=exercice_id)
+    serializer = QuizSerializer1(quiz, many=True)
+    return Response(serializer.data)
 """
 class CreateQuizView(APIView):
     @jwt_required

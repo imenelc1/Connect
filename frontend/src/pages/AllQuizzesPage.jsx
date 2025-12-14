@@ -39,6 +39,8 @@ export default function AllQuizzesPage() {
           //levelLabel: t(`levels.${c.niveau_cour_label}`),
           duration: c.exercice?.duration_readable,
           author: c.exercice?.utilisateur_name,
+          activer:c.activerDuration,
+          duration: c.duration_minutes,
           initials: c.exercice?.utilisateur_name
             .split(" ")
             .map(n => n[0])
