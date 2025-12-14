@@ -1,0 +1,30 @@
+{
+    "title": "Quizzes Management",
+    "subtitle": "Create and manage quizzes",
+    "searchPlaceholder": "Search quizzes..",
+    "stats": {
+        "questions": "Questions",
+        "attempts": "Attempts",
+        "avgScore": "AVG score"
+    },
+    "createButton": "+ Add Quiz",
+    "modal": {
+        "createTitle": "Add a new quiz",
+        "createSubtitle": "Fill the form to add a new quiz",
+        "editTitle": "Edit quiz",
+        "editSubtitle": "Update quiz details",
+        "submitCreate": "Add Quiz",
+        "submitEdit": "Update",
+        "cancel": "Cancel",
+        "fields": {
+            "title": {
+                "label": "Quiz title",
+                "placeholder": "Enter the quiz title"
+            },
+            "description": {
+                "label": "Chapitre",
+                "placeholder": "Enter the name of the chapiter"
+            }
+        }
+    }
+}

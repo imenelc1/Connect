@@ -1,0 +1,17 @@
+{
+  "titre": "Quiz Boucles",
+  "slogan": "Relevez le défi ! 🏆",
+  "desc1": "Ce quiz évalue votre compréhension des boucles",
+  "desc2": "en programmation. Répondez aux questions suivantes pour",
+  "desc3": "tester vos connaissances.",
+  "niveau": "Avancé",
+  "minutes": "minutes",
+  "points": "points",
+  "nombreQuestions": "Nombre de questions",
+  "questions": "questions",
+  "dureeEstimee": "Durée estimée",
+  "pointsTotaux": "Points totaux",
+  "start": "C’est parti ! 🚀",
+  "back": "Retourner au menu",
+  "testTranslation": "Ceci est un test de traduction"
+}

@@ -1,0 +1,24 @@
+{
+  "backToSpaces": "Back to Spaces",
+  "students": "Students",
+  "cancel": "Cancel",
+  "topbar": {
+    "course": "Courses",
+    "quizzes": "Quizzes",
+    "exercises": "Exercises"
+  },
+  "coursesTitle": "Courses",
+  "addCourse": "Add Course",
+  "createdOn": "Created on",
+  "addCourseTitle": "Add Course",
+  "addCourseSubtitle": "Add a new course to Mobile Design Patterns",
+  "createCourse": "Create Course",
+  "courseTitleLabel": "Course Title",
+  "courseTitlePlaceholder": "e.g. Introduction to Mobile Design",
+  "courseDescriptionLabel": "Description",
+  "courseDescriptionPlaceholder": "Describe what students will learn",
+  "quizzesTitle": "Quizzes",
+
+  "selectCourseLabel": "Validate",
+  "selectCoursePlaceholder": "Select a course"
+}

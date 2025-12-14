@@ -6,6 +6,7 @@ export default function UserCircle({ initials, onToggleTheme }) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const [currentLang, setCurrentLang] = useState(i18n.language || "fr");
+const [isEditing, setIsEditing] = useState(false);
 
   // Fermer dropdown si clic extérieur
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function UserCircle({ initials, onToggleTheme }) {
   };
 
   return (
-    <div ref={menuRef} className="relative select-none">
+    <div ref={menuRef} className="relative select-none z-50">
 
       {/* Cercle utilisateur */}
       <div

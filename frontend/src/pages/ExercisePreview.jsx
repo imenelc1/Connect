@@ -1,10 +1,11 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import SideNavbar from "../components/common/Navbar";
+import SideNavbar from "../components/common/NavBar";
 import { PlayCircle, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import ThemeContext from "../context/ThemeContext";
+import Select from "../components/common/Select";
 import Topbar from "../components/common/TopBar";
 import { FileText, Activity } from "lucide-react";
 

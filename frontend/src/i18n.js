@@ -22,14 +22,23 @@ import translationENFilters from "./locales/Filters/en/translation.json";
 import translationFRContentPage from "./locales/contentPage/fr/translation.json";
 import translationENContentPage from "./locales/contentPage/en/translation.json";
 import translationFRCreateQuiz from "./locales/fr-quiz/fr.json";
-import translationENCreateQuiz from "./locales/en-quiz/en.json"; 
-import translationFRSetting from "./locales/Settings/en-Setting/translation.json";
-import translationENSetting from "./locales/Settings/fr-Setting/translation.json";
+import translationENCreateQuiz from "./locales/en-quiz/en.json";
+import translationFRSetting from "./locales/Settings/fr-Setting/translation.json";
+import translationENSetting from "./locales/Settings/en-Setting/translation.json";
 import translationENDashboard from "./locales/Dashboard/en/translation.json";
 import translationFRDashboard from "./locales/Dashboard/fr/translation.json";
 
 import translationFRBadges from "./locales/badges/fr.json";
 import translationENBadges from "./locales/badges/en.json";
+import translationFRQuiz1 from "./locales/quiz1/fr.json";
+import translationENQuiz1 from "./locales/quiz1/en.json";
+
+import translationFRquiz2 from "./locales/quiz2/fr.json";
+import translationENquiz2 from "./locales/quiz2/en.json"; 
+
+import translationFRrecquiz from "./locales/recquiz/fr.json";
+import translationENrecquiz from "./locales/recquiz/en.json";
+
 import frCourses from "./locales/courses/fr-courses/translation.json";
 import enCourses from "./locales/courses/en-courses/translation.json";
 import translationFRMyStudents from "./locales/MyStudents/fr-MyStudents/translation.json";
@@ -45,6 +54,47 @@ import translationnFRProgressExercice from "./locales/ProgressionExo/fr/translat
 import translationnENProgressStudent from "./locales/ProgressionStudent/en/translation.json";
 import translationnFRProgressStudent from "./locales/ProgressionStudent/fr/translation.json";
 
+
+import translationENStartExo from "./locales/StartExercise/en-Exo/translation.json";
+import translationFRStartExo from "./locales/StartExercise/fr-Exo/translation.json";
+import translationFRCourseDetails from "./locales/CourseDetails/fr_CourseDetails/translation.json";
+import translationENCourseDetails from "./locales/CourseDetails/en_CourseDetails/translation.json";
+
+import translationFRSubmittedExercise from "./locales/SubmittedExo/fr-SubExo/translation.json";
+import translationENSubmittedExercise from "./locales/SubmittedExo/en-SubExo/translation.json";
+import translationFRExercisePage from "./locales/exercisepage/fr-exercisepage/translation.json";
+import translationENExercisePage from "./locales/exercisepage/en-exercisepage/translation.json";
+import translationFRSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-fr/translation.json";
+import translationENSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-en/translation.json";
+import translationFRQuizManagement from "./locales/QuizManagement/QuizManagement-fr/translation.json";
+import translationENQuizManagement from "./locales/QuizManagement/QuizManagement-en/translation.json";
+
+import translationFRExerciseManagement from "./locales/ExerciseManagement/ExerciseManagement-fr/translation.json";
+import translationENExerciseManagement from "./locales/ExerciseManagement/ExerciseManagement-en/translation.json";
+
+import translationFRCourseManagement from "./locales/CourseManagement/CourseManagement-fr/translation.json";
+import translationENCourseManagement from "./locales/CourseManagement/CourseManagement-en/translation.json";
+
+
+
+
+
+
+import translationFRValidationCourses from "./locales/ValidationCourses/fr-validationcourses/translation.json";
+import translationENValidationCourses from "./locales/ValidationCourses/en-validationcourses/translation.json";
+
+
+import translationENDashboardAdmin from "./locales/DashboardAdmin/en-dashboardadmin/translation.json";
+import translationFRDashboardAdmin from "./locales/DashboardAdmin/fr-dashboardadmin/translation.json";
+
+import translationnENforumManagement from "./locales/forumManagement/en/translation.json";
+import translationnFRforumManagement from "./locales/forumManagement/fr/translation.json";
+
+import translationnENbadgesManagement from "./locales/badgesManagement/en/translation.json";
+import translationnFRbadgesManagement from "./locales/badgesManagement/fr/translation.json";
+
+import translationnENStudentsManagement from "./locales/StudentsManagement/en/translation.json";
+import translationnFRStudentsManagement from "./locales/StudentsManagement/fr/translation.json";
 const resources = {
   fr: {
     translation: translationFR,
@@ -60,19 +110,43 @@ const resources = {
     filters: translationFRFilters,
     contentPage: translationFRContentPage,
     courseInfo: translationFRCourseInfo,
-  createQuiz: translationFRCreateQuiz,
-  setting: translationFRSetting,
+    createQuiz: translationFRCreateQuiz,
+    setting: translationFRSetting,
     Dashboard: translationFRDashboard,
     badges: translationFRBadges,
     community: translationnFRCommunity,
 
     courses: frCourses,
+    quiz1: translationFRQuiz1,
+    quiz2: translationFRquiz2,
+    quiz3:translationFRrecquiz,
 
-  myStudents: translationFRMyStudents,
-  Spaces:translationFRSpaces,
-  exerciceStudent:translationnFRexerciceStudent,
-  ProgressExercice:translationnFRProgressExercice,
-  ProgressStudent:translationnFRProgressStudent
+   
+
+    myStudents: translationFRMyStudents,
+    Spaces: translationFRSpaces,
+
+    exerciceStudent: translationnFRexerciceStudent,
+    startExercise: translationFRStartExo,
+    CourseDetails: translationFRCourseDetails,
+    myStudents: translationFRMyStudents,
+    Spaces: translationFRSpaces,
+    CourseDetails: translationFRCourseDetails,
+    SubmittedExercise: translationFRSubmittedExercise,
+
+    SubmittedExercises: translationFRSubmittedExercises,
+    QuizManagement: translationFRQuizManagement,
+    ExerciseManagement: translationFRExerciseManagement,
+    CoursesManagement: translationFRCourseManagement,
+    exercisePage: translationFRExercisePage,
+
+    ProgressExercice: translationnFRProgressExercice,
+    ProgressStudent: translationnFRProgressStudent,
+     ValidationCourses: translationFRValidationCourses,
+    DashboardAdmin: translationFRDashboardAdmin,
+     ForumManagement:translationnFRforumManagement,
+     BadgesManagement:translationnFRbadgesManagement,
+    StudentsManagement:translationnFRStudentsManagement
   },
 
   en: {
@@ -89,17 +163,41 @@ const resources = {
     filters: translationENFilters,
     contentPage: translationENContentPage,
     courseInfo: translationENCourseInfo,
-  createQuiz: translationENCreateQuiz,
-  setting: translationENSetting,
+    createQuiz: translationENCreateQuiz,
+    setting: translationENSetting,
     Dashboard: translationENDashboard,
-   badges: translationENBadges,
+    badges: translationENBadges,
     courses: enCourses,
     myStudents: translationENMyStudents,
-     Spaces: translationENSpaces,
+    Spaces: translationENSpaces,
+    quiz2: translationENquiz2,
     community: translationnENCommunity,
-   ProgressExercice:translationnENexerciceStudent,
-     ProgressExercice:translationnENProgressExercice, 
-     ProgressStudent:translationnENProgressStudent
+    exerciceStudent: translationnENexerciceStudent,
+
+    startExercise: translationENStartExo,
+    CourseDetails: translationENCourseDetails,
+    Spaces: translationENSpaces,
+    CourseDetails: translationENCourseDetails,
+    SubmittedExercise: translationENSubmittedExercise,
+
+    exercisePage: translationENExercisePage,
+
+    ProgressExercice: translationnENProgressExercice,
+    ProgressStudent: translationnENProgressStudent,
+
+     quiz3:translationENrecquiz,
+    community: translationnENCommunity,
+    SubmittedExercises: translationENSubmittedExercises,
+    QuizManagement: translationENQuizManagement,
+    ExerciseManagement: translationENExerciseManagement,
+    CoursesManagement: translationENCourseManagement,
+      ValidationCourses: translationENValidationCourses,
+    DashboardAdmin: translationENDashboardAdmin,
+     ForumManagement:translationnENforumManagement,
+       BadgesManagement:translationnENbadgesManagement,
+      StudentsManagement:translationnENStudentsManagement
+
+
   },
 };
 
@@ -107,7 +205,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: localStorage.getItem("lang") || "fr",   // <── FIX ICI
+    lng: localStorage.getItem("lang") || "fr",
     fallbackLng: "fr",
     interpolation: {
       escapeValue: false,

@@ -1,0 +1,20 @@
+{
+  "title": "Quiz Recap",
+  "congrats": "Congratulations!",
+  "youScored": "You scored",
+  "points": "points",
+  "outOf": "out of",
+  "minutes": "minutes",
+  "point": "point",
+  "recap": "Answer Recap",
+  "yourAnswer": "Your answer",
+   "correctAnswer": "Correct answer",
+  "backMenu": "Back to menu",
+  "reset": "Reset",
+  "levels": {
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced"
+  },
+  "levelKey": "advanced"
+}

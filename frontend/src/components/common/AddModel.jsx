@@ -1,5 +1,5 @@
 // import React from "react";
-import Button from "../common/Button.jsx";
+import Button from "./Button.jsx";
 import Input from "../common/Input";
 
 export default function AddModal({
@@ -28,7 +28,7 @@ export default function AddModal({
           ✕
         </button>
 
-        {/* 🏷️ En-tête du modal */}
+        {/*  En-tête du modal */}
         <h2 className="text-lg font-semibold mb-1 text-primary">{title}</h2>
         <p className="text-sm text-textc mb-4">{subtitle}</p>
 
@@ -36,7 +36,7 @@ export default function AddModal({
         <form className="space-y-5" onSubmit={onSubmit}>
 
           {/*
-            🔁 Génération dynamique des champs
+             Génération dynamique des champs
             Chaque élément du tableau "fields" contient :
             - label
             - placeholder
@@ -79,9 +79,10 @@ export default function AddModal({
             </Button>
 
             {/* Bouton submit */}
-            <Button variant="primary" type="submit" className="!px-4 !py-2 !w-auto !h-auto !text-sm">
-              {submitLabel}
-            </Button>
+           <Button variant="primary" type="submit" className="!px-4 !py-2 !w-40 !h-auto !text-sm">
+  {submitLabel}
+</Button>
+
 
           </div>
 

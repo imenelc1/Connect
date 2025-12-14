@@ -1,6 +1,9 @@
 {
   "home": "Home",
   "dashboard": "Dashboard",
+  "admin": "Administrator",
+  "enseignant": "Teacher",
+  "etudiant": "Student",
   "courses": "Courses",
   "exercises": "Exercises",
   "quizzes": "Quizzes",
@@ -10,6 +13,11 @@
   "mycommunity": "My Community",
   "settings": "Settings",
   "logout": "Log Out",
-  "myspaces":"My Spaces"
+  "myspaces":"My Spaces",
+  "students": "Students",
+  "instructors": "Instructors",
+  "spaces": "Spaces",
+  "badges": "Badges",
+  "forms": "Forms"
 
 }

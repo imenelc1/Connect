@@ -1,21 +1,20 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 // Styles globaux
 import "../styles/index.css";// Import des styles globaux
 import NavSetting from "../components/common/navsetting";
 import Button from "../components/common/Button";
-import { Trash, Home, LayoutDashboard, BookOpen, FileCheck2, Users, Sun, Globe, Shield, User, UserRound, Mail, Pen, Hash, Award } from "lucide-react";
+import { Trash, Sun, Globe, Shield, User, UserRound, Mail, Pen, Hash, Award } from "lucide-react";
 import { useTranslation } from "react-i18next";
 // Thème global (dark/light mode)
 import ThemeContext from "../context/ThemeContext";
 import { useContext } from "react";
-import Navbar from "../components/common/Navbar";
-import "../components/common/Navbar";
-import LogoComponent from "../components/common/LogoComponent";
-import axios from "../services/api";
+import Navbar from "../components/common/NavBar";
+import "../components/common/NavBar";
 import api from "../services/api";
+import UserCircle from "../components/common/UserCircle";
+import toast, { Toaster } from "react-hot-toast";
 
-
-
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 export default function Setting() {
     // Hook de traduction
     const { t, i18n } = useTranslation("setting");
@@ -28,56 +27,177 @@ export default function Setting() {
     const { darkMode, toggleDarkMode } = useContext(ThemeContext);
 
 
-const [user, setUser] = useState(null);
-const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const [activeTab, setActiveTab] = useState("profile");
-    // Permet de changer la langue (FR ↔ EN)²
-    // const toggleLanguage = () => {
-    //     const newLang = i18n.language === "fr" ? "en" : "fr";
-    //     i18n.changeLanguage(newLang);
-    // };
+    const [isEditing, setIsEditing] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
+    const [showPassword, setShowPassword] = useState(false);       // Pour le nouveau mot de passe
+    const [showConfirm, setShowConfirm] = useState(false);         // Pour confirmer le mot de passe
+    const [passwordSuccess, setPasswordSuccess] = useState("");
+
+    // STATE pour le formulaire
+    // 1️⃣ Initialisation avec des champs vides
+    const [formData, setFormData] = useState({
+        nom: "",
+        prenom: "",
+        date_naissance: "",
+        adresse_email: "",
+        matricule: "",
+        specialite: "",
+        annee_etude: "",
+        grade: "",
+    });
+
+    // 2️⃣ Remplir formData une fois user chargé
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                nom: user.nom || "",
+                prenom: user.prenom || "",
+                date_naissance: user.date_naissance || "",
+                adresse_email: user.adresse_email || "",
+                matricule: user.matricule || "",
+                specialite: user.specialite || "",
+                annee_etude: user.annee_etude || "",
+                grade: user.grade || "",
+            });
+        }
+    }, [user]);
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+    });
+    const [passwordError, setPasswordError] = useState("");
+
+    const handleSave = async () => {
+        if (!validateProfile()) {
+            console.error("Erreurs dans le formulaire:", formErrors);
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+            await api.put("profile/", formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUser(formData);
+            setIsEditing(false);
+        } catch (error) {
+            console.error(t("Errors.ProfileUpdateFailed"), error);
+            toast.error(t("Errors.ProfileUpdateFailed"));
+        }
+    };
+
+    const validatePassword = () => {
+        const { newPassword, confirmPassword } = passwordData;
+        const passwordRegex = /^.{8,}$/; // minimum 8 caractères
+
+        if (!newPassword) {
+            setPasswordError(t("Errors.PasswordRequired"));
+            return false;
+        }
+
+        if (!passwordRegex.test(newPassword)) {
+            setPasswordError(t("Errors.PasswordMin8"));
+            return false;
+        }
+
+        if (newPassword !== confirmPassword) {
+            setPasswordError(t("Errors.PasswordsMismatch"));
+            return false;
+        }
+
+        setPasswordError("");
+        return true;
+    };
 
 
- useEffect(() => {
-  const fetchProfile = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("No token found, cannot fetch profile");
-      setLoading(false);
-      return;
+    const handlePasswordUpdate = async () => {
+        if (!validatePassword()) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            await api.put("profile/password/", passwordData, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+            setPasswordSuccess(t("Messages.PasswordUpdateSuccess"));
+            setPasswordError("");
+            toast.success(t("Messages.PasswordUpdateSuccess"));
+            setTimeout(() => setPasswordSuccess(""), 3000);
+        } catch (error) {
+            console.error(t("Messages.PasswordUpdateFailed"), error);
+            setPasswordError(t("Messages.PasswordUpdateFailed"));
+            toast.error(t("Messages.PasswordUpdateFailed"));
+        }
+    };
+    const validateProfile = () => {
+        const errors = {};
+
+        // Email obligatoire + format correct
+        if (!formData.adresse_email) {
+            errors.adresse_email = t("Errors.EmailRequired");
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.adresse_email)) {
+            errors.adresse_email = t("Errors.EmailInvalid");
+        }
+
+        // Mot de passe obligatoire + min 8 caractères
+        if (formData.mot_de_passe && formData.mot_de_passe.length < 8) {
+            errors.mot_de_passe = t("Errors.PasswordMin8");
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                console.error(t("Errors.NoToken"));
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await api.get("profile/", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                setUser(response.data);
+            } catch (error) {
+                console.error(t("Errors.ProfileLoadFailed"), error);
+                toast.error(t("Errors.ProfileLoadFailed"));
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    if (loading) {
+        return <div className="p-10 text-center text-textc">{t("Global.Loading")}</div>;
+    }
+    if (!user) {
+        return <div className="p-10 text-center text-red">{t("Errors.ProfileLoadFailed")}</div>;
     }
 
-    try {
-      const response = await api.get("profile/");
-      setUser(response.data);
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProfile();
-}, []);
-
-if (loading) {
-    return <div className="p-10 text-center text-textc">Loading...</div>;
-}
-if (!user) {
-    return <div className="p-10 text-center text-red-500">Cannot load user profile</div>;
-}
+    const initials = `${user.nom?.[0] || ""}${user.prenom?.[0] || ""}`.toUpperCase();
 
     return (
         // -------- GLOBAL LAYOUT --------
         <div className="  flex w-full md:flex-row min-h-screen">
-           
 
 
             {/* Sidebar : cachée sur mobile, visible sur large écrans */}
             <div className="hidden lg:block w-64 ">
-                
-                
+
+
                 <Navbar />
             </div>
 
@@ -93,18 +213,17 @@ if (!user) {
 
                     <div className="mt-10 bg-grad-3 backdrop-blur-md rounded-3xl shadow-md p-6 sm:p-6 md:p-8  border border-white/40">
 
-
-
                         {/* PROFILE HEADER */}
                         <div className="flex flex-col md:flex-row md:items-center gap-6 mb-12">
 
-                            {/* Avatar + infos sur une seule ligne */}
-                            <div className="flex items-center gap-4 sm:whitespace-nowrap">
+                            {/* Avatar + Name */}
+                            <div className="flex items-center gap-4">
 
-                                {/* Avatar */}
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-grad-7 text-white flex items-center justify-center text-2xl sm:text-3xl font-bold">
-                                    M.H
-                                </div>
+                                <UserCircle
+                                    initials={initials}
+                                    onToggleTheme={toggleDarkMode}
+                                    onChangeLang={(lang) => i18n.changeLanguage(lang)}
+                                />
 
                                 {/* Name + email + tag */}
                                 <div>
@@ -124,12 +243,21 @@ if (!user) {
 
                             {/* Edit button */}
                             <div className="md:ml-auto">
-
                                 <Button
                                     variant="Setting"
-                                    className="bg-grad-7 hover:bg-sky-600 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base"
-                                >  <Pen />{t("Profile.Editprofile")}
+                                    onClick={() => {
+                                        if (isEditing) {
+                                            handleSave();  // Sauvegarde les changements dans la BDD
+                                        } else {
+                                            setIsEditing(true);  // Passe en mode édition
+                                        }
+                                    }}
+                                    className="bg-grad-7 hover:bg-sky-600 text-white font-xl px-4"
+                                >
+                                    <Pen />
+                                    {isEditing ? t("Profile.SaveChanges") : t("Profile.Editprofile")}
                                 </Button>
+
                             </div>
                         </div>
 
@@ -144,9 +272,17 @@ if (!user) {
                                     <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
                                         type="text"
-                                        defaultValue={`${user?.nom}`}
-                                        className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
+                                        value={formData.nom}
+                                        onChange={(e) => {
+                                            // Ne garder que les lettres et les espaces
+                                            const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                                            setFormData({ ...formData, nom: value });
+                                        }}
+                                        disabled={!isEditing}
+                                        className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+     ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                                     />
+
 
                                 </div>
                             </div>
@@ -156,10 +292,16 @@ if (!user) {
                                 <label className="text-textc smb-2"> {t("Profile.NickName")}</label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                     <input
+                                    <input
                                         type="text"
-                                        defaultValue={`${user?.prenom}`}
-                                        className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
+                                        value={formData.prenom}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                                            setFormData({ ...formData, prenom: value });
+                                        }}
+                                        disabled={!isEditing}
+                                        className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                                     />
                                 </div>
                             </div>
@@ -169,8 +311,11 @@ if (!user) {
                                 <label className="text-textc mb-2">{t("Profile.Datebirth")}</label>
                                 <input
                                     type="date"
-                                    defaultValue={user?.dateNaissance}
-                                    className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/50"
+                                    value={formData.date_naissance}
+                                    onChange={(e) => setFormData({ ...formData, date_naissance: e.target.value })}
+                                    disabled={!isEditing}
+                                    className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/50 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                                 />
                             </div>
 
@@ -181,9 +326,14 @@ if (!user) {
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
                                         type="text"
-                                        defaultValue={user?.email}
-                                        className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
+                                        value={formData.adresse_email}
+                                        onChange={(e) => setFormData({ ...formData, adresse_email: e.target.value })}
+                                        disabled={!isEditing}
+                                        className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
                                     />
+                                    {formErrors.adresse_email && <p className="text-red text-sm mt-1">{formErrors.adresse_email}</p>}
+
 
                                 </div>
                             </div>
@@ -194,55 +344,67 @@ if (!user) {
                                 <div className="relative">
                                     <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                                     <input
-                                            type="text"
-                                            defaultValue={user?.matricule}
-                                            className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
-                                        />
+                                        type="text"
+                                        value={formData.matricule}
+                                        onChange={(e) => setFormData({ ...formData, matricule: e.target.value })}
+                                        disabled={!isEditing}
+                                        className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                                    />
 
                                 </div>
                             </div>
 
                             {/* ---- EXTRA FIELDS BASED ON ROLE ----*/}
-{user.role === "etudiant" && (
-    <>
-        {/* Specialité */}
-        <div className="flex flex-col">
-            <label className="text-textc mb-2">{t("Profile.Speciality")}</label>
-            <input
-                type="text"
-                defaultValue={user.specialite}
-                className="w-full bg-white rounded-xl p-3 shadow-sm text-black/80"
-            />
-        </div>
+                            {user.role === "etudiant" && (
+                                <>
+                                    {/* Specialité */}
+                                    <div className="flex flex-col">
+                                        <label className="text-textc mb-2">{t("Profile.Speciality")}</label>
+                                        <input
+                                            type="text"
+                                            value={formData.specialite}
+                                            onChange={(e) => setFormData({ ...formData, specialite: e.target.value })}
+                                            disabled={!isEditing}
+                                            className={`w-full bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                                        />
+                                    </div>
 
-        {/* Année d'étude */}
-        <div className="flex flex-col">
-            <label className="text-textc mb-2">{t("Profile.StudyYear")}</label>
-            <input
-                type="text"
-                defaultValue={user.annee_etude}
-                className="w-full bg-white rounded-xl p-3 shadow-sm text-black/80"
-            />
-        </div>
-    </>
-)}
+                                    {/* Année d'étude */}
+                                    <div className="flex flex-col">
+                                        <label className="text-textc mb-2">{t("Profile.StudyYear")}</label>
+                                        <input
+                                            type="text"
+                                            value={formData.annee_etude}
+                                            onChange={(e) => setFormData({ ...formData, annee_etude: e.target.value })}
+                                            disabled={!isEditing}
+                                            className={`w-full bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                                        />
+                                    </div>
+                                </>
+                            )}
 
-{user.role === "enseignant" && (
-    <>
-        {/* Grade */}
-        <div className="flex flex-col">
-            <label className="text-textc mb-2">{t("Profile.Grade")}</label>
-            <div className="relative">
-                <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                    type="text"
-                    defaultValue={user.grade}
-                    className="w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80"
-                />
-            </div>
-        </div>
-    </>
-)}
+                            {user.role === "enseignant" && (
+                                <>
+                                    {/* Grade */}
+                                    <div className="flex flex-col">
+                                        <label className="text-textc mb-2">{t("Profile.Grade")}</label>
+                                        <div className="relative">
+                                            <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                            <input
+                                                type="text"
+                                                value={formData.grade}
+                                                onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                                                disabled={!isEditing}
+                                                className={`w-full pl-10 bg-white rounded-xl p-3 shadow-sm text-black/80 
+                                           ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
 
                         </div>
                     </div>
@@ -339,29 +501,52 @@ if (!user) {
                                 <label className="text-textc mb-2">  {t("Account.CurrentPassword")}</label>
                                 <input
                                     type="password"
-                                    placeholder="Enter current password"
+                                    placeholder={t("Placeholders.CurrentPassword")}
+                                    value={passwordData.currentPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                                     className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm"
                                 />
                             </div>
 
-                            {/* New Password */}
+                            {/* NEW PASSWORD */}
                             <div className="flex flex-col mb-4">
-                                <label className="text-textc mb-2">  {t("Account.NewPassword")}</label>
-                                <input
-                                    type="password"
-                                    placeholder="Enter new password"
-                                    className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm"
-                                />
+                                <label className="text-textc mb-2">{t("Account.NewPassword")}</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder={t("Placeholders.NewPassword")}
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                        className="w-full bg-white border border-gray-200 rounded-xl p-3 pr-10 shadow-sm"
+                                    />
+                                    <span
+                                        className="absolute right-3 cursor-pointer text-gray-400"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                    </span>
+                                </div>
+                                {passwordError && <p className="text-red text-sm mt-1">{passwordError}</p>}
                             </div>
 
-                            {/* Confirm New Password */}
+                            {/* CONFIRM PASSWORD */}
                             <div className="flex flex-col mb-6">
-                                <label className="text-textc mb-2">  {t("Account.ConfirmNewPassword")}</label>
-                                <input
-                                    type="password"
-                                    placeholder="Confirm new password"
-                                    className="bg-white border border-gray-200 rounded-xl p-3 shadow-sm"
-                                />
+                                <label className="text-textc mb-2">{t("Account.ConfirmNewPassword")}</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        type={showConfirm ? "text" : "password"}
+                                        placeholder={t("Placeholders.ConfirmPassword")}
+                                        value={passwordData.confirmPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                        className="w-full bg-white border border-gray-200 rounded-xl p-3 pr-10 shadow-sm"
+                                    />
+                                    <span
+                                        className="absolute right-3 cursor-pointer text-gray-400"
+                                        onClick={() => setShowConfirm(!showConfirm)}
+                                    >
+                                        {showConfirm ? <FaEyeSlash /> : <FaEye />}
+                                    </span>
+                                </div>
                             </div>
 
                             {/* UPDATE BUTTON */}
@@ -369,7 +554,7 @@ if (!user) {
 
                                 <Button
                                     variant="Setting"
-                                    onClick={() => navigate("/")}
+                                    onClick={handlePasswordUpdate}
                                     className="bg-sky-500 hover:bg-sky-600 text-white font-medium px-6 py-2 rounded-lg shadow h-15 w-[180px] "
                                 >  {t("Account.UpdatePass")}</Button>
                             </div>
@@ -391,10 +576,10 @@ if (!user) {
                                 <Button
                                     variant="Setting"
                                     onClick={() => navigate("/")}
-                                     className="bg-red  hover:bg-red/80 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base w-[205px]"
+                                    className="bg-red  hover:bg-red/80 text-white font-xl px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base w-[205px]"
                                 >  {t("Account.DeleteAccount")}
                                 </Button>
-                             
+
 
 
 

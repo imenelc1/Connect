@@ -1,0 +1,33 @@
+{
+  "title": "Exercises Management",
+  "description": "Manage coding exercises and problems",
+  "searchPlaceholder": "Search exercises...",
+  "difficulty": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "addExerciseButton": "+ Add Exercise",
+  "modal": {
+    "create": {
+      "title": "Add New Exercise",
+      "subtitle": "Fill the form to add a new exercise",
+      "submit": "Add Exercise",
+      "cancel": "Cancel"
+    },
+    "edit": {
+      "title": "Edit Exercise",
+      "subtitle": "Modify the exercise information",
+      "submit": "Update",
+      "cancel": "Cancel"
+    }
+  },
+  "submissions": "{{count}} submissions",
+  "field": {
+    "title": "Title",
+    "category": "Category",
+    "titlePlaceholder": "Exercise title",
+    "categoryPlaceholder": "Category",
+    "difficulty":"Difficulty"
+  }
+}

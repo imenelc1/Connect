@@ -4,23 +4,11 @@
   "modalTitle": "Créer un nouvel espace",
   "modalSubtitle": "Remplissez les informations pour créer un espace",
   "modalSubmit": "Ajouter l'espace",
+  "modalCancel": "Annuler",
   "fieldSpaceName": "Nom de l'espace",
   "fieldSpaceNamePlaceholder": "Entrez le nom de l'espace",
   "fieldDescription": "Description",
   "fieldDescriptionPlaceholder": "Entrez la description de l'espace",
-  "mobileDesignPatterns": {
-    "title": "Modèles de design mobile",
-    "description": "Apprenez les fondamentaux du design mobile",
-    "status": "Créé le 15/01/2024"
-  },
-  "uxCaseStudies": {
-    "title": "Études de cas UX",
-    "description": "Plongée dans les succès UX",
-    "status": "Créé le 20/01/2024"
-  },
-  "designSystemLibrary": {
-    "title": "Bibliothèque de design système",
-    "description": "Composants UI centralisés",
-    "status": "Créé le 25/01/2024"
-  }
+  "created": "Créé le ",
+  "mySpacesTitle":"Mes Spaces"
 }

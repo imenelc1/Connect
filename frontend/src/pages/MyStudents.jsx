@@ -1,151 +1,254 @@
-import React, { useState,useContext } from "react";
-import { Search, Bell } from "lucide-react";
-import Navbar from "../components/common/Navbar";
-import Button from "../components/common/Button";
-import Cards2 from "../components/common/Cards2";
-import AddModal from "../components/common/AddModel";
-import UserCircle from "../components/common/UserCircle";
-import "../styles/index.css";
-import { useTranslation } from "react-i18next"; // Pour support multilingue
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import ThemeContext from "../context/ThemeContext";
+import Navbar from "../components/common/NavBar";
+import Button from "../components/common/Button";
+import AddModal from "../components/common/AddModel";
+import UserCircle from "../components/common/UserCircle";
+import { Bell, ChevronRight } from "lucide-react";
 
+import { getSpacesStudents, createStudent, removeStudent } from "../services/studentService";
+import { getSpaces } from "../services/spacesService";
 
 export default function MyStudents() {
+  const { t } = useTranslation("myStudents");
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
 
-  const { t } = useTranslation("myStudents"); // Aller chercher les textes depuis le fichier de traduction
-  const [modal, setModal] = useState(false); // Gère l’ouverture/fermeture du modal
-  const [email, setEmail] = useState(""); // Champ email du futur étudiant à ajouter
-  const [studentID, setStudentID] = useState(""); // Champ identifiant de l’étudiant
-  const [space, setSpace] = useState(""); // Classe/Espace auquel l'étudiant sera affecté
+  const [spacesList, setSpacesList] = useState([]);
+  const [studentsList, setStudentsList] = useState([]);
+  const [modal, setModal] = useState(false);
+  const [email, setEmail] = useState("");
+  const [space, setSpace] = useState("");
 
-  // Liste temporaire (mock data) — normalement viendra de la DB / API
-  const students = [
-    { name: "Hamouche Meriem", course: "Mobile Design Patterns", progress: 100, lastActive: "3h ago", bg: "bg-grad-2" },
-    { name: "Imene Lakhdar Chaouch", course: "Mobile Design Patterns", progress: 30, lastActive: "3h ago", bg: "bg-grad-3" },
-    { name: "Albane Amina", course: "Mobile Design Patterns", progress: 100, lastActive: "2h ago", bg: "bg-grad-4" },
-    { name: "Azidane Chahla", course: "Mobile Design Patterns", progress: 100, lastActive: "1h ago", bg: "bg-grad-2" },
-  ];
+  // -----------------------------
+  // Récupérer les étudiants + espaces
+  // -----------------------------
+  const fetchStudents = () => {
+    getSpacesStudents()
+      .then((data) => {
+        const array = Array.isArray(data) ? data : [];
+        const studentsMap = {};
 
-  // Action quand on valide le modal
-  const handleSubmit = (e) => {
-    e.preventDefault();  // Empêche le refresh de la page
-    setModal(false);     // Ferme le modal après l’envoi
+        array.forEach((st) => {
+          const id = st.etudiant?.id_utilisateur || st.id;
+          const prenom = st.etudiant?.prenom || "";
+          const nom = st.etudiant?.nom || "";
+          const spaceName = st.space?.nom_space || "Espace inconnu";
+          const spaceId = st.space?.id_space || st.space_id;
+
+          if (!studentsMap[id]) {
+            studentsMap[id] = {
+              id,
+              prenom,
+              nom,
+              spaces: [spaceName],
+              spacesIds: [spaceId],
+              progress: st.progress || 0,
+            };
+          } else {
+            if (!studentsMap[id].spaces.includes(spaceName)) {
+              studentsMap[id].spaces.push(spaceName);
+              studentsMap[id].spacesIds.push(spaceId);
+            }
+          }
+        });
+
+        const formatted = Object.values(studentsMap).map((st) => ({
+          ...st,
+          spaceName: st.spaces.join(", "),
+        }));
+
+        setStudentsList(formatted);
+      })
+      .catch((err) => console.error("Erreur getStudents:", err));
   };
 
+  const fetchSpaces = () => {
+    getSpaces()
+      .then((data) => {
+        setSpacesList(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => console.error("Erreur getSpaces:", err));
+  };
 
-  const { toggleDarkMode } = useContext(ThemeContext);
+  useEffect(() => {
+    fetchStudents();
+    fetchSpaces();
+  }, []);
+
+  // -----------------------------
+  // Ajout étudiant
+  // -----------------------------
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !space) return;
+
+    try {
+      await createStudent({ email, space_id: space });
+      alert("Étudiant ajouté avec succès !");
+      setModal(false);
+      setEmail("");
+      setSpace("");
+      fetchStudents();
+      fetchSpaces();
+    } catch (err) {
+      console.error("Erreur createStudent:", err);
+      alert(
+        err.response?.data?.error ||
+        "Une erreur est survenue lors de l'ajout de l'étudiant"
+      );
+    }
+  };
+
+  // -----------------------------
+  // Supprimer un étudiant
+  // -----------------------------
+  const handleRemove = async (studentId, spaceId) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer cet étudiant de cet espace ?")) return;
+
+    try {
+      await removeStudent(studentId, spaceId);
+      alert("Étudiant supprimé avec succès !");
+      fetchStudents();
+    } catch (err) {
+      console.error("Erreur removeStudent:", err);
+      alert(
+        err.response?.data?.error ||
+        "Une erreur est survenue lors de la suppression"
+      );
+    }
+  };
 
   return (
-    <div className="flex w-full">
-
-      {/* ========== NAVBAR ========== */}
-      {/* Affichée uniquement sur Desktop → cachée sur mobiles/tablettes */}
-      <Navbar className="hidden lg:block" />
-
-      {/* Zone principale de la page */}
-      <main className="lg:ml-60 w-full min-h-screen px-4 sm:px-6 py-6 bg-bg">
-
-        {/* ========== HEADER ========== */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-3xl md:text-5xl font-semibold text-muted text-3d">
-            {t("myStudentsTitle")} {/* titre venant du fichier de traduction */}
-          </h1>
-
-          {/* Icônes à droite du header */}
-          <div className="flex items-center gap-4">
-            <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
-            <UserCircle initials="MH" onToggleTheme={toggleDarkMode} /> {/* Avatar simple avec initiales */}
-          </div>
+    <div className="flex flex-col w-full min-h-screen bg-surface">
+      {/* Header */}
+      <div className="flex justify-between items-center w-full m-5 pl-4 lg:pl-60">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted">
+          {t("myStudentsTitle")}
+        </h1>
+        <div className="flex items-center gap-4 mr-8">
+          <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
+          <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
         </div>
+      </div>
 
-        {/* ========== BARRE DE RECHERCHE & ACTIONS ========== */}
-        <div className="mt-5 w-full flex flex-wrap items-center gap-4 lg:flex-nowrap">
+      <div className="flex w-full">
+        <Navbar />
 
-          {/* Champ de recherche étudiant */}
-          <div className="relative flex-1 min-w-[280px] lg:min-w-[450px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 
-              text-blue-500 w-5 h-5" />
-            <input
-              type="text"
-              placeholder={t("searchStudentPlaceholder")}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          {/* Boutons à droite = ajout espace / ajout étudiant */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto lg:ml-auto">
-
-            {/* Bouton créer un espace */}
-            <Button className="!px-6 !py-2 w-full sm:w-auto">
-              {t("createSpace")}
-            </Button>
-
-            {/* Bouton ouvrir modal d'ajout étudiant */}
-            <Button onClick={() => setModal(true)}
-              className="!px-6 !py-2 w-full sm:w-auto">
+        <div className="flex-1 p-4 sm:p-6 ml-0 mt-5 lg:ml-60 transition-all duration-300">
+          {/* Boutons */}
+          <div className="flex flex-col sm:flex-row justify-end sm:items-center gap-4 mb-6">
+            <Button
+              variant="primary"
+              className="!px-4 !py-2 !w-auto"
+              onClick={() => setModal(true)}
+            >
               {t("addStudent")}
             </Button>
           </div>
+
+          {/* Liste des étudiants */}
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {studentsList.length > 0 ? (
+              studentsList.map((st, index) => {
+                const gradients = ["bg-grad-2", "bg-grad-3", "bg-grad-4"];
+                const randomGrad = gradients[index % gradients.length];
+
+                return (
+                  <div
+                    key={st.id}
+                    className={`p-6 rounded-2xl shadow-lg border border-white/10 ${randomGrad}
+                      transition-transform duration-300 hover:scale-[1.03] hover:shadow-2xl`}
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="flex gap-[150px]">
+                        <div className="flex gap-5">
+                          <UserCircle
+                            initials={(st.prenom[0] || "") + (st.nom[0] || "")}
+                            className="w-14 h-14"
+                          />
+                          <h2 className="font-semibold text-lg text-textc whitespace-nowrap">
+                            {st.prenom} {st.nom}
+                          </h2>
+                        </div>
+
+                        {/* RIGHT ARROW */}
+                        <Button className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10">
+                          <ChevronRight size={16} className="w-6 h-6" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Badges espaces */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {st.spaces.map((spName, i) => (
+                        <span key={i} className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2">
+                          {spName}
+                          <button
+                            onClick={() => handleRemove(st.id, st.spacesIds[i])}
+                            className="text-red-500 font-bold"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="w-full h-3 bg-grayc/20 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-black rounded-full"
+                        style={{ width: `${st.progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-grayc">{t("noStudentsMessage")}</p>
+            )}
+          </div>
         </div>
+      </div>
 
-        {/* ========== LISTE D'ÉTUDIANTS ========== */}
-        <div className="mt-10 grid gap-6 
-          md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-
-          {/* On boucle sur la liste students */}
-          {students.map((st, i) => (
-            <Cards2
-              key={i}
-              icon={<UserCircle initials={st.name.split(" ").map(n => n[0]).join("").slice(0, 2)} />}
-              roundedIcon={true}
-              title={st.name}
-              description={st.course}
-              progress={st.progress} // barre de progression d'avancement
-              status={`${t("active")} ${st.lastActive}`} // ex : "Active 3h ago"
-              className={`${st.bg} rounded-xl shadow-md border p-6`}
-            />
-          ))}
-        </div>
-
-        {/* ========== PAGINATION ========== */}
-        <div className="flex justify-center gap-4 mt-10 text-sm">
-          <span className="cursor-pointer">&lt;</span>
-          <span className="cursor-pointer hover:bg-secondary/80 px-2 rounded">1</span>
-          <span className="cursor-pointer hover:bg-secondary/80 px-2 rounded">2</span>
-          <span className="cursor-pointer hover:bg-secondary/80 px-2 rounded">3</span>
-          <span className="cursor-pointer">&gt;</span>
-        </div>
-
-        {/* ========== MODAL D’AJOUT ÉTUDIANT ========== */}
-        <AddModal
-          open={modal}
-          onClose={() => setModal(false)}
-          title={t("addStudentTitle")}
-          subtitle={t("addStudentSubtitle")}
-          submitLabel={t("addStudentSubmit")}
-          cancelLabel={t("addStudentCancel")}
-          onSubmit={handleSubmit}
-          fields={[
-            // Champs remplis dans le modal
-            { label: t("email"), placeholder: t("emailPlaceholder"), value: email, onChange: e => setEmail(e.target.value) },
-            { label: t("studentID"), placeholder: t("studentIDPlaceholder"), value: studentID, onChange: e => setStudentID(e.target.value) },
-            {
-              label: t("space"),
-              // Menu déroulant pour choisir un espace
-              element: (
-                <select value={space} onChange={e => setSpace(e.target.value)} className="w-full border rounded px-3 py-2 text-black/80">
-                  <option value="UI/UX Class">{t("UIUXClass")}</option>
-                  <option value="Mobile Design">{t("mobileDesign")}</option>
-                  <option value="Web Development">{t("webDevelopment")}</option>
-                  <option value="Data Science">{t("dataScience")}</option>
-                </select>
-              )
-            }
-          ]}
-        />
-
-      </main>
+      {/* Modal */}
+      <AddModal
+        open={modal}
+        onClose={() => setModal(false)}
+        title={t("addStudentTitle")}
+        subtitle={t("addStudentSubtitle")}
+        submitLabel={t("addStudentSubmit")}
+        cancelLabel={t("addStudentCancel")}
+        onSubmit={handleSubmit}
+        fields={[
+          {
+            label: t("email"),
+            placeholder: t("emailPlaceholder"),
+            value: email,
+            onChange: (e) => setEmail(e.target.value),
+          },
+          {
+            label: t("space"),
+            element: (
+              <select
+                value={space}
+                onChange={(e) => setSpace(e.target.value)}
+                className="w-full border rounded px-3 py-2 text-black/80"
+              >
+                <option value="">{t("selectSpace")}</option>
+                {spacesList.map((s) => (
+                  <option key={s.id_space} value={s.id_space}>
+                    {s.nom_space}
+                  </option>
+                ))}
+              </select>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

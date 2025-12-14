@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import "../../styles/index.css";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import IconeLogoComponent from "../common/IconeLogoComponent";
+import IconeLogoComponent from "./IconeLogoComponent";
+import { useContext } from "react";
+import AuthContext from "../../context/AuthContext";
+
 import {
   Settings,
   LogOut,
@@ -11,7 +14,10 @@ import {
   Users,
   Award,
   Clipboard,
+  ClipboardList,
   Activity,
+  FileQuestion,
+  GraduationCap,
   MessageCircle,
   FileText,
   ChevronLeft,
@@ -25,19 +31,28 @@ export default function Navbar() {
 
   const [collapsed, setCollapsed] = useState(false);
   const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
+  const { logout } = useContext(AuthContext);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsed = JSON.parse(storedUser);
-      const userObj = parsed.user || parsed.utilisateur || parsed;
+    let userObj = { nom: "", prenom: "", role: "" };
 
-      setUserData({
-        nom: userObj.nom || "",
-        prenom: userObj.prenom || "",
-        role: userObj.role || "",
-      });
+    try {
+      const storedUser = localStorage.getItem("user");
+
+      // 🔥 Empêcher le crash si la valeur est "undefined" ou vide
+      if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
+        const parsed = JSON.parse(storedUser);
+        userObj = parsed.user || parsed.utilisateur || parsed;
+      }
+    } catch (err) {
+      console.error("Erreur parsing user JSON:", err);
     }
+
+    setUserData({
+      nom: userObj.nom || "",
+      prenom: userObj.prenom || "",
+      role: userObj.role || "",
+    });
   }, []);
 
   useEffect(() => {
@@ -65,25 +80,43 @@ export default function Navbar() {
     { href: "/community", label: t("mycommunity"), icon: MessageCircle },
     { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },
   ];
+  const adminLinks = [
+    { href: "/", label: t("home"), icon: Home },
+    { href: "/Dashboard-admin", label: t("dashboard"), icon: Activity },
+    { href: "/CourseManagement", label: t("courses"), icon: BookOpen },
+    { href: "/ExerciseManagement", label: t("exercises"), icon: ClipboardList },
+    { href: "/QuizManagement", label: t("quizzes"), icon: FileQuestion },
+    { href: "/students", label: t("students"), icon: Users },
+    { href: "/instructors", label: t("instructors"), icon: GraduationCap },
+    { href: "/spaces", label: t("spaces"), icon: LayoutGrid },
+    { href: "/badges", label: t("badges"), icon: Award },
+    { href: "/forms", label: t("forms"), icon: FileText },
+  ];
 
-  const links = userData.role === "enseignant" ? teacherLinks : studentLinks;
+  const links =
+    userData.role === "admin"
+      ? adminLinks
+      : userData.role === "enseignant"
+        ? teacherLinks
+        : studentLinks;
+
 
   // 🔥 logique pour activer le bouton Courses dans toutes les pages liées aux cours
   const courseRoutes = [
     "/all-courses",
-  "/CoursInfo",
+    "/CoursInfo",
 
   ];
   const exerciseRoutes = [
-  "/all-exercises",
-  "/new-exercise",
-  "/exercise-preview",
-];
+    "/all-exercises",
+    "/new-exercise",
+    "/exercise-preview",
+  ];
 
-const quizRoutes = [
-  "/all-quizzes",
+  const quizRoutes = [
+    "/all-quizzes",
 
-];
+  ];
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
@@ -117,8 +150,9 @@ const quizRoutes = [
         {!collapsed && (
           <div className="flex flex-col leading-tight ml-2 -mt-1">
             <span className="text-textc font-semibold text-xs capitalize">
-              {userData.role}
+              {t(userData.role)}
             </span>
+
             <span className="text-grayc text-[11px]">
               {userData.nom} {userData.prenom}
             </span>
@@ -132,26 +166,25 @@ const quizRoutes = [
           let forceActive = false;
 
           // ⭐ si c'est le bouton cours, on force active dans toutes les pages courses
-         if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
-    forceActive = true;
-  }
-   if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
-    forceActive = true;
-  }
+          if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
 
-  if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
-    forceActive = true;
-  }
+          if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
 
           return (
             <NavLink
               key={i}
               to={item.href}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-xl text-sm transition-all ${
-                  isActive || forceActive
-                    ? "bg-grad-1 border-primary text-white"
-                    : "bg-card border-surface text-nav hover:bg-grad-2"
+                `flex items-center px-3 py-2 rounded-xl text-sm transition-all ${isActive || forceActive
+                  ? "bg-grad-1 border-primary text-white"
+                  : "bg-card border-surface text-nav hover:bg-grad-2"
                 }`
               }
             >
@@ -167,8 +200,7 @@ const quizRoutes = [
         <NavLink
           to="/settings"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
+            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
             }`
           }
         >
@@ -176,19 +208,17 @@ const quizRoutes = [
           {!collapsed && <span>{t("settings")}</span>}
         </NavLink>
 
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
-              isActive
-                ? "bg-grad-1 text-white"
-                : "bg-card text-red hover:bg-red/20"
-            }`
-          }
+        <button
+          onClick={() => {
+            logout();     // <-- supprime le token + user
+            window.location.href = "/"; // <-- redirige proprement
+          }}
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red hover:bg-red/20 transition-colors"
         >
           <LogOut size={17} strokeWidth={1.5} />
           {!collapsed && <span>{t("logout")}</span>}
-        </NavLink>
+        </button>
+
       </div>
     </aside>
   );

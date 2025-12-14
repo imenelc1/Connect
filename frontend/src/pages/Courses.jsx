@@ -1,85 +1,87 @@
-import React from "react";
-import { ChevronLeft, ChevronDown, Search } from "lucide-react";
-import CoursesSidebar from "../components/ui/CourseSidebarItem";
-import CourseContent from "../components/ui/CourseContent";
+import React, { useState, useContext, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useContext } from "react";
-import UserCircle from "../components/common/UserCircle";
-import ThemeContext from "../context/ThemeContext";
-import HeadMascotte from "../components/ui/HeadMascotte";
-import IaAssistant from "../components/ui/IaAssistant";
+import ThemeContext from "../context/ThemeContext.jsx";
+import UserCircle from "../components/common/UserCircle.jsx";
+import ContentSearchBar from "../components/common/ContentSearchBar.jsx";
+import CoursesSidebarItem from "../components/ui/CourseSidebarItem.jsx";
+import CourseContent from "../components/ui/CourseContent.jsx";
+import HeadMascotte from "../components/ui/HeadMascotte.jsx";
+import IaAssistant from "../components/ui/IaAssistant.jsx";
+import api from "../services/courseService";
 
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
-
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-    localStorage.setItem("lang", newLang);
-  };
-
   const { toggleDarkMode } = useContext(ThemeContext);
-
+  const { id: coursId } = useParams();
   const storedUser = localStorage.getItem("user");
+  const userData = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const initials = userData ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase() : "";
 
-// Si storedUser est null, vide ou "undefined", on renvoie null
-const userData =
-  storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const [sections, setSections] = useState([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [duration, setDuration] = useState("");
+  const [level, setLevel] = useState("");
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
+  const [courseProgress, setCourseProgress] = useState(0);
 
-const userRole = userData?.role ?? null;
-const initials = userData
-  ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
-  : "";
+  useEffect(() => {
+    if (!coursId) return;
 
+    const fetchCourse = async () => {
+      const token = localStorage.getItem("access_token");
+      try {
+        const res = await api.get(`courses/courses/${coursId}/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = res.data;
+        setTitle(data.titre_cour);
+        setDescription(data.description);
+        setDuration(data.duration);
+        setLevel(data.niveau_cour);
+        const fetchedSections = (data.sections || []).map(sec => ({
+          id: sec.id_section,
+          title: sec.titre_section,
+          description: sec.description || "",
+          open: true,
+          ordre: sec.ordre,
+          lessons: (sec.lecons || []).map(lec => ({
+            id: lec.id_lecon,
+            title: lec.titre_lecon,
+            content: lec.contenu_lecon,
+            type: lec.type_lecon,
+            preview: lec.type_lecon === "image" ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}` : null
+          }))
+        }));
+        setSections(fetchedSections);
+      } catch (err) {
+        console.error("Erreur chargement cours :", err.response?.data || err);
+      }
+    };
+    fetchCourse();
+  }, [coursId]);
 
   return (
-    <div className="w-full bg-background flex flex-col items-center">
-      {/* HEADER */}
-      <header className="w-full max-w-7xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-6 px-4">    
-        {/*Title */}
-      
-          <h1 className="text-2xl md:text-3xl font-bold text-muted ml-10">{t("title")}</h1>
-
-        {/* Right section */}
-        <div className="flex flex-wrap items-center gap-3 md:gap-4">
-
-          {/* Search */}
-          <div className="relative w-full sm:w-64 md:w-80">
-            <input
-              placeholder={t("search")}
-              className="w-full pl-10 pr-4 py-2 rounded-full border border-blue/30 shadow-sm focus:outline-none"
-            />
-            <Search
-              size={18}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-          </div>
-
-          {/* IA Assistant */}
-         <div className="flex gap-2 ml-5">
-           <IaAssistant />
-           <HeadMascotte />
-         </div>
-
-          {/* My Courses */}
-          <button className="flex items-center gap-2  px-4 py-2 rounded-xl border shadow text-muted w-full sm:w-auto">
-            {t("myCourses")} <ChevronDown size={18} />
-          </button>
-
-                  {/* User Circle */}
-              <UserCircle
-                initials={initials}
-                onToggleTheme={toggleDarkMode}
-                onChangeLang={(lang) => i18n.changeLanguage(lang)}
-              />
-
+    <div className="w-full bg-surface flex flex-col items-center">
+      <header className="w-full max-w-7xl flex flex-col gap-4 py-6 px-4 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">{t("title")}</h1>
+        <div className="hidden sm:flex sm:flex-row w-full gap-3 md:gap-4 items-center md:w-auto">
+          <div className="relative w-full sm:w-64 md:w-80"><ContentSearchBar /></div>
+          <IaAssistant />
+          <HeadMascotte />
+          <UserCircle initials={initials} onToggleTheme={toggleDarkMode} onChangeLang={lang => i18n.changeLanguage(lang)} />
         </div>
       </header>
-
-      {/* MAIN GRID */}
-      <div className="w-full max-w-7xl flex flex-col lg:flex-row items-start gap-6 px-4 pb-10">
-        <CoursesSidebar />
-        <CourseContent t={t} />
+      <div className="w-full max-w-7xl px-4 pb-10 flex flex-col lg:flex-row gap-6 relative">
+        <div className="block"><CoursesSidebarItem sections={sections} currentSectionIndex={currentSectionIndex} setCurrentSectionIndex={setCurrentSectionIndex} /></div>
+        <CourseContent
+          course={{ title, description, level, duration, sections }}
+          currentSectionIndex={currentSectionIndex}
+          setCurrentSectionIndex={setCurrentSectionIndex}
+          setCourseProgress={setCourseProgress}
+          setSections={setSections}
+        />
       </div>
     </div>
   );
