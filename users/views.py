@@ -158,7 +158,6 @@ class AdminLoginView(APIView):
         except Administrateur.DoesNotExist:
             return Response({"error": "Admin introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
-
 # -----------------------------
 # User Profile
 # -----------------------------

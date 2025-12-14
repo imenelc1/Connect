@@ -36,12 +36,15 @@ def complete_lesson(request, lecon_id):
     cours=cours,
     defaults={
         "avancement_cours": 0.0,
-        "temps_passe": timedelta(seconds=0)
+        "temps_passe": timedelta(seconds=0),
+        "derniere_lecon": lecon
     }
 )
+
     pc.avancement_cours = avancement
-    pc.temps_passe = pc.temps_passe 
+    pc.derniere_lecon = lecon  
     pc.save()
+
 
     return Response({"progress": avancement})
 

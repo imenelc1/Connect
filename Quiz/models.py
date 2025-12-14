@@ -1,11 +1,14 @@
 from django.db import models
-from exercices.models import Exercice
+from Exercices.models import Exercice
 
 
 
 class Quiz(models.Model):
     scoreMinimum=models.IntegerField()
     exercice = models.OneToOneField(Exercice, on_delete=models.CASCADE)
+    activerDuration=models.BooleanField(default=True)
+    duration=models.DurationField(null=True)
+    nbMax_tentative=models.IntegerField(default=0)
 
 class Question(models.Model):
     id_qst = models.AutoField(primary_key=True)

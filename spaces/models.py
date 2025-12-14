@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import Utilisateur
 from courses.models import Cours
-from exercices.models import Exercice
+from Exercices.models import Exercice
 
 
 # Modèle Space

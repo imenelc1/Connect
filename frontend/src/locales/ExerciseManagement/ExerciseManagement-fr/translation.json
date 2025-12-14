@@ -1,0 +1,33 @@
+{
+  "title": "Gestion des exercices",
+  "description": "Gérez les exercices et problèmes de codage",
+  "searchPlaceholder": "Rechercher des exercices...",
+  "difficulty": {
+    "easy": "Facile",
+    "medium": "Moyen",
+    "hard": "Difficile"
+  },
+  "addExerciseButton": "+ Ajouter un exercice",
+  "modal": {
+    "create": {
+      "title": "Ajouter un nouvel exercice",
+      "subtitle": "Remplissez le formulaire pour ajouter un nouvel exercice",
+      "submit": "Ajouter l'exercice",
+      "cancel": "Annuler"
+    },
+    "edit": {
+      "title": "Modifier l'exercice",
+      "subtitle": "Modifiez les informations de l'exercice",
+      "submit": "Mettre à jour",
+      "cancel": "Annuler"
+    }
+  },
+  "submissions": "{{count}} soumissions",
+  "field": {
+    "title": "Titre",
+    "category": "Catégorie",
+    "titlePlaceholder": "Titre de l'exercice",
+    "categoryPlaceholder": "Catégorie",
+    "difficulty":"Difficulté"
+  }
+}

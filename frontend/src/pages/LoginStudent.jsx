@@ -135,16 +135,42 @@ export default function LoginStudent() {
         </div>
 
         {/* MASCOTTE */}
-        <div className="w-full lg:w-1/2 relative hidden lg:flex items-center justify-center bg-card">
-          <div className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full blur-3xl" style={{ background: "rgba(52,144,220,0.6)", top: "50%", left: "70%", transform: "translate(-50%, -50%)" }} />
-          <div className="absolute top-8 right-10 rounded-xl shadow p-6 sm:p-9 w-max min-h-[80px] bg-white z-20">
-            <p className="text-black font-medium text-sm whitespace-pre-line">{t("login.welcome")}</p>
-            <div className="absolute -top-5 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow bg-white">
-              <span className="text-[#4F9DDE] text-[20px] font-bold">&lt;&gt;</span>
-            </div>
-          </div>
-          <Mascotte width="w-48 sm:w-60 lg:w-58" className="absolute top-20 right-20 h-58 z-10" />
-        </div>
+                <div className="w-full lg:w-1/2 relative flex items-center justify-center bg-card min-h-[400px] lg:min-h-0 hidden lg:block">
+                  <div className="absolute top-4 right-4 bg-white rounded-xl shadow p-6 sm:p-9 w-max min-h-[80px] z-20">
+                    <p className="text-gray-700 font-medium text-sm whitespace-pre-line">
+                      {t("login.welcome")}
+                    </p>
+        
+                    <div
+                      className="absolute -top-2 -right-2 w-9 h-9 rounded-full flex items-center justify-center shadow"
+                      style={{ backgroundColor: "#FFFFFF" }}
+                    >
+                      <span
+                        style={{
+                          color: "#4F9DDE",
+                          fontSize: "20px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        &lt;&gt;
+                      </span>
+                    </div>
+                  </div>
+        
+                  {/* RESPONSIVE: Bulle floue taille adaptative */}
+                  <div
+                    className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full blur-3xl"
+                    style={{
+                      background: "rgba(52,144,220,0.6)",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)"
+                    }}
+                  />
+        
+                  {/* RESPONSIVE: Mascotte taille adaptative */}
+                  <Mascotte width="w-48 sm:w-60 lg:w-58" className="hidden lg:block absolute top-20 right-20 h-58 z-10 mt-20 mr-10 " />
+                </div>
 
       </div>
     </div>

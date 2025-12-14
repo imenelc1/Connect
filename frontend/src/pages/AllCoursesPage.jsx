@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
 import i18n from "../i18n";
 import { useNavigate } from "react-router-dom";
-import ThemeContext from "../context/ThemeContext";
+import ThemeContext from "../context/ThemeContext.jsx";
 import { getCurrentUserId } from "../hooks/useAuth";
 import progressionService from "../services/progressionService";
 
@@ -20,7 +20,7 @@ const gradientMap = {
 };
 
 export default function AllCoursesPage() {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
   const currentUserId = getCurrentUserId();
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [courses, setCourses] = useState([]);
@@ -29,7 +29,7 @@ export default function AllCoursesPage() {
   const { t } = useTranslation("allcourses");
   const { toggleDarkMode } = useContext(ThemeContext);
 
-  
+
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const initials = `${userData?.nom?.[0] || ""}${
@@ -42,9 +42,12 @@ export default function AllCoursesPage() {
       ? courses
       : courses.filter((course) => course.level === filterLevel);
 
+  // 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
   if (userRole === "enseignant" && categoryFilter === "mine") {
     filteredCourses = filteredCourses.filter((course) => course.isMine);
   }
+
+
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -107,6 +110,9 @@ export default function AllCoursesPage() {
           .toUpperCase(),
         isMine: c.utilisateur === currentUserId,
         progress: c.progress ?? 0,
+        action: c.action,
+        lastLessonId: c.last_lesson_id,
+
       }));
 
       setCourses(formatted);
@@ -174,24 +180,46 @@ export default function AllCoursesPage() {
             </Button>
           )}
         </div>
-        <div
-          className="grid gap-6"
-          style={{
-            gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
+<div
+  className="grid gap-6"
+  style={{
+    gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
+  }}
+>
+  {filteredCourses.map((course, idx) => (
+    <ContentCard
+      key={idx}
+      className={gradientMap[course.level]}
+      course={course}
+      role={userRole}
+      showProgress={userRole === "etudiant"}
+      onDelete={handleDeleteCourse}
+    >
+      {userRole === "etudiant" && (
+        <Button
+          variant="courseStart"
+          className="mt-2 w-full"
+          onClick={() => {
+            if (course.action === "start") {
+              navigate(`/course/${course.id_cours}/lesson/first`);
+            } else if (course.action === "continue") {
+              navigate(
+                `/course/${course.id_cours}/lesson/${course.last_lesson_id}`
+              );
+            } else if (course.action === "restart") {
+              navigate(`/course/${course.id_cours}/lesson/first`);
+            }
           }}
         >
-          {filteredCourses.map((course, idx) => (
-            <ContentCard
-              key={idx}
-              className={gradientMap[course.level]}
-              course={course}
-              role={userRole}
-              showProgress={userRole === "etudiant"}
-              onDelete={handleDeleteCourse}
-              onCompleteLesson={() => handleCompleteLesson(course.id)}
-            />
-          ))}
-        </div>
+          {course.action === "start" && t("startCourse")}
+          {course.action === "continue" && t("continueCourse")}
+          {course.action === "restart" && t("restartCourse")}
+        </Button>
+      )}
+    </ContentCard>
+  ))}
+</div>
+
       </main>
     </div>
   );

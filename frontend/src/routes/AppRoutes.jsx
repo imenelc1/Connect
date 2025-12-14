@@ -30,16 +30,26 @@ import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
 import StudentExercice from "../pages/exerciceStudent";
-import StartExercise from "../pages/StartExercise";
-import ExercisePage from "../pages/ExercisePage";
+import CodeExercisePage from '../pages/CodeExercisePage';
+import TheoryExercisePage from '../pages/TheoryExercisePage';
+
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
 import ProgressExercice from "../pages/ProgressionExo";
 import ProgressStudent from "../pages/ProgressionStudent";
-import { QuizPage2 } from "../pages/QuizPage2";
-import QuizPage1 from "../pages/QuizPage1";
-import QuizRecapPage from "../pages/QuizRecapPage";
+import QuizIntroPage from '../pages/QuizIntroPage';
+import QuizTakePage from '../pages/QuizTakePage';
+import QuizSummaryPage from '../pages/QuizSummaryPage';
+
 import SubmittedExercises from "../pages/SubmittedExercises";
+import QuizManagement from "../pages/QuizManagement";
+import ExercisesManagement from "../pages/ExerciseManagement";
+import CoursesManagement from "../pages/CourseManagement";
+ import ValidationCourses from "../pages/ValidationCourses";
+  import Dashboard from "../pages/Dashboard"
+import AdminLogin from "../pages/AdminLogin.jsx";
+import UpdateExercice from "../pages/UpdateExercice.jsx";
+
 
 export default function AppRoutes() {
   return (
@@ -79,30 +89,46 @@ export default function AppRoutes() {
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/preview" element={<QuizPreview />} />
         <Route path="/courses/edit/:id" element={<CourseUpdate />} />
+        <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
         <Route path="/community" element={<CommunityPage />} />
         <Route path="/badges" element={<Badges />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/my-students" element={<MyStudents />} />
         <Route path="/spaces" element={<Spaces />} />
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
+          <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
         <Route path="/student-exercice" element={<StudentExercice />} />
         <Route path="/progressExercice" element={<ProgressExercice />} />
         <Route path="/progressStudent" element={<ProgressStudent />} />
-        <Route path="/quiz1" element={<QuizPage1 />} />
-        <Route path="/quiz" element={<QuizPage2 />} />
-        <Route path="/quiz3" element={<QuizRecapPage />} />
-        <Route path="/start-exercise" element={<StartExercise />} />
-        <Route path="/exercise-page" element={<ExercisePage />} />
+        <Route path="/quizIntro" element={<QuizIntroPage />} />
+        <Route path="/quizTake" element={<QuizTakePage />} />
+        <Route path="/quizSummary" element={<QuizSummaryPage />} />
+        <Route path="/codeExo" element={<CodeExercisePage />} />
+        <Route path="/theoryExo" element={<TheoryExercisePage />} />
         <Route path="/course-details" element={<CourseDetails />} />
-        <Route path="/submitted-exercise" element={<SubmittedExercise />} />
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
+
 
         {/* Routes avec paramètres */}
         <Route path="/CourseDetails/:id" element={<CourseDetails />} />
         <Route path="/Seecourses/:id" element={<Courses />} />
         <Route path="/MyStudents" element={<MyStudents />} />
+        {/* quiz management */}
+        <Route path="/QuizManagement" element={<QuizManagement />} />
 
+        {/* exercise management */}
+        <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
+
+        {/* admin */}
+        <Route path ="ValidationCourses" element ={<ValidationCourses></ValidationCourses>}></Route>
+        <Route path="/Dashboard-admin" element={<Dashboard/>} />
+
+{/* course management */}
+    <Route path="/CourseManagement" element={<CoursesManagement />} />
+    <Route path="/admin/login" element={<AdminLogin />} />
+
+   
       </Routes>
     </BrowserRouter>
   );

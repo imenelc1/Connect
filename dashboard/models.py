@@ -1,7 +1,7 @@
 from django.db import models
 from users.models import Utilisateur
 from courses.models import Cours, Lecon
-from exercices.models import Exercice
+from Exercices.models import Exercice
 
 class LeconComplete(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
@@ -16,6 +16,14 @@ class ProgressionCours(models.Model):
     cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
     avancement_cours = models.FloatField()
     temps_passe = models.DurationField()
+
+    derniere_lecon = models.ForeignKey(
+        Lecon,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
 
 class TentativeExercice(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)

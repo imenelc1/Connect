@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Question, Option, Quiz
-from exercices.serializers import ExerciceSerializer
+from Exercices.serializers import ExerciceSerializer
 
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,4 +22,4 @@ class QuizSerializer1(serializers.ModelSerializer):
     exercice = ExerciceSerializer(read_only=True)
     class Meta:
         model = Quiz
-        fields = ['id', 'scoreMinimum', 'exercice']
+        fields = ['id', 'scoreMinimum', 'exercice' , 'nbMax_tentative', 'duration', 'activerDuration']

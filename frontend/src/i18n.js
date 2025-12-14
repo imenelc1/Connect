@@ -66,7 +66,26 @@ import translationFRExercisePage from "./locales/exercisepage/fr-exercisepage/tr
 import translationENExercisePage from "./locales/exercisepage/en-exercisepage/translation.json";
 import translationFRSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-fr/translation.json";
 import translationENSubmittedExercises from "./locales/SubmittedExos/SubmittedExos-en/translation.json";
+import translationFRQuizManagement from "./locales/QuizManagement/QuizManagement-fr/translation.json";
+import translationENQuizManagement from "./locales/QuizManagement/QuizManagement-en/translation.json";
 
+import translationFRExerciseManagement from "./locales/ExerciseManagement/ExerciseManagement-fr/translation.json";
+import translationENExerciseManagement from "./locales/ExerciseManagement/ExerciseManagement-en/translation.json";
+
+import translationFRCourseManagement from "./locales/CourseManagement/CourseManagement-fr/translation.json";
+import translationENCourseManagement from "./locales/CourseManagement/CourseManagement-en/translation.json";
+
+
+
+
+
+
+import translationFRValidationCourses from "./locales/ValidationCourses/fr-validationcourses/translation.json";
+import translationENValidationCourses from "./locales/ValidationCourses/en-validationcourses/translation.json";
+
+
+import translationENDashboardAdmin from "./locales/DashboardAdmin/en-dashboardadmin/translation.json";
+import translationFRDashboardAdmin from "./locales/DashboardAdmin/fr-dashboardadmin/translation.json";
 const resources = {
   fr: {
     translation: translationFR,
@@ -107,13 +126,15 @@ const resources = {
     SubmittedExercise: translationFRSubmittedExercise,
 
     SubmittedExercises: translationFRSubmittedExercises,
-
-
+    QuizManagement: translationFRQuizManagement,
+    ExerciseManagement: translationFRExerciseManagement,
+    CoursesManagement: translationFRCourseManagement,
     exercisePage: translationFRExercisePage,
 
-
     ProgressExercice: translationnFRProgressExercice,
-    ProgressStudent: translationnFRProgressStudent
+    ProgressStudent: translationnFRProgressStudent,
+     ValidationCourses: translationFRValidationCourses,
+    DashboardAdmin: translationFRDashboardAdmin,
   },
 
   en: {
@@ -154,7 +175,14 @@ const resources = {
 
      quiz3:translationENrecquiz,
     community: translationnENCommunity,
-    SubmittedExercises: translationENSubmittedExercises
+    SubmittedExercises: translationENSubmittedExercises,
+    QuizManagement: translationENQuizManagement,
+    ExerciseManagement: translationENExerciseManagement,
+    CoursesManagement: translationENCourseManagement,
+      ValidationCourses: translationENValidationCourses,
+    DashboardAdmin: translationENDashboardAdmin,
+
+
   },
 };
 

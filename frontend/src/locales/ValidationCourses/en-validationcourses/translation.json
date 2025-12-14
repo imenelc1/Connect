@@ -1,0 +1,23 @@
+{
+  "title": "Course Validation",
+  "subtitle": "Manage courses submitted by instructors",
+
+  "tabs": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+
+  "empty": "No courses in this category.",
+
+  "labels": {
+    "instructor": "By",
+    "submitted": "Submitted on"
+  },
+
+  "buttons": {
+    "inspect": "Review",
+    "approve": "Approve",
+    "reject": "Reject"
+  }
+}

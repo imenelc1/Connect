@@ -1,0 +1,23 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Welcome back! Here's what's happening today.",
+  "stats": {
+    "totalStudents": "Total Students",
+    "activeCourses": "Active Courses",
+    "totalExercises": "Total Exercises",
+    "completionRate": "Completion Rate"
+  },
+  "recentActivity": "Recent Activity",
+  "validationCourses": "Validation Courses",
+  "tabs": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "noCourses": "No courses in this category.",
+  "buttons": {
+    "inspect": "Inspect",
+    "approve": "Approve",
+    "reject": "Reject"
+  }
+}

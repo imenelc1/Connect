@@ -111,11 +111,7 @@ export default function NewExercise() {
   };
 
 
-  /*const handleSaveAndNext = async () => {
-    const savedId = await handleSaveStep1();
-    if (savedId) navigate("/exercise-preview");
-  };*/
-
+  
   return (
     <div className="w-full min-h-screen flex bg-primary/5">
       {/* SIDEBAR */}

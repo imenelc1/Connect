@@ -39,6 +39,7 @@ export default function ContentFilters({
 
   const current = labels[type];
 
+
   return (
     <div className="w-full flex justify-center mt-8">
       <div className="flex items-center gap-4 flex-wrap">
@@ -53,7 +54,7 @@ export default function ContentFilters({
                 lvl === activeFilter
                   ? "text-white bg-primary shadow-md"
                   : "text-primary/70 hover:text-primary"
-              }`}
+                }`}
             >
               {lvl === "ALL" ? t("allLevels") : t(`levels.${lvl}`)}
             </button>
@@ -85,6 +86,7 @@ export default function ContentFilters({
               { value: "all", label: current.all },
             ]}
           />
+
         )}
 
       </div>
