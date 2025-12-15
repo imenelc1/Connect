@@ -52,6 +52,8 @@ import UpdateExercice from "../pages/UpdateExercice.jsx";
 import StudentsMangement from "../pages/studentsManagement.jsx";
 import BadgesManagement from "../pages/badgesManagement.jsx";
 import ForumManagement from "../pages/forumManagement.jsx";
+import SpacesManagement from "../pages/SpacesManagement.jsx";
+import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 
 
 export default function AppRoutes() {
@@ -111,6 +113,9 @@ export default function AppRoutes() {
         <Route path="/course-details" element={<CourseDetails />} />
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
+         {/* Page des espaces */}
+        <Route path="/spaceManagement" element={<SpacesManagement />} />
+         <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
 
 
         {/* Routes avec paramètres */}
