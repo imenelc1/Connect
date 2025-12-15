@@ -1,0 +1,12 @@
+
+{
+  "StudentsManagement": {
+    "StudentsManagement": "Students Management" ,
+    "view":"View and manage student accounts",
+    "buttonAdd": "Add Student",
+    "Search": "Search Students ...",
+    "Encolled":"Enrolled Courses",
+    "Overal":"Overal Progress",
+    "joined":"Joined"
+  }
+}

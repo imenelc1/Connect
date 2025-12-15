@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Pencil, Trash2, FileText, Search } from "lucide-react";

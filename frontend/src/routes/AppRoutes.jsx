@@ -49,6 +49,9 @@ import CoursesManagement from "../pages/CourseManagement";
   import Dashboard from "../pages/Dashboard"
 import AdminLogin from "../pages/AdminLogin.jsx";
 import UpdateExercice from "../pages/UpdateExercice.jsx";
+import StudentsMangement from "../pages/studentsManagement.jsx";
+import BadgesManagement from "../pages/badgesManagement.jsx";
+import ForumManagement from "../pages/forumManagement.jsx";
 
 
 export default function AppRoutes() {
@@ -128,6 +131,12 @@ export default function AppRoutes() {
 {/* course management */}
     <Route path="/CourseManagement" element={<CoursesManagement />} />
     <Route path="/admin/login" element={<AdminLogin />} />
+     {/* students management */}
+        <Route path="/StudentsManagement" element={<StudentsMangement />} />
+        {/* badges management */}
+          <Route path="/BadgesManagement" element={<BadgesManagement />} />
+           {/* Forums management */}
+            <Route path="/ForumManagement" element={<ForumManagement />} />
 
    
       </Routes>

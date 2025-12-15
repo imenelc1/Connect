@@ -86,11 +86,11 @@ export default function Navbar() {
     { href: "/CourseManagement", label: t("courses"), icon: BookOpen },
     { href: "/ExerciseManagement", label: t("exercises"), icon: ClipboardList },
     { href: "/QuizManagement", label: t("quizzes"), icon: FileQuestion },
-    { href: "/students", label: t("students"), icon: Users },
+    { href: "/StudentsManagement", label: t("students"), icon: Users },
     { href: "/instructors", label: t("instructors"), icon: GraduationCap },
     { href: "/spaces", label: t("spaces"), icon: LayoutGrid },
-    { href: "/badges", label: t("badges"), icon: Award },
-    { href: "/forms", label: t("forms"), icon: FileText },
+    { href: "/BadgesManagement", label: t("badges"), icon: Award },
+    { href: "/ForumManagement", label: t("forms"), icon: FileText },
   ];
 
   const links =
