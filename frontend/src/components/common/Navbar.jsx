@@ -120,6 +120,15 @@ export default function Navbar() {
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
+  const adminDashboardRoutes = ["/Dashboard-admin"];
+  const courseManagementRoutes = ["/CourseManagement"];
+  const exerciseManagementRoutes = ["/ExerciseManagement"];
+  const quizManagementRoutes = ["/QuizManagement"];
+  const studentsManagementRoutes = ["/StudentsManagement"];
+  const instructorsManagementRoutes = ["/InstructorsManagement"];
+  const spacesManagementRoutes = ["/spaceManagement"];
+  const badgesManagementRoutes = ["/BadgesManagement"];
+  const forumManagementRoutes = ["/ForumManagement"];
 
   return (
     <aside
@@ -165,15 +174,42 @@ export default function Navbar() {
         {links.map((item, i) => {
           let forceActive = false;
 
-          // ⭐ si c'est le bouton cours, on force active dans toutes les pages courses
           if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
             forceActive = true;
           }
           if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
             forceActive = true;
           }
-
           if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+
+          // 🔥 logique pour admin
+          if (item.href === "/Dashboard-admin" && adminDashboardRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/CourseManagement" && courseManagementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/ExerciseManagement" && exerciseManagementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/QuizManagement" && quizManagementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/StudentsManagement" && studentsManagementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/InstructorsManagement" && instructorsManagementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/spaceManagement" && spacesManagementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/BadgesManagement" && badgesManagementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/ForumManagement" && forumManagementRoutes.some(r => location.pathname.startsWith(r))) {
             forceActive = true;
           }
 
