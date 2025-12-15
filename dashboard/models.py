@@ -17,6 +17,14 @@ class ProgressionCours(models.Model):
     avancement_cours = models.FloatField()
     temps_passe = models.DurationField()
 
+    derniere_lecon = models.ForeignKey(
+        Lecon,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+
 class TentativeExercice(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE)

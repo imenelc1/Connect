@@ -110,6 +110,9 @@ export default function AllCoursesPage() {
           .toUpperCase(),
         isMine: c.utilisateur === currentUserId,
         progress: c.progress ?? 0,
+        action: c.action,
+        lastLessonId: c.last_lesson_id,
+
       }));
 
       setCourses(formatted);
@@ -177,24 +180,46 @@ export default function AllCoursesPage() {
             </Button>
           )}
         </div>
-        <div
-          className="grid gap-6"
-          style={{
-            gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
+<div
+  className="grid gap-6"
+  style={{
+    gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
+  }}
+>
+  {filteredCourses.map((course, idx) => (
+    <ContentCard
+      key={idx}
+      className={gradientMap[course.level]}
+      course={course}
+      role={userRole}
+      showProgress={userRole === "etudiant"}
+      onDelete={handleDeleteCourse}
+    >
+      {userRole === "etudiant" && (
+        <Button
+          variant="courseStart"
+          className="mt-2 w-full"
+          onClick={() => {
+            if (course.action === "start") {
+              navigate(`/course/${course.id_cours}/lesson/first`);
+            } else if (course.action === "continue") {
+              navigate(
+                `/course/${course.id_cours}/lesson/${course.last_lesson_id}`
+              );
+            } else if (course.action === "restart") {
+              navigate(`/course/${course.id_cours}/lesson/first`);
+            }
           }}
         >
-          {filteredCourses.map((course, idx) => (
-            <ContentCard
-              key={idx}
-              className={gradientMap[course.level]}
-              course={course}
-              role={userRole}
-              showProgress={userRole === "etudiant"}
-              onDelete={handleDeleteCourse}
-              onCompleteLesson={() => handleCompleteLesson(course.id)}
-            />
-          ))}
-        </div>
+          {course.action === "start" && t("startCourse")}
+          {course.action === "continue" && t("continueCourse")}
+          {course.action === "restart" && t("restartCourse")}
+        </Button>
+      )}
+    </ContentCard>
+  ))}
+</div>
+
       </main>
     </div>
   );

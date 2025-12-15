@@ -9,7 +9,9 @@ export default function CourseContent({
   setCurrentSectionIndex,
   setSections,
   setCourseProgress,
-}) {
+  initialLessonPage = 0,
+}) 
+{
   const { t } = useTranslation("courses");
   const { title, sections } = course;
   const courseId = course.id || "default";
@@ -49,6 +51,8 @@ export default function CourseContent({
     localStorage.setItem(`courseTimer_${courseId}`, secondsSpent.toString());
   }, [secondsSpent, courseId]);
 
+
+
   const formatTime = (secs) => {
     const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
@@ -63,7 +67,7 @@ export default function CourseContent({
   const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
   const lessons = section?.lessons || [];
   const totalLessonPages = Math.ceil(lessons.length / LESSONS_PER_PAGE);
-  const [currentLessonPage, setCurrentLessonPage] = useState(0);
+  const [currentLessonPage, setCurrentLessonPage] = useState(initialLessonPage);
   const currentLessons = lessons.slice(
     currentLessonPage * LESSONS_PER_PAGE,
     currentLessonPage * LESSONS_PER_PAGE + LESSONS_PER_PAGE
