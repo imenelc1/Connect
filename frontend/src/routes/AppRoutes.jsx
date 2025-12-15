@@ -121,7 +121,8 @@ export default function AppRoutes() {
         <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
 
         {/* admin */}
-        <Route path ="ValidationCourses" element ={<ValidationCourses></ValidationCourses>}></Route>
+        <Route path="/validation-courses" element={<ValidationCourses />} />
+
         <Route path="/Dashboard-admin" element={<Dashboard/>} />
 
 {/* course management */}

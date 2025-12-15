@@ -21,7 +21,12 @@ export default function SpacesPage() {
   const navigate = useNavigate();
 
   const storedUser = localStorage.getItem("user");
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userRole = userData?.user?.role ?? userData?.role;
   const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
   const initialRole = parsedUser?.role === "enseignant" ? "prof" : "student";
 
@@ -122,7 +127,11 @@ export default function SpacesPage() {
             className="w-5 h-5 text-gray-600 cursor-pointer"
             fill="currentColor"
           />
-          <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
         </div>
       </div>
 

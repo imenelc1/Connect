@@ -5,9 +5,11 @@ import AddModal from "../components/common/AddModel";
 import { Search, Pencil, Trash2, BookOpen } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 
 export default function CoursesManagement() {
+const navigate = useNavigate();
   // SEARCH contrôlé
   const [search, setSearch] = useState("");
 
@@ -94,12 +96,24 @@ export default function CoursesManagement() {
             <h1 className="text-3xl font-semibold text-textc">{t("title")}</h1>
             <p className="text-textc mb-6">{t("description")}</p>
           </div>
-          <Button
-            text={t("addCourseButton")}
-            variant="primary"
-            className="!w-auto px-6 py-2 rounded-xl"
-            onClick={() => setCreateModal(true)}
-          />
+          <div className="flex gap-4">
+            <Button
+              text={t("addCourseButton")}
+              variant="primary"
+              className="px-6 py-3 whitespace-nowrap"
+              onClick={() => setCreateModal(true)}
+            />
+
+            <Button
+              text={t("validationButton")}
+              variant="primary"
+              className="px-6 py-3 whitespace-nowrap"
+              onClick={() => navigate("/validation-courses")}
+            />
+          </div>
+
+
+
         </div>
 
         {/* Search Bar */}
