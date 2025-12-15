@@ -87,8 +87,8 @@ export default function Navbar() {
     { href: "/ExerciseManagement", label: t("exercises"), icon: ClipboardList },
     { href: "/QuizManagement", label: t("quizzes"), icon: FileQuestion },
     { href: "/StudentsManagement", label: t("students"), icon: Users },
-    { href: "/instructors", label: t("instructors"), icon: GraduationCap },
-    { href: "/spaces", label: t("spaces"), icon: LayoutGrid },
+    { href: "/InstructorsManagement", label: t("instructors"), icon: GraduationCap },
+    { href: "/spaceManagement", label: t("spaces"), icon: LayoutGrid },
     { href: "/BadgesManagement", label: t("badges"), icon: Award },
     { href: "/ForumManagement", label: t("forms"), icon: FileText },
   ];
