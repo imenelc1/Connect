@@ -63,15 +63,30 @@ export default function CourseContent({
   };
 
   // Pagination des leçons
-  const LESSONS_PER_PAGE = 2;
-  const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
-  const lessons = section?.lessons || [];
-  const totalLessonPages = Math.ceil(lessons.length / LESSONS_PER_PAGE);
-  const [currentLessonPage, setCurrentLessonPage] = useState(initialLessonPage);
-  const currentLessons = lessons.slice(
-    currentLessonPage * LESSONS_PER_PAGE,
-    currentLessonPage * LESSONS_PER_PAGE + LESSONS_PER_PAGE
-  );
+const LESSONS_PER_PAGE = 2;
+const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
+const lessons = section?.lessons || [];
+const totalLessonPages = Math.ceil(lessons.length / LESSONS_PER_PAGE);
+
+const [currentLessonPage, setCurrentLessonPage] = useState(initialLessonPage);
+
+const currentLessons = lessons.slice(
+  currentLessonPage * LESSONS_PER_PAGE,
+  currentLessonPage * LESSONS_PER_PAGE + LESSONS_PER_PAGE
+);
+
+
+const [lastUpdatedLessonId, setLastUpdatedLessonId] = useState(null);
+
+useEffect(() => {
+  if (!currentLessons.length) return;
+
+  const firstLesson = currentLessons[0];
+  if (firstLesson?.id && firstLesson.id !== lastUpdatedLessonId) {
+    progressionService.updateLastLesson(firstLesson.id);
+    setLastUpdatedLessonId(firstLesson.id);
+  }
+}, [currentLessons, currentLessonPage, currentSectionIndex, lastUpdatedLessonId]);
 
   const isLastPage =
     currentSectionIndex === sections.length - 1 &&

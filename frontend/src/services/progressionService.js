@@ -56,6 +56,27 @@ export const getGlobalProgress = async () => {
   return res.data.global_progress; 
 };
 
+// Marquer la dernière leçon vue
+export const updateLastLesson = async (lessonId) => {
+  const res = await api.post(
+    `dashboard/update-last-lesson/${lessonId}/`,
+    {},
+    { headers: getAuthHeader() }
+  );
+  return res.data;
+};
+
+export const resetCourseProgress = async (courseId) => {
+  const res = await api.post(
+    `dashboard/reset-progress/${courseId}/`,
+    {},
+    { headers: getAuthHeader() }
+  );
+  return res.data;
+};
+
+
+
 
 export default {
   getCoursesProgress,
@@ -63,5 +84,7 @@ export default {
   getActiveCoursesCount,
   addSession,
   getAverageTime,
-  getGlobalProgress
+  getGlobalProgress,
+  updateLastLesson,
+  resetCourseProgress
 };
