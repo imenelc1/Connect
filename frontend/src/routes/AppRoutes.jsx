@@ -28,6 +28,8 @@ import ResetPassword from "../pages/ResetPassword";
 import { QuizPage2 } from "../pages/QuizPage2";
 import QuizPage1 from '../pages/QuizPage1';
 import QuizRecapPage from '../pages/QuizRecapPage';
+import SpacesPage from "../pages/SpacesPage";
+import InstructorsPage from "../pages/InstructorsPage";
 
 
 export default function AppRoutes() {
@@ -94,6 +96,9 @@ export default function AppRoutes() {
           <Route path="/quiz1" element={<QuizPage1 />} />
           <Route path="/quiz" element={<QuizPage2 />} />
           <Route path="/quiz3" element={<QuizRecapPage />} />
+           {/* Page des espaces */}
+        <Route path="/space" element={<SpacesPage />} />
+         <Route path="/instructors" element={<InstructorsPage />} />
 
 
       </Routes>

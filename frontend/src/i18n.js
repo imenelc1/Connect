@@ -48,6 +48,11 @@ import translationENSpaces from "./locales/Spaces/en-Spaces/translation.json";
 import translationnFRCommunity from "./locales/Community/fr/translation.json";
 import translationnENCommunity from "./locales/Community/en/translation.json";
 
+import translationFRSpacesPage from "./locales/addSpace/fr.json";
+import translationENSpacesPage from "./locales/addSpace/en.json";
+import translationFRInstructors from "./locales/addinstructors/fr.json";
+import translationENInstructors from "./locales/addinstructors/en.json";
+
 const resources = {
   fr: {
     translation: translationFR,
@@ -73,6 +78,10 @@ const resources = {
     quiz1: translationFRQuiz1,
     quiz2: translationFRquiz2,
     quiz3:translationFRrecquiz,
+
+     
+      space: translationFRSpacesPage,
+       instructors: translationFRInstructors,
 
    
 
@@ -105,6 +114,8 @@ const resources = {
 
      quiz2: translationENquiz2,
      quiz3:translationENrecquiz,
+     space: translationENSpacesPage,
+      instructors: translationENInstructors,
     community: translationnENCommunity
   },
 };
