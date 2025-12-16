@@ -1,9 +1,8 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/common/NavBar";
-import UserCircle from "../components/common/UserCircle";
 import CourseCard from "../components/common/CourseCard";
-import { Users, BookOpen, ClipboardList, TrendingUp } from "lucide-react";
+import { Users, BookOpen, ClipboardList, LayoutGrid } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
 
 export default function DashboardAdmin() {
@@ -11,9 +10,11 @@ export default function DashboardAdmin() {
   const { t } = useTranslation("DashboardAdmin");
 
   const userData = JSON.parse(localStorage.getItem("user"));
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
   const [activeTab, setActiveTab] = useState("pending");
+  const token = localStorage.getItem("admin_token");
+
+
 
   // ----- MOCK COURSES -----
   const pendingCourses = [
@@ -44,12 +45,34 @@ export default function DashboardAdmin() {
   const courses = coursesByTab[activeTab];
 
   // ----- MOCK STATS -----
-  const stats = [
-    { title: t("stats.totalStudents"), value: "1,234", icon: <Users className="text-blue" size={40} /> },
-    { title: t("stats.activeCourses"), value: "42", icon: <BookOpen className="text-purple" size={40} /> },
-    { title: t("stats.totalExercises"), value: "567", icon: <ClipboardList className="text-pink" size={40} /> },
-    { title: t("stats.completionRate"), value: "78%", icon: <TrendingUp className="text-blue" size={40} /> },
-  ];
+ const [statsData, setStatsData] = useState({
+  total_students: 0,
+  total_courses: 0,
+  total_exercises: 0,
+  total_spaces: 0,
+});
+const stats = [
+  {
+    title: t("stats.totalStudents"),
+    value: statsData.total_students,
+    icon: <Users className="text-blue" size={40} />,
+  },
+  {
+    title: t("stats.activeCourses"),
+    value: statsData.total_courses,
+    icon: <BookOpen className="text-purple" size={40} />,
+  },
+  {
+    title: t("stats.totalExercises"),
+    value: statsData.total_exercises,
+    icon: <ClipboardList className="text-pink" size={40} />,
+  },
+  {
+    title: t("stats.totalSpaces"), 
+    value: statsData.total_spaces,
+    icon: <LayoutGrid className="text-blue" size={40} />,
+  },
+];
 
   // ----- COLORS DU PROTOTYPE -----
   const statGradients = [
@@ -67,6 +90,21 @@ export default function DashboardAdmin() {
     { name: "David Lee", action: "Earned 'Master of Algo'", time: "1 hour ago" },
     { name: "Emma Wilson", action: "Posted in Recursion", time: "2 hours ago" },
   ];
+useEffect(() => {
+  fetch("http://localhost:8000/api/users/admin/stats/", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Unauthorized");
+      return res.json();
+    })
+    .then((data) => setStatsData(data))
+    .catch((err) => console.error(err));
+}, []);
+
+console.log("ADMIN TOKEN =", token);
 
   return (
     <div className="w-full min-h-screen flex bg-surface">
@@ -76,10 +114,7 @@ export default function DashboardAdmin() {
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col p-4 lg:p-10 gap-8">
         
-        {/* USER ICON */}
-        <div className="flex justify-end">
-          <UserCircle initials={initials} />
-        </div>
+       
 
         {/* PAGE TITLE */}
         <div>

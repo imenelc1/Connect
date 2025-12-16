@@ -268,3 +268,15 @@ class CoursesWithProgressView(APIView):
             })
 
         return Response(data)
+
+@api_view(['POST'])
+def assign_course_author(request, pk):
+    try:
+        cours = Cours.objects.get(pk=pk)
+        user_id = request.data.get("user_id")
+        user = Utilisateur.objects.get(pk=user_id)
+        cours.utilisateur = user
+        cours.save()
+        return Response({"message": "Auteur assigné"}, status=200)
+    except Cours.DoesNotExist:
+        return Response({"error": "Cours introuvable"}, status=404)

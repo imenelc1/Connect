@@ -20,6 +20,9 @@ urlpatterns = [
     path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
     
     path('cours/progress/', CoursesWithProgressView.as_view(), name='courses-progress'),
+      path("admin/courses/", cours_list_api, name="admin-courses"),
+    path("admin/courses/create/", CreateCoursView.as_view(), name="create-cours"),
+    path("admin/courses/<int:pk>/", CoursDetailView.as_view(), name="cours-detail"),
        
   
   

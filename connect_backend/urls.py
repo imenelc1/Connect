@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/spaces/', include('spaces.urls')),
 
     path('api/my-courses/', my_courses, name='my-courses'), 
+    
    
 
 ]
