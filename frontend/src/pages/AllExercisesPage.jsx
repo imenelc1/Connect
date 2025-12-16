@@ -43,6 +43,7 @@ export default function AllCoursesPage() {
           level: c.niveau_exercice_label,
           description: c.enonce,
           author: c.utilisateur_name,
+          categorie:c.categorie,
           initials: c.utilisateur_name
             .split(" ")
             .map(n => n[0])

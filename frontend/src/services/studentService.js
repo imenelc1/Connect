@@ -21,4 +21,16 @@ export const getSpacesStudents = async () => {
   return res.data;
 };
 
+// Supprimer un étudiant d’un espace
+export const removeStudent = async (studentId, spaceId) => {
+  const token = localStorage.getItem("token");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  // Ici on suppose que ton API attend DELETE /spaces/remove_student/:studentId/?space_id=xxx
+  const res = await api.delete(`remove_student/${studentId}/`, {
+    headers,
+    params: { space_id: spaceId },
+  });
+  return res.data;
+};
+
 export default { createStudent, getSpacesStudents };

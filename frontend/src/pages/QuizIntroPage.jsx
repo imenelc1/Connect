@@ -35,7 +35,7 @@ export default function QuizPage1() {
         title: q.exercice?.titre_exo,
         description: q.exercice?.enonce,
         level: q.exercice?.niveau_exo,
-        duration: q.duration,
+        duration: q.duration_minutes,
         points: q.scoreMinimum,
         question: q.questions.length,
         activer:q.activerDuration

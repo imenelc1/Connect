@@ -17,6 +17,24 @@ const buttonStyles = {
   Avancé: "bg-pink text-white",
 };
 
+const initialsBgMap = {
+  Débutant: "bg-blue",
+  Intermédiaire: "bg-purple",
+  Avancé: "bg-pink",
+};
+
+const progressColorMap = {
+  Débutant: "bg-blue",
+  Intermédiaire: "bg-purple",
+  Avancé: "bg-pink",
+};
+
+const levelKeyMap = {
+  Débutant: "beginner",
+  Intermédiaire: "intermediate",
+  Avancé: "advanced",
+};
+
 export default function ContentCard({ course, role, showProgress, type, className = "", onDelete }) {
   const { t } = useTranslation("contentPage");
   const location = useLocation();
@@ -26,18 +44,22 @@ export default function ContentCard({ course, role, showProgress, type, classNam
 
   const pageType = type || (location.pathname.includes("courses") ? "course" :
     location.pathname.includes("exercises") ? "exercise" : "quiz");
+  
 
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
     continue: t(`continue${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
     restart: t(`restart${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
+     check:
+      pageType === "course"
+        ? t("checkCourse")
+        : pageType === "exercise"
+        ? t("checkExercise")
+        : t("checkQuiz"),
   };
 
-  const levelKeyMap = {
-    Débutant: "beginner",
-    Intermédiaire: "intermediate",
-    Avancé: "advanced"
-  };
+
+
 
   const handleEdit = () => {
     if (pageType === "course"){
@@ -58,7 +80,12 @@ export default function ContentCard({ course, role, showProgress, type, classNam
 
  const handleStart = () => {
   if (pageType === "exercise") {
-    navigate(`/start-exercise/${course.id}`); // <- juste la page existante
+    if (course.categorie === "code") {
+      navigate(`/start-exerciseCode/${course.id}`);
+    } else {
+      navigate(`/start-exercise/${course.id}`);
+    }
+    //navigate(`/start-exercise/${course.id}`); // <- juste la page existante
   } else {
     if(pageType === "quiz"){
       navigate(`/quiz1/${course.id}`)
@@ -70,9 +97,7 @@ export default function ContentCard({ course, role, showProgress, type, classNam
 
 
   return (
-    <div className={`shadow-md p-6 rounded-2xl flex flex-col justify-between h-full
-      transition-all duration-300 ease-out
-      hover:shadow-xl hover:-translate-y-1 ${className}`}>
+    <div className={`shadow-md p-6 rounded-2xl flex flex-col justify-between h-full transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 ${className}`}>
 
       <div className="flex flex-col flex-1">
         {/* Header */}
@@ -95,7 +120,9 @@ export default function ContentCard({ course, role, showProgress, type, classNam
             <span className="text-sm">{course.author}</span>
           </div>
          <span className="text-xs text-gray-400">
-  {pageType === "quiz" && course.duration
+  {pageType === "exercise"
+    ? course.categorie
+    : pageType === "quiz" && course.duration
     ? `${course.duration} min`
     : pageType !== "quiz"
     ? course.duration
@@ -104,8 +131,13 @@ export default function ContentCard({ course, role, showProgress, type, classNam
         </div>
 
         {/* Progress */}
-        {showProgress && <ContentProgress value={course.progress ?? 0} className="mt-3" />}
-      </div>
+ {showProgress && (
+          <ContentProgress
+            value={course.progress ?? 0}
+            className="mt-3"
+            color={progressColorMap[course.level]}
+          />
+        )}      </div>
 
       {/* Footer */}
       <div className="mt-4 flex items-center justify-between">
@@ -164,4 +196,5 @@ export default function ContentCard({ course, role, showProgress, type, classNam
 
     </div>
   );
+
 }

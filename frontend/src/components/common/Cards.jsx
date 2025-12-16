@@ -1,4 +1,3 @@
-
 import { useTranslation } from "react-i18next";
 import React from "react";
 import "../../styles/index.css";
@@ -9,7 +8,8 @@ export default function Cards({ icon, title, text, gradient }) {
   return (
     <div
       className={`
-        w-78 rounded-3xl shadow-md p-4 p-6 flex flex-col items-start gap-4 transition
+        w-78 rounded-3xl shadow-md p-6 flex flex-col items-start gap-4
+        transform transition-transform duration-300 hover:scale-105 hover:shadow-xl
         ${gradient ? "bg-grad-1 text-white" : "bg-surface text-title-card"}
       `}
     >

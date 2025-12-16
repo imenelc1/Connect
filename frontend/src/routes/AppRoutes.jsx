@@ -30,17 +30,29 @@ import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
 import StudentExercice from "../pages/exerciceStudent";
-import StartExercise from "../pages/StartExercise";
+import StartExercise from "../pages/CodeExercisePage.jsx";
 import ExercisePage from "../pages/ExercisePage";
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
 import ProgressExercice from "../pages/ProgressionExo";
 import ProgressStudent from "../pages/ProgressionStudent";
-import { QuizPage2 } from "../pages/QuizPage2";
-import QuizPage1 from "../pages/QuizPage1";
+import { QuizPage2 } from "../pages/QuizTakePage.jsx";
+import QuizPage1 from "../pages/QuizIntroPage";
 import QuizRecapPage from "../pages/QuizRecapPage";
 import SubmittedExercises from "../pages/SubmittedExercises";
 import UpdateExercice from "../pages/UpdateExercice.jsx";
+import TheoryExercisePage from "../pages/TheoryExercisePage.jsx";
+
+import QuizManagement from "../pages/QuizManagement";
+import ExercisesManagement from "../pages/ExerciseManagement";
+import CoursesManagement from "../pages/CourseManagement";
+ import ValidationCourses from "../pages/ValidationCourses";
+  import Dashboard from "../pages/Dashboard"
+import AdminLogin from "../pages/AdminLogin.jsx";
+import StudentsMangement from "../pages/studentsManagement.jsx";
+import BadgesManagement from "../pages/badgesManagement.jsx";
+import ForumManagement from "../pages/forumManagement.jsx";
+
 
 export default function AppRoutes() {
   return (
@@ -98,7 +110,9 @@ export default function AppRoutes() {
         <Route path="/submitted-exercise" element={<SubmittedExercise />} />
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
-        <Route path="/start-exercise/:exerciceId" element={<StartExercise />} />
+        <Route path="/start-exerciseCode/:exerciceId" element={<StartExercise />} />
+        <Route path="/start-exercise/:exerciceId" element={<TheoryExercisePage />} />
+
 
 
         {/* Routes avec paramètres */}
@@ -106,6 +120,29 @@ export default function AppRoutes() {
         <Route path="/Seecourses/:id" element={<Courses />} />
         <Route path="/MyStudents" element={<MyStudents />} />
 
+
+
+
+
+  <Route path="/QuizManagement" element={<QuizManagement />} />
+
+        {/* exercise management */}
+        <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
+
+        {/* admin */}
+        <Route path="/validation-courses" element={<ValidationCourses />} />
+
+        <Route path="/Dashboard-admin" element={<Dashboard/>} />
+
+{/* course management */}
+    <Route path="/CourseManagement" element={<CoursesManagement />} />
+    <Route path="/admin/login" element={<AdminLogin />} />
+     {/* students management */}
+        <Route path="/StudentsManagement" element={<StudentsMangement />} />
+        {/* badges management */}
+          <Route path="/BadgesManagement" element={<BadgesManagement />} />
+           {/* Forums management */}
+            <Route path="/ForumManagement" element={<ForumManagement />} />
       </Routes>
     </BrowserRouter>
   );
