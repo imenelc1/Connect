@@ -1,0 +1,30 @@
+
+{
+  "BadgesManagement": {
+    "BadgesManagement": "Gestion des badges" ,
+    "badgesp":"Créer et gérer des badges de réussite",
+    "buttonCreate": "Créer des badges",
+    "search": "Rechercher des badges ...",
+    "common":"Commun",
+    "Rare":"Rare",
+    "Epic":"Épique",
+    "FirstSteps":"Premiers pas",
+    "Completefist":"Complétez vos exercices de poing",
+    "earned":"Gagné par",
+    "students":"étudiants",
+    "codemaster":"Maître des codes",
+    "complete":"Complet",
+    "exercises":"exercices",
+    "Algorithmexpert":"Expert en algorithmes",
+    "Masteralgo":"Cours de master en algorithme",
+    "QuickLeaner":"Apprentissage rapide",
+    "completecourse":"Suivez un cours en moins d'une semaine",
+    "healpingHAND":"Coup de main",
+    "Help":"Aide",
+    "studentsforum":"étudiants dans les forums",
+    "PerfectScore":"Score parfait",
+    "get":"Obtenir",
+    "on":"sur",
+    "quizzes":"quiz"
+  }
+}

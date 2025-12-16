@@ -1,0 +1,30 @@
+
+{
+  "BadgesManagement": {
+    "BadgesManagement": "Badges Management " ,
+    "badgesp":"Create and manage achievement badges",
+    "buttonCreate": "Create Badges",
+    "search": "Search badges ...",
+    "common":"Common",
+    "Rare":"Rare",
+    "Epic":"Epic",
+    "FirstSteps":"First Steps",
+    "Completefist":"Complete your fist exercises",
+    "earned":"Earned by",
+    "students":"students",
+    "codemaster":"Code Master",
+    "complete":"Complete",
+    "exercises":"exercises",
+    "Algorithmexpert":"Algorithm Expert",
+    "Masteralgo":"Master algorithm courses",
+    "QuickLeaner":"Quick Leaner",
+    "completecourse":"Complete a course in under a week",
+    "healpingHAND":"Healping Hand",
+    "Help":"Help",
+    "studentsforum":"students in forums",
+    "PerfectScore":"Perfect Score",
+    "get":"Get",
+    "on":"on",
+    "quizzes":"quizzes"
+  }
+}
