@@ -11,9 +11,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 
 # Quick-start development settings - unsuitable for production
@@ -46,6 +49,8 @@ INSTALLED_APPS = [
     'ia',
     'dashboard',
     'feedback',
+    'spaces',
+    'badges',
     # API et CORS
     'rest_framework',
     'corsheaders',
@@ -64,10 +69,32 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
     "http://localhost:3000",
-     "http://127.0.0.1:5173",
-     "http://localhost:5173",
 ]
+  
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# Autoriser ton frontend local
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_HEADERS = [
+    "*",
+]
+
 ROOT_URLCONF = 'connect_backend.urls'
 
 TEMPLATES = [
@@ -96,7 +123,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'connect',  # Nom de ta base PostgreSQL
         'USER': 'postgres',    # Ton nom d’utilisateur PostgreSQL
-        'PASSWORD': 'postgressql GP',  # Celui que tu as choisi à l’installation
+        'PASSWORD': 'imene',  # Celui que tu as choisi à l’installation
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -123,9 +150,10 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        # Ne mets pas SimpleJWT ici si tu veux ton propre token
+        
     ],
 }
+
 
 
 # Internationalization
@@ -152,3 +180,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.Utilisateur'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR 
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'connectBejaia@gmail.com'
+EMAIL_HOST_PASSWORD = 'ickb bnvm ozdg kuro'
