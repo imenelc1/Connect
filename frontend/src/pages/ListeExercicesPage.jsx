@@ -153,7 +153,7 @@ useEffect(() => {
     if (ex.categorie === "code") {
       navigate(`/codeExo/${ex.id_exercice}`);
     } else {
-      alert("Cet exercice n'est pas de type code."); 
+      navigate(`/start-exercise/${ex.id_exercice}`);
     }
   }}
 />

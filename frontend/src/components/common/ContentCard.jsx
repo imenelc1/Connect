@@ -63,31 +63,37 @@ export default function ContentCard({
   /* ===================== LABELS ===================== */
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
-    continue: t(
-      `continue${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`
-    ),
-    restart: t(
-      `restart${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`
-    ),
-    check:
+    continue: t(`continue${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
+    restart: t(`restart${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
+     check:
       pageType === "course"
         ? t("checkCourse")
         : pageType === "exercise"
         ? t("checkExercise")
         : t("checkQuiz"),
   };
+
+
   const seeExo=()=>{
     navigate(`/ListeExercices/${course.id}`);
   }
 
-  /* ===================== ACTIONS ===================== */
-  const handleStart = () => {
-    if (pageType === "exercise") {
-      navigate(`/ListeExercices/${course.id}`);
+ const handleStart = () => {
+  if (pageType === "exercise") {
+    if (course.categorie === "code") {
+      navigate(`/start-exerciseCode/${course.id}`);
     } else {
-      navigate(`/Seecourses/${course.id}`);
+      navigate(`/start-exercise/${course.id}`);
     }
-  };
+    //navigate(`/start-exercise/${course.id}`); // <- juste la page existante
+  } else {
+    if(pageType === "quiz"){
+      navigate(`/quiz1/${course.id}`)
+      
+    }else{navigate(`/Seecourses/${course.id}`);}
+    
+  }
+};
 
   const seeExercises = () => {
     navigate(`/ListeExercices/${course.id}`);
@@ -134,7 +140,15 @@ export default function ContentCard({
             </div>
             <span className="text-sm">{course.author}</span>
           </div>
-          <span className="text-xs text-gray-400">{course.duration}</span>
+         <span className="text-xs text-gray-400">
+  {pageType === "exercise"
+    ? course.categorie
+    : pageType === "quiz" && course.duration
+    ? `${course.duration} min`
+    : pageType !== "quiz"
+    ? course.duration
+    : null}
+</span>
         </div>
 
         {/* Progress */}

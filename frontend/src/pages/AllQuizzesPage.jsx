@@ -36,9 +36,9 @@ export default function AllQuizzesPage() {
           title: c.exercice?.titre_exo,
           description: c.exercice?.enonce,
           level: c.exercice?.niveau_exercice_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
-          //levelLabel: t(`levels.${c.niveau_cour_label}`),
-          duration: c.exercice?.duration_readable,
           author: c.exercice?.utilisateur_name,
+          activer:c.activerDuration,
+          duration: c.duration_minutes,
           initials: c.exercice?.utilisateur_name
             .split(" ")
             .map(n => n[0])

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
