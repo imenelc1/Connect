@@ -17,8 +17,11 @@ export default function Courses() {
   const location = useLocation();
 
   const storedUser = localStorage.getItem("user");
-  const userData = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-  const initials = userData ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase() : "";
+  const userData =
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const initials = userData
+    ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+    : "";
 
   const [sections, setSections] = useState([]);
   const [title, setTitle] = useState("");
@@ -47,31 +50,39 @@ export default function Courses() {
         setDuration(data.duration);
         setLevel(data.niveau_cour);
 
-        const fetchedSections = (data.sections || []).map(sec => ({
+        const fetchedSections = (data.sections || []).map((sec) => ({
           id: sec.id_section,
           title: sec.titre_section,
           description: sec.description || "",
           open: true,
           ordre: sec.ordre,
-          lessons: (sec.lecons || []).map(lec => ({
+          lessons: (sec.lecons || []).map((lec) => ({
             id: lec.id_lecon,
             title: lec.titre_lecon,
             content: lec.contenu_lecon,
             type: lec.type_lecon,
+            visited: false, // important
             preview:
               lec.type_lecon === "image"
-                ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
-                : null
-          }))
+                ? `http://localhost:8000/media/${lec.contenu_lecon.replace(
+                    /\\/g,
+                    "/"
+                  )}`
+                : null,
+          })),
         }));
 
-        /* 🔥 POSITIONNEMENT AUTOMATIQUE */
+        /* POSITIONNEMENT AUTOMATIQUE */
         if (lastLessonId) {
           const LESSONS_PER_PAGE = 2;
 
-          for (let secIndex = 0; secIndex < fetchedSections.length; secIndex++) {
+          for (
+            let secIndex = 0;
+            secIndex < fetchedSections.length;
+            secIndex++
+          ) {
             const lessons = fetchedSections[secIndex].lessons;
-            const lessonIndex = lessons.findIndex(l => l.id === lastLessonId);
+            const lessonIndex = lessons.findIndex((l) => l.id === lastLessonId);
 
             if (lessonIndex !== -1) {
               setCurrentSectionIndex(secIndex);
@@ -90,10 +101,36 @@ export default function Courses() {
     fetchCourse();
   }, [coursId, lastLessonId]);
 
+  const updateSectionProgress = (sectionIndex, lessonId) => {
+    setSections((prev) =>
+      prev.map((sec, i) => {
+        if (i !== sectionIndex) return sec;
+
+        const updatedLessons = sec.lessons.map((lesson) =>
+          lesson.id === lessonId ? { ...lesson, visited: true } : lesson
+        );
+
+        const visitedCount = updatedLessons.filter((l) => l.visited).length;
+        const progress = Math.round(
+          (visitedCount / updatedLessons.length) * 100
+        );
+
+        return {
+          ...sec,
+          lessons: updatedLessons,
+          progress, // barre de progression
+          completed: progress === 100,
+        };
+      })
+    );
+  };
+
   return (
     <div className="w-full bg-surface flex flex-col items-center">
       <header className="w-full max-w-7xl flex flex-col gap-4 py-6 px-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">{t("title")}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">
+          {t("title")}
+        </h1>
         <div className="hidden sm:flex sm:flex-row w-full gap-3 md:gap-4 items-center md:w-auto">
           <div className="relative w-full sm:w-64 md:w-80">
             <ContentSearchBar />
@@ -103,7 +140,7 @@ export default function Courses() {
           <UserCircle
             initials={initials}
             onToggleTheme={toggleDarkMode}
-            onChangeLang={lang => i18n.changeLanguage(lang)}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
           />
         </div>
       </header>
@@ -115,16 +152,23 @@ export default function Courses() {
             setCurrentSectionIndex={setCurrentSectionIndex}
           />
         </div>
-       <CourseContent
-  course={{ title, description, level, duration, sections, id: coursId }}
-  currentSectionIndex={currentSectionIndex}
-  setCurrentSectionIndex={setCurrentSectionIndex}
-  setSections={setSections}
-  setCourseProgress={setCourseProgress}
-  currentLessonPage={initialLessonPage} // Passe la page initiale
-  setCurrentLessonPage={setInitialLessonPage} // Permet de la mettre à jour depuis CourseContent
-/>
-
+        <CourseContent
+          course={{
+            title,
+            description,
+            level,
+            duration,
+            sections,
+            id: coursId,
+          }}
+          currentSectionIndex={currentSectionIndex}
+          setCurrentSectionIndex={setCurrentSectionIndex}
+          setSections={setSections}
+          setCourseProgress={setCourseProgress}
+          currentLessonPage={initialLessonPage} // Passe la page initiale
+          setCurrentLessonPage={setInitialLessonPage}
+          updateSectionProgress={updateSectionProgress}
+        />
       </div>
     </div>
   );

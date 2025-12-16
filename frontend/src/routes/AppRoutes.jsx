@@ -30,32 +30,30 @@ import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
 import StudentExercice from "../pages/exerciceStudent";
-import CodeExercisePage from '../pages/CodeExercisePage';
-import TheoryExercisePage from '../pages/TheoryExercisePage';
+import CodeExercisePage from "../pages/CodeExercisePage";
+import TheoryExercisePage from "../pages/TheoryExercisePage";
 
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
 import ProgressExercice from "../pages/ProgressionExo";
 import ProgressStudent from "../pages/ProgressionStudent";
-import QuizIntroPage from '../pages/QuizIntroPage';
-import QuizTakePage from '../pages/QuizTakePage';
-import QuizSummaryPage from '../pages/QuizSummaryPage';
+import QuizIntroPage from "../pages/QuizIntroPage";
+import QuizTakePage from "../pages/QuizTakePage";
+import QuizSummaryPage from "../pages/QuizSummaryPage";
 
 import SubmittedExercises from "../pages/SubmittedExercises";
 import QuizManagement from "../pages/QuizManagement";
 import ExercisesManagement from "../pages/ExerciseManagement";
 import CoursesManagement from "../pages/CourseManagement";
- import ValidationCourses from "../pages/ValidationCourses";
-  import Dashboard from "../pages/Dashboard"
+import ValidationCourses from "../pages/ValidationCourses";
+import Dashboard from "../pages/Dashboard";
 import AdminLogin from "../pages/AdminLogin.jsx";
 import UpdateExercice from "../pages/UpdateExercice.jsx";
-
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* ------------------------- */}
         {/*       ROUTES PUBLIQUES    */}
         {/* ------------------------- */}
@@ -96,7 +94,10 @@ export default function AppRoutes() {
         <Route path="/my-students" element={<MyStudents />} />
         <Route path="/spaces" element={<Spaces />} />
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
-          <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
+        <Route
+          path="/ListeExercices/:coursId"
+          element={<ListeExercicesPage />}
+        />
         <Route path="/student-exercice" element={<StudentExercice />} />
         <Route path="/progressExercice" element={<ProgressExercice />} />
         <Route path="/progressStudent" element={<ProgressStudent />} />
@@ -109,7 +110,6 @@ export default function AppRoutes() {
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
 
-
         {/* Routes avec paramètres */}
         <Route path="/CourseDetails/:id" element={<CourseDetails />} />
         <Route path="/Seecourses/:id" element={<Courses />} />
@@ -121,14 +121,15 @@ export default function AppRoutes() {
         <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
 
         {/* admin */}
-        <Route path ="ValidationCourses" element ={<ValidationCourses></ValidationCourses>}></Route>
-        <Route path="/Dashboard-admin" element={<Dashboard/>} />
+        <Route
+          path="ValidationCourses"
+          element={<ValidationCourses></ValidationCourses>}
+        ></Route>
+        <Route path="/Dashboard-admin" element={<Dashboard />} />
 
-{/* course management */}
-    <Route path="/CourseManagement" element={<CoursesManagement />} />
-    <Route path="/admin/login" element={<AdminLogin />} />
-
-   
+        {/* course management */}
+        <Route path="/CourseManagement" element={<CoursesManagement />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
       </Routes>
     </BrowserRouter>
   );

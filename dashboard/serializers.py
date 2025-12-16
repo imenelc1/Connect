@@ -11,7 +11,7 @@ class LeconCompleteSerializer(serializers.ModelSerializer):
 class ProgressionCoursSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgressionCours
-        fields = ['utilisateur', 'cours', 'avancement_cours', 'temps_passe']
+        fields = ['utilisateur', 'cours', 'avancement_cours', 'temps_passe', 'derniere_lecon', 'created_at']
         
 class CoursSerializer(serializers.ModelSerializer):
     niveau_cour_label = serializers.CharField(source='niveau_cour.label', read_only=True)

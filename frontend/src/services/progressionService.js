@@ -26,6 +26,24 @@ export const completeLesson = async (lessonId) => {
   return res.data;
 };
 
+// Compléter plusieurs leçons en bulk avec durée
+export const completeLessonsBulk = async (lessonIds, options = {}) => {
+  if (!Array.isArray(lessonIds) || lessonIds.length === 0) return { course_progress: 0 };
+
+  const payload = { lesson_ids: lessonIds };
+  if (options.duration && options.duration > 0) {
+    payload.duration = options.duration;  // ajouter le temps passé
+  }
+
+  const res = await api.post(
+    "dashboard/complete-lessons-bulk/",
+    payload,
+    { headers: getAuthHeader() }
+  );
+  return res.data;
+};
+
+
 // Nombre de cours actifs
 export const getActiveCoursesCount = async () => {
   const res = await api.get("dashboard/active/count/", { headers: getAuthHeader() });
@@ -75,16 +93,53 @@ export const resetCourseProgress = async (courseId) => {
   return res.data;
 };
 
+// Historique progression globale pour le graphe
+export const getGlobalProgressHistory = async () => {
+  const res = await api.get("dashboard/history/", { headers: getAuthHeader() });
+  return res.data; // [{ date: "2025-12-16 14:30", progression: 45 }, ...]
+};
+// === Professeur ===
+export const getActiveCoursesCountProf = async () => {
+  const res = await api.get("dashboard/prof/active/count/", { headers: getAuthHeader() });
+  return res.data.active_courses; // nombre de cours qu’il a créés
+};
 
+export const addSessionProf = async (duration) => {
+  if (duration <= 0) throw new Error("Invalid duration");
+  const res = await api.post(
+    "dashboard/prof/add-session/",
+    { duration },
+    { headers: getAuthHeader() }
+  );
+  return res.data;
+};
+
+export const getAverageTimeProf = async () => {
+  const res = await api.get("dashboard/prof/average-time/", { headers: getAuthHeader() });
+  return res.data.average_duration; 
+};
+
+export const getGlobalProgressProf = async () => {
+  const res = await api.get("dashboard/global-progress/students/", { headers: getAuthHeader() });
+  return res.data; 
+};
 
 
 export default {
   getCoursesProgress,
   completeLesson,
+  completeLessonsBulk,
   getActiveCoursesCount,
   addSession,
   getAverageTime,
   getGlobalProgress,
   updateLastLesson,
-  resetCourseProgress
+  resetCourseProgress,
+  getGlobalProgressHistory,
+  // Prof
+  getActiveCoursesCountProf,
+  addSessionProf,
+  getAverageTimeProf,
+  getGlobalProgressProf,
+
 };
