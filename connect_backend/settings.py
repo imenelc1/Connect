@@ -38,12 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     # Apps du projet
     'users',
     'courses',
     'exercices',
     'quiz',
-    'forum',
+    'forum.apps.ForumConfig',
     'ia',
     'dashboard',
     'feedback',

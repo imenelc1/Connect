@@ -10,6 +10,8 @@ import ModernDropdown from "../components/common/ModernDropdown";
 import { Bell, Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("recent");
@@ -36,6 +38,7 @@ export default function CommunityPage() {
   
   const navigate = useNavigate();
   const { t } = useTranslation("community");
+  const { fetchUnreadCount } = useNotifications();
   
   const userData = JSON.parse(localStorage.getItem("user")) || {};
   const token = localStorage.getItem("access") || localStorage.getItem("token");
@@ -53,9 +56,9 @@ export default function CommunityPage() {
   // Définir le type de forum par défaut selon le rôle
   useEffect(() => {
     if (role === "enseignant") {
-      setForumTypeToCreate("teacher-student"); // Par défaut : enseignant → étudiant
+      setForumTypeToCreate("teacher-student");
     } else {
-      setForumTypeToCreate("student-teacher"); // Par défaut : étudiant → enseignant
+      setForumTypeToCreate("student-teacher");
     }
   }, [role]);
 
@@ -76,16 +79,54 @@ export default function CommunityPage() {
     { value: "student-teacher", label: t("forums.student-teacher") || "Étudiant → Enseignant" }
   ].filter(opt => {
     if (role === "enseignant") {
-      // Enseignants : tout sauf student-student et student-teacher
       return opt.value !== "student-student" && opt.value !== "student-teacher";
     } else {
-      // Étudiants : tout sauf teacher-teacher et teacher-student
       return opt.value !== "teacher-teacher" && opt.value !== "teacher-student";
     }
   });
 
   const [forumType, setForumType] = useState("all");
   const [posts, setPosts] = useState([]);
+
+  // Fonction pour déclencher une notification
+  const triggerNotificationEvent = () => {
+    window.dispatchEvent(new CustomEvent('new-notification'));
+    if (fetchUnreadCount) {
+      fetchUnreadCount();
+    }
+  };
+
+  // Fonction pour vérifier les likes de tous les forums
+  const checkAllForumLikes = async (forums) => {
+    if (!token) return forums;
+    
+    const forumsWithLikes = await Promise.all(
+      forums.map(async (forum) => {
+        try {
+          const response = await fetch(`${API_URL}/forums/${forum.id}/check-like/`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            return {
+              ...forum,
+              userHasLiked: data.user_has_liked || false,
+              likes: data.likes_count || forum.likes
+            };
+          }
+        } catch (error) {
+          console.error(`Erreur vérification like forum ${forum.id}:`, error);
+        }
+        return forum;
+      })
+    );
+    
+    return forumsWithLikes;
+  };
 
   // Charger les messages initiaux pour chaque forum
   useEffect(() => {
@@ -159,6 +200,9 @@ export default function CommunityPage() {
       
       setNewComments(prev => ({ ...prev, [messageId]: "" }));
       setExpandedComments(prev => ({ ...prev, [messageId]: true }));
+      
+      // Déclencher notification
+      triggerNotificationEvent();
       
     } catch (error) {
       console.error("Erreur lors de l'envoi du commentaire:", error);
@@ -237,8 +281,9 @@ export default function CommunityPage() {
     }
 
     const newLikedState = !message.user_has_liked;
-    const newLikesCount = newLikedState ? (message.nombre_likes || 0) + 1 : (message.nombre_likes || 0) - 1;
+    const newLikesCount = newLikedState ? (message.nombre_likes || 0) + 1 : Math.max(0, (message.nombre_likes || 0) - 1);
     
+    // Mise à jour optimiste
     setMessages(prev => {
       const forumMessages = prev[forumId] || [];
       const updatedMessages = forumMessages.map(msg => 
@@ -264,6 +309,8 @@ export default function CommunityPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        
+        // Revert en cas d'erreur
         setMessages(prev => {
           const forumMessages = prev[forumId] || [];
           const updatedMessages = forumMessages.map(msg => 
@@ -281,6 +328,7 @@ export default function CommunityPage() {
         console.error("Erreur lors du like:", errorData.error || `Erreur ${response.status}`);
       } else {
         const data = await response.json();
+        // Mise à jour avec la réponse du serveur
         setMessages(prev => {
           const forumMessages = prev[forumId] || [];
           const updatedMessages = forumMessages.map(msg => 
@@ -294,8 +342,12 @@ export default function CommunityPage() {
           );
           return { ...prev, [forumId]: updatedMessages };
         });
+
+        // Déclencher notification
+        triggerNotificationEvent();
       }
     } catch (error) {
+      // Revert en cas d'erreur réseau
       setMessages(prev => {
         const forumMessages = prev[forumId] || [];
         const updatedMessages = forumMessages.map(msg => 
@@ -342,6 +394,7 @@ export default function CommunityPage() {
       
       setMessages(prev => ({ ...prev, [forumId]: messagesWithComments }));
       
+      // Mettre à jour le compteur de commentaires dans les posts
       setPosts(prev => prev.map(post => 
         post.id === forumId 
           ? { ...post, commentsCount: messagesData.length }
@@ -416,6 +469,9 @@ export default function CommunityPage() {
       
       setNewMessages(prev => ({ ...prev, [forumId]: "" }));
       
+      // Déclencher notification
+      triggerNotificationEvent();
+      
     } catch (error) {
       console.error("Erreur lors de l'envoi du message:", error);
     } finally {
@@ -423,27 +479,67 @@ export default function CommunityPage() {
     }
   };
 
-  const refreshForumState = async (forumId) => {
-    if (!token || !forumId) return;
+  const handleLike = async (forumId) => {
+    if (!token) {
+      return;
+    }
+
+    const post = posts.find(p => p.id === forumId);
+    if (!post) return;
+
+    const newLikedState = !post.userHasLiked;
+    const newLikesCount = newLikedState ? (post.likes || 0) + 1 : Math.max(0, (post.likes || 0) - 1);
     
+    // Mise à jour optimiste
+    setPosts(prev => prev.map(p => 
+      p.id === forumId 
+        ? { ...p, likes: newLikesCount, userHasLiked: newLikedState }
+        : p
+    ));
+
     try {
-      const response = await fetch(`${API_URL}/forums/${forumId}/check-like/`, {
+      const response = await fetch(`${API_URL}/forums/${forumId}/like/`, {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
-      if (response.ok) {
-        const data = await response.json();
+
+      if (!response.ok) {
+        // Revert en cas d'erreur
         setPosts(prev => prev.map(p => 
           p.id === forumId 
-            ? { ...p, likes: data.likes_count, userHasLiked: data.user_has_liked }
+            ? { ...p, likes: post.likes || 0, userHasLiked: post.userHasLiked || false }
             : p
         ));
+        
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Erreur lors du like:", errorData.error || "Erreur inconnue");
+      } else {
+        const data = await response.json();
+        // Mise à jour avec la réponse du serveur
+        setPosts(prev => prev.map(p => 
+          p.id === forumId 
+            ? { 
+                ...p, 
+                likes: data.likes_count || newLikesCount, 
+                userHasLiked: data.user_has_liked || newLikedState 
+              }
+            : p
+        ));
+        
+        // Déclencher notification
+        triggerNotificationEvent();
       }
     } catch (error) {
-      console.error("Erreur rafraîchissement:", error);
+      // Revert en cas d'erreur réseau
+      setPosts(prev => prev.map(p => 
+        p.id === forumId 
+          ? { ...p, likes: post.likes || 0, userHasLiked: post.userHasLiked || false }
+          : p
+      ));
+      console.error("Erreur réseau lors du like:", error);
     }
   };
 
@@ -472,10 +568,8 @@ export default function CommunityPage() {
         // Filtrage selon le rôle
         const filteredForums = forums.filter(forum => {
           if (role === "enseignant") {
-            // Enseignants voient : teacher-teacher, teacher-student, student-teacher
             return forum.type !== "student-student";
           } else {
-            // Étudiants voient : student-student, student-teacher, teacher-student
             return forum.type !== "teacher-teacher";
           }
         });
@@ -492,10 +586,14 @@ export default function CommunityPage() {
           userHasLiked: forum.user_has_liked || false,
           forumData: forum,
           isMine: forum.utilisateur === userId,
-          comments: []
+          comments: [],
+          initialMessage: forum.contenu_message || ""
         }));
         
-        setPosts(transformedForums);
+        // Vérifier les likes pour chaque forum
+        const forumsWithLikes = await checkAllForumLikes(transformedForums);
+        
+        setPosts(forumsWithLikes);
         setError("");
       } catch (error) {
         setError("Impossible de charger les forums");
@@ -565,7 +663,8 @@ export default function CommunityPage() {
         userHasLiked: false,
         type: createdForum.type,
         isMine: true,
-        commentsCount: 1
+        commentsCount: 1,
+        initialMessage: newPostContent
       };
 
       setPosts(prev => [newForum, ...prev]);
@@ -577,68 +676,13 @@ export default function CommunityPage() {
         [createdForum.id_forum]: true
       }));
       
+      // Déclencher notification
+      triggerNotificationEvent();
+      
     } catch (error) {
       console.error("Erreur lors de la création:", error);
     } finally {
       setIsCreatingPost(false);
-    }
-  };
-
-  const handleLike = async (forumId) => {
-    if (!token) {
-      return;
-    }
-
-    const post = posts.find(p => p.id === forumId);
-    if (!post) return;
-
-    const newLikedState = !post.userHasLiked;
-    const newLikesCount = newLikedState ? post.likes + 1 : post.likes - 1;
-    
-    setPosts(prev => prev.map(p => 
-      p.id === forumId 
-        ? { ...p, likes: newLikesCount, userHasLiked: newLikedState }
-        : p
-    ));
-
-    try {
-      const response = await fetch(`${API_URL}/forums/${forumId}/like/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setPosts(prev => prev.map(p => 
-          p.id === forumId 
-            ? { ...p, likes: post.likes, userHasLiked: post.userHasLiked }
-            : p
-        ));
-        console.error("Erreur lors du like:", errorData.error || "Erreur inconnue");
-      } else {
-        const data = await response.json();
-        setPosts(prev => prev.map(p => 
-          p.id === forumId 
-            ? { 
-                ...p, 
-                likes: data.likes_count || newLikesCount, 
-                userHasLiked: data.user_has_liked || newLikedState 
-              }
-            : p
-        ));
-        
-        refreshForumState(forumId);
-      }
-    } catch (error) {
-      setPosts(prev => prev.map(p => 
-        p.id === forumId 
-          ? { ...p, likes: post.likes, userHasLiked: post.userHasLiked }
-          : p
-      ));
-      console.error("Erreur réseau lors du like:", error);
     }
   };
 
@@ -696,7 +740,11 @@ export default function CommunityPage() {
     if (diffMins < 60) return `il y a ${diffMins} min`;
     if (diffHours < 24) return `il y a ${diffHours} h`;
     if (diffDays < 7) return `il y a ${diffDays} j`;
-    return date.toLocaleDateString();
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
   };
 
   const getForumTypeLabel = (type) => {
@@ -712,15 +760,15 @@ export default function CommunityPage() {
   const getForumTypeClasses = (type) => {
     switch(type) {
       case "teacher-teacher": 
-        return "bg-purple-100 text-purple-800 border-purple-200";
+        return "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800";
       case "teacher-student": 
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800";
       case "student-student": 
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800";
       case "student-teacher":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800";
       default: 
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700";
     }
   };
 
@@ -746,10 +794,10 @@ export default function CommunityPage() {
 
   if (!userData || !token) {
     return (
-      <div className="flex min-h-screen bg-background items-center justify-center">
+      <div className="flex min-h-screen bg-background dark:bg-gray-900 items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Non connecté</h1>
-          <p className="mb-6">Veuillez vous connecter</p>
+          <h1 className="text-2xl font-bold mb-4 dark:text-white">Non connecté</h1>
+          <p className="mb-6 dark:text-gray-300">Veuillez vous connecter</p>
           <button 
             onClick={() => navigate("/login")}
             className="bg-blue text-white px-6 py-2 rounded-full hover:bg-blue-dark transition"
@@ -762,13 +810,11 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background dark:bg-gray-900">
       <Navbar />
       
       <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
-          <Bell size={18} />
-        </div>
+        <NotificationBell />
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
@@ -781,50 +827,47 @@ export default function CommunityPage() {
 
       <div className="flex-1 ml-56 p-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-blue">{t("community.title")}</h1>
-          <p className="mb-6 text-grayc">
+          <h1 className="text-3xl font-bold mb-2 text-blue dark:text-blue-400">{t("community.title")}</h1>
+          <p className="mb-6 text-grayc dark:text-gray-400">
             {t("community.subtitle")}
           </p>
         </header>
 
         {/* Formulaire de création de forum */}
-        <div className="bg-card shadow-lg rounded-3xl p-5 mb-8 border border-blue/20">
+        <div className="bg-card dark:bg-gray-800 shadow-lg rounded-3xl p-5 mb-8 border border-blue/20 dark:border-blue-800/30">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Titre du forum *
             </label>
             <Input
               placeholder="Donnez un titre à votre discussion"
               value={newPostTitle}
               onChange={(e) => setNewPostTitle(e.target.value)}
-              className="bg-surface text-textc border border-blue/20 rounded-xl px-5 py-3 font-semibold"
+              className="bg-surface dark:bg-gray-700 text-textc dark:text-white border border-blue/20 dark:border-gray-600 rounded-xl px-5 py-3 font-semibold"
               disabled={isCreatingPost}
             />
           </div>
           
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Votre message initial *
             </label>
-          <textarea
-  placeholder="Écrivez votre message..."
-  value={newPostContent}
-  onChange={(e) => setNewPostContent(e.target.value)}
-  className="w-full bg-white text-textc border border-grayc/20 rounded-xl px-5 py-3 h-40 resize-none
-             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-  disabled={isCreatingPost}
-/>
-
-
-            
-            <p className="text-xs text-gray-500 mt-1">
+            <textarea
+              placeholder="Écrivez votre message..."
+              value={newPostContent}
+              onChange={(e) => setNewPostContent(e.target.value)}
+              className="w-full bg-white dark:bg-gray-700 text-textc dark:text-white border border-grayc/20 dark:border-gray-600 rounded-xl px-5 py-3 h-40 resize-none
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition"
+              disabled={isCreatingPost}
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Ce message sera le point de départ de la discussion
             </p>
           </div>
           
           {/* Section de sélection du type de forum */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Publier pour :
             </label>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -897,9 +940,9 @@ export default function CommunityPage() {
           </div>
           
           <div className="flex justify-between items-center mt-4">
-            <div className="text-sm text-grayc">
+            <div className="text-sm text-grayc dark:text-gray-400">
               Posté par <span className="font-semibold">{initials}</span>
-              <span className="ml-2 px-2 py-1 text-xs bg-blue/10 text-blue rounded">
+              <span className="ml-2 px-2 py-1 text-xs bg-blue/10 dark:bg-blue-900/30 text-blue dark:text-blue-300 rounded">
                 {role === "enseignant" ? "Enseignant" : "Étudiant"}
               </span>
             </div>
@@ -934,21 +977,21 @@ export default function CommunityPage() {
         <div className="space-y-6">
           {isLoading ? (
             <div className="flex justify-center py-12">
-              <Loader className="animate-spin" size={24} />
+              <Loader className="animate-spin dark:text-white" size={24} />
             </div>
           ) : error ? (
             <div className="text-center py-12 text-red-500">
               {error}
             </div>
           ) : finalPosts.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 dark:text-gray-300">
               <div className="text-4xl mb-4">📭</div>
               <h3 className="text-xl font-semibold mb-2">Aucun forum</h3>
-              <p className="text-grayc mb-6">Soyez le premier à créer un forum !</p>
+              <p className="text-grayc dark:text-gray-400 mb-6">Soyez le premier à créer un forum !</p>
             </div>
           ) : (
             finalPosts.map((post) => (
-              <div key={post.id} className="bg-grad-2 rounded-3xl p-6 shadow-md border border-blue/10">
+              <div key={post.id} className="bg-grad-2 dark:bg-gray-800 rounded-3xl p-6 shadow-md border border-blue/10 dark:border-gray-700">
                 {/* TOUT DANS LA MÊME CARTE */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -956,17 +999,16 @@ export default function CommunityPage() {
                       {post.authorInitials}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-blue">{post.authorName}</h3>
+                      <h3 className="font-semibold text-blue dark:text-blue-400">{post.authorName}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-sm text-grayc">
+                        <p className="text-sm text-grayc dark:text-gray-400">
                           {formatTimeAgo(post.time)}
                         </p>
                         <span className={`px-2 py-1 text-xs rounded border ${getForumTypeClasses(post.type)}`}>
                           {getForumTypeLabel(post.type)}
                         </span>
-                        {/* Badge supplémentaire pour les questions directionnelles */}
                         {post.type === "student-teacher" && (
-                          <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded border border-yellow-200">
+                          <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded border border-yellow-200 dark:border-yellow-800">
                             Question d'étudiant
                           </span>
                         )}
@@ -974,54 +1016,55 @@ export default function CommunityPage() {
                     </div>
                   </div>
                   {post.isMine && (
-                    <span className="px-3 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                    <span className="px-3 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full">
                       Votre forum
                     </span>
                   )}
                 </div>
                 
                 {/* Titre du forum */}
-                <h2 className="mb-4 text-textc font-bold text-lg">
+                <h2 className="mb-4 text-textc dark:text-white font-bold text-lg">
                   {post.title}
                 </h2>
                 
-                {/* Message initial intégré directement dans la carte */}
+                {/* Message initial */}
                 <div className="mb-4">
-                  <p className="text-textc whitespace-pre-wrap">
-                    {loadingMessages[post.id] ? (
-                      <span className="italic text-gray-500">
+                  <p className="text-textc dark:text-gray-300 whitespace-pre-wrap">
+                    {post.initialMessage || 
+                     (loadingMessages[post.id] ? (
+                      <span className="italic text-gray-500 dark:text-gray-400">
                         Chargement du message...
                       </span>
                     ) : messages[post.id]?.[0]?.contenu_message ? (
                       messages[post.id][0].contenu_message
                     ) : (
-                      <span className="italic text-gray-500">
+                      <span className="italic text-gray-500 dark:text-gray-400">
                         Contenu du forum
                       </span>
-                    )}
+                    ))}
                   </p>
                 </div>
                 
                 {/* Boutons d'interaction */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-6">
                     <button 
                       onClick={() => handleLike(post.id)}
-                      className="flex items-center space-x-2 text-grayc hover:text-red-500 transition-colors"
+                      className="flex items-center space-x-2 text-grayc dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                     >
                       <Heart 
                         size={20} 
                         fill={post.userHasLiked ? "#ef4444" : "none"} 
                         color={post.userHasLiked ? "#ef4444" : "#6b7280"} 
                       />
-                      <span className={post.userHasLiked ? "text-red-500 font-semibold" : ""}>
+                      <span className={post.userHasLiked ? "text-red-500 dark:text-red-400 font-semibold" : ""}>
                         {post.likes} {post.likes === 1 ? 'like' : 'likes'}
                       </span>
                     </button>
                     
                     <button 
                       onClick={() => toggleForumMessages(post.id)}
-                      className="flex items-center space-x-2 text-grayc hover:text-blue transition-colors"
+                      className="flex items-center space-x-2 text-grayc dark:text-gray-400 hover:text-blue dark:hover:text-blue-400 transition-colors"
                     >
                       <MessageSquare size={18} />
                       <span>
@@ -1043,9 +1086,9 @@ export default function CommunityPage() {
                       <button 
                         onClick={() => setShowDeleteConfirm(post.id)}
                         disabled={deletingForumId === post.id}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 border border-red-500 text-red-700 
-               hover:bg-red-100 hover:border-red-600 hover:text-red-800 transition-colors 
-               disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-500 text-red-700 dark:text-red-300 
+                                 hover:bg-red-100 dark:hover:bg-red-900/30 hover:border-red-600 hover:text-red-800 dark:hover:text-red-200 transition-colors 
+                                 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                       >
                         {deletingForumId === post.id ? (
                           <>
@@ -1060,16 +1103,15 @@ export default function CommunityPage() {
                         )}
                       </button>
                       
-                      {/* Popup de confirmation */}
                       {showDeleteConfirm === post.id && (
-                        <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-red-200 p-4 z-10">
+                        <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-red-200 dark:border-red-800 p-4 z-10">
                           <div className="flex items-start gap-3 mb-4">
-                            <div className="bg-red-100 p-2 rounded-full">
-                              <Trash2 className="h-5 w-5 text-red-600" />
+                            <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full">
+                              <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
                             </div>
                             <div>
-                              <h4 className="font-semibold text-gray-800">Supprimer ce forum ?</h4>
-                              <p className="text-sm text-gray-600 mt-1">
+                              <h4 className="font-semibold text-gray-800 dark:text-white">Supprimer ce forum ?</h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                 Cette action est irréversible. Tous les messages et commentaires seront supprimés.
                               </p>
                             </div>
@@ -1077,7 +1119,7 @@ export default function CommunityPage() {
                           <div className="flex justify-end gap-3">
                             <button
                               onClick={() => setShowDeleteConfirm(null)}
-                              className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                             >
                               Annuler
                             </button>
@@ -1103,13 +1145,13 @@ export default function CommunityPage() {
                       value={newMessages[post.id] || ""}
                       onChange={(e) => setNewMessages(prev => ({ ...prev, [post.id]: e.target.value }))}
                       onKeyPress={(e) => e.key === 'Enter' && !postingMessage[post.id] && handlePostMessage(post.id)}
-                      className="flex-1 bg-white text-textc border border-gray-300 rounded-full px-4 py-2"
+                      className="flex-1 bg-white dark:bg-gray-700 text-textc dark:text-white border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2"
                       disabled={postingMessage[post.id]}
                     />
                     <button
                       onClick={() => handlePostMessage(post.id)}
                       disabled={postingMessage[post.id] || !newMessages[post.id]?.trim()}
-                      className="bg-blue text-white p-2 rounded-full hover:bg-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-blue dark:bg-blue-600 text-white p-2 rounded-full hover:bg-blue-dark dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {postingMessage[post.id] ? (
                         <Loader className="h-5 w-5 animate-spin" />
@@ -1120,34 +1162,33 @@ export default function CommunityPage() {
                   </div>
                 </div>
                 
-                {/* Section des autres messages (dépliée) - SEULEMENT LES RÉPONSES EXISTANTES */}
+                {/* Section des autres messages (dépliée) */}
                 {expandedForums[post.id] && messages[post.id]?.length > 1 && (
-                  <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h4 className="text-lg font-semibold mb-4 text-gray-700">
+                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h4 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">
                       {messages[post.id].length - 1} réponse{messages[post.id].length - 1 !== 1 ? 's' : ''}
                     </h4>
                     
-                    <div className="mb-4 max-h-96 overflow-y-auto pr-2">
+                    <div className="mb-4 max-h-96 overflow-y-auto pr-2 scrollbar-thin">
                       {loadingMessages[post.id] ? (
                         <div className="flex justify-center py-8">
                           <Loader className="animate-spin" size={20} />
                         </div>
                       ) : messages[post.id]?.length > 1 ? (
                         <div className="space-y-4">
-                          {/* Afficher seulement les messages après le premier */}
                           {messages[post.id].slice(1).map((message) => (
-                            <div key={message.id_message} className="bg-gray-50 rounded-lg p-4">
+                            <div key={message.id_message} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                               <div className="flex items-start space-x-3">
-                                <div className="w-8 h-8 rounded-full bg-blue/20 flex items-center justify-center text-sm font-bold">
+                                <div className="w-8 h-8 rounded-full bg-blue/20 dark:bg-blue-900/40 flex items-center justify-center text-sm font-bold">
                                   {`${message.utilisateur_prenom?.[0] || ""}${message.utilisateur_nom?.[0] || ""}`.toUpperCase()}
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-center justify-between">
                                     <div>
-                                      <span className="font-medium">
+                                      <span className="font-medium dark:text-white">
                                         {message.utilisateur_prenom} {message.utilisateur_nom}
                                       </span>
-                                      <span className="text-xs text-grayc ml-2">
+                                      <span className="text-xs text-grayc dark:text-gray-400 ml-2">
                                         {formatTimeAgo(message.date_publication)}
                                       </span>
                                     </div>
@@ -1155,7 +1196,7 @@ export default function CommunityPage() {
                                       <button 
                                         onClick={() => handleLikeMessage(message.id_message, post.id)}
                                         disabled={likingMessageId === message.id_message}
-                                        className="flex items-center space-x-1 text-grayc hover:text-red-500 transition-colors disabled:opacity-50"
+                                        className="flex items-center space-x-1 text-grayc dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50"
                                       >
                                         {likingMessageId === message.id_message ? (
                                           <Loader className="h-3 w-3 animate-spin" />
@@ -1166,7 +1207,7 @@ export default function CommunityPage() {
                                             color={message.user_has_liked ? "#ef4444" : "#6b7280"} 
                                           />
                                         )}
-                                        <span className={`text-xs ${message.user_has_liked ? "text-red-500 font-semibold" : ""}`}>
+                                        <span className={`text-xs ${message.user_has_liked ? "text-red-500 dark:text-red-400 font-semibold" : ""}`}>
                                           {message.nombre_likes || 0} {message.nombre_likes === 1 ? 'like' : 'likes'}
                                         </span>
                                       </button>
@@ -1175,26 +1216,26 @@ export default function CommunityPage() {
                                         <div className="relative">
                                           <button 
                                             onClick={() => setShowDeleteCommentConfirm(message.id_message)}
-                                            className="text-red-400 hover:text-red-600 text-xs px-2 py-1 hover:bg-red-50 rounded transition-colors"
+                                            className="text-red-400 hover:text-red-600 text-xs px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                           >
                                             <Trash2 size={12} />
                                           </button>
                                           
                                           {showDeleteCommentConfirm === message.id_message && (
-                                            <div className="absolute top-full right-0 mt-1 w-64 bg-white rounded-lg shadow-lg border border-red-200 p-3 z-10">
-                                              <p className="text-sm text-gray-700 mb-3">
+                                            <div className="absolute top-full right-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-red-200 dark:border-red-800 p-3 z-10">
+                                              <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
                                                 Supprimer ce message ?
                                               </p>
                                               <div className="flex justify-end gap-2">
                                                 <button
                                                   onClick={() => setShowDeleteCommentConfirm(null)}
-                                                  className="px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
+                                                  className="px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                                                 >
                                                   Annuler
                                                 </button>
                                                 <button
                                                   onClick={() => {
-                                                    // Ici vous devriez appeler une fonction pour supprimer le message
+                                                    // Fonction de suppression de message
                                                     setShowDeleteCommentConfirm(null);
                                                   }}
                                                   className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
@@ -1209,13 +1250,13 @@ export default function CommunityPage() {
                                     </div>
                                   </div>
                                   
-                                  <p className="mt-2 text-textc">{message.contenu_message}</p>
+                                  <p className="mt-2 text-textc dark:text-gray-300">{message.contenu_message}</p>
                                   
                                   {/* SECTION COMMENTAIRES DU MESSAGE */}
                                   <div className="mt-4">
                                     <button
                                       onClick={() => toggleMessageComments(message.id_message)}
-                                      className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600 mb-2"
+                                      className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mb-2"
                                     >
                                       <MessageSquare size={14} />
                                       <span>{message.nombre_commentaires || 0} commentaire{message.nombre_commentaires !== 1 ? 's' : ''}</span>
@@ -1227,19 +1268,19 @@ export default function CommunityPage() {
                                     </button>
                                     
                                     {expandedComments[message.id_message] && (
-                                      <div className="ml-2 border-l-2 border-gray-200 pl-4">
+                                      <div className="ml-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
                                         <div className="space-y-3 mb-4">
                                           {message.commentaires?.map(comment => (
-                                            <div key={comment.id_commentaire} className="bg-gray-100 rounded p-3">
+                                            <div key={comment.id_commentaire} className="bg-gray-100 dark:bg-gray-800 rounded p-3">
                                               <div className="flex justify-between items-start">
                                                 <div className="flex items-center gap-2">
-                                                  <div className="w-6 h-6 rounded-full bg-blue/20 flex items-center justify-center text-xs font-bold">
+                                                  <div className="w-6 h-6 rounded-full bg-blue/20 dark:bg-blue-900/40 flex items-center justify-center text-xs font-bold">
                                                     {`${comment.utilisateur_prenom?.[0] || ""}${comment.utilisateur_nom?.[0] || ""}`.toUpperCase()}
                                                   </div>
-                                                  <span className="font-medium text-sm">
+                                                  <span className="font-medium text-sm dark:text-white">
                                                     {comment.utilisateur_prenom} {comment.utilisateur_nom}
                                                   </span>
-                                                  <span className="text-xs text-gray-500">
+                                                  <span className="text-xs text-gray-500 dark:text-gray-400">
                                                     {formatTimeAgo(comment.date_commpub)}
                                                   </span>
                                                 </div>
@@ -1248,7 +1289,7 @@ export default function CommunityPage() {
                                                     <button
                                                       onClick={() => setShowDeleteCommentConfirm(`comment_${comment.id_commentaire}`)}
                                                       disabled={deletingCommentId === comment.id_commentaire}
-                                                      className="text-red-400 hover:text-red-600 text-xs disabled:opacity-50"
+                                                      className="text-red-400 hover:text-red-600 dark:hover:text-red-400 text-xs disabled:opacity-50"
                                                     >
                                                       {deletingCommentId === comment.id_commentaire ? (
                                                         <Loader className="h-3 w-3 animate-spin" />
@@ -1258,14 +1299,14 @@ export default function CommunityPage() {
                                                     </button>
                                                     
                                                     {showDeleteCommentConfirm === `comment_${comment.id_commentaire}` && (
-                                                      <div className="absolute top-full right-0 mt-1 w-64 bg-white rounded-lg shadow-lg border border-red-200 p-3 z-10">
-                                                        <p className="text-sm text-gray-700 mb-3">
+                                                      <div className="absolute top-full right-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-red-200 dark:border-red-800 p-3 z-10">
+                                                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
                                                           Supprimer ce commentaire ?
                                                         </p>
                                                         <div className="flex justify-end gap-2">
                                                           <button
                                                             onClick={() => setShowDeleteCommentConfirm(null)}
-                                                            className="px-3 py-1 text-xs text-gray-600 hover:bg-gray-100 rounded"
+                                                            className="px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                                                           >
                                                             Annuler
                                                           </button>
@@ -1281,7 +1322,7 @@ export default function CommunityPage() {
                                                   </div>
                                                 )}
                                               </div>
-                                              <p className="mt-2 text-sm text-textc">{comment.contenu_comm}</p>
+                                              <p className="mt-2 text-sm text-textc dark:text-gray-300">{comment.contenu_comm}</p>
                                             </div>
                                           ))}
                                         </div>
@@ -1292,13 +1333,13 @@ export default function CommunityPage() {
                                             value={newComments[message.id_message] || ""}
                                             onChange={(e) => setNewComments(prev => ({ ...prev, [message.id_message]: e.target.value }))}
                                             onKeyPress={(e) => e.key === 'Enter' && !postingComment[message.id_message] && handlePostComment(message.id_message, post.id)}
-                                            className="flex-1 text-sm bg-white border border-gray-300 rounded-full px-3 py-1.5"
+                                            className="flex-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1.5"
                                             disabled={postingComment[message.id_message]}
                                           />
                                           <button
                                             onClick={() => handlePostComment(message.id_message, post.id)}
                                             disabled={postingComment[message.id_message] || !newComments[message.id_message]?.trim()}
-                                            className="bg-blue text-white p-1.5 rounded-full hover:bg-blue-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="bg-blue dark:bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-dark dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                           >
                                             {postingComment[message.id_message] ? (
                                               <Loader className="h-4 w-4 animate-spin" />
@@ -1317,8 +1358,8 @@ export default function CommunityPage() {
                           <div ref={messagesEndRef} />
                         </div>
                       ) : (
-                        <div className="text-center py-8 text-grayc">
-                          <MessageSquare className="mx-auto h-12 w-12 text-gray-300 mb-2" />
+                        <div className="text-center py-8 text-grayc dark:text-gray-400">
+                          <MessageSquare className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-2" />
                           <p>Pas encore de réponses. Soyez le premier à répondre !</p>
                         </div>
                       )}
