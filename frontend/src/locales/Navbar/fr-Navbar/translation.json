@@ -1,9 +1,6 @@
 {
   "home": "Accueil",
   "dashboard": "Tableau de bord",
-  "admin": "Administrateur",
-  "enseignant": "Enseignant",
-  "etudiant": "Étudiant",
   "courses": "Cours",
   "exercises": "Exercices",
   "quizzes": "Quiz",
@@ -13,10 +10,5 @@
   "mycommunity": "Ma communauté",
   "settings": "Paramètres",
   "logout": "Déconnexion",
-  "myspaces": "Mes espaces",
-  "students": "Étudiants",
-  "instructors": "Enseignants",
-  "spaces": "Espaces",
-  "badges": "Badges",
-  "forms": "Formulaires"
+  "myspaces":"Mes espaces"
 }

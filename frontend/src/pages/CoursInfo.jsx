@@ -11,13 +11,11 @@ import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService";
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
-import { useEffect } from "react";
-export default function CoursePage() {
-  const navigate = useNavigate();
 
+export default function CoursePage() {
   const { t, i18n } = useTranslation("courseInfo");
   const { toggleDarkMode } = useContext(ThemeContext);
 
@@ -49,11 +47,10 @@ export default function CoursePage() {
     }
   }, []);
 
-
+  
 
   // user data
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
-    }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] ?? ""}${userData?.prenom?.[0] ?? ""}`;
   const currentUserId = userData?.id_utilisateur;
   const userRole = userData?.role;
 
@@ -71,21 +68,6 @@ export default function CoursePage() {
     { label: t("course.curriculum"), icon: BookOpenCheck },
     { label: t("course.publish_title"), icon: CheckCircle },
   ];
-  const [hours, setHours] = useState("00");
-  const [minutes, setMinutes] = useState("00");
-  const [seconds, setSeconds] = useState("00");
-  useEffect(() => {
-    setDuration(`${hours}:${minutes}:${seconds}`);
-  }, [hours, minutes, seconds]);
-  const hourOptions = [...Array(13)].map((_, i) => ({
-    value: String(i).padStart(2, "0"),
-    label: `${i} h`,
-  }));
-
-  const minuteSecondOptions = [...Array(12)].map((_, i) => ({
-    value: String(i * 5).padStart(2, "0"),
-    label: `${i * 5} min`
-  }));
 
 
   // --- Course info ---
@@ -93,8 +75,6 @@ export default function CoursePage() {
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [level, setLevel] = useState("");
-  const [courseVisibility, setCourseVisibility] = useState("public"); // default
-
   const [currentCoursId, setCurrentCoursId] = useState(null);
 
   // --- Sections & lessons ---
@@ -172,11 +152,11 @@ export default function CoursePage() {
       prev.map(s =>
         s.id === sectionId
           ? {
-            ...s,
-            lessons: s.lessons.map(l =>
-              l.id === lessonId ? { ...l, imageFile: file, preview: URL.createObjectURL(file) } : l
-            ),
-          }
+              ...s,
+              lessons: s.lessons.map(l =>
+                l.id === lessonId ? { ...l, imageFile: file, preview: URL.createObjectURL(file) } : l
+              ),
+            }
           : s
       )
     );
@@ -193,7 +173,6 @@ export default function CoursePage() {
           duration,
           niveau_cour: level,
           utilisateur: currentUserId,
-          visibilite_cour: courseVisibility === "private" ? false : true
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -263,27 +242,26 @@ export default function CoursePage() {
       const coursId = await handleSaveStep1();
       if (!coursId) return;
 
-      await handleSaveAllSections(coursId); // ✅ passe le bon id
-      navigate("/all-courses");
-
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement complet :", error);
+      await handleSaveAllSections(coursId);
+      setActiveStep(3);
+    } catch (err) {
+      console.error("Erreur lors de l'enregistrement complet :", err);
     }
   };
+  
+     if (authLoading) {
+  return <div style={{ padding: 20 }}>Checking authentication...</div>;
+}
 
-  if (authLoading) {
-    return <div style={{ padding: 20 }}>Checking authentication...</div>;
-  }
-
-  // --- Security check ---
-  if (!isAuthenticated || !userData) {
-    return <div style={{ padding: 20 }}>Not authenticated...</div>;
-  }
+// --- Security check ---
+if (!isAuthenticated || !userData) {
+  return <div style={{ padding: 20 }}>Not authenticated...</div>;
+}
 
 
   return (
     <div className="w-full min-h-screen flex bg-primary/5">
-
+    
       <div className="hidden lg:block w-64 min-h-screen">
         <Navbar />
       </div>
@@ -329,56 +307,28 @@ export default function CoursePage() {
               />
             </div>
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div className="flex flex-col">
-                <label className="font-medium mb-2">{t("course.duration")}</label>
-                <div className="flex gap-2">
-                  <ModernDropdown
-                    value={hours}
-                    onChange={setHours}
-                    options={hourOptions}
-                    placeholder="Heures"
-                  />
-                  <ModernDropdown
-                    value={minutes}
-                    onChange={setMinutes}
-                    options={minuteSecondOptions.map(o => ({ ...o, label: `${o.value} min` }))}
-                    placeholder="Minutes"
-                  />
-                  <ModernDropdown
-                    value={seconds}
-                    onChange={setSeconds}
-                    options={minuteSecondOptions.map(o => ({ ...o, label: `${o.value} s` }))}
-                    placeholder="Secondes"
-                  />
-                </div>
+              <div className="flex flex-col ">
+                <Input
+                  label={t("course.duration")}
+                  placeholder={t("course.duration_placeholder")}
+                  className="w-full "
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                />
               </div>
-
               <div className="flex flex-col">
                 <label className="font-medium mb-2">{t("course.level")}</label>
-                <ModernDropdown
+                <Select
+                  className="w-full rounded-full border border-grayc px-5 py-3 bg-background shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   value={level}
-                  onChange={(v) => setLevel(v)}
-                  placeholder={t("select.placeholder")}
+                  onChange={(e) => setLevel(e.target.value)}
                   options={[
+                    { value: "", label: t("select.placeholder") },
                     { value: "debutant", label: t("select.Beginner") },
                     { value: "intermediaire", label: t("select.Intermediate") },
                     { value: "avance", label: t("select.Advanced") },
                   ]}
                 />
-
-              </div>
-              <div className="flex flex-col mt-4">
-                <label className="font-medium mb-2">{t("course.visibility")}</label>
-                <ModernDropdown
-                  value={courseVisibility}
-                  onChange={(v) => setCourseVisibility(v)}
-                  placeholder={t("course.visibility")}
-                  options={[
-                    { value: "public", label: t("course.public") },
-                    { value: "private", label: t("course.private") },
-                  ]}
-                />
-
               </div>
             </div>
             <div className="flex justify-between mt-10 ">
@@ -591,7 +541,7 @@ export default function CoursePage() {
                 </button>
                 <button
                   className="px-8 py-2 rounded-xl bg-grad-1 text-white font-medium shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
-                  onClick={() => setActiveStep(3)}
+                  onClick={handleSaveAll}
                 >
                   {t("course.save_next")}
                 </button>
@@ -602,108 +552,10 @@ export default function CoursePage() {
 
         {/* STEP 3 */}
         {activeStep === 3 && (
-          <div className="w-full flex flex-col items-center gap-10">
-
-            {/* ---------- RÉSUMÉ INFOS GÉNÉRALES ---------- */}
-            <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
-              <h2 className="text-2xl font-semibold mb-4 text-primary">
-                {t("course.summary")}
-              </h2>
-
-              <div className="space-y-3 text-gray-700">
-                <p>
-                  <strong>{t("course.title")} :</strong> {title}
-                </p>
-                <p>
-                  <strong>{t("course.course_topic")} :</strong> {description}
-                </p>
-                <p>
-                  <strong>{t("course.duration")} :</strong> {duration}
-                </p>
-                <p>
-                  <strong>{t("course.level")} :</strong> {level}
-                </p>
-                <p>
-                  <strong>{t("course.courseVisibility")} :</strong> {courseVisibility}
-                </p>
-              </div>
-            </div>
-
-            {/* ---------- RÉSUMÉ SECTIONS + LEÇONS ---------- */}
-            <div className="w-full max-w-3xl bg-white rounded-2xl shadow-md p-8">
-              <h3 className="text-xl font-semibold mb-6 text-primary">
-                {t("course.curriculum")}
-              </h3>
-
-              {sections.map((section, sectionIndex) => (
-                <div key={section.id} className="mb-6 pb-4 border-b border-gray-200">
-
-                  <h4 className="text-lg font-semibold text-gray-800">
-                    {sectionIndex + 1}. {section.title || t("course.untitled_section")}
-                  </h4>
-
-                  {section.description && (
-                    <p className="text-sm text-gray-500 mt-1">{section.description}</p>
-                  )}
-
-                  {/* Leçons */}
-                  <div className="mt-4 pl-4 space-y-3">
-                    {section.lessons.map((lesson, lessonIndex) => (
-                      <div key={lesson.id} className="bg-gray-50 p-3 rounded-lg border">
-
-                        <p className="font-medium text-gray-800">
-                          {lessonIndex + 1}. {lesson.title || t("course.untitled_lesson")}
-                        </p>
-
-                        {/* type */}
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                          {lesson.type}
-                        </span>
-
-                        {/* Texte ou exemple */}
-                        {(lesson.type === "text" || lesson.type === "example") && (
-                          <p className="text-sm text-gray-600 mt-2 whitespace-pre-line">
-                            {lesson.content || t("course.no_content")}
-                          </p>
-                        )}
-
-                        {/* Image */}
-                        {lesson.type === "image" && lesson.preview && (
-                          <img
-                            src={lesson.preview}
-                            alt="Lesson visual"
-                            className="w-48 mt-2 rounded-xl border object-cover"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* ---------- Boutons ---------- */}
-            <div className="flex justify-between items-center mt-10 max-w-xl w-full mx-auto">
-              <button
-                className="px-6 py-2 bg-[#DDE7FF] text-gray-700 rounded-xl text-sm shadow"
-                onClick={() => setActiveStep(2)}
-              >
-                {t("course.back")}
-              </button>
-
-              <div className="flex gap-3">
-
-
-                <button className="px-6 py-2 bg-primary text-white rounded-xl text-sm shadow hover:bg-grad-1" onClick={handleSaveAll}>
-                  {t("course.save_publier")}
-                </button>
-              </div>
-            </div>
-
-
+          <div className="w-full bg-white rounded-2xl shadow-md p-6">
+            <h2 className="text-xl font-semibold">Publish Course</h2>
           </div>
         )}
-
       </div>
     </div>
   );

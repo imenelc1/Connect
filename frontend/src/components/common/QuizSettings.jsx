@@ -1,146 +1,131 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import ModernDropdown from "./ModernDropdown";
 
-export default function QuizSettings({ quizData, onQuizChange, courses }) {
+export default function QuizSettings({ quizData, onQuizChange }) {
   const { t } = useTranslation("createQuiz");
 
-const handleChange = (field, value) => {
-  onQuizChange(field, value);  // juste passer la valeur, ne pas utiliser une fonction ici
-};
-
-
+  const handleChange = (field, value) => onQuizChange(field, value);
 
   const levels = [
-    { key: "debutant", label: t("beginner") },
-    { key: "intermediaire", label: t("intermediate") },
-    { key: "avance", label: t("advanced") },
+    { key: "beginner", label: t("beginner") },
+    { key: "intermediate", label: t("intermediate") },
+    { key: "advanced", label: t("advanced") }
   ];
 
-  const myCourses = courses.filter((c) => c.isMine);
-
   return (
-    <div className="rounded-3xl shadow-xl p-6 max-w-[20rem] border border-white/10 backdrop-blur bg-grad-3">
-      <h2 className="text-lg font-semibold mb-4">
+    <div
+      className="rounded-3xl shadow-xl p-6 max-w-[20rem] border border-white/10 backdrop-blur bg-grad-3"
+    >
+      {/* TITLE */}
+      <h2
+        className="text-lg font-semibold mb-4 tracking-wide"
+        style={{ color: "var(--color-text-main)" }}
+      >
         {t("quizSettings")}
       </h2>
 
       <div className="space-y-6">
 
-        {/* TITRE */}
+        {/* TITLE INPUT */}
         <div className="flex flex-col gap-2">
-          <label>{t("quizTitle")}</label>
+          <label
+            className="text-sm font-medium"
+            style={{ color: "var(--color-text-main)" }}
+          >
+            {t("quizTitle")}
+          </label>
           <input
-            value={quizData.title || ""}
+            type="text"
+            placeholder={t("quizTitlePlaceholder")}
+            value={quizData.title}
             onChange={(e) => handleChange("title", e.target.value)}
+            className="w-full text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
           />
         </div>
 
         {/* DESCRIPTION */}
         <div className="flex flex-col gap-2">
-          <label>{t("descriptionLabel")}</label>
+          <label
+            className="text-sm font-medium"
+            style={{ color: "var(--color-text-main)" }}
+          >
+            {t("descriptionLabel")}
+          </label>
           <textarea
-            value={quizData.description || ""}
+            placeholder={t("descriptionPlaceholder")}
+            value={quizData.description}
             onChange={(e) => handleChange("description", e.target.value)}
             rows={3}
+            className="w-full text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
           />
         </div>
 
-        {/* COURS */}
-        <div className="flex flex-col gap-2">
-          <label>{t("selectCourse")}</label>
-          <select
-            value={quizData.courseId || ""}
-            onChange={(e) => handleChange("courseId", e.target.value)}
+        {/* NUMBERS */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label
+              className="block text-sm font-medium mb-1 whitespace-nowrap"
+              style={{ color: "var(--color-text-main)" }}
+            >
+              {t("duration")}
+            </label>
+            <input
+              type="number"
+              value={quizData.duration}
+              onChange={(e) =>
+                handleChange("duration", parseInt(e.target.value) || 0)
+              }
+              className="w-full text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
+            />
+          </div>
+
+          <div>
+            <label
+              className="block text-sm font-medium mb-1 whitespace-nowrap"
+              style={{ color: "var(--color-text-main)" }}
+            >
+              {t("passingScore")}
+            </label>
+            <input
+              type="number"
+              value={quizData.passingScore}
+              onChange={(e) =>
+                handleChange("passingScore", parseInt(e.target.value) || 0)
+              }
+              className="w-full text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
+            />
+          </div>
+        </div>
+
+        {/* LEVEL SELECTOR (CHIPS) */}
+        <div>
+          <label
+            className="block text-sm font-medium mb-2 text-textc"
           >
-            <option value="">{t("chooseCourse")}</option>
-            {myCourses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
-        </div>
+            {t("quizLevel")}
+          </label>
 
-        {/* VISIBILITÉ */}
-        <div className="flex flex-col gap-2">
-          <label>{t("exercises.visibility")}</label>
-          <ModernDropdown
-            value={quizData.visibility || "public"}
-            onChange={(val) => handleChange("visibility", val)}
-            options={[
-              { value: "public", label: t("select.public") },
-              { value: "private", label: t("select.private") },
-            ]}
-          />
-        </div>
+          <div className="flex flex-wrap gap-2">
+            {levels.map(({ key, label }) => {
+              const active = quizData.level === key;
 
-        {/* NIVEAU */}
-        <div className="flex flex-col gap-2">
-          <label>{t("quizLevel")}</label>
-          <select
-            value={quizData.level || ""}
-            onChange={(e) => handleChange("level", e.target.value)}
-          >
-            <option value="">{t("selectLevel")}</option>
-            {levels.map((lvl) => (
-              <option key={lvl.key} value={lvl.key}>
-                {lvl.label}
-              </option>
-            ))}
-          </select>
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => handleChange("level", key)}
+                  className={`px-3 py-1.5 text-xs rounded-full border transition 
+                  ${active
+                    ? "bg-primary text-white border-primary shadow-sm"
+                    : "border-gray-300 text-muted hover:bg-gray-100 hover:text-black"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-{/*score minimum*/}
-{/* SCORE MINIMUM */}
-<div className="flex flex-col gap-2">
-  <label className="text-sm font-medium">{t("scoreMinimum")}</label>
-  <input
-    type="number"
-    min={0}
-    max={100}
-    value={quizData.passingScore || 0} // valeur contrôlée
-    onChange={(e) =>
-      onQuizChange("passingScore", parseInt(e.target.value) || 0)
-    }
-    className="w-full text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
-  />
-</div>
-
-        {/* MAX ATTEMPTS */}
-        <div className="flex flex-col gap-2">
-          <label>{t("maxAttempts")}</label>
-          <input
-            type="number"
-            min={0}
-            value={quizData.maxAttempts || 0}
-            onChange={(e) =>
-              handleChange("maxAttempts", parseInt(e.target.value) || 0)
-            }
-          />
-        </div>
-
-        {/* DURÉE */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={quizData.durationEnabled || false}
-            onChange={(e) =>
-              handleChange("durationEnabled", e.target.checked)
-            }
-          />
-          <label>{t("enableDuration")}</label>
-        </div>
-
-        {quizData.durationEnabled && (
-          <input
-            type="number"
-            min={1}
-            value={quizData.duration || ""}
-            onChange={(e) =>
-              handleChange("duration", parseInt(e.target.value) || 0)
-            }
-          />
-        )}
       </div>
     </div>
   );

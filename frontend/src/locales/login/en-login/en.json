@@ -10,28 +10,24 @@
     "signIn": "Sign in",
     "welcome": "Welcome, dear\nstudent!",
     "welcomeInstructor": "Welcome, dear\ninstructor!",
-    
-    "forgotPassword": "Forgot Password",
-  "sendLink": "Send Reset Link",
-  "sending": "Sending",
-  "checkEmail": "Check Your Email",
-  "emailSentTo": "A reset link has been sent to",
-  "resetPassword": "Reset Password",
-  "newPassword": "New Password",
-  "confirmPassword": "Confirm Password",
-  "passwordUpdated": "Password updated successfully",
-  "error": "An error occurred",
-  "updatePassword": "Update Password",
-  "language": "Language"
+    "forgotPassword": "Forgot password?",
+    "resetLinkSent": "A reset link has been sent to your email.",
+    "sending": "Sending",
+    "sendLink": "Send reset link",
+    "resetPassword": "Reset password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordUpdated": "Password updated successfully!",
+    "updatePassword": "Update Password",
+    "language": "Language"
   },
   "errors": {
+    "emailRequired": "Email required",
+    "passwordRequired": "Password required",
+    "passwordLength": "Minimum 8 characters",
     "emailNotFound": "Email address not found",
     "wrongPassword": "Incorrect password",
-    "networkError": "Network error",
-     "emailRequired": "Email is required",
-    "passwordRequired": "Password is required",
-    "passwordLength": "Password must be at least 8 characters",
-    "passwordMatch": "Passwords do not match"
+    "networkError": "Network error"
   },
   "success": {
     "login": "Login successful!"

@@ -1,11 +1,11 @@
 import React from "react";
 
-export default function ContentProgress({ value = 0, color }) {
+export default function ContentProgress({ value = 0, className = "" }) {
   return (
-    <div className="mt-4 w-full">
+    <div className={`mt-4 w-full ${className}`}>
       <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className={`h-full rounded-all transition-all duration-300 ease-out ${color}`}
+          className="h-full bg-blue rounded-full transition-all"
           style={{ width: `${value}%` }}
         ></div>
       </div>

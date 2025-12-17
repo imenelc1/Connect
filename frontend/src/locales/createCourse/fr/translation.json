@@ -1,19 +1,24 @@
 {
   "course": {
-    "basic_info": "Informations de base",
+    "basic_info": "Informations de Base",
     "title": "Titre",
     "course_title_placeholder": "Titre de votre cours",
     "course_topic": "Sujet du cours",
-    "course_topic_placeholder": "Que va-t-on apprendre dans votre cours ?",
+    "course_topic_placeholder": "Que sera principalement enseigné dans votre cours ?",
     "duration": "Durée",
     "duration_placeholder": "exemple 00:00:00",
     "level": "Niveau du cours",
-
     "cancel": "Annuler",
-    "save_next": "Suivant",
-    "save_publier": "Enregistrer & Publier",
+    "save_next": "Enregistrer & Suivant",
+    "text":"text",
+     "example":"exemple",
+     "image":"image",
+     "section_description_placeholder":"La description du cours",
+     "lesson_title":"Titre de la leçon",
+     "lesson_content":"Contenu de la leçon",
 
-    "curriculum": "Programme du cours",
+
+    "curriculum": "Curriculum du Cours",
     "add_section": "Ajouter une section",
     "section_title_placeholder": "Titre de la section",
     "lesson": "Leçon",
@@ -22,30 +27,11 @@
     "back": "Retour",
 
     "publish_title": "Publier le cours",
-    "publish_description": "→ Dernière étape avant la publication.",
-
-    "text": "texte",
-    "example": "exemple",
-    "image": "image",
-
-    "section_description_placeholder": "Description de la section",
-    "lesson_title": "Titre de la leçon",
-    "lesson_content": "Contenu de la leçon",
-
-    "summary": "Résumé du cours",
-    "untitled_section": "Section sans titre",
-    "untitled_lesson": "Leçon sans titre",
-    "no_content": "Aucun contenu fourni",
-
-    "visibility": "Visibilité",
-    "public": "Public",
-    "private": "Privé",
-
-    "courseVisibility": "Visibilité du cours"
+    "publish_description": "→ Page finale ici."
   },
 
   "select": {
-    "placeholder": "Sélectionnez une option",
+    "placeholder": "Choisir une option",
     "day": "Jour",
     "week": "Semaine",
     "month": "Mois",

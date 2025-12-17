@@ -10,28 +10,24 @@
     "signIn": "Se connecter",
     "welcome": "Bienvenue, cher\nétudiant !",
     "welcomeInstructor": "Bienvenue, cher\ninstructeur !",
+    "forgotPassword": "Mot de passe oublié ?",
     "resetLinkSent": "Un lien de réinitialisation vous a été envoyé.",
-    "updatePassword": "Mettre à jour le mot de passe",
-    "forgotPassword": "Mot de passe oublié",
-    "sendLink": "Envoyer le lien de réinitialisation",
-    "sending": "Envoi en cours",
-    "checkEmail": "Vérifiez votre email",
-    "emailSentTo": "Un lien de réinitialisation a été envoyé à",
+    "sending": "Envoi",
+    "sendLink": "Envoyer le lien",
     "resetPassword": "Réinitialiser le mot de passe",
     "newPassword": "Nouveau mot de passe",
     "confirmPassword": "Confirmer le mot de passe",
-    "passwordUpdated": "Mot de passe mis à jour avec succès",
-    "error": "Une erreur est survenue",
+    "passwordUpdated": "Mot de passe mis à jour avec succès !",
+    "updatePassword": "Mettre à jour le mot de passe",
     "language": "Langue"
   },
   "errors": {
+    "emailRequired": "Email obligatoire",
+    "passwordRequired": "Mot de passe obligatoire",
+    "passwordLength": "Minimum 8 caractères",
     "emailNotFound": "Adresse email inconnue",
     "wrongPassword": "Mot de passe incorrect",
-    "networkError": "Erreur réseau",
-    "emailRequired": "L'email est requis",
-    "passwordRequired": "Le mot de passe est requis",
-    "passwordLength": "Le mot de passe doit contenir au moins 8 caractères",
-    "passwordMatch": "Les mots de passe ne correspondent pas"
+    "networkError": "Erreur réseau"
   },
   "success": {
     "login": "Connexion réussie !"

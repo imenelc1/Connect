@@ -1,6 +1,6 @@
 
 import { useContext } from "react";
-import ThemeContext from "../../context/ThemeContext.jsx";
+import ThemeContext from "../../context/ThemeContext";
 
 // Logos pour dark / light mode
 import LogoLight from "../../assets/LogoLight.svg";

@@ -9,14 +9,17 @@ export default function ContentFilters({
   userRole,
   type = "courses",
   categoryFilter,
-  setCategoryFilter,
-  hideCategoryFilter = false // <-- Nouvelle prop pour cacher le filtre catégorie
+  setCategoryFilter
+   // NEW ➜ "courses" | "exercises" | "quizzes"
+ 
 }) {
   const { t } = useTranslation("filters");
   const levels = ["ALL", "Débutant", "Intermédiaire", "Avancé"];
 
+  
   const [completedStatus, setCompletedStatus] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
+
 
   // TEXTES DYNAMIQUES SELON LE TYPE
   const labels = {
@@ -38,23 +41,23 @@ export default function ContentFilters({
   };
 
   const current = labels[type];
-
+  
 
   return (
     <div className="w-full flex justify-center mt-8">
       <div className="flex items-center gap-4 flex-wrap">
 
         {/* NIVEAUX */}
-        <div className="flex bg-primary/50 rounded-full px-6 py-2 gap-4 font-semibold shadow-inner text-sm">
+         <div className="flex bg-primary/20 rounded-full px-6 py-2 gap-4 font-semibold shadow-inner text-sm">
           {levels.map((lvl) => (
             <button
               key={lvl}
               onClick={() => onFilterChange(lvl)}
-              className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm${
+              className={`px-4 py-1.5 transition-all duration-300 rounded-full ${
                 lvl === activeFilter
                   ? "text-white bg-primary shadow-md"
                   : "text-primary/70 hover:text-primary"
-                }`}
+              }`}
             >
               {lvl === "ALL" ? t("allLevels") : t(`levels.${lvl}`)}
             </button>
@@ -75,8 +78,8 @@ export default function ContentFilters({
           />
         )}
 
-        {/* CATÉGORIE : cachée si hideCategoryFilter est true */}
-        {!hideCategoryFilter && (userRole === "enseignant" || userRole === "etudiant") && (
+        {/* CATÉGORIE : DYNAMIQUE SELON type */}
+        {(userRole === "enseignant" || userRole === "etudiant") && (
           <ModernDropdown
             value={categoryFilter}
             onChange={setCategoryFilter}
@@ -86,9 +89,7 @@ export default function ContentFilters({
               { value: "all", label: current.all },
             ]}
           />
-
         )}
-
       </div>
     </div>
   );

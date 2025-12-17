@@ -51,7 +51,7 @@ const navigate = useNavigate();
     if (!coursId) return;
 
     const fetchCourse = async () => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("access_token");
       try {
         const res = await api.get(`courses/courses/${coursId}/`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -179,7 +179,7 @@ const navigate = useNavigate();
 
      const confirmDelete = window.confirm("Tu es sûr de supprimer cette section ?");
     if (!confirmDelete) return;
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("access_token");
 
   try {
     // Appel API pour supprimer la section
@@ -253,7 +253,7 @@ const navigate = useNavigate();
   
 const handleSaveCourse = async (coursId) => {
   const currentUserId = getCurrentUserId();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("access_token");
 
   try {
     // --- Étape 1 : Mettre à jour le cours ---

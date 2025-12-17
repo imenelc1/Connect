@@ -1,50 +1,40 @@
 import { createContext, useState, useEffect } from "react";
-import * as jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // 🔹 pour gérer le chargement initial
 
-  // 🔹 Charger la session au démarrage
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
+    const token = localStorage.getItem("access_token");
 
-    if (token && userData) {
+    if (token) {
       try {
-        // Vérifie que le token est encore valide (optionnel)
-        setUser(JSON.parse(userData));
+        const payload = jwtDecode(token);
+
+        setUser({
+          id: payload.user_id,
+          role: payload.role,
+          username: payload.username,
+          email: payload.email,
+        });
 
       } catch (err) {
-        console.error("Token invalide → logout automatique");
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setUser(null);
+        console.error("TOKEN INVALID → logout auto");
+        localStorage.removeItem("access_token");
       }
     }
-
-    setLoading(false);
   }, []);
 
-  // 🔹 Fonction login
-  const loginUser = (token, userData) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
-
-    setUser(userData);
-  };
-
-  // 🔹 Fonction logout
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem("access_token");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loginUser, logout, loading }}>
+    <AuthContext.Provider value={{ user, logout }}>
       {children}
     </AuthContext.Provider>
   );

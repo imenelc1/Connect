@@ -1,37 +1,21 @@
+// services/studentService.js
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/spaces/",
+  baseURL: "http://localhost:8000/api/",
 });
 
-// Ajouter un étudiant à un espace
+const token = localStorage.getItem("access_token");
+const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
 export const createStudent = async (data) => {
-  const token = localStorage.getItem("token");
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-  const res = await api.post("add_student/", data, { headers });
+  const res = await api.post("spaces/add_student/", data, { headers });
   return res.data;
 };
 
-// Récupérer tous les étudiants par espace
 export const getSpacesStudents = async () => {
-  const token = localStorage.getItem("token");
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await api.get("students/", { headers });
-  return res.data;
-};
-
-// Supprimer un étudiant d’un espace
-export const removeStudent = async (studentId, spaceId) => {
-  const token = localStorage.getItem("token");
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  // Ici on suppose que ton API attend DELETE /spaces/remove_student/:studentId/?space_id=xxx
-  const res = await api.delete(`remove_student/${studentId}/`, {
-    headers,
-    params: { space_id: spaceId },
-  });
+  const res = await api.get("spaces/students/", { headers });
   return res.data;
 };
 
 export default { createStudent, getSpacesStudents };
-

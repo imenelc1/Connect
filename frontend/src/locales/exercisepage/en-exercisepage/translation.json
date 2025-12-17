@@ -1,18 +1,19 @@
 {
   "exercise_title": "Exercise",
   "question_title": "Let's start the exercise!",
-  "write_here": "Write your answer here...",
+
   "advice_text": "Test your code gradually and use printf to debug.",
   "send_solution": "Send the solution",
+
   "feedback_title": "How did you find this exercise?",
   "feedback_subtitle": "Your feedback helps improve the platform.",
+
   "labels": {
     "veryEasy": "Very easy",
     "moderate": "Moderate",
     "veryDifficult": "Very difficult"
   },
+
   "need_help": "Need help? The AI assistant is here for you.",
-  "ask_help": "Ask for help",
-  "your_solution": "Your solution",
-  "lines": "lines"
+  "ask_help": "Ask for help"
 }

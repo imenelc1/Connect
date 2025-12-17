@@ -79,10 +79,9 @@ export default function AddModal({
             </Button>
 
             {/* Bouton submit */}
-           <Button variant="primary" type="submit" className="!px-4 !py-2 !w-40 !h-auto !text-sm">
-  {submitLabel}
-</Button>
-
+            <Button variant="primary" type="submit" className="!px-4 !py-2 !w-auto !h-auto !text-sm">
+              {submitLabel}
+            </Button>
 
           </div>
 

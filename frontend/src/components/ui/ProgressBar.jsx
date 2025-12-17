@@ -1,13 +1,13 @@
 import React from "react";
 
-const ProgressBar = ({ value, title = "Progression" }) => {
+const ProgressBar = ({ value = 50, title = "Progression" }) => {
   return (
     <div className="w-full group relative">
       {/* Titre */}
       <p className="text-xl font-semibold mb-2 text-textc">{title}</p>
 
       {/* Barre */}
-      <div className="w-full bg-gray-200 rounded-full h-4 relative cursor-pointer">
+      <div className="w-full bg-gray-300 rounded-full h-4 relative cursor-pointer">
         <div
           className="h-4 rounded-full transition-all duration-500 bg-blue"
           style={{ width: `${value}%` }}

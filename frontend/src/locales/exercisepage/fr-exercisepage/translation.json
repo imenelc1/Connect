@@ -1,18 +1,19 @@
 {
   "exercise_title": "Exercice",
   "question_title": "Commençons l'exercice !",
-  "write_here": "Écrivez votre réponse ici...",
+
   "advice_text": "Testez votre code progressivement et utilisez printf pour déboguer.",
   "send_solution": "Envoyer la solution",
+
   "feedback_title": "Comment avez-vous trouvé cet exercice ?",
   "feedback_subtitle": "Votre avis nous aide à améliorer la plateforme.",
+
   "labels": {
     "veryEasy": "Très facile",
     "moderate": "Modéré",
     "veryDifficult": "Très difficile"
   },
+
   "need_help": "Besoin d’aide ? L’assistant IA est là pour vous.",
-  "ask_help": "Poser une question",
-  "your_solution": "Votre solution",
-  "lines": "lignes"
+  "ask_help": "Poser une question"
 }

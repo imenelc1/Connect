@@ -13,7 +13,7 @@ export default function Input({
   return (
     <div className="flex flex-col mb-4 appearance-none text-secondary">
 
-      <label className="mb-1 font-semibold text-grayc text-sm">
+      <label className="mb-1 font-semibold text-textc">
         {label}
       </label>
 

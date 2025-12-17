@@ -12,8 +12,7 @@ import ThemeButton from "../components/common/ThemeButton";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
+
 
 
 const gradientMap = {
@@ -33,31 +32,26 @@ export default function AllCoursesPage() {
     fetch("http://localhost:8000/api/exercices/api/exo")
       .then(res => res.json())
       .then(data => {
-        if (!Array.isArray(data)) {
-          console.error("Data récupérée n'est pas un tableau :", data);
-          setExercice([]); // sécurité
-          return;
-        }
         const formatted = data.map(c => ({
           id: c.id_exercice,
           title: c.titre_exo,
-          level: c.niveau_exercice_label,
+          level: c.niveau_exercice_label,  // ATTENTION : django = 'beginner' ? 'intermediate' ?
+          //levelLabel: t(`levels.${c.niveau_cour_label}`),
+          //duration: c.duration_readable,
+          //cours: c.cours,
           description: c.enonce,
+          //categorie: c.categorie,
           author: c.utilisateur_name,
-          categorie:c.categorie,
           initials: c.utilisateur_name
             .split(" ")
             .map(n => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId
+          isMine: c.utilisateur === currentUserId //NEWDED GHR ISMINE //
         }));
         setExercice(formatted);
       })
-      .catch(err => {
-        console.error("Erreur chargement exercices :", err);
-        setExercice([]);
-      });
+      .catch(err => console.error("Erreur chargement exercices :", err));
   }, []);
 
 
@@ -69,7 +63,10 @@ export default function AllCoursesPage() {
   const navigate = useNavigate();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const [ownerFilter, setOwnerFilter] = useState("mine");
+  const filteredexercises =
+    filterLevel === "ALL"
+      ? exercises
+      : exercises.filter((exercise) => exercise.level === filterLevel);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -117,43 +114,25 @@ export default function AllCoursesPage() {
     if (sidebarCollapsed) return 3; // desktop sidebar fermé
     return 3; // desktop sidebar ouvert (fixé pour garder taille ancienne version)
   };
-  
-  const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
-
-
-   let filteredexercises =
-
-    // 1️⃣ Filtrer par niveau
-    filterLevel === "ALL"
-      ? exercises
-      : exercises.filter((ex) => ex.level === filterLevel);
-
-  // 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
-  if (userRole === "enseignant" && categoryFilter === "mine") {
-    filteredexercises = filteredexercises.filter((ex) => ex.isMine);
-  }
-
-  
-  
-  
-  
-
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
-   return (
-    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
+  return (
+    <div className="flex bg-surface min-h-screen">
       <Navbar />
-      
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
+      {/* Header Right Controls */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
+
+        {/* Notification Icon */}
+        <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+          <Bell size={16} />
+        </div>
+
+        {/* User Circle */}
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
         />
       </div>
 
@@ -173,14 +152,11 @@ export default function AllCoursesPage() {
         <div className="mt-6 mb-6 flex flex-col sm:flex-row  px-2 sm:px-0 md:px-6 lg:px-2 justify-between gap-4 hover:text-grad-1 transition">
           <ContentFilters
             type="exercises"
-            userRole={userRole}
-            activeFilter={filterLevel}
-            onFilterChange={setFilterLevel}
-            categoryFilter={categoryFilter}       // <-- ici
-            setCategoryFilter={setCategoryFilter}
-            showCompletedFilter={userRole === "etudiant"} // <-- ici
+            userRole={userRole}                  // <-- corrige ici
+            activeFilter={filterLevel}           // <- tu utilises filterLevel, pas activeFilter
+            onFilterChange={setFilterLevel}      // <- tu as setFilterLevel
+            showCompletedFilter={userRole === "etudiant"} // <- correct
           />
-
 
           {userRole === "enseignant" && (
             <Button
@@ -197,18 +173,17 @@ export default function AllCoursesPage() {
 
         {/* Cards */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-          {filteredexercises?.map((exercise, idx) => (
+          {filteredexercises.map((exercise, idx) => (
             <ContentCard
               key={idx}
               className={gradientMap[exercise.level] ?? "bg-grad-1"}
               course={exercise}
-              type="exercise"
+
               role={userRole}
               showProgress={userRole === "etudiant"}
               onDelete={handleDeleteExo}
             />
           ))}
-
         </div>
       </main>
     </div>

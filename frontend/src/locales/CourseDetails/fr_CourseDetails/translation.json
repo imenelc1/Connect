@@ -18,10 +18,5 @@
   "courseDescriptionLabel": "Description",
   "courseDescriptionPlaceholder": "Décrivez ce que les étudiants apprendront",
   "quizzesTitle": "Quiz",
-  "exercisesTitle": "Exercices",
-
-  "selectCourseLabel": "Valider",
-  "selectCoursePlaceholder": "Sélectionnez un cours"
-
-
+  "exercisesTitle": "Exercices"
 }

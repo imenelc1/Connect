@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import UserCircle from "../components/common/UserCircle";
 import TaskCard from "../components/common/TaskCard";
 import "../styles/index.css";

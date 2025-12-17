@@ -8,10 +8,10 @@ import { useTranslation } from "react-i18next";
 
 export default function ForgotPassword() {
   const { t } = useTranslation("login");
+
   const [email, setEmail] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,31 +24,25 @@ export default function ForgotPassword() {
 
     try {
       setLoading(true);
-      await api.post("password/forgot/", { email });
-      setSubmitted(true); // Affiche message “Check your email”
+
+      const res = await api.post("password/forgot/", { email });
+
+      toast.success(res.data?.message || t("login.resetLinkSent"));
+      setEmail("");
     } catch (error) {
       const backend = error.response?.data;
+
       if (typeof backend?.error === "string") {
         setErrorEmail(backend.error);
         toast.error(backend.error);
         return;
       }
+
       toast.error(t("login.error"));
     } finally {
       setLoading(false);
     }
   };
-
-  if (submitted) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="bg-card p-6 rounded-2xl shadow-lg w-full max-w-md text-center">
-          <h2 className="text-xl font-semibold mb-4">{t("login.checkEmail")}</h2>
-          <p>{t("login.emailSentTo")}: {email}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">

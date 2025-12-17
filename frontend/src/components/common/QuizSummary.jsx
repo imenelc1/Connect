@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Clock, HelpCircle, Target, BarChart3, Repeat } from "lucide-react";
+import { Clock, HelpCircle, Target, BarChart3 } from "lucide-react";
 
-export default function QuizSummary({ totalQuestions, totalPoints, duration, passingScore, maxAttempts }) {
+export default function QuizSummary({ totalQuestions, totalPoints, duration, passingScore }) {
   const { t } = useTranslation("createQuiz");
   const passPoints = Math.ceil((passingScore / 100) * totalPoints);
 
@@ -26,11 +26,6 @@ export default function QuizSummary({ totalQuestions, totalPoints, duration, pas
       label: t("durationLabel"),
       value: `${duration} ${t("minutes")}`,
       icon: <Clock className="w-4 h-4" />
-    },
-    {
-      label: t("maxAttempts"),
-      value: maxAttempts === 0 ? t("unlimited") : maxAttempts,
-      icon: <Repeat className="w-4 h-4" />
     }
   ];
 

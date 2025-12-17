@@ -16,26 +16,16 @@
     "advanced": "Advanced"
   },
 
- "continueCourse": "Continue ",
-"continueExercise": "Continue",
-"continueQuiz": "Continue",
+ "continueCourse": "Continue the course",
+"continueExercise": "Continue the exercise",
+"continueQuiz": "Continue the quiz",
 
-"restartCourse": "Restart",
-"restartExercise": "Restart",
-"restartQuiz": "Restart",
+"restartCourse": "Restart the course",
+"restartExercise": "Restart the exercise",
+"restartQuiz": "Restart the quiz",
 
-"startCourse": "Start",
-"startExercise": "Start",
-"startQuiz": "Start",
-
-"checkCourse": "Check the course",
-"checkExercise": "Check the exercise",
-"checkQuiz": "Check the quiz",
-
-"checkExos": "Check exercises"
-
-
-
-
+"startCourse": "Start the course",
+"startExercise": "Start the exercise",
+"startQuiz": "Start the quiz"
 
 }

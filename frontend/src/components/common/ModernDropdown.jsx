@@ -17,7 +17,7 @@ export default function ModernDropdown({ value, onChange, options, placeholder }
   return (
     <div className="relative" ref={ref}>
       {/* BOUTON COMPACT */}
-      <button type="button"
+      <button
         className="flex items-center justify-between min-w-[115px] px-3 py-1.5
                    rounded-lg bg-white border border-primary/20 shadow-sm
                    text-primary text-sm font-medium cursor-pointer
@@ -38,26 +38,24 @@ export default function ModernDropdown({ value, onChange, options, placeholder }
       {/* LISTE COMPACTE */}
       {open && (
         <div
-          className="absolute left-0 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-gray-100 shadow-lg
-               rounded-md py-1 z-20 animate-dropdown text-sm"
+          className="absolute left-0 mt-1 w-full bg-white border border-gray-100 shadow-lg
+                     rounded-md py-1 z-20 animate-dropdown text-sm"
         >
           {options.map((opt) => (
-            <button
-              type="button"
+            <div
               key={opt.value}
               onClick={() => {
                 onChange(opt.value);
                 setOpen(false);
               }}
-              className="block w-full text-left px-3 py-1 cursor-pointer text-primary hover:bg-primary/10 transition-all"
+              className="px-3 py-1 cursor-pointer text-primary
+                         hover:bg-primary/10 transition-all"
             >
               {opt.label}
-            </button>
-
+            </div>
           ))}
         </div>
       )}
-
     </div>
   );
 }

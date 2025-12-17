@@ -33,25 +33,17 @@ module.exports = {
         green: "rgb(var(--color-green) / <alpha-value>)",
         blue_primary_light: "rgb(var(--color-blue-primary-light) / <alpha-value>)",
 
-        /* 🎨 Couleurs du prototype (Stats) */
-        statBlue1: "var(--stat-blue-1)",
-        statBlue2: "var(--stat-blue-2)",
-        statPurple1: "var(--stat-purple-1)",
-        statPurple2: "var(--stat-purple-2)",
-        statPink1: "var(--stat-pink-1)",
-        statPink2: "var(--stat-pink-2)",
-        statSoftBlue1: "var(--stat-softblue-1)",
-        statSoftBlue2: "var(--stat-softblue-2)",
-      },
 
+
+      },
       backgroundImage: {
         "grad-1": "var(--grad-1)",
         "grad-2": "var(--grad-2)",
         "grad-3": "var(--grad-3)",
         "grad-4": "var(--grad-4)",
         "grad-5": "var(--grad-5)",
-        "grad-6": "var(--grad-6)",
         "grad-7": "var(--grad-7)",
+        "grad-6": "var(--grad-6)",
         "grad-8": "var(--grad-8)",
         "grad-dark-1": "var(--grad-dark-1)",
         "grad-dark-2": "var(--grad-dark-2)",
