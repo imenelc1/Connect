@@ -7,6 +7,7 @@ from spaces.views import my_courses
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('forum.urls')), 
+    path('api/', include('feedback.urls')), 
     path('api/users/', include('users.urls')),
     path('api/courses/', include('courses.urls')),
     path('api/exercices/', include('exercices.urls')),

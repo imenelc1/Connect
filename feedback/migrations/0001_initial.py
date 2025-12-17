@@ -31,5 +31,10 @@ class Migration(migrations.Migration):
                 ('date_envoie', models.DateTimeField(auto_now_add=True)),
                 ('utilisateur', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
+            options={
+                'db_table': 'feedback_notification',
+                'ordering': ['-date_envoie'],
+                'indexes': [models.Index(fields=['content_type', 'object_id'], name='feedback_no_content_1777ae_idx'), models.Index(fields=['utilisateur_destinataire', 'is_read'], name='feedback_no_utilisa_9df4bb_idx')],
+            },
         ),
     ]
