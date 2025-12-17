@@ -38,21 +38,18 @@ export default function ResetPassword() {
     }
 
     try {
-      const res = await api.post("password/reset/", {
-        token,
-        new_password: password,
-      });
-
+      const res = await api.post("password/reset/", { token, new_password: password });
       toast.success(res.data?.message || t("login.passwordUpdated"));
-      navigate("/login/student");
+      navigate("/login/student"); // redirection après succès
     } catch (error) {
       const backend = error.response?.data;
-
       if (backend?.error) {
         toast.error(backend.error);
+        if (backend.error === "Token expiré") {
+          navigate("/forgot-password"); // redirection si token expiré
+        }
         return;
       }
-
       toast.error(t("login.error"));
     }
   };

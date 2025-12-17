@@ -5,8 +5,6 @@ import HeadMascotte from "../ui/HeadMascotte";
 import IaAssistant from "../ui/IaAssistant";
 import UserCircle from "../common/UserCircle";
 import ThemeContext from "../../context/ThemeContext";
-import NotificationBell from "../common/NotificationBell";
-import { useNotifications } from "../../context/NotificationContext";
 
 export default function BadgeHeader() {
   const { t: tBadges } = useTranslation("badges");
@@ -44,7 +42,7 @@ export default function BadgeHeader() {
     }}
   >
     {/* Icône */}
-    <div className="w-10 h-10 items-center justify-center rounded-md text-white text-xl bg-grad-all transition-all duration-300 hidden sm:flex">
+    <div className="w-10 h-10 flex items-center justify-center rounded-md text-white text-xl bg-grad-all transition-all duration-300 hidden sm:flex">
       <FaMedal />
     </div>
 
@@ -71,7 +69,7 @@ export default function BadgeHeader() {
     <button className="px-5 py-1 sm:px-4 sm:py-2 rounded-md bg-tertiary text-white font-semibold shadow text-xs sm:text-sm">
       {tBadges("header.level")}
     </button>
-<NotificationBell />
+
     {/* UserCircle */}
     <UserCircle
       initials={initials}

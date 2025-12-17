@@ -1,0 +1,23 @@
+{
+  "title": "Tableau de bord",
+  "subtitle": "Bienvenue ! Voici ce qui se passe aujourd'hui.",
+  "recentActivity": "Activité récente",
+  "validationCourses": "Cours à valider",
+  "tabs": {
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté"
+  },
+  "noCourses": "Aucun cours dans cette catégorie.",
+  "buttons": {
+    "inspect": "Examiner",
+    "approve": "Approuver",
+    "reject": "Rejeter"
+  },
+   "stats": {
+    "totalStudents": "Total étudiants",
+    "activeCourses": "Total cours",
+    "totalExercises": "Total exercices",
+    "totalSpaces": "Total espaces"
+  }
+}

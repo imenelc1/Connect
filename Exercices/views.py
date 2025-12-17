@@ -8,6 +8,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from users.jwt_auth import jwt_required
 from rest_framework.views import APIView
+from rest_framework import status
+
 
 class CreateExoView(APIView):
 
@@ -30,7 +32,7 @@ class CreateExoView(APIView):
 
 @api_view(['GET'])
 def Exercice_list_api(request):
-    exercice = Exercice.objects.filter(visibilite_exo=True).exclude(quiz__isnull=False)
+    exercice = Exercice.objects.filter(visibilite_exo=True).exclude(categorie="quiz")
     serializer = ExerciceSerializer(exercice, many=True)
     return Response(serializer.data)
 
@@ -55,3 +57,20 @@ def delete_exercice(request, pk):
         return Response({"message": "deleted"}, status=204)
     except Exercice.DoesNotExist:
         return Response({"error": "not found"}, status=404)
+    
+    
+    
+"""class ExerciceeDetailView(generics.RetrieveAPIView):
+    queryset = Exercice.objects.all()
+    serializer_class = ExerciceSerializer
+    lookup_field = "pk"
+    """
+
+
+
+
+class ExerciceParCoursView(APIView):
+    def get(self, request, cours_id):
+        exercices = Exercice.objects.filter(cours_id=cours_id, visibilite_exo=True).exclude(categorie="quiz")
+        serializer = ExerciceSerializer(exercices, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

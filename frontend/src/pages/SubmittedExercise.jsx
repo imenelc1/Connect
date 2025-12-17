@@ -34,10 +34,7 @@ int main() {
         feedback: "Excellent work! Your solution is clean and efficient. Good use of the modulo operator."
     });
 
-    // 🔹 Fonction pour modifier le feedback
-    const handleFeedbackChange = (e) => {
-        setExerciseData({ ...exerciseData, feedback: e.target.value });
-    };
+    
 
     return (
         <div className="flex bg-background min-h-screen">

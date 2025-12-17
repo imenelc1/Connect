@@ -7,8 +7,7 @@ import { useTranslation } from "react-i18next";
 import { CircleCheck, TrendingUp, Clock4, Clock, Circle } from "lucide-react";
 import WeeklySubmissionChart from "../components/common/WeeklySubmissionChart";
 import GradeProgressionChart from "../components/common/GradeProgressionChart";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
+
 export default function ProgressStudent() {
 
     const { t } = useTranslation("ProgressStudent");
@@ -77,17 +76,7 @@ export default function ProgressStudent() {
                 {/* Profile Header */}
                 <div className="bg-card rounded-3xl shadow-md p-6 sm:p-8 mb-6 sm:mb-8 w-full max-w-full lg:max-w-5xl mx-auto">
                     <div className="flex flex-col sm:flex-row items-center sm:gap-6">
-                        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
+                        <UserCircle />
 
                         <div className="mt-4 sm:mt-0 text-center sm:text-left">
                             <h2 className="text-xl sm:text-2xl font-semibold">Meriem Hamouche</h2>

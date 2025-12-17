@@ -3,14 +3,21 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from .models import Utilisateur, Etudiant, Enseignant, Administrateur
+from .models import Utilisateur, Etudiant, Enseignant, Administrateur, PasswordResetToken
+from courses.models import Cours
+from exercices.models import Exercice
+from spaces.models import Space
 from .serializers import UtilisateurSerializer, EtudiantSerializer, EnseignantSerializer, AdministrateurSerializer
 import jwt
 from django.conf import settings
 from datetime import datetime, timedelta
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import ProfileSerializer
-from .jwt_helpers import jwt_required, IsAuthenticatedJWT
+from .jwt_helpers import IsAuthenticatedJWT
+from django.core.mail import send_mail
+import uuid
+from rest_framework.permissions import BasePermission
+
 # -----------------------------
 # Constantes JWT manquantes
 # -----------------------------
@@ -143,10 +150,21 @@ class AdminLoginView(APIView):
         try:
             admin = Administrateur.objects.get(email_admin=email)
             if admin.check_password(password):
+                # 🔥 Création du token JWT pour admin
+                payload = {
+                    "admin_id": admin.id_admin,
+                    "role": "admin",
+                    "exp": datetime.utcnow() + timedelta(hours=24)
+                }
+                token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+                if isinstance(token, bytes):
+                    token = token.decode("utf-8")
+
                 return Response({
                     "message": "Connexion admin réussie",
                     "id_admin": admin.id_admin,
-                    "email_admin": admin.email_admin
+                    "email_admin": admin.email_admin,
+                    "token": token
                 }, status=status.HTTP_200_OK)
 
             return Response({"error": "Mot de passe incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -154,6 +172,18 @@ class AdminLoginView(APIView):
         except Administrateur.DoesNotExist:
             return Response({"error": "Admin introuvable"}, status=status.HTTP_404_NOT_FOUND)
 
+class IsAdminJWT(BasePermission):
+    def has_permission(self, request, view):
+        auth = request.headers.get("Authorization")
+        if not auth:
+            return False
+
+        try:
+            token = auth.split(" ")[1]
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            return payload.get("role") == "admin"
+        except:
+            return False
 
 # -----------------------------
 # User Profile
@@ -193,3 +223,113 @@ class ChangePasswordView(APIView):
         user.save()
 
         return Response({"detail": "Mot de passe mis à jour avec succès"}, status=200)
+
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email requis"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = Utilisateur.objects.get(adresse_email=email)
+        except Utilisateur.DoesNotExist:
+            return Response({"error": "Utilisateur introuvable"}, status=status.HTTP_404_NOT_FOUND)
+
+        token = PasswordResetToken.objects.create(user=user)
+        reset_link = f"http://localhost:5173/reset-password?token={token.token}"
+
+        # envoyer email
+        send_mail(
+            "Réinitialisation de mot de passe",
+            f"Cliquer sur ce lien pour réinitialiser votre mot de passe : {reset_link}",
+            "no-reply@platform.com",
+            [email],
+            fail_silently=False,
+        )
+
+        return Response({"message": "Lien de réinitialisation envoyé"})
+    
+class ResetPasswordView(APIView):
+    def post(self, request):
+        token_str = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        if not token_str or not new_password:
+            return Response({"error": "Token et nouveau mot de passe requis"}, status=400)
+
+        try:
+            token_obj = PasswordResetToken.objects.get(token=token_str)
+        except PasswordResetToken.DoesNotExist:
+            return Response({"error": "Token invalide"}, status=400)
+
+        if not token_obj.is_valid():
+            return Response({"error": "Token expiré"}, status=400)
+
+        user = token_obj.user
+        user.set_password(new_password)
+        user.save()
+
+        token_obj.delete()  # empêche réutilisation
+
+        return Response({"message": "Mot de passe mis à jour avec succès"})
+   
+def send_reset_email(user_email, token):
+    reset_link = f"http://localhost:5173/reset-password?token={token}"
+    send_mail(
+        "Réinitialisation de mot de passe",
+        f"Cliquer sur ce lien pour réinitialiser votre mot de passe : {reset_link}",
+        "no-reply@platform.com",
+        [user_email],
+        fail_silently=False,
+    )
+
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user_role == "admin"
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT, IsAdmin])
+def admin_stats(request):
+    from courses.models import Cours
+    from exercices.models import Exercice
+    from spaces.models import Space
+    from .models import Etudiant
+
+    try:
+        data = {
+            "total_students": Etudiant.objects.count(),
+            "total_courses": Cours.objects.count(),
+            "total_exercises": Exercice.objects.count(),
+            "total_spaces": Space.objects.count(),
+        }
+        return Response(data, status=200)
+    except Exception as e:
+        return Response({"error": "Erreur serveur : " + str(e)}, status=500)
+
+# Permission custom pour ton JWT
+class IsAdminOrTeacherJWT(BasePermission):
+    def has_permission(self, request, view):
+        auth = request.headers.get("Authorization")
+        if not auth:
+            return False
+        try:
+            token = auth.split(" ")[1]
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            # Tu peux filtrer par rôle si besoin
+            return payload.get("role") in ["admin", "enseignant"]
+        except:
+            return False
+
+@api_view(["GET"])
+@permission_classes([IsAdminOrTeacherJWT])
+def get_enseignants(request):
+    enseignants = Enseignant.objects.select_related("utilisateur").all()
+    data = [
+        {
+            "id_utilisateur": e.utilisateur.id_utilisateur,
+            "nom": e.utilisateur.nom,
+            "prenom": e.utilisateur.prenom,
+        }
+        for e in enseignants
+    ]
+    return Response(data, status=200)

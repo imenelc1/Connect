@@ -1,16 +1,6 @@
 from django.contrib import admin
-from .models import ProgressionCours, TentativeExercice, Badge, GagnerBadge
+from .models import ProgressionCours, TentativeExercice
 
-# --- Badges ---
-@admin.register(Badge)
-class BadgeAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'description', 'condition', 'categorie', 'numpoints')
-    search_fields = ('nom', 'condition', 'categorie')
-
-@admin.register(GagnerBadge)
-class GagnerBadgeAdmin(admin.ModelAdmin):
-    list_display = ('utilisateur', 'badge', 'date_obtention')
-    search_fields = ('utilisateur__adresse_email', 'badge__nom')
 
 # --- Progression des cours ---
 @admin.register(ProgressionCours)

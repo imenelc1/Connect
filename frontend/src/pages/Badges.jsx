@@ -243,9 +243,9 @@ export default function Badges() {
     <>
       <div className="bg-surface">
         <Navbar />
-      
+
         <BadgeHeader />
-      
+
         <main
           className={`
         p-6 pt-10 min-h-screen text-textc transition-all duration-300

@@ -10,25 +10,36 @@
     "level": "Course Level",
     "cancel": "Cancel",
     "save_next": "Save & Next",
+    "save_publier": "Save & Publish",
 
     "curriculum": "Course Curriculum",
     "add_section": "Add Section",
     "section_title_placeholder": "Section title",
+    "section_description_placeholder": "Section description",
     "lesson": "Lesson",
     "lesson_type": "Lesson Type",
     "add_lesson": "Add Lesson",
+    "lesson_title": "Lesson title",
+    "lesson_content": "Content of the lesson",
+
     "back": "Back",
 
     "publish_title": "Publish Course",
     "publish_description": "→ Final page here.",
 
-    "text":"text",
-     "example":"example",
-     "image":"image",
-    "section_description_placeholder":"Course description",
-     "lesson_title":"Lesson title",
-     "lesson_content":"Content of the lesson"
+    "text": "Text",
+    "example": "Example",
+    "image": "Image",
 
+    "public": "Public",
+    "private": "Private",
+    "visibility": "Visibility",
+    "courseVisibility": "Course Visibility",
+
+    "summary": "Course Summary",
+    "untitled_section": "Untitled section",
+    "untitled_lesson": "Untitled lesson",
+    "no_content": "No content provided"
   },
 
   "select": {

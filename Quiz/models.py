@@ -6,15 +6,18 @@ from exercices.models import Exercice
 class Quiz(models.Model):
     scoreMinimum=models.IntegerField()
     exercice = models.OneToOneField(Exercice, on_delete=models.CASCADE)
+    activerDuration=models.BooleanField(default=True)
+    duration=models.DurationField(null=True)
+    nbMax_tentative=models.IntegerField(default=0)
 
 class Question(models.Model):
     id_qst = models.AutoField(primary_key=True)
     texte_qst = models.TextField()
     reponse_correcte = models.CharField(max_length=255)
     score = models.FloatField()
-    exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE)
+    exercice = models.ForeignKey(Exercice, related_name="questions" ,on_delete=models.CASCADE)
 
 class Option(models.Model):
     id_option = models.AutoField(primary_key=True)
     texte_option = models.CharField(max_length=255)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name="options", on_delete=models.CASCADE)

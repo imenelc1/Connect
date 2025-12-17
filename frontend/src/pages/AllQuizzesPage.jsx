@@ -10,10 +10,10 @@ import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import { getCurrentUserId } from "../hooks/useAuth";
-
-import { useNavigate } from "react-router-dom";
 import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
+import { useNavigate } from "react-router-dom";
+
 
 const gradientMap = {
   Débutant: "bg-grad-2",
@@ -37,9 +37,9 @@ export default function AllQuizzesPage() {
           title: c.exercice?.titre_exo,
           description: c.exercice?.enonce,
           level: c.exercice?.niveau_exercice_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
-          //levelLabel: t(`levels.${c.niveau_cour_label}`),
-          duration: c.exercice?.duration_readable,
           author: c.exercice?.utilisateur_name,
+          activer:c.activerDuration,
+          duration: c.duration_minutes,
           initials: c.exercice?.utilisateur_name
             .split(" ")
             .map(n => n[0])
@@ -65,10 +65,28 @@ const navigate = useNavigate();
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const filteredList =
+  /*const filteredList =
+    filterLevel === "ALL"
+      ? quizzes
+      : quizzes.filter((q) => q.level === filterLevel);*/
+
+  const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
+
+ let filteredList =
+
+    // 1️⃣ Filtrer par niveau
     filterLevel === "ALL"
       ? quizzes
       : quizzes.filter((q) => q.level === filterLevel);
+
+  // 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
+  if (userRole === "enseignant" && categoryFilter === "mine") {
+    filteredList = filteredList.filter((q) => q.isMine);
+  }
+
+
+
+
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -117,19 +135,22 @@ const navigate = useNavigate();
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
-   return (
-    <div className="flex min-h-screen bg-background dark:bg-gray-900">
+  return (
+    <div className="flex bg-surface min-h-screen">
       <Navbar />
-      
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
+      {/* Header Right Controls */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
+
+        {/* Notification Icon */}
+        <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+          <Bell size={16} />
+        </div>
+
+        {/* User Circle */}
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
         />
       </div>
 
@@ -148,7 +169,9 @@ const navigate = useNavigate();
             type="quizzes"
             userRole={userRole}
             onFilterChange={setFilterLevel}   // ✔️ correction
-            activeFilter={filterLevel}        // ✔️ correction
+            activeFilter={filterLevel}  
+            categoryFilter={categoryFilter}        // ← bien passer le state
+            setCategoryFilter={setCategoryFilter}      // ✔️ correction
             showCompletedFilter={userRole === "etudiant"}
           />
 

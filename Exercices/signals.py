@@ -1,82 +1,38 @@
-# exercices/tests/test_signals.py
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from courses.models import Cours
-from ..models import Exercice
-import logging
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import Exercice
+from spaces.models import SpaceCour, SpaceEtudiant
+from feedback.utils import create_notification
 
-# Capture les logs pour vérifier
-logging.basicConfig(level=logging.INFO)
+@receiver(post_save, sender=Exercice)
+def notify_students_new_exercice(sender, instance, created, **kwargs):
+    if not created:
+        return
 
-class ExerciceSignalsTest(TestCase):
-    def setUp(self):
-        User = get_user_model()
-        self.teacher = User.objects.create_user(
-            email='teacher@test.com',
-            password='testpass',
-            nom='Teacher',
-            prenom='Test',
-            role='enseignant'
-        )
-        
-        self.student = User.objects.create_user(
-            email='student@test.com',
-            password='testpass',
-            nom='Student',
-            prenom='Test',
-            role='etudiant'
-        )
-        
-        # Créer un cours
-        self.cours = Cours.objects.create(
-            titre_cours="Cours de test",
-            description="Description test",
-            utilisateur=self.teacher
-        )
-    
-    def test_exercice_creation_signal(self):
-        """Test que le signal se déclenche à la création d'exercice"""
-        print("\n🔍 Test création exercice...")
-        
-        # Créer un exercice
-        exercice = Exercice.objects.create(
-            titre_exo="Test Signal",
-            enonce="Ceci est un test",
-            niveau_exo="debutant",
-            utilisateur=self.teacher,
-            cours=self.cours,
-            visibilite_exo=True
-        )
-        
-        # Vérifier que l'exercice a bien été créé
-        self.assertIsNotNone(exercice.id_exercice)
-        print(f"   ✅ Exercice créé: {exercice.titre_exo}")
-        
-        # Dans un vrai test, vous vérifieriez qu'une notification a été créée
-        from feedback.models import Notification
-        notifications = Notification.objects.filter(
-            module_source='exercice',
-            action_type='exercice_created'
-        )
-        
-        print(f"   📨 Notifications créées: {notifications.count()}")
-        
-    def test_exercice_update_signal(self):
-        """Test que le signal se déclenche à la modification d'exercice"""
-        print("\n🔍 Test modification exercice...")
-        
-        # Créer puis modifier
-        exercice = Exercice.objects.create(
-            titre_exo="Exercice à modifier",
-            enonce="Contenu",
-            niveau_exo="debutant",
-            utilisateur=self.teacher,
-            cours=self.cours,
-            visibilite_exo=False  # Privé au départ
-        )
-        
-        # Modifier la visibilité
-        exercice.visibilite_exo = True
-        exercice.save()
-        
-        print(f"   ✅ Exercice modifié: publié={exercice.visibilite_exo}")
+    exercice = instance
+    professeur = exercice.utilisateur
+    cours = exercice.cours
+
+    if exercice.visibilite_exo:
+        # Exercice public → tous les étudiants
+        from users.models import Utilisateur
+        students = Utilisateur.objects.filter(role='etudiant')
+    else:
+        # Exercice privé → étudiants des espaces contenant ce cours
+        space_ids = SpaceCour.objects.filter(cours=cours).values_list('space_id', flat=True)
+        students = Utilisateur.objects.filter(
+            spaceetudiant__space_id__in=space_ids
+        ).distinct()
+
+    for student in students:
+        try:
+            create_notification(
+                destinataire=student,
+                envoyeur=professeur,
+                content_object=exercice,
+                action_type='new_exercice',
+                module_source='exercice',
+                message=f"{professeur.prenom} a publié l'exercice '{exercice.titre_exo}'."
+            )
+        except Exception as e:
+            print(f"Erreur notification exercice pour {student}: {e}")

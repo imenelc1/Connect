@@ -7,7 +7,7 @@ export default function AboutSection() {
   const { t } = useTranslation("acceuil");
 
   return (
-    <div className="about-container w-full px-8 md:px-16 py-6 flex flex-col md:flex-row justify-between gap-20 font-poppins bg-surface">
+    <div id="about" className="about-container w-full px-8 md:px-16 py-6 flex flex-col md:flex-row justify-between gap-20 font-poppins bg-surface">
 
       {/* ---------------------- LEFT SIDE : Texte sur la plateforme ---------------------- */}
       <div className="about-content flex flex-col gap-3 md:gap-10 w-full md:w-1/2">

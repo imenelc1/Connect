@@ -1,0 +1,12 @@
+
+{
+  "StudentsManagement": {
+    "StudentsManagement": "Gestion des étudiants" ,
+    "view":"Consulter et gérer les comptes étudiants",
+    "buttonAdd": "Ajouter un étudiant",
+    "Search": "Rechercher des étudiants ...",
+    "Encolled":"Cours suivis",
+    "Overal":"Progrès global",
+    "joined":"Rejoint"
+  }
+}

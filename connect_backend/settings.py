@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'ia',
     'dashboard',
     'feedback',
-    'spaces',
+    'spaces.apps.SpacesConfig',
     # API et CORS
     'rest_framework',
     'corsheaders',

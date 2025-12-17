@@ -14,8 +14,7 @@ import { toast } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext"; 
+  
 
 
 import ModernDropdown from "../components/common/ModernDropdown";
@@ -52,7 +51,7 @@ const navigate = useNavigate();
     if (!coursId) return;
 
     const fetchCourse = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("token");
       try {
         const res = await api.get(`courses/courses/${coursId}/`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -180,7 +179,7 @@ const navigate = useNavigate();
 
      const confirmDelete = window.confirm("Tu es sûr de supprimer cette section ?");
     if (!confirmDelete) return;
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
 
   try {
     // Appel API pour supprimer la section
@@ -254,7 +253,7 @@ const navigate = useNavigate();
   
 const handleSaveCourse = async (coursId) => {
   const currentUserId = getCurrentUserId();
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
 
   try {
     // --- Étape 1 : Mettre à jour le cours ---
@@ -354,7 +353,6 @@ const handleSaveCourse = async (coursId) => {
 
       <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
         <div className="flex justify-end">
-          <NotificationBell />
           <UserCircle
             initials={initials}
             onToggleTheme={toggleDarkMode}
