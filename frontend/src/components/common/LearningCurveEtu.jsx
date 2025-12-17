@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/index.css";
 import {
   LineChart,
@@ -9,16 +9,29 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+import progressionService from "../../services/progressionService";
 
 export default function LearningCurve({ title }) {
-  const data = [
-    { month: "Jan", A: 40, B: 30, C: 50 },
-    { month: "Feb", A: 50, B: 45, C: 60 },
-    { month: "Mar", A: 35, B: 55, C: 45 },
-    { month: "Apr", A: 55, B: 50, C: 65 },
-    { month: "May", A: 45, B: 40, C: 55 },
-    { month: "Jun", A: 60, B: 55, C: 70 },
-  ];
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const history = await progressionService.getGlobalProgressHistory();
+        // s'assurer que la valeur est numérique
+        const formatted = history.map(item => ({
+          date: item.date,
+          progression: Number(item.progression)
+        }));
+        console.log("Historique progression globale:", formatted);
+        setData(formatted);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchHistory();
+  }, []);
 
   return (
     <div className="bg-card p-6 rounded-2xl shadow w-full h-full">
@@ -27,10 +40,8 @@ export default function LearningCurve({ title }) {
       <ResponsiveContainer width="100%" height="90%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--color-surface))" />
-
-          <XAxis dataKey="month" stroke="rgb(var(--color-gray))" />
-          <YAxis stroke="rgb(var(--color-gray))" />
-
+          <XAxis dataKey="date" stroke="rgb(var(--color-gray))" tick={{ fontSize: 11 }} />
+          <YAxis domain={[0, 100]} stroke="rgb(var(--color-gray))" tick={{ fontSize: 11 }} />
           <Tooltip
             contentStyle={{
               backgroundColor: "rgb(var(--color-card))",
@@ -38,26 +49,13 @@ export default function LearningCurve({ title }) {
               border: "1px solid rgb(var(--color-surface))"
             }}
           />
-
-          {/* Courbe bleue */}
           <Line
             type="monotone"
-            dataKey="A"
-            stroke="rgb(var(--color-muted)"
+            dataKey="progression" // correspond à ton API
+            stroke="rgb(var(--color-muted))"
             strokeWidth={3}
-            dot={false}
+            dot={{ r: 3 }}
           />
-
-          {/* Courbe violette */}
-          <Line
-            type="monotone"
-            dataKey="B"
-            stroke="rgb(var(--color-purple))"
-            strokeWidth={3}
-            dot={false}
-          />
-
-         
         </LineChart>
       </ResponsiveContainer>
     </div>

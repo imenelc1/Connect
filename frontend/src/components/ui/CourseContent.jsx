@@ -17,35 +17,29 @@ export default function CourseContent({
   const courseId = course.id || "default";
 
   // Timer
-  const [secondsSpent, setSecondsSpent] = useState(
-    parseInt(localStorage.getItem(`courseTimer_${courseId}`) || "0", 10)
+ // ===================== TIMER =====================
+const [secondsSpent, setSecondsSpent] = useState(() => {
+  return parseInt(
+    localStorage.getItem(`courseTimer_${course.id}`) || "0",
+    10
   );
+});
 
-  useEffect(() => {
-    const storedCourseId = localStorage.getItem("currentCourseId");
-    if (storedCourseId !== courseId) {
-      setSecondsSpent(0);
-      localStorage.setItem("currentCourseId", courseId);
-    }
-  }, [courseId]);
+useEffect(() => {
+  const interval = setInterval(() => {
+    setSecondsSpent(prev => prev + 1);
+  }, 1000);
 
-  useEffect(() => {
-    let interval;
-    const startTimer = () => {
-      interval = setInterval(() => setSecondsSpent((prev) => prev + 1), 1000);
-    };
-    const stopTimer = () => clearInterval(interval);
-    startTimer();
-    const handleVisibility = () => {
-      if (document.hidden) stopTimer();
-      else startTimer();
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => {
-      stopTimer();
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, [courseId]);
+  return () => clearInterval(interval);
+}, [course.id]);
+
+useEffect(() => {
+  localStorage.setItem(
+    `courseTimer_${course.id}`,
+    secondsSpent.toString()
+  );
+}, [secondsSpent, course.id]);
+
 
   useEffect(() => {
     localStorage.setItem(`courseTimer_${courseId}`, secondsSpent.toString());
@@ -61,6 +55,8 @@ export default function CourseContent({
       .toString()
       .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
+
+  
 
   // Pagination des leçons
   const LESSONS_PER_PAGE = 2;
@@ -78,41 +74,65 @@ export default function CourseContent({
     currentLessonPage === totalLessonPages - 1;
 
   // Navigation et progression
-  const nextLessonPage = async () => {
-    const startIdx = currentLessonPage * LESSONS_PER_PAGE;
-    const endIdx = startIdx + LESSONS_PER_PAGE;
-    const currentPageLessons = lessons.slice(startIdx, endIdx);
+ const nextLessonPage = async () => {
+  // Toutes les leçons jusqu'à la page actuelle
+  const endIdx = (currentLessonPage + 1) * LESSONS_PER_PAGE;
+  const lessonsToComplete = lessons.slice(0, endIdx).filter(l => !l.visited && l?.id);
 
-    // Marquer toutes les leçons de la page actuelle comme complétées
-    for (const lesson of currentPageLessons) {
-      if (lesson?.id) {
-        try {
-          const res = await progressionService.completeLesson(lesson.id);
-          const newProgress = res.progress ?? section.progress ?? 0;
+  if (lessonsToComplete.length > 0) {
+    const lessonIds = lessonsToComplete.map(l => l.id);
 
-          const updatedSections = sections.map((sec, i) =>
-            i === currentSectionIndex ? { ...sec, progress: newProgress } : sec
-          );
-          setSections(updatedSections);
-          if (setCourseProgress) setCourseProgress(newProgress);
-        } catch (err) {
-          console.error("Erreur progression :", err.response?.data || err.message);
-        }
+    try {
+      // On envoie aussi le temps passé
+      const res = await progressionService.completeLessonsBulk(lessonIds, { duration: secondsSpent });
+      const newProgress = res.course_progress ?? section.progress ?? 0;
+
+      // Reset chrono local à 0 après envoi
+      setSecondsSpent(0);
+      localStorage.setItem(`courseTimer_${courseId}`, "0");
+
+      // Mettre à jour le frontend
+      const updatedSections = sections.map((sec, i) => {
+        if (i !== currentSectionIndex) return sec;
+        return {
+          ...sec,
+          lessons: sec.lessons.map(l =>
+            lessonIds.includes(l.id) ? { ...l, visited: true } : l
+          ),
+          progress: newProgress,
+        };
+      });
+
+      setSections(updatedSections);
+      if (setCourseProgress) setCourseProgress(newProgress);
+    } catch (err) {
+      console.error("Erreur progression :", err.response?.data || err.message);
+    }
+  }
+
+  // Navigation
+  if (!isLastPage) {
+    if (currentLessonPage < totalLessonPages - 1) setCurrentLessonPage(currentLessonPage + 1);
+    else if (currentSectionIndex < sections.length - 1) {
+      setCurrentSectionIndex(currentSectionIndex + 1);
+      setCurrentLessonPage(0);
+    }
+  } else {
+    console.log("Cours terminé !");
+
+    // Envoi final du temps restant au backend
+    if (secondsSpent > 0) {
+      try {
+        await progressionService.addSession({ duration: secondsSpent });
+        setSecondsSpent(0);
+        localStorage.setItem(`courseTimer_${courseId}`, "0");
+      } catch (err) {
+        console.error("Erreur enregistrement temps :", err.response?.data || err.message);
       }
     }
+  }
+};
 
-    // Aller à la page/section suivante
-    if (!isLastPage) {
-      if (currentLessonPage < totalLessonPages - 1) setCurrentLessonPage(currentLessonPage + 1);
-      else if (currentSectionIndex < sections.length - 1) {
-        setCurrentSectionIndex(currentSectionIndex + 1);
-        setCurrentLessonPage(0);
-      }
-    } else {
-      // Dernière page : cours terminé
-      console.log("Cours terminé !");
-    }
-  };
 
   const prevLessonPage = () => {
     if (currentLessonPage > 0) setCurrentLessonPage(currentLessonPage - 1);

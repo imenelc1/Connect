@@ -30,23 +30,23 @@ import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
 import ListeExercicesPage from "../pages/ListeExercicesPage";
 import StudentExercice from "../pages/exerciceStudent";
-import CodeExercisePage from '../pages/CodeExercisePage';
-import TheoryExercisePage from '../pages/TheoryExercisePage';
+import CodeExercisePage from "../pages/CodeExercisePage";
+import TheoryExercisePage from "../pages/TheoryExercisePage";
 
 import CourseDetails from "../pages/CourseDetails.jsx";
 import SubmittedExercise from "../pages/SubmittedExercise.jsx";
 import ProgressExercice from "../pages/ProgressionExo";
 import ProgressStudent from "../pages/ProgressionStudent";
-import QuizIntroPage from '../pages/QuizIntroPage';
-import QuizTakePage from '../pages/QuizTakePage';
-import QuizSummaryPage from '../pages/QuizSummaryPage';
+import QuizIntroPage from "../pages/QuizIntroPage";
+import QuizTakePage from "../pages/QuizTakePage";
+import QuizSummaryPage from "../pages/QuizSummaryPage";
 
 import SubmittedExercises from "../pages/SubmittedExercises";
 import QuizManagement from "../pages/QuizManagement";
 import ExercisesManagement from "../pages/ExerciseManagement";
 import CoursesManagement from "../pages/CourseManagement";
 import ValidationCourses from "../pages/ValidationCourses";
-import Dashboard from "../pages/Dashboard"
+import Dashboard from "../pages/Dashboard";
 import AdminLogin from "../pages/AdminLogin.jsx";
 import UpdateExercice from "../pages/UpdateExercice.jsx";
 import StudentsMangement from "../pages/studentsManagement.jsx";
@@ -55,12 +55,10 @@ import ForumManagement from "../pages/forumManagement.jsx";
 import SpacesManagement from "../pages/SpacesManagement.jsx";
 import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 
-
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* ------------------------- */}
         {/*       ROUTES PUBLIQUES    */}
         {/* ------------------------- */}
@@ -116,7 +114,6 @@ export default function AppRoutes() {
         {/* Page des espaces */}
         <Route path="/spaceManagement" element={<SpacesManagement />} />
         <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
-
 
         {/* Routes avec paramètres */}
         <Route path="/CourseDetails/:id" element={<CourseDetails />} />

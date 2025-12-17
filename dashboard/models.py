@@ -14,15 +14,15 @@ class LeconComplete(models.Model):
 class ProgressionCours(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
-    avancement_cours = models.FloatField()
-    temps_passe = models.DurationField()
-
+    avancement_cours = models.FloatField()  # en pourcentage 0-100
+    temps_passe = models.DurationField()  # durée de session
     derniere_lecon = models.ForeignKey(
         Lecon,
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
+    created_at = models.DateTimeField(auto_now_add=True)  # <-- pour l’axe X
 
 
 class TentativeExercice(models.Model):
