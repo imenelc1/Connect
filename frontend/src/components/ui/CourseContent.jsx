@@ -1,149 +1,108 @@
 import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import progressionService from "../../services/progressionService";
 
 export default function CourseContent({
   course,
   currentSectionIndex,
   setCurrentSectionIndex,
   setSections,
-  setCourseProgress,
-  initialLessonPage = 0,
-}) 
-{
+  sectionPages,
+  setSectionPages,
+  markLessonVisited,
+  updateSectionProgress,
+}) {
   const { t } = useTranslation("courses");
   const { title, sections } = course;
   const courseId = course.id || "default";
 
   // Timer
- // ===================== TIMER =====================
-const [secondsSpent, setSecondsSpent] = useState(() => {
-  return parseInt(
-    localStorage.getItem(`courseTimer_${course.id}`) || "0",
-    10
-  );
-});
+  const [secondsSpent, setSecondsSpent] = useState(() => {
+    return parseInt(localStorage.getItem(`courseTimer_${courseId}`) || "0", 10);
+  });
 
-useEffect(() => {
-  const interval = setInterval(() => {
-    setSecondsSpent(prev => prev + 1);
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [course.id]);
-
-useEffect(() => {
-  localStorage.setItem(
-    `courseTimer_${course.id}`,
-    secondsSpent.toString()
-  );
-}, [secondsSpent, course.id]);
-
+  useEffect(() => {
+    const interval = setInterval(() => setSecondsSpent((prev) => prev + 1), 1000);
+    return () => clearInterval(interval);
+  }, [courseId]);
 
   useEffect(() => {
     localStorage.setItem(`courseTimer_${courseId}`, secondsSpent.toString());
   }, [secondsSpent, courseId]);
 
-
-
   const formatTime = (secs) => {
     const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
-    return `${h.toString().padStart(2, "0")}:${m
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
       .toString()
-      .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+      .padStart(2, "0")}`;
   };
 
-  
-
-  // Pagination des leçons
+  // Gestion des leçons et pages
   const LESSONS_PER_PAGE = 2;
   const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
   const lessons = section?.lessons || [];
   const totalLessonPages = Math.ceil(lessons.length / LESSONS_PER_PAGE);
-  const [currentLessonPage, setCurrentLessonPage] = useState(initialLessonPage);
+
+  const currentLessonPage = sectionPages?.[currentSectionIndex] ?? 0;
   const currentLessons = lessons.slice(
     currentLessonPage * LESSONS_PER_PAGE,
     currentLessonPage * LESSONS_PER_PAGE + LESSONS_PER_PAGE
   );
 
+  // Marquer les leçons visitées
+  useEffect(() => {
+    currentLessons.forEach((lesson) => {
+      if (!lesson.visited) {
+        markLessonVisited(lesson.id);
+        updateSectionProgress(currentSectionIndex, lesson.id);
+      }
+    });
+
+    if (currentLessons.some((l) => !l.visited)) {
+      setSecondsSpent(0);
+      localStorage.setItem(`courseTimer_${courseId}`, "0");
+    }
+  }, [currentLessons, currentSectionIndex, markLessonVisited, updateSectionProgress, courseId]);
+
+  // Navigation
+  const goToLessonPage = (page) => {
+    setSectionPages((prev) => ({ ...prev, [currentSectionIndex]: page }));
+  };
+
+  const nextLessonPage = () => {
+    if (currentLessonPage < totalLessonPages - 1) {
+      goToLessonPage(currentLessonPage + 1);
+    } else if (currentSectionIndex < sections.length - 1) {
+      const nextIndex = currentSectionIndex + 1;
+      setCurrentSectionIndex(nextIndex);
+
+      const nextLessons = sections[nextIndex].lessons;
+      const firstUnvisited = nextLessons.findIndex((l) => !l.visited);
+      setSectionPages((prev) => ({
+        ...prev,
+        [nextIndex]: firstUnvisited >= 0 ? Math.floor(firstUnvisited / LESSONS_PER_PAGE) : 0,
+      }));
+    }
+  };
+
+  const prevLessonPage = () => {
+    if (currentLessonPage > 0) goToLessonPage(currentLessonPage - 1);
+    else if (currentSectionIndex > 0) {
+      const prevIndex = currentSectionIndex - 1;
+      setCurrentSectionIndex(prevIndex);
+
+      const totalPrevPages = Math.ceil(sections[prevIndex].lessons.length / LESSONS_PER_PAGE);
+      setSectionPages((prev) => ({ ...prev, [prevIndex]: totalPrevPages - 1 }));
+    }
+  };
+
   const isLastPage =
     currentSectionIndex === sections.length - 1 &&
     currentLessonPage === totalLessonPages - 1;
 
-  // Navigation et progression
- const nextLessonPage = async () => {
-  // Toutes les leçons jusqu'à la page actuelle
-  const endIdx = (currentLessonPage + 1) * LESSONS_PER_PAGE;
-  const lessonsToComplete = lessons.slice(0, endIdx).filter(l => !l.visited && l?.id);
-
-  if (lessonsToComplete.length > 0) {
-    const lessonIds = lessonsToComplete.map(l => l.id);
-
-    try {
-      // On envoie aussi le temps passé
-      const res = await progressionService.completeLessonsBulk(lessonIds, { duration: secondsSpent });
-      const newProgress = res.course_progress ?? section.progress ?? 0;
-
-      // Reset chrono local à 0 après envoi
-      setSecondsSpent(0);
-      localStorage.setItem(`courseTimer_${courseId}`, "0");
-
-      // Mettre à jour le frontend
-      const updatedSections = sections.map((sec, i) => {
-        if (i !== currentSectionIndex) return sec;
-        return {
-          ...sec,
-          lessons: sec.lessons.map(l =>
-            lessonIds.includes(l.id) ? { ...l, visited: true } : l
-          ),
-          progress: newProgress,
-        };
-      });
-
-      setSections(updatedSections);
-      if (setCourseProgress) setCourseProgress(newProgress);
-    } catch (err) {
-      console.error("Erreur progression :", err.response?.data || err.message);
-    }
-  }
-
-  // Navigation
-  if (!isLastPage) {
-    if (currentLessonPage < totalLessonPages - 1) setCurrentLessonPage(currentLessonPage + 1);
-    else if (currentSectionIndex < sections.length - 1) {
-      setCurrentSectionIndex(currentSectionIndex + 1);
-      setCurrentLessonPage(0);
-    }
-  } else {
-    console.log("Cours terminé !");
-
-    // Envoi final du temps restant au backend
-    if (secondsSpent > 0) {
-      try {
-        await progressionService.addSession({ duration: secondsSpent });
-        setSecondsSpent(0);
-        localStorage.setItem(`courseTimer_${courseId}`, "0");
-      } catch (err) {
-        console.error("Erreur enregistrement temps :", err.response?.data || err.message);
-      }
-    }
-  }
-};
-
-
-  const prevLessonPage = () => {
-    if (currentLessonPage > 0) setCurrentLessonPage(currentLessonPage - 1);
-    else if (currentSectionIndex > 0) {
-      const prevSection = sections[currentSectionIndex - 1];
-      setCurrentSectionIndex(currentSectionIndex - 1);
-      setCurrentLessonPage(Math.ceil(prevSection.lessons.length / LESSONS_PER_PAGE) - 1);
-    }
-  };
-
-  // Feedback
+     // Feedback
   const allFeedbacks = [
     { id: 1, initials: "A.S", comment: t("feedback1"), stars: 5 },
     { id: 2, initials: "M.K", comment: t("feedback2"), stars: 5 },
@@ -168,9 +127,9 @@ useEffect(() => {
     setRating(0);
   };
 
+  // Render
   return (
     <div className="bg-card rounded-3xl border border-blue/20 p-4 sm:p-8 shadow-sm">
-      {/* Header */}
       <div className="px-2 mb-6">
         <h1 className="text-xl sm:text-3xl font-bold text-muted">{title}</h1>
         <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm">
@@ -183,15 +142,20 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Leçons */}
       <div className="bg-card rounded-3xl border border-blue/20 p-4 sm:p-8 shadow-sm">
         {currentLessons.length > 0 ? (
           currentLessons.map((lesson) => (
             <div key={lesson.id} className="mb-10">
               <h2 className="mt-6 text-lg sm:text-xl font-semibold text-muted">{lesson.title}</h2>
-              {lesson.type === "image" && lesson.preview && <img src={lesson.preview} alt={lesson.title} className="rounded-xl mt-4" />}
-              {lesson.type === "text" && lesson.content && <p className="mt-2 text-sm sm:text-base text-textc leading-relaxed">{lesson.content}</p>}
-              {lesson.type === "example" && lesson.content && <pre className="mt-2 p-4 bg-gray-100 rounded-xl overflow-x-auto">{lesson.content}</pre>}
+              {lesson.type === "image" && lesson.preview && (
+                <img src={lesson.preview} alt={lesson.title} className="rounded-xl mt-4" />
+              )}
+              {lesson.type === "text" && lesson.content && (
+                <p className="mt-2 text-sm sm:text-base text-textc leading-relaxed">{lesson.content}</p>
+              )}
+              {lesson.type === "example" && lesson.content && (
+                <pre className="mt-2 p-4 bg-gray-100 rounded-xl overflow-x-auto">{lesson.content}</pre>
+              )}
             </div>
           ))
         ) : (
@@ -199,7 +163,6 @@ useEffect(() => {
         )}
       </div>
 
-      {/* Navigation */}
       <div className="flex flex-row gap-2 sm:gap-3 mt-4">
         <button
           onClick={prevLessonPage}
@@ -213,7 +176,7 @@ useEffect(() => {
           onClick={nextLessonPage}
           className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-xs sm:text-base shadow ${
             isLastPage
-            ? "bg-supp/80 text-white hover:bg-supp/90 focus:bg-supp/30"
+              ? "bg-supp/80 text-white hover:bg-supp/90 focus:bg-supp/30"
               : "bg-blue text-white hover:bg-blue/90"
           }`}
         >
@@ -222,7 +185,7 @@ useEffect(() => {
         </button>
       </div>
 
-      {/* Quiz */}
+            {/* Quiz */}
       <div className="mt-10 w-full">
         <div className="w-full bg-grad-1 text-white p-4 sm:p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between shadow">
           <div className="text-left mb-4 md:mb-0">
@@ -299,6 +262,7 @@ useEffect(() => {
           </button>
         </div>
       </div>
+      
     </div>
   );
 }

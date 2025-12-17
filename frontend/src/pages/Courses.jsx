@@ -9,6 +9,8 @@ import CourseContent from "../components/ui/CourseContent.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import IaAssistant from "../components/ui/IaAssistant.jsx";
 import api from "../services/courseService";
+import progressionService from "../services/progressionService";
+
 
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
@@ -32,13 +34,42 @@ export default function Courses() {
   const [courseProgress, setCourseProgress] = useState(0);
   const [initialLessonPage, setInitialLessonPage] = useState(0);
 
+  // **NOUVEAU** pour gérer la page par section
+  const [sectionPages, setSectionPages] = useState({});
+
   const lastLessonId = location.state?.lastLessonId;
+
+// Marquer une leçon comme visitée
+const markLessonVisited = async (lessonId) => {
+  try {
+    // Appel backend pour marquer la leçon
+    const res = await progressionService.completeLesson(lessonId);
+    
+    // Mettre à jour la progression globale du cours
+    if (res?.course_progress !== undefined) {
+      setCourseProgress(res.course_progress);
+    }
+
+    // Mettre à jour localement la leçon comme visitée
+    setSections(prev =>
+      prev.map((sec) => ({
+        ...sec,
+        lessons: sec.lessons.map((l) =>
+          l.id === lessonId ? { ...l, visited: true } : l
+        ),
+      }))
+    );
+  } catch (err) {
+    console.error("Erreur lors du marquage de la leçon :", err);
+  }
+};
+
 
   useEffect(() => {
     if (!coursId) return;
 
     const fetchCourse = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("token");
       try {
         const res = await api.get(`courses/courses/${coursId}/`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -61,13 +92,10 @@ export default function Courses() {
             title: lec.titre_lecon,
             content: lec.contenu_lecon,
             type: lec.type_lecon,
-            visited: false, // important
+            visited: lec.visited,
             preview:
               lec.type_lecon === "image"
-                ? `http://localhost:8000/media/${lec.contenu_lecon.replace(
-                    /\\/g,
-                    "/"
-                  )}`
+                ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
                 : null,
           })),
         }));
@@ -75,19 +103,14 @@ export default function Courses() {
         /* POSITIONNEMENT AUTOMATIQUE */
         if (lastLessonId) {
           const LESSONS_PER_PAGE = 2;
-
-          for (
-            let secIndex = 0;
-            secIndex < fetchedSections.length;
-            secIndex++
-          ) {
+          for (let secIndex = 0; secIndex < fetchedSections.length; secIndex++) {
             const lessons = fetchedSections[secIndex].lessons;
             const lessonIndex = lessons.findIndex((l) => l.id === lastLessonId);
-
             if (lessonIndex !== -1) {
               setCurrentSectionIndex(secIndex);
               setInitialLessonPage(Math.floor(lessonIndex / LESSONS_PER_PAGE));
-              break; // stop dès qu’on trouve la leçon
+              setSectionPages({ [secIndex]: Math.floor(lessonIndex / LESSONS_PER_PAGE) });
+              break;
             }
           }
         }
@@ -111,14 +134,12 @@ export default function Courses() {
         );
 
         const visitedCount = updatedLessons.filter((l) => l.visited).length;
-        const progress = Math.round(
-          (visitedCount / updatedLessons.length) * 100
-        );
+        const progress = Math.round((visitedCount / updatedLessons.length) * 100);
 
         return {
           ...sec,
           lessons: updatedLessons,
-          progress, // barre de progression
+          progress,
           completed: progress === 100,
         };
       })
@@ -128,9 +149,7 @@ export default function Courses() {
   return (
     <div className="w-full bg-surface flex flex-col items-center">
       <header className="w-full max-w-7xl flex flex-col gap-4 py-6 px-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">
-          {t("title")}
-        </h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">{t("title")}</h1>
         <div className="hidden sm:flex sm:flex-row w-full gap-3 md:gap-4 items-center md:w-auto">
           <div className="relative w-full sm:w-64 md:w-80">
             <ContentSearchBar />
@@ -144,31 +163,26 @@ export default function Courses() {
           />
         </div>
       </header>
+
       <div className="w-full max-w-7xl px-4 pb-10 flex flex-col lg:flex-row gap-6 relative">
-        <div className="block">
-          <CoursesSidebarItem
-            sections={sections}
-            currentSectionIndex={currentSectionIndex}
-            setCurrentSectionIndex={setCurrentSectionIndex}
-          />
-        </div>
-        <CourseContent
-          course={{
-            title,
-            description,
-            level,
-            duration,
-            sections,
-            id: coursId,
-          }}
+        <CoursesSidebarItem
+          sections={sections}
           currentSectionIndex={currentSectionIndex}
           setCurrentSectionIndex={setCurrentSectionIndex}
-          setSections={setSections}
-          setCourseProgress={setCourseProgress}
-          currentLessonPage={initialLessonPage} // Passe la page initiale
-          setCurrentLessonPage={setInitialLessonPage}
-          updateSectionProgress={updateSectionProgress}
         />
+       <CourseContent
+  course={{ title, description, level, duration, sections, id: coursId }}
+  currentSectionIndex={currentSectionIndex}
+  setCurrentSectionIndex={setCurrentSectionIndex}
+  setSections={setSections}
+  sectionPages={sectionPages}
+  setSectionPages={setSectionPages}
+  currentLessonPage={initialLessonPage}
+  setCurrentLessonPage={setInitialLessonPage}
+  updateSectionProgress={updateSectionProgress}
+  markLessonVisited={markLessonVisited} // <-- ici
+/>
+
       </div>
     </div>
   );

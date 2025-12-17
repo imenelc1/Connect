@@ -3,11 +3,7 @@ import { CheckCircle } from "lucide-react";
 import ProgressBar from "./ProgressBar";
 
 export default function CoursesSidebarItem({ sections, currentSectionIndex, setCurrentSectionIndex }) {
-  // fallback si sections est undefined ou null
-  if (!Array.isArray(sections)) {
-    console.warn("CoursesSidebarItem: sections should be an array", sections);
-    sections = [];
-  }
+  if (!Array.isArray(sections)) sections = [];
 
   const toggleSection = (index) => {
     setCurrentSectionIndex(index);
@@ -33,8 +29,6 @@ export default function CoursesSidebarItem({ sections, currentSectionIndex, setC
               <h2 className="text-[15px] font-semibold">{section.title || "Titre manquant"}</h2>
               {sectionProgress === 100 && <CheckCircle className="w-5 h-5 text-purple" />}
             </div>
-
-            {/* Progression de la section */}
             <div className="mt-2">
               <ProgressBar value={sectionProgress} title="" />
             </div>

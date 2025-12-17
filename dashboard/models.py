@@ -43,3 +43,17 @@ class SessionDuration(models.Model):
 
     def __str__(self):
         return f"{self.utilisateur.USERNAME_FIELD} - {self.duration}s"
+    
+
+# Historique pour dashboard / graphiques
+class ProgressionHistory(models.Model):
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
+
+    avancement = models.FloatField()
+    temps_passe = models.DurationField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]

@@ -119,13 +119,24 @@ export const getAverageTimeProf = async () => {
   return res.data.average_duration; 
 };
 
-export const getGlobalProgressProf = async () => {
-  const res = await api.get("dashboard/global-progress/students/", { headers: getAuthHeader() });
-  return res.data; 
+
+// Récupérer l’historique global des étudiants pour le prof (7 derniers jours)
+export const getGlobalProgressStudents= async () => {
+    const res = await api.get("dashboard/global-progress/students/",{ headers: getAuthHeader() });
+    return res.data;
+  };
+
+
+export const getCurrentProgressStudents = async () => {
+  const res = await api.get("dashboard/current-progress/students/", { headers: getAuthHeader() });
+  return res.data;
 };
 
 
-export default {
+
+
+
+ export default {
   getCoursesProgress,
   completeLesson,
   completeLessonsBulk,
@@ -140,6 +151,7 @@ export default {
   getActiveCoursesCountProf,
   addSessionProf,
   getAverageTimeProf,
-  getGlobalProgressProf,
+  getGlobalProgressStudents,
+  getCurrentProgressStudents,
 
 };

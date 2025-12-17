@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import generics, viewsets, permissions
 
 import courses
-from dashboard.models import ProgressionCours
+from dashboard.models import LeconComplete, ProgressionCours
 from users.models import Utilisateur
 from .models import Cours, Section, Lecon
 from .serializers import CoursSerializer, CourseSerializer2, SectionSerializer, LeconSerializer, CoursSerializer1
@@ -177,9 +177,17 @@ class CoursListCreateView(generics.ListCreateAPIView):
     serializer_class = CoursSerializer
 
 # Détail, modification, suppression
-class CoursDetailView(generics.RetrieveUpdateDestroyAPIView):
+class CoursDetailView(generics.RetrieveAPIView):
     queryset = Cours.objects.all()
-    serializer_class = CoursSerializer
+    serializer_class = CourseSerializer2
+    lookup_field = "pk"
+
+    def get_serializer_context(self):
+        # Permet de passer request au serializer pour utiliser visited
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 
 class SectionListCreateView(generics.ListCreateAPIView):
     queryset = Section.objects.all()
@@ -282,3 +290,14 @@ class CoursesWithProgressView(APIView):
             })
 
         return Response(data)
+
+class MarkLessonVisitedView(APIView):
+    @jwt_required
+    def post(self, request, lesson_id):
+        try:
+            lecon = Lecon.objects.get(pk=lesson_id)
+        except Lecon.DoesNotExist:
+            return Response({"error": "Leçon introuvable"}, status=404)
+
+        LeconComplete.objects.get_or_create(utilisateur_id=request.user_id, lecon=lecon)
+        return Response({"message": "Leçon marquée visitée"}, status=200)
