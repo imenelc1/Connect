@@ -14,7 +14,8 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { BookOpen, NotebookPen, FileCheck } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 export default function CourseDetails() {
   const userData = JSON.parse(localStorage.getItem("user")) || {};
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
@@ -136,7 +137,7 @@ export default function CourseDetails() {
 
           <div className="flex justify-around items-center gap-4">
             <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-              <Bell size={16} />
+              <NotificationBell />
             </div>
             <UserCircle
               initials={initials}

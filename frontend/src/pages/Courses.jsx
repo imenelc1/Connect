@@ -8,6 +8,8 @@ import ThemeContext from "../context/ThemeContext.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import IaAssistant from "../components/ui/IaAssistant.jsx";
 import ContentSearchBar from "../components/common/ContentSearchBar.jsx";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
   const { toggleDarkMode } = useContext(ThemeContext);

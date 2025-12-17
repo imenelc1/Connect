@@ -8,7 +8,8 @@ import IaAssistant from "../components/ui/IaAssistant";
 import UserCircle from "../components/common/UserCircle";
 import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 // -------------------------------
 // 1. Exercices stockés en CONSTANTE
 // -------------------------------
@@ -71,7 +72,18 @@ export default function ExercisesPage() {
 
             <IaAssistant />
             <HeadMascotte />
-            <UserCircle initials={initials} onToggleTheme={toggleDarkMode} />
+          
+            <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
           </div>
 
         </div>

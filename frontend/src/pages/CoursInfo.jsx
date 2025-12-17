@@ -14,7 +14,8 @@ import { toast } from "react-hot-toast";
 import { useEffect } from "react";
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 export default function CoursePage() {
   const { t, i18n } = useTranslation("courseInfo");
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -268,6 +269,7 @@ if (!isAuthenticated || !userData) {
 
       <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
         <div className="flex justify-end">
+          <NotificationBell />
           <UserCircle
             initials={initials}
             onToggleTheme={toggleDarkMode}

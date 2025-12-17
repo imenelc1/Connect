@@ -14,7 +14,8 @@ import { toast } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-  
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext"; 
 
 
 import ModernDropdown from "../components/common/ModernDropdown";
@@ -353,6 +354,7 @@ const handleSaveCourse = async (coursId) => {
 
       <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
         <div className="flex justify-end">
+          <NotificationBell />
           <UserCircle
             initials={initials}
             onToggleTheme={toggleDarkMode}

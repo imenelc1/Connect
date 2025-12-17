@@ -12,7 +12,8 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
 import { getCurrentUserId } from "../hooks/useAuth";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 
 
 
@@ -26,7 +27,7 @@ export default function AllCoursesPage() {
   const token = localStorage.getItem("access_token");
   const currentUserId = getCurrentUserId();
   const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
-
+  //const { fetchUnreadCount } = useNotifications();
   const [courses, setCourses] = useState([]);
   useEffect(() => {
     fetch("http://localhost:8000/api/courses/api/cours")
@@ -132,25 +133,20 @@ if (userRole === "enseignant" && categoryFilter === "mine") {
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
-  return (
-    <div className="flex bg-surface min-h-screen">
+   return (
+    <div className="flex min-h-screen bg-background dark:bg-gray-900">
       <Navbar />
-      {/* Header Right Controls */}
-      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
-        {/* Notification Icon */}
-        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
-          <Bell size={18} />
-        </div>
-
-        {/* User Circle */}
-        <div className="flex items-center">
-          <UserCircle
-            initials={initials}
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
-          />
-        </div>
-
+      
+      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
       </div>
 
 

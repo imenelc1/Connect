@@ -8,11 +8,15 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 set "VIRTUAL_ENV=D:\GP\Connect\venv"
 =======
 set "VIRTUAL_ENV=C:\Users\Logitech inf Tazmalt\Desktop\Connect\venv"
 >>>>>>> d76af9709473bc7d3a6c707973740bf43b6e9937
+=======
+set "VIRTUAL_ENV=C:\GP\Connect\venv"
+>>>>>>> Stashed changes
 
 if not defined PROMPT set PROMPT=$P$G
 

@@ -8,7 +8,8 @@ import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
-import { Bell } from "lucide-react";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 
 import { getSpacesStudents, createStudent } from "../services/studentService";
 import { getSpaces } from "../services/spacesService";
@@ -93,8 +94,17 @@ export default function MyStudents() {
           {t("myStudentsTitle")}
         </h1>
         <div className="flex items-center gap-4">
-          <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
-          <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
+          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
         </div>
       </div>
 

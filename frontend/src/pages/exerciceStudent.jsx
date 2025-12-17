@@ -1,10 +1,11 @@
 import React from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import UserCircle from "../components/common/UserCircle";
 import TaskCard from "../components/common/TaskCard";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 export default function StudentExercice() {
   const { t } = useTranslation("exerciceStudent");
 
@@ -19,6 +20,9 @@ export default function StudentExercice() {
 
         {/* Profile Header */}
         <div className="bg-white rounded-3xl shadow-md p-6 sm:p-8 mb-6 sm:mb-8 w-full max-w-full lg:max-w-5xl mx-auto">
+           <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+              <NotificationBell />
+            </div>
           <div className="flex flex-col sm:flex-row items-center sm:gap-6">
             <UserCircle />
 

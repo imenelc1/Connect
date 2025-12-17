@@ -9,7 +9,8 @@ import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
 import { Folder, Bell } from "lucide-react";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import { getSpaces, createSpace } from "../services/spacesService";
 
 export default function SpacesPage() {
@@ -84,7 +85,7 @@ export default function SpacesPage() {
           {t("spacesTitle")}
         </h1>
         <div className="flex items-center gap-4">
-          <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
+          <NotificationBell />
           <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
         </div>
       </div>

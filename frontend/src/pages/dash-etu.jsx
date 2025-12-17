@@ -13,6 +13,8 @@ import UserCircle from "../components/common/UserCircle";
 import ThemeContext from "../context/ThemeContext";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 // Traduction (i18next)
 import { useTranslation } from "react-i18next";
 import ContentSearchBar from "../components/common/ContentSearchBar";import api from "../services/api";
@@ -69,7 +71,7 @@ export default function Dashboardetu() {
         
                 <div className="flex items-center gap-3 mt-3">
                   <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-                    <Bell size={16} />
+                    <NotificationBell />
                   </div>
         
                   <div className="w-7 h-7 flex items-center justify-center">

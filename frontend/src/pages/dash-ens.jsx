@@ -9,6 +9,8 @@ import NotificationItem from "../components/common/AcivityFeed";
 import Mascotte from "../components/common/Mascotte";
 import "../styles/index.css";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 // Traduction (i18next)
 import { useTranslation } from "react-i18next";
 // Thème global (dark/light mode)
@@ -109,7 +111,7 @@ useEffect(() => {
 
         <div className="flex items-center gap-3">
           <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-            <Bell size={16} />
+            <NotificationBell />
           </div>
 
                    {/* User Circle */}
