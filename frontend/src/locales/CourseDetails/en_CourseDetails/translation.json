@@ -3,7 +3,7 @@
   "students": "Students",
   "cancel": "Cancel",
   "topbar": {
-    "course": "Course",
+    "course": "Courses",
     "quizzes": "Quizzes",
     "exercises": "Exercises"
   },
@@ -17,5 +17,8 @@
   "courseTitlePlaceholder": "e.g. Introduction to Mobile Design",
   "courseDescriptionLabel": "Description",
   "courseDescriptionPlaceholder": "Describe what students will learn",
-  "quizzesTitle": "Quizzes"
+  "quizzesTitle": "Quizzes",
+
+  "selectCourseLabel": "Validate",
+  "selectCoursePlaceholder": "Select a course"
 }

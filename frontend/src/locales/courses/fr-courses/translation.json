@@ -1,13 +1,13 @@
 {
   
-  "chapitrePrec":"Chapitre Précédent",
-  "ChapitreSuiv":"Chapitre suivant",
+  "chapitrePrec":"page Précédente",
+  "ChapitreSuiv":"Page suivante",
   "title": "Cours",
   "search": "Rechercher...",
   "assistant": "Assistant IA",
   "myCourses": "Mes cours",
-  "chapterPrev": "Chapitre précédent",
-  "chapterNext": "Chapitre suivant",
+  "chapterPrev": "page précédente",
+  "chapterNext": "Page suivante",
   "readyQuiz": "Prêt à tester tes connaissances ?",
   "quizDesc": "Passe le quiz de ce chapitre pour valider ta compréhension",
   "startQuiz": "Commencer le quiz",

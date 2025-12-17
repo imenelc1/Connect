@@ -42,7 +42,7 @@ export default function BadgeHeader() {
     }}
   >
     {/* Icône */}
-    <div className="w-10 h-10 items-center justify-center rounded-md text-white text-xl bg-grad-all transition-all duration-300 hidden sm:flex">
+    <div className="w-10 h-10 flex items-center justify-center rounded-md text-white text-xl bg-grad-all transition-all duration-300 hidden sm:flex">
       <FaMedal />
     </div>
 

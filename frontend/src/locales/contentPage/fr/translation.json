@@ -16,16 +16,22 @@
     "advanced": "Avancé"
   },
 
-  "continueCourse": "Continuer le cours",
-"continueExercise": "Continuer l’exercice",
-"continueQuiz": "Continuer le quiz",
+  "continueCourse": "Continuer",
+"continueExercise": "Continuer",
+"continueQuiz": "Continuer",
 
-"restartCourse": "Recommencer le cours",
-"restartExercise": "Recommencer l’exercice",
-"restartQuiz": "Recommencer le quiz",
+"restartCourse": "Recommencer",
+"restartExercise": "Recommencer",
+"restartQuiz": "Recommencer",
 
-"startCourse": "Commencer le cours",
-"startExercise": "Commencer l’exercice",
-"startQuiz": "Commencer le quiz"
+"startCourse": "Commencer",
+"startExercise": "Commencer",
+"startQuiz": "Commencer",
+
+"checkCourse": "Consulter le cours",
+"checkExercise": "Consulter l'exercice",
+"checkQuiz": "Consulter le quiz",
+
+"checkExos": "Voir exercices"
 
 }

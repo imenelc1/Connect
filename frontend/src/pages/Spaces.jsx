@@ -1,79 +1,120 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
+import { FiTrash2 } from "react-icons/fi";
 import ThemeContext from "../context/ThemeContext";
 import Navbar from "../components/common/NavBar";
 import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import { Folder, Bell } from "lucide-react";
 
-import { getSpaces, createSpace } from "../services/spacesService";
+import { getSpaces, createSpace, deleteSpace } from "../services/spacesService";
+import { getMySpaces } from "../services/studentSpacesService";
+
+import toast from "react-hot-toast";
 
 export default function SpacesPage() {
   const { t } = useTranslation("Spaces");
   const { toggleDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
 
+  const storedUser = localStorage.getItem("user");
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userRole = userData?.user?.role ?? userData?.role;
+  const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
+
+  const initialRole = parsedUser?.role === "enseignant" ? "prof" : "student";
+
+  const [role, setRole] = useState(initialRole);
+  const [spaces, setSpaces] = useState([]);
   const [open, setOpen] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const [spaceDesc, setSpaceDesc] = useState("");
-  const [spaces, setSpaces] = useState([]);
 
-
-  
+  // -------------------------
+  // Fetch des espaces selon rôle
+  // -------------------------
   useEffect(() => {
-  getSpaces()
-    .then((data) => {
-      console.log("GET /spaces response:", data);
-
-      // Si DRF paginé
-      const spacesArray = Array.isArray(data.results)
-        ? data.results
-        : Array.isArray(data)
-        ? data
-        : [];
-
-      // On mappe pour avoir le même format partout
-      const formatted = spacesArray.map((s) => ({
-        id_space: s.id_space,
-        nom_space: s.nom_space,
-        description: s.description,
-        date_creation: s.date_creation,
-      }));
-
-      setSpaces(formatted);
-    })
-    .catch((err) => console.error("Erreur getSpaces:", err));
-}, []);
-
-
-
-  // --- Création d'un espace ---
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!spaceName) return;
-
-    const data = { nom_space: spaceName, description: spaceDesc };
-
-    createSpace(data)
-      .then((res) => {
-        if (res.data) {
-          const newSpace = {
-            id_space: res.data.id_space,
-            nom_space: res.data.nom_space,
-            description: res.data.description,
-            date_creation: res.data.date_creation,
-          };
-          setSpaces((prev) => [...prev, newSpace]);
+    const fetchSpaces = async () => {
+      try {
+        if (role === "prof") {
+          const data = await getSpaces();
+          setSpaces(Array.isArray(data) ? data : data.results || []);
+        } else {
+          const data = await getMySpaces();
+          setSpaces(Array.isArray(data) ? data : []);
         }
-        setOpen(false);
-        setSpaceName("");
-        setSpaceDesc("");
-      })
-      .catch((err) => console.error("Erreur createSpace:", err));
+      } catch (err) {
+        console.error("Erreur fetchSpaces:", err);
+      }
+    };
+    console.log("ROLE DETECTED:", role);
+    fetchSpaces();
+  }, [role]);
+
+  // -------------------------
+  // Création d'un espace (prof uniquement)
+  // -------------------------
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!spaceName) {
+      toast.error(t("spaceNameRequired"));
+      return;
+    }
+
+    // Vérification doublon
+    const exists = spaces.some(
+      (s) => s.nom_space.toLowerCase() === spaceName.trim().toLowerCase()
+    );
+    if (exists) {
+      toast.error(t("spaceNameExists")); // message si nom déjà pris
+      return;
+    }
+
+    try {
+      const data = { nom_space: spaceName, description: spaceDesc };
+      const res = await createSpace(data);
+
+      if (res) {
+        const newSpace = {
+          id_space: res.id_space,
+          nom_space: res.nom_space,
+          description: res.description,
+          date_creation: res.date_creation,
+        };
+        setSpaces((prev) => [...prev, newSpace]);
+        toast.success(t("spaceCreated"));
+      }
+
+      setOpen(false);
+      setSpaceName("");
+      setSpaceDesc("");
+    } catch (err) {
+      console.error("Erreur createSpace:", err);
+      toast.error(t("spaceCreationFailed"));
+    }
+  };
+
+  const handleDeleteSpace = async (id_space) => {
+    const confirmDelete = window.confirm(t("confirmDeleteSpace"));
+    if (!confirmDelete) return;
+
+    try {
+      await deleteSpace(id_space); // appel API pour supprimer
+      setSpaces((prev) => prev.filter((s) => s.id_space !== id_space)); // mise à jour frontend
+      toast.success(t("spaceDeleted"));
+    } catch (err) {
+      console.error("Erreur deleteSpace:", err);
+      toast.error(t("spaceDeleteFailed"));
+    }
   };
 
   return (
@@ -81,12 +122,19 @@ export default function SpacesPage() {
       {/* Header */}
       <div className="flex justify-between items-center w-full mb-6">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted ml-[250px]">
-          {t("spacesTitle")}
+          {role === "prof" ? t("spacesTitle") : t("mySpacesTitle")}
         </h1>
-        <div className="flex items-center gap-4">
-          <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
-          <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
-        </div>
+        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
       </div>
 
       <div className="flex w-full min-h-screen bg-surface">
@@ -95,22 +143,27 @@ export default function SpacesPage() {
 
         {/* Contenu principal */}
         <div className="flex-1 p-4 sm:p-6 ml-0 lg:ml-56 transition-all duration-300">
-          {/* Bouton Ajouter un espace */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
-            <Button
-              variant="primary"
-              className="!px-4 !py-2 !text-white !w-auto ml-auto whitespace-nowrap"
-              onClick={() => setOpen(true)}
-            >
-              {t("createSpaceButton")}
-            </Button>
-          </div>
+          {/* Bouton Ajouter un espace (prof seulement) */}
+          {role === "prof" && (
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+              <Button
+                variant="primary"
+                className="!px-4 !py-2 !text-white !w-auto ml-auto whitespace-nowrap"
+                onClick={() => setOpen(true)}
+              >
+                {t("createSpaceButton")}
+              </Button>
+            </div>
+          )}
 
           {/* Liste des espaces */}
           <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
-            {Array.isArray(spaces) && spaces.length > 0 ? (
+            {spaces.length > 0 ? (
               spaces.map((item) => (
-                <div key={item.id_space} className="rounded-xl shadow p-2 bg-grad-3">
+                <div
+                  key={item.id_space}
+                  className="rounded-xl shadow p-2 bg-grad-3"
+                >
                   <Cards2
                     icon={
                       <div className="w-12 h-12 flex items-center justify-center bg-grad-1 rounded-md text-white">
@@ -119,49 +172,73 @@ export default function SpacesPage() {
                     }
                     title={item.nom_space || "No title"}
                     description={item.description || ""}
-                    status={`${t("created")} ${new Date(item.date_creation).toLocaleDateString()}`}
+                    status={
+                      role === "prof"
+                        ? `${t("created")} ${new Date(
+                          item.date_creation
+                        ).toLocaleDateString()}`
+                        : ""
+                    }
                     showArrow={true}
-                    onArrowClick={() => navigate(`/CourseDetails/${item.id_space}`)}
+                    onArrowClick={() =>
+                      navigate(`/CourseDetails/${item.id_space}`)
+                    }
+                    extraActions={
+                      role === "prof" && (   // <-- condition ajoutée
+                        <div className="">
+                          <FiTrash2
+                            size={18}
+                            className="cursor-pointer text-grayc hover:text-red-500 mt-20 ml-5"
+                            onClick={() => handleDeleteSpace(item.id_space)}
+                            title={t("deleteSpace")}
+                          />
+                        </div>
+                      )
+                    }
                   />
                 </div>
               ))
             ) : (
-              <p className="text-gray-500">{t("noSpacesMessage")}</p>
+              <p className="text-gray-500">
+                {role === "prof" ? t("noSpacesMessage") : t("noStudentSpaces")}
+              </p>
             )}
           </div>
         </div>
 
-        {/* Modal d'ajout */}
-        <AddModal
-          open={open}
-          onClose={() => setOpen(false)}
-          title={t("modalTitle")}
-          subtitle={t("modalSubtitle")}
-          submitLabel={t("modalSubmit")}
-          cancelLabel={t("modalCancel")}
-          fields={[
-            {
-              label: t("fieldSpaceName"),
-              placeholder: t("fieldSpaceNamePlaceholder"),
-              value: spaceName,
-              onChange: (e) => setSpaceName(e.target.value),
-            },
-            {
-              label: t("fieldDescription"),
-              element: (
-                <textarea
-                  placeholder={t("fieldDescriptionPlaceholder")}
-                  value={spaceDesc}
-                  onChange={(e) => setSpaceDesc(e.target.value)}
-                  className="w-full bg-grad-3 dark:bg-gray-700 rounded-md px-3 py-2
+        {/* Modal d'ajout espace (prof uniquement) */}
+        {role === "prof" && (
+          <AddModal
+            open={open}
+            onClose={() => setOpen(false)}
+            title={t("modalTitle")}
+            subtitle={t("modalSubtitle")}
+            submitLabel={t("modalSubmit")}
+            cancelLabel={t("modalCancel")}
+            fields={[
+              {
+                label: t("fieldSpaceName"),
+                placeholder: t("fieldSpaceNamePlaceholder"),
+                value: spaceName,
+                onChange: (e) => setSpaceName(e.target.value),
+              },
+              {
+                label: t("fieldDescription"),
+                element: (
+                  <textarea
+                    placeholder={t("fieldDescriptionPlaceholder")}
+                    value={spaceDesc}
+                    onChange={(e) => setSpaceDesc(e.target.value)}
+                    className="w-full bg-grad-3 dark:bg-gray-700 rounded-md px-3 py-2
                              focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  rows={4}
-                />
-              ),
-            },
-          ]}
-          onSubmit={handleSubmit}
-        />
+                    rows={4}
+                  />
+                ),
+              },
+            ]}
+            onSubmit={handleSubmit}
+          />
+        )}
       </div>
     </div>
   );

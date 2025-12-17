@@ -5,7 +5,8 @@ import Button from "../components/common/Button";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 export function QuizPage2() {
   const { t, i18n } = useTranslation("quiz2");
 
@@ -115,12 +116,15 @@ export function QuizPage2() {
       className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8 py-3 md:py-6"
       style={{ background: "rgb(var(--color-bg))" }}
     >
-      {/* User Circle */}
-      <div className="flex items-center justify-end">
+     <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
         />
       </div>
 

@@ -4,7 +4,8 @@ import { FaClock, FaMedal, FaStar, FaTrophy } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import Button from "../components/common/Button";
 import "../styles/index.css";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 export default function QuizPage1() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("quiz1");
