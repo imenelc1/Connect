@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext.jsx";
 import { getCurrentUserId } from "../hooks/useAuth";
 import progressionService from "../services/progressionService";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 
 const gradientMap = {
   Débutant: "bg-grad-2",
@@ -32,9 +34,8 @@ export default function AllCoursesPage() {
 
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
-  const initials = `${userData?.nom?.[0] || ""}${
-    userData?.prenom?.[0] || ""
-  }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
+    }`.toUpperCase();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
   let filteredCourses =
@@ -88,41 +89,41 @@ export default function AllCoursesPage() {
     return 3;
   };
 
- useEffect(() => {
-  const fetchProgress = async () => {
-    try {
-      const data = await progressionService.getCoursesProgress();
-      console.log(
-  data.map((c) => c.niveau_cour_label)
-);
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const data = await progressionService.getCoursesProgress();
+        console.log(
+          data.map((c) => c.niveau_cour_label)
+        );
 
-      const formatted = data.map((c) => ({
-        id: c.id_cours,
-        title: c.titre_cour,
-        description: c.description,
-        level: c.niveau_cour_label,
-        duration: c.duration_readable,
-        author: c.utilisateur_name,
-        initials: c.utilisateur_name
-          ?.split(" ")
-          .map((n) => n[0])
-          .join("")
-          .toUpperCase(),
-        isMine: c.utilisateur === currentUserId,
-        progress: c.progress ?? 0,
-        action: c.action,
-        lastLessonId: c.last_lesson_id,
+        const formatted = data.map((c) => ({
+          id: c.id_cours,
+          title: c.titre_cour,
+          description: c.description,
+          level: c.niveau_cour_label,
+          duration: c.duration_readable,
+          author: c.utilisateur_name,
+          initials: c.utilisateur_name
+            ?.split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase(),
+          isMine: c.utilisateur === currentUserId,
+          progress: c.progress ?? 0,
+          action: c.action,
+          lastLessonId: c.last_lesson_id,
 
-      }));
+        }));
 
-      setCourses(formatted);
-    } catch (err) {
-      console.error("Erreur chargement cours :", err);
-    }
-  };
+        setCourses(formatted);
+      } catch (err) {
+        console.error("Erreur chargement cours :", err);
+      }
+    };
 
-  fetchProgress();
-}, [currentUserId]);
+    fetchProgress();
+  }, [currentUserId]);
 
   const handleCompleteLesson = async (lessonId) => {
     try {
@@ -139,16 +140,18 @@ export default function AllCoursesPage() {
   };
 
   return (
-    <div className="flex bg-surface min-h-screen">
+    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
       <Navbar />
-      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
-        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
-          <Bell size={18} />
-        </div>
+
+      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
         />
       </div>
       <main
@@ -180,45 +183,45 @@ export default function AllCoursesPage() {
             </Button>
           )}
         </div>
-<div
-  className="grid gap-6"
-  style={{
-    gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
-  }}
->
-  {filteredCourses.map((course, idx) => (
-    <ContentCard
-      key={idx}
-      className={gradientMap[course.level]}
-      course={course}
-      role={userRole}
-      showProgress={userRole === "etudiant"}
-      onDelete={handleDeleteCourse}
-    >
-      {userRole === "etudiant" && (
-        <Button
-          variant="courseStart"
-          className="mt-2 w-full"
-          onClick={() => {
-            if (course.action === "start") {
-              navigate(`/course/${course.id_cours}/lesson/first`);
-            } else if (course.action === "continue") {
-              navigate(
-                `/course/${course.id_cours}/lesson/${course.last_lesson_id}`
-              );
-            } else if (course.action === "restart") {
-              navigate(`/course/${course.id_cours}/lesson/first`);
-            }
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
           }}
         >
-          {course.action === "start" && t("startCourse")}
-          {course.action === "continue" && t("continueCourse")}
-          {course.action === "restart" && t("restartCourse")}
-        </Button>
-      )}
-    </ContentCard>
-  ))}
-</div>
+          {filteredCourses.map((course, idx) => (
+            <ContentCard
+              key={idx}
+              className={gradientMap[course.level]}
+              course={course}
+              role={userRole}
+              showProgress={userRole === "etudiant"}
+              onDelete={handleDeleteCourse}
+            >
+              {userRole === "etudiant" && (
+                <Button
+                  variant="courseStart"
+                  className="mt-2 w-full"
+                  onClick={() => {
+                    if (course.action === "start") {
+                      navigate(`/course/${course.id_cours}/lesson/first`);
+                    } else if (course.action === "continue") {
+                      navigate(
+                        `/course/${course.id_cours}/lesson/${course.last_lesson_id}`
+                      );
+                    } else if (course.action === "restart") {
+                      navigate(`/course/${course.id_cours}/lesson/first`);
+                    }
+                  }}
+                >
+                  {course.action === "start" && t("startCourse")}
+                  {course.action === "continue" && t("continueCourse")}
+                  {course.action === "restart" && t("restartCourse")}
+                </Button>
+              )}
+            </ContentCard>
+          ))}
+        </div>
 
       </main>
     </div>

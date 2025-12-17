@@ -38,9 +38,12 @@ deactivate nondestructive
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 VIRTUAL_ENV="D:\ProjetGP\Connect\venv"
 export VIRTUAL_ENV
 =======
+=======
+>>>>>>> origin/back-forum-amina
 =======
 >>>>>>> origin/back-forum-amina
 # on Windows, a path can contain colons and backslashes and has to be converted:
@@ -65,6 +68,9 @@ case "$(uname)" in
         ;;
 esac
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> origin/back-forum-amina
+=======
 >>>>>>> origin/back-forum-amina
 =======
 >>>>>>> origin/back-forum-amina
