@@ -333,3 +333,26 @@ def get_enseignants(request):
         for e in enseignants
     ]
     return Response(data, status=200)
+
+@api_view(["GET"])
+@permission_classes([IsAdminOrTeacherJWT])
+def get_etudiants(request):
+    etudiants = Etudiant.objects.select_related("utilisateur").all()
+
+    data = []
+    for e in etudiants:
+        u = e.utilisateur
+        data.append({
+            "id": u.id_utilisateur,
+            "nom": u.nom,
+            "prenom": u.prenom,
+            "email": u.adresse_email,
+            "specialite": e.specialite,
+            "annee_etude": e.annee_etude,
+            "initials": f"{u.nom[0]}{u.prenom[0]}".upper(),
+            "joined": u.date_joined.strftime("%b %Y") if hasattr(u, "date_joined") else "—",
+            "courses": 0,      # 🔹 tu pourras le calculer plus tard
+            "progress": 0      # 🔹 idem
+        })
+
+    return Response(data, status=200)
