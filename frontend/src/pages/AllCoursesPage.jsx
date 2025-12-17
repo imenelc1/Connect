@@ -141,16 +141,18 @@ export default function AllCoursesPage() {
   };
 
   return (
-    <div className="flex bg-surface min-h-screen">
+    <div className="flex min-h-screen bg-background dark:bg-gray-900">
       <Navbar />
-      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
-        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
-          <Bell size={18} />
-        </div>
+      
+      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
         />
       </div>
       <main

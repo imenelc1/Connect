@@ -9,6 +9,7 @@ import BadgeGrid from "../components/common/BadgeGrid";
 import BadgeFooter from "../components/common/BadgeFooter";
 import ThemeContext from "../context/ThemeContext";
 
+
 import { MdAutoAwesome } from "react-icons/md";
 
 // List of badges
