@@ -14,6 +14,8 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import { useEffect } from "react";
 export default function CoursePage() {
   const navigate = useNavigate();

@@ -50,7 +50,7 @@ def notify_students_on_course_publish(sender, instance, created, **kwargs):
             for etudiant in etudiants:
                 notifications.append(
                     Notification(
-                        message_notif=f"Nouveau cours privé publié dans l'espace '{espace.nom_space}' : {cours.titre_cour}",
+                        message_notif=f"Nouveau cours privé publié '{cours.titre_cour}'",
                         utilisateur_destinataire=etudiant,
                         utilisateur_envoyeur=prof,
                         content_type=content_type,
