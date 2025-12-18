@@ -124,7 +124,6 @@ export default function SpacesPage() {
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted ml-[250px]">
           {role === "prof" ? t("spacesTitle") : t("mySpacesTitle")}
         </h1>
-<<<<<<< HEAD
         <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
         <NotificationBell />
         <UserCircle
@@ -136,19 +135,6 @@ export default function SpacesPage() {
           }}
         />
       </div>
-=======
-        <div className="flex items-center gap-4">
-          <Bell
-            className="w-5 h-5 text-gray-600 cursor-pointer"
-            fill="currentColor"
-          />
-          <UserCircle
-            initials={initials}
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
-          />
-        </div>
->>>>>>> main
       </div>
 
       <div className="flex w-full min-h-screen bg-surface">
