@@ -4,18 +4,29 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg
+from django.db.models.functions import TruncDate
+from django.utils.timezone import now
 from courses.models import Cours, Lecon
+from spaces.models import Space, SpaceEtudiant
 from users.jwt_auth import IsAuthenticatedJWT
 from users.models import Utilisateur
-from .models import LeconComplete, ProgressionCours, SessionDuration
+from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration
 from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def complete_lesson(request, lecon_id):
     user = request.user
-    lecon = Lecon.objects.get(pk=lecon_id)
+
+    # Récupérer la leçon
+    try:
+        lecon = Lecon.objects.get(pk=lecon_id)
+    except Lecon.DoesNotExist:
+        return Response({"error": "Leçon introuvable"}, status=404)
+
+    # Marquer la leçon comme complétée
     LeconComplete.objects.get_or_create(utilisateur=user, lecon=lecon)
 
     section = lecon.section
@@ -23,23 +34,44 @@ def complete_lesson(request, lecon_id):
 
     # Progression section
     total_section = Lecon.objects.filter(section=section).count()
-    completed_section = LeconComplete.objects.filter(utilisateur=user, lecon__section=section).count()
-    section_progress = round((completed_section / total_section) * 100)
+    completed_section = LeconComplete.objects.filter(
+        utilisateur=user,
+        lecon__section=section
+    ).count()
+    section_progress = round((completed_section / total_section) * 100) if total_section > 0 else 0
 
     # Progression cours
     total_cours = Lecon.objects.filter(section__cours=cours).count()
-    completed_cours = LeconComplete.objects.filter(utilisateur=user, lecon__section__cours=cours).count()
-    cours_progress = round((completed_cours / total_cours) * 100)
+    completed_cours = LeconComplete.objects.filter(
+        utilisateur=user,
+        lecon__section__cours=cours
+    ).count()
+    cours_progress = round((completed_cours / total_cours) * 100) if total_cours > 0 else 0
 
-    pc, _ = ProgressionCours.objects.get_or_create(utilisateur=user, cours=cours)
+    # Récupérer ou créer la progression du cours (⚠️ defaults obligatoires)
+    pc, _ = ProgressionCours.objects.get_or_create(
+        utilisateur=user,
+        cours=cours,
+        defaults={
+            "avancement_cours": 0,
+            "temps_passe": timedelta(seconds=0),
+            "derniere_lecon": lecon
+        }
+    )
+
+    # Mise à jour progression
     pc.avancement_cours = cours_progress
     pc.derniere_lecon = lecon
 
-    # Ajouter le temps passé (en secondes) depuis le frontend
+    # Ajouter le temps passé (envoyé depuis le frontend)
     duration = request.data.get("duration", 0)
-    if duration > 0:
+    if duration and duration > 0:
         pc.temps_passe = (pc.temps_passe or timedelta(seconds=0)) + timedelta(seconds=duration)
+
     pc.save()
+
+    # Historique
+    create_progress_history(user, cours, pc.avancement_cours, pc.temps_passe)
 
     return Response({
         "section_progress": section_progress,
@@ -58,7 +90,7 @@ def complete_lessons_bulk(request):
     if not lesson_ids:
         return Response({"error": "No lessons provided"}, status=400)
 
-    lessons = Lecon.objects.filter(id_lecon__in=lesson_ids)
+    lessons = Lecon.objects.filter(id__in=lesson_ids)
     for lesson in lessons:
         LeconComplete.objects.get_or_create(utilisateur=user, lecon=lesson)
 
@@ -91,6 +123,7 @@ def complete_lessons_bulk(request):
         if duration > 0:
             pc.temps_passe = (pc.temps_passe or timedelta(seconds=0)) + timedelta(seconds=duration)
         pc.save()
+        create_progress_history(user, cours, pc.avancement_cours, pc.temps_passe)
     else:
         cours_progress = 0
 
@@ -111,15 +144,15 @@ def update_last_lesson(request, lesson_id):
 
     cours = lecon.section.cours
 
-    pc, _ = ProgressionCours.objects.get_or_create(
-        utilisateur=user,
-        cours=cours,
-        defaults={
-            "avancement_cours": 0.0,
-            "temps_passe": timedelta(seconds=0),
-            "derniere_lecon": lecon
-        }
-    )
+    pc, created = ProgressionCours.objects.get_or_create(
+    utilisateur=user,
+    cours=cours,
+    defaults={
+        "avancement_cours": 0.0,
+        "temps_passe": timedelta(seconds=0),
+        "derniere_lecon": lecon
+    }
+) 
 
     # Ne jamais reculer
     if not pc.derniere_lecon or lecon.id_lecon >= pc.derniere_lecon.id_lecon:
@@ -176,31 +209,56 @@ def average_time(request):
 @permission_classes([IsAuthenticatedJWT])
 def global_progress(request):
     user = request.user
-    # récupérer tous les cours actifs
-    courses = ProgressionCours.objects.filter(utilisateur=user)
-    if not courses.exists():
-        return Response({"global_progress": 0})
 
-    total = sum(course.avancement_cours for course in courses)
-    global_progress = round(total / courses.count())
-    return Response({"global_progress": global_progress})
+    result = ProgressionCours.objects.filter(
+        utilisateur=user
+    ).aggregate(global_progress=Avg("avancement_cours"))
+
+    return Response({
+        "global_progress": round(result["global_progress"] or 0)
+    })
 
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticatedJWT])
-def global_progress_history(request):
-    user = request.user
-    # récupérer tous les enregistrements de progression
-    progressions = ProgressionCours.objects.filter(utilisateur=user).order_by('created_at')
+def create_progress_history(user, cours, avancement, temps_passe):
+    """
+    Crée une entrée dans ProgressionHistory
+    """
+    ProgressionHistory.objects.create(
+        utilisateur=user,
+        cours=cours,
+        avancement=avancement,
+        temps_passe=temps_passe
+    )
 
-    data = []
-    for p in progressions:
-        data.append({
-            "date": p.created_at.strftime("%Y-%m-%d %H:%M"),  # format X
-            "progression": p.avancement_cours
-        })
 
-    return Response(data)
+# 🔹 Historique global (7 derniers jours)
+class GlobalProgressHistoryView(APIView):
+    permission_classes = [IsAuthenticatedJWT]
+
+    def get(self, request):
+        user = request.user
+        start_date = now().date() - timedelta(days=6)  # 7 derniers jours
+
+        progressions = (
+            ProgressionHistory.objects
+            .filter(utilisateur=user, created_at__date__gte=start_date)
+            .annotate(day=TruncDate("created_at"))
+            .values("day")
+            .annotate(progression=Avg("avancement"))
+            .order_by("day")
+        )
+
+        # Remplir les jours manquants à 0
+        days = [(start_date + timedelta(days=i)) for i in range(7)]
+        data = []
+        prog_dict = {p["day"]: round(p["progression"]) for p in progressions}
+        for d in days:
+            data.append({
+                "date": d.strftime("%Y-%m-%d"),
+                "progression": prog_dict.get(d, 0)
+            })
+
+        return Response(data)
 
 
 @api_view(['GET'])
@@ -231,21 +289,106 @@ def average_time_prof(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def global_progress_students(request):
-    user = request.user  # professeur
-    # récupérer tous les étudiants inscrits à ses cours
-    courses = Cours.objects.filter(utilisateur=user)
+    prof = request.user
+
+    # Espaces du prof
+    spaces = Space.objects.filter(utilisateur=prof)
+
+    # Cours dans ces espaces
+    courses = Cours.objects.filter(spacecour__space__in=spaces).distinct()
+
+    # Étudiants inscrits dans ces espaces
     students = Utilisateur.objects.filter(
-        progressioncours__cours__in=courses
-    ).distinct()
+    id_utilisateur__in=SpaceEtudiant.objects.filter(space__in=spaces).values_list("etudiant_id", flat=True)
+)
 
-    # dictionnaire {date: [progressions]}
-    data_dict = {}
-    for student in students:
-        progressions = ProgressionCours.objects.filter(utilisateur=student).order_by('created_at')
-        for p in progressions:
-            date_str = p.created_at.strftime("%Y-%m-%d")
-            data_dict.setdefault(date_str, []).append(p.avancement_cours)
+    # Historique des progressions pour ces étudiants et cours
+    progressions = ProgressionHistory.objects.filter(
+        utilisateur__in=students,
+        cours__in=courses
+    ).annotate(day=TruncDate("created_at"))
 
-    # moyenne par jour
-    result = [{"date": date, "progression": round(sum(vals)/len(vals))} for date, vals in sorted(data_dict.items())]
+    # Préparer la période : derniers 7 jours
+    today = now().date()
+    start_date = today - timedelta(days=6)
+    days = [(start_date + timedelta(days=i)) for i in range(7)]
+
+    #  Construire un dictionnaire {jour: {student_id: progression}}
+    progress_dict = {}
+    for p in progressions:
+        day_key = p.day
+        if day_key not in progress_dict:
+            progress_dict[day_key] = {}
+        progress_dict[day_key][p.utilisateur_id] = p.avancement
+        
+    # Calculer la moyenne quotidienne en incluant tous les étudiants
+    result = []
+    for d in days:
+        daily_progress = progress_dict.get(d, {})
+        total_progress = sum(daily_progress.get(u.pk, 0) for u in students)
+        avg = round(total_progress / students.count()) if students.exists() else 0
+        result.append({
+            "date": d.strftime("%Y-%m-%d"),
+            "progression": avg
+        })
+
     return Response(result)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def current_progress_students(request):
+    prof = request.user
+
+    spaces = Space.objects.filter(utilisateur=prof)
+    students = Utilisateur.objects.filter(
+        id_utilisateur__in=SpaceEtudiant.objects.filter(space__in=spaces).values_list("etudiant_id", flat=True)
+    )
+    courses = Cours.objects.filter(spacecour__space__in=spaces).distinct()
+
+    result = []
+    for student in students:
+        prog_avg = ProgressionCours.objects.filter(
+            utilisateur=student,
+            cours__in=courses
+        ).aggregate(avg_prog=Avg("avancement_cours"))["avg_prog"] or 0
+
+        result.append({
+            "student_id": student.id_utilisateur,
+            "progress": round(prog_avg)
+        })
+
+    return Response(result)
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def last_lesson(request, course_id):
+    try:
+        user = request.user
+
+        if not user or user.is_anonymous:
+            return Response(
+                {"error": "Utilisateur non authentifié"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        pc = ProgressionCours.objects.filter(
+            utilisateur=user,
+            cours_id=course_id
+        ).select_related("derniere_lecon__section").first()
+
+        if not pc or not pc.derniere_lecon:
+            return Response(None, status=status.HTTP_200_OK)
+
+        if not pc.derniere_lecon.section:
+            return Response(None, status=status.HTTP_200_OK)
+
+        return Response({
+            "id": pc.derniere_lecon.pk,          # ✅ utilisation de pk
+            "section_id": pc.derniere_lecon.section.pk
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print("❌ ERREUR last_lesson :", e)
+        return Response(
+            {"error": "Erreur serveur last_lesson"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

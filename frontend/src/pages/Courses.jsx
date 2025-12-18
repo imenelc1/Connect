@@ -9,8 +9,7 @@ import CourseContent from "../components/ui/CourseContent.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import IaAssistant from "../components/ui/IaAssistant.jsx";
 import api from "../services/courseService";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
+
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -101,18 +100,11 @@ export default function Courses() {
           </div>
           <IaAssistant />
           <HeadMascotte />
-           
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={lang => i18n.changeLanguage(lang)}
+          />
         </div>
       </header>
       <div className="w-full max-w-7xl px-4 pb-10 flex flex-col lg:flex-row gap-6 relative">

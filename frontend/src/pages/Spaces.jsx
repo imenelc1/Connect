@@ -8,8 +8,6 @@ import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 import { Folder, Bell } from "lucide-react";
 
 import { getSpaces, createSpace, deleteSpace } from "../services/spacesService";
@@ -124,17 +122,17 @@ export default function SpacesPage() {
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted ml-[250px]">
           {role === "prof" ? t("spacesTitle") : t("mySpacesTitle")}
         </h1>
-        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
+        <div className="flex items-center gap-4">
+          <Bell
+            className="w-5 h-5 text-gray-600 cursor-pointer"
+            fill="currentColor"
+          />
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
+        </div>
       </div>
 
       <div className="flex w-full min-h-screen bg-surface">

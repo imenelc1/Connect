@@ -44,34 +44,43 @@ class LeconSerializer(serializers.ModelSerializer):
 """
 
 
+# Ajout du champ visited à ton LessonSerializer1
 class LessonSerializer1(serializers.ModelSerializer):
+    visited = serializers.SerializerMethodField()
+
     class Meta:
         model = Lecon
-        fields = ['id_lecon', 'titre_lecon', 'contenu_lecon', 'type_lecon']
+        fields = ['id_lecon', 'titre_lecon', 'contenu_lecon', 'type_lecon', 'ordre', 'visited']
 
+    def get_visited(self, obj):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+        return obj.leconcomplete_set.filter(utilisateur=request.user).exists()
 
 
 class SectionSerializer1(serializers.ModelSerializer):
-    lecons = LessonSerializer1(many=True)  # ⚡ nested
+    lecons = serializers.SerializerMethodField()
 
     class Meta:
         model = Section
-        fields = ['id_section', 'titre_section', 'description', 'lecons', 'ordre']
-        
-    
-    
+        fields = ['id_section', 'titre_section', 'description', 'ordre', 'lecons']
+
+    def get_lecons(self, obj):
+        # On transmet le context ici pour que visited fonctionne
+        return LessonSerializer1(obj.lecons.all(), many=True, context=self.context).data
+
+
 class CourseSerializer2(serializers.ModelSerializer):
-    sections = SectionSerializer1(many=True)  # ⚡ nested
+    sections = serializers.SerializerMethodField()
 
     class Meta:
         model = Cours
         fields = ['id_cours', 'titre_cour', 'description', 'duration', 'niveau_cour', 'sections']
-        
-        
-        
 
-
-
+    def get_sections(self, obj):
+        # On transmet le context aux sections imbriquées
+        return SectionSerializer1(obj.sections.all(), many=True, context=self.context).data
 
 
 class LeconNestedSerializer(serializers.ModelSerializer):

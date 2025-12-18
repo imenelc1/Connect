@@ -14,8 +14,6 @@ import ThemeButton from "../components/common/ThemeButton";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService"; // Make sure your API helper is here
 import UserCircle from "../components/common/UserCircle";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 import Topbar from "../components/common/TopBar";
 import { FaClock, FaMedal, FaStar } from "react-icons/fa";
 
@@ -297,17 +295,13 @@ const handlePublishQuiz = async () => {
         <div className="max-w-7xl mx-auto">
 
           {/* HEADER */}
-          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
+          <div className="flex justify-end">
+                   <UserCircle
+                     initials={initials}
+                     onToggleTheme={toggleDarkMode}
+                     onChangeLang={(lang) => i18n.changeLanguage(lang)}
+                   />
+                 </div>
          
                  <Topbar
                    steps={exerciseSteps}

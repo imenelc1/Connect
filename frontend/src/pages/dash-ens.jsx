@@ -9,8 +9,6 @@ import NotificationItem from "../components/common/AcivityFeed";
 import Mascotte from "../components/common/Mascotte";
 import "../styles/index.css";
 import UserCircle from "../components/common/UserCircle";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 // Traduction (i18next)
 import { useTranslation } from "react-i18next";
 // Thème global (dark/light mode)
@@ -109,17 +107,18 @@ useEffect(() => {
           <Input placeholder={t("Dashboard.Search")} icon={<Search size={16} />} />
         </form>
 
-        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+            <Bell size={16} />
+          </div>
+
+                   {/* User Circle */}
+                <UserCircle
+                  initials={initials}
+                  onToggleTheme={toggleDarkMode}
+                  onChangeLang={(lang) => i18n.changeLanguage(lang)}
+                />
+        </div>
       </header>
 
       {/* Welcome banner */}

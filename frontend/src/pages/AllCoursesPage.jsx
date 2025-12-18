@@ -12,8 +12,6 @@ import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext.jsx";
 import { getCurrentUserId } from "../hooks/useAuth";
 import progressionService from "../services/progressionService";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 
 const gradientMap = {
   Débutant: "bg-grad-2",
@@ -141,18 +139,16 @@ export default function AllCoursesPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
+    <div className="flex bg-surface min-h-screen">
       <Navbar />
-      
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
+        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+          <Bell size={18} />
+        </div>
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
         />
       </div>
       <main

@@ -10,8 +10,7 @@ import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";
 import { getCurrentUserId } from "../hooks/useAuth";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
+
 import { useNavigate } from "react-router-dom";
 
 
@@ -135,19 +134,22 @@ const navigate = useNavigate();
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
-   return (
-    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
+  return (
+    <div className="flex bg-surface min-h-screen">
       <Navbar />
-      
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
+      {/* Header Right Controls */}
+      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
+
+        {/* Notification Icon */}
+        <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+          <Bell size={16} />
+        </div>
+
+        {/* User Circle */}
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
+          onChangeLang={(lang) => i18n.changeLanguage(lang)}
         />
       </div>
 
