@@ -25,7 +25,6 @@ class ForumSerializer(serializers.ModelSerializer):
     nombre_messages = serializers.SerializerMethodField()
     nombre_likes = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()
-   
     class Meta:
         model = Forum
         fields = [
@@ -41,7 +40,6 @@ class ForumSerializer(serializers.ModelSerializer):
             'user_has_liked'
         ]
         read_only_fields = ('utilisateur', 'date_creation')
-   
     def get_nombre_messages(self, obj):
         return obj.messages.count()
    

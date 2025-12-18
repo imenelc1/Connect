@@ -1,8 +1,11 @@
 from datetime import timedelta
-from dashboard.models import Badge, GagnerBadge, ProgressionCours, TentativeExercice, Analyse
+from badges.models import Badge, GagnerBadge
+from dashboard.models import ProgressionCours, TentativeExercice
 from courses.models import Quiz, Exercice
 from django.db.models import Count, Sum
 from django.utils import timezone
+
+from ia.models import Analyse
 
 def attribuer_badges(utilisateur):
     """

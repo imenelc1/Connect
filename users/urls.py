@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, AdminLoginView,UserProfileView,ChangePasswordView,ForgotPasswordView,ResetPasswordView,admin_stats, get_enseignants
+from .views import RegisterView, LoginView, AdminLoginView,UserProfileView,ChangePasswordView,ForgotPasswordView,ResetPasswordView,admin_stats, get_enseignants,get_etudiants
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
@@ -10,6 +10,7 @@ urlpatterns = [
     path("password/reset/", ResetPasswordView.as_view(), name="reset-password"),
     path("admin/stats/", admin_stats),
     path("enseignants/", get_enseignants, name="get_enseignants"),
+    path("etudiants/", get_etudiants)
   # GET/PATCH profil utilisateur
 
 ]

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import generics, viewsets, permissions
 
 import courses
-from dashboard.models import ProgressionCours
+from dashboard.models import LeconComplete, ProgressionCours
 from users.models import Utilisateur
 from .models import Cours, Section, Lecon
 from .serializers import CoursSerializer, CourseSerializer2, SectionSerializer, LeconSerializer, CoursSerializer1
@@ -177,9 +177,17 @@ class CoursListCreateView(generics.ListCreateAPIView):
     serializer_class = CoursSerializer
 
 # Détail, modification, suppression
-class CoursDetailView(generics.RetrieveUpdateDestroyAPIView):
+class CoursDetailView(generics.RetrieveAPIView):
     queryset = Cours.objects.all()
-    serializer_class = CoursSerializer
+    serializer_class = CourseSerializer2
+    lookup_field = "pk"
+
+    def get_serializer_context(self):
+        # Permet de passer request au serializer pour utiliser visited
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 
 class SectionListCreateView(generics.ListCreateAPIView):
     queryset = Section.objects.all()
@@ -207,6 +215,8 @@ class CourseDetailView(generics.RetrieveAPIView):
     serializer_class = CourseSerializer2
     lookup_field = "pk"
 
+
+
 class CoursesWithProgressView(APIView):
     @jwt_required
     def get(self, request):
@@ -226,6 +236,15 @@ class CoursesWithProgressView(APIView):
             "avance": "Avancé",
         }
 
+        def format_timedelta(td):
+            """Formatte timedelta en 'HH:MM:SS'"""
+            if not td:
+                return "00:00:00"
+            total_seconds = int(td.total_seconds())
+            hours, remainder = divmod(total_seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
         for course in courses:
             # Récupération de la progression
             progress_obj = ProgressionCours.objects.filter(
@@ -233,12 +252,13 @@ class CoursesWithProgressView(APIView):
                 cours=course
             ).first()
             progress = progress_obj.avancement_cours if progress_obj else 0.0
+            temps_passe = progress_obj.temps_passe if progress_obj else timedelta(seconds=0)
 
             # Niveau lisible
             niveau_raw = getattr(course, 'niveau_cour', None)
             niveau_label = NIVEAUX_MAP.get(str(niveau_raw).lower(), "Débutant") if niveau_raw else "Débutant"
 
-            
+            # Détermination de l'action
             if progress == 0:
                 action = "start"
             elif progress >= 100:
@@ -264,7 +284,9 @@ class CoursesWithProgressView(APIView):
                     if progress_obj and progress_obj.derniere_lecon
                     else None
                 ),
-                "action": action
+                "action": action,
+                "temps_passe": int(temps_passe.total_seconds()),  # en secondes pour calculs JS
+                "temps_passe_readable": format_timedelta(temps_passe)  # lisible HH:MM:SS
             })
 
         return Response(data)
@@ -280,3 +302,13 @@ def assign_course_author(request, pk):
         return Response({"message": "Auteur assigné"}, status=200)
     except Cours.DoesNotExist:
         return Response({"error": "Cours introuvable"}, status=404)
+class MarkLessonVisitedView(APIView):
+    @jwt_required
+    def post(self, request, lesson_id):
+        try:
+            lecon = Lecon.objects.get(pk=lesson_id)
+        except Lecon.DoesNotExist:
+            return Response({"error": "Leçon introuvable"}, status=404)
+
+        LeconComplete.objects.get_or_create(utilisateur_id=request.user_id, lecon=lecon)
+        return Response({"message": "Leçon marquée visitée"}, status=200)
