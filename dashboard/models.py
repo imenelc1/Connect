@@ -12,6 +12,14 @@ class LeconComplete(models.Model):
     class Meta:
         unique_together = ('utilisateur', 'lecon')
 
+class LeconComplete(models.Model):
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    lecon = models.ForeignKey(Lecon, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('utilisateur', 'lecon')
+
 class ProgressionCours(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
@@ -26,6 +34,14 @@ class ProgressionCours(models.Model):
         blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+    derniere_lecon = models.ForeignKey(
+        Lecon,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
 
 
 class TentativeExercice(models.Model):

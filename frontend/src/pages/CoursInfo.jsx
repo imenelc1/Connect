@@ -14,6 +14,8 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import { useEffect } from "react";
 export default function CoursePage() {
   const navigate = useNavigate();
@@ -289,13 +291,17 @@ export default function CoursePage() {
       </div>
 
       <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
-        <div className="flex justify-end">
-          <UserCircle
-            initials={initials}
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
-          />
-        </div>
+        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
 
         <Topbar
           steps={courseSteps}

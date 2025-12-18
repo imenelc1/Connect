@@ -7,13 +7,12 @@ from spaces.views import my_courses
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('forum.urls')), 
-    path('api/', include('feedback.urls')), 
     path('api/users/', include('users.urls')),
     path('api/courses/', include('courses.urls')),
     path('api/exercices/', include('exercices.urls')),
     path('api/quiz/', include('quiz.urls')),
     path('api/dashboard/', include('dashboard.urls')),
-
+    path('api/', include('feedback.urls')),
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

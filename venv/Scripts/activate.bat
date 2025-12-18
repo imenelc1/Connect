@@ -9,6 +9,10 @@ if defined _OLD_CODEPAGE (
 )
 
 <<<<<<< HEAD
+<<<<<<< Updated upstream
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 set VIRTUAL_ENV=D:\ProjetGP\Connect\venv
@@ -18,17 +22,24 @@ set VIRTUAL_ENV=D:\ProjetGP\Connect\venv
 >>>>>>> origin/back-forum-amina
 =======
 >>>>>>> origin/back-forum-amina
+>>>>>>> main
 set "VIRTUAL_ENV=D:\GP\Connect\venv"
 =======
 set "VIRTUAL_ENV=C:\Users\Logitech inf Tazmalt\Desktop\Connect\venv"
 >>>>>>> d76af9709473bc7d3a6c707973740bf43b6e9937
 <<<<<<< HEAD
+=======
+set "VIRTUAL_ENV=C:\GP\Connect\venv"
+>>>>>>> Stashed changes
+=======
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> origin/back-forum-amina
 =======
 >>>>>>> origin/back-forum-amina
 =======
 >>>>>>> origin/back-forum-amina
+>>>>>>> main
 
 if not defined PROMPT set PROMPT=$P$G
 

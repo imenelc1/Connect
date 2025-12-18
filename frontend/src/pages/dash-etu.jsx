@@ -8,6 +8,8 @@ import LearningCurve from "../components/common/LearningCurveEtu";
 import NotificationItem from "../components/common/AcivityFeed";
 import ProgressBar from "../components/ui/ProgressBar";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -107,17 +109,17 @@ useEffect(() => {
         <header className="flex justify-between items-center gap-3">
           <ContentSearchBar className="mt-3" />
           <div className="flex items-center gap-3 mt-3">
-            <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-              <Bell size={16} />
-            </div>
-            <div className="w-7 h-7 flex items-center justify-center">
-              <UserCircle
-                size={20}
-                initials={initials}
-                onToggleTheme={toggleDarkMode}
-                onChangeLang={(lang) => i18n.changeLanguage(lang)}
-              />
-            </div>
+           <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
           </div>
         </header>
 
