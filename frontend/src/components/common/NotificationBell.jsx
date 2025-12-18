@@ -46,15 +46,10 @@ const NotificationBell = () => {
     }
   };
 const handleNotificationNavigation = (notif) => {
-  // Marquer comme lu d'abord
-  if (!notif.is_read) {
-    markAsRead(notif.id_notif);
-  }
-  
-  // Navigation selon le type
   switch (notif.module_source) {
+
     case 'forum': {
-      const forumId = notif.object_data?.forum_id || notif.forum_id;
+      const forumId = notif.forum_id || notif.object_data?.forum_id;
       if (forumId) {
         window.location.href = `/community#forum-${forumId}`;
       } else {
@@ -64,7 +59,7 @@ const handleNotificationNavigation = (notif) => {
     }
 
     case 'cours': {
-      const coursId = notif.object_data?.cours_id || notif.object_id;
+      const coursId = notif.object_data?.cours_id;
       if (coursId) {
         window.location.href = `/cours/${coursId}`;
       } else {
@@ -74,14 +69,10 @@ const handleNotificationNavigation = (notif) => {
     }
 
     case 'exercice': {
-      // Récupérer l'ID depuis object_data OU object_id
-      const exerciceId = notif.object_data?.exercice_id || notif.object_id;
-      
+      const exerciceId = notif.object_data?.exercice_id;
       if (exerciceId) {
-        // Redirection vers la page d'exercice spécifique
-        window.location.href = `/exercice/${exerciceId}`;
+        window.location.href = `/exercices/${exerciceId}`;
       } else {
-        // Fallback vers la liste des exercices
         window.location.href = '/exercices';
       }
       break;
@@ -97,9 +88,6 @@ const handleNotificationNavigation = (notif) => {
       window.location.href = '/notifications';
     }
   }
-  
-  // Fermer le dropdown
-  setShowDropdown(false);
 };
 
   return (
