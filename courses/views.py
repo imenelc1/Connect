@@ -177,16 +177,16 @@ class CoursListCreateView(generics.ListCreateAPIView):
     serializer_class = CoursSerializer
 
 # Détail, modification, suppression
-class CoursDetailView(generics.RetrieveAPIView):
+class CoursDetailView(generics.RetrieveUpdateAPIView):
     queryset = Cours.objects.all()
     serializer_class = CourseSerializer2
     lookup_field = "pk"
 
     def get_serializer_context(self):
-        # Permet de passer request au serializer pour utiliser visited
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
 
 
 class SectionListCreateView(generics.ListCreateAPIView):

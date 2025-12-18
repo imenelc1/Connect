@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.db import models
 from users.models import Utilisateur
 from courses.models import Cours, Lecon
@@ -14,15 +15,16 @@ class LeconComplete(models.Model):
 class ProgressionCours(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
-    avancement_cours = models.FloatField()  # en pourcentage 0-100
-    temps_passe = models.DurationField()  # durée de session
-    derniere_lecon = models.ForeignKey(
-        Lecon,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-    created_at = models.DateTimeField(auto_now_add=True)  # <-- pour l’axe X
+    avancement_cours = models.FloatField(null=False, default=0)
+    temps_passe = models.DurationField(default=timedelta())
+    derniere_lecon = models.ForeignKey(Lecon, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['utilisateur', 'cours'], name='unique_user_cours')
+        ]
+
 
 
 class TentativeExercice(models.Model):

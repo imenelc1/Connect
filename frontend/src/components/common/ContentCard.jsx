@@ -260,7 +260,7 @@ export default function ContentCard({
                 <FiTrash2
                   size={18}
                   className="cursor-pointer text-grayc hover:text-red-500"
-                  onClick={() => onDelete(course.id_cours)}
+                  onClick={() => onDelete(course.id)}
                 />
               </div>
             )}
