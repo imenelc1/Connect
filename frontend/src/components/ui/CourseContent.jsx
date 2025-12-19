@@ -3,6 +3,7 @@ import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import progressionService from "../../services/progressionService";
 import feedbackService from "../../services/feedbackService";
+import FeedbackCard from "../common/FeedbackCard";
 
 
 export default function CourseContent({
@@ -53,6 +54,33 @@ export default function CourseContent({
     localStorage.setItem(`courseTimer_${courseId}`, secondsSpent.toString());
   }, [secondsSpent, courseId]);
 
+useEffect(() => {
+  if (!courseId) return;
+
+  const fetchFeedbacks = async () => {
+    setLoadingFeedbacks(true);
+    try {
+      const data = await feedbackService.getFeedbacks(courseId);
+
+      const formatted = data.map((f) => ({
+        id: f.id_feedback,
+        initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
+        comment: f.contenu,
+        stars: f.etoile,
+        nomComplet: f.utilisateur_nom && f.utilisateur_prenom ? `${f.utilisateur_nom} ${f.utilisateur_prenom}` : "Utilisateur inconnu",
+
+      }));
+
+      setAllFeedbacks(formatted);
+    } catch (err) {
+      console.error("Erreur chargement feedbacks", err);
+    } finally {
+      setLoadingFeedbacks(false);
+    }
+  };
+
+  fetchFeedbacks();
+}, [courseId]);
 
 
   const formatTime = (secs) => {
@@ -126,14 +154,9 @@ export default function CourseContent({
   };
 
   // Feedback
-  const allFeedbacks = [
-    { id: 1, initials: "A.S", comment: t("feedback1"), stars: 5 },
-    { id: 2, initials: "M.K", comment: t("feedback2"), stars: 5 },
-    { id: 3, initials: "S.R", comment: t("feedback3"), stars: 5 },
-    { id: 4, initials: "T.L", comment: t("feedback1"), stars: 4 },
-    { id: 5, initials: "H.D", comment: t("feedback2"), stars: 5 },
-    { id: 6, initials: "N.M", comment: t("feedback3"), stars: 4 },
-  ];
+  const [allFeedbacks, setAllFeedbacks] = useState([]);
+const [loadingFeedbacks, setLoadingFeedbacks] = useState(true);
+
   const [page, setPage] = useState(0);
   const feedbacksPerPage = 3;
   const totalPages = Math.ceil(allFeedbacks.length / feedbacksPerPage);
@@ -152,25 +175,33 @@ const handleSubmit = async () => {
   }
 
   try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Vous devez être connecté pour envoyer un feedback");
-      return;
-    }
-
+    // 1️⃣ Création du feedback
     await feedbackService.createFeedback({
       contenu: feedback,
       etoile: rating,
-      content_type_string: "courses.cours",
       object_id: courseId,
+      content_type_string: "courses.cours",
     });
 
+    // 2️⃣ Rafraîchir la liste des feedbacks ⬅️ ICI
+    const refreshed = await feedbackService.getFeedbacks(courseId);
+setAllFeedbacks(
+  refreshed.map((f) => ({
+    id: f.id_feedback,
+    initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
+    comment: f.contenu,
+    stars: f.etoile,
+    nomComplet: f.utilisateur_nom && f.utilisateur_prenom ? `${f.utilisateur_nom} ${f.utilisateur_prenom}` : "Utilisateur inconnu",
+  }))
+);
+
+    // 3️⃣ Nettoyage UI
     setFeedback("");
     setRating(0);
-    alert("Feedback envoyé avec succès !");
+
   } catch (err) {
-    console.error("Erreur feedback :", err);
-    alert("Impossible d'envoyer le feedback.");
+    console.error(err);
+    alert("Erreur lors de l'envoi");
   }
 };
 
@@ -254,19 +285,21 @@ const handleSubmit = async () => {
           </button>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 flex-1 px-4 sm:px-6">
-            {currentFeedbacks.map((f) => (
-              <div key={f.id} className="relative bg-grad-1 rounded-3xl p-4 sm:p-6 text-white shadow-lg">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center text-sm sm:text-lg font-semibold mb-4">
-                  {f.initials}
-                </div>
-                <p className="text-xs sm:text-sm leading-relaxed opacity-90">{f.comment}</p>
-                <div className="flex gap-1 text-yellow-300 text-base sm:text-xl mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i}>{i < f.stars ? "★" : "☆"}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
+            {loadingFeedbacks ? (
+  <p className="col-span-3 text-center text-gray-300">
+    Chargement des feedbacks...
+  </p>
+) : currentFeedbacks.length === 0 ? (
+  <p className="col-span-3 text-center text-gray-300">
+    Aucun feedback pour ce cours
+  </p>
+) : (
+  currentFeedbacks.map((f) => (
+  <FeedbackCard key={f.id} feedback={f} />
+))
+
+)}
+
           </div>
 
           <button

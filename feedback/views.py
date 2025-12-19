@@ -11,9 +11,8 @@ from django.shortcuts import get_object_or_404
 
 # ----- FEEDBACK -----
 class FeedbackListCreateView(generics.ListCreateAPIView):
-    queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
-    permission_classes = [IsAuthenticatedJWT]  # MODIFIÉ
+    permission_classes = [IsAuthenticatedJWT]
 
     def get_queryset(self):
         object_id = self.request.query_params.get('object_id')
@@ -21,20 +20,21 @@ class FeedbackListCreateView(generics.ListCreateAPIView):
         
         if object_id:
             try:
-                # Convertir le string content_type en objet ContentType
                 app_label, model = content_type_str.split('.')
                 content_type = ContentType.objects.get(app_label=app_label, model=model)
-                return self.queryset.filter(
+                
+                # 🔹 Ajouter select_related pour récupérer les données utilisateur
+                return Feedback.objects.filter(
                     content_type=content_type,
                     object_id=object_id
-                ).order_by('-date_creation')
+                ).select_related('utilisateur').order_by('-date_creation')
             except (ValueError, ContentType.DoesNotExist):
-                return self.queryset.none()
-        return self.queryset.none()
+                return Feedback.objects.none()
+        return Feedback.objects.none()
 
     def perform_create(self, serializer):
-        # S'assurer que l'utilisateur est attaché
         serializer.save(utilisateur=self.request.user)
+
 
 class FeedbackRetrieveView(generics.RetrieveAPIView):
     queryset = Feedback.objects.all()
