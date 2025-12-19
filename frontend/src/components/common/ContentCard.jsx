@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
@@ -53,7 +53,6 @@ export default function ContentCard({
 
   if (!course) return null;
 
-  /* ===================== PAGE TYPE ===================== */
   const pageType =
     type ||
     (location.pathname.includes("courses")
@@ -62,7 +61,6 @@ export default function ContentCard({
       ? "exercise"
       : "quiz");
 
-  /* ===================== LABELS ===================== */
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
     continue: t(
@@ -79,10 +77,15 @@ export default function ContentCard({
         : t("checkQuiz"),
   };
 
-  /* ===================== FUNCTIONS ===================== */
   const handleStart = () => {
     if (pageType === "exercise") {
-      navigate(`/ListeExercices/${course.id}`);
+      if (course.categorie === "code") {
+        navigate(`/start-exerciseCode/${course.id}`);
+      } else {
+        navigate(`/start-exercise/${course.id}`);
+      }
+    } else if (pageType === "quiz") {
+      navigate(`/quiz1/${course.id}`);
     } else {
       navigate(`/Seecourses/${course.id}`);
     }
@@ -102,38 +105,29 @@ export default function ContentCard({
     }
   };
 
-  const refreshProgress = async () => {
+  const handleRestart = async () => {
     try {
-      const updatedProgress = await progressionService.getCourseProgress(course.id);
-      setProgress(updatedProgress ?? 0);
+      await progressionService.resetCourseProgress(course.id);
+      setProgress(0);
+      if (pageType === "course") navigate(`/Seecourses/${course.id}`);
+      else if (pageType === "quiz") navigate(`/quiz1/${course.id}`);
+      else navigate(`/ListeExercices/${course.id}`);
     } catch (error) {
-      console.error("Erreur lors de la récupération de la progression :", error);
+      console.error("Erreur lors de la réinitialisation :", error);
     }
   };
 
-  const handleRestart = async () => {
-  try {
-    await progressionService.resetCourseProgress(course.id);
-    setProgress(0); 
-    navigate(`/Seecourses/${course.id}`); 
-  } catch (error) {
-    console.error("Erreur lors de la réinitialisation :", error);
-  }
-};
-
-
-  /* ===================== RENDER ===================== */
   return (
     <div
-      className={`shadow-md p-6 rounded-2xl flex flex-col justify-between h-full
-      transition-all duration-300 ease-out
-      hover:shadow-xl hover:-translate-y-1 ${className}`}
+      className={`shadow-md p-6 rounded-2xl flex flex-col justify-between h-full transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 ${className}`}
     >
-      {/* ===================== BODY ===================== */}
+      {/* BODY */}
       <div className="flex flex-col flex-1">
         <div className="flex justify-between items-start">
           <h2 className="font-semibold text-lg">{course.title}</h2>
-          <span className={`px-3 py-1 text-xs rounded-full ${levelStyles[course.level]}`}>
+          <span
+            className={`px-3 py-1 text-xs rounded-full ${levelStyles[course.level]}`}
+          >
             {t(`levels.${levelKeyMap[course.level]}`)}
           </span>
         </div>
@@ -149,7 +143,13 @@ export default function ContentCard({
             </div>
             <span className="text-sm">{course.author}</span>
           </div>
-          <span className="text-xs text-gray-400">{course.duration}</span>
+          <span className="text-xs text-gray-400">
+            {pageType === "exercise"
+              ? course.categorie
+              : pageType === "quiz" && course.duration
+              ? `${course.duration} min`
+              : course.duration}
+          </span>
         </div>
 
         {showProgress && (
@@ -161,81 +161,106 @@ export default function ContentCard({
         )}
       </div>
 
-      {/* ===================== FOOTER ===================== */}
+      {/* FOOTER */}
       <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {role === "etudiant" && (
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            {progress === 0 && (
-              <>
+            {/* ======= Quiz ======= */}
+            {pageType === "quiz" ? (
+              <div className="flex gap-2">
                 <Button
-                  variant="heroPrimary"
-                  className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${levelStyles[course.level]}`}
-                  onClick={() => navigate(`/Seecourses/${course.id}`)}
+                  variant="courseStart"
+                  className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
+                  onClick={handleStart}
                 >
-                  {labels.start}
+                  {progress > 0 ? labels.continue : labels.start}
                 </Button>
-                <Button
-                  variant="heroPrimary"
-                  className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${buttonStyles[course.level]}`}
-                  onClick={seeExercises}
-                >
-                  {t("checkExos")}
-                </Button>
-              </>
-            )}
-
-            {progress > 0 && progress < 100 && (
-              <div className="flex flex-col gap-2">
-                <div className="flex flex-col sm:flex-row gap-3">
+                {progress > 0 && (
                   <Button
                     variant="heroOutline"
-                    className="px-4 py-2 whitespace-nowrap"
+                    className="!w-auto px-4 py-2"
                     onClick={handleRestart}
                   >
                     {labels.restart}
                   </Button>
-                  <Button
-                    variant="heroPrimary"
-                    className={`px-2 py-2 whitespace-nowrap ${levelStyles[course.level]}`}
-                    onClick={seeExercises}
-                  >
-                    {t("checkExos")}
-                  </Button>
-                </div>
-
-                <div>
-                  <Button
-                    variant="heroPrimary"
-                    className={`px-4 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
-                    onClick={() =>
-                      navigate(`/Seecourses/${course.id}`, {
-                        state: { lastLessonId: course.lastLessonId },
-                      })
-                    }
-                  >
-                    {labels.continue}
-                  </Button>
-                </div>
+                )}
               </div>
-            )}
+            ) : (
+              /* ======= Courses & Exercises ======= */
+              <>
+                {progress === 0 && (
+                  <>
+                    <Button
+                      variant="heroPrimary"
+                      className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${levelStyles[course.level]}`}
+                      onClick={() => navigate(`/Seecourses/${course.id}`)}
+                    >
+                      {labels.start}
+                    </Button>
+                    <Button
+                      variant="heroPrimary"
+                      className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${buttonStyles[course.level]}`}
+                      onClick={seeExercises}
+                    >
+                      {t("checkExos")}
+                    </Button>
+                  </>
+                )}
 
-            {progress >= 100 && (
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <Button
-                  variant="heroOutline"
-                  className="px-4 py-2 whitespace-nowrap"
-                  onClick={handleRestart}
-                >
-                  {labels.restart}
-                </Button>
-                <Button
-                  variant="heroPrimary"
-                  className={`px-3 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
-                  onClick={seeExercises}
-                >
-                  {t("checkExos")}
-                </Button>
-              </div>
+                {progress > 0 && progress < 100 && (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        variant="heroOutline"
+                        className="px-4 py-2 whitespace-nowrap"
+                        onClick={handleRestart}
+                      >
+                        {labels.restart}
+                      </Button>
+                      <Button
+                        variant="heroPrimary"
+                        className={`px-2 py-2 whitespace-nowrap ${levelStyles[course.level]}`}
+                        onClick={seeExercises}
+                      >
+                        {t("checkExos")}
+                      </Button>
+                    </div>
+
+                    <div>
+                      <Button
+                        variant="heroPrimary"
+                        className={`px-4 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
+                        onClick={() =>
+                          navigate(`/Seecourses/${course.id}`, {
+                            state: { lastLessonId: course.lastLessonId },
+                          })
+                        }
+                      >
+                        {labels.continue}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {progress >= 100 && (
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <Button
+                      variant="heroOutline"
+                      className="px-4 py-2 whitespace-nowrap"
+                      onClick={handleRestart}
+                    >
+                      {labels.restart}
+                    </Button>
+                    <Button
+                      variant="heroPrimary"
+                      className={`px-3 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
+                      onClick={seeExercises}
+                    >
+                      {t("checkExos")}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}

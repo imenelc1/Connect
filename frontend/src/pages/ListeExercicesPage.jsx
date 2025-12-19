@@ -151,9 +151,9 @@ useEffect(() => {
   className="mt-4 px-6 h-9 text-sm bg-blue text-white rounded-full mx-auto block !w-fit"
   onClick={() => {
     if (ex.categorie === "code") {
-      navigate(`/codeExo/${ex.id_exercice}`);
+      navigate(`/start-exerciseCode/${ex.id_exercice}`);
     } else {
-      alert("Cet exercice n'est pas de type code."); 
+      navigate(`/start-exercise/${ex.id_exercice}`);
     }
   }}
 />

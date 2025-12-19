@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.db import models
 from users.models import Utilisateur
 from courses.models import Cours, Lecon
-from Exercices.models import Exercice
+from exercices.models import Exercice
 
 class LeconComplete(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)

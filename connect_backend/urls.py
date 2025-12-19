@@ -9,8 +9,8 @@ urlpatterns = [
     path('api/', include('forum.urls')), 
     path('api/users/', include('users.urls')),
     path('api/courses/', include('courses.urls')),
-    path('api/exercices/', include('Exercices.urls')),
-    path('api/quiz/', include('Quiz.urls')),
+    path('api/exercices/', include('exercices.urls')),
+    path('api/quiz/', include('quiz.urls')),
     path('api/dashboard/', include('dashboard.urls')),
 
 

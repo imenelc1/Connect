@@ -1,5 +1,5 @@
 from courses import models
-from Exercices.models import Exercice
+from exercices.models import Exercice
 from users.models import Utilisateur
 from django.db import models
 
