@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import progressionService from "../../services/progressionService";
+import feedbackService from "../../services/feedbackService";
+
 
 export default function CourseContent({
   course,
@@ -142,11 +144,36 @@ export default function CourseContent({
 
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(0);
-  const handleSubmit = () => {
-    console.log("Feedback submitted:", { feedback, rating });
+  // Remplacer l'ancien handleSubmit par celui-ci
+const handleSubmit = async () => {
+  if (!feedback || rating === 0) {
+    alert("Veuillez écrire un feedback et donner une note");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Vous devez être connecté pour envoyer un feedback");
+      return;
+    }
+
+    await feedbackService.createFeedback({
+      contenu: feedback,
+      etoile: rating,
+      content_type_string: "courses.cours",
+      object_id: courseId,
+    });
+
     setFeedback("");
     setRating(0);
-  };
+    alert("Feedback envoyé avec succès !");
+  } catch (err) {
+    console.error("Erreur feedback :", err);
+    alert("Impossible d'envoyer le feedback.");
+  }
+};
+
 
   return (
     <div className="bg-card rounded-3xl border border-blue/20 p-4 sm:p-8 shadow-sm">

@@ -1,9 +1,68 @@
-# feedback/serializers.py
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
-from .models import Notification
+from .models import Notification, Feedback
+from users.models import Utilisateur
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    utilisateur_nom = serializers.CharField(
+        source="utilisateur.nom", read_only=True
+    )
+    utilisateur_prenom = serializers.CharField(
+        source="utilisateur.prenom", read_only=True
+    )
+
+    # MODIFIÉ: Accepter le string du content_type
+    content_type_string = serializers.CharField(write_only=True, required=True)
+    
+    class Meta:
+        model = Feedback
+        fields = [
+            "id_feedback",
+            "contenu",
+            "etoile",
+            "utilisateur",
+            "utilisateur_nom",
+            "utilisateur_prenom",
+            "content_type_string",  # MODIFIÉ
+            "object_id",
+            "date_creation",
+        ]
+        read_only_fields = [
+            "id_feedback",
+            "date_creation",
+            "utilisateur",
+        ]
+
+    def validate_etoile(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("La note doit être comprise entre 1 et 5.")
+        return value
+
+    def validate_content_type_string(self, value):
+        try:
+            app_label, model = value.split('.')
+            ContentType.objects.get(app_label=app_label, model=model)
+        except (ValueError, ContentType.DoesNotExist):
+            raise serializers.ValidationError(
+                "content_type_string doit être au format 'app_label.model'"
+            )
+        return value
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        
+        # Convertir le string en ContentType
+        content_type_string = validated_data.pop('content_type_string')
+        app_label, model = content_type_string.split('.')
+        content_type = ContentType.objects.get(app_label=app_label, model=model)
+        
+        validated_data['content_type'] = content_type
+        validated_data['utilisateur'] = request.user
+        
+        return super().create(validated_data)
 
 class NotificationSerializer(serializers.ModelSerializer):
+    # ... (le reste reste identique)
     # Infos utilisateurs
     envoyeur_nom = serializers.CharField(source='utilisateur_envoyeur.nom', read_only=True, allow_null=True)
     envoyeur_prenom = serializers.CharField(source='utilisateur_envoyeur.prenom', read_only=True, allow_null=True)
@@ -47,8 +106,14 @@ class NotificationSerializer(serializers.ModelSerializer):
         
         data = {'id': obj.object_id}
         
+        # Feedback
+        if isinstance(obj.content_object, Feedback):
+            data['type'] = 'feedback'
+            data['contenu_preview'] = obj.content_object.contenu[:100] if obj.content_object.contenu else ""
+            data['etoile'] = obj.content_object.etoile
+        
         # Forum
-        if hasattr(obj.content_object, 'titre_forum'):
+        elif hasattr(obj.content_object, 'titre_forum'):
             data['titre'] = obj.content_object.titre_forum
             data['type'] = 'forum'
         

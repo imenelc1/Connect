@@ -4,11 +4,41 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from users.models import Utilisateur
 
+
 class Feedback(models.Model):
     id_feedback = models.AutoField(primary_key=True)
+
+    # Contenu du feedback
     contenu = models.TextField()
-    etoile = models.IntegerField()
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    etoile = models.PositiveSmallIntegerField()  # 1 à 5
+
+    # Auteur
+    utilisateur = models.ForeignKey(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name="feedbacks"
+    )
+
+    # ====== RELATION GÉNÉRIQUE ======
+    content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE
+    )
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "feedback"
+        ordering = ["-date_creation"]
+        indexes = [
+            models.Index(fields=["content_type", "object_id"]),
+        ]
+
+    def __str__(self):
+        return f"Feedback {self.id_feedback} ({self.etoile}★)"
+
 
 class Notification(models.Model):
     id_notif = models.AutoField(primary_key=True)

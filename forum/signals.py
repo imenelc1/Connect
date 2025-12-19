@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from .models import Like, Commentaire, MessageLike, Message, Forum
 from feedback.utils import create_notification
 from users.models import Utilisateur
-from feedback.utils import create_notification
+
 
 def get_user_role(user):
     """Retourne le rôle d'un utilisateur : 'etudiant', 'enseignant' ou None."""
