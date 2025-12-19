@@ -26,17 +26,43 @@ class ProgressionCours(models.Model):
         ]
 
 
+from django.utils import timezone
 
 class TentativeExercice(models.Model):
+    ETAT_CHOICES = [
+        ('brouillon', 'Brouillon'),
+        ('soumis', 'Soumis'),
+        ('corrige', 'Corrigé'),
+    ]
+
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE)
-    date_soumission = models.DateField()
-    heure_tentative = models.TimeField()
-    etat = models.CharField(max_length=50)
-    score = models.FloatField()
-    temps_passe = models.DurationField()
+
     reponse = models.TextField()
-    feedback = models.TextField(blank=True, null=True)
+    output = models.TextField(null=True, blank=True)  # 👈 ICI
+
+    etat = models.CharField(
+        max_length=20,
+        choices=ETAT_CHOICES,
+        default='brouillon'
+    )
+
+    score = models.FloatField(null=True, blank=True)
+    feedback = models.TextField(null=True, blank=True)
+
+    temps_passe = models.DurationField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if self.etat == "soumis" and not self.submitted_at:
+            self.submitted_at = timezone.now()
+        super().save(*args, **kwargs)
+    class Meta:
+        unique_together = ('utilisateur', 'exercice')
+
+
 
 class SessionDuration(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)

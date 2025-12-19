@@ -7,10 +7,11 @@ from django.db.models import Sum, Avg
 from django.db.models.functions import TruncDate
 from django.utils.timezone import now
 from courses.models import Cours, Lecon
+from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from spaces.models import Space, SpaceEtudiant
 from users.jwt_auth import IsAuthenticatedJWT
 from users.models import Utilisateur
-from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration
+from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration, TentativeExercice
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -331,3 +332,28 @@ def current_progress_students(request):
         })
 
     return Response(result)
+
+# exos
+
+# ---------------- GET toutes les tentatives ----------------
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def list_tentatives(request):
+    user = request.user
+    tentatives = TentativeExercice.objects.filter(utilisateur=user)
+    serializer = TentativeExerciceReadSerializer(tentatives, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+# ---------------- POST nouvelle tentative ----------------
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedJWT])
+def create_tentative(request):
+    # On utilise le serializer d'écriture pour valider et créer/mettre à jour
+    serializer = TentativeExerciceWriteSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        tentative = serializer.save(utilisateur=request.user)
+        return Response(TentativeExerciceWriteSerializer(tentative).data, status=status.HTTP_201_CREATED)
+    else:
+        print(serializer.errors)  # <-- ajoute ça
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

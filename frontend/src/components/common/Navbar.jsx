@@ -65,6 +65,7 @@ export default function Navbar() {
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
+    { href: "/SubmittedExos", label: t("myExercises"), icon: ClipboardList },
     { href: "/badges", label: t("ranking"), icon: Award },
     { href: "/community", label: t("community"), icon: MessageCircle },
     { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },
@@ -86,11 +87,11 @@ export default function Navbar() {
     { href: "/CourseManagement", label: t("courses"), icon: BookOpen },
     { href: "/ExerciseManagement", label: t("exercises"), icon: ClipboardList },
     { href: "/QuizManagement", label: t("quizzes"), icon: FileQuestion },
-    { href: "/students", label: t("students"), icon: Users },
+    { href: "/StudentsManagement", label: t("students"), icon: Users },
     { href: "/instructors", label: t("instructors"), icon: GraduationCap },
     { href: "/spaces", label: t("spaces"), icon: LayoutGrid },
     { href: "/badges", label: t("badges"), icon: Award },
-    { href: "/forms", label: t("forms"), icon: FileText },
+    { href: "/ForumManagement", label: t("forms"), icon: FileText },
   ];
 
   const links =
@@ -122,29 +123,42 @@ export default function Navbar() {
   );
 
   return (
+
     <aside
-      className={`h-screen bg-card rounded-3xl shadow-2xl p-3 flex flex-col justify-between
-      fixed top-0 left-0 transition-all duration-300 z-50
-      ${collapsed ? "w-16" : "w-56"}`}
+    
+      className={`fixed
+    min-h-screen   bg-card rounded-3xl shadow-2xl p-3 flex flex-col 
+     top-0 left-0 z-50 transition-all duration-300
+  
+    w-16
+    md:${collapsed ? "w-16 min-h-screen" : "w-56 "}
+  `}
     >
+
 
       {/* Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className={`absolute top-4 
-          ${collapsed ? "right-0 translate-x-1/2" : "-right-4"}
-          ${collapsed ? "w-7 h-7" : "w-9 h-9"}
-          rounded-full bg-grad-1 text-white shadow-md flex items-center justify-center
-          z-50 transition-all duration-300`}
+        className={`
+    hidden md:flex
+    absolute top-4 
+    ${collapsed ? "right-0 translate-x-1/2" : "-right-4"}
+    ${collapsed ? "w-7 h-7" : "w-9 h-9"}
+    rounded-full bg-grad-1 text-white shadow-md
+    items-center justify-center
+    z-50 transition-all duration-300
+  `}
       >
+
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
       </button>
+      
 
       {/* Header */}
       <div className="flex items-center justify-center p-2 bg-card rounded-2xl shadow-sm -mt-1 mb-1">
         <IconeLogoComponent
-          size={collapsed ? "w-8 h-8 -ml-2" : "w-8 h-10"}
-          className="transition-all duration-300 -ml-2"
+          size={collapsed ? "w-8 h-8 ml-2 md:ml-0" : "w-8 h-10 ml-0 "}
+          className="transition-all duration-300   "
         />
 
         {!collapsed && (
@@ -161,7 +175,8 @@ export default function Navbar() {
       </div>
 
       {/* NAVIGATION */}
-      <nav className="mt-2 flex flex-col gap-1 font-medium pb-3 border-b border-surface/60">
+      <nav className="mt-2 flex flex-col gap-2 font-medium pb-2 border-b border-surface/60">
+
         {links.map((item, i) => {
           let forceActive = false;
 
@@ -189,14 +204,22 @@ export default function Navbar() {
               }
             >
               <item.icon size={17} strokeWidth={1.5} />
-              {!collapsed && <span className="ml-2">{item.label}</span>}
+              {!collapsed && (
+                <span className="ml-2 hidden md:inline transition-opacity duration-200 opacity-100">
+                  {item.label}
+                </span>
+              )}
+
+
             </NavLink>
           );
         })}
       </nav>
 
+
+
       {/* SETTINGS + LOGOUT */}
-      <div className="flex flex-col gap-1 mt-2 mb-2">
+      <div className="flex flex-col gap-1 mt-16 mb-2 pt-1">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
@@ -205,7 +228,7 @@ export default function Navbar() {
           }
         >
           <Settings size={17} strokeWidth={1.5} />
-          {!collapsed && <span>{t("settings")}</span>}
+          {!collapsed && <span className="hidden md:inline ">{t("settings")}</span>}
         </NavLink>
 
         <button
@@ -215,8 +238,9 @@ export default function Navbar() {
           }}
           className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red hover:bg-red/20 transition-colors"
         >
+
           <LogOut size={17} strokeWidth={1.5} />
-          {!collapsed && <span>{t("logout")}</span>}
+          {!collapsed && <span className="hidden md:inline ">{t("logout")}</span>}
         </button>
 
       </div>

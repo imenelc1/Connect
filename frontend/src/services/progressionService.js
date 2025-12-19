@@ -133,6 +133,42 @@ export const getCurrentProgressStudents = async () => {
 };
 
 
+// Récupérer toutes les tentatives de l'utilisateur
+export const getTentatives = async () => {
+  const res = await api.get("dashboard/tentatives/", { headers: getAuthHeader() });
+  return res.data; // renvoie un tableau de tentatives
+};
+
+// Créer ou sauvegarder une tentative (brouillon ou soumise)
+export const createTentative = async ({ exercice_id, reponse, etat = "brouillon", score = null, feedback = null, temps_passe = 0, output = "" }) => {
+  const payload = { exercice_id, reponse, etat, score, feedback, temps_passe, output };
+  const res = await api.post("dashboard/tentatives/create/", payload, { headers: getAuthHeader() });
+  return res.data;
+};
+
+// Sauvegarder un brouillon
+export const saveDraftTentative = async ({ exercice_id, reponse, output = "" }) => {
+  return createTentative({
+    exercice_id,
+    reponse,
+    output,
+    etat: "brouillon",
+  });
+};
+
+// Soumettre une tentative
+export const submitTentative = async ({ exercice_id, reponse, output = "", temps_passe = null }) => {
+  return createTentative({
+    exercice_id,
+    reponse,
+    output,
+    etat: "soumis",
+    temps_passe,
+  });
+};
+
+
+
 
 
 
@@ -147,6 +183,10 @@ export const getCurrentProgressStudents = async () => {
   updateLastLesson,
   resetCourseProgress,
   getGlobalProgressHistory,
+  getTentatives,
+  createTentative,
+  saveDraftTentative,
+  submitTentative,
   // Prof
   getActiveCoursesCountProf,
   addSessionProf,
