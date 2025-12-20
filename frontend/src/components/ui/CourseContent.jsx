@@ -2,91 +2,107 @@ import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-export default function CourseContent({ course, currentSectionIndex, setCurrentSectionIndex }) {
+export default function CourseContent({
+  course,
+  currentSectionIndex,
+  setCurrentSectionIndex,
+  setSections,
+  sectionPages,
+  setSectionPages,
+  markLessonVisited,
+  updateSectionProgress,
+}) {
   const { t } = useTranslation("courses");
   const { title, sections } = course;
-
-  // Timer spécifique au cours
- const courseId = course.id || "default";
+  const courseId = course.id || "default";
 
   // Timer
   const [secondsSpent, setSecondsSpent] = useState(() => {
     return parseInt(localStorage.getItem(`courseTimer_${courseId}`) || "0", 10);
   });
 
-  // Reset timer uniquement si nouveau cours
   useEffect(() => {
-    const storedCourseId = localStorage.getItem("currentCourseId");
-    if (storedCourseId !== courseId) {
-      setSecondsSpent(0);
-      localStorage.setItem("currentCourseId", courseId);
-    }
-  }, [courseId]);
-
-  useEffect(() => {
-    let interval;
-    const startTimer = () => {
-      interval = setInterval(() => setSecondsSpent(prev => prev + 1), 1000);
-    };
-    const stopTimer = () => clearInterval(interval);
-
-    startTimer();
-    const handleVisibility = () => {
-      if (document.hidden) stopTimer();
-      else startTimer();
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    return () => {
-      stopTimer();
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
+    const interval = setInterval(() => setSecondsSpent((prev) => prev + 1), 1000);
+    return () => clearInterval(interval);
   }, [courseId]);
 
   useEffect(() => {
     localStorage.setItem(`courseTimer_${courseId}`, secondsSpent.toString());
   }, [secondsSpent, courseId]);
 
-  const formatTime = secs => {
+  const formatTime = (secs) => {
     const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
-    return `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
+      .toString()
+      .padStart(2, "0")}`;
   };
 
-  // Pagination des leçons
+  // Gestion des leçons et pages
   const LESSONS_PER_PAGE = 2;
-const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
+  const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
   const lessons = section?.lessons || [];
-  const totalLessonPages = Math.ceil(section.lessons.length / LESSONS_PER_PAGE);
-  const [currentLessonPage, setCurrentLessonPage] = useState(0);
+  const totalLessonPages = Math.ceil(lessons.length / LESSONS_PER_PAGE);
 
+  const currentLessonPage = sectionPages?.[currentSectionIndex] ?? 0;
   const currentLessons = lessons.slice(
     currentLessonPage * LESSONS_PER_PAGE,
     currentLessonPage * LESSONS_PER_PAGE + LESSONS_PER_PAGE
   );
 
+  // Marquer les leçons visitées
+  useEffect(() => {
+    currentLessons.forEach((lesson) => {
+      if (!lesson.visited) {
+        markLessonVisited(lesson.id);
+        updateSectionProgress(currentSectionIndex, lesson.id);
+      }
+    });
+
+    if (currentLessons.some((l) => !l.visited)) {
+      setSecondsSpent(0);
+      localStorage.setItem(`courseTimer_${courseId}`, "0");
+    }
+  }, [currentLessons, currentSectionIndex, markLessonVisited, updateSectionProgress, courseId]);
+
+  // Navigation
+  const goToLessonPage = (page) => {
+    setSectionPages((prev) => ({ ...prev, [currentSectionIndex]: page }));
+  };
+
   const nextLessonPage = () => {
     if (currentLessonPage < totalLessonPages - 1) {
-      setCurrentLessonPage(currentLessonPage + 1);
+      goToLessonPage(currentLessonPage + 1);
     } else if (currentSectionIndex < sections.length - 1) {
-      setCurrentSectionIndex(currentSectionIndex + 1);
-      setCurrentLessonPage(0);
+      const nextIndex = currentSectionIndex + 1;
+      setCurrentSectionIndex(nextIndex);
+
+      const nextLessons = sections[nextIndex].lessons;
+      const firstUnvisited = nextLessons.findIndex((l) => !l.visited);
+      setSectionPages((prev) => ({
+        ...prev,
+        [nextIndex]: firstUnvisited >= 0 ? Math.floor(firstUnvisited / LESSONS_PER_PAGE) : 0,
+      }));
     }
   };
 
   const prevLessonPage = () => {
-    if (currentLessonPage > 0) {
-      setCurrentLessonPage(currentLessonPage - 1);
-    } else if (currentSectionIndex > 0) {
-      const prevSection = sections[currentSectionIndex - 1];
-      setCurrentSectionIndex(currentSectionIndex - 1);
-      setCurrentLessonPage(Math.ceil(prevSection.lessons.length / LESSONS_PER_PAGE) - 1);
+    if (currentLessonPage > 0) goToLessonPage(currentLessonPage - 1);
+    else if (currentSectionIndex > 0) {
+      const prevIndex = currentSectionIndex - 1;
+      setCurrentSectionIndex(prevIndex);
+
+      const totalPrevPages = Math.ceil(sections[prevIndex].lessons.length / LESSONS_PER_PAGE);
+      setSectionPages((prev) => ({ ...prev, [prevIndex]: totalPrevPages - 1 }));
     }
   };
 
-  // Feedback
+  const isLastPage =
+    currentSectionIndex === sections.length - 1 &&
+    currentLessonPage === totalLessonPages - 1;
+
+     // Feedback
   const allFeedbacks = [
     { id: 1, initials: "A.S", comment: t("feedback1"), stars: 5 },
     { id: 2, initials: "M.K", comment: t("feedback2"), stars: 5 },
@@ -111,15 +127,14 @@ const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
     setRating(0);
   };
 
+  // Render
   return (
     <div className="bg-card rounded-3xl border border-blue/20 p-4 sm:p-8 shadow-sm">
-     {/* Header */}
       <div className="px-2 mb-6">
         <h1 className="text-xl sm:text-3xl font-bold text-muted">{title}</h1>
         <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm">
           <span className="flex items-center gap-1 text-muted font-medium">
-            <BookOpen size={14} className="sm:w-4 sm:h-4" />
-            Chapitre {section.ordre} / {sections.length}
+            <BookOpen size={14} className="sm:w-4 sm:h-4" /> Chapitre {section.ordre} / {sections.length}
           </span>
           <span className="flex items-center gap-1 text-muted">
             <Clock size={14} className="sm:w-4 sm:h-4" /> {formatTime(secondsSpent)}
@@ -127,33 +142,27 @@ const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
         </div>
       </div>
 
-      {/* Leçons paginées */}
-   <div className="bg-card rounded-3xl border border-blue/20 p-4 sm:p-8 shadow-sm">
-  {currentLessons.length > 0 ? (
-    currentLessons.map((lesson) => (
-      <div key={lesson.id} className="mb-10">
-        <h2 className="mt-6 text-lg sm:text-xl font-semibold text-muted">{lesson.title}</h2>
-        {lesson.type === "image" && lesson.preview && (
-          <img src={lesson.preview} alt={lesson.title} className="rounded-xl mt-4" />
-        )}
-        {lesson.type === "text" && lesson.content && (
-          <p className="mt-2 text-sm sm:text-base text-textc leading-relaxed">{lesson.content}</p>
-        )}
-        {lesson.type === "example" && lesson.content && (
-          <pre className="mt-2 p-4 bg-gray-100 rounded-xl overflow-x-auto">{lesson.content}</pre>
+      <div className="bg-card rounded-3xl border border-blue/20 p-4 sm:p-8 shadow-sm">
+        {currentLessons.length > 0 ? (
+          currentLessons.map((lesson) => (
+            <div key={lesson.id} className="mb-10">
+              <h2 className="mt-6 text-lg sm:text-xl font-semibold text-muted">{lesson.title}</h2>
+              {lesson.type === "image" && lesson.preview && (
+                <img src={lesson.preview} alt={lesson.title} className="rounded-xl mt-4" />
+              )}
+              {lesson.type === "text" && lesson.content && (
+                <p className="mt-2 text-sm sm:text-base text-textc leading-relaxed">{lesson.content}</p>
+              )}
+              {lesson.type === "example" && lesson.content && (
+                <pre className="mt-2 p-4 bg-gray-100 rounded-xl overflow-x-auto">{lesson.content}</pre>
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-sm sm:text-base text-gray-500 mt-4">Aucune leçon disponible</p>
         )}
       </div>
-    ))
-  ) : (
-    <p className="text-center text-sm sm:text-base text-gray-500 mt-4">
-      Aucune leçon disponible
-    </p>
-  )}
-</div>
 
-
-
-      {/* Navigation leçons */}
       <div className="flex flex-row gap-2 sm:gap-3 mt-4">
         <button
           onClick={prevLessonPage}
@@ -162,16 +171,21 @@ const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
         >
           <ChevronLeft size={14} className="sm:w-4 sm:h-4" /> {t("chapitrePrec")}
         </button>
+
         <button
           onClick={nextLessonPage}
-          disabled={currentSectionIndex === sections.length - 1 && currentLessonPage === totalLessonPages - 1}
-          className="flex items-center gap-1 sm:gap-2 bg-blue px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-white text-xs sm:text-base shadow hover:bg-blue/90 disabled:opacity-30"
+          className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-xs sm:text-base shadow ${
+            isLastPage
+              ? "bg-supp/80 text-white hover:bg-supp/90 focus:bg-supp/30"
+              : "bg-blue text-white hover:bg-blue/90"
+          }`}
         >
-          {t("ChapitreSuiv")} <ChevronRight size={14} className="sm:w-4 sm:h-4" />
+          {isLastPage ? "Terminer" : t("ChapitreSuiv")}
+          {!isLastPage && <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
         </button>
       </div>
 
-      {/* Quiz */}
+            {/* Quiz */}
       <div className="mt-10 w-full">
         <div className="w-full bg-grad-1 text-white p-4 sm:p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between shadow">
           <div className="text-left mb-4 md:mb-0">
@@ -221,7 +235,6 @@ const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
         </div>
 
         <h3 className="text-lg sm:text-xl font-bold text-muted mb-3">{t("yourFeedback")}</h3>
-
         <textarea
           className="w-full h-36 sm:h-48 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
           placeholder={t("feedbackPlaceholder")}
@@ -234,12 +247,7 @@ const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
             <span className="text-gray-800 font-medium text-sm sm:text-base">{t("rateCourse")}</span>
             <div className="flex gap-1 text-xl sm:text-2xl">
               {[1, 2, 3, 4, 5].map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setRating(s)}
-                  className="cursor-pointer text-yellow-400"
-                >
+                <button key={s} type="button" onClick={() => setRating(s)} className="cursor-pointer text-yellow-400">
                   {s <= rating ? "★" : "☆"}
                 </button>
               ))}
@@ -254,6 +262,7 @@ const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
           </button>
         </div>
       </div>
+      
     </div>
   );
 }

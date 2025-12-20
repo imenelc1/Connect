@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaClock, FaMedal, FaStar, FaTrophy } from "react-icons/fa";
 import { useTranslation } from "react-i18next";

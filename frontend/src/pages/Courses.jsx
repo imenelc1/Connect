@@ -1,55 +1,75 @@
-import React, { useState, useContext } from "react";
-import { Menu } from "lucide-react";
+import React, { useState, useContext, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import ThemeContext from "../context/ThemeContext.jsx";
+import UserCircle from "../components/common/UserCircle.jsx";
+import ContentSearchBar from "../components/common/ContentSearchBar.jsx";
 import CoursesSidebarItem from "../components/ui/CourseSidebarItem.jsx";
 import CourseContent from "../components/ui/CourseContent.jsx";
-import { useTranslation } from "react-i18next";
-import UserCircle from "../components/common/UserCircle.jsx";
-import ThemeContext from "../context/ThemeContext.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import IaAssistant from "../components/ui/IaAssistant.jsx";
-import ContentSearchBar from "../components/common/ContentSearchBar.jsx";
 import api from "../services/courseService";
-import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import progressionService from "../services/progressionService";
 
-import { getCurrentUserId } from "../hooks/useAuth";
 
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
   const { toggleDarkMode } = useContext(ThemeContext);
+  const { id: coursId } = useParams();
+  const location = useLocation();
 
   const storedUser = localStorage.getItem("user");
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
 
-  const [collapsed, setCollapsed] = useState(false);
-
-  const { id: coursId } = useParams();
+  const [sections, setSections] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [level, setLevel] = useState("");
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-const [sections, setSections] = useState([
-    {
-      id: 1,
-      title: "",
-      description: "", // ⭐ AJOUTÉ
-      open: true,
-      ordre:"",
-      lessons: [{ id: 1, title: "", content: "" }], // ⭐ AJOUTÉ
-    },
-  ]);
+  const [courseProgress, setCourseProgress] = useState(0);
+  const [initialLessonPage, setInitialLessonPage] = useState(0);
 
-useEffect(() => {
+  // **NOUVEAU** pour gérer la page par section
+  const [sectionPages, setSectionPages] = useState({});
+
+  const lastLessonId = location.state?.lastLessonId;
+
+// Marquer une leçon comme visitée
+const markLessonVisited = async (lessonId) => {
+  try {
+    // Appel backend pour marquer la leçon
+    const res = await progressionService.completeLesson(lessonId);
+    
+    // Mettre à jour la progression globale du cours
+    if (res?.course_progress !== undefined) {
+      setCourseProgress(res.course_progress);
+    }
+
+    // Mettre à jour localement la leçon comme visitée
+    setSections(prev =>
+      prev.map((sec) => ({
+        ...sec,
+        lessons: sec.lessons.map((l) =>
+          l.id === lessonId ? { ...l, visited: true } : l
+        ),
+      }))
+    );
+  } catch (err) {
+    console.error("Erreur lors du marquage de la leçon :", err);
+  }
+};
+
+
+  useEffect(() => {
     if (!coursId) return;
 
     const fetchCourse = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("token");
       try {
         const res = await api.get(`courses/courses/${coursId}/`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -72,11 +92,28 @@ useEffect(() => {
             title: lec.titre_lecon,
             content: lec.contenu_lecon,
             type: lec.type_lecon,
-            preview: lec.type_lecon === "image"
-  ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
-  : null
+            visited: lec.visited,
+            preview:
+              lec.type_lecon === "image"
+                ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
+                : null,
           })),
         }));
+
+        /* POSITIONNEMENT AUTOMATIQUE */
+        if (lastLessonId) {
+          const LESSONS_PER_PAGE = 2;
+          for (let secIndex = 0; secIndex < fetchedSections.length; secIndex++) {
+            const lessons = fetchedSections[secIndex].lessons;
+            const lessonIndex = lessons.findIndex((l) => l.id === lastLessonId);
+            if (lessonIndex !== -1) {
+              setCurrentSectionIndex(secIndex);
+              setInitialLessonPage(Math.floor(lessonIndex / LESSONS_PER_PAGE));
+              setSectionPages({ [secIndex]: Math.floor(lessonIndex / LESSONS_PER_PAGE) });
+              break;
+            }
+          }
+        }
 
         setSections(fetchedSections);
       } catch (err) {
@@ -85,54 +122,40 @@ useEffect(() => {
     };
 
     fetchCourse();
-  }, [coursId]);
-  console.log( coursId,title,+"niii //", description);
+  }, [coursId, lastLessonId]);
 
+  const updateSectionProgress = (sectionIndex, lessonId) => {
+    setSections((prev) =>
+      prev.map((sec, i) => {
+        if (i !== sectionIndex) return sec;
 
+        const updatedLessons = sec.lessons.map((lesson) =>
+          lesson.id === lessonId ? { ...lesson, visited: true } : lesson
+        );
 
+        const visitedCount = updatedLessons.filter((l) => l.visited).length;
+        const progress = Math.round((visitedCount / updatedLessons.length) * 100);
+
+        return {
+          ...sec,
+          lessons: updatedLessons,
+          progress,
+          completed: progress === 100,
+        };
+      })
+    );
+  };
 
   return (
     <div className="w-full bg-surface flex flex-col items-center">
-
-      {/* HEADER */}
       <header className="w-full max-w-7xl flex flex-col gap-4 py-6 px-4 md:flex-row md:items-center md:justify-between">
-
-        {/* TITLE */}
-        <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">
-          {t("title")}
-        </h1>
-
-        {/* ROW MOBILE : SEARCH + CHAPITRES */}
-        <div className="flex w-full items-center gap-3 sm:hidden">
-          {/* SEARCH */}
-         
-            <ContentSearchBar />
-          
-
-          {/* CHAPTER BUTTON */}
-          <button
-            className="bg-blue text-white px-3 py-2 rounded-xl flex items-center gap-1 whitespace-nowrap"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            <Menu size={18} />
-            {t("chapters")}
-          </button>
-        </div>
-
-        {/* DESKTOP ROW */}
+        <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">{t("title")}</h1>
         <div className="hidden sm:flex sm:flex-row w-full gap-3 md:gap-4 items-center md:w-auto">
-          {/* SEARCH DESKTOP */}
           <div className="relative w-full sm:w-64 md:w-80">
-            <input
-              placeholder={t("search")}
-              className="w-full pl-10 pr-4 py-2 rounded-full border border-blue/30 shadow-sm"
-            />
+            <ContentSearchBar />
           </div>
-
-          {/* ICONS */}
           <IaAssistant />
           <HeadMascotte />
-
           <UserCircle
             initials={initials}
             onToggleTheme={toggleDarkMode}
@@ -141,25 +164,25 @@ useEffect(() => {
         </div>
       </header>
 
-      {/* MAIN GRID */}
       <div className="w-full max-w-7xl px-4 pb-10 flex flex-col lg:flex-row gap-6 relative">
-        {/* SIDEBAR */}
-        <div className={`${collapsed ? "hidden lg:block" : "block"}`}>
-          
-<CoursesSidebarItem
-  sections={sections}
+        <CoursesSidebarItem
+          sections={sections}
+          currentSectionIndex={currentSectionIndex}
+          setCurrentSectionIndex={setCurrentSectionIndex}
+        />
+       <CourseContent
+  course={{ title, description, level, duration, sections, id: coursId }}
   currentSectionIndex={currentSectionIndex}
   setCurrentSectionIndex={setCurrentSectionIndex}
+  setSections={setSections}
+  sectionPages={sectionPages}
+  setSectionPages={setSectionPages}
+  currentLessonPage={initialLessonPage}
+  setCurrentLessonPage={setInitialLessonPage}
+  updateSectionProgress={updateSectionProgress}
+  markLessonVisited={markLessonVisited} // <-- ici
 />
-        </div>
 
-        {/* CONTENT */}
-       
-<CourseContent
-  course={{ title, description, level, duration, sections }}
-  currentSectionIndex={currentSectionIndex}
-  setCurrentSectionIndex={setCurrentSectionIndex}
-/>
       </div>
     </div>
   );

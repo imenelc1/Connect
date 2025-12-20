@@ -21,6 +21,8 @@ import NewExercise from "../pages/NewExercice";
 import ExercisePreview from "../pages/ExercisePreview";
 import CoursInfo from "../pages/CoursInfo";
 import CreateQuiz from "../pages/CreateQuiz";
+import UpdateQuiz from "../pages/UpdateQuiz";
+
 import QuizPreview from "../pages/QuizPreview";
 import CourseUpdate from "../pages/CourseUpdate";
 import CommunityPage from "../pages/CommunityPage";
@@ -46,8 +48,8 @@ import TheoryExercisePage from "../pages/TheoryExercisePage.jsx";
 import QuizManagement from "../pages/QuizManagement";
 import ExercisesManagement from "../pages/ExerciseManagement";
 import CoursesManagement from "../pages/CourseManagement";
- import ValidationCourses from "../pages/ValidationCourses";
-  import Dashboard from "../pages/Dashboard"
+import ValidationCourses from "../pages/ValidationCourses";
+import Dashboard from "../pages/Dashboard"
 import AdminLogin from "../pages/AdminLogin.jsx";
 import StudentsMangement from "../pages/studentsManagement.jsx";
 import BadgesManagement from "../pages/badgesManagement.jsx";
@@ -90,6 +92,7 @@ export default function AppRoutes() {
         <Route path="/exercise-preview" element={<ExercisePreview />} />
         <Route path="/CoursInfo" element={<CoursInfo />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route path="/quiz/edit/:exerciceId" element={<UpdateQuiz />} />
         <Route path="/preview" element={<QuizPreview />} />
         <Route path="/courses/edit/:id" element={<CourseUpdate />} />
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
@@ -104,7 +107,7 @@ export default function AppRoutes() {
         <Route path="/progressStudent" element={<ProgressStudent />} />
         <Route path="/quiz1/:exerciceId" element={<QuizPage1 />} />
         <Route path="/quiz/:exerciceId" element={<QuizPage2 />} />
-        <Route path="/quiz3" element={<QuizRecapPage />} />
+        <Route path="/quiz3/:exerciceId" element={<QuizRecapPage />} />
         <Route path="/exercise-page" element={<ExercisePage />} />
         <Route path="/course-details" element={<CourseDetails />} />
         <Route path="/submitted-exercise" element={<SubmittedExercise />} />

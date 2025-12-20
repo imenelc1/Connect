@@ -43,7 +43,7 @@ export default function CreateQuiz() {
 
   maxAttempts: 0,
   durationEnabled: false,
-  duration: 30,
+  duration: 0,
 
   passingScore: 0,
 
@@ -176,11 +176,11 @@ const currentUserId = getCurrentUserId();
   const token = localStorage.getItem("token");
   const idToUse = exerciceIdParam || exerciceId; // fallback si param non fourni
 
-  if (!token || !idToUse) {
+  /*if (!token || !idToUse) {
     alert("Exercice non trouvé. Veuillez créer l'exercice d'abord.");
     return null;
   }
-
+*/
   try {
     const response = await api.post(
       "/quiz/",
@@ -214,12 +214,12 @@ const currentUserId = getCurrentUserId();
   }
 };
 /* step 3 les questions et option*/
-const handleSaveStep3 = async (exerciceId) => {
+const handleSaveStep3 = async (idQuiz) => {
   const token = localStorage.getItem("token");
-  if (!token || !exerciceId) {
+  /*if (!token || !exerciceId) {
     alert("Exercice non trouvé. Veuillez créer l'exercice et le quiz d'abord.");
     return null;
-  }
+  }*/
 
   try {
     for (const question of quizData.questions) {
@@ -230,7 +230,7 @@ const handleSaveStep3 = async (exerciceId) => {
           texte_qst: question.text,        // texte de la question
           reponse_correcte: question.answers.find(a => a.isCorrect)?.text || "",
           score: question.points || 1,
-          exercice: exerciceId,            // FK vers Exercice
+          exercice: idQuiz,            // FK vers Exercice
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -270,7 +270,7 @@ const handlePublishQuiz = async () => {
 
   // Step 2 : créer le quiz
   const quizId = await handleSaveStep2(exoId);
-  if (!quizId) return;
+ // if (!quizId) return;
 
   // Step 3 : créer les questions et options
   await handleSaveStep3(exoId);
