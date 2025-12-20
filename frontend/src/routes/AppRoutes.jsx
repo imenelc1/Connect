@@ -129,7 +129,7 @@ export default function AppRoutes() {
         <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
 
         {/* admin */}
-        <Route path="/validation-courses" element={<ValidationCourses />} />
+        <Route path="/ValidationCourses" element={<ValidationCourses />} />
 
         <Route path="/Dashboard-admin" element={<Dashboard/>} />
 
@@ -142,6 +142,10 @@ export default function AppRoutes() {
           <Route path="/BadgesManagement" element={<BadgesManagement />} />
            {/* Forums management */}
             <Route path="/ForumManagement" element={<ForumManagement />} />
+           {/* InstructorsManagement*/}
+            <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
+           {/* SpacesManagement*/}
+            <Route path="/SpacesManagement" element={<SpacesManagement />} />
 
    
       </Routes>

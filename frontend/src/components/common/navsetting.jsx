@@ -19,7 +19,7 @@ export default function NavSetting({ active = "profile", onChange }) {
   return (
       // Conteneur principal centré
     <div className="w-full mt-6">
-      <ul className="flex overflow-x-auto sm:overflow-x-visible bg-grad-7 rounded-full shadow-sm p-1 
+      <ul className="flex overflow-x-auto sm:overflow-x-visible bg-grad-1 rounded-full shadow-sm p-1 
                      gap-4 sm:gap-4 md:gap-6 h-12 sm:h-16 justify-center sm:justify-center w-full max-w-[870px] sm:max-w-[870px] mx-auto">
         {tabs.map((tab) => (
           <li

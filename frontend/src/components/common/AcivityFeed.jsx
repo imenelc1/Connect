@@ -3,7 +3,7 @@ import "../../styles/index.css";
 
 export default function NotificationItem({ title, date, day, time }) {
   return (
-    <div className="bg-background shadow-sm rounded-xl p-4 border-l-8 border-muted mb-3">
+    <div className="bg-grad-3 shadow-sm rounded-xl p-4 border-l-8 border-muted mb-3">
       {/* Title */}
       <h3 className="font-semibold text-textc">{title}</h3>
 

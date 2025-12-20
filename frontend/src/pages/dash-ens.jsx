@@ -29,7 +29,6 @@ import { Link } from "react-router-dom";
 export default function Dashboardens() {
   // Hook de traduction
   const { t, i18n } = useTranslation("Dashboard");
-
   // Récupérer darkMode depuis ThemeContext
   const navigate = useNavigate();
   const storedUser = localStorage.getItem("user");
@@ -83,6 +82,17 @@ export default function Dashboardens() {
       time: "11:30 - 12:30",
     },
   ];
+//responsivite mobile desktop
+const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   // Chart data
   const data = [

@@ -1,18 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Search, Pencil, Trash2, BookOpen } from "lucide-react";
+import { Pencil, Trash2, BookOpen } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ModernDropdown from "../components/common/ModernDropdown";
+import ThemeContext from "../context/ThemeContext";
+import UserCircle from "../components/common/UserCircle";
 
 export default function CoursesManagement() {
   const navigate = useNavigate();
-  const { t } = useTranslation("CoursesManagement");
-
+  const { t, i18n } = useTranslation("CoursesManagement");
+  const { toggleDarkMode } = useContext(ThemeContext);
+  
+  // États pour la responsivité
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
   const [createModal, setCreateModal] = useState(false);
@@ -53,6 +60,24 @@ export default function CoursesManagement() {
     Intermédiaire: "bg-grad-3",
     Avancé: "bg-grad-4",
   };
+
+  // Effet pour la responsivité
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Gestion de la sidebar
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+    
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
 
   // Fetch courses
   useEffect(() => {
@@ -163,82 +188,104 @@ export default function CoursesManagement() {
   };
 
   return (
-    <div className="flex w-full bg-surface min-h-screen overflow-x-hidden">
-      <Navbar />
+    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
 
-      <div className="flex-1 p-4 md:p-8 md:ml-56">
+      {/* Main Content */}
+      <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 box-border
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-semibold text-textc">{t("title")}</h1>
-            <p className="text-textc mb-6">{t("description")}</p>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
+            <p className="text-gray">{t("description")}</p>
           </div>
-          <div className="flex gap-4">
-            <Button
-              text={t("addCourseButton")}
-              variant="primary"
-              className="px-6 py-3 whitespace-nowrap"
-              onClick={() => setCreateModal(true)}
-            />
-            <Button
-              text={t("validationButton")}
-              variant="primary"
-              className="px-6 py-3 whitespace-nowrap"
-              onClick={() => navigate("/validation-courses")}
-            />
+          
+          <div className="flex gap-4 items-center">
+            <div className="flex gap-4">
+              <Button
+                text={t("addCourseButton")}
+                variant="primary"
+                className="px-4 py-2 sm:px-6 sm:py-3 sm:px-6 sm:py-3 whitespace-nowrap text-sm sm:text-base"
+                onClick={() => setCreateModal(true)}
+              />
+              <Button
+                text={t("validationButton")}
+                variant="primary"
+                className="px-4 py-2 sm:px-6 sm:py-3 whitespace-nowrap text-sm sm:text-base"
+                onClick={() => navigate("/ValidationCourses")}
+              />
+            </div>
+           
           </div>
         </div>
 
         {/* Search */}
-        <div className="flex flex-col sm:flex-row sm:justify-between gap-3 mb-6 w-full">
-          <div className="relative flex-1 min-w-[280px] lg:min-w-[450px]">
-            <ContentSearchBar
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("searchPlaceholder")}
-            />
-          </div>
+        <div className="relative mb-6 sm:mb-10 w-full max-w-md">
+          <ContentSearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="w-full"
+          />
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+       
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 box-border">
+
           {filtered.map((item) => (
-            <div
-              key={item.id_cours}
-              className={`rounded-xl shadow p-5 flex flex-col border hover:shadow-md transition
-                ${gradientMap[item.niveau_cour_label] || "bg-white"}`}
-            >
-              <div className="flex justify-between items-center mb-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-lg">
-                  <BookOpen size={24} className="text-primary" />
+           <div
+           key={item.id_cours}
+           className={`
+             w-full sm:w-auto  // prend toute la largeur sur mobile, auto sur sm+
+             max-w-[85%] sm:max-w-none  // limite la largeur à 90% sur mobile
+             rounded-2xl border border-gray-200 p-4 sm:p-6
+             shadow-sm hover:shadow-md flex flex-col
+             ${gradientMap[item.niveau_cour_label] || "bg-white"}
+           `}
+         >
+         
+              <div className="flex justify-between items-center mb-4">
+                <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
+                  <BookOpen size={24} className="text-muted" />
                 </div>
                 <span
-                  className={`px-3 py-1 text-xs rounded-lg font-medium ${item.niveau_cour === "debutant"
-                    ? "bg-primary/30 text-primary"
-                    : item.niveau_cour === "intermediaire"
-                      ? "bg-secondary/30 text-secondary"
-                      : "bg-pink/30 text-pink"
-                    }`}
+                  className={`px-3 py-1 text-xs font-medium rounded-full ${
+                    item.niveau_cour === "debutant"
+                      ? "bg-muted/20 text-muted"
+                      : item.niveau_cour === "intermediaire"
+                      ? "bg-secondary/20 text-secondary"
+                      : "bg-pink/20 text-pink"
+                  }`}
                 >
                   {item.niveau_cour_label}
                 </span>
               </div>
 
-              <h3 className="text-lg font-semibold text-textc">{item.titre_cour}</h3>
+              <h3 className="font-semibold text-lg mb-2 truncate">{item.titre_cour}</h3>
+              {item.description && (
+                <p className="text-gray-500 text-sm mb-4 line-clamp-2">{item.description}</p>
+              )}
 
-              <div className="flex justify-end mt-4">
+              <div className="flex justify-end mt-auto pt-4">
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={() => openEdit(item)}
-                    className="p-2 rounded-lg text-primary hover:bg-primary/10 hover:scale-110 transition"
+                    className="p-2 text-muted hover:bg-gray-100 rounded-lg hover:opacity-80 transition"
                   >
                     <Pencil size={18} />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(item.id_cours)}
-                    className="p-2 rounded-lg text-red-500 hover:bg-red-500/10 hover:scale-110 transition"
+                    className="p-2 text-red hover:bg-red-50 rounded-lg hover:opacity-80 transition"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -247,7 +294,7 @@ export default function CoursesManagement() {
             </div>
           ))}
         </div>
-      </div>
+      </main>
 
       {/* CREATE MODAL */}
       <AddModal
@@ -317,6 +364,18 @@ export default function CoursesManagement() {
             placeholder: t("field.titlePlaceholder"),
             value: editValues.titre_cour,
             onChange: (e) => setEditValues({ ...editValues, titre_cour: e.target.value }),
+          },
+          {
+            label: t("field.description"),
+            placeholder: t("field.descriptionPlaceholder"),
+            value: editValues.description,
+            onChange: (e) => setEditValues({ ...editValues, description: e.target.value }),
+          },
+          {
+            label: t("field.duration"),
+            placeholder: t("field.durationPlaceholder"),
+            value: editValues.duration,
+            onChange: (e) => setEditValues({ ...editValues, duration: e.target.value }),
           },
           {
             label: t("field.teacher"),

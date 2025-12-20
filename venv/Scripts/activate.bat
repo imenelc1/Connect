@@ -9,6 +9,7 @@ if defined _OLD_CODEPAGE (
 )
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 <<<<<<< HEAD
 =======
@@ -40,6 +41,9 @@ set "VIRTUAL_ENV=C:\GP\Connect\venv"
 =======
 >>>>>>> origin/back-forum-amina
 >>>>>>> main
+=======
+set VIRTUAL_ENV=C:\Users\BENZ\Connect\Connect\venv
+>>>>>>> origin/sonia
 
 if not defined PROMPT set PROMPT=$P$G
 

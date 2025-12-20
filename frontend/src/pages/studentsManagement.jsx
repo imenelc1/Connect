@@ -1,16 +1,31 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Button from "../components/common/Button";
 import ProgressBar from "../components/ui/ProgressBar";
 import Navbar from "../components/common/NavBar";
 import { Trash, SquarePen, Search, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
+// Navigation entre routes (React Router)
+import { useNavigate } from "react-router-dom";
+import ContentSearchBar from "../components/common/ContentSearchBar";
+
+// Thème global (dark/light mode)
+import ThemeContext from "../context/ThemeContext";
+import UserCircle from "../components/common/UserCircle";
 
 export default function StudentsManagement() {
-  const { t } = useTranslation("StudentsManagement");
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    // Hook pour naviguer vers d'autres pages
+    const navigate = useNavigate();
+    const { t, i18n } = useTranslation("StudentsManagement");
+    const { toggleDarkMode } = useContext(ThemeContext);
+    const [search, setSearch] = useState("");
+    
+    // États
+    const [createModal, setCreateModal] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const [students, setStudents] = useState([]);
-  const [search, setSearch] = useState("");
+    const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 useEffect(() => {
@@ -68,116 +83,136 @@ useEffect(() => {
 }, []);
 
 
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+            setIsMobile(window.innerWidth < 768);
+        };
+        
+        // Gestion de la sidebar
+        const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+        
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("sidebarChanged", handleSidebarChange);
+        
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("sidebarChanged", handleSidebarChange);
+        };
+    }, []);
 
-  const sidebarWidth = windowWidth < 640 ? 64 : 240;
-
-  const getGridCols = () => {
-    if (windowWidth < 640) return 1;
-    if (windowWidth < 1024) return 2;
-    return 3;
-  };
-
-  const filteredStudents = students.filter((s) =>
+    const getGridCols = () => {
+        if (windowWidth < 640) return 1;
+        if (windowWidth < 1024) return 2;
+        return 3;
+    };
+ const filteredStudents = students.filter((s) =>
     `${s.nom} ${s.prenom}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  return (
-    <div className="flex bg-surface min-h-screen">
-      {/* Navbar */}
-      <div className={`flex-shrink-0 transition-all duration-300`} style={{ width: sidebarWidth }}>
-        <Navbar collapsed={windowWidth < 640} />
-      </div>
+    return (
+        <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+            {/* Sidebar */}
+            <div>
+                <Navbar />
+            </div>
 
-      {/* Main content */}
-      <main className="flex-1 p-4 sm:p-6 md:p-10 transition-all duration-300">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">
-              {t("StudentsManagement.StudentsManagement")}
-            </h1>
-            <p className="text-grayc text-sm sm:text-base">
-              {t("StudentsManagement.view")}
-            </p>
-          </div>
+            {/* Main content */}
+            <main className={`
+                flex-1 p-6 pt-10 space-y-5 transition-all duration-300
+                ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+            `}>
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-muted">
+                            {t("StudentsManagement.StudentsManagement")}
+                        </h1>
+                        <p className="text-gray">{t("StudentsManagement.view")}</p>
+                    </div>
 
-          <Button
-            variant="heroPrimary"
-            className="!w-auto bg-primary rounded-full px-6 py-3 flex items-center gap-2"
-          >
-            <UserPlus size={18} />
-            {t("StudentsManagement.buttonAdd")}
-          </Button>
-        </div>
+                    <div className="flex gap-4 items-center">
+                        <Button
+                            text={
+                                <span className="flex items-center gap-2">
+                                    <UserPlus size={18} />
+                                    {t("StudentsManagement.buttonAdd")}
+                                </span>
+                            }
+                            variant="primary"
+                            className="!w-auto px-6 py-2 rounded-xl"
+                            onClick={() => setCreateModal(true)}
+                        />
+                        
+                    </div>
+                </div>
 
-        {/* Search bar */}
-        <div className="relative mb-6 sm:mb-10 w-full max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-grayc w-5 h-5" />
-          <input
-            className="w-full pl-12 pr-4 py-2 rounded-full border border-grayc/30 shadow-sm focus:outline-none"
-            placeholder={t("StudentsManagement.Search")}
+                {/* Search bar */}
+                <div className="relative mb-6 sm:mb-10 w-full max-w-md">
+          <ContentSearchBar
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="w-full"
           />
         </div>
 
-        {/* Loading / Error */}
-        {loading && <p>Chargement des étudiants…</p>}
-        {error && <p className="text-red mt-2">{error}</p>}
+                {/* Students Grid */}
+                <div
+                    className="grid gap-6"
+                    style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}
+                >
+                    {students.map((s, index) => (
+                        <div
+                            key={index}
+                            className="bg-grad-3 border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between"
+                        >
+                            {/* Card header */}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-12 h-12 rounded-full bg-grad-1 text-white flex items-center justify-center text-lg font-semibold">
+                                        {s.initials}
+                                    </div>
+                                    <div className="truncate">
+                                        <h2 className="font-semibold text-lg truncate">{s.name}</h2>
+                                        <p className="text-sm text-gray-500 truncate">{s.email}</p>
+                                    </div>
+                                </div>
 
-        {/* Students Grid */}
-        {!loading && !error && (
-          <div
-            className="grid gap-6"
-            style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}
-          >
-            {filteredStudents.map((s) => (
-              <div
-                key={s.id}
-                className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-primary text-card flex items-center justify-center text-lg font-semibold">
-                      {s.initials}
-                    </div>
-                    <div>
-                      <h2 className="font-semibold text-lg">{s.nom} {s.prenom}</h2>
-                      <p className="text-sm text-grayc">{s.email}</p>
-                    </div>
-                  </div>
+                                {/* Actions */}
+                                <div className="flex gap-4 text-gray-500">
+                                    <button className="text-muted hover:opacity-80">
+                                        <SquarePen size={20} />
+                                    </button>
+                                    <button className="text-red hover:opacity-80">
+                                        <Trash size={20} />
+                                    </button>
+                                </div>
+                            </div>
 
-                  <div className="flex gap-4 text-grayc">
-                    <button className="text-primary hover:opacity-80">
-                      <SquarePen size={20} />
-                    </button>
-                    <button className="text-red hover:opacity-80">
-                      <Trash size={20} />
-                    </button>
-                  </div>
+                            {/* Courses */}
+                            <p className="text-sm text-gray-500 mb-2">
+                                {t("StudentsManagement.Encolled")} {s.courses}
+                            </p>
+
+                            {/* Progress */}
+                            <div className="mb-2">
+                                <div className="flex justify-between text-sm text-gray-500 mb-1">
+                                    <span>{t("StudentsManagement.Overal")}</span>
+                                    <span>{s.progress}%</span>
+                                </div>
+                                <ProgressBar value={s.progress} />
+                            </div>
+
+                            {/* Joined */}
+                            <div className="flex justify-between text-sm text-gray-500 mt-4">
+                                <span>{t("StudentsManagement.joined")}</span>
+                                <span className="font-medium">{s.joined}</span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-
-                <p className="text-sm text-grayc mb-2">
-                  {t("StudentsManagement.Encolled")} {s.courses}
-                </p>
-
-                <div className="mb-2">
-                  <div className="flex justify-between text-sm text-grayc mb-1">
-                    <span>{t("StudentsManagement.Overal")}</span>
-                    <span>{s.progress}%</span>
-                  </div>
-                  <ProgressBar value={s.progress} />
-                </div>
-
-                <div className="flex justify-between text-sm text-grayc mt-4">
-                  <span>{t("StudentsManagement.joined")}</span>
-                  <span className="font-medium">{s.joined}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
-  );
+            </main>
+        </div>
+    );
 }

@@ -1,4 +1,7 @@
 import Button from "./Button.jsx";
+import ThemeContext from "../../context/ThemeContext";
+import React, {  useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function AddModal({
   open,
@@ -11,10 +14,13 @@ export default function AddModal({
   onSubmit,
 }) {
   if (!open) return null;
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
+  
 
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-start z-50 px-4 py-6 overflow-auto">
-      <div className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative transform transition-all duration-300 mt-6 sm:mt-12">
+      <div className="bg-card rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative transform transition-all duration-300 mt-6 sm:mt-12">
 
         {/* Bouton de fermeture */}
         <button
@@ -25,14 +31,14 @@ export default function AddModal({
         </button>
 
         {/* Header */}
-        <h2 className="text-2xl font-bold mb-2 text-primary">{title}</h2>
+        <h2 className="text-2xl font-bold mb-2 text-muted">{title}</h2>
         {subtitle && <p className="text-gray-500 mb-6">{subtitle}</p>}
 
         {/* Formulaire */}
         <form className="space-y-5" onSubmit={onSubmit}>
           {fields.map((field, index) => (
             <div key={index} className="flex flex-col gap-2">
-              <label className="font-medium text-gray-700">{field.label}</label>
+              <label className="font-medium text-grad-2">{field.label}</label>
               {field.element ? (
                 <div className="w-full">{field.element}</div>
               ) : (

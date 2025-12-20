@@ -22,7 +22,14 @@ export default function Setting() {
     const handleLanguageChange = (e) => {
         const lang = e.target.value;
         i18n.changeLanguage(lang);
+        
     };
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+        useEffect(() => {
+           const handler = (e) => setSidebarCollapsed(e.detail);
+           window.addEventListener("sidebarChanged", handler);
+           return () => window.removeEventListener("sidebarChanged", handler);
+         }, []);
     // Récupérer darkMode depuis ThemeContext
     const { darkMode, toggleDarkMode } = useContext(ThemeContext);
 
@@ -191,11 +198,11 @@ export default function Setting() {
 
     return (
         // -------- GLOBAL LAYOUT --------
-        <div className="  flex w-full md:flex-row min-h-screen">
+        <div className="  w-full md:flex-row min-h-screen">
 
 
             {/* Sidebar : cachée sur mobile, visible sur large écrans */}
-            <div className="hidden lg:block w-64 ">
+           <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
 
 
                 <Navbar />
@@ -203,7 +210,10 @@ export default function Setting() {
 
 
             {/* -------- RIGHT CONTENT -------- */}
-            <div className="flex-1 p-4 p-4 sm:p-6 md:p-8 lg:p-10">
+           <div className={`
+        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
+        ${sidebarCollapsed ? "ml-20" : "ml-64"}
+      `}>
 
                 {/* Top nav tabs */}
                 <NavSetting active={activeTab} onChange={setActiveTab} />
@@ -211,7 +221,7 @@ export default function Setting() {
                 {/* -------- PROFILE TAB -------- */}
                 {activeTab === "profile" && (
 
-                    <div className="mt-10 bg-grad-3 backdrop-blur-md rounded-3xl shadow-md p-6 sm:p-6 md:p-8  border border-white/40">
+                    <div className="mt-10 bg-grad-2 backdrop-blur-md rounded-3xl shadow-md p-6 sm:p-6 md:p-8  border border-white/40">
 
                         {/* PROFILE HEADER */}
                         <div className="flex flex-col md:flex-row md:items-center gap-6 mb-12">
@@ -412,7 +422,7 @@ export default function Setting() {
 
                 {/* -------- PREFERENCES -------- */}
                 {activeTab === "preferences" && (
-                    <div className="mt-10 p-6  bg-grad-3 sm:p-8 md:p-10 rounded-3xl shadow-md">
+                    <div className="mt-10 p-6  bg-grad-2 sm:p-8 md:p-10 rounded-3xl shadow-md">
 
                         {/* THEME */}
                         <div className="mb-10">
@@ -486,7 +496,7 @@ export default function Setting() {
 
                 {/* -------- ACCOUNT -------- */}
                 {activeTab === "account" && (
-                    <div className="mt-4 p-6 sm:p-8 md:p-10 rounded-3xl shadow-md bg-grad-3">
+                    <div className="mt-4 p-6 sm:p-8 md:p-10 rounded-3xl shadow-md bg-grad-2">
 
                         {/* SECURITY */}
                         <div className="bg-primary/10 rounded-2xl p-6 shadow-sm border border-white/40 mb-10">
