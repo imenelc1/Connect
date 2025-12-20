@@ -4,62 +4,53 @@ from .models import Notification, Feedback
 from users.models import Utilisateur
 
 class FeedbackSerializer(serializers.ModelSerializer):
-    utilisateur_nom = serializers.CharField(
-        source="utilisateur.nom", read_only=True
-    )
-    utilisateur_prenom = serializers.CharField(
-        source="utilisateur.prenom", read_only=True
-    )
+    utilisateur_nom = serializers.SerializerMethodField()
+    utilisateur_prenom = serializers.SerializerMethodField()
 
-    # MODIFIÉ: Accepter le string du content_type
-    content_type_string = serializers.CharField(write_only=True, required=True)
-    
+    content_type_string = serializers.CharField(write_only=True)
+    nom_personnel = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
     class Meta:
         model = Feedback
         fields = [
             "id_feedback",
             "contenu",
             "etoile",
-            "utilisateur",
             "utilisateur_nom",
             "utilisateur_prenom",
-            "content_type_string",  # MODIFIÉ
+            "content_type_string",
             "object_id",
             "date_creation",
+            "nom_personnel",
         ]
-        read_only_fields = [
-            "id_feedback",
-            "date_creation",
-            "utilisateur",
-        ]
+        read_only_fields = ["id_feedback", "date_creation"]
 
-    def validate_etoile(self, value):
-        if value < 1 or value > 5:
-            raise serializers.ValidationError("La note doit être comprise entre 1 et 5.")
-        return value
+    # 🔥 LOGIQUE FINALE
+    def get_utilisateur_nom(self, obj):
+        return obj.nom_personnel if obj.nom_personnel else "Utilisateur anonyme"
 
-    def validate_content_type_string(self, value):
-        try:
-            app_label, model = value.split('.')
-            ContentType.objects.get(app_label=app_label, model=model)
-        except (ValueError, ContentType.DoesNotExist):
-            raise serializers.ValidationError(
-                "content_type_string doit être au format 'app_label.model'"
-            )
-        return value
+    def get_utilisateur_prenom(self, obj):
+        return ""
 
     def create(self, validated_data):
         request = self.context.get("request")
-        
-        # Convertir le string en ContentType
-        content_type_string = validated_data.pop('content_type_string')
-        app_label, model = content_type_string.split('.')
-        content_type = ContentType.objects.get(app_label=app_label, model=model)
-        
-        validated_data['content_type'] = content_type
-        validated_data['utilisateur'] = request.user
-        
+
+        # content type
+        content_type_string = validated_data.pop("content_type_string")
+        app_label, model = content_type_string.split(".")
+        validated_data["content_type"] = ContentType.objects.get(
+            app_label=app_label,
+            model=model
+        )
+
+        # utilisateur uniquement technique (pas affichage)
+        validated_data["utilisateur"] = (
+            request.user if request and request.user.is_authenticated else None
+        )
+
         return super().create(validated_data)
+
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     # ... (le reste reste identique)

@@ -103,20 +103,16 @@ def notify_new_message(sender, instance, created, **kwargs):
     if not forum or not sender_user:
         return
 
-    forum_type = forum.type  # type envoyé depuis le front-end
+    forum_cible = getattr(forum, 'cible', None)
 
-    # Déterminer le groupe de participants à notifier selon le type
-    if forum_type in ["teacher-student", "student-student"]:
-        # Notifier les étudiants
+    if forum_cible == 'etudiants':
         participants = Utilisateur.objects.filter(etudiant__isnull=False).exclude(id_utilisateur=sender_user.id_utilisateur)
-    elif forum_type in ["student-teacher", "teacher-teacher"]:
-        # Notifier les enseignants
+    elif forum_cible == 'enseignants':
         participants = Utilisateur.objects.filter(enseignant__isnull=False).exclude(id_utilisateur=sender_user.id_utilisateur)
     else:
-        # fallback : tous sauf l'auteur
         participants = Utilisateur.objects.exclude(id_utilisateur=sender_user.id_utilisateur)
 
-    # Si tu veux notifier aussi les participants ayant déjà posté un message, tu peux fusionner :
+    # Inclure les personnes ayant déjà posté
     previous_posters = set(
         Message.objects.filter(forum=forum)
         .exclude(utilisateur=sender_user)
@@ -124,7 +120,6 @@ def notify_new_message(sender, instance, created, **kwargs):
     )
     participants = participants | Utilisateur.objects.filter(id_utilisateur__in=previous_posters)
 
-    # Envoyer les notifications
     for user in participants:
         try:
             create_notification(
@@ -138,10 +133,6 @@ def notify_new_message(sender, instance, created, **kwargs):
         except Exception as e:
             print(f"Erreur notification pour {user.adresse_email}: {e}")
 
-
-
-
-
 @receiver(post_save, sender=Forum)
 def notify_new_forum(sender, instance, created, **kwargs):
     if not created:
@@ -152,17 +143,15 @@ def notify_new_forum(sender, instance, created, **kwargs):
     if not creator:
         return
 
-    # Déterminer les destinataires selon le type du forum
-    forum_type = forum.type  # ex: "teacher-student", "student-teacher", "teacher-teacher", "student-student"
+    # ❌ Avant : forum_type = forum.type
+    # ✅ Maintenant on utilise le champ cible
+    forum_cible = getattr(forum, 'cible', None)  # 'etudiants' ou 'enseignants'
 
-    if forum_type in ["teacher-student", "student-student"]:
-        # Notifier uniquement les étudiants
+    if forum_cible == 'etudiants':
         destinataires = Utilisateur.objects.filter(etudiant__isnull=False).exclude(id_utilisateur=creator.id_utilisateur)
-    elif forum_type in ["student-teacher", "teacher-teacher"]:
-        # Notifier uniquement les enseignants
+    elif forum_cible == 'enseignants':
         destinataires = Utilisateur.objects.filter(enseignant__isnull=False).exclude(id_utilisateur=creator.id_utilisateur)
     else:
-        # fallback : tous sauf le créateur
         destinataires = Utilisateur.objects.exclude(id_utilisateur=creator.id_utilisateur)
 
     for user in destinataires:
