@@ -8,7 +8,7 @@ import "../../styles/index.css";
 
 export default function Body() {
   return (
-    <section className="py-20 bg-[var(--color-surface)] flex flex-col items-center gap-16 w-full max-w-[1400px] mx-auto px-6">
+    <section className="py-20 bg-background flex flex-col items-center gap-16 w-full max-w-[1400px] mx-auto px-6">
       
       {/* ---------------------- PARTIE 1 : Code + Mascotte ---------------------- */}
       <div className="flex flex-row items-center justify-center gap-0">

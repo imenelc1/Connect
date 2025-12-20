@@ -28,6 +28,12 @@ export default function Dashboardetu() {
 
   const [activeCoursesCount, setActiveCoursesCount] = useState(0);
   const [averageTime, setAverageTime] = useState(0); // en secondes
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+      useEffect(() => {
+         const handler = (e) => setSidebarCollapsed(e.detail);
+         window.addEventListener("sidebarChanged", handler);
+         return () => window.removeEventListener("sidebarChanged", handler);
+       }, []);
 
   const sessionStartRef = useRef(Date.now());
 
@@ -97,12 +103,15 @@ useEffect(() => {
 
 
   return (
-    <div className="flex min-h-screen bg-primary/10">
-      <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
+    <div className=" min-h-screen bg-primary/10">
+  <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
-      <div className="flex-1 pl-6 pr-3 sm:pl-8 sm:pr-5 md:pl-10 md:pr-6 lg:pl-12 lg:pr-8 space-y-4">
+     <div className={`
+        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
+        ${sidebarCollapsed ? "ml-20" : "ml-64"}
+      `}>
         {/* Header */}
         <header className="flex justify-between items-center gap-3">
           <ContentSearchBar className="mt-3" />

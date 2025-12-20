@@ -26,6 +26,12 @@ import { PieChart, Pie, Cell, Tooltip } from "recharts";
 export default function Dashboardens() {
   // Hook de traduction
   const { t, i18n } = useTranslation("Dashboard");
+   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    useEffect(() => {
+       const handler = (e) => setSidebarCollapsed(e.detail);
+       window.addEventListener("sidebarChanged", handler);
+       return () => window.removeEventListener("sidebarChanged", handler);
+     }, []);
   
   // Récupérer darkMode depuis ThemeContext
    const navigate = useNavigate();
@@ -80,6 +86,17 @@ useEffect(() => {
       time: "11:30 - 12:30",
     },
   ];
+//responsivite mobile desktop
+const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   // Chart data
   const data = [
@@ -89,25 +106,29 @@ useEffect(() => {
   ];
 
    return (
-  <div className="flex min-h-screen bg-primary/10">
+ <div className="flex flex-row md:flex-row min-h-screen bg-surface  gap-16 md:gap-1">
+ {/* Sidebar */}
+ <div>
+  <Navbar />
+
+ </div>
     
-    {/* Sidebar */}
-    <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
-      <Navbar />
-    </div>
+   
 
     {/* Main content */}
-    <div className="flex-1 pl-6 pr-3 sm:pl-8 sm:pr-5 md:pl-10 md:pr-6 lg:pl-12 lg:pr-8 space-y-4">
+    <div className={`
+  flex-1 p-6 pt-10 space-y-5 transition-all duration-300
+  ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+`}>
+        
 
 
       
       {/* Header */}
-      <header className="flex justify-between items-center gap-3">
-        <form className="flex-1 max-w-full lg:max-w-xs ml-5">
-          <Input placeholder={t("Dashboard.Search")} icon={<Search size={16} />} />
-        </form>
+     <header className="flex justify-end items-center gap-3 p-3">
+        
 
-        <div className="flex items-center gap-3">
+         <div className="flex items-center gap-3">
           <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
             <Bell size={16} />
           </div>
@@ -136,10 +157,10 @@ useEffect(() => {
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-textc">
-        <Cards text="Average Student Progress" value="68%" icon={<TrendingDown size={18}/>} bg="bg-grad-2"/>
-        <Cards text="Success Rate" value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-3" />
-        <Cards text="Average time spent" value="4.2h" icon={<Book size={18} />} bg="bg-grad-4" />
-        <Cards text="Active Courses" value="10" icon={<Clock3 size={18} />} bg="bg-grad-2" />
+        <Cards text={t("Dashboard.AverageS")} value="68%" icon={<TrendingDown size={18}/>} bg="bg-grad-2"/>
+        <Cards text={t("Dashboard.Success")} value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-3" />
+        <Cards text={t("Dashboard.AverageT")}  value="4.2h" icon={<Book size={18} />} bg="bg-grad-4" />
+        <Cards text={t("Dashboard.ActiveC")} value="10" icon={<Clock3 size={18} />} bg="bg-grad-2" />
       </div>
 
       {/* Learning curve */}

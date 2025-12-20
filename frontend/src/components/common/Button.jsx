@@ -79,7 +79,8 @@ export default function Button({
                text-sm px-4 py-2 transition`,
     manage: `
   px-5 py-2 
-  bg-white 
+  bg-grad-4
+  text-muted 
   border border-gray-300 
   rounded-lg 
   hover:bg-gray-100 

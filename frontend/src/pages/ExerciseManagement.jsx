@@ -1,15 +1,29 @@
-
-import React, { useState } from "react";
-import Navbar from "../components/common/Navbar";
+import React, { useState, useEffect, useContext } from "react";
+import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Search, Pencil, Trash2, Code } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
+// Navigation entre routes (React Router)
+import { useNavigate } from "react-router-dom";
+
+// Thème global (dark/light mode)
+import ThemeContext from "../context/ThemeContext";
+import UserCircle from "../components/common/UserCircle";
+import ContentSearchBar from "../components/common/ContentSearchBar";
 
 export default function ExercisesManagement() {
     // SEARCH contrôlé
     const [search, setSearch] = useState("");
+    // Hook pour naviguer vers d'autres pages
+    const navigate = useNavigate();
+    const { toggleDarkMode } = useContext(ThemeContext);
+    const { t, i18n } = useTranslation("ExerciseManagement");
+    
+    // États pour la responsivité
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     // CREATE
     const [createModal, setCreateModal] = useState(false);
@@ -38,6 +52,24 @@ export default function ExercisesManagement() {
         { id: 6, title: "Memory Allocation", category: "Advanced C Techniques", difficulty: "hard", submissions: 89 },
     ]);
 
+    // Effet pour la responsivité
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        
+        // Gestion de la sidebar
+        const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+        
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("sidebarChanged", handleSidebarChange);
+        
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("sidebarChanged", handleSidebarChange);
+        };
+    }, []);
+
     // --- FILTRAGE ---
     const filtered = exercises.filter((e) =>
         (e.title || "").toLowerCase().includes((search || "").toLowerCase())
@@ -57,6 +89,11 @@ export default function ExercisesManagement() {
         setNewExercise({ title: "", category: "", difficulty: "Easy" });
         setCreateModal(false);
     };
+    const difficultyBgMap = {
+        easy: "bg-grad-2",
+        medium: "bg-grad-3",
+        hard: "bg-grad-4",
+      };
 
     // --- EDIT ---
     const openEdit = (ex) => {
@@ -82,97 +119,95 @@ export default function ExercisesManagement() {
         setExercises(exercises.filter((ex) => ex.id !== id));
     };
 
-    const { t } = useTranslation("ExerciseManagement");
-
     return (
-        <div className="flex w-full bg-bg min-h-screen overflow-x-hidden">
-            <Navbar />
+        <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+            {/* Sidebar */}
+            <div>
+                <Navbar />
+            </div>
 
             {/* Main Content */}
-            <div className="flex-1 p-4 md:p-8 md:ml-56">
+            <main className={`
+                flex-1 p-6 pt-10 space-y-5 transition-all duration-300
+                ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+            `}>
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <div className="flex flex-col gap-2">
-                        <h1 className="text-3xl font-semibold text-textc">{t("title")}</h1>
-                        <p className="text-textc mb-6">{t("description")}</p>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
+                        <p className="text-gray">{t("description")}</p>
                     </div>
-                    <Button
-                        text={t("addExerciseButton")}
-                        variant="primary"
-                        className="!w-auto px-6 py-2 rounded-xl"
-                        onClick={() => setCreateModal(true)}
-                    />
-                </div>
-
-                {/* Search Bar */}
-
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-3 mb-6 w-full">
-
-                    {/* Champ de recherche étudiant */}
-                    <div className="relative flex-1 min-w-[280px] lg:min-w-[450px]">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 
-                                  text-primary w-5 h-5" />
-                        <input
-                            type="text"
-                            placeholder={t("searchPlaceholder")}
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border bg-white text-primary
-             focus:bg-white focus:text-primary focus:ring-2 focus:ring-primary outline-none"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                    
+                    <div className="flex gap-4 items-center">
+                        <Button
+                            text={t("addExerciseButton")}
+                            variant="primary"
+                            className="!w-auto px-6 py-2 rounded-xl"
+                            onClick={() => setCreateModal(true)}
                         />
-
+                       
                     </div>
-
-
-
                 </div>
+
+                {/* Search */}
+        <div className="relative mb-6 sm:mb-10 w-full max-w-md">
+          <ContentSearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="w-full"
+          />
+        </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filtered.map((item) => (
-                        <div
-                            key={item.id}
-                            className="bg-white rounded-xl shadow p-5 flex flex-col border hover:shadow-md transition"
-                        >
-                            <div className="flex justify-between items-center mb-3">
-                                <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-lg">
-                                    <Code size={24} className="text-primary" />
-                                </div>
-                                <span
-                                    className={`px-3 py-1 text-xs rounded-lg font-medium ${item.difficulty === "easy"
-                                        ? "bg-primary/30 text-primary"
-                                        : item.difficulty === "medium"
-                                            ? "bg-secondary/30 text-secondary"
-                                            : "bg-pink/30 text-pink"
-                                        }`}
-                                >
-                                    {t(`difficulty.${item.difficulty}`)}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  {filtered.map((item) => (
+    <div
+      key={item.id}
+      className={`${difficultyBgMap[item.difficulty] || "bg-white"} border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
+    >
+      <div className="flex justify-between items-center mb-4">
+        <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
+          <Code size={24} className="text-muted" />
+        </div>
+        <span
+          className={`px-3 py-1 text-xs font-medium rounded-full ${
+            item.difficulty === "easy"
+              ? "bg-muted/20 text-muted"
+              : item.difficulty === "medium"
+              ? "bg-pink/20 text-pink"
+              : "bg-purple/20 text-purple"
+          }`}
+        >
+          {t(`difficulty.${item.difficulty}`)}
+        </span>
+      </div>
 
-                                </span>
-                            </div>
+      <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+      <p className="text-gray-500 text-sm mb-4">{item.category}</p>
 
-                            <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
-                            <p className="text-gray-500 text-sm mb-4">{item.category}</p>
+      <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
+        <span>{t("submissions", { count: item.submissions })}</span>
+        <div className="flex gap-3">
+          <button 
+            className="text-muted hover:opacity-80"
+            onClick={() => openEdit(item)}
+          >
+            <Pencil size={18} />
+          </button>
+          <button 
+            className="text-red hover:opacity-80"
+            onClick={() => handleDelete(item.id)}
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
 
-                            <div className="flex justify-between items-center text-sm text-gray-500">
-                                <span>{t("submissions", { count: item.submissions })}</span>
-                                <div className="flex gap-3 text-gray-400">
-                                    <Pencil
-                                        size={18}
-                                        className="text-primary cursor-pointer hover:scale-110 transition"
-                                        onClick={() => openEdit(item)}
-                                    />
-                                    <Trash2
-                                        size={18}
-                                        className="text-red-500 cursor-pointer hover:scale-110 transition"
-                                        onClick={() => handleDelete(item.id)}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            </main>
 
             {/* Modals */}
             <AddModal
@@ -202,7 +237,7 @@ export default function ExercisesManagement() {
                             <select
                                 value={newExercise.difficulty}
                                 onChange={(e) => setNewExercise({ ...newExercise, difficulty: e.target.value })}
-                                className="bg-grisclair rounded-md px-3 py-2 border-primary"
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                             >
                                 <option value="easy">{t("difficulty.easy")}</option>
                                 <option value="medium">{t("difficulty.medium")}</option>
@@ -240,7 +275,7 @@ export default function ExercisesManagement() {
                             <select
                                 value={editValues.difficulty}
                                 onChange={(e) => setEditValues({ ...editValues, difficulty: e.target.value })}
-                                className="bg-grisclair rounded-md px-3 py-2"
+                                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                             >
                                 <option value="easy">{t("difficulty.easy")}</option>
                                 <option value="medium">{t("difficulty.medium")}</option>
@@ -253,4 +288,3 @@ export default function ExercisesManagement() {
         </div>
     );
 }
-

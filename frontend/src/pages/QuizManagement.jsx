@@ -1,15 +1,27 @@
-
-import React, { useState } from "react";
-import Navbar from "../components/common/Navbar";
+import React, { useState, useEffect, useContext } from "react";
+import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Pencil, Trash2, FileText, Search } from "lucide-react";
+import { Pencil, Trash2, FileText } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
+// Navigation entre routes (React Router)
+import { useNavigate } from "react-router-dom";
+
+// Thème global (dark/light mode)
+import ThemeContext from "../context/ThemeContext";
+import UserCircle from "../components/common/UserCircle";
+import ContentSearchBar from "../components/common/ContentSearchBar";
 
 export default function QuizzesManagement() {
-    const { t } = useTranslation("QuizManagement");
-
+    const { t, i18n } = useTranslation("QuizManagement");
+    const navigate = useNavigate();
+    const { toggleDarkMode } = useContext(ThemeContext);
+    
+    // États pour la responsivité
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    
     const [search, setSearch] = useState("");
     const [createModal, setCreateModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
@@ -22,6 +34,24 @@ export default function QuizzesManagement() {
         { id: 4, icon: <FileText size={22} />, title: "Data Structures Final", subtitle: "Data Structures", questions: 30, attempts: 287, score: 81 },
         { id: 5, icon: <FileText size={22} />, title: "Recursion Practice", subtitle: "Algorithm Design", questions: 18, attempts: 198, score: 68 },
     ]);
+
+    // Effet pour la responsivité
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        
+        // Gestion de la sidebar
+        const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+        
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("sidebarChanged", handleSidebarChange);
+        
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("sidebarChanged", handleSidebarChange);
+        };
+    }, []);
 
     // CREATE QUIZ
     const [newQuiz, setNewQuiz] = useState({ title: "", description: "" });
@@ -65,97 +95,101 @@ export default function QuizzesManagement() {
     const handleDelete = (id) => {
         setQuizzes(quizzes.filter((q) => q.id !== id));
     };
-    const [drawerOpen, setDrawerOpen] = useState(false);
-
 
     return (
-        <div className="flex w-full bg-bg min-h-screen overflow-x-hidden">
-            <Navbar />
+        <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+            {/* Sidebar */}
+            <div>
+                <Navbar />
+            </div>
 
-            {/* PAGE CONTENT */}
-            <div className="flex-1 p-4 md:p-8 ml-0 md:ml-56 transition-all" id="page-content">
-                {/* HEADER */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                    <div className="flex flex-col gap-2">
-                        <h1 className="text-3xl font-semibold text-textc">{t("title")}</h1>
-                        <p className="text-textc mb-6">{t("subtitle")}</p>
+            {/* Main Content */}
+            <main className={`
+                flex-1 p-6 pt-10 space-y-5 transition-all duration-300
+                ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+            `}>
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
+                        <p className="text-gray">{t("subtitle")}</p>
                     </div>
-                    <Button
-                        text={t("createButton")}
-                        variant="primary"
-                        className="!w-auto px-6 py-2 rounded-xl"
-                        onClick={() => setCreateModal(true)}
+                    
+                    <div className="flex gap-4 items-center">
+                        <Button
+                            text={t("createButton")}
+                            variant="primary"
+                            className="!w-auto px-6 py-2 rounded-xl"
+                            onClick={() => setCreateModal(true)}
+                        />
+                      
+                    </div>
+                </div>
+
+                {/* Search */}
+                <div className="relative mb-6 sm:mb-10 w-full max-w-md">
+                    <ContentSearchBar
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder={t("searchPlaceholder")}
+                        className="w-full"
                     />
                 </div>
 
-
-                {/* SEARCH */}
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 w-full">
-                    <div className="relative flex-1 min-w-[280px] sm:min-w-[350px] lg:min-w-[450px]">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-primary w-5 h-5" />
-                        <input
-                            type="text"
-                            placeholder={t("searchPlaceholder")}
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border bg-white text-primary
-                                       focus:bg-white focus:text-primary focus:ring-2 focus:ring-primary outline-none"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
-                </div>
-
-                {/* QUIZZES GRID */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-5">
+                {/* Quizzes Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
                     {quizzes
                         .filter((q) => q.title.toLowerCase().includes(search.toLowerCase()))
                         .map((q) => (
                             <div
                                 key={q.id}
-                                className="bg-white rounded-xl shadow p-5 flex flex-col border hover:shadow-md transition"
+                                className="bg-grad-4 border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col"
                             >
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 flex items-center justify-center bg-grad-4 text-pink rounded-lg">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-12 h-12 flex items-center justify-center bg-pink/20 text-pink rounded-xl">
                                             {q.icon}
                                         </div>
-                                        <div>
-                                            <h3 className="font-semibold text-textc text-base break-words">{q.title}</h3>
-                                            <p className="text-textc text-sm break-words">{q.subtitle}</p>
+                                        <div className="min-w-0">
+                                            <h3 className="font-semibold text-lg truncate">{q.title}</h3>
+                                            <p className="text-gray-500 text-sm truncate">{q.subtitle}</p>
                                         </div>
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <Pencil
-                                            size={18}
-                                            className="text-primary cursor-pointer hover:scale-110 transition"
+                                        <button 
+                                            className="text-muted hover:opacity-80"
                                             onClick={() => handleEdit(q)}
-                                        />
-                                        <Trash2
-                                            size={18}
-                                            className="text-red-500 cursor-pointer hover:scale-110 transition"
+                                        >
+                                            <Pencil size={18} />
+                                        </button>
+                                        <button 
+                                            className="text-red hover:opacity-80"
                                             onClick={() => handleDelete(q.id)}
-                                        />
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="mt-4 grid grid-cols-3 text-center text-sm text-textc">
+                                <div className="mt-auto pt-4 grid grid-cols-3 text-center">
                                     <div>
-                                        <span className="text-textc/80 text-m">{t("stats.questions")}</span>
+                                        <span className="text-gray-500 text-sm">{t("stats.questions")}</span>
                                         <p className="font-semibold text-lg">{q.questions}</p>
                                     </div>
                                     <div>
-                                        <span className="text-textc/80 text-m">{t("stats.attempts")}</span>
+                                        <span className="text-gray-500 text-sm">{t("stats.attempts")}</span>
                                         <p className="font-semibold text-lg">{q.attempts}</p>
                                     </div>
                                     <div>
-                                        <span className="text-textc/80 text-m">{t("stats.avgScore")}</span>
+                                        <span className="text-gray-500 text-sm">{t("stats.avgScore")}</span>
                                         <p className="font-semibold text-lg">{q.score}%</p>
                                     </div>
                                 </div>
                             </div>
                         ))}
                 </div>
-            </div>
+            </main>
 
             {/* CREATE MODAL */}
             <AddModal
@@ -166,7 +200,6 @@ export default function QuizzesManagement() {
                 submitLabel={t("modal.submitCreate")}
                 cancelLabel={t("modal.cancel")}
                 onSubmit={submitCreate}
-                className="w-[90vw] md:w-auto max-w-lg"
                 fields={[
                     {
                         label: t("modal.fields.title.label"),
@@ -192,7 +225,6 @@ export default function QuizzesManagement() {
                 submitLabel={t("modal.submitEdit")}
                 cancelLabel={t("modal.cancel")}
                 onSubmit={submitEdit}
-                className="w-[90vw] md:w-auto max-w-lg"
                 fields={selectedQuiz
                     ? [
                         {
@@ -215,4 +247,3 @@ export default function QuizzesManagement() {
         </div>
     );
 }
-
