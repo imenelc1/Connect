@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import progressionService from "../../services/progressionService";
 
 const levelStyles = {
   Débutant: "bg-blue text-white",
@@ -39,6 +40,7 @@ export default function ContentCard({ course, role, showProgress, type, classNam
   const { t } = useTranslation("contentPage");
   const location = useLocation();
   const navigate = useNavigate();
+  const [progress, setProgress] = useState(course?.progress ?? 0);
 
   if (!course) return null; // sécurité
 
@@ -48,9 +50,13 @@ export default function ContentCard({ course, role, showProgress, type, classNam
 
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
-    continue: t(`continue${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
-    restart: t(`restart${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
-     check:
+    continue: t(
+      `continue${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`
+    ),
+    restart: t(
+      `restart${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`
+    ),
+    check:
       pageType === "course"
         ? t("checkCourse")
         : pageType === "exercise"
