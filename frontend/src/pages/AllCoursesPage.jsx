@@ -141,7 +141,7 @@ export default function AllCoursesPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background dark:bg-gray-900">
+    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
       <Navbar />
       
       <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
