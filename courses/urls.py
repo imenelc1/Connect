@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import CoursListCreateView, UpdateLeconView,  CreateSectionView, CourseDetailView, CreateLeconView,  CreateCoursView, CoursDetailView, SectionListCreateView, LeconListCreateView, SectionDetailView, LeconDetailView
+from .views import CoursListCreateView, CoursesWithProgressView, UpdateLeconView,  CreateSectionView, CourseDetailView, CreateLeconView,  CreateCoursView, CoursDetailView, SectionListCreateView, LeconListCreateView, SectionDetailView, LeconDetailView
 from django.urls import path
 from .views import cours_list_api, delete_cours
 from rest_framework.routers import DefaultRouter
@@ -17,9 +17,11 @@ urlpatterns = [
     path('createSection/', CreateSectionView.as_view(), name='create_Section') ,      
     path('createLesson/', CreateLeconView.as_view(), name='create_lesson'),    
     path('Lesson/<int:pk>/', UpdateLeconView.as_view(), name='update_lesson_img'),      
-    path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),   
+    path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
+    
+    path('cours/progress/', CoursesWithProgressView.as_view(), name='courses-progress'),
+       
   
   
      
 ]
-

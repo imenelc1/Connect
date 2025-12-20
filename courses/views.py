@@ -1,12 +1,16 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 # Create your views here.
 from rest_framework import generics, viewsets, permissions
+
+import courses
+from dashboard.models import ProgressionCours
+from users.models import Utilisateur
 from .models import Cours, Section, Lecon
 from .serializers import CoursSerializer, CourseSerializer2, SectionSerializer, LeconSerializer, CoursSerializer1
-from users.jwt_auth import jwt_required
+from users.jwt_auth import IsAuthenticatedJWT, jwt_required
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
@@ -18,7 +22,7 @@ class CreateCoursView(APIView):
     @jwt_required
     def post(self, request):
         data = request.data.copy()
-        data["utilisateur"] = request.user_id  # 🟩 automatique, sécurisé
+        data["utilisateur"] = request.user_id 
 
         serializer = CoursSerializer1(data=data)
 
@@ -202,5 +206,65 @@ class CourseDetailView(generics.RetrieveAPIView):
     queryset = Cours.objects.all()
     serializer_class = CourseSerializer2
     lookup_field = "pk"
-    
 
+class CoursesWithProgressView(APIView):
+    @jwt_required
+    def get(self, request):
+        try:
+            user_id = request.user_id
+            user = Utilisateur.objects.get(pk=user_id)
+        except Utilisateur.DoesNotExist:
+            return Response({"detail": "Utilisateur introuvable."}, status=404)
+
+        courses = Cours.objects.all()
+        data = []
+
+        # Mapping pour normaliser les niveaux
+        NIVEAUX_MAP = {
+            "debutant": "Débutant",
+            "intermediaire": "Intermédiaire",
+            "avance": "Avancé",
+        }
+
+        for course in courses:
+            # Récupération de la progression
+            progress_obj = ProgressionCours.objects.filter(
+                utilisateur=user,
+                cours=course
+            ).first()
+            progress = progress_obj.avancement_cours if progress_obj else 0.0
+
+            # Niveau lisible
+            niveau_raw = getattr(course, 'niveau_cour', None)
+            niveau_label = NIVEAUX_MAP.get(str(niveau_raw).lower(), "Débutant") if niveau_raw else "Débutant"
+
+            
+            if progress == 0:
+                action = "start"
+            elif progress >= 100:
+                action = "restart"
+            else:
+                action = "continue"
+
+            data.append({
+                "id_cours": course.id_cours,
+                "titre_cour": course.titre_cour,
+                "description": course.description,
+                "niveau_cour_label": niveau_label,
+                "utilisateur": course.utilisateur.id_utilisateur,
+                "utilisateur_name": course.utilisateur.nom,
+                "duration_readable": (
+                    course.get_duration_display()
+                    if hasattr(course, 'get_duration_display')
+                    else ""
+                ),
+                "progress": progress,
+                "last_lesson_id": (
+                    progress_obj.derniere_lecon.id_lecon
+                    if progress_obj and progress_obj.derniere_lecon
+                    else None
+                ),
+                "action": action
+            })
+
+        return Response(data)
