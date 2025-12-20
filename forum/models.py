@@ -11,12 +11,20 @@ class Forum(models.Model):
     titre_forum = models.CharField(max_length=255)
     contenu_forum = models.TextField()  # NOUVEAU CHAMP
     date_creation = models.DateTimeField(auto_now_add=True)
-   
+
+    # NOUVEAU : définir la cible du forum
+    CIBLE_CHOICES = (
+        ('etudiants', 'Étudiants'),
+        ('enseignants', 'Enseignants'),
+    )
+    cible = models.CharField(max_length=20, choices=CIBLE_CHOICES)
+
     class Meta:
         ordering = ['-date_creation']
-   
+
     def __str__(self):
         return f"{self.titre_forum} ({self.type})"
+
 
 
 class Message(models.Model):

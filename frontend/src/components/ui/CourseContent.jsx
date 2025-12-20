@@ -15,6 +15,7 @@ export default function CourseContent({
   initialLessonPage = 0,
 }) 
 {
+  const [userName, setUserName] = useState("");
   const { t } = useTranslation("courses");
   const { title, sections } = course;
   const courseId = course.id || "default";
@@ -67,7 +68,10 @@ useEffect(() => {
         initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
         comment: f.contenu,
         stars: f.etoile,
-        nomComplet: f.utilisateur_nom && f.utilisateur_prenom ? `${f.utilisateur_nom} ${f.utilisateur_prenom}` : "Utilisateur inconnu",
+        nomComplet: f.utilisateur_nom && f.utilisateur_prenom
+  ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+  : f.utilisateur_nom || "Utilisateur anonyme",
+
 
       }));
 
@@ -175,35 +179,39 @@ const handleSubmit = async () => {
   }
 
   try {
-    // 1️⃣ Création du feedback
     await feedbackService.createFeedback({
       contenu: feedback,
       etoile: rating,
       object_id: courseId,
       content_type_string: "courses.cours",
+      nom_personnel: userName || undefined, // <-- ici
     });
 
-    // 2️⃣ Rafraîchir la liste des feedbacks ⬅️ ICI
+    // Rafraîchir les feedbacks
     const refreshed = await feedbackService.getFeedbacks(courseId);
-setAllFeedbacks(
-  refreshed.map((f) => ({
-    id: f.id_feedback,
-    initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
-    comment: f.contenu,
-    stars: f.etoile,
-    nomComplet: f.utilisateur_nom && f.utilisateur_prenom ? `${f.utilisateur_nom} ${f.utilisateur_prenom}` : "Utilisateur inconnu",
-  }))
-);
+    setAllFeedbacks(
+      refreshed.map((f) => ({
+        id: f.id_feedback,
+        initials: `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase(),
+        comment: f.contenu,
+        stars: f.etoile,
+        nomComplet: f.utilisateur_nom && f.utilisateur_prenom
+          ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+          : f.utilisateur_nom || "Utilisateur anonyme",
+      }))
+    );
 
-    // 3️⃣ Nettoyage UI
+    // Nettoyer le formulaire
     setFeedback("");
     setRating(0);
-
+    setUserName("");
   } catch (err) {
     console.error(err);
     alert("Erreur lors de l'envoi");
   }
 };
+
+
 
 
   return (
@@ -312,6 +320,14 @@ setAllFeedbacks(
         </div>
 
         <h3 className="text-lg sm:text-xl font-bold text-muted mb-3">{t("yourFeedback")}</h3>
+        <input
+  type="text"
+  className="w-full mb-4 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
+  placeholder={t("optionalName")} // par ex: "Votre nom (optionnel)"
+  value={userName}
+  onChange={(e) => setUserName(e.target.value)}
+/>
+
         <textarea
           className="w-full h-36 sm:h-48 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
           placeholder={t("feedbackPlaceholder")}

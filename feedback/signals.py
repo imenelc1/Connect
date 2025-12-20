@@ -40,7 +40,7 @@ def create_notification_on_feedback(sender, instance, created, **kwargs):
         Notification.objects.create(
             message_notif=message,
             utilisateur_destinataire=destinataire,
-            utilisateur_envoyeur=utilisateur_source,
+            utilisateur_envoyeur=None,
             content_type=ContentType.objects.get_for_model(Feedback),
             object_id=instance.id_feedback,
             action_type="feedback_created",
