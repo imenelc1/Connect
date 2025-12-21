@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import Button from "../components/common/Button";
 import "../styles/index.css";
 
-export default function QuizPage1() {
+export default function QuizIntroPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("quiz1");
   const { exerciceId  } = useParams();
@@ -136,7 +136,7 @@ export default function QuizPage1() {
           <Button
             text={t("start")}
             variant="quizStart"
-            onClick={() => navigate(`/quiz/${exerciceId}`)}
+            onClick={() => navigate(`/QuizTake/${exerciceId}`)}
           />
           <Button
             text={t("back")}

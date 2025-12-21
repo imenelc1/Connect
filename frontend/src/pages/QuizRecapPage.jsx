@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import "../styles/index.css";
 
-export default function RecQuizPage() {
+export default function QuizRecapPage() {
   const navigate = useNavigate();
   const { t } = useTranslation("quiz3");
   const { exerciceId } = useParams();
@@ -192,7 +192,7 @@ export default function RecQuizPage() {
               </span>
             }
             variant="quizStart"
-            onClick={() => navigate(`/quiz/${exerciceId}`)}
+            onClick={() => navigate(`/QuizTake/${exerciceId}`)}
           />
         </div>
       </div>

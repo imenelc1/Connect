@@ -8,7 +8,7 @@ import UserCircle from "../components/common/UserCircle";
 import { useNavigate, useParams } from "react-router-dom";
 
 
-export function QuizPage2() {
+export function QuizTakePage() {
   const { t, i18n } = useTranslation("quiz2");
   const { exerciceId } = useParams();
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -84,7 +84,7 @@ const navigate = useNavigate();
       setCurrentQuestion(currentQuestion + 1); // question suivante
     } else {
       // dernière question → redirection
-      navigate(`/quiz3/${exerciceId}`);
+      navigate(`/QuizRecape/${exerciceId}`);
     }
   };
 

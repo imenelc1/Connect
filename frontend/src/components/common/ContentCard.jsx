@@ -94,7 +94,7 @@ export default function ContentCard({ course, role, showProgress, type, classNam
     //navigate(`/start-exercise/${course.id}`); // <- juste la page existante
   } else {
     if(pageType === "quiz"){
-      navigate(`/quiz1/${course.id}`)
+      navigate(`/QuizIntro/${course.id}`)
       
     }else{navigate(`/Seecourses/${course.id}`);}
     
@@ -106,7 +106,7 @@ const handleRestart = async () => {
       await progressionService.resetCourseProgress(course.id);
       setProgress(0);
       if (pageType === "course") navigate(`/Seecourses/${course.id}`);
-      else if (pageType === "quiz") navigate(`/quiz1/${course.id}`);
+      else if (pageType === "quiz") navigate(`/QuizIntro/${course.id}`);
       else navigate(`/ListeExercices/${course.id}`);
     } catch (error) {
       console.error("Erreur lors de la réinitialisation :", error);
