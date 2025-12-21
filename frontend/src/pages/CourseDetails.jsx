@@ -36,7 +36,6 @@ export default function SpaceDetails() {
   const [spaceCourses, setSpaceCourses] = useState([]);
   const [spaceQuizzes, setSpaceQuizzes] = useState([]);
   const [spaceExercises, setSpaceExercises] = useState([]);
-
   const [myCourses, setMyCourses] = useState([]);
   const [myQuizzes, setMyQuizzes] = useState([]);
   const [myExercises, setMyExercises] = useState([]);
@@ -74,6 +73,7 @@ export default function SpaceDetails() {
     const fetchItems = async () => {
       try {
         if (activeStep === 1) {
+          // Courses
           const allCourses = await getCoursesProgress();
           const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/courses/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -85,49 +85,59 @@ export default function SpaceDetails() {
               .filter(c => spaceCoursesIds.includes(c.id_cours))
               .map(c => ({
                 id: c.id_cours,
-                title: c.titre_cour?.trim() || "Sans titre",
-                description: c.description || "",
-                level: c.niveau_cour_label || "",
-                author: c.utilisateur_name || "",
-                date: c.date_ajout || "",
+                title: c.titre_cour,
+                description: c.description,
+                level: c.niveau_cour_label,
+                author: c.utilisateur_name,
+                date: c.date_ajout,
                 progress: c.progress ?? 0,
                 isMine: c.utilisateur === userData?.id,
               }))
           );
         } else if (activeStep === 2) {
+          // Quizzes
           const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/quizzes/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           const data = await res.json();
           setSpaceQuizzes(
-            (data || []).map(q => ({
-              id: q.id_quiz,
-              title: q.titre_exo?.trim() || "Sans titre",
-              description: q.enonce || "",
-              level: q.niveau_exo || "",
-              author: q.utilisateur ? `${q.utilisateur.nom} ${q.utilisateur.prenom}` : "Inconnu",
-              date: q.date_creation || "",
-              progress: q.progress ?? 0,
-              isMine: q.utilisateur?.id_utilisateur === userData?.id,
-            }))
+            (data || [])
+              .filter(q => q.quiz)
+              .map(q => ({
+                id: q.quiz.id_quiz,
+                title: q.quiz.exercice?.titre_exo || "Sans titre",
+                description: q.quiz.exercice?.enonce || "",
+                level: q.quiz.exercice?.niveau_exo || "",
+                author: q.quiz.exercice?.utilisateur
+                  ? `${q.quiz.exercice.utilisateur.nom} ${q.quiz.exercice.utilisateur.prenom}`
+                  : "Inconnu",
+                date: q.quiz.exercice?.date_creation || "",
+                progress: q.progress ?? 0,
+                isMine: q.quiz.exercice?.utilisateur?.id_utilisateur === userData?.id,
+              }))
           );
         } else if (activeStep === 3) {
+          // Exercises
           const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           const data = await res.json();
           setSpaceExercises(
-            (data || []).map(e => ({
-              id: e.id_exercice,
-              title: e.titre_exo?.trim() || "Sans titre",
-              description: e.enonce || "",
-              level: e.niveau_exo || "",
-              author: e.utilisateur ? `${e.utilisateur.nom} ${e.utilisateur.prenom}` : "Inconnu",
-              date: e.date_creation || "",
-              categorie: e.categorie || "",
-              progress: e.progress ?? 0,
-              isMine: e.utilisateur?.id_utilisateur === userData?.id,
-            }))
+            (data || [])
+              .filter(e => e.exercice)
+              .map(e => ({
+                id: e.exercice.id_exercice,
+                title: e.exercice.titre_exo,
+                description: e.exercice.enonce,
+                level: e.exercice.niveau_exo,
+                author: e.exercice.utilisateur
+                  ? `${e.exercice.utilisateur.nom} ${e.exercice.utilisateur.prenom}`
+                  : "Inconnu",
+                date: e.exercice.date_creation,
+                categorie: e.exercice.categorie,
+                progress: e.progress ?? 0,
+                isMine: e.exercice.utilisateur?.id_utilisateur === userData?.id,
+              }))
           );
         }
       } catch (err) {
@@ -159,30 +169,33 @@ export default function SpaceDetails() {
         setMyCourses(
           (coursesData || []).map(c => ({
             id: c.id_cours,
-            title: c.titre_cour?.trim() || "Sans titre",
-            description: c.description || "",
-            level: c.niveau_cour_label || "",
-            author: c.utilisateur_name || "",
+            title: c.titre_cour,
+            description: c.description,
+            level: c.niveau_cour_label,
+            author: c.utilisateur_name,
           }))
         );
 
-        setMyQuizzes(
-          (quizzesData || []).map(q => ({
-            id: q.id_quiz,
-            title: q.titre_exo?.trim() || "Sans titre",
-            description: q.enonce || "",
-            level: q.niveau_exo || "",
-            author: q.utilisateur ? `${q.utilisateur.nom} ${q.utilisateur.prenom}` : "",
-          }))
-        );
+      setMyQuizzes(
+  (quizzesData || []).map(q => ({
+    id: q.id_quiz,
+    title: q.titre_exo?.trim() || "Sans titre",
+    description: q.enonce || "",
+    level: q.niveau_exo || "",
+    author: `${q.utilisateur?.nom || ""} ${q.utilisateur?.prenom || ""}`.trim(),
+  }))
+);
+
 
         setMyExercises(
           (exercisesData || []).map(e => ({
             id: e.id_exercice,
-            title: e.titre_exo?.trim() || "Sans titre",
-            description: e.enonce || "",
-            level: e.niveau_exo || "",
-            author: e.utilisateur ? `${e.utilisateur.nom} ${e.utilisateur.prenom}` : "",
+            title: e.titre_exo,
+            description: e.enonce,
+            level: e.niveau_exo,
+            author: e.utilisateur
+              ? `${e.utilisateur.nom} ${e.utilisateur.prenom}`
+              : "",
           }))
         );
       })
@@ -226,9 +239,49 @@ export default function SpaceDetails() {
         return res.json();
       })
       .then(newItem => {
-        if (activeStep === 1) setSpaceCourses([...spaceCourses, { id: newItem.cours.id_cours, title: newItem.cours.titre_cour || "Sans titre", description: newItem.cours.description, level: newItem.cours.niveau_cour_label, author: newItem.cours.utilisateur_name, date: newItem.cours.date_ajout, progress: 0, isMine: true }]);
-        else if (activeStep === 2) setSpaceQuizzes([...spaceQuizzes, { id: newItem.quiz.id_quiz, title: newItem.quiz.titre_exo || "Sans titre", description: newItem.quiz.enonce, level: newItem.quiz.niveau_exo, author: `${newItem.quiz.utilisateur.nom} ${newItem.quiz.utilisateur.prenom}`, date: newItem.quiz.date_creation, progress: 0, isMine: true }]);
-        else if (activeStep === 3) setSpaceExercises([...spaceExercises, { id: newItem.exercice.id_exercice, title: newItem.exercice.titre_exo || "Sans titre", description: newItem.exercice.enonce, level: newItem.exercice.niveau_exo, author: `${newItem.exercice.utilisateur.nom} ${newItem.exercice.utilisateur.prenom}`, date: newItem.exercice.date_creation, categorie: newItem.exercice.categorie, progress: 0, isMine: true }]);
+        if (activeStep === 1)
+          setSpaceCourses([
+            ...spaceCourses,
+            {
+              id: newItem.cours.id_cours,
+              title: newItem.cours.titre_cour,
+              description: newItem.cours.description,
+              level: newItem.cours.niveau_cour_label,
+              author: newItem.cours.utilisateur_name,
+              date: newItem.cours.date_ajout,
+              progress: 0,
+              isMine: true,
+            },
+          ]);
+        else if (activeStep === 2)
+          setSpaceQuizzes([
+            ...spaceQuizzes,
+            {
+              id: newItem.quiz.id_quiz,
+              title: newItem.quiz.exercice.titre_exo,
+              description: newItem.quiz.exercice.enonce,
+              level: newItem.quiz.exercice.niveau_exo,
+              author: `${newItem.quiz.exercice.utilisateur.nom} ${newItem.quiz.exercice.utilisateur.prenom}`,
+              date: newItem.quiz.exercice.date_creation,
+              progress: 0,
+              isMine: true,
+            },
+          ]);
+        else if (activeStep === 3)
+          setSpaceExercises([
+            ...spaceExercises,
+            {
+              id: newItem.exercice.id_exercice,
+              title: newItem.exercice.titre_exo,
+              description: newItem.exercice.enonce,
+              level: newItem.exercice.niveau_exo,
+              author: `${newItem.exercice.utilisateur.nom} ${newItem.exercice.utilisateur.prenom}`,
+              date: newItem.exercice.date_creation,
+              categorie: newItem.exercice.categorie,
+              progress: 0,
+              isMine: true,
+            },
+          ]);
 
         toast.success(t("addedSuccessfully"));
         setOpenModal(false);
@@ -240,12 +293,14 @@ export default function SpaceDetails() {
       });
   };
 
-  const itemsToDisplay = activeStep === 1 ? spaceCourses : activeStep === 2 ? spaceQuizzes : spaceExercises;
+  const itemsToDisplay =
+    activeStep === 1 ? spaceCourses : activeStep === 2 ? spaceQuizzes : spaceExercises;
   const filteredItems = itemsToDisplay
     .filter(c => filterLevel === "ALL" || c.level === filterLevel)
     .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const modalItems = activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
+  const modalItems =
+    activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
 
   return (
     <div className="flex w-full bg-surface min-h-screen">
@@ -253,14 +308,21 @@ export default function SpaceDetails() {
       <main className="flex-1 p-6 lg:ml-64 bg-bg min-h-screen">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <button className="text-muted font-medium hover:underline flex items-center gap-1" onClick={() => navigate("/Spaces")}>
+          <button
+            className="text-muted font-medium hover:underline flex items-center gap-1"
+            onClick={() => navigate("/Spaces")}
+          >
             <ArrowLeft size={16} /> {t("backToSpaces")}
           </button>
           <div className="flex gap-4 items-center">
             <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
               <Bell size={16} />
             </div>
-            <UserCircle initials={initials} onToggleTheme={toggleDarkMode} onChangeLang={lang => i18n.changeLanguage(lang)} />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={lang => i18n.changeLanguage(lang)}
+            />
           </div>
         </div>
 
@@ -268,19 +330,33 @@ export default function SpaceDetails() {
         <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
           <h2 className="text-4xl font-semibold text-muted">{spaceName}</h2>
           <div className="w-full md:w-[400px]">
-            <ContentSearchBar placeholder={t("searchItems")} onChange={setSearchTerm} />
+            <ContentSearchBar
+              placeholder={t("searchItems")}
+              onChange={setSearchTerm}
+            />
           </div>
           <div className="flex items-center gap-2 bg-card text-muted font-semibold px-4 py-2 rounded-md">
             <Users size={16} /> {studentsCount} {t("students")}
           </div>
         </div>
 
-        <Topbar steps={steps} activeStep={activeStep} onStepChange={setActiveStep} className="flex justify-between" />
+        <Topbar
+          steps={steps}
+          activeStep={activeStep}
+          onStepChange={setActiveStep}
+          className="flex justify-between"
+        />
 
         {/* Filters + Add Button */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <ContentFilters
-            type={activeStep === 1 ? "courses" : activeStep === 2 ? "quizzes" : "exercises"}
+            type={
+              activeStep === 1
+                ? "courses"
+                : activeStep === 2
+                ? "quizzes"
+                : "exercises"
+            }
             userRole={userRole}
             activeFilter={filterLevel}
             onFilterChange={setFilterLevel}
@@ -288,26 +364,52 @@ export default function SpaceDetails() {
             hideCategoryFilter={true}
           />
           {userRole === "enseignant" && (
-            <Button variant="courseStart" className="w-full sm:w-50 md:w-[200px] lg:w-70 h-10 md:h-12 lg:h-10 mt-4 sm:mt-0 px-5 py-6 bg-grad-1 text-white transition-all flex items-center gap-2 justify-center whitespace-nowrap" onClick={() => setOpenModal(true)}>
+            <Button
+              variant="courseStart"
+              className="w-full sm:w-50 md:w-[200px] lg:w-70 h-10 md:h-12 lg:h-10 mt-4 sm:mt-0 px-5 py-6 bg-grad-1 text-white transition-all flex items-center gap-2 justify-center whitespace-nowrap"
+              onClick={() => setOpenModal(true)}
+            >
               <Plus size={18} /> {t("addItem")}
             </Button>
           )}
         </div>
 
         {/* Items Grid */}
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3}, minmax(0, 1fr))` }}>
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${
+              window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
+            }, minmax(0, 1fr))`,
+          }}
+        >
           {filteredItems.map(item => (
             <ContentCard
               key={`${activeStep}-${item.id}`}
-              course={{ ...item, initials: item.author ? item.author[0] + (item.author.split(" ")[1]?.[0] || "") : "", duration: item.date ? "Created on " + item.date : "" }}
+              course={{
+                ...item,
+                initials: item.author
+                  ? item.author[0] + (item.author.split(" ")[1]?.[0] || "")
+                  : "",
+                duration: item.date ? `Créé le ${item.date}` : "",
+              }}
               role={userRole}
               showProgress={userRole === "etudiant" && activeStep === 1}
-              type={activeStep === 1 ? "course" : activeStep === 2 ? "quiz" : "exercise"}
+              type={
+                activeStep === 1
+                  ? "course"
+                  : activeStep === 2
+                  ? "quiz"
+                  : "exercise"
+              }
               className={gradientMap[item.level] ?? "bg-grad-1"}
               onDelete={id => {
-                if (activeStep === 1) setSpaceCourses(spaceCourses.filter(c => c.id !== id));
-                else if (activeStep === 2) setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
-                else if (activeStep === 3) setSpaceExercises(spaceExercises.filter(c => c.id !== id));
+                if (activeStep === 1)
+                  setSpaceCourses(spaceCourses.filter(c => c.id !== id));
+                else if (activeStep === 2)
+                  setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
+                else if (activeStep === 3)
+                  setSpaceExercises(spaceExercises.filter(c => c.id !== id));
               }}
               onClick={() => {
                 if (userRole === "etudiant") {
@@ -340,21 +442,25 @@ export default function SpaceDetails() {
               {
                 label: t("selectItemLabel"),
                 element: (
-                  <select className="w-full bg-gray-100 dark:bg-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" onChange={e => setSelectedItemId(e.target.value)} value={selectedItemId}>
+                  <select
+                    className="w-full bg-gray-100 dark:bg-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                    onChange={e => setSelectedItemId(e.target.value)}
+                    value={selectedItemId}
+                  >
                     <option value="">{t("selectItemPlaceholder")}</option>
                     {modalItems
-                      .filter(c =>
-                        activeStep === 1
-                          ? !spaceCourses.some(sc => sc.id === c.id)
-                          : activeStep === 2
-                          ? !spaceQuizzes.some(sc => sc.id === c.id)
-                          : !spaceExercises.some(sc => sc.id === c.id)
-                      )
-                      .map(c => (
-                        <option key={`${activeStep}-${c.id}`} value={c.id}>
-                          {c.title || "Sans titre"}
-                        </option>
-                      ))}
+               
+  .filter(c => {
+    if (activeStep === 1) return !spaceCourses.some(sc => sc.id === c.id);
+    if (activeStep === 2) return !spaceQuizzes.some(sc => sc.id === c.id);
+    return !spaceExercises.some(sc => sc.id === c.id);
+  })
+  .map(c => (
+    <option key={`${activeStep}-${c.id}`} value={c.id}>
+      {c.title?.trim() || "Sans titre"}
+    </option>
+  ))}
+
                   </select>
                 ),
               },
