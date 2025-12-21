@@ -1,5 +1,5 @@
 // src/pages/ExercisePage.jsx
-import React, {useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { MessageCircle, Globe } from "lucide-react";
 import { MdAutoAwesome } from "react-icons/md";
@@ -9,6 +9,9 @@ import NavBar from "../components/common/NavBar";
 import Mascotte from "../assets/head_mascotte.svg";
 import AssistantIA from "./AssistantIA";
 
+import progressionService from "../services/progressionService";
+import toast from "react-hot-toast";
+
 
 export default function TheoryExercisePage() {
   const [openAssistant, setOpenAssistant] = useState(false);
@@ -17,20 +20,101 @@ export default function TheoryExercisePage() {
   const [answer, setAnswer] = useState("");
   const [exercise, setExercise] = useState(null);
   const { exerciceId } = useParams(); // Récupération de l'ID de l'exercice
+  const [loadingExercise, setLoadingExercise] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState(null); // pour stocker le feedback après soumission
 
- // ------------------- FETCH EXERCISE -------------------
+  // au début du composant
+  const [startTime, setStartTime] = useState(Date.now());
+
+  // On initialise le timer au chargement de l'exercice
   useEffect(() => {
-    console.log("URL appelée :", `http://localhost:8000/api/exercices/${exerciceId}/`);
+    if (exercise) {
+      setStartTime(Date.now());
+    }
+  }, [exercise]);
+
+  // Fonction utilitaire pour calculer le temps passé en secondes
+  const getTempsPasse = () => Math.floor((Date.now() - startTime) / 1000);
+
+  // ------------------- SAVE DRAFT -------------------
+  const handleSaveDraft = async () => {
+    if (!exercise) return;
+
+    try {
+      setLoading(true);
+
+     const res = await progressionService.createTentative({
+  exercice_id: exercise.id_exercice, // <-- nom exact du serializer
+  reponse: answer,
+  output: "",        // facultatif, mais le serializer attend ce champ
+  etat: "brouillon",
+  temps_passe: getTempsPasse(),
+});
+
+
+
+      console.log("Brouillon sauvegardé:", res.data || res);
+      setFeedback(res.data?.feedback || "Brouillon sauvegardé !");
+      toast.success("Solution sauvegardée !");
+
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde :", error.response || error);
+      toast.error("Erreur lors de la sauvegarde");
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ------------------- SEND SOLUTION -------------------
+  const handleSendSolution = async () => {
+    if (!exercise) return;
+
+    try {
+      setLoading(true);
+
+       const res = await progressionService.submitTentative({
+  exercice_id: exercise.id_exercice, // <-- nom exact du serializer
+  reponse: answer,
+  output: "",        // facultatif, mais le serializer attend ce champ
+  etat: "soumis",
+  temps_passe: getTempsPasse(),
+});
+
+
+      console.log("Solution envoyée:", res.data || res);
+      setFeedback(res.data?.feedback || "Solution envoyée !");
+      toast.success("Solution envoyée !");
+    } catch (error) {
+      console.error("Erreur lors de l'envoi :", error.response || error);
+      toast.error("Erreur lors de l'envoi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ------------------- FETCH EXERCISE -------------------
+  useEffect(() => {
+    console.log(
+      "URL appelée :",
+      `http://localhost:8000/api/exercices/${exerciceId}/`
+    );
     console.log("${exerciceId}/");
     if (!exerciceId) return;
-    console.log("URL appelée :", `http://localhost:8000/api/exercices/${exerciceId}/`);
+    console.log(
+      "URL appelée :",
+      `http://localhost:8000/api/exercices/${exerciceId}/`
+    );
     const fetchExercise = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
-       
+        const response = await fetch(
+          `http://localhost:8000/api/exercices/${exerciceId}/`
+        );
 
-        if (!response.ok) throw new Error("Erreur lors de la récupération de l'exercice");
+        if (!response.ok)
+          throw new Error("Erreur lors de la récupération de l'exercice");
         const data = await response.json();
         setExercise(data);
       } catch (error) {
@@ -42,10 +126,6 @@ export default function TheoryExercisePage() {
 
     fetchExercise();
   }, [exerciceId]);
-
-
-
-
 
   const { t, i18n } = useTranslation("exercisePage");
 
@@ -62,7 +142,6 @@ export default function TheoryExercisePage() {
 
   return (
     <div className="flex bg-[rgb(var(--color-surface))] min-h-screen">
-
       {/* NAVBAR */}
       <div className="hidden lg:block">
         <NavBar />
@@ -73,10 +152,8 @@ export default function TheoryExercisePage() {
 
       {/* PAGE CONTENT */}
       <div className="flex-1 lg:ml-72 px-4 sm:px-6 md:px-10 lg:px-12 py-6 sm:py-8 md:py-10 w-full">
-
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 md:gap-0">
-
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[rgb(var(--color-primary))] mb-2">
               {t("exercise_title")}
@@ -88,7 +165,6 @@ export default function TheoryExercisePage() {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
-
             {/* SWITCH LANG */}
             <button
               onClick={switchLang}
@@ -105,57 +181,63 @@ export default function TheoryExercisePage() {
               <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
             </button>
 
-            <img src={Mascotte} className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11" alt="Mascotte" />
+            <img
+              src={Mascotte}
+              className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11"
+              alt="Mascotte"
+            />
           </div>
         </div>
 
         {/* EXERCISE CARD */}
         <div className="border border-[rgb(var(--color-gray-light))] bg-[rgb(var(--grad-6))] shadow-card rounded-2xl px-4 sm:px-5 md:px-6 py-5 mb-12">
           {exercise ? (
-    <>
-          <p className="font-semibold text-[rgb(var(--color-primary))] text-lg sm:text-xl md:text-xl">
-            Exercice 
-            <span className="font-normal text-[rgb(var(--color-text))] ml-2 text-base sm:text-lg">
-             {exercise.titre_exo}
-            </span>
-          </p>
+            <>
+              <p className="font-semibold text-[rgb(var(--color-primary))] text-lg sm:text-xl md:text-xl">
+                Exercice
+                <span className="font-normal text-[rgb(var(--color-text))] ml-2 text-base sm:text-lg">
+                  {exercise.titre_exo}
+                </span>
+              </p>
 
-          <p className="text-[rgb(var(--color-gray))] mt-2 text-sm sm:text-base">
-            {exercise.enonce}
-          </p>
-          </>
-  ) : (
-    <p className="text-red-500 text-sm">
-      Impossible de charger l'exercice.
-    </p>
-  )}
+              <p className="text-[rgb(var(--color-gray))] mt-2 text-sm sm:text-base">
+                {exercise.enonce}
+              </p>
+            </>
+          ) : (
+            <p className="text-red-500 text-sm">
+              Impossible de charger l'exercice.
+            </p>
+          )}
         </div>
-  
+
         {/* SECTION TITLE */}
         <h2 className="text-lg sm:text-xl font-semibold text-[rgb(var(--color-primary))] mb-3">
           {t("your_solution")}
         </h2>
 
-       {/* MODERN ANSWER AREA - Théorie */}
-<div className="relative w-full mb-10">
-  <textarea
-    value={answer}
-    onChange={(e) => setAnswer(e.target.value)}
-    placeholder={t("write_here")}
-    className="w-full min-h-[150px] sm:min-h-[200px] md:min-h-[250px] p-5 rounded-2xl border border-gray-300 bg-white text-[rgb(var(--color-text))] text-base sm:text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:shadow-md resize-none transition-all duration-200 hover:shadow-md"
-  />
+        {/* MODERN ANSWER AREA - Théorie */}
+        <div className="relative w-full mb-10">
+          <textarea
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder={t("write_here")}
+            className="w-full min-h-[150px] sm:min-h-[200px] md:min-h-[250px] p-5 rounded-2xl border border-gray-300 bg-white text-[rgb(var(--color-text))] text-base sm:text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:shadow-md resize-none transition-all duration-200 hover:shadow-md"
+          />
 
-  {/* Counter in top-right corner */}
-  <div className="absolute top-2 right-4 text-xs text-gray-400">
-    {answer.length} / 1000 | {answer.split("\n").length} {t("lines")}
-  </div>
-</div>
+          {/* Counter in top-right corner */}
+          <div className="absolute top-2 right-4 text-xs text-gray-400">
+            {answer.length} / 1000 | {answer.split("\n").length} {t("lines")}
+          </div>
+        </div>
 
         {/* TIP BLOCK */}
         <div className="border border-[rgb(var(--color-gray-light))] bg-[rgb(var(--grad-7))] shadow-card rounded-xl px-4 sm:px-5 md:px-6 py-4 mt-10 mb-12">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white shadow"
-              style={{ backgroundImage: "var(--grad-1)" }}>
+            <div
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white shadow"
+              style={{ backgroundImage: "var(--grad-1)" }}
+            >
               <MdAutoAwesome size={18} />
             </div>
 
@@ -169,21 +251,37 @@ export default function TheoryExercisePage() {
             </div>
           </div>
         </div>
+      <div className="flex justify-around mb-5">
+          {/* SAVE DRAFT */}
+        <button
+          onClick={handleSaveDraft}
+          disabled={loading}
+          className="px-8 py-3 rounded-xl font-semibold shadow-md
+             bg-white border border-[rgb(var(--color-primary))]
+             text-[rgb(var(--color-primary))]
+             hover:bg-gray-50 transition text-sm sm:text-base"
+        >
+          Sauvegarder
+        </button>
 
         {/* SEND SOLUTION */}
-        <div className="flex justify-center mb-16">
-          <button
-            className="px-8 sm:px-10 md:px-12 py-3 rounded-xl text-white font-semibold shadow-lg hover:opacity-90 transition text-sm sm:text-base"
-            style={{ backgroundImage: "var(--grad-1)" }}
-          >
-            {t("send_solution")}
-          </button>
-        </div>
+        <button
+          onClick={handleSendSolution}
+          disabled={loading}
+          className="px-8 py-3 rounded-xl text-white font-semibold shadow-lg
+             hover:opacity-90 transition text-sm sm:text-base"
+          style={{ backgroundImage: "var(--grad-1)" }}
+        >
+          {t("send_solution")}
+        </button>
 
+      </div>
+       
         {/* FEEDBACK */}
-        <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24"
-          style={{ backgroundImage: "var(--grad-8)" }}>
-
+        <div
+          className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24"
+          style={{ backgroundImage: "var(--grad-8)" }}
+        >
           <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg mb-1">
             {t("feedback_title")}
           </p>
@@ -203,7 +301,11 @@ export default function TheoryExercisePage() {
                   onClick={() => setRating(i)}
                   className={`cursor-pointer text-transparent bg-clip-text drop-shadow 
                     ${getStarGradient(i)} 
-                    ${(hover || rating) >= i ? "opacity-100 scale-110" : "opacity-40"} 
+                    ${
+                      (hover || rating) >= i
+                        ? "opacity-100 scale-110"
+                        : "opacity-40"
+                    } 
                     transition-all duration-150`}
                 >
                   ★
@@ -212,9 +314,15 @@ export default function TheoryExercisePage() {
             </div>
 
             <div className="flex justify-between w-full text-xs sm:text-sm font-medium mt-2">
-              <span className="w-24 text-left label-very-easy">{t("labels.veryEasy")}</span>
-              <span className="w-24 text-center label-moderate">{t("labels.moderate")}</span>
-              <span className="w-24 text-right label-very-difficult">{t("labels.veryDifficult")}</span>
+              <span className="w-24 text-left label-very-easy">
+                {t("labels.veryEasy")}
+              </span>
+              <span className="w-24 text-center label-moderate">
+                {t("labels.moderate")}
+              </span>
+              <span className="w-24 text-right label-very-difficult">
+                {t("labels.veryDifficult")}
+              </span>
             </div>
           </div>
 

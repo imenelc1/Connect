@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { FaClock, FaMedal, FaStar, FaTrophy, FaRedoAlt, FaHome } from "react-icons/fa";
 import Button from "../components/common/Button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import "../styles/index.css";
 
-export default function RecQuizPage() {
+export default function QuizRecapPage() {
   const navigate = useNavigate();
   const { t } = useTranslation("quiz3");
+  const { exerciceId } = useParams();
 
   // Bouton test traduction
   const toggleLanguage = () => {
@@ -182,7 +183,7 @@ export default function RecQuizPage() {
               </span>
             }
             variant="quizBack"
-            onClick={() => navigate("/menu")}
+            onClick={() => navigate("/all-quizzes")}
           />
           <Button
             text={
@@ -191,7 +192,7 @@ export default function RecQuizPage() {
               </span>
             }
             variant="quizStart"
-            onClick={() => navigate("/quiz/3/start")}
+            onClick={() => navigate(`/QuizTake/${exerciceId}`)}
           />
         </div>
       </div>

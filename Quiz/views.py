@@ -3,7 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.jwt_auth import jwt_required
-
+from exercices.models import Exercice
+from datetime import timedelta
 # Create your views here.
 from rest_framework import generics
 from .models import Quiz, Question, Option
@@ -51,3 +52,8 @@ def Quiz_api(request, exercice_id):
     quiz = Quiz.objects.filter(exercice_id=exercice_id)
     serializer = QuizSerializer1(quiz, many=True)
     return Response(serializer.data)
+
+
+
+
+

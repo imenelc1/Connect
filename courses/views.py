@@ -178,7 +178,7 @@ class CoursListCreateView(generics.ListCreateAPIView):
     serializer_class = CoursSerializer
 
 # Détail, modification, suppression
-class CoursDetailView(generics.RetrieveAPIView):
+class CoursDetailView(generics.RetrieveUpdateAPIView):
     queryset = Cours.objects.all()
     serializer_class = CourseSerializer2
     lookup_field = "pk"
