@@ -56,7 +56,7 @@ export default function SpacesPage() {
   // Création d'un espace (prof uniquement)
   // -------------------------
   const handleSubmit = async (e) => {
-    e.preventDefault();
+   
 
     if (!spaceName) {
       toast.error(t("spaceNameRequired"));

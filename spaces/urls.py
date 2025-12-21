@@ -27,8 +27,9 @@ urlpatterns = [
     path("my-spaces/", MySpacesStudentView.as_view(), name="my-spaces"),
     
     # --- Spécifiques avant le générique ---
-    path('<int:space_id>/quizzes/', views.space_quizzes, name='space_quizzes'),
+    
     path('<int:space_id>/exercises/', views.space_exercises, name='space_exercises'),
+    path('<int:space_id>/quizzes/', views.space_quizzes, name='space_quizzes'),
     path('<int:space_id>/courses/', views.space_courses, name='space_courses'),
     
     path('remove_student/<int:student_id>/', remove_student_from_space.as_view(), name='remove-student'),

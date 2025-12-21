@@ -221,20 +221,18 @@ def space_quizzes(request, space_id):
         return Response(serializer.data)
 
     elif request.method == "POST":
-        # Vérification JWT pour POST
-        if not hasattr(request, 'user') or request.user is None:
-            return Response({"error": "Authentication required"}, status=401)
-        
         quiz_id = request.data.get("quiz")
         if not quiz_id:
-            return Response({"error": "No quiz id provided"}, status=400)
+            return Response({"error": "exercice field required"}, status=400)
         try:
-            quiz = Quiz.objects.get(pk=quiz_id)
-            space_quiz, created = SpaceQuiz.objects.get_or_create(space=space, quiz=quiz)
-            serializer = SpaceQuizSerializer(space_quiz)
-            return Response(serializer.data, status=status.HTTP_201_CREATED if created else 200)
+            quiz = Quiz.objects.get(id=quiz_id)
         except Quiz.DoesNotExist:
-            return Response({"error": "Quiz not found"}, status=404)
+            return Response({"error": "Exercice not found"}, status=404)
+
+        space_quizzes, created = SpaceQuiz.objects.get_or_create(space=space, quiz=quiz)
+        serializer = SpaceQuizSerializer(space_quizzes)
+        return Response(serializer.data, status=201 if created else 200)
+
 
 
 class remove_student_from_space(APIView):

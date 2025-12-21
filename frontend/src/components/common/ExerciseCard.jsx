@@ -21,7 +21,7 @@ export default function ExerciseCard({ exercise }) {
   if (!exercise) return null;
 
   return (
-    <div className={`shadow-md p-6 rounded-2xl flex flex-col justify-between h-full transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 ${levelcard[exercise.level]}`}>
+    <div className={`shadow-md p-6 rounded-3xl flex flex-col justify-between h-full transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 ${levelcard[exercise.level]}`}>
       <div className={`flex flex-col flex-1`}>
         <div className={`flex justify-between items-start`}>
           <h2 className="font-semibold text-lg">{exercise.title}</h2>
@@ -35,8 +35,8 @@ export default function ExerciseCard({ exercise }) {
 
       <div className="mt-2">
         <Button
-          variant="heroPrimary"
-          className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${levelStyles[exercise.level]}`}
+          variant="start"
+          className={`py-1 whitespace-nowrap ${levelStyles[exercise.level]}`}
           onClick={() => {
             console.log("Exercise ", exercise);
             if (exercise.categorie === "code") {
