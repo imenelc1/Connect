@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     # API et CORS
     'rest_framework',
     'corsheaders',
+    'django_extensions',
 ]
 
 

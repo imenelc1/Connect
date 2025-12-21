@@ -184,10 +184,10 @@ class CoursDetailView(generics.RetrieveUpdateAPIView):
     lookup_field = "pk"
 
     def get_serializer_context(self):
-        # Permet de passer request au serializer pour utiliser visited
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
 
 
 class SectionListCreateView(generics.ListCreateAPIView):

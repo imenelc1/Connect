@@ -34,8 +34,21 @@ export default function AddModal({
         <h2 className="text-2xl font-bold mb-2 text-muted">{title}</h2>
         {subtitle && <p className="text-gray-500 mb-6">{subtitle}</p>}
 
-        {/* Formulaire */}
-        <form className="space-y-5" onSubmit={onSubmit}>
+        {/* FORMULAIRE */}
+        <form className="space-y-5" onSubmit={(e) => {
+    e.preventDefault(); // empêche le refresh/navigue
+    onSubmit(); // appelle ton handleAddItem
+  }}>
+
+          {/*
+             Génération dynamique des champs
+            Chaque élément du tableau "fields" contient :
+            - label
+            - placeholder
+            - value
+            - onChange
+            - element → si fourni, remplace l’input (ex: <select>)
+          */}
           {fields.map((field, index) => (
             <div key={index} className="flex flex-col gap-2">
               <label className="font-medium text-grad-2">{field.label}</label>

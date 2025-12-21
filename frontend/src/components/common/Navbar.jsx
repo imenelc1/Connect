@@ -65,6 +65,7 @@ export default function Navbar() {
     { href: "/all-courses", label: t("courses"), icon: BookOpen },
     { href: "/all-exercises", label: t("exercises"), icon: Clipboard },
     { href: "/all-quizzes", label: t("quizzes"), icon: FileText },
+    { href: "/SubmittedExos", label: t("myExercises"), icon: ClipboardList },
     { href: "/badges", label: t("ranking"), icon: Award },
     { href: "/community", label: t("community"), icon: MessageCircle },
     { href: "/spaces", label: t("myspaces"), icon: LayoutGrid },

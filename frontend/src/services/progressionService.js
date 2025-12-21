@@ -156,6 +156,8 @@ export const saveDraftTentative = async ({ exercice_id, reponse, output = "" }) 
   });
 };
 
+
+
 // Soumettre une tentative
 export const submitTentative = async ({ exercice_id, reponse, output = "", temps_passe = null }) => {
   return createTentative({
@@ -167,8 +169,13 @@ export const submitTentative = async ({ exercice_id, reponse, output = "", temps
   });
 };
 
-
-
+export const getTentativeById = async (tentativeId) => {
+  const res = await api.get(
+    `dashboard/tentatives/id/${tentativeId}/`,
+    { headers: getAuthHeader() }
+  );
+  return res.data;
+};
 
 
 
@@ -187,6 +194,7 @@ export const submitTentative = async ({ exercice_id, reponse, output = "", temps
   createTentative,
   saveDraftTentative,
   submitTentative,
+  getTentativeById,
   // Prof
   getActiveCoursesCountProf,
   addSessionProf,

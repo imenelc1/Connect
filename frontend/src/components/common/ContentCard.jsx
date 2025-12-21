@@ -6,6 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import progressionService from "../../services/progressionService";
 
+/* ===================== STYLES ===================== */
 const levelStyles = {
   Débutant: "bg-blue text-white",
   Intermédiaire: "bg-purple text-white",
@@ -36,17 +37,29 @@ const levelKeyMap = {
   Avancé: "advanced",
 };
 
-export default function ContentCard({ course, role, showProgress, type, className = "", onDelete }) {
+/* ===================== COMPONENT ===================== */
+export default function ContentCard({
+  course,
+  role,
+  showProgress,
+  type,
+  className = "",
+  onDelete,
+}) {
   const { t } = useTranslation("contentPage");
   const location = useLocation();
   const navigate = useNavigate();
   const [progress, setProgress] = useState(course?.progress ?? 0);
 
-  if (!course) return null; // sécurité
+  if (!course) return null;
 
-  const pageType = type || (location.pathname.includes("courses") ? "course" :
-    location.pathname.includes("exercises") ? "exercise" : "quiz");
-  
+  const pageType =
+    type ||
+    (location.pathname.includes("courses")
+      ? "course"
+      : location.pathname.includes("exercises")
+      ? "exercise"
+      : "quiz");
 
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
@@ -64,56 +77,46 @@ export default function ContentCard({ course, role, showProgress, type, classNam
         : t("checkQuiz"),
   };
 
+  const handleStart = () => {
+    if (pageType === "exercise") {
+      if (course.categorie === "code") {
+        navigate(`/start-exerciseCode/${course.id}`);
+      } else {
+        navigate(`/start-exercise/${course.id}`);
+      }
+    } else if (pageType === "quiz") {
+      navigate(`/quiz-intro/${course.id}`);
+    } else {
+      navigate(`/Seecourses/${course.id}`);
+    }
+  };
 
-
+  const seeExercises = () => {
+    navigate(`/ListeExercices/${course.id}`);
+  };
 
   const handleEdit = () => {
-    if (pageType === "course"){
+    if (pageType === "course") {
       navigate(`/courses/edit/${course.id}`);
-    } 
-    else {
-      if (pageType === "exercise"){
-        navigate(`/exercices/edit/${course.id}`);
-      }
-      else{
-        navigate(`/quiz/edit/${course.id}`);
-      }
-    } 
-  };
-  const seeExercises=()=>{
-    navigate(`/ListeExercices/${course.id}`);
-  }
-
- const handleStart = () => {
-  if (pageType === "exercise") {
-    if (course.categorie === "code") {
-      navigate(`/start-exerciseCode/${course.id}`);
+    } else if (pageType === "exercise") {
+      navigate(`/exercices/edit/${course.id}`);
     } else {
-      navigate(`/start-exercise/${course.id}`);
+      navigate(`/ListeExercices/${course.id}`);
     }
-    //navigate(`/start-exercise/${course.id}`); // <- juste la page existante
-  } else {
-    if(pageType === "quiz"){
-      navigate(`/QuizIntro/${course.id}`)
-      
-    }else{navigate(`/Seecourses/${course.id}`);}
-    
-  }
-};
+  };
 
-const handleRestart = async () => {
+  const handleRestart = async () => {
     try {
       await progressionService.resetCourseProgress(course.id);
       setProgress(0);
       if (pageType === "course") navigate(`/Seecourses/${course.id}`);
-      else if (pageType === "quiz") navigate(`/QuizIntro/${course.id}`);
+      else if (pageType === "quiz") navigate(`/quiz1/${course.id}`);
       else navigate(`/ListeExercices/${course.id}`);
     } catch (error) {
       console.error("Erreur lors de la réinitialisation :", error);
     }
   };
 
- 
   return (
     <div
       className={`shadow-md p-6 rounded-2xl flex flex-col justify-between h-full transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 ${className}`}
@@ -140,18 +143,16 @@ const handleRestart = async () => {
             </div>
             <span className="text-sm">{course.author}</span>
           </div>
-         <span className="text-xs text-gray-400">
-  {pageType === "exercise"
-    ? course.categorie
-    : pageType === "quiz" && course.duration
-    ? `${course.duration} min`
-    : pageType !== "quiz"
-    ? course.duration
-    : null}
-</span>
+          <span className="text-xs text-gray-400">
+            {pageType === "exercise"
+              ? course.categorie
+              : pageType === "quiz" && course.duration
+              ? `${course.duration} min`
+              : course.duration}
+          </span>
         </div>
 
-      {showProgress && (
+        {showProgress && (
           <ContentProgress
             value={progress}
             className="mt-3"
@@ -259,6 +260,8 @@ const handleRestart = async () => {
                     </Button>
                   </div>
                 )}
+
+                
               </>
             )}
           </div>

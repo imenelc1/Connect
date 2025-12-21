@@ -16,6 +16,9 @@ urlpatterns = [
  path ("prof/average-time/", views.average_time_prof, name="average-time-prof"),
  path ("global-progress/students/", views.global_progress_students, name="global-progress-students"),
  path ("current-progress/students/", views.current_progress_students, name="current-progress-students"),
- path("last-lesson/<int:course_id>/", views.last_lesson),
+ path("tentatives/", views.list_tentatives, name="list_tentatives"),
+ path("tentatives/create/", views.create_tentative, name="create_tentative"),
+ path("tentatives/id/<int:tentative_id>/", views.get_tentative, name="get-tentative"),
 
+ 
 ]

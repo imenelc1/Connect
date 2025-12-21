@@ -114,7 +114,7 @@ export default function MyStudents() {
   // Ajout étudiant
   // -----------------------------
   const handleSubmit = async (e) => {
-    e.preventDefault();
+   
     if (!email || !space) return;
 
     try {

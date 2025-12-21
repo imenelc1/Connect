@@ -18,6 +18,7 @@ urlpatterns = [
     path('createLesson/', CreateLeconView.as_view(), name='create_lesson'),    
     path('Lesson/<int:pk>/', UpdateLeconView.as_view(), name='update_lesson_img'),      
     path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
+
     
     path('cours/progress/', CoursesWithProgressView.as_view(), name='courses-progress'),
     path("admin/courses/", cours_list_api, name="admin-courses"),

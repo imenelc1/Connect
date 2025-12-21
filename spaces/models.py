@@ -1,4 +1,5 @@
 from django.db import models
+from quiz.models import Quiz
 from users.models import Utilisateur
 from courses.models import Cours
 from exercices.models import Exercice
@@ -52,3 +53,14 @@ class SpaceExo(models.Model):
 
     def __str__(self):
         return f"{self.exercice.titre_exo} dans {self.space.nom_space}"
+
+class SpaceQuiz(models.Model):
+    date_ajout = models.DateTimeField(auto_now_add=True)
+    space = models.ForeignKey(Space, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('space', 'quiz')  # un quiz ne peut être ajouté qu'une fois dans un space
+
+    def __str__(self):
+        return f"{self.quiz.exercice.titre_exo} Quiz dans {self.space.nom_space}"

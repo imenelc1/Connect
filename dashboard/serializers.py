@@ -1,6 +1,10 @@
+from django.utils import timezone
 from rest_framework import serializers
 
 from courses.models import Cours
+from exercices.models import Exercice
+from exercices.serializers import ExerciceSerializer
+from spaces.serializers import UtilisateurSerializer
 from .models import LeconComplete, ProgressionCours, ProgressionHistory, TentativeExercice
 
 class LeconCompleteSerializer(serializers.ModelSerializer):
@@ -39,3 +43,41 @@ class ProgressionHistorySerializer(serializers.ModelSerializer):
 
     def get_day(self, obj):
         return obj.created_at.strftime("%Y-%m-%d")
+
+# Lecture
+class TentativeExerciceReadSerializer(serializers.ModelSerializer):
+    exercice = ExerciceSerializer(read_only=True)
+    utilisateur = UtilisateurSerializer(read_only=True)
+
+    class Meta:
+        model = TentativeExercice
+        fields = ['id', 'etat', 'feedback', 'reponse', 'output', 'exercice', 'utilisateur', 'submitted_at', 'created_at']
+
+# Écriture
+class TentativeExerciceWriteSerializer(serializers.ModelSerializer):
+    exercice_id = serializers.PrimaryKeyRelatedField(
+        queryset=Exercice.objects.all(),
+        write_only=True,
+        source='exercice'  # ceci mappe exercice_id -> exercice FK
+    )
+
+    class Meta:
+        model = TentativeExercice
+        fields = [
+            "exercice_id", "reponse", "output", "etat", "temps_passe"
+        ]
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data['utilisateur'] = user
+        if validated_data.get("etat") == "soumis":
+            validated_data["submitted_at"] = timezone.now()
+
+        tentative, created = TentativeExercice.objects.update_or_create(
+            utilisateur=user,
+            exercice=validated_data['exercice'],
+            defaults=validated_data
+        )
+        return tentative
+
+

@@ -12,6 +12,12 @@ class ProgressionCoursAdmin(admin.ModelAdmin):
 # --- Tentatives d'exercices ---
 @admin.register(TentativeExercice)
 class TentativeExerciceAdmin(admin.ModelAdmin):
-    list_display = ('utilisateur', 'exercice', 'date_soumission', 'etat', 'score', 'temps_passe', 'heure_tentative', 'feedback')
-    search_fields = ('utilisateur__adresse_email', 'exercice__titre_exo')
-    list_filter = ('etat',)
+    list_display = (
+        'utilisateur',
+        'exercice',
+        'etat',
+        'score',
+        'created_at',
+        'submitted_at',
+    )
+
