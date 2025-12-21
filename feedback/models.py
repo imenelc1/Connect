@@ -18,7 +18,8 @@ class Feedback(models.Model):
         on_delete=models.CASCADE,
         related_name="feedbacks"
     )
-    nom_personnel = models.CharField(max_length=255, blank=True, null=True)
+    afficher_nom = models.BooleanField(default=False)
+
     # ====== RELATION GÉNÉRIQUE ======
     content_type = models.ForeignKey(
         ContentType,

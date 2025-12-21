@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
-
+import feedbackService from "../../services/feedbackService";
 export default function CourseContent({
   course,
   currentSectionIndex,
@@ -15,7 +15,9 @@ export default function CourseContent({
   const { t } = useTranslation("courses");
   const { title, sections } = course;
   const courseId = course.id || "default";
-
+const [afficherNom, setAfficherNom] = useState(false);
+const [allFeedbacks, setAllFeedbacks] = useState([]);
+const [loadingFeedbacks, setLoadingFeedbacks] = useState(true);
   // Timer
   const [secondsSpent, setSecondsSpent] = useState(() => {
     return parseInt(localStorage.getItem(`courseTimer_${courseId}`) || "0", 10);
@@ -29,6 +31,38 @@ export default function CourseContent({
   useEffect(() => {
     localStorage.setItem(`courseTimer_${courseId}`, secondsSpent.toString());
   }, [secondsSpent, courseId]);
+
+useEffect(() => {
+  if (!courseId) return;
+
+  const fetchFeedbacks = async () => {
+    setLoadingFeedbacks(true);
+    try {
+      const data = await feedbackService.getFeedbacks(courseId);
+
+      const formatted = data.map((f) => ({
+        id: f.id_feedback,
+        comment: f.contenu,
+        stars: f.etoile,
+        nomComplet: f.afficher_nom
+          ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+          : "Utilisateur anonyme",
+        initials: f.afficher_nom
+          ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
+          : "??",
+      }));
+
+      setAllFeedbacks(formatted);
+    } catch (err) {
+      console.error("Erreur chargement feedbacks", err);
+    } finally {
+      setLoadingFeedbacks(false);
+    }
+  };
+
+  fetchFeedbacks();
+}, [courseId]);
+
 
   const formatTime = (secs) => {
     const h = Math.floor(secs / 3600);
@@ -102,15 +136,7 @@ export default function CourseContent({
     currentSectionIndex === sections.length - 1 &&
     currentLessonPage === totalLessonPages - 1;
 
-     // Feedback
-  const allFeedbacks = [
-    { id: 1, initials: "A.S", comment: t("feedback1"), stars: 5 },
-    { id: 2, initials: "M.K", comment: t("feedback2"), stars: 5 },
-    { id: 3, initials: "S.R", comment: t("feedback3"), stars: 5 },
-    { id: 4, initials: "T.L", comment: t("feedback1"), stars: 4 },
-    { id: 5, initials: "H.D", comment: t("feedback2"), stars: 5 },
-    { id: 6, initials: "N.M", comment: t("feedback3"), stars: 4 },
-  ];
+   
   const [page, setPage] = useState(0);
   const feedbacksPerPage = 3;
   const totalPages = Math.ceil(allFeedbacks.length / feedbacksPerPage);
@@ -121,11 +147,51 @@ export default function CourseContent({
 
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(0);
-  const handleSubmit = () => {
-    console.log("Feedback submitted:", { feedback, rating });
-    setFeedback("");
+  // Remplacer l'ancien handleSubmit par celui-ci
+const handleSubmit = async () => {
+  if (!feedback || rating === 0) {
+    alert("Veuillez écrire un feedback et donner une note");
+    return;
+  }
+
+  try {
+    await feedbackService.createFeedback({
+      contenu: feedback,
+      etoile: rating,
+      object_id: courseId,
+      content_type_string: "courses.cours",
+      afficher_nom: afficherNom,
+    });
+
+    // Rafraîchir les feedbacks
+     const refreshed = await feedbackService.getFeedbacks(courseId);
+    setAllFeedbacks(
+      refreshed.map((f) => ({
+        id: f.id_feedback,
+        comment: f.contenu,
+        stars: f.etoile,
+        nomComplet: f.afficher_nom
+          ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+          : "Utilisateur anonyme",
+        initials: f.afficher_nom
+          ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
+          : "??",
+      }))
+    );
+
+
+    // Nettoyer le formulaire
+     setFeedback("");
     setRating(0);
-  };
+    setAfficherNom(false);
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors de l'envoi");
+  }
+};
+
+
+
 
   // Render
   return (
@@ -235,6 +301,22 @@ export default function CourseContent({
         </div>
 
         <h3 className="text-lg sm:text-xl font-bold text-muted mb-3">{t("yourFeedback")}</h3>
+        
+        <div className="flex items-center gap-2 mb-4">
+  <label className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={afficherNom}
+    onChange={(e) => setAfficherNom(e.target.checked)}
+  />
+  Afficher mon nom
+</label>
+
+  <label htmlFor="afficherNom" className="text-sm text-gray-700">
+    Afficher mon nom
+  </label>
+</div>
+
         <textarea
           className="w-full h-36 sm:h-48 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
           placeholder={t("feedbackPlaceholder")}
