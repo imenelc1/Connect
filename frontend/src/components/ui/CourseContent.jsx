@@ -15,10 +15,10 @@ export default function CourseContent({
   initialLessonPage = 0,
 }) 
 {
-  const [userName, setUserName] = useState("");
   const { t } = useTranslation("courses");
   const { title, sections } = course;
   const courseId = course.id || "default";
+const [afficherNom, setAfficherNom] = useState(false);
 
   // Timer
   const [secondsSpent, setSecondsSpent] = useState(
@@ -65,14 +65,14 @@ useEffect(() => {
 
       const formatted = data.map((f) => ({
         id: f.id_feedback,
-        initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
         comment: f.contenu,
         stars: f.etoile,
-        nomComplet: f.utilisateur_nom && f.utilisateur_prenom
-  ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-  : f.utilisateur_nom || "Utilisateur anonyme",
-
-
+        nomComplet: f.afficher_nom
+          ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+          : "Utilisateur anonyme",
+        initials: f.afficher_nom
+          ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
+          : "??",
       }));
 
       setAllFeedbacks(formatted);
@@ -184,27 +184,30 @@ const handleSubmit = async () => {
       etoile: rating,
       object_id: courseId,
       content_type_string: "courses.cours",
-      nom_personnel: userName || undefined, // <-- ici
+      afficher_nom: afficherNom,
     });
 
     // Rafraîchir les feedbacks
-    const refreshed = await feedbackService.getFeedbacks(courseId);
+     const refreshed = await feedbackService.getFeedbacks(courseId);
     setAllFeedbacks(
       refreshed.map((f) => ({
         id: f.id_feedback,
-        initials: `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase(),
         comment: f.contenu,
         stars: f.etoile,
-        nomComplet: f.utilisateur_nom && f.utilisateur_prenom
+        nomComplet: f.afficher_nom
           ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-          : f.utilisateur_nom || "Utilisateur anonyme",
+          : "Utilisateur anonyme",
+        initials: f.afficher_nom
+          ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
+          : "??",
       }))
     );
 
+
     // Nettoyer le formulaire
-    setFeedback("");
+     setFeedback("");
     setRating(0);
-    setUserName("");
+    setAfficherNom(false);
   } catch (err) {
     console.error(err);
     alert("Erreur lors de l'envoi");
@@ -320,13 +323,21 @@ const handleSubmit = async () => {
         </div>
 
         <h3 className="text-lg sm:text-xl font-bold text-muted mb-3">{t("yourFeedback")}</h3>
-        <input
-  type="text"
-  className="w-full mb-4 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
-  placeholder={t("optionalName")} // par ex: "Votre nom (optionnel)"
-  value={userName}
-  onChange={(e) => setUserName(e.target.value)}
-/>
+        
+        <div className="flex items-center gap-2 mb-4">
+  <label className="flex items-center gap-2">
+  <input
+    type="checkbox"
+    checked={afficherNom}
+    onChange={(e) => setAfficherNom(e.target.checked)}
+  />
+  Afficher mon nom
+</label>
+
+  <label htmlFor="afficherNom" className="text-sm text-gray-700">
+    Afficher mon nom
+  </label>
+</div>
 
         <textarea
           className="w-full h-36 sm:h-48 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"

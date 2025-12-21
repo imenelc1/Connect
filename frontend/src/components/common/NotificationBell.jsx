@@ -1,5 +1,5 @@
 // src/components/common/NotificationBell.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { Bell, Loader, Check, MessageSquare, BookOpen, Award, TrendingUp } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 
@@ -10,6 +10,7 @@ const NotificationBell = () => {
     loading, 
     unreadCount, 
     fetchNotifications, 
+    fetchUnreadCount,
     markAsRead, 
     markAllAsRead 
   } = useNotifications();
@@ -45,6 +46,10 @@ const NotificationBell = () => {
         return <Bell size={16} className="text-gray-500" />;
     }
   };
+  useEffect(() => {
+  fetchUnreadCount();
+}, [fetchUnreadCount]);
+
 const handleNotificationNavigation = (notif) => {
   // Marquer comme lu d'abord
   if (!notif.is_read) {

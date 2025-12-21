@@ -22,8 +22,6 @@ class FeedbackListCreateView(generics.ListCreateAPIView):
             try:
                 app_label, model = content_type_str.split('.')
                 content_type = ContentType.objects.get(app_label=app_label, model=model)
-                
-                # 🔹 Ajouter select_related pour récupérer les données utilisateur
                 return Feedback.objects.filter(
                     content_type=content_type,
                     object_id=object_id
@@ -31,6 +29,7 @@ class FeedbackListCreateView(generics.ListCreateAPIView):
             except (ValueError, ContentType.DoesNotExist):
                 return Feedback.objects.none()
         return Feedback.objects.none()
+
 
     def perform_create(self, serializer):
         serializer.save(utilisateur=self.request.user)

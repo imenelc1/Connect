@@ -4,11 +4,11 @@ from .models import Notification, Feedback
 from users.models import Utilisateur
 
 class FeedbackSerializer(serializers.ModelSerializer):
+    afficher_nom = serializers.BooleanField()  # plus write_only
     utilisateur_nom = serializers.SerializerMethodField()
     utilisateur_prenom = serializers.SerializerMethodField()
 
     content_type_string = serializers.CharField(write_only=True)
-    nom_personnel = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = Feedback
@@ -16,40 +16,34 @@ class FeedbackSerializer(serializers.ModelSerializer):
             "id_feedback",
             "contenu",
             "etoile",
+            "afficher_nom",
             "utilisateur_nom",
             "utilisateur_prenom",
             "content_type_string",
             "object_id",
-            "date_creation",
-            "nom_personnel",
         ]
-        read_only_fields = ["id_feedback", "date_creation"]
 
-    # 🔥 LOGIQUE FINALE
+    
     def get_utilisateur_nom(self, obj):
-        return obj.nom_personnel if obj.nom_personnel else "Utilisateur anonyme"
+        if obj.afficher_nom and obj.utilisateur:
+            return obj.utilisateur.nom
+        return None
 
     def get_utilisateur_prenom(self, obj):
-        return ""
+        if obj.afficher_nom and obj.utilisateur:
+            return obj.utilisateur.prenom
+        return None
 
     def create(self, validated_data):
-        request = self.context.get("request")
-
-        # content type
+        request = self.context["request"]
         content_type_string = validated_data.pop("content_type_string")
         app_label, model = content_type_string.split(".")
         validated_data["content_type"] = ContentType.objects.get(
             app_label=app_label,
             model=model
         )
-
-        # utilisateur uniquement technique (pas affichage)
-        validated_data["utilisateur"] = (
-            request.user if request and request.user.is_authenticated else None
-        )
-
+        validated_data["utilisateur"] = request.user
         return super().create(validated_data)
-
 
 
 class NotificationSerializer(serializers.ModelSerializer):
