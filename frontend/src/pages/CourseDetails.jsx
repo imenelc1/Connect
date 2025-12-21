@@ -16,6 +16,7 @@ import { getCoursesProgress } from "../../src/services/progressionService";
 import MyCoursesSelect from "../components/ui/MyCoursesSelect";
 import MyQuizzesSelect from "../components/ui/MyQuizzesSelect";
 import MyExercisesSelect from "../components/ui/MyExercisesSelect";
+import ExerciseCard from "../components/common/ExerciseCard";
 
 const gradientMap = {
   Débutant: "bg-grad-2",
@@ -387,13 +388,15 @@ export default function SpaceDetails() {
               onDelete={id => {
                 if (activeStep === 1) setSpaceCourses(spaceCourses.filter(c => c.id !== id));
                 else if (activeStep === 2) setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
-                else if (activeStep === 3) setSpaceExercises(spaceExercises.filter(c => c.id !== id));
+                else if (activeStep === 3) {
+                  <ExerciseCard/>
+                  setSpaceExercises(spaceExercises.filter(c => c.id !== id));}
               }}
               onClick={() => {
                 if (userRole === "etudiant") {
                   if (activeStep === 1) navigate(`/courses/${item.id}/start`);
                   else if (activeStep === 2) navigate(`/quizzes/${item.id}/start`);
-                  else if (activeStep === 3) navigate(`/exercises/${item.id}/start`);
+                  else if (activeStep === 3) navigate(`/exercises/${item.id}`);
                 } else {
                   if (activeStep === 1) navigate(`/courses/${item.id}`);
                   else if (activeStep === 2) navigate(`/quizzes/${item.id}`);
