@@ -33,7 +33,10 @@ export default function AddModal({
         <p className="text-sm text-textc mb-4">{subtitle}</p>
 
         {/* FORMULAIRE */}
-        <form className="space-y-5" onSubmit={onSubmit}>
+        <form className="space-y-5" onSubmit={(e) => {
+    e.preventDefault(); // empêche le refresh/navigue
+    onSubmit(); // appelle ton handleAddItem
+  }}>
 
           {/*
              Génération dynamique des champs

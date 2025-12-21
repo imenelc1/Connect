@@ -10,7 +10,7 @@ from exercices.models import Exercice
 from exercices.serializers import ExerciceSerializer
 from quiz.models import Quiz
 
-from quiz.serializers import QuizSerializer
+from quiz.serializers import QuizSerializer, QuizSerializer1
 from users.models import Utilisateur
 from .models import Space, SpaceCour, SpaceEtudiant, SpaceExo, SpaceQuiz
 from .serializers import (
@@ -138,8 +138,14 @@ def my_exercises(request):
 def my_quizzes(request):
     prof = request.user
     quizzes = Quiz.objects.filter(exercice__utilisateur=prof)
-    serializer = QuizSerializer(quizzes, many=True)
+    serializer = QuizSerializer1(quizzes, many=True)  
+    print("mes quizzes ", serializer.data)
+
+    print("serializer.data", serializer.data)
+
+
     return Response(serializer.data)
+
 
 
 
@@ -199,7 +205,8 @@ def space_exercises(request, space_id):
         serializer = SpaceExoSerializer(space_exo)
         return Response(serializer.data, status=201 if created else 200)
 
-@api_view(["GET", "POST"])
+# --- Liste des quizzes d'un espace ---
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticatedJWT])
 def space_quizzes(request, space_id):
     try:
@@ -207,29 +214,27 @@ def space_quizzes(request, space_id):
     except Space.DoesNotExist:
         return Response({"error": "Space not found"}, status=404)
 
-    # --- Lister les quizzes du space ---
     if request.method == "GET":
-        quizzes = SpaceQuiz.objects.filter(space=space)
-        serializer = SpaceQuizSerializer(quizzes, many=True)
+        print("space_quizzes GET called", space_id)
+        space_quizzes = SpaceQuiz.objects.filter(space=space)
+        serializer = SpaceQuizSerializer(space_quizzes, many=True)
         return Response(serializer.data)
 
-    # --- Ajouter un quiz au space ---
     elif request.method == "POST":
+        # Vérification JWT pour POST
+        if not hasattr(request, 'user') or request.user is None:
+            return Response({"error": "Authentication required"}, status=401)
+        
         quiz_id = request.data.get("quiz")
         if not quiz_id:
-            return Response({"error": "quiz field required"}, status=400)
+            return Response({"error": "No quiz id provided"}, status=400)
         try:
-            quiz = Quiz.objects.get(id=quiz_id)
+            quiz = Quiz.objects.get(pk=quiz_id)
+            space_quiz, created = SpaceQuiz.objects.get_or_create(space=space, quiz=quiz)
+            serializer = SpaceQuizSerializer(space_quiz)
+            return Response(serializer.data, status=status.HTTP_201_CREATED if created else 200)
         except Quiz.DoesNotExist:
             return Response({"error": "Quiz not found"}, status=404)
-
-        space_quiz, created = SpaceQuiz.objects.get_or_create(space=space, quiz=quiz)
-        serializer = SpaceQuizSerializer(space_quiz)
-        return Response(serializer.data, status=201 if created else 200)
-
-
-
-
 
 
 class remove_student_from_space(APIView):

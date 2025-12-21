@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from courses.serializers import CoursSerializer
 from exercices.serializers import ExerciceSerializer
-from quiz.serializers import QuizSerializer
+from quiz.serializers import QuizSerializer, QuizSerializer1
 from .models import Space, SpaceEtudiant, SpaceCour, SpaceExo, SpaceQuiz
 from users.models import Utilisateur
 
@@ -56,7 +56,7 @@ class SpaceExoSerializer(serializers.ModelSerializer):
         fields = ['id', 'space', 'exercice', 'date_ajout']
 
 class SpaceQuizSerializer(serializers.ModelSerializer):
-    quiz = QuizSerializer(read_only=True)
+    quiz = QuizSerializer1(read_only=True)  # ✅
 
     class Meta:
         model = SpaceQuiz

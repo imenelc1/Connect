@@ -13,6 +13,9 @@ import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import toast from "react-hot-toast";
 import { getCoursesProgress } from "../../src/services/progressionService";
+import MyCoursesSelect from "../components/ui/MyCoursesSelect";
+import MyQuizzesSelect from "../components/ui/MyQuizzesSelect";
+import MyExercisesSelect from "../components/ui/MyExercisesSelect";
 
 const gradientMap = {
   Débutant: "bg-grad-2",
@@ -36,6 +39,7 @@ export default function SpaceDetails() {
   const [spaceCourses, setSpaceCourses] = useState([]);
   const [spaceQuizzes, setSpaceQuizzes] = useState([]);
   const [spaceExercises, setSpaceExercises] = useState([]);
+
   const [myCourses, setMyCourses] = useState([]);
   const [myQuizzes, setMyQuizzes] = useState([]);
   const [myExercises, setMyExercises] = useState([]);
@@ -52,7 +56,7 @@ export default function SpaceDetails() {
     { label: t("topbar.exercises"), icon: FileCheck },
   ];
 
-  // --- fetch space details ---
+  // --- Fetch space details ---
   useEffect(() => {
     if (!id) return;
     fetch(`http://127.0.0.1:8000/api/spaces/${id}/`, {
@@ -66,7 +70,7 @@ export default function SpaceDetails() {
       .catch(err => console.error("Failed to load space details:", err));
   }, [id]);
 
-  // --- fetch space items selon l'étape active ---
+  // --- Fetch space items according to active step ---
   useEffect(() => {
     if (!id) return;
 
@@ -101,20 +105,16 @@ export default function SpaceDetails() {
           });
           const data = await res.json();
           setSpaceQuizzes(
-            (data || [])
-              .filter(q => q.quiz)
-              .map(q => ({
-                id: q.quiz.id_quiz,
-                title: q.quiz.exercice?.titre_exo || "Sans titre",
-                description: q.quiz.exercice?.enonce || "",
-                level: q.quiz.exercice?.niveau_exo || "",
-                author: q.quiz.exercice?.utilisateur
-                  ? `${q.quiz.exercice.utilisateur.nom} ${q.quiz.exercice.utilisateur.prenom}`
-                  : "Inconnu",
-                date: q.quiz.exercice?.date_creation || "",
-                progress: q.progress ?? 0,
-                isMine: q.quiz.exercice?.utilisateur?.id_utilisateur === userData?.id,
-              }))
+            (data || []).filter(q => q.quiz).map(q => ({
+              id: q.quiz.id,
+              title: q.quiz.exercice?.titre_exo || "Sans titre",
+              description: q.quiz.exercice?.enonce || "",
+              level: q.quiz.exercice?.niveau_exercice_label || "",
+              author: q.quiz.exercice?.utilisateur_name || "Inconnu",
+              date: q.quiz.exercice?.date_creation || "",
+              progress: q.progress ?? 0,
+              isMine: q.quiz.exercice?.utilisateur === userData?.id,
+            }))
           );
         } else if (activeStep === 3) {
           // Exercises
@@ -123,21 +123,17 @@ export default function SpaceDetails() {
           });
           const data = await res.json();
           setSpaceExercises(
-            (data || [])
-              .filter(e => e.exercice)
-              .map(e => ({
-                id: e.exercice.id_exercice,
-                title: e.exercice.titre_exo,
-                description: e.exercice.enonce,
-                level: e.exercice.niveau_exo,
-                author: e.exercice.utilisateur
-                  ? `${e.exercice.utilisateur.nom} ${e.exercice.utilisateur.prenom}`
-                  : "Inconnu",
-                date: e.exercice.date_creation,
-                categorie: e.exercice.categorie,
-                progress: e.progress ?? 0,
-                isMine: e.exercice.utilisateur?.id_utilisateur === userData?.id,
-              }))
+            (data || []).filter(e => e.exercice).map(e => ({
+              id: e.exercice.id_exercice,
+              title: e.exercice.titre_exo,
+              description: e.exercice.enonce,
+              level: e.exercice.niveau_exercice_label,
+              author: e.exercice.utilisateur_name || "Inconnu",
+              date: e.exercice.date_creation || "",
+              categorie: e.exercice.categorie,
+              progress: e.progress ?? 0,
+              isMine: e.exercice.utilisateur === userData?.id,
+            }))
           );
         }
       } catch (err) {
@@ -148,7 +144,7 @@ export default function SpaceDetails() {
     fetchItems();
   }, [id, activeStep, userData?.id]);
 
-  // --- fetch my courses/quizzes/exercises pour le modal ---
+  // --- Fetch my items for modal ---
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -166,141 +162,142 @@ export default function SpaceDetails() {
 
     Promise.all([fetchMyCourses, fetchMyQuizzes, fetchMyExercises])
       .then(([coursesData, quizzesData, exercisesData]) => {
-        setMyCourses(
-          (coursesData || []).map(c => ({
-            id: c.id_cours,
-            title: c.titre_cour,
-            description: c.description,
-            level: c.niveau_cour_label,
-            author: c.utilisateur_name,
-          }))
-        );
+        setMyCourses((coursesData || []).map(c => ({
+          id: c.id_cours,
+          title: c.titre_cour,
+          description: c.description,
+          level: c.niveau_cour_label,
+          author: c.utilisateur_name,
+        })));
 
-      setMyQuizzes(
-  (quizzesData || []).map(q => ({
-    id: q.id_quiz,
-    title: q.titre_exo?.trim() || "Sans titre",
-    description: q.enonce || "",
-    level: q.niveau_exo || "",
-    author: `${q.utilisateur?.nom || ""} ${q.utilisateur?.prenom || ""}`.trim(),
-  }))
-);
+        setMyQuizzes((quizzesData || []).filter(q => q.exercice && q.exercice.id_exercice).map(q => ({
+          id: q.exercice.id_exercice,
+          title: q.exercice.titre_exo?.trim() || "Sans titre",
+          description: q.exercice.enonce || "",
+          level: q.exercice.niveau_exercice_label || "",
+          author: q.exercice.utilisateur_name || "",
+        })));
 
-
-        setMyExercises(
-          (exercisesData || []).map(e => ({
-            id: e.id_exercice,
-            title: e.titre_exo,
-            description: e.enonce,
-            level: e.niveau_exo,
-            author: e.utilisateur
-              ? `${e.utilisateur.nom} ${e.utilisateur.prenom}`
-              : "",
-          }))
-        );
+        setMyExercises((exercisesData || []).filter(e => e.id_exercice).map(e => ({
+          id: e.id_exercice,
+          title: e.titre_exo?.trim() || "Sans titre",
+          description: e.enonce || "",
+          level: e.niveau_exercice_label || "",
+          author: e.utilisateur_name || "",
+        })));
       })
       .catch(err => console.error("Failed to fetch my items:", err));
   }, []);
 
-  // --- handle add item ---
-  const handleAddItem = (itemId) => {
-    if (!itemId) return;
+  // --- Unified handle add item ---
+ const handleAddItem = (selectedItemId) => {
+  const idToSend = Number(selectedItemId);
+  if (!idToSend) {
+    toast.error(t("selectItemFirst"));
+    return;
+  }
 
-    let alreadyAdded = false;
-    let url = "";
-    let bodyKey = "";
+  let alreadyAdded = false;
+  let url = "";
+  let bodyKey = "";
 
-    if (activeStep === 1) {
-      alreadyAdded = spaceCourses.some(c => c.id === itemId);
-      url = `http://127.0.0.1:8000/api/spaces/${id}/courses/`;
-      bodyKey = "cours";
-    } else if (activeStep === 2) {
-      alreadyAdded = spaceQuizzes.some(c => c.id === itemId);
-      url = `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`;
-      bodyKey = "quiz";
-    } else if (activeStep === 3) {
-      alreadyAdded = spaceExercises.some(c => c.id === itemId);
-      url = `http://127.0.0.1:8000/api/spaces/${id}/exercises/`;
-      bodyKey = "exercice";
-    }
+  if (activeStep === 1) {
+    alreadyAdded = spaceCourses.some(c => c.id === idToSend);
+    url = `http://127.0.0.1:8000/api/spaces/${id}/courses/`;
+    bodyKey = "cours";
+  } else if (activeStep === 2) {
+    alreadyAdded = spaceQuizzes.some(c => c.id === idToSend);
+    url = `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`;
+    bodyKey = "quiz";
+  } else if (activeStep === 3) {
+    alreadyAdded = spaceExercises.some(c => c.id === idToSend);
+    url = `http://127.0.0.1:8000/api/spaces/${id}/exercises/`;
+    bodyKey = "exercice";
+  }
 
-    if (alreadyAdded) {
-      toast.error(t("alreadyAdded"));
-      return;
-    }
+  if (alreadyAdded) {
+    toast.error(t("alreadyAdded"));
+    return;
+  }
 
-    fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
-      body: JSON.stringify({ [bodyKey]: itemId }),
+  const body = { [bodyKey]: idToSend };
+  console.log("POST to", url, "body:", body);
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(body),
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to add item");
+      return res.json();
     })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to add item");
-        return res.json();
-      })
-      .then(newItem => {
-        if (activeStep === 1)
-          setSpaceCourses([
-            ...spaceCourses,
-            {
-              id: newItem.cours.id_cours,
-              title: newItem.cours.titre_cour,
-              description: newItem.cours.description,
-              level: newItem.cours.niveau_cour_label,
-              author: newItem.cours.utilisateur_name,
-              date: newItem.cours.date_ajout,
-              progress: 0,
-              isMine: true,
-            },
-          ]);
-        else if (activeStep === 2)
-          setSpaceQuizzes([
-            ...spaceQuizzes,
-            {
-              id: newItem.quiz.id_quiz,
-              title: newItem.quiz.exercice.titre_exo,
-              description: newItem.quiz.exercice.enonce,
-              level: newItem.quiz.exercice.niveau_exo,
-              author: `${newItem.quiz.exercice.utilisateur.nom} ${newItem.quiz.exercice.utilisateur.prenom}`,
-              date: newItem.quiz.exercice.date_creation,
-              progress: 0,
-              isMine: true,
-            },
-          ]);
-        else if (activeStep === 3)
-          setSpaceExercises([
-            ...spaceExercises,
-            {
-              id: newItem.exercice.id_exercice,
-              title: newItem.exercice.titre_exo,
-              description: newItem.exercice.enonce,
-              level: newItem.exercice.niveau_exo,
-              author: `${newItem.exercice.utilisateur.nom} ${newItem.exercice.utilisateur.prenom}`,
-              date: newItem.exercice.date_creation,
-              categorie: newItem.exercice.categorie,
-              progress: 0,
-              isMine: true,
-            },
-          ]);
+    .then(newItem => {
+      if (activeStep === 1) {
+        setSpaceCourses([
+          ...spaceCourses,
+          {
+            id: newItem.cours.id_cours,
+            title: newItem.cours.titre_cour,
+            description: newItem.cours.description,
+            level: newItem.cours.niveau_cour_label,
+            author: newItem.cours.utilisateur_name,
+            date: newItem.cours.date_ajout,
+            progress: 0,
+            isMine: true,
+          },
+        ]);
+      } else if (activeStep === 2) {
+        setSpaceQuizzes([
+          ...spaceQuizzes,
+          {
+            id: newItem.quiz.id,
+            title: newItem.quiz.exercice?.titre_exo || "Sans titre",
+            description: newItem.quiz.exercice?.enonce || "",
+            level: newItem.quiz.exercice?.niveau_exercice_label || "",
+            author: newItem.quiz.exercice?.utilisateur_name || "Inconnu",
+            date: newItem.quiz.exercice?.date_creation || "",
+            progress: 0,
+            isMine: true,
+          },
+        ]);
+      } else if (activeStep === 3) {
+        setSpaceExercises([
+          ...spaceExercises,
+          {
+            id: newItem.exercice.id_exercice,
+            title: newItem.exercice.titre_exo,
+            description: newItem.exercice.enonce,
+            level: newItem.exercice.niveau_exercice_label,
+            author: newItem.exercice.utilisateur_name || "Inconnu",
+            date: newItem.exercice.date_creation,
+            categorie: newItem.exercice.categorie,
+            progress: 0,
+            isMine: true,
+          },
+        ]);
+      }
 
-        toast.success(t("addedSuccessfully"));
-        setOpenModal(false);
-        setSelectedItemId("");
-      })
-      .catch(err => {
-        console.error(err);
-        toast.error(t("addFailed"));
-      });
-  };
+      toast.success(t("addedSuccessfully"));
+      setOpenModal(false);
+      setSelectedItemId("");
+    })
+    .catch(err => {
+      console.error(err);
+      toast.error(t("addFailed"));
+    });
+};
 
-  const itemsToDisplay =
-    activeStep === 1 ? spaceCourses : activeStep === 2 ? spaceQuizzes : spaceExercises;
+
+  const itemsToDisplay = activeStep === 1 ? spaceCourses : activeStep === 2 ? spaceQuizzes : spaceExercises;
   const filteredItems = itemsToDisplay
     .filter(c => filterLevel === "ALL" || c.level === filterLevel)
     .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const modalItems =
-    activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
+  const modalItems = activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
 
   return (
     <div className="flex w-full bg-surface min-h-screen">
@@ -350,13 +347,7 @@ export default function SpaceDetails() {
         {/* Filters + Add Button */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <ContentFilters
-            type={
-              activeStep === 1
-                ? "courses"
-                : activeStep === 2
-                ? "quizzes"
-                : "exercises"
-            }
+            type={activeStep === 1 ? "courses" : activeStep === 2 ? "quizzes" : "exercises"}
             userRole={userRole}
             activeFilter={filterLevel}
             onFilterChange={setFilterLevel}
@@ -378,9 +369,7 @@ export default function SpaceDetails() {
         <div
           className="grid gap-6"
           style={{
-            gridTemplateColumns: `repeat(${
-              window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
-            }, minmax(0, 1fr))`,
+            gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3}, minmax(0, 1fr))`,
           }}
         >
           {filteredItems.map(item => (
@@ -388,28 +377,17 @@ export default function SpaceDetails() {
               key={`${activeStep}-${item.id}`}
               course={{
                 ...item,
-                initials: item.author
-                  ? item.author[0] + (item.author.split(" ")[1]?.[0] || "")
-                  : "",
+                initials: item.author ? item.author[0] + (item.author.split(" ")[1]?.[0] || "") : "",
                 duration: item.date ? `Créé le ${item.date}` : "",
               }}
               role={userRole}
               showProgress={userRole === "etudiant" && activeStep === 1}
-              type={
-                activeStep === 1
-                  ? "course"
-                  : activeStep === 2
-                  ? "quiz"
-                  : "exercise"
-              }
+              type={activeStep === 1 ? "course" : activeStep === 2 ? "quiz" : "exercise"}
               className={gradientMap[item.level] ?? "bg-grad-1"}
               onDelete={id => {
-                if (activeStep === 1)
-                  setSpaceCourses(spaceCourses.filter(c => c.id !== id));
-                else if (activeStep === 2)
-                  setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
-                else if (activeStep === 3)
-                  setSpaceExercises(spaceExercises.filter(c => c.id !== id));
+                if (activeStep === 1) setSpaceCourses(spaceCourses.filter(c => c.id !== id));
+                else if (activeStep === 2) setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
+                else if (activeStep === 3) setSpaceExercises(spaceExercises.filter(c => c.id !== id));
               }}
               onClick={() => {
                 if (userRole === "etudiant") {
@@ -441,28 +419,29 @@ export default function SpaceDetails() {
             fields={[
               {
                 label: t("selectItemLabel"),
-                element: (
-                  <select
-                    className="w-full bg-gray-100 dark:bg-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                    onChange={e => setSelectedItemId(e.target.value)}
-                    value={selectedItemId}
-                  >
-                    <option value="">{t("selectItemPlaceholder")}</option>
-                    {modalItems
-               
-  .filter(c => {
-    if (activeStep === 1) return !spaceCourses.some(sc => sc.id === c.id);
-    if (activeStep === 2) return !spaceQuizzes.some(sc => sc.id === c.id);
-    return !spaceExercises.some(sc => sc.id === c.id);
-  })
-  .map(c => (
-    <option key={`${activeStep}-${c.id}`} value={c.id}>
-      {c.title?.trim() || "Sans titre"}
-    </option>
-  ))}
-
-                  </select>
-                ),
+                element:
+                  activeStep === 1 ? (
+                    <MyCoursesSelect
+                      items={myCourses}
+                      selectedItemId={selectedItemId}
+                      onChange={setSelectedItemId}
+                      existingItems={spaceCourses}
+                    />
+                  ) : activeStep === 2 ? (
+                    <MyQuizzesSelect
+                      items={myQuizzes}
+                      selectedItemId={selectedItemId}
+                      onChange={setSelectedItemId}
+                      existingItems={spaceQuizzes}
+                    />
+                  ) : (
+                    <MyExercisesSelect
+                      items={myExercises}
+                      selectedItemId={selectedItemId}
+                      onChange={setSelectedItemId}
+                      existingItems={spaceExercises}
+                    />
+                  ),
               },
             ]}
           />
