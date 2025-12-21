@@ -367,45 +367,66 @@ export default function SpaceDetails() {
         </div>
 
         {/* Items Grid */}
-        <div
-          className="grid gap-6"
-          style={{
-            gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3}, minmax(0, 1fr))`,
-          }}
-        >
-          {filteredItems.map(item => (
-            <ContentCard
-              key={`${activeStep}-${item.id}`}
-              course={{
-                ...item,
-                initials: item.author ? item.author[0] + (item.author.split(" ")[1]?.[0] || "") : "",
-                duration: item.date ? `Créé le ${item.date}` : "",
-              }}
-              role={userRole}
-              showProgress={userRole === "etudiant" && activeStep === 1}
-              type={activeStep === 1 ? "course" : activeStep === 2 ? "quiz" : "exercise"}
-              className={gradientMap[item.level] ?? "bg-grad-1"}
-              onDelete={id => {
-                if (activeStep === 1) setSpaceCourses(spaceCourses.filter(c => c.id !== id));
-                else if (activeStep === 2) setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
-                else if (activeStep === 3) {
-                  <ExerciseCard/>
-                  setSpaceExercises(spaceExercises.filter(c => c.id !== id));}
-              }}
-              onClick={() => {
-                if (userRole === "etudiant") {
-                  if (activeStep === 1) navigate(`/courses/${item.id}/start`);
-                  else if (activeStep === 2) navigate(`/quizzes/${item.id}/start`);
-                  else if (activeStep === 3) navigate(`/exercises/${item.id}`);
-                } else {
-                  if (activeStep === 1) navigate(`/courses/${item.id}`);
-                  else if (activeStep === 2) navigate(`/quizzes/${item.id}`);
-                  else if (activeStep === 3) navigate(`/exercises/${item.id}`);
-                }
-              }}
-            />
-          ))}
-        </div>
+       <div
+  className="grid gap-6"
+  style={{
+    gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3}, minmax(0, 1fr))`,
+  }}
+>
+  {/* COURSES & QUIZZES */}
+  {activeStep !== 3 &&
+    filteredItems.map(item => (
+      <ContentCard
+        key={`${activeStep}-${item.id}`}
+        course={{
+          ...item,
+          initials: item.author
+            ? item.author
+                .split(" ")
+                .map(n => n[0])
+                .join("")
+                .toUpperCase()
+            : "",
+          duration: item.date ? `Créé le ${item.date}` : "",
+        }}
+        role={userRole}
+        showProgress={userRole === "etudiant" && activeStep === 1}
+        type={activeStep === 1 ? "course" : "quiz"}
+        className={gradientMap[item.level] ?? "bg-grad-1"}
+        onDelete={id => {
+          if (activeStep === 1)
+            setSpaceCourses(spaceCourses.filter(c => c.id !== id));
+          else if (activeStep === 2)
+            setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
+        }}
+        onClick={() => {
+          if (userRole === "etudiant") {
+            if (activeStep === 1) navigate(`/courses/${item.id}/start`);
+            else navigate(`/quizzes/${item.id}/start`);
+          } else {
+            if (activeStep === 1) navigate(`/courses/${item.id}`);
+            else navigate(`/quizzes/${item.id}`);
+          }
+        }}
+      />
+    ))}
+
+  {/* EXERCISES */}
+  {activeStep === 3 &&
+    filteredItems.map(exercise => (
+      <ExerciseCard
+        key={exercise.id}
+        exercise={exercise}
+        onDelete={() =>
+          setSpaceExercises(prev =>
+            prev.filter(e => e.id !== exercise.id)
+          )
+        }
+        onClick={() => navigate(`/exercises/${exercise.id}`)}
+      />
+    ))}
+</div>
+
 
         {/* Add Modal */}
         {openModal && (
