@@ -1,4 +1,5 @@
 from datetime import timedelta
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -357,3 +358,15 @@ def create_tentative(request):
         print(serializer.errors)  # <-- ajoute ça
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def get_tentative(request, tentative_id):
+    user = request.user
+    tentative = get_object_or_404(
+        TentativeExercice,
+        id=tentative_id,
+        utilisateur=user
+    )
+    serializer = TentativeExerciceReadSerializer(tentative)
+    return Response(serializer.data, status=status.HTTP_200_OK)

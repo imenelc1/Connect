@@ -4,6 +4,7 @@ from rest_framework import serializers
 from courses.models import Cours
 from exercices.models import Exercice
 from exercices.serializers import ExerciceSerializer
+from spaces.serializers import UtilisateurSerializer
 from .models import LeconComplete, ProgressionCours, ProgressionHistory, TentativeExercice
 
 class LeconCompleteSerializer(serializers.ModelSerializer):
@@ -46,10 +47,11 @@ class ProgressionHistorySerializer(serializers.ModelSerializer):
 # Lecture
 class TentativeExerciceReadSerializer(serializers.ModelSerializer):
     exercice = ExerciceSerializer(read_only=True)
+    utilisateur = UtilisateurSerializer(read_only=True)
 
     class Meta:
         model = TentativeExercice
-        fields = "__all__"
+        fields = ['id', 'etat', 'feedback', 'reponse', 'output', 'exercice', 'utilisateur', 'submitted_at', 'created_at']
 
 # Écriture
 class TentativeExerciceWriteSerializer(serializers.ModelSerializer):

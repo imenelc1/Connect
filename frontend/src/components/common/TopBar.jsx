@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-export default function Topbar({ steps = [], activeStep, setActiveStep, className = "" }) {
+export default function Topbar({ steps = [], activeStep, setActiveStep, onStepChange, className = "" }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -12,13 +12,17 @@ export default function Topbar({ steps = [], activeStep, setActiveStep, classNam
         const isActive = activeStep === index + 1;
         const Icon = step.icon || (() => <div />);
 
-
         return (
           <div
             key={index}
             onClick={() => {
-              setActiveStep && setActiveStep(index + 1);
-              step.route && navigate(step.route); // <-- navigation ici
+              // Utilise onStepChange si fourni (pour SpaceDetails)
+              if (onStepChange) onStepChange(index + 1);
+              // Sinon, fallback sur setActiveStep (autres pages)
+              else if (setActiveStep) setActiveStep(index + 1);
+
+              // Navigation si route définie
+              step.route && navigate(step.route);
             }}
             className={`flex flex-col items-center gap-1 cursor-pointer ${activeStep < index + 1 ? "opacity-60" : ""}`}
           >

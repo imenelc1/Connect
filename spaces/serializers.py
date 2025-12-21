@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
 from courses.serializers import CoursSerializer
-from .models import Space, SpaceEtudiant, SpaceCour, SpaceExo
+from exercices.serializers import ExerciceSerializer
+from quiz.serializers import QuizSerializer
+from .models import Space, SpaceEtudiant, SpaceCour, SpaceExo, SpaceQuiz
 from users.models import Utilisateur
 
 # --- Serializer Utilisateur ---
@@ -47,6 +49,15 @@ class SpaceCourSerializer(serializers.ModelSerializer):
 
 # --- Serializer SpaceExo ---
 class SpaceExoSerializer(serializers.ModelSerializer):
+    exercice = ExerciceSerializer(read_only=True)
+
     class Meta:
         model = SpaceExo
-        fields = '__all__'
+        fields = ['id', 'space', 'exercice', 'date_ajout']
+
+class SpaceQuizSerializer(serializers.ModelSerializer):
+    quiz = QuizSerializer(read_only=True)
+
+    class Meta:
+        model = SpaceQuiz
+        fields = ['id', 'space', 'quiz', 'date_ajout']

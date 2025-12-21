@@ -14,6 +14,12 @@ import ThemeContext from "../context/ThemeContext";
 import toast from "react-hot-toast";
 import { getCoursesProgress } from "../../src/services/progressionService";
 
+const gradientMap = {
+  Débutant: "bg-grad-2",
+  Intermédiaire: "bg-grad-3",
+  Avancé: "bg-grad-4",
+};
+
 export default function SpaceDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,13 +32,20 @@ export default function SpaceDetails() {
 
   const [spaceName, setSpaceName] = useState("");
   const [studentsCount, setStudentsCount] = useState(0);
+
   const [spaceCourses, setSpaceCourses] = useState([]);
+  const [spaceQuizzes, setSpaceQuizzes] = useState([]);
+  const [spaceExercises, setSpaceExercises] = useState([]);
+
   const [myCourses, setMyCourses] = useState([]);
+  const [myQuizzes, setMyQuizzes] = useState([]);
+  const [myExercises, setMyExercises] = useState([]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("ALL");
   const [activeStep, setActiveStep] = useState(1);
   const [openModal, setOpenModal] = useState(false);
-  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState("");
 
   const steps = [
     { label: t("topbar.course"), icon: BookOpen },
@@ -40,160 +53,214 @@ export default function SpaceDetails() {
     { label: t("topbar.exercises"), icon: FileCheck },
   ];
 
-  const gradientMap = {
-    Débutant: "bg-grad-2",
-    Intermédiaire: "bg-grad-3",
-    Avancé: "bg-grad-4",
-  };
-
-  const pageType =
-    activeStep === 1
-      ? "course"
-      : activeStep === 2
-      ? "quiz"
-      : activeStep === 3
-      ? "exercise"
-      : "course";
-
   // --- fetch space details ---
   useEffect(() => {
     if (!id) return;
     fetch(`http://127.0.0.1:8000/api/spaces/${id}/`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         setSpaceName(data.nom_space || "My space");
         setStudentsCount(data.students_count || 0);
       })
-      .catch((err) => console.error("Failed to load space details:", err));
+      .catch(err => console.error("Failed to load space details:", err));
   }, [id]);
 
-  // --- fetch all courses with progress ---
+  // --- fetch space items selon l'étape active ---
   useEffect(() => {
-    getCoursesProgress()
-      .then((allCourses) => {
-        // Filter only courses of this space
-        // Assumption: spaceCoursesIds come from backend via space details API
-        fetch(`http://127.0.0.1:8000/api/spaces/${id}/courses/`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        })
-          .then((res) => res.json())
-          .then((spaceData) => {
-            const spaceCoursesIds = (spaceData || [])
-              .filter((sc) => sc.cours)
-              .map((sc) => sc.cours.id_cours);
+    if (!id) return;
 
-            const formatted = allCourses
-              .filter((c) => spaceCoursesIds.includes(c.id_cours))
-              .map((c) => ({
+    const fetchItems = async () => {
+      try {
+        if (activeStep === 1) {
+          const allCourses = await getCoursesProgress();
+          const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/courses/`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          const data = await res.json();
+          const spaceCoursesIds = data.map(sc => sc.cours.id_cours);
+          setSpaceCourses(
+            allCourses
+              .filter(c => spaceCoursesIds.includes(c.id_cours))
+              .map(c => ({
                 id: c.id_cours,
-                title: c.titre_cour,
-                description: c.description,
-                level: c.niveau_cour_label,
-                author: c.utilisateur_name,
-                date: c.date_ajout,
+                title: c.titre_cour?.trim() || "Sans titre",
+                description: c.description || "",
+                level: c.niveau_cour_label || "",
+                author: c.utilisateur_name || "",
+                date: c.date_ajout || "",
                 progress: c.progress ?? 0,
                 isMine: c.utilisateur === userData?.id,
-              }));
-
-            setSpaceCourses(formatted);
+              }))
+          );
+        } else if (activeStep === 2) {
+          const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/quizzes/`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
-      })
-      .catch((err) => console.error("Failed to fetch courses with progress:", err));
-  }, [id]);
+          const data = await res.json();
+          setSpaceQuizzes(
+            (data || []).map(q => ({
+              id: q.id_quiz,
+              title: q.titre_exo?.trim() || "Sans titre",
+              description: q.enonce || "",
+              level: q.niveau_exo || "",
+              author: q.utilisateur ? `${q.utilisateur.nom} ${q.utilisateur.prenom}` : "Inconnu",
+              date: q.date_creation || "",
+              progress: q.progress ?? 0,
+              isMine: q.utilisateur?.id_utilisateur === userData?.id,
+            }))
+          );
+        } else if (activeStep === 3) {
+          const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          const data = await res.json();
+          setSpaceExercises(
+            (data || []).map(e => ({
+              id: e.id_exercice,
+              title: e.titre_exo?.trim() || "Sans titre",
+              description: e.enonce || "",
+              level: e.niveau_exo || "",
+              author: e.utilisateur ? `${e.utilisateur.nom} ${e.utilisateur.prenom}` : "Inconnu",
+              date: e.date_creation || "",
+              categorie: e.categorie || "",
+              progress: e.progress ?? 0,
+              isMine: e.utilisateur?.id_utilisateur === userData?.id,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  // --- fetch all my courses for the "Add" modal ---
+    fetchItems();
+  }, [id, activeStep, userData?.id]);
+
+  // --- fetch my courses/quizzes/exercises pour le modal ---
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/my-courses/`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const formatted = (data || []).map((c) => ({
-          id: c.id_cours,
-          title: c.titre_cour,
-          description: c.description,
-          level: c.niveau_cour_label,
-          author: c.utilisateur_name,
-          date: c.date_ajout,
-        }));
-        setMyCourses(formatted);
+    const token = localStorage.getItem("token");
+
+    const fetchMyCourses = fetch(`http://127.0.0.1:8000/api/spaces/my-courses/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(res => res.json());
+
+    const fetchMyQuizzes = fetch(`http://127.0.0.1:8000/api/spaces/my-quizzes/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(res => res.json());
+
+    const fetchMyExercises = fetch(`http://127.0.0.1:8000/api/spaces/my-exercises/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(res => res.json());
+
+    Promise.all([fetchMyCourses, fetchMyQuizzes, fetchMyExercises])
+      .then(([coursesData, quizzesData, exercisesData]) => {
+        setMyCourses(
+          (coursesData || []).map(c => ({
+            id: c.id_cours,
+            title: c.titre_cour?.trim() || "Sans titre",
+            description: c.description || "",
+            level: c.niveau_cour_label || "",
+            author: c.utilisateur_name || "",
+          }))
+        );
+
+        setMyQuizzes(
+          (quizzesData || []).map(q => ({
+            id: q.id_quiz,
+            title: q.titre_exo?.trim() || "Sans titre",
+            description: q.enonce || "",
+            level: q.niveau_exo || "",
+            author: q.utilisateur ? `${q.utilisateur.nom} ${q.utilisateur.prenom}` : "",
+          }))
+        );
+
+        setMyExercises(
+          (exercisesData || []).map(e => ({
+            id: e.id_exercice,
+            title: e.titre_exo?.trim() || "Sans titre",
+            description: e.enonce || "",
+            level: e.niveau_exo || "",
+            author: e.utilisateur ? `${e.utilisateur.nom} ${e.utilisateur.prenom}` : "",
+          }))
+        );
       })
-      .catch((err) => console.error("Failed to fetch my courses:", err));
+      .catch(err => console.error("Failed to fetch my items:", err));
   }, []);
 
-  const handleAddCourse = (courseId) => {
-    if (!courseId) return;
+  // --- handle add item ---
+  const handleAddItem = (itemId) => {
+    if (!itemId) return;
 
-    const alreadyAdded = spaceCourses.some((c) => c.id === courseId);
+    let alreadyAdded = false;
+    let url = "";
+    let bodyKey = "";
+
+    if (activeStep === 1) {
+      alreadyAdded = spaceCourses.some(c => c.id === itemId);
+      url = `http://127.0.0.1:8000/api/spaces/${id}/courses/`;
+      bodyKey = "cours";
+    } else if (activeStep === 2) {
+      alreadyAdded = spaceQuizzes.some(c => c.id === itemId);
+      url = `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`;
+      bodyKey = "quiz";
+    } else if (activeStep === 3) {
+      alreadyAdded = spaceExercises.some(c => c.id === itemId);
+      url = `http://127.0.0.1:8000/api/spaces/${id}/exercises/`;
+      bodyKey = "exercice";
+    }
+
     if (alreadyAdded) {
-      toast.error(t("courseAlreadyAdded"));
+      toast.error(t("alreadyAdded"));
       return;
     }
 
-    fetch(`http://127.0.0.1:8000/api/spaces/${id}/courses/`, {
+    fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ cours: courseId }),
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+      body: JSON.stringify({ [bodyKey]: itemId }),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to add course");
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to add item");
         return res.json();
       })
-      .then((newCourse) => {
-        setSpaceCourses([
-          ...spaceCourses,
-          {
-            id: newCourse.cours.id_cours,
-            title: newCourse.cours.titre_cour,
-            description: newCourse.cours.description,
-            level: newCourse.cours.niveau_cour_label,
-            author: newCourse.cours.utilisateur_name,
-            date: newCourse.cours.date_ajout,
-            progress: 0,
-            isMine: true,
-          },
-        ]);
-        toast.success(t("courseAdded"));
+      .then(newItem => {
+        if (activeStep === 1) setSpaceCourses([...spaceCourses, { id: newItem.cours.id_cours, title: newItem.cours.titre_cour || "Sans titre", description: newItem.cours.description, level: newItem.cours.niveau_cour_label, author: newItem.cours.utilisateur_name, date: newItem.cours.date_ajout, progress: 0, isMine: true }]);
+        else if (activeStep === 2) setSpaceQuizzes([...spaceQuizzes, { id: newItem.quiz.id_quiz, title: newItem.quiz.titre_exo || "Sans titre", description: newItem.quiz.enonce, level: newItem.quiz.niveau_exo, author: `${newItem.quiz.utilisateur.nom} ${newItem.quiz.utilisateur.prenom}`, date: newItem.quiz.date_creation, progress: 0, isMine: true }]);
+        else if (activeStep === 3) setSpaceExercises([...spaceExercises, { id: newItem.exercice.id_exercice, title: newItem.exercice.titre_exo || "Sans titre", description: newItem.exercice.enonce, level: newItem.exercice.niveau_exo, author: `${newItem.exercice.utilisateur.nom} ${newItem.exercice.utilisateur.prenom}`, date: newItem.exercice.date_creation, categorie: newItem.exercice.categorie, progress: 0, isMine: true }]);
+
+        toast.success(t("addedSuccessfully"));
         setOpenModal(false);
-        setSelectedCourseId("");
+        setSelectedItemId("");
       })
-      .catch((err) => {
+      .catch(err => {
         console.error(err);
-        toast.error(t("addCourseFailed"));
+        toast.error(t("addFailed"));
       });
   };
 
-  const filteredCourses = spaceCourses
-    .filter((c) => filterLevel === "ALL" || c.level === filterLevel)
-    .filter((c) => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  const itemsToDisplay = activeStep === 1 ? spaceCourses : activeStep === 2 ? spaceQuizzes : spaceExercises;
+  const filteredItems = itemsToDisplay
+    .filter(c => filterLevel === "ALL" || c.level === filterLevel)
+    .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const modalItems = activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
 
   return (
     <div className="flex w-full bg-surface min-h-screen">
       <Navbar />
-
       <main className="flex-1 p-6 lg:ml-64 bg-bg min-h-screen">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <button
-            className="text-muted font-medium hover:underline flex items-center gap-1"
-            onClick={() => navigate("/Spaces")}
-          >
+          <button className="text-muted font-medium hover:underline flex items-center gap-1" onClick={() => navigate("/Spaces")}>
             <ArrowLeft size={16} /> {t("backToSpaces")}
           </button>
           <div className="flex gap-4 items-center">
             <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
               <Bell size={16} />
             </div>
-            <UserCircle
-              initials={initials}
-              onToggleTheme={toggleDarkMode}
-              onChangeLang={(lang) => i18n.changeLanguage(lang)}
-            />
+            <UserCircle initials={initials} onToggleTheme={toggleDarkMode} onChangeLang={lang => i18n.changeLanguage(lang)} />
           </div>
         </div>
 
@@ -201,7 +268,7 @@ export default function SpaceDetails() {
         <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
           <h2 className="text-4xl font-semibold text-muted">{spaceName}</h2>
           <div className="w-full md:w-[400px]">
-            <ContentSearchBar placeholder={t("searchCourses")} onChange={setSearchTerm} />
+            <ContentSearchBar placeholder={t("searchItems")} onChange={setSearchTerm} />
           </div>
           <div className="flex items-center gap-2 bg-card text-muted font-semibold px-4 py-2 rounded-md">
             <Users size={16} /> {studentsCount} {t("students")}
@@ -213,52 +280,44 @@ export default function SpaceDetails() {
         {/* Filters + Add Button */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <ContentFilters
-            type="courses"
+            type={activeStep === 1 ? "courses" : activeStep === 2 ? "quizzes" : "exercises"}
             userRole={userRole}
             activeFilter={filterLevel}
             onFilterChange={setFilterLevel}
-            showCompletedFilter={userRole === "etudiant"}
+            showCompletedFilter={userRole === "etudiant" && activeStep === 1}
             hideCategoryFilter={true}
           />
           {userRole === "enseignant" && (
-            <Button
-              variant="courseStart"
-              className="w-full sm:w-50 md:w-[200px] lg:w-70 h-10 md:h-12 lg:h-10 mt-4 sm:mt-10 px-5 py-6 bg-grad-1 text-white transition-all flex items-center gap-2 justify-center whitespace-nowrap"
-              onClick={() => setOpenModal(true)}
-            >
-              <Plus size={18} />
-              {t("addCourseTitle")}
+            <Button variant="courseStart" className="w-full sm:w-50 md:w-[200px] lg:w-70 h-10 md:h-12 lg:h-10 mt-4 sm:mt-0 px-5 py-6 bg-grad-1 text-white transition-all flex items-center gap-2 justify-center whitespace-nowrap" onClick={() => setOpenModal(true)}>
+              <Plus size={18} /> {t("addItem")}
             </Button>
           )}
         </div>
 
-        {/* Courses Grid */}
-        <div
-          className="grid gap-6"
-          style={{
-            gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3}, minmax(0, 1fr))`,
-          }}
-        >
-          {filteredCourses.map((course) => (
+        {/* Items Grid */}
+        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3}, minmax(0, 1fr))` }}>
+          {filteredItems.map(item => (
             <ContentCard
-              key={course.id}
-              course={{
-                ...course,
-                initials: course.author?.[0] + (course.author?.split(" ")[1]?.[0] || ""),
-                duration: course.date ? "Created on " + course.date : "",
-              }}
+              key={`${activeStep}-${item.id}`}
+              course={{ ...item, initials: item.author ? item.author[0] + (item.author.split(" ")[1]?.[0] || "") : "", duration: item.date ? "Created on " + item.date : "" }}
               role={userRole}
-              showProgress={userRole === "etudiant"}
-              type={pageType}
-              className={gradientMap[course.level] ?? "bg-grad-1"}
-              onDelete={(id) => setSpaceCourses(spaceCourses.filter((c) => c.id !== id))}
+              showProgress={userRole === "etudiant" && activeStep === 1}
+              type={activeStep === 1 ? "course" : activeStep === 2 ? "quiz" : "exercise"}
+              className={gradientMap[item.level] ?? "bg-grad-1"}
+              onDelete={id => {
+                if (activeStep === 1) setSpaceCourses(spaceCourses.filter(c => c.id !== id));
+                else if (activeStep === 2) setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
+                else if (activeStep === 3) setSpaceExercises(spaceExercises.filter(c => c.id !== id));
+              }}
               onClick={() => {
                 if (userRole === "etudiant") {
-                  if (pageType === "course") navigate(`/courses/${course.id}/start`);
-                  else if (pageType === "quiz") navigate(`/quizzes/${course.id}/start`);
-                  else if (pageType === "exercise") navigate(`/exercises/${course.id}/start`);
+                  if (activeStep === 1) navigate(`/courses/${item.id}/start`);
+                  else if (activeStep === 2) navigate(`/quizzes/${item.id}/start`);
+                  else if (activeStep === 3) navigate(`/exercises/${item.id}/start`);
                 } else {
-                  navigate(`/courses/${course.id}`);
+                  if (activeStep === 1) navigate(`/courses/${item.id}`);
+                  else if (activeStep === 2) navigate(`/quizzes/${item.id}`);
+                  else if (activeStep === 3) navigate(`/exercises/${item.id}`);
                 }
               }}
             />
@@ -271,27 +330,29 @@ export default function SpaceDetails() {
             open={openModal}
             onClose={() => {
               setOpenModal(false);
-              setSelectedCourseId("");
+              setSelectedItemId("");
             }}
-            title={t("addCourseTitle")}
-            subtitle={t("addCourseSubtitle")}
-            submitLabel={t("addCourseButton")}
-            onSubmit={() => handleAddCourse(selectedCourseId)}
+            title={t("addItem")}
+            subtitle={t("selectItemToAdd")}
+            submitLabel={t("addButton")}
+            onSubmit={() => handleAddItem(selectedItemId)}
             fields={[
               {
-                label: t("selectCourseLabel"),
+                label: t("selectItemLabel"),
                 element: (
-                  <select
-                    className="w-full bg-gray-100 dark:bg-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                    onChange={(e) => setSelectedCourseId(e.target.value)}
-                    value={selectedCourseId}
-                  >
-                    <option value="">{t("selectCoursePlaceholder")}</option>
-                    {myCourses
-                      .filter((c) => !spaceCourses.some((sc) => sc.id === c.id))
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.title}
+                  <select className="w-full bg-gray-100 dark:bg-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" onChange={e => setSelectedItemId(e.target.value)} value={selectedItemId}>
+                    <option value="">{t("selectItemPlaceholder")}</option>
+                    {modalItems
+                      .filter(c =>
+                        activeStep === 1
+                          ? !spaceCourses.some(sc => sc.id === c.id)
+                          : activeStep === 2
+                          ? !spaceQuizzes.some(sc => sc.id === c.id)
+                          : !spaceExercises.some(sc => sc.id === c.id)
+                      )
+                      .map(c => (
+                        <option key={`${activeStep}-${c.id}`} value={c.id}>
+                          {c.title || "Sans titre"}
                         </option>
                       ))}
                   </select>

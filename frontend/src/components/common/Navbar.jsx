@@ -219,7 +219,7 @@ export default function Navbar() {
 
 
       {/* SETTINGS + LOGOUT */}
-      <div className="flex flex-col gap-1 mt-16 mb-2 pt-1">
+      <div className="flex flex-col gap-1 mt-8 mb-2 pt-1">
         <NavLink
           to="/settings"
           className={({ isActive }) =>

@@ -5,10 +5,18 @@ from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.csrf import csrf_exempt
 from courses.models import Cours
 from courses.serializers import CoursSerializer
+from exercices.models import Exercice
+
+from exercices.serializers import ExerciceSerializer
+from quiz.models import Quiz
+
+from quiz.serializers import QuizSerializer
 from users.models import Utilisateur
-from .models import Space, SpaceCour, SpaceEtudiant
+from .models import Space, SpaceCour, SpaceEtudiant, SpaceExo, SpaceQuiz
 from .serializers import (
     SpaceCourSerializer,
+    SpaceExoSerializer,
+    SpaceQuizSerializer,
     SpaceSerializer,
     SpaceEtudiantCreateSerializer,
     SpaceEtudiantDisplaySerializer
@@ -116,6 +124,26 @@ def my_courses(request):
     return Response(serializer.data)
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def my_exercises(request):
+    prof = request.user
+    exercises = Exercice.objects.filter(utilisateur=prof)
+    serializer = ExerciceSerializer(exercises, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def my_quizzes(request):
+    prof = request.user
+    quizzes = Quiz.objects.filter(exercice__utilisateur=prof)
+    serializer = QuizSerializer(quizzes, many=True)
+    return Response(serializer.data)
+
+
+
+
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticatedJWT])
 def space_courses(request, space_id):
@@ -141,6 +169,67 @@ def space_courses(request, space_id):
         space_cour, created = SpaceCour.objects.get_or_create(space=space, cours=cours)
         serializer = SpaceCourSerializer(space_cour)
         return Response(serializer.data, status=201 if created else 200)
+    
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticatedJWT])
+def space_exercises(request, space_id):
+    try:
+        space = Space.objects.get(id_space=space_id)
+    except Space.DoesNotExist:
+        return Response({"error": "Space not found"}, status=404)
+
+    # --- Lister les exercices du space ---
+    if request.method == "GET":
+        exercises = SpaceExo.objects.filter(space=space)
+        serializer = SpaceExoSerializer(exercises, many=True)
+        return Response(serializer.data)
+
+    # --- Ajouter un exercice au space ---
+    elif request.method == "POST":
+        exercice_id = request.data.get("exercice")
+        if not exercice_id:
+            return Response({"error": "exercice field required"}, status=400)
+        try:
+            exercice = Exercice.objects.get(id_exercice=exercice_id)
+        except Exercice.DoesNotExist:
+            return Response({"error": "Exercice not found"}, status=404)
+
+        space_exo, created = SpaceExo.objects.get_or_create(space=space, exercice=exercice)
+        serializer = SpaceExoSerializer(space_exo)
+        return Response(serializer.data, status=201 if created else 200)
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticatedJWT])
+def space_quizzes(request, space_id):
+    try:
+        space = Space.objects.get(id_space=space_id)
+    except Space.DoesNotExist:
+        return Response({"error": "Space not found"}, status=404)
+
+    # --- Lister les quizzes du space ---
+    if request.method == "GET":
+        quizzes = SpaceQuiz.objects.filter(space=space)
+        serializer = SpaceQuizSerializer(quizzes, many=True)
+        return Response(serializer.data)
+
+    # --- Ajouter un quiz au space ---
+    elif request.method == "POST":
+        quiz_id = request.data.get("quiz")
+        if not quiz_id:
+            return Response({"error": "quiz field required"}, status=400)
+        try:
+            quiz = Quiz.objects.get(id=quiz_id)
+        except Quiz.DoesNotExist:
+            return Response({"error": "Quiz not found"}, status=404)
+
+        space_quiz, created = SpaceQuiz.objects.get_or_create(space=space, quiz=quiz)
+        serializer = SpaceQuizSerializer(space_quiz)
+        return Response(serializer.data, status=201 if created else 200)
+
+
+
+
 
 
 class remove_student_from_space(APIView):

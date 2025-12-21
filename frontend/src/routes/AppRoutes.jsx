@@ -21,7 +21,7 @@ import CourseUpdate from "../pages/CourseUpdate";
 import CoursInfo from "../pages/CoursInfo";
 
 // Pages Exos & Quiz (version 1)
-import AllExercisesPage from "../pages/AllExercisesPage";
+import CourseExercisesPage from "../pages/AllExercisesPage";
 import AllQuizzesPage from "../pages/AllQuizzesPage";
 import NewExercise from "../pages/NewExercice";
 import ExercisePreview from "../pages/ExercisePreview";
@@ -96,7 +96,7 @@ export default function AppRoutes() {
         {/* ------------------------- */}
         {/*       ROUTES EXOS & QUIZ */}
         {/* ------------------------- */}
-        <Route path="/all-exercises" element={<AllExercisesPage />} />
+        <Route path="/all-exercises" element={<CourseExercisesPage />} />
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
@@ -113,6 +113,9 @@ export default function AppRoutes() {
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
         <Route path="/start-exerciseCode/:exerciceId" element={<StartExercise />} />
         <Route path="/start-exercise/:exerciceId" element={<TheoryExercisePage />} />
+
+        <Route path="/submitted-exercise/:tentativeId"element={<SubmittedExercise />}/>
+
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
 

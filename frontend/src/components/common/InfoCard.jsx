@@ -35,7 +35,7 @@ export default function InfoCard({ exercise }) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div className="flex items-center text-gray-700 dark:text-grayc">
                     <User size={16} className="mr-2 text-primary" />
-                    <span className="font-semibold">Student : </span> {exercise.student}
+                    <span className="font-semibold">Student : </span> {exercise.studentName}
                 </div>
                 <div className="flex items-center text-gray-700 dark:text-grayc">
                     <Clock size={16} className="mr-2 text-primary" />
