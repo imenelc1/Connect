@@ -26,11 +26,10 @@ def complete_lesson(request, lecon_id):
     cours = lecon.section.cours
     total_lecons = Lecon.objects.filter(section__cours=cours).count()
     completed_lecons = LeconComplete.objects.filter(utilisateur=user, lecon__section__cours=cours).count()
-    avancement = (completed_lecons / total_lecons) * 100
-    avancement = round(avancement)
+    total_lecons = Lecon.objects.filter(section__cours=cours).count()
+    avancement = round((completed_lecons / total_lecons) * 100)
 
 
-    # Mettre à jour ProgressionCours
     pc, created = ProgressionCours.objects.get_or_create(
     utilisateur=user,
     cours=cours,
@@ -41,12 +40,63 @@ def complete_lesson(request, lecon_id):
     }
 )
 
-    pc.avancement_cours = avancement
-    pc.derniere_lecon = lecon  
-    pc.save()
+#  Ne pas reculer la dernière leçon
+    if not pc.derniere_lecon or lecon.id_lecon >= pc.derniere_lecon.id_lecon:
+     pc.derniere_lecon = lecon
+
+     pc.avancement_cours = avancement
+     pc.save()
+
 
 
     return Response({"progress": avancement})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedJWT])
+def update_last_lesson(request, lesson_id):
+    user = request.user
+    try:
+        lecon = Lecon.objects.get(pk=lesson_id)
+    except Lecon.DoesNotExist:
+        return Response({"error": "Lesson not found"}, status=404)
+
+    cours = lecon.section.cours
+
+    pc, _ = ProgressionCours.objects.get_or_create(
+        utilisateur=user,
+        cours=cours,
+        defaults={
+            "avancement_cours": 0.0,
+            "temps_passe": timedelta(seconds=0),
+            "derniere_lecon": lecon
+        }
+    )
+
+    # Ne jamais reculer
+    if not pc.derniere_lecon or lecon.id_lecon >= pc.derniere_lecon.id_lecon:
+        pc.derniere_lecon = lecon
+        pc.save()
+
+    return Response({"status": "ok"})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedJWT])
+def reset_progress(request, cours_id):
+    student = request.user
+    try:
+        # Supprimer les leçons complétées
+        LeconComplete.objects.filter(utilisateur=student, lecon__section__cours_id=cours_id).delete()
+
+        # Réinitialiser la progression du cours
+        pc, _ = ProgressionCours.objects.get_or_create(utilisateur=student, cours_id=cours_id)
+        pc.avancement_cours = 0
+        pc.derniere_lecon = None
+        pc.save()
+
+        return Response({"status": "success", "progress": 0})
+    except ProgressionCours.DoesNotExist:
+        return Response({"status": "error", "message": "Progression not found"}, status=404)
+
 
 
 @api_view(['GET'])
