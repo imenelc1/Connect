@@ -1,0 +1,22 @@
+{
+  "title": "Instructors Management",
+  "subtitle": "Manage instructors and academic staff",
+  "toggleLang": "Switch language",
+  "addInstructor": "Add Instructor",
+  "search": "Search instructor...",
+  "instructor": "Instructor",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "email": "Email",
+  "birthdate": "Birthdate",
+  "rank": "Rank",
+  "matricule": "Matricule",
+  "actions": "Actions",
+  "modalAddTitle": "Add a new instructor",
+  "modalAddSubtitle": "Fill in the details to create the instructor profile",
+  "modalEditTitle": "Edit instructor",
+  "modalEditSubtitle": "Modify the instructor details",
+  "create": "Create",
+  "update": "Update",
+  "cancel": "Cancel"
+}

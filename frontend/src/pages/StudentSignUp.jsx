@@ -7,7 +7,7 @@ import {
 import { FiGlobe } from "react-icons/fi";
 
 import Input from "../components/common/Input";
-import Button from "../components/common/Button";
+import Button from "../components/common/Button.jsx";
 import AuthTabs from "../components/common/AuthTabs";
 import LogoComponent from "../components/common/LogoComponent";
 import Select from "../components/common/Select";

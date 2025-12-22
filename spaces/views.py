@@ -48,18 +48,18 @@ class SpaceListView(generics.ListAPIView):
         return Space.objects.filter(utilisateur=user)
 
 # --- Détail / Update / Delete d'un espace ---
-class SpaceDetailView(generics.RetrieveAPIView):
+class SpaceDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = SpaceSerializer
     permission_classes = [IsAuthenticatedJWT]
     lookup_field = "id_space"
 
     def get_queryset(self):
         user = self.request.user
-
         return Space.objects.filter(
             Q(utilisateur=user) |                # prof (créateur)
             Q(spaceetudiant__etudiant=user)      # étudiant inscrit
         ).distinct()
+
 
 # --- Ajouter un étudiant à un espace ---
 class AddStudentToSpaceView(APIView):

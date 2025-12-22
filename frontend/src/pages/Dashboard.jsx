@@ -1,19 +1,40 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/common/NavBar";
-import UserCircle from "../components/common/UserCircle";
 import CourseCard from "../components/common/CourseCard";
-import { Users, BookOpen, ClipboardList, TrendingUp } from "lucide-react";
+import { Users, BookOpen, ClipboardList, LayoutGrid } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
+import UserCircle from "../components/common/UserCircle";
+import ContentFilters from "../components/common/ContentFilters";
 
 export default function DashboardAdmin() {
   const { toggleDarkMode } = useContext(ThemeContext);
-  const { t } = useTranslation("DashboardAdmin");
-
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const { t, i18n } = useTranslation("DashboardAdmin");
+  
+  // États pour la responsivité
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const [activeTab, setActiveTab] = useState("pending");
+  const token = localStorage.getItem("admin_token");
+
+  // Effet pour la responsivité
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Gestion de la sidebar
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+    
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
 
   // ----- MOCK COURSES -----
   const pendingCourses = [
@@ -44,19 +65,42 @@ export default function DashboardAdmin() {
   const courses = coursesByTab[activeTab];
 
   // ----- MOCK STATS -----
+  const [statsData, setStatsData] = useState({
+    total_students: 0,
+    total_courses: 0,
+    total_exercises: 0,
+    total_spaces: 0,
+  });
+  
   const stats = [
-    { title: t("stats.totalStudents"), value: "1,234", icon: <Users className="text-blue" size={40} /> },
-    { title: t("stats.activeCourses"), value: "42", icon: <BookOpen className="text-purple" size={40} /> },
-    { title: t("stats.totalExercises"), value: "567", icon: <ClipboardList className="text-pink" size={40} /> },
-    { title: t("stats.completionRate"), value: "78%", icon: <TrendingUp className="text-blue" size={40} /> },
+    {
+      title: t("stats.totalStudents"),
+      value: statsData.total_students,
+      icon: <Users className="text-blue" size={40} />,
+    },
+    {
+      title: t("stats.activeCourses"),
+      value: statsData.total_courses,
+      icon: <BookOpen className="text-purple" size={40} />,
+    },
+    {
+      title: t("stats.totalExercises"),
+      value: statsData.total_exercises,
+      icon: <ClipboardList className="text-pink" size={40} />,
+    },
+    {
+      title: t("stats.totalSpaces"), 
+      value: statsData.total_spaces,
+      icon: <LayoutGrid className="text-blue" size={40} />,
+    },
   ];
 
   // ----- COLORS DU PROTOTYPE -----
   const statGradients = [
-    "from-statBlue1 to-statBlue2",
-    "from-statPurple1 to-statPurple2",
-    "from-statPink1 to-statPink2",
-    "from-statSoftBlue1 to-statSoftBlue2",
+    "bg-grad-5",
+    "bg-grad-4",
+    "bg-grad-2",
+    "bg-grad-3",
   ];
 
   // ----- MOCK RECENT ACTIVITY -----
@@ -67,38 +111,60 @@ export default function DashboardAdmin() {
     { name: "David Lee", action: "Earned 'Master of Algo'", time: "1 hour ago" },
     { name: "Emma Wilson", action: "Posted in Recursion", time: "2 hours ago" },
   ];
+  
+  useEffect(() => {
+    fetch("http://localhost:8000/api/users/admin/stats/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then((data) => setStatsData(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
-    <div className="w-full min-h-screen flex bg-surface">
-      {/* SIDEBAR */}
-      <div className="hidden lg:block w-64 min-h-screen"><Navbar /></div>
+    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col p-4 lg:p-10 gap-8">
-        
-        {/* USER ICON */}
-        <div className="flex justify-end">
-          <UserCircle initials={initials} />
-        </div>
-
-        {/* PAGE TITLE */}
-        <div>
-          <h1 className="text-3xl font-bold text-textc">{t("title")}</h1>
-          <p className="text-grayc">{t("subtitle")}</p>
+      {/* Main Content */}
+      <main className={`
+        flex-1 p-6 pt-10 space-y-5 transition-all duration-300
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
+            <p className="text-gray">{t("subtitle")}</p>
+          </div>
+          
+          <UserCircle
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
         </div>
 
         {/* STATS WITH PROTOTYPE COLORS */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, i) => (
             <div 
               key={i}
-              className={`rounded-3xl p-6 shadow-card flex justify-between items-center bg-gradient-to-br ${statGradients[i]}`}
+              className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition flex justify-between items-center bg-gradient-to-br ${statGradients[i]}`}
             >
               <div>
-                <p className="text-grayc">{stat.title}</p>
-                <h2 className="text-3xl font-bold text-textc">{stat.value}</h2>
+                <p className="text-gray">{stat.title}</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-muted">{stat.value}</h2>
               </div>
-              {stat.icon}
+              <div className="opacity-80">
+                {stat.icon}
+              </div>
             </div>
           ))}
         </div>
@@ -107,18 +173,18 @@ export default function DashboardAdmin() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* LEFT: Recent Activity */}
-          <div className="bg-card shadow-card p-6 rounded-3xl">
-            <h2 className="text-xl font-semibold text-textc mb-4">{t("recentActivity")}</h2>
+          <div className="bg-card  rounded-2xl p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-muted mb-4">{t("recentActivity")}</h2>
 
             <ul className="flex flex-col gap-4">
               {recentActivity.map((item, i) => (
                 <li key={i} className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
+                  <div className="w-10 h-10 rounded-full bg-grad-2 text-muted flex items-center justify-center font-bold">
                     {item.name.charAt(0)}
                   </div>
-                  <div>
-                    <p className="text-textc font-medium">{item.name}</p>
-                    <p className="text-grayc text-sm">{item.action}</p>
+                  <div className="flex-1">
+                    <p className="text-muted font-medium">{item.name}</p>
+                    <p className="text-gray text-sm">{item.action}</p>
                     <span className="text-gray-400 text-xs">{item.time}</span>
                   </div>
                 </li>
@@ -127,36 +193,43 @@ export default function DashboardAdmin() {
           </div>
 
           {/* RIGHT: COURSES VALIDATION */}
-          <div className="bg-card shadow-card p-6 rounded-3xl">
-            <h2 className="text-xl font-semibold text-textc mb-4">{t("validationCourses")}</h2>
+          <div className="bg-card  rounded-2xl p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-muted mb-4">{t("validationCourses")}</h2>
 
             {/* TABS */}
-            <div className="flex gap-4 bg-gray-100 p-2 rounded-full w-max shadow-sm mb-4">
+            <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
               {["pending", "approved", "rejected"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                    activeTab === tab ? "bg-white shadow text-textc" : "text-gray-500 hover:text-textc"
-                  }`}
+                   className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm
+                    ${activeTab === tab 
+                       ? "text-white bg-primary shadow-md"
+                  : "text-primary/70 "
+                    }`}
                 >
                   {t(`tabs.${tab}`)} ({coursesByTab[tab].length})
                 </button>
               ))}
             </div>
+    
+
+
+                     
 
             {/* COURSES LIST */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               {courses.length === 0 ? (
-                <p className="text-grayc text-sm italic">{t("noCourses")}</p>
+                <p className="text-gray text-sm italic text-center py-4">{t("noCourses")}</p>
               ) : (
-                courses.map((course) => <CourseCard key={course.id} course={course} />)
+                courses.map((course) => (
+                  <CourseCard key={course.id} course={course} />
+                ))
               )}
             </div>
           </div>
-
         </div>
-      </div>
+      </main>
     </div>
   );
 }

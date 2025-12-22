@@ -86,6 +86,19 @@ import translationENValidationCourses from "./locales/ValidationCourses/en-valid
 
 import translationENDashboardAdmin from "./locales/DashboardAdmin/en-dashboardadmin/translation.json";
 import translationFRDashboardAdmin from "./locales/DashboardAdmin/fr-dashboardadmin/translation.json";
+
+import translationnENforumManagement from "./locales/forumManagement/en/translation.json";
+import translationnFRforumManagement from "./locales/forumManagement/fr/translation.json";
+
+import translationnENbadgesManagement from "./locales/badgesManagement/en/translation.json";
+import translationnFRbadgesManagement from "./locales/badgesManagement/fr/translation.json";
+
+import translationnENStudentsManagement from "./locales/StudentsManagement/en/translation.json";
+import translationnFRStudentsManagement from "./locales/StudentsManagement/fr/translation.json";
+import translationFRSpacesPage from "./locales/addSpace/fr.json";
+import translationENSpacesPage from "./locales/addSpace/en.json";
+import translationFRInstructors from "./locales/addinstructors/fr.json";
+import translationENInstructors from "./locales/addinstructors/en.json";
 const resources = {
   fr: {
     translation: translationFR,
@@ -112,6 +125,10 @@ const resources = {
     quiz2: translationFRquiz2,
     quiz3:translationFRrecquiz,
 
+     
+      space: translationFRSpacesPage,
+       instructors: translationFRInstructors,
+
    
 
     myStudents: translationFRMyStudents,
@@ -135,7 +152,10 @@ const resources = {
     ProgressStudent: translationnFRProgressStudent,
      ValidationCourses: translationFRValidationCourses,
     DashboardAdmin: translationFRDashboardAdmin,
-  },
+     ForumManagement:translationnFRforumManagement,
+     BadgesManagement:translationnFRbadgesManagement,
+    StudentsManagement:translationnFRStudentsManagement
+    },
 
   en: {
     translation: translationEN,
@@ -181,6 +201,11 @@ const resources = {
     CoursesManagement: translationENCourseManagement,
       ValidationCourses: translationENValidationCourses,
     DashboardAdmin: translationENDashboardAdmin,
+     ForumManagement:translationnENforumManagement,
+       BadgesManagement:translationnENbadgesManagement,
+      StudentsManagement:translationnENStudentsManagement,
+       space: translationENSpacesPage,
+      instructors: translationENInstructors,
 
 
   },

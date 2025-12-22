@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -16,13 +16,14 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from datetime import timedelta
 import os
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 class CreateCoursView(APIView):
 
     @jwt_required
     def post(self, request):
         data = request.data.copy()
-        data["utilisateur"] = request.user_id  # 🟩 automatique, sécurisé
+        data["utilisateur"] = request.user_id 
 
         serializer = CoursSerializer1(data=data)
 
@@ -188,7 +189,6 @@ class CoursDetailView(generics.RetrieveUpdateAPIView):
         return context
 
 
-
 class SectionListCreateView(generics.ListCreateAPIView):
     queryset = Section.objects.all()
     serializer_class = SectionSerializer
@@ -291,6 +291,17 @@ class CoursesWithProgressView(APIView):
 
         return Response(data)
 
+@api_view(['POST'])
+def assign_course_author(request, pk):
+    try:
+        cours = Cours.objects.get(pk=pk)
+        user_id = request.data.get("user_id")
+        user = Utilisateur.objects.get(pk=user_id)
+        cours.utilisateur = user
+        cours.save()
+        return Response({"message": "Auteur assigné"}, status=200)
+    except Cours.DoesNotExist:
+        return Response({"error": "Cours introuvable"}, status=404)
 class MarkLessonVisitedView(APIView):
     @jwt_required
     def post(self, request, lesson_id):
@@ -301,3 +312,22 @@ class MarkLessonVisitedView(APIView):
 
         LeconComplete.objects.get_or_create(utilisateur_id=request.user_id, lecon=lecon)
         return Response({"message": "Leçon marquée visitée"}, status=200)
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated, IsAdminUser])
+def update_course_status(request, pk):
+    course = get_object_or_404(Cours, pk=pk)
+
+    status = request.data.get("status")
+    if status not in ["pending", "approved", "rejected"]:
+        return Response(
+            {"error": "Statut invalide"},
+            status=400
+        )
+
+    course.status = status
+    course.save()
+
+    return Response(
+        {"message": "Statut mis à jour", "status": course.status}
+    )

@@ -11,11 +11,13 @@ urlpatterns = [
     path('api/exercices/', include('exercices.urls')),
     path('api/quiz/', include('quiz.urls')),
     path('api/dashboard/', include('dashboard.urls')),
-
+    path('api/', include('feedback.urls')),
 
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/spaces/', include('spaces.urls')),
+
+    
    
 
 ]

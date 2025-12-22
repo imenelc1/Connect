@@ -4,6 +4,8 @@
   "addCourseButton": "+ Ajouter un cours",
   "searchPlaceholder": "Rechercher un cours...",
   "submissions": "{{count}} étudiants",
+  "validationButton": "Validation des cours",
+  
   "difficulty": {
     "Beginner": "Débutant",
     "Intermediate": "Intermédiaire",

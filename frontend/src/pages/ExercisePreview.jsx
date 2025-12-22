@@ -26,6 +26,7 @@ export default function ExercisePreview() {
   { label: t("exercises.preview"), icon: Activity, route: "/exercise-preview" }
 ];
 
+
   return (
     <div className="flex w-full min-h-screen bg-surface">
       

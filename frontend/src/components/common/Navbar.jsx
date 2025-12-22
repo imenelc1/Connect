@@ -88,9 +88,9 @@ export default function Navbar() {
     { href: "/ExerciseManagement", label: t("exercises"), icon: ClipboardList },
     { href: "/QuizManagement", label: t("quizzes"), icon: FileQuestion },
     { href: "/StudentsManagement", label: t("students"), icon: Users },
-    { href: "/instructors", label: t("instructors"), icon: GraduationCap },
-    { href: "/spaces", label: t("spaces"), icon: LayoutGrid },
-    { href: "/badges", label: t("badges"), icon: Award },
+    { href: "/InstructorsManagement", label: t("instructors"), icon: GraduationCap },
+    { href: "/SpacesManagement", label: t("spaces"), icon: LayoutGrid },
+    { href: "/badgesManagement", label: t("badges"), icon: Award },
     { href: "/ForumManagement", label: t("forms"), icon: FileText },
   ];
 
@@ -112,6 +112,9 @@ export default function Navbar() {
     "/all-exercises",
     "/new-exercise",
     "/exercise-preview",
+    "/start-exerciseCode",
+    "/ListeExercices",
+    "/start-exercise"
   ];
 
   const quizRoutes = [
@@ -162,7 +165,7 @@ export default function Navbar() {
         />
 
         {!collapsed && (
-          <div className="flex flex-col leading-tight ml-2 -mt-1">
+          <div className="hidden md:flex  flex flex-col leading-tight ml-2 -mt-1">
             <span className="text-textc font-semibold text-xs capitalize">
               {t(userData.role)}
             </span>
@@ -219,7 +222,7 @@ export default function Navbar() {
 
 
       {/* SETTINGS + LOGOUT */}
-      <div className="flex flex-col gap-1 mt-8 mb-2 pt-1">
+      <div className="flex flex-col gap-1 mt-6 mb-2 pt-1">
         <NavLink
           to="/settings"
           className={({ isActive }) =>

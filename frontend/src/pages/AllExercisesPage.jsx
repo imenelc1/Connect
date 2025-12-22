@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/NavBar.jsx";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -11,6 +11,10 @@ import i18n from "../i18n";
 import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext.jsx";
 import { getCurrentUserId } from "../hooks/useAuth";
+import api from "../services/courseService";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
+
 import ExerciseCard from "../components/common/ExerciseCard";
 
 const gradientMap = {

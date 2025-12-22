@@ -85,7 +85,7 @@ export default function ContentCard({
         navigate(`/start-exercise/${course.id}`);
       }
     } else if (pageType === "quiz") {
-      navigate(`/quiz1/${course.id}`);
+      navigate(`/quiz-intro/${course.id}`);
     } else {
       navigate(`/Seecourses/${course.id}`);
     }
@@ -95,22 +95,25 @@ export default function ContentCard({
     navigate(`/ListeExercices/${course.id}`);
   };
 
-  const handleEdit = () => {
-    if (pageType === "course") {
-      navigate(`/courses/edit/${course.id}`);
-    } else if (pageType === "exercise") {
-      navigate(`/exercices/edit/${course.id}`);
-    } else {
-      navigate(`/ListeExercices/${course.id}`);
-    }
-  };
+const handleEdit = () => {
+  if (pageType === "course") {
+    navigate(`/courses/edit/${course.id}`);
+  } else if (pageType === "exercise") {
+    navigate(`/exercices/edit/${course.id}`);
+  } else if (pageType === "quiz") {
+    navigate(`/QuizIntro/${course.id}`);
+  } else {
+    navigate(`/Seecourses/${course.id}`);
+  }
+};
+
 
   const handleRestart = async () => {
     try {
       await progressionService.resetCourseProgress(course.id);
       setProgress(0);
       if (pageType === "course") navigate(`/Seecourses/${course.id}`);
-      else if (pageType === "quiz") navigate(`/quiz1/${course.id}`);
+      else if (pageType === "quiz") navigate(`/QuizIntro/${course.id}`);
       else navigate(`/ListeExercices/${course.id}`);
     } catch (error) {
       console.error("Erreur lors de la réinitialisation :", error);

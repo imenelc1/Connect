@@ -1,0 +1,25 @@
+
+{
+  "ForumManagement": {
+    "forumM": "Forums Management" ,
+    "Managediscussion":"Manage discussion forums and threads",
+    "createF": "Create Forum",
+    "searchF": "Search forums ...",
+    "GeneralD":"General Discussion",
+    "Talk":"Talk about anything C relatded",
+    "ButtonManage":"Manage",
+    "threads":"threads",
+    "posts":"posts",
+    "memebers":"members",
+    "Homework":"Homework Help",
+    "gethelp":"Get help with your assignements",
+    "ProjetShowcase":"Project Showcase",
+    "share":"Share your C projects",
+    "AlgorithmD":"Algorithm Discussion",
+    "deepDive":"Deep dive into algorithms",
+    "career":"Career Advice",
+    "Careerp":"Career guidance for C developers",
+    "Bug":"Bug Reports",
+    "Report":"Report plateform issues"
+  }
+}

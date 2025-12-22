@@ -62,6 +62,3 @@ class Lecon(models.Model):
     contenu_lecon = models.TextField()
     type_lecon = models.CharField(max_length=50)
     ordre = models.IntegerField()
-
-
-

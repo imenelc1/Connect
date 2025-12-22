@@ -58,7 +58,7 @@ class TentativeExerciceWriteSerializer(serializers.ModelSerializer):
     exercice_id = serializers.PrimaryKeyRelatedField(
         queryset=Exercice.objects.all(),
         write_only=True,
-        source='exercice'  # ceci mappe exercice_id -> exercice FK
+        source='exercice'
     )
 
     class Meta:
@@ -69,15 +69,15 @@ class TentativeExerciceWriteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context['request'].user
+        exercice = validated_data.pop('exercice')
         validated_data['utilisateur'] = user
+
         if validated_data.get("etat") == "soumis":
             validated_data["submitted_at"] = timezone.now()
 
         tentative, created = TentativeExercice.objects.update_or_create(
             utilisateur=user,
-            exercice=validated_data['exercice'],
+            exercice=exercice,
             defaults=validated_data
         )
         return tentative
-
-

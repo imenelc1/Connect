@@ -14,13 +14,21 @@ from users.jwt_auth import IsAuthenticatedJWT
 from users.models import Utilisateur
 from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration, TentativeExercice
 from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta
 
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def complete_lesson(request, lecon_id):
     user = request.user
-    lecon = Lecon.objects.get(pk=lecon_id)
+
+    # Récupérer la leçon
+    try:
+        lecon = Lecon.objects.get(pk=lecon_id)
+    except Lecon.DoesNotExist:
+        return Response({"error": "Leçon introuvable"}, status=404)
+
+    # Marquer la leçon comme complétée
     LeconComplete.objects.get_or_create(utilisateur=user, lecon=lecon)
 
     section = lecon.section
@@ -28,24 +36,43 @@ def complete_lesson(request, lecon_id):
 
     # Progression section
     total_section = Lecon.objects.filter(section=section).count()
-    completed_section = LeconComplete.objects.filter(utilisateur=user, lecon__section=section).count()
-    section_progress = round((completed_section / total_section) * 100)
+    completed_section = LeconComplete.objects.filter(
+        utilisateur=user,
+        lecon__section=section
+    ).count()
+    section_progress = round((completed_section / total_section) * 100) if total_section > 0 else 0
 
     # Progression cours
     total_cours = Lecon.objects.filter(section__cours=cours).count()
-    completed_cours = LeconComplete.objects.filter(utilisateur=user, lecon__section__cours=cours).count()
-    cours_progress = round((completed_cours / total_cours) * 100)
+    completed_cours = LeconComplete.objects.filter(
+        utilisateur=user,
+        lecon__section__cours=cours
+    ).count()
+    cours_progress = round((completed_cours / total_cours) * 100) if total_cours > 0 else 0
 
-    pc, _ = ProgressionCours.objects.get_or_create(utilisateur=user, cours=cours)
+    # Récupérer ou créer la progression du cours (⚠️ defaults obligatoires)
+    pc, _ = ProgressionCours.objects.get_or_create(
+        utilisateur=user,
+        cours=cours,
+        defaults={
+            "avancement_cours": 0,
+            "temps_passe": timedelta(seconds=0),
+            "derniere_lecon": lecon
+        }
+    )
+
+    # Mise à jour progression
     pc.avancement_cours = cours_progress
     pc.derniere_lecon = lecon
 
-    # Ajouter le temps passé (en secondes) depuis le frontend
+    # Ajouter le temps passé (envoyé depuis le frontend)
     duration = request.data.get("duration", 0)
-    if duration > 0:
+    if duration and duration > 0:
         pc.temps_passe = (pc.temps_passe or timedelta(seconds=0)) + timedelta(seconds=duration)
-        
+
     pc.save()
+
+    # Historique
     create_progress_history(user, cours, pc.avancement_cours, pc.temps_passe)
 
     return Response({
@@ -65,7 +92,7 @@ def complete_lessons_bulk(request):
     if not lesson_ids:
         return Response({"error": "No lessons provided"}, status=400)
 
-    lessons = Lecon.objects.filter(id_lecon__in=lesson_ids)
+    lessons = Lecon.objects.filter(id__in=lesson_ids)
     for lesson in lessons:
         LeconComplete.objects.get_or_create(utilisateur=user, lecon=lesson)
 
@@ -119,15 +146,15 @@ def update_last_lesson(request, lesson_id):
 
     cours = lecon.section.cours
 
-    pc, _ = ProgressionCours.objects.get_or_create(
-        utilisateur=user,
-        cours=cours,
-        defaults={
-            "avancement_cours": 0.0,
-            "temps_passe": timedelta(seconds=0),
-            "derniere_lecon": lecon
-        }
-    )
+    pc, created = ProgressionCours.objects.get_or_create(
+    utilisateur=user,
+    cours=cours,
+    defaults={
+        "avancement_cours": 0.0,
+        "temps_passe": timedelta(seconds=0),
+        "derniere_lecon": lecon
+    }
+) 
 
     # Ne jamais reculer
     if not pc.derniere_lecon or lecon.id_lecon >= pc.derniere_lecon.id_lecon:

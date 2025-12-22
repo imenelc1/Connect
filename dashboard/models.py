@@ -3,6 +3,15 @@ from django.db import models
 from users.models import Utilisateur
 from courses.models import Cours, Lecon
 from exercices.models import Exercice
+from datetime import timedelta
+
+class LeconComplete(models.Model):
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    lecon = models.ForeignKey(Lecon, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('utilisateur', 'lecon')
 
 class LeconComplete(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)

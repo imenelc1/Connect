@@ -28,7 +28,7 @@ class ExerciceSerializer(serializers.ModelSerializer):
      return ""
 
     def get_visibilite_exo_label(self, obj):
-        return "public" if obj.visibilite_exo else "privé"
+        return "public" if obj.visibilite_exo else "private"
     
 
   

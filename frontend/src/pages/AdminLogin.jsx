@@ -25,7 +25,7 @@ export default function AdminLogin() {
   const [errorPassword, setErrorPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorEmail("");
     setErrorPassword("");
@@ -35,23 +35,29 @@ export default function AdminLogin() {
     if (!password) return setErrorPassword(t("errors.passwordRequired"));
 
     try {
-      const res = await api.post("admin/login/", { email_admin: email, mdp_admin: password });
-      // Dans ton backend admin, il n’y a pas de token JWT ? Si tu veux, tu peux ajouter JWT pour admin aussi.
+      // Appel API backend
+      const res = await api.post("admin/login/", {
+        email_admin: email,
+        mdp_admin: password,
+      });
+
+      // ✅ Stockage du token JWT
+      const token = res.data.token;
+      localStorage.setItem("admin_token", token);
+
+      // Stockage info utilisateur
       const user = {
         id_admin: res.data.id_admin,
         email_admin: res.data.email_admin,
         role: "admin",
       };
-
       localStorage.setItem("user", JSON.stringify(user));
-      // Si tu mets un token dans ton backend, tu peux aussi le stocker ici
-      // localStorage.setItem("token", res.data.token);
 
-      loginUser(null, user); // ⚡ AuthContext
+      // Met à jour le context Auth (si utilisé)
+      loginUser(token, user);
 
       toast.success("Connexion administrateur réussie");
-      navigate("/Dashboard-admin");
-
+      navigate("/Dashboard-admin"); // Redirection vers dashboard admin
     } catch (error) {
       const backend = error.response?.data;
       const msg = backend?.detail || backend?.error || "Accès refusé";

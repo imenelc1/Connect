@@ -1,0 +1,21 @@
+{
+  "title": "Gestion des instructeurs",
+  "subtitle": "Gérez les instructeurs et le personnel enseignant",
+  "addInstructor": "Ajouter un instructeur",
+  "search": "Rechercher un instructeur...",
+  "instructor": "Instructeur",
+  "email": "Email",
+  "courses": "Cours",
+  "students": "Étudiants",
+  "actions": "Actions",
+  "modalAddTitle": "Ajouter un nouvel instructeur",
+  "modalAddSubtitle": "Remplissez les détails pour créer le profil de l'instructeur",
+  "modalEditTitle": "Modifier l'instructeur",
+  "modalEditSubtitle": "Modifiez les détails de l'instructeur",
+  "initials": "Initiales",
+  "name": "Nom",
+  "create": "Créer",
+  "update": "Mettre à jour",
+  "cancel": "Annuler",
+  "toggleLang": "Passer en EN"
+}
