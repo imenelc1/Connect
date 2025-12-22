@@ -268,6 +268,7 @@ const handleUpdateQuiz = async () => {
     }
 
     alert("✅ Quiz mis à jour avec succès !");
+    navigate("/all-quizzes");
   } catch (error) {
     console.error("❌ ERREUR BACKEND 👉", error.response?.data || error.message);
     alert("❌ Erreur lors de la mise à jour");

@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import { useNavigate, useParams } from "react-router-dom";
+import { getCurrentUserId } from "../hooks/useAuth";
+
 
 
 export function QuizTakePage() {
@@ -18,6 +20,8 @@ const navigate = useNavigate();
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
+  const currentUserId = getCurrentUserId();
+  
 
   /* ================= FETCH QUIZ ================= */
   useEffect(() => {
@@ -77,6 +81,39 @@ const navigate = useNavigate();
       [questionId]: optionId,
     }));
   };
+
+/* Une fonction pour submit le quiz */
+const submitQuiz = async () => {
+  try {
+    const response = await fetch(
+      "http://localhost:8000/api/quiz/quiz/submit/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          utilisateur:currentUserId,
+          quiz_id: quiz.quizId,
+          answers: answers,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    navigate(`/QuizRecape/${exerciceId}`, {
+      state: data,
+    });
+  } catch (err) {
+    console.error(err);
+    alert("Erreur lors de la soumission du quiz");
+  }
+};
+
+
+
  const nextQuestion = () => {
     if (!answers[q.id]) return; // si aucune option sélectionnée, on bloque
 
@@ -84,7 +121,7 @@ const navigate = useNavigate();
       setCurrentQuestion(currentQuestion + 1); // question suivante
     } else {
       // dernière question → redirection
-      navigate(`/QuizRecape/${exerciceId}`);
+      submitQuiz();
     }
   };
 
