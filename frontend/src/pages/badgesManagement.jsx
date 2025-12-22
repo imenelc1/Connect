@@ -179,7 +179,7 @@ export default function BadgesManagement() {
               key={index}
               className={`
                 ${gradientMap[b.type]}
-                border border-gray
+               
                 rounded-2xl
                 p-6
                 shadow-sm
@@ -210,7 +210,7 @@ export default function BadgesManagement() {
 
               {/* Content */}
               <h2 className="font-semibold text-lg">{b.title}</h2>
-              <p className="text-sm text-gray-500">{b.description}</p>
+              <p className="text-sm text-grayc/85">{b.description}</p>
 
               {/* Footer */}
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 gap-2">

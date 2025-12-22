@@ -143,7 +143,7 @@ export default function QuizzesManagement() {
                         .map((q) => (
                             <div
                                 key={q.id}
-                                className="bg-grad-4 border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col"
+                                className="bg-grad-2  rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col"
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-3 min-w-0">
@@ -152,7 +152,7 @@ export default function QuizzesManagement() {
                                         </div>
                                         <div className="min-w-0">
                                             <h3 className="font-semibold text-lg truncate">{q.title}</h3>
-                                            <p className="text-gray-500 text-sm truncate">{q.subtitle}</p>
+                                            <p className="text-grayc text-sm truncate">{q.subtitle}</p>
                                         </div>
                                     </div>
 

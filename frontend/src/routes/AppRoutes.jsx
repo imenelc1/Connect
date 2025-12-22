@@ -55,12 +55,14 @@ import QuizRecapPage from "../pages/QuizRecapPage";
 /* ================= ADMIN ================= */
 import AdminLogin from "../pages/AdminLogin.jsx";
 import CoursesManagement from "../pages/CourseManagement";
-import StudentsMangement from "../pages/studentsManagement.jsx";
 import BadgesManagement from "../pages/badgesManagement.jsx";
 import QuizManagement from "../pages/QuizManagement";
 import ExercisesManagement from "../pages/ExerciseManagement";
 import ValidationCourses from "../pages/ValidationCourses";
 import ForumManagement from "../pages/forumManagement.jsx";
+import SpacesManagement from "../pages/SpacesManagement.jsx";
+import InstructorsManagement from "../pages/InstructorsManagement.jsx";
+import StudentsManagement from "../pages/studentsManagement.jsx";
 
 export default function AppRoutes() {
   return (
@@ -111,6 +113,7 @@ export default function AppRoutes() {
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
+       
 
         {/* ========= QUIZZES ========= */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
@@ -122,14 +125,17 @@ export default function AppRoutes() {
 
         {/* ========= ADMIN ========= */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/course-management" element={<CoursesManagement />} />
-        <Route path="/students-management" element={<StudentsMangement />} />
-        <Route path="/badges-management" element={<BadgesManagement />} />
-        <Route path="/quiz-management" element={<QuizManagement />} />
-        <Route path="/exercises-management" element={<ExercisesManagement />} />
+        <Route path="/CourseManagement" element={<CoursesManagement />} />
+        <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
+        <Route path="/badgesManagement" element={<BadgesManagement />} />
+        <Route path="/QuizManagement" element={<QuizManagement />} />
+        <Route path="/StudentsManagement" element={<StudentsManagement />} />
         <Route path="/validation-courses" element={<ValidationCourses />} />
-        <Route path="/forum-management" element={<ForumManagement />} />
+        <Route path="/ForumManagement" element={<ForumManagement />} />
+         <Route path="/SpacesManagement" element={<SpacesManagement />} />
+         <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
 
+   
       </Routes>
     </BrowserRouter>
   );

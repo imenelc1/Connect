@@ -189,7 +189,6 @@ class CoursDetailView(generics.RetrieveUpdateAPIView):
         return context
 
 
-
 class SectionListCreateView(generics.ListCreateAPIView):
     queryset = Section.objects.all()
     serializer_class = SectionSerializer

@@ -225,7 +225,7 @@ export default function ExercisesManagement() {
           {filtered.map((item) => (
             <div
               key={item.id_exercice}
-              className={`${ difficultyBgMap[item.niveau_exo] || "bg-white"} border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
+              className={`${ difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
             >
               <div className="flex justify-between items-center mb-4">
                 <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
@@ -247,7 +247,7 @@ export default function ExercisesManagement() {
               <h3 className="font-semibold text-lg mb-2">
                 {item.titre_exo}
               </h3>
-              <p className="text-gray-500 text-sm mb-4">
+              <p className="text-grayc text-sm mb-4">
                 {item.categorie}
               </p>
 

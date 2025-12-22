@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { CheckCircle, Clock, MessageCircle, Calendar, ChevronRight } from "lucide-react";
 import { getTentatives} from "../services/progressionService";
 import { useTranslation } from "react-i18next";

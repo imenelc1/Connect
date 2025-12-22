@@ -12,7 +12,6 @@ import AssistantIA from "./AssistantIA";
 import progressionService from "../services/progressionService";
 import toast from "react-hot-toast";
 
-
 export default function TheoryExercisePage() {
   const [openAssistant, setOpenAssistant] = useState(false);
   const [rating, setRating] = useState(0);
@@ -210,7 +209,7 @@ export default function TheoryExercisePage() {
             </p>
           )}
         </div>
-
+  
         {/* SECTION TITLE */}
         <h2 className="text-lg sm:text-xl font-semibold text-[rgb(var(--color-primary))] mb-3">
           {t("your_solution")}

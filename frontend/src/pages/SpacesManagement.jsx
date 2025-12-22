@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import { Folder, Edit, Trash2, Plus, Search } from "lucide-react";
 import Button from "../components/common/Button";
 import AddModel from "../components/common/AddModel";
@@ -144,7 +144,7 @@ export default function SpacesPage() {
           {filteredSpaces.map((space, index) => (
             <div
               key={space.id}
-              className="bg-card border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between h-full"
+              className="bg-card  rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between h-full"
             >
               {/* Header with Folder icon */}
               <div className="flex items-start gap-3 mb-3">
@@ -153,7 +153,7 @@ export default function SpacesPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg font-semibold text-muted truncate">{space.title}</h2>
-                  <p className="text-gray-500 text-sm mt-1 line-clamp-2">{space.description}</p>
+                  <p className="text-grayc text-sm mt-1 line-clamp-2">{space.description}</p>
                 </div>
               </div>
 

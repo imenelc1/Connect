@@ -31,6 +31,38 @@ export default function CourseContent({
     localStorage.setItem(`courseTimer_${courseId}`, secondsSpent.toString());
   }, [secondsSpent, courseId]);
 
+useEffect(() => {
+  if (!courseId) return;
+
+  const fetchFeedbacks = async () => {
+    setLoadingFeedbacks(true);
+    try {
+      const data = await feedbackService.getFeedbacks(courseId);
+
+      const formatted = data.map((f) => ({
+        id: f.id_feedback,
+        initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
+        comment: f.contenu,
+        stars: f.etoile,
+        nomComplet: f.utilisateur_nom && f.utilisateur_prenom
+  ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+  : f.utilisateur_nom || "Utilisateur anonyme",
+
+
+      }));
+
+      setAllFeedbacks(formatted);
+    } catch (err) {
+      console.error("Erreur chargement feedbacks", err);
+    } finally {
+      setLoadingFeedbacks(false);
+    }
+  };
+
+  fetchFeedbacks();
+}, [courseId]);
+
+
   const formatTime = (secs) => {
     const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
@@ -271,19 +303,21 @@ export default function CourseContent({
           </button>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 flex-1 px-4 sm:px-6">
-            {currentFeedbacks.map((f) => (
-              <div key={f.id} className="relative bg-grad-1 rounded-3xl p-4 sm:p-6 text-white shadow-lg">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center text-sm sm:text-lg font-semibold mb-4">
-                  {f.initials}
-                </div>
-                <p className="text-xs sm:text-sm leading-relaxed opacity-90">{f.comment}</p>
-                <div className="flex gap-1 text-yellow-300 text-base sm:text-xl mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i}>{i < f.stars ? "★" : "☆"}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
+            {loadingFeedbacks ? (
+  <p className="col-span-3 text-center text-gray-300">
+    Chargement des feedbacks...
+  </p>
+) : currentFeedbacks.length === 0 ? (
+  <p className="col-span-3 text-center text-gray-300">
+    Aucun feedback pour ce cours
+  </p>
+) : (
+  currentFeedbacks.map((f) => (
+  <FeedbackCard key={f.id} feedback={f} />
+))
+
+)}
+
           </div>
 
           <button

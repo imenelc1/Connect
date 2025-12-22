@@ -4,7 +4,7 @@ export default function CourseCard({ course }) {
  
   return (
     <div
-      className="w-full bg-grad-2 border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition
+      className="w-full bg-grad-2  rounded-2xl shadow-sm hover:shadow-md transition
                  p-4 md:p-6 flex flex-col sm:flex-row gap-4 items-start"
     >
       {/* ICON */}
