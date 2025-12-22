@@ -236,7 +236,8 @@ export default function Setting() {
                                     </p>
 
                                     <span className="inline-block mt-1 bg-secondary text-white text-xs px-3 py-1 rounded-full">
-                                        {user?.role === "enseignant" ? "Professor" : "Student"}
+                                        {user?.role === "enseignant" ? t("Profile.Role.Professor") : t("Profile.Role.Student")}
+
                                     </span>
                                 </div>
                             </div>

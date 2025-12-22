@@ -144,11 +144,19 @@ int main() {
   };
 
 
+  // const switchLang = () => {
+  //   const newLang = i18n.language === "fr" ? "en" : "fr";
+  //   i18n.changeLanguage(newLang);
+  //   localStorage.setItem("lang", newLang);
+  // };
   const switchLang = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-    localStorage.setItem("lang", newLang);
-  };
+  const current = i18n.language;
+  const newLang = current.startsWith("fr") ? "en" : "fr";
+
+  i18n.changeLanguage(newLang);
+  localStorage.setItem("lang", newLang);
+};
+
 
   return (
     <div

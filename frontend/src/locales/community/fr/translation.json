@@ -5,6 +5,45 @@
     "placeholder": "Partagez avec la communauté...",
     "send": "Envoyer"
   },
+  "forum":
+  {
+    "forumTitle":"Titre Du Forum*",
+    "forumPlaceholder":"Donnez un titre à votre discussion",
+    "forumMessage":"Votre message initial*",
+    "forumMessagePlaceholder":"Écrivez votre message...",
+    "message":"Ce message sera le point de départ de la discussion",
+    "forumEtud":"Forum étudiant",
+    "forumEtudMessage":"Ce forum sera visible uniquement par les étudiants",
+    "forumInfo":"Aucun forum disponible",
+    "forumInfoMessage":"Soyez le premier à créer un forum",
+    "postedby":"Publié par",
+    "deleteForum":"Supprimer le forum",
+    "delete":"Supprimer ce forum ?",
+    "deleteAction":"Cette action est irréversible. Tous les messages et commentaires seront supprimés.",
+    "deleteCancel":"Annuler",
+    "yourForum":"Votre forum",
+    "published":"Publié pour :",
+    "forENS":"Aux enseignants",
+   "forENSOnly":"Seulement entre enseignants",
+   "forSTD":"Aux étudiants",
+   "forSTD_ENS":"Étudiants & enseignants",
+
+   "role": {
+  "teacher": "Enseignant",
+  "student": "Étudiant"
+  
+},
+
+
+  "hideMessages": "Masquer les messages",
+  "showMessages": "Voir les messages",
+  "other_one": "{{count}} autre",
+  "other_other": "{{count}} autres",
+ "writeComment": "Écrire un commentaire...",
+ "deleteComment": "Supprimer ce commentaire ?",
+  "deleteMessage": "Supprimer ce message?"
+
+  },
   "tabs": {
     "recent": "Récent",
     "popular": "Populaire",
@@ -16,5 +55,12 @@
     "teacher-teacher": "Enseignant ↔ Enseignant",
     "teacher-student": "Enseignant ↔ Étudiant",
     "student-student": "Étudiant ↔ Étudiant"
+  },
+  "repForum": {
+    "rep":"Écrivez votre réponse...",
+     "replies": "{{count}} réponse",
+  "replies_plural": "{{count}} réponses",
+  "comments": "{{count}} commentaire",
+  "comments_plural": "{{count}} commentaires"
   }
 }

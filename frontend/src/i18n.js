@@ -192,7 +192,7 @@ const resources = {
 
     ProgressExercice: translationnENProgressExercice,
     ProgressStudent: translationnENProgressStudent,
-
+    quiz1: translationENQuiz1,
      quiz3:translationENrecquiz,
     community: translationnENCommunity,
     SubmittedExercises: translationENSubmittedExercises,

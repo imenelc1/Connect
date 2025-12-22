@@ -17,5 +17,6 @@
   "create": "Create",
   "update": "Update",
   "cancel": "Cancel",
-  "toggleLang": "Switch to FR"
+  "toggleLang": "Switch to FR",
+  "instructorSummary":"Instructor Summary"
 }

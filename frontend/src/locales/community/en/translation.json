@@ -4,6 +4,50 @@
     "subtitle": "Exchange with other instructors and share your experience",
     "placeholder": "Share with the community...",
     "send": "Send"
+    
+
+
+  },
+  "forum":
+  {
+    
+    "forumTitle":"Forum Title*",
+    "forumPlaceholder":"Give a title to your discussion",
+    "forumMessage":"Your initial post*",
+    "forumMessagePlaceholder":"Write Your Message...",
+    "message":"This message will be the starting point of the discussion",
+    "forumEtud":"Student forum",
+    "forumEtudMessage":"This forum will be visible only to students",
+    "forumInfo":"No forum available",
+    "forumInfoMessage":"Be the first to create a forum",
+    "postedby":"Posted By",
+    "deleteForum":"Delete Forum",
+    "delete":"Delete This Forum ?",
+    "deleteAction":"This action is irreversible. All messages and comments will be deleted.",
+    "deleteCancel":"Cancel",
+    "yourForum":"Your Forum",
+    "published":"published for :",
+   "forENS":"For instructors",
+   "forENSOnly":"Restricted to instructors",
+   "forSTD":"For Students",
+   "forSTD_ENS":"Students & instructors",
+   "role": {
+  "teacher": "Instructor",
+  "student": "Student"
+
+},
+ "hideMessages": "Hide messages",
+  "showMessages": "View messages",
+  "other_one": "{{count}} other",
+  "other_other": "{{count}} others",
+ 
+  "writeComment": "Write a comment...",
+"deleteComment": "Delete this comment?",
+"deleteMessage": "Delete this message?"
+
+
+
+
   },
   "tabs": {
     "recent": "Recent",
@@ -13,8 +57,16 @@
   "forums": {
     "select": "Select forum type",
     "all": "All forums",
-    "teacher-teacher": "Teacher ↔ Teacher",
-    "teacher-student": "Teacher ↔ Student",
+    "teacher-teacher": "Instructor ↔ Instructor",
+    "teacher-student": "Instructor ↔ Student",
     "student-student": "Student ↔ Student"
+  },
+  "repForum": {
+    "repF":"Write your answer...",
+    "replies": "{{count}} reply",
+  "replies_plural": "{{count}} replies",
+  "comments": "{{count}} comment",
+  "comments_plural": "{{count}} comments"
   }
+
 }

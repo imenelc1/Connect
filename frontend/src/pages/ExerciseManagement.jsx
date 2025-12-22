@@ -164,7 +164,7 @@ export default function ExercisesManagement() {
                                     />
                                     <Trash2
                                         size={18}
-                                        className="text-red-500 cursor-pointer hover:scale-110 transition"
+                                        className="text-red cursor-pointer hover:scale-110 transition"
                                         onClick={() => handleDelete(item.id)}
                                     />
                                 </div>

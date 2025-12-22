@@ -136,10 +136,10 @@ useEffect(() => {
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-textc">
-        <Cards text="Average Student Progress" value="68%" icon={<TrendingDown size={18}/>} bg="bg-grad-2"/>
-        <Cards text="Success Rate" value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-3" />
-        <Cards text="Average time spent" value="4.2h" icon={<Book size={18} />} bg="bg-grad-4" />
-        <Cards text="Active Courses" value="10" icon={<Clock3 size={18} />} bg="bg-grad-2" />
+        <Cards text={t("Dashboard.AverageS")} value="68%" icon={<TrendingDown size={18}/>} bg="bg-grad-2"/>
+        <Cards text={t("Dashboard.Success")} value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-3" />
+        <Cards text={t("Dashboard.AverageT")} value="4.2h" icon={<Book size={18} />} bg="bg-grad-4" />
+        <Cards text={t("Dashboard.ActiveC")}value="10" icon={<Clock3 size={18} />} bg="bg-grad-2" />
       </div>
 
       {/* Learning curve */}
@@ -214,13 +214,13 @@ useEffect(() => {
 
           <div className="flex gap-4 text-xs mt-2">
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-rgb(var(--color-purple)) rounded-full"></span> Published
+              <span className="w-2 h-2 bg-rgb(var(--color-purple)) rounded-full"></span> {t("Dashboard.Published")}
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-rgb(var(--color-primary)) rounded-full"></span> Draft
+              <span className="w-2 h-2 bg-rgb(var(--color-primary)) rounded-full"></span> {t("Dashboard.Draft")}
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-rgb(var(--color-pink)) rounded-full"></span> Quizzes
+              <span className="w-2 h-2 bg-rgb(var(--color-pink)) rounded-full"></span> {t("Dashboard.quizzes")}
             </div>
           </div>
         </div>

@@ -1,4 +1,24 @@
 {
+    "quiz": {
+    "info": "Informations du quiz",
+    "preview": "Aperçu du quiz"
+  },
+
+  "selectCourse": "Sélectionner un cours",
+  "chooseCourse": "Choisir un cours",
+   "exercises": {
+    "visibility": "Visibilité"
+  },
+
+  "select": {
+    "public": "Public",
+    "private": "Privé"
+  },
+  "selectLevel": "Niveau",
+  "scoreMinimum": "Score minimum",
+  "maxAttempts": "Nombre maximum de tentatives",
+  "enableDuration": "Activer la durée",
+  "publishQuiz": "Publier le quiz",
   "newQuiz": "Nouveau Quiz",
   "exitPreview": "Quitter l’aperçu",
   "noData": "Aucune donnée de quiz trouvée.",
@@ -8,7 +28,7 @@
   "points": "point(s)",
   "level": "Avancé",
   "questionText": "Entrez votre question ici...",
-  "answerOption": "Option de réponse...",
+  "answerOption": "Option ...",
   "sendQuiz": "Envoyer le quiz",
 
   "quizSettings": "Paramètres du Quiz",
@@ -33,8 +53,8 @@
   "addQuestion": "Ajouter une question",
 
   "answers": "Réponses",
-  "answerOptionA": "Option de réponse A",
-  "answerOptionB": "Option de réponse B",
+  "answerOptionA": "Option  A",
+  "answerOptionB": "Option  B",
   "addAnswer": "Ajouter une réponse",
 
   "saveDraft": "Enregistrer le brouillon",

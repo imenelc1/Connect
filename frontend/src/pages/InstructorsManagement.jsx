@@ -12,7 +12,7 @@ function DetailsModal({ open, onClose, instructor }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
       <div className="bg-white rounded-xl shadow-lg p-6 w-[400px]">
-        <h2 className="text-xl font-bold mb-4">Résumé de l’enseignant</h2>
+        <h2 className="text-xl font-bold mb-4">{t("instructorSummary")}</h2>
         <ul className="text-sm text-gray-700 space-y-2">
           <li><strong>Prénom :</strong> {instructor.firstName}</li>
           <li><strong>Nom :</strong> {instructor.lastName}</li>

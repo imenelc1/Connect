@@ -60,7 +60,7 @@ export default function TaskCard({ title, date, etat, code, feedback }) {
             </label>
             <input
               type="text"
-              placeholder="Enter feedback here..."
+              placeholder={t("exerciceStudent.placeholder")}
               className="bg-primary/20 w-full p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple"
             />
             <button className="flex px-4 py-2 bg-purple text-white rounded-xl self-start items-center gap-2 mt-2">

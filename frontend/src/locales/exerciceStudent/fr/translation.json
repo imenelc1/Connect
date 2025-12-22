@@ -13,7 +13,8 @@
      "Edit":"Modifier",
      "Send":"Envoyer des retours",
      "Pending":"En attente",
-     "Reviewect":"Réviser"
+     "Reviewect":"Réviser",
+     "placeholder":"Entrez votre retour ici..."
   
   }
 }

@@ -59,7 +59,7 @@ export default function LoginStudent() {
 
       loginUser(res.data.token, userWithRole); // ⚡ AuthContext
 
-      toast.success(t("login.success"));
+      toast.success(t("success.login"));
       navigate("/dashboard-etu");
 
     } catch (error) {

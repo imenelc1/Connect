@@ -87,35 +87,35 @@ export default function AppRoutes() {
         <Route path="/settings" element={<Setting />} />
         <Route path="/all-courses" element={<AllCoursesPage />} />
         <Route path="/all-exercises" element={<AllExercisesPage />} />
-        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
+        <Route path="/all-quizzes" element={<AllQuizzesPage />} />   
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
         <Route path="/CoursInfo" element={<CoursInfo />} />
-        <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route path="/create-quiz" element={<CreateQuiz />} /> {/*normalement ca vaaa*/}
         <Route path="/preview" element={<QuizPreview />} />
         <Route path="/courses/edit/:id" element={<CourseUpdate />} />
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
-        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/community" element={<CommunityPage />} /> {/* cavaaaaa */}
         <Route path="/badges" element={<Badges />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/my-students" element={<MyStudents />} />
         <Route path="/spaces" element={<Spaces />} />
-        <Route path="/ListeExercices" element={<ListeExercicesPage />} />
-          <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
+        <Route path="/ListeExercices" element={<ListeExercicesPage />} /> 
+          <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} /> {/*son fichier de tradu nexiste meme pas*/}
         <Route path="/student-exercice" element={<StudentExercice />} />
-        <Route path="/progressExercice" element={<ProgressExercice />} />
+        <Route path="/progressExercice" element={<ProgressExercice />} />{/*le truc la de week*/}
         <Route path="/progressStudent" element={<ProgressStudent />} />
-        <Route path="/quizIntro" element={<QuizIntroPage />} />
-        <Route path="/quizTake" element={<QuizTakePage />} />
-        <Route path="/quizSummary" element={<QuizSummaryPage />} />
-        <Route path="/codeExo" element={<CodeExercisePage />} />
+        <Route path="/quizIntro" element={<QuizIntroPage />} /> {/*rien a signaler pour le moment*/}
+        <Route path="/quizTake" element={<QuizTakePage />} />{/*ok ok*/}
+        <Route path="/quizSummary" element={<QuizSummaryPage />} /> {/*je narrive pas a retrouver le fichier */}
+        <Route path="/codeExo" element={<CodeExercisePage />} /> {/*wtf */}
         <Route path="/theoryExo" element={<TheoryExercisePage />} />
         <Route path="/course-details" element={<CourseDetails />} />
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
          {/* Page des espaces */}
-        <Route path="/spaceManagement" element={<SpacesManagement />} />
-         <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
+        <Route path="/spaceManagement" element={<SpacesManagement />} /> {/*edit subtitle wtf */}
+         <Route path="/InstructorsManagement" element={<InstructorsManagement />} /> {/*cata */}
 
 
         {/* Routes avec paramètres */}
@@ -137,11 +137,11 @@ export default function AppRoutes() {
     <Route path="/CourseManagement" element={<CoursesManagement />} />
     <Route path="/admin/login" element={<AdminLogin />} />
      {/* students management */}
-        <Route path="/StudentsManagement" element={<StudentsMangement />} />
+        <Route path="/StudentsManagement" element={<StudentsMangement />} />    {/* pas de modal */}
         {/* badges management */}
-          <Route path="/BadgesManagement" element={<BadgesManagement />} />
+          <Route path="/BadgesManagement" element={<BadgesManagement />} />{/* meme chose */}
            {/* Forums management */}
-            <Route path="/ForumManagement" element={<ForumManagement />} />
+            <Route path="/ForumManagement" element={<ForumManagement />} /> {/* meme chose */}
 
    
       </Routes>

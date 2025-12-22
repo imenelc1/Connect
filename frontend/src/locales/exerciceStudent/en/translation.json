@@ -13,6 +13,7 @@
      "Edit":"Edit",
      "Send":"Send feedback",
      "Pending":"Pending",
-     "Reviewect":"Reviewect"
+     "Reviewect":"Reviewect",
+     "placeholder":"Enter feedback here..."
   }
 }
