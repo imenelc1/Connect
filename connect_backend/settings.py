@@ -40,17 +40,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     # Apps du projet
     'users',
-    'courses',
+    'courses.apps.CoursesConfig',
     'exercices',
     'quiz',
-    'forum',
+    'forum.apps.ForumConfig',
     'ia',
     'dashboard',
     'feedback',
-    'spaces',
-    'badges',
+    'spaces.apps.SpacesConfig',
     # API et CORS
     'rest_framework',
     'corsheaders',

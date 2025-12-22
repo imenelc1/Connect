@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import { CheckCircle, Clock, MessageCircle, Calendar, ChevronRight } from "lucide-react";
 import "../styles/index.css";

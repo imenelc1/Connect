@@ -32,7 +32,7 @@ export default function AddModal({
 
         {/* Header */}
         <h2 className="text-2xl font-bold mb-2 text-muted">{title}</h2>
-        {subtitle && <p className="text-gray-500 mb-6">{subtitle}</p>}
+        {subtitle && <p className="text-grayc mb-6">{subtitle}</p>}
 
         {/* Formulaire */}
         <form className="space-y-5" onSubmit={onSubmit}>
@@ -60,7 +60,7 @@ export default function AddModal({
             <Button
               variant="outline"
               onClick={onClose}
-              className="!px-5 !py-2 !w-auto !text-sm hover:bg-gray-100 transition"
+              className="!px-5 !py-2 !w-auto !text-sm hover:bg-grad-1 transition"
             >
               {cancelLabel}
             </Button>

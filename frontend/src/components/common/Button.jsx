@@ -20,13 +20,13 @@ export default function Button({
 
   // Variants disponibles : chaque style correspond à un usage spécifique
   const variants = {
-
+    
     quizPrev: `${base.replace("w-full", "w-auto")} 
     px-6 py-2 rounded-xl border border-gray-300 
     bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text))] 
     font-medium hover:opacity-80 disabled:opacity-50`,
 
-    quizNext: `${base.replace("w-full", "w-auto")} 
+  quizNext: `${base.replace("w-full", "w-auto")} 
     px-6 py-2 rounded-xl 
     bg-[rgb(var(--color-primary))] text-white 
     font-medium hover:opacity-90 disabled:opacity-50`,
@@ -62,18 +62,18 @@ export default function Button({
     tabActive: `flex items-center justify-center gap-2 px-5 py-2 rounded-full
       shadow bg-blue text-white`,
 
-    share: `${base} w-full h-14 bg-card border border-blue/20 shadow-sm rounded-full flex items-center px-6 text-grayc font-medium hover:bg-surface transition`,
-
-    quizStart: `${base.replace("w-full", "w-auto")} 
+share: `${base} w-full h-14 bg-card border border-blue/20 shadow-sm rounded-full flex items-center px-6 text-grayc font-medium hover:bg-surface transition`,
+ 
+quizStart: `${base.replace("w-full", "w-auto")} 
   px-6 py-2 rounded-xl 
   bg-[rgb(var(--color-primary))] text-white 
   font-medium hover:opacity-90 disabled:opacity-50`,
-    quizBack: `${base.replace("w-full", "w-auto")} 
+  quizBack: `${base.replace("w-full", "w-auto")} 
   px-6 py-2 rounded-xl 
   border border-gray-300 
   text-[rgb(var(--color-primary))] bg-white 
   font-medium hover:bg-[rgb(var(--color-bg))] disabled:opacity-50`,
-    mediumPlus: `${base.replace("w-full", "")
+ mediumPlus: `${base.replace("w-full", "")
       .replace("py-2", "py-2.5")
       .replace("rounded-full", "rounded-md")}
                text-sm px-4 py-2 transition`,
@@ -81,14 +81,11 @@ export default function Button({
   px-5 py-2 
   bg-grad-4
   text-muted 
-  border border-gray-300 
   rounded-lg 
   hover:bg-gray-100 
   transition
   flex items-center justify-center
 `
-
-
 
   };
 

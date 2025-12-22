@@ -10,33 +10,48 @@ from users.jwt_helpers import IsAuthenticatedJWT
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
 def list_forums(request):
-    """Liste tous les forums avec statistiques"""
-    forums = Forum.objects.all().order_by('-date_creation')
+    """Liste tous les forums visibles par l'utilisateur"""
+    user = request.user
+
+    if hasattr(user, 'etudiant'):
+        forums = Forum.objects.filter(cible='etudiants').order_by('-date_creation')
+    elif hasattr(user, 'enseignant'):
+        forums = Forum.objects.filter(cible='enseignants').order_by('-date_creation')
+    else:
+        forums = Forum.objects.none()  # ou admins si besoin
+
     serializer = ForumSerializer(forums, many=True, context={'request': request})
     return Response(serializer.data)
+
 
 
 # forum/views.py
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def create_forum(request):
-    """Crée un nouveau forum AVEC le premier message"""
     serializer = ForumSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        forum = serializer.save(utilisateur=request.user)
-        
-        # Créer automatiquement le premier message avec le contenu
-        contenu_message = request.data.get('contenu_message', '')
-        if contenu_message:
-            Message.objects.create(
-                forum=forum,
-                utilisateur=request.user,
-                contenu_message=contenu_message
-            )
-        
-        # Retourner le forum avec ses données complètes
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+
+    user = request.user
+
+    # 🔐 visibilité (sécurité)
+    if hasattr(user, 'etudiant'):
+        cible = 'enseignants'
+    elif hasattr(user, 'enseignant'):
+        cible = request.data.get('cible')
+    else:
+        return Response({'error': 'Rôle invalide'}, status=403)
+
+    forum = serializer.save(
+        utilisateur=user,
+        cible=cible,
+        type=request.data.get('type')  # 🏷️ sens du message
+    )
+
+    return Response(ForumSerializer(forum).data, status=201)
+
+
 
 
 @api_view(['DELETE'])
@@ -198,11 +213,21 @@ def create_message(request, forum_id):
             {'error': 'Forum introuvable'}, 
             status=status.HTTP_404_NOT_FOUND
         )
-    
+
+    user = request.user
+
+    # 🔒 Vérification des droits selon la cible du forum
+    if forum.cible == 'etudiants' and not hasattr(user, 'etudiant'):
+        return Response({'error': 'Accès interdit'}, status=status.HTTP_403_FORBIDDEN)
+
+    if forum.cible == 'enseignants' and not hasattr(user, 'enseignant'):
+        return Response({'error': 'Accès interdit'}, status=status.HTTP_403_FORBIDDEN)
+
     serializer = MessageSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        serializer.save(forum=forum, utilisateur=request.user)
+        serializer.save(forum=forum, utilisateur=user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -276,3 +301,18 @@ def delete_comment(request, comment_id):
         {"message": "Commentaire supprimé avec succès"}, 
         status=status.HTTP_200_OK
     )
+
+from users.models import Utilisateur
+
+def get_destinataires(forum):
+    """
+    Retourne tous les utilisateurs qui doivent voir ce forum
+    """
+    if forum.cible == 'etudiants':
+        # uniquement ceux qui ont un profil Etudiant
+        return Utilisateur.objects.filter(etudiant__isnull=False)
+    elif forum.cible == 'enseignants':
+        # uniquement ceux qui ont un profil Enseignant
+        return Utilisateur.objects.filter(enseignant__isnull=False)
+    else:
+        return Utilisateur.objects.none()

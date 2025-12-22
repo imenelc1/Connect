@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import { useTranslation } from "react-i18next";
 import { Eye, CheckCircle, XCircle, BookOpen } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
@@ -8,11 +8,11 @@ import UserCircle from "../components/common/UserCircle";
 export default function ValidationCourses() {
   const { t, i18n } = useTranslation("ValidationCourses");
   const { toggleDarkMode } = useContext(ThemeContext);
-  
+
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
+
   const [activeTab, setActiveTab] = useState("pending");
   const [courses, setCourses] = useState([]);
   const token = localStorage.getItem("admin_token");
@@ -22,13 +22,13 @@ export default function ValidationCourses() {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     // Gestion de la sidebar
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -84,10 +84,10 @@ export default function ValidationCourses() {
     }
   };
   const gradientMap = {
-  Débutant: "bg-primary text-white",
-  Intermédiaire: "bg-pink text-white",
-  Avancé: "bg-purple  text-white",
-};
+    Débutant: "bg-primary text-white",
+    Intermédiaire: "bg-pink text-white",
+    Avancé: "bg-purple  text-white",
+  };
 
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -109,24 +109,20 @@ export default function ValidationCourses() {
             </h1>
             <p className="text-gray">{t("subtitle")}</p>
           </div>
+
           
-          <UserCircle
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
-          />
         </div>
 
         {/* Tabs */}
-        <div className="flex overflow-x-auto gap-2 bg-gray-100 p-2 rounded-full w-max max-w-full shadow-sm">
+        <div  className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
           {["pending", "approved", "rejected"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 md:px-6 py-2 rounded-full text-sm font-medium transition whitespace-nowrap
-                ${
-                  activeTab === tab
-                    ? "bg-white shadow text-primary"
-                    : "text-gray-500 hover:text-primary"
+              className={`px-4 md:px-6 py-2 rounded-full text-sm font-medium transition text-white whitespace-nowrap
+                ${activeTab === tab
+                  ? "text-white bg-primary shadow-md"
+                  : "text-primary/70 "
                 }`}
             >
               {t(`tabs.${tab}`)}
@@ -144,7 +140,7 @@ export default function ValidationCourses() {
             courses.map((course) => (
               <div
                 key={course.id_cours}
-                className="w-full bg-grad-2 border border-gray-200 rounded-2xl shadow-sm 
+                className="w-full bg-grad-2  rounded-2xl shadow-sm 
                            p-6 flex flex-col sm:flex-row gap-4 md:gap-6 hover:shadow-md transition"
               >
                 {/* Icon */}
@@ -159,30 +155,28 @@ export default function ValidationCourses() {
                       {course.titre_cour}
                     </h2>
 
-                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                      course.status === "approved" 
+                    <span className={`text-xs px-3 py-1 rounded-full font-medium ${course.status === "approved"
                         ? "bg-green-100 text-green-800"
                         : course.status === "rejected"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}>
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}>
                       {course.status}
                     </span>
 
-                   <span
-  className={`text-xs px-3 py-1 rounded-full ${
-    gradientMap[course.niveau_cour_label] || "bg-gray-100 text-gray-700"
-  }`}
->
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full ${gradientMap[course.niveau_cour_label] || "bg-gray-100 text-gray-700"
+                        }`}
+                    >
                       {course.niveau_cour_label}
                     </span>
                   </div>
 
-                  <p className="text-gray-400 text-sm md:text-base">
+                  <p className="text-grayc text-sm md:text-base">
                     {course.description}
                   </p>
 
-                  <p className="text-xs md:text-sm text-gray-500">
+                  <p className="text-xs md:text-sm text-gray-300">
                     {t("by")}{" "}
                     <span className="font-medium">
                       {course.utilisateur_nom}

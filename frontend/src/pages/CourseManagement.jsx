@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Pencil, Trash2, BookOpen } from "lucide-react";
@@ -60,6 +60,7 @@ export default function CoursesManagement() {
     Intermédiaire: "bg-grad-3",
     Avancé: "bg-grad-4",
   };
+ 
 
   // Effet pour la responsivité
   useEffect(() => {
@@ -245,7 +246,7 @@ export default function CoursesManagement() {
            className={`
              w-full sm:w-auto  // prend toute la largeur sur mobile, auto sur sm+
              max-w-[85%] sm:max-w-none  // limite la largeur à 90% sur mobile
-             rounded-2xl border border-gray-200 p-4 sm:p-6
+             rounded-2xl  p-4 sm:p-6
              shadow-sm hover:shadow-md flex flex-col
              ${gradientMap[item.niveau_cour_label] || "bg-white"}
            `}
@@ -270,7 +271,7 @@ export default function CoursesManagement() {
 
               <h3 className="font-semibold text-lg mb-2 truncate">{item.titre_cour}</h3>
               {item.description && (
-                <p className="text-gray-500 text-sm mb-4 line-clamp-2">{item.description}</p>
+                <p className="text-grayc  text-sm mb-4 line-clamp-2">{item.description}</p>
               )}
 
               <div className="flex justify-end mt-auto pt-4">

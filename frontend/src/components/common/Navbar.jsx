@@ -161,7 +161,7 @@ export default function Navbar() {
         />
 
         {!collapsed && (
-          <div className="flex flex-col leading-tight ml-2 -mt-1">
+          <div className="hidden md:flex  flex flex-col leading-tight ml-2 -mt-1">
             <span className="text-textc font-semibold text-xs capitalize">
               {t(userData.role)}
             </span>

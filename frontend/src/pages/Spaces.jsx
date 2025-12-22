@@ -8,6 +8,8 @@ import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import { Folder, Bell } from "lucide-react";
 
 import { getSpaces, createSpace, deleteSpace } from "../services/spacesService";
@@ -25,7 +27,12 @@ export default function SpacesPage() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const storedUser = localStorage.getItem("user");
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userRole = userData?.user?.role ?? userData?.role;
   const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
   const initialRole = parsedUser?.role === "enseignant" ? "prof" : "student";
 
@@ -133,10 +140,23 @@ export default function SpacesPage() {
   };
 
   return (
-    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      {/* Sidebar */}
-      <div>
-        <Navbar />
+    <div className="flex flex-col w-full min-h-screen bg-surface pr-5 pt-3">
+      {/* Header */}
+      <div className="flex justify-between items-center w-full mb-6">
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted ml-[250px]">
+          {role === "prof" ? t("spacesTitle") : t("mySpacesTitle")}
+        </h1>
+        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
       </div>
 
       {/* Main Content */}

@@ -45,15 +45,15 @@ import SubmittedExercises from "../pages/SubmittedExercises";
 import QuizManagement from "../pages/QuizManagement";
 import ExercisesManagement from "../pages/ExerciseManagement";
 import CoursesManagement from "../pages/CourseManagement";
-import ValidationCourses from "../pages/ValidationCourses";
-import Dashboard from "../pages/Dashboard"
+ import ValidationCourses from "../pages/ValidationCourses";
+  import Dashboard from "../pages/Dashboard"
 import AdminLogin from "../pages/AdminLogin.jsx";
 import UpdateExercice from "../pages/UpdateExercice.jsx";
 import StudentsMangement from "../pages/studentsManagement.jsx";
 import BadgesManagement from "../pages/badgesManagement.jsx";
 import ForumManagement from "../pages/forumManagement.jsx";
-import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 import SpacesManagement from "../pages/SpacesManagement.jsx";
+import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 
 
 export default function AppRoutes() {
@@ -101,7 +101,7 @@ export default function AppRoutes() {
         <Route path="/my-students" element={<MyStudents />} />
         <Route path="/spaces" element={<Spaces />} />
         <Route path="/ListeExercices" element={<ListeExercicesPage />} />
-        <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
+          <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
         <Route path="/student-exercice" element={<StudentExercice />} />
         <Route path="/progressExercice" element={<ProgressExercice />} />
         <Route path="/progressStudent" element={<ProgressStudent />} />
@@ -113,6 +113,9 @@ export default function AppRoutes() {
         <Route path="/course-details" element={<CourseDetails />} />
         <Route path="/SubmittedExo" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
+         {/* Page des espaces */}
+        <Route path="/spaceManagement" element={<SpacesManagement />} />
+         <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
 
 
         {/* Routes avec paramètres */}
@@ -126,13 +129,14 @@ export default function AppRoutes() {
         <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
 
         {/* admin */}
-        <Route path="ValidationCourses" element={<ValidationCourses></ValidationCourses>}></Route>
-        <Route path="/Dashboard-admin" element={<Dashboard />} />
+        <Route path="/ValidationCourses" element={<ValidationCourses />} />
 
-        {/* course management */}
-        <Route path="/CourseManagement" element={<CoursesManagement />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        {/* students management */}
+        <Route path="/Dashboard-admin" element={<Dashboard/>} />
+
+{/* course management */}
+    <Route path="/CourseManagement" element={<CoursesManagement />} />
+    <Route path="/admin/login" element={<AdminLogin />} />
+     {/* students management */}
         <Route path="/StudentsManagement" element={<StudentsMangement />} />
         {/* badges management */}
           <Route path="/BadgesManagement" element={<BadgesManagement />} />
@@ -143,6 +147,7 @@ export default function AppRoutes() {
            {/* SpacesManagement*/}
             <Route path="/SpacesManagement" element={<SpacesManagement />} />
 
+   
       </Routes>
     </BrowserRouter>
   );

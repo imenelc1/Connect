@@ -1,19 +1,50 @@
 // src/pages/ExercisePage.jsx
-import React, { useState } from "react";
+import React, {useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { MessageCircle, Globe } from "lucide-react";
 import { MdAutoAwesome } from "react-icons/md";
+import { useParams } from "react-router-dom";
 
 import NavBar from "../components/common/NavBar";
 import Mascotte from "../assets/head_mascotte.svg";
 import AssistantIA from "./AssistantIA";
 
 
-export default function ExercisePage() {
+export default function TheoryExercisePage() {
   const [openAssistant, setOpenAssistant] = useState(false);
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [answer, setAnswer] = useState("");
+  const [exercise, setExercise] = useState(null);
+  const { exerciceId } = useParams(); // Récupération de l'ID de l'exercice
+
+
+ // ------------------- FETCH EXERCISE -------------------
+  useEffect(() => {
+    console.log("URL appelée :", `http://localhost:8000/api/exercices/${exerciceId}/`);
+    console.log("${exerciceId}/");
+    if (!exerciceId) return;
+    console.log("URL appelée :", `http://localhost:8000/api/exercices/${exerciceId}/`);
+    const fetchExercise = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
+       
+
+        if (!response.ok) throw new Error("Erreur lors de la récupération de l'exercice");
+        const data = await response.json();
+        setExercise(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingExercise(false);
+      }
+    };
+
+    fetchExercise();
+  }, [exerciceId]);
+
+
+
 
 
   const { t, i18n } = useTranslation("exercisePage");
@@ -80,18 +111,26 @@ export default function ExercisePage() {
 
         {/* EXERCISE CARD */}
         <div className="border border-[rgb(var(--color-gray-light))] bg-[rgb(var(--grad-6))] shadow-card rounded-2xl px-4 sm:px-5 md:px-6 py-5 mb-12">
+          {exercise ? (
+    <>
           <p className="font-semibold text-[rgb(var(--color-primary))] text-lg sm:text-xl md:text-xl">
-            Exercice 1
+            Exercice 
             <span className="font-normal text-[rgb(var(--color-text))] ml-2 text-base sm:text-lg">
-              Somme de deux nombres
+             {exercise.titre_exo}
             </span>
           </p>
 
           <p className="text-[rgb(var(--color-gray))] mt-2 text-sm sm:text-base">
-            Écrivez un programme C qui affiche la somme de deux entiers
+            {exercise.enonce}
           </p>
+          </>
+  ) : (
+    <p className="text-red-500 text-sm">
+      Impossible de charger l'exercice.
+    </p>
+  )}
         </div>
-
+  
         {/* SECTION TITLE */}
         <h2 className="text-lg sm:text-xl font-semibold text-[rgb(var(--color-primary))] mb-3">
           {t("your_solution")}

@@ -1,38 +1,59 @@
-
 import React from "react";
-import CodeBlock from "../common/CodeBlock";        // Bloc de code illustratif
-import mascotte from "../../assets/mascotte.svg";  // Image mascotte/robot
-import CardsSection from "../common/CardsSection";  // Section des fonctionnalités
-import AboutSection from "../ui/AboutSection";      // Section "À propos"
+import { motion } from "framer-motion";
+import CodeBlock from "../common/CodeBlock";
+import mascotte from "../../assets/mascotte.svg";
+import CardsSection from "../common/CardsSection";
+import AboutSection from "../ui/AboutSection";
 import "../../styles/index.css";
 
 export default function Body() {
+  const fadeUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
+  };
+
   return (
     <section className="py-20 bg-background flex flex-col items-center gap-16 w-full max-w-[1400px] mx-auto px-6">
       
-      {/* ---------------------- PARTIE 1 : Code + Mascotte ---------------------- */}
-      <div className="flex flex-row items-center justify-center gap-0">
-
-        {/* Bloc de code */}
+      <motion.div
+        className="flex flex-row items-center justify-center gap-0"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={fadeUp}
+      >
         <div className="md:-translate-y-10">
           <CodeBlock />
         </div>
-
-        {/* Mascotte/Robot à côté du code */}
-        <img
+        <motion.img
           src={mascotte}
           alt="Robot"
           className="w-44 md:w-56 md:translate-y-12"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.2 } }}
+          viewport={{ once: true, amount: 0.3 }}
         />
-      </div>
+      </motion.div>
 
-      {/* ----------------------  PARTIE 2 : About Section ---------------------- */}
-      <AboutSection />
+      <motion.div
+        className="w-full"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={fadeUp}
+      >
+        <AboutSection />
+      </motion.div>
 
-      {/* ---------------------- PARTIE 3 : Cards Section ---------------------- */}
-      <div className="w-full">
+      <motion.div
+        className="w-full"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={fadeUp}
+      >
         <CardsSection />
-      </div>
+      </motion.div>
 
     </section>
   );

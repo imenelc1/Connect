@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModel from "../components/common/AddModel";
 import { Users, Trash2, Edit, Calendar, Plus } from "lucide-react";
@@ -15,8 +15,8 @@ function DetailsModal({ open, onClose, instructor }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
       <div className="bg-card rounded-xl shadow-lg p-6 w-[400px]">
-        <h2 className="text-xl font-bold mb-4">Résumé de l'enseignant</h2>
-        <ul className="text-sm text-gray-300 space-y-2">
+        <h2 className="text-xl text-muted font-bold mb-4">Résumé de l'enseignant</h2>
+        <ul className="text-sm text-gray space-y-2">
           <li><strong>Prénom :</strong> {instructor.firstName}</li>
           <li><strong>Nom :</strong> {instructor.lastName}</li>
           <li><strong>Email :</strong> {instructor.email}</li>
@@ -178,7 +178,7 @@ export default function InstructorsPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-card rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+        <div className="bg-card rounded-xl  shadow-sm overflow-x-auto">
           <div className="min-w-full">
             <table className="w-full text-sm text-left">
               <thead className="bg-grad-3 text-gray-700">
@@ -201,15 +201,15 @@ export default function InstructorsPage() {
                   >
                     <td className="px-4 py-4 sm:px-6 sm:py-4 font-medium text-muted">{i.firstName}</td>
                     <td className="px-4 py-4 sm:px-6 sm:py-4 font-medium text-muted">{i.lastName}</td>
-                    <td className="px-4 py-4 sm:px-6 sm:py-4 text-gray-500 hidden sm:table-cell">{i.email}</td>
-                    <td className="px-4 py-4 sm:px-6 sm:py-4 text-gray-500 hidden md:table-cell">
+                    <td className="px-4 py-4 sm:px-6 sm:py-4 text-grayc hidden sm:table-cell">{i.email}</td>
+                    <td className="px-4 py-4 sm:px-6 sm:py-4 text-grayc hidden md:table-cell">
                       <div className="flex items-center gap-2">
                         <Calendar size={16} className="text-blue" />
                         {i.birthdate}
                       </div>
                     </td>
-                    <td className="px-4 py-4 sm:px-6 sm:py-4 text-gray-500 hidden lg:table-cell">{i.rank}</td>
-                    <td className="px-4 py-4 sm:px-6 sm:py-4 text-gray-500 hidden lg:table-cell">{i.matricule}</td>
+                    <td className="px-4 py-4 sm:px-6 sm:py-4 text-grayc hidden lg:table-cell">{i.rank}</td>
+                    <td className="px-4 py-4 sm:px-6 sm:py-4 text-grayc hidden lg:table-cell">{i.matricule}</td>
                     <td className="px-4 py-4 sm:px-6 sm:py-4 text-gray-500">
                       <div className="flex items-center gap-3">
                         <button

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -12,7 +12,8 @@ import ThemeButton from "../components/common/ThemeButton";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 
 
 const gradientMap = {
@@ -43,6 +44,7 @@ export default function AllCoursesPage() {
           level: c.niveau_exercice_label,
           description: c.enonce,
           author: c.utilisateur_name,
+          categorie:c.categorie,
           initials: c.utilisateur_name
             .split(" ")
             .map(n => n[0])
@@ -139,22 +141,19 @@ export default function AllCoursesPage() {
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
-  return (
-    <div className="flex bg-surface min-h-screen">
+   return (
+    <div className="flex min-h-screen bg-background dark:bg-gray-900">
       <Navbar />
-      {/* Header Right Controls */}
-      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
-
-        {/* Notification Icon */}
-        <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-          <Bell size={16} />
-        </div>
-
-        {/* User Circle */}
+      
+      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
         />
       </div>
 

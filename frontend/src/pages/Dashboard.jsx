@@ -1,10 +1,11 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import CourseCard from "../components/common/CourseCard";
 import { Users, BookOpen, ClipboardList, LayoutGrid } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
+import ContentFilters from "../components/common/ContentFilters";
 
 export default function DashboardAdmin() {
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -172,7 +173,7 @@ export default function DashboardAdmin() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* LEFT: Recent Activity */}
-          <div className="bg-card border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div className="bg-card  rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-muted mb-4">{t("recentActivity")}</h2>
 
             <ul className="flex flex-col gap-4">
@@ -192,25 +193,29 @@ export default function DashboardAdmin() {
           </div>
 
           {/* RIGHT: COURSES VALIDATION */}
-          <div className="bg-card border border-gray-200 rounded-2xl p-6 shadow-sm">
+          <div className="bg-card  rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-muted mb-4">{t("validationCourses")}</h2>
 
             {/* TABS */}
-            <div className="flex overflow-x-auto gap-2 bg-grad-5 p-2 rounded-full w-max max-w-full shadow-sm mb-4">
+            <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
               {["pending", "approved", "rejected"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition whitespace-nowrap
+                   className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm
                     ${activeTab === tab 
-                      ? "bg-grad-3 shadow text-muted" 
-                      : "text-gray-500 hover:text-muted"
+                       ? "text-white bg-primary shadow-md"
+                  : "text-primary/70 "
                     }`}
                 >
                   {t(`tabs.${tab}`)} ({coursesByTab[tab].length})
                 </button>
               ))}
             </div>
+    
+
+
+                     
 
             {/* COURSES LIST */}
             <div className="flex flex-col gap-4">

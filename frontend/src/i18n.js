@@ -95,6 +95,10 @@ import translationnFRbadgesManagement from "./locales/badgesManagement/fr/transl
 
 import translationnENStudentsManagement from "./locales/StudentsManagement/en/translation.json";
 import translationnFRStudentsManagement from "./locales/StudentsManagement/fr/translation.json";
+import translationFRSpacesPage from "./locales/addSpace/fr.json";
+import translationENSpacesPage from "./locales/addSpace/en.json";
+import translationFRInstructors from "./locales/addinstructors/fr.json";
+import translationENInstructors from "./locales/addinstructors/en.json";
 const resources = {
   fr: {
     translation: translationFR,
@@ -120,6 +124,10 @@ const resources = {
     quiz1: translationFRQuiz1,
     quiz2: translationFRquiz2,
     quiz3:translationFRrecquiz,
+
+     
+      space: translationFRSpacesPage,
+       instructors: translationFRInstructors,
 
    
 
@@ -147,7 +155,7 @@ const resources = {
      ForumManagement:translationnFRforumManagement,
      BadgesManagement:translationnFRbadgesManagement,
     StudentsManagement:translationnFRStudentsManagement
-  },
+    },
 
   en: {
     translation: translationEN,
@@ -195,7 +203,9 @@ const resources = {
     DashboardAdmin: translationENDashboardAdmin,
      ForumManagement:translationnENforumManagement,
        BadgesManagement:translationnENbadgesManagement,
-      StudentsManagement:translationnENStudentsManagement
+      StudentsManagement:translationnENStudentsManagement,
+       space: translationENSpacesPage,
+      instructors: translationENInstructors,
 
 
   },

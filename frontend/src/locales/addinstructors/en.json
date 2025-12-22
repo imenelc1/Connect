@@ -1,0 +1,21 @@
+{
+  "title": "Instructors Management",
+  "subtitle": "Manage instructors and teaching staff",
+  "addInstructor": "Add Instructor",
+  "search": "Search instructors...",
+  "instructor": "Instructor",
+  "email": "Email",
+  "courses": "Courses",
+  "students": "Students",
+  "actions": "Actions",
+  "modalAddTitle": "Add a new instructor",
+  "modalAddSubtitle": "Fill in the details to create the instructor profile",
+  "modalEditTitle": "Edit instructor",
+  "modalEditSubtitle": "Modify the instructor details",
+  "initials": "Initials",
+  "name": "Name",
+  "create": "Create",
+  "update": "Update",
+  "cancel": "Cancel",
+  "toggleLang": "Switch to FR"
+}

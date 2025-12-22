@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import { MessageSquare, TrendingUp, User, Plus } from "lucide-react";
 import "../styles/index.css";
@@ -96,7 +96,7 @@ export default function ForumManagement() {
           {forums.map((forum, i) => (
             <div
               key={i}
-              className="bg-grad-2 border border-gray-200 rounded-xl p-4 sm:p-6 
+              className="bg-grad-2  rounded-xl p-4 sm:p-6 
                          flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4"
             >
               {/* LEFT PART - Plus compact sur mobile */}
@@ -115,7 +115,7 @@ export default function ForumManagement() {
                     </h3>
                     
                     {/* Description plus petite sur mobile */}
-                    <p className="text-gray-500 text-sm sm:text-base mt-1">
+                    <p className="text-grayc/80 text-sm sm:text-base mt-1">
                       {forum.description}
                     </p>
 

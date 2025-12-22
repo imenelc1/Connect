@@ -1,0 +1,22 @@
+{
+  "title": "Gestion des enseignants",
+  "subtitle": "Gérer les enseignants et le personnel académique",
+  "toggleLang": "Changer de langue",
+  "addInstructor": "Ajouter un enseignant",
+  "search": "Rechercher un enseignant...",
+  "instructor": "Enseignant",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "email": "Email",
+  "birthdate": "Date de naissance",
+  "rank": "Rang",
+  "matricule": "Matricule",
+  "actions": "Actions",
+  "modalAddTitle": "Ajouter un nouvel enseignant",
+  "modalAddSubtitle": "Remplissez les détails pour créer le profil de l’enseignant",
+  "modalEditTitle": "Modifier un enseignant",
+  "modalEditSubtitle": "Modifiez les informations de l’enseignant",
+  "create": "Créer",
+  "update": "Mettre à jour",
+  "cancel": "Annuler"
+}
