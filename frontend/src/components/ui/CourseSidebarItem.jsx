@@ -10,7 +10,20 @@ export default function CoursesSidebarItem({ sections, currentSectionIndex, setC
   };
 
   return (
-    <aside className="w-full sm:w-[280px] bg-card border border-blue/20 rounded-3xl p-4 space-y-4 overflow-y-auto max-h-[80vh]">
+   <aside className="
+  w-full 
+  sm:w-[230px]
+  lg:w-[250px]
+  flex-shrink-0
+  bg-card 
+  border border-blue/20 
+  rounded-3xl 
+  p-4 
+  space-y-4 
+  overflow-y-auto 
+  max-h-[80vh]
+">
+
       {sections.map((section, i) => {
         const isActive = i === currentSectionIndex;
         const sectionProgress = section.lessons?.length

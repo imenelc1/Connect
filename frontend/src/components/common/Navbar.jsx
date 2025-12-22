@@ -112,6 +112,8 @@ export default function Navbar() {
     "/all-exercises",
     "/new-exercise",
     "/exercise-preview",
+    "/start-exerciseCode",
+    "/ListeExercices",
   ];
 
   const quizRoutes = [
