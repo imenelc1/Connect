@@ -17,6 +17,7 @@ from .jwt_helpers import IsAuthenticatedJWT
 from django.core.mail import send_mail
 import uuid
 from rest_framework.permissions import BasePermission
+from django.http import JsonResponse
 
 # -----------------------------
 # Constantes JWT manquantes
@@ -329,10 +330,14 @@ def get_enseignants(request):
             "id_utilisateur": e.utilisateur.id_utilisateur,
             "nom": e.utilisateur.nom,
             "prenom": e.utilisateur.prenom,
+            "email": e.utilisateur.adresse_email,
+            "date_naissance": e.utilisateur.date_naissance,
+            "grade": e.grade,
+            "matricule": e.utilisateur.matricule
         }
         for e in enseignants
     ]
-    return Response(data, status=200)
+    return JsonResponse(data, safe=False)
 
 @api_view(["GET"])
 @permission_classes([IsAdminOrTeacherJWT])

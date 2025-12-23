@@ -209,6 +209,128 @@ const [activeCourses, setActiveCourses] = useState("");
             <span className="ml-16 text-xl font-bold">Stats</span>
           </button>
         </div>
+
+        {/* Quick stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-textc">
+          <Cards text="Average Student Progress" value="68%" icon={<TrendingDown size={18} />} bg="bg-grad-2" />
+          <Cards text="Success Rate" value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-3" />
+          <Cards text="Average time spent" value="4.2h" icon={<Book size={18} />} bg="bg-grad-4" />
+          <Cards text="Active Courses" value="10" icon={<Clock3 size={18} />} bg="bg-grad-2" />
+        </div>
+
+       {/* Learning curve */}
+      <div className="p-3 w-full" style={{ height: "330px" }}>
+        <LearningCurve />
+      </div>
+
+        {/* Quick actions + Pie chart */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {/* Quick actions */}
+          <div>
+            <h2 className="text-xl text-muted font-bold mb-6">{t("Dashboard.Quick")}</h2>
+
+            {/* Fond complètement opaque */}
+            <div className="bg-grad-1 text-center text-white rounded-3xl  pl-6 shadow-lg">
+
+              <div className="flex flex-col">
+
+                {/* Create a course */}
+                <Link
+                  to="/coursInfo"
+                  className="relative w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 rounded-tl-full transition"
+                >
+                  <CirclePlus size={22} />
+                  <span className="ml-16 text-xl font-bold">
+                    {t("Dashboard.CreateC")}
+                  </span>
+                </Link>
+
+                {/* My spaces */}
+                <Link
+                  to="/spaces"
+                  className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 transition"
+                >
+                  <Activity size={22} />
+                  <span className="ml-16 text-xl font-bold">
+                    {t("Dashboard.Space")}
+                  </span>
+                </Link>
+
+                {/* Publish exercise */}
+                <Link
+                  to="/new-exercise"
+                  className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 transition"
+                >
+                  <FolderPlus size={22} />
+                  <span className="ml-16 text-xl font-bold">
+                    {t("Dashboard.publish")}
+                  </span>
+                </Link>
+
+                {/* Stats */}
+                <Link
+                  to="/my-students"
+                  className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 rounded-bl-full transition"
+                >
+                  <TrendingDown size={22} />
+                  <span className="ml-16 text-xl font-bold">
+                    {t("Dashboard.Stats")}
+                  </span>
+                </Link>
+
+              </div>
+            </div>
+          </div>
+
+          {/* Pie chart */}
+          <div className="rounded-2xl shadow-md p-4 flex flex-col items-center bg-card">
+            <PieChart width={220} height={220}>
+              <Pie
+                dataKey="value"
+                data={data}
+                outerRadius={90}
+                paddingAngle={2}
+                label={({ value }) => value}
+                labelStyle={{ fontSize: 12 }}
+              >
+                <Cell fill="rgb(var(--color-purple))" />
+                <Cell fill="rgb(var(--color-blue))" />
+                <Cell fill="rgb(var(--color-pink))" />
+              </Pie>
+            </PieChart>
+
+            <div className="flex gap-4 text-xs mt-2">
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-rgb(var(--color-purple)) rounded-full"></span> Published
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-rgb(var(--color-primary)) rounded-full"></span> Draft
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-rgb(var(--color-pink)) rounded-full"></span> Quizzes
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Activity feed */}
+        <div className="bg-card p-4 rounded-2xl">
+          <h2 className="text-lg font-bold mb-1">{t("Dashboard.ActivityF")}</h2>
+          <p className="text-gray-500 text-xs mb-2">1st Feb Monday - 7th Feb Sunday</p>
+
+          {dat.map((item, index) => (
+            <NotificationItem
+              key={index}
+              title={item.title}
+              date={item.date}
+              day={item.day}
+              time={item.time}
+            />
+          ))}
+        </div>
+
       </div>
     </div>
 
