@@ -8,8 +8,6 @@ import LearningCurve from "../components/common/LearningCurveEtu";
 import NotificationItem from "../components/common/AcivityFeed";
 import ProgressBar from "../components/ui/ProgressBar";
 import UserCircle from "../components/common/UserCircle";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -30,12 +28,6 @@ export default function Dashboardetu() {
 
   const [activeCoursesCount, setActiveCoursesCount] = useState(0);
   const [averageTime, setAverageTime] = useState(0); // en secondes
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-      useEffect(() => {
-         const handler = (e) => setSidebarCollapsed(e.detail);
-         window.addEventListener("sidebarChanged", handler);
-         return () => window.removeEventListener("sidebarChanged", handler);
-       }, []);
 
   const sessionStartRef = useRef(Date.now());
 
@@ -105,30 +97,27 @@ useEffect(() => {
 
 
   return (
-    <div className=" min-h-screen bg-primary/10">
-  <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
+    <div className="flex min-h-screen bg-primary/10">
+      <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
-     <div className={`
-        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
-        ${sidebarCollapsed ? "ml-20" : "ml-64"}
-      `}>
+      <div className="flex-1 pl-6 pr-3 sm:pl-8 sm:pr-5 md:pl-10 md:pr-6 lg:pl-12 lg:pr-8 space-y-4">
         {/* Header */}
         <header className="flex justify-between items-center gap-3">
           <ContentSearchBar className="mt-3" />
           <div className="flex items-center gap-3 mt-3">
-           <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
+            <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
+              <Bell size={16} />
+            </div>
+            <div className="w-7 h-7 flex items-center justify-center">
+              <UserCircle
+                size={20}
+                initials={initials}
+                onToggleTheme={toggleDarkMode}
+                onChangeLang={(lang) => i18n.changeLanguage(lang)}
+              />
+            </div>
           </div>
         </header>
 

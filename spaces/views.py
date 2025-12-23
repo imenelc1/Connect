@@ -37,7 +37,7 @@ class CreateSpaceView(APIView):
             return Response(SpaceSerializer(space).data, status=201)
         return Response(serializer.errors, status=400)
 
-# --- Liste des espaces du prof connecté ---
+
 # --- Liste des espaces du prof connecté ---
 class SpaceListView(generics.ListAPIView):
     serializer_class = SpaceSerializer
@@ -48,18 +48,18 @@ class SpaceListView(generics.ListAPIView):
         return Space.objects.filter(utilisateur=user)
 
 # --- Détail / Update / Delete d'un espace ---
-class SpaceDetailView(generics.RetrieveAPIView):
+class SpaceDetailView(generics.RetrieveDestroyAPIView):
     serializer_class = SpaceSerializer
     permission_classes = [IsAuthenticatedJWT]
     lookup_field = "id_space"
 
     def get_queryset(self):
         user = self.request.user
-
         return Space.objects.filter(
             Q(utilisateur=user) |                # prof (créateur)
             Q(spaceetudiant__etudiant=user)      # étudiant inscrit
         ).distinct()
+
 
 # --- Ajouter un étudiant à un espace ---
 class AddStudentToSpaceView(APIView):
@@ -255,3 +255,10 @@ class remove_student_from_space(APIView):
             return Response({"success": "Étudiant supprimé"}, status=200)
         except SpaceEtudiant.DoesNotExist:
             return Response({"error": "Relation non trouvée"}, status=404)
+        
+
+def etudiant_appartient_a_lespace(user, exercice):
+    return SpaceEtudiant.objects.filter(
+        etudiant=user,
+        space__spaceexo__exercice=exercice
+    ).distinct().exists()

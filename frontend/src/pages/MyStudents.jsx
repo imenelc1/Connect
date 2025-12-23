@@ -27,12 +27,6 @@ export default function MyStudents() {
   const [modal, setModal] = useState(false);
   const [email, setEmail] = useState("");
   const [space, setSpace] = useState("");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  useEffect(() => {
-    const handler = (e) => setSidebarCollapsed(e.detail);
-    window.addEventListener("sidebarChanged", handler);
-    return () => window.removeEventListener("sidebarChanged", handler);
-  }, []);
 
   const [studentsProgress, setStudentsProgress] = useState({});
 
@@ -159,7 +153,7 @@ export default function MyStudents() {
   };
 
   return (
-    <div className=" w-full min-h-screen bg-surface">
+    <div className="flex flex-col w-full min-h-screen bg-surface">
       {/* Header */}
       <div className="flex justify-between items-center w-full m-5 pl-4 lg:pl-60">
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted">
@@ -174,37 +168,32 @@ export default function MyStudents() {
         </div>
       </div>
 
-      <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
+      <div className="flex w-full">
         <Navbar />
-      </div>
-       <div className={`
-        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
-        ${sidebarCollapsed ? "ml-20" : "ml-64"}
-      `}>
 
-      <div className="flex-1 p-4 sm:p-6 ml-0 mt-5 lg:ml-60 transition-all duration-300">
-        {/* Boutons */}
-        <div className="flex flex-col sm:flex-row justify-end sm:items-center gap-4 mb-6">
-          <Button
-            variant="primary"
-            className="!px-4 !py-2 !w-auto"
-            onClick={() => setModal(true)}
-          >
-            {t("addStudent")}
-          </Button>
-        </div>
+        <div className="flex-1 p-4 sm:p-6 ml-0 mt-5 lg:ml-60 transition-all duration-300">
+          {/* Boutons */}
+          <div className="flex flex-col sm:flex-row justify-end sm:items-center gap-4 mb-6">
+            <Button
+              variant="primary"
+              className="!px-4 !py-2 !w-auto"
+              onClick={() => setModal(true)}
+            >
+              {t("addStudent")}
+            </Button>
+          </div>
 
-        {/* Liste des étudiants */}
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {studentsList.length > 0 ? (
-            studentsList.map((st, index) => {
-              const gradients = ["bg-grad-2", "bg-grad-3", "bg-grad-4"];
-              const randomGrad = gradients[index % gradients.length];
+          {/* Liste des étudiants */}
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {studentsList.length > 0 ? (
+              studentsList.map((st, index) => {
+                const gradients = ["bg-grad-2", "bg-grad-3", "bg-grad-4"];
+                const randomGrad = gradients[index % gradients.length];
 
-              return (
-                <div
-                  key={st.id}
-                  className={`p-6 rounded-2xl shadow-lg border border-white/10 ${randomGrad}
+                return (
+                  <div
+                    key={st.id}
+                    className={`p-6 rounded-2xl shadow-lg border border-white/10 ${randomGrad}
                       transition-transform duration-300 hover:scale-[1.03] hover:shadow-2xl`}
                   >
                     <div className="flex items-center justify-between">
@@ -224,6 +213,7 @@ export default function MyStudents() {
                           <ChevronRight size={16} className="w-6 h-6" />
                         </Button>
                       </div>
+                    </div>
 
                     {/* Badges espaces */}
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -255,74 +245,50 @@ export default function MyStudents() {
                       ></div>
                     </div>
                   </div>
-
-                  {/* Badges espaces */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {st.spaces.map((spName, i) => (
-                      <span key={i} className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2">
-                        {spName}
-                        <button
-                          onClick={() => handleRemove(st.id, st.spacesIds[i])}
-                          className="text-red-500 font-bold"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Progress bar */}
-                  <div className="w-full h-3 bg-grayc/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-black rounded-full"
-                      style={{ width: `${st.progress}%` }}
-                    ></div>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <p className="text-grayc">{t("noStudentsMessage")}</p>
-          )}
+                );
+              })
+            ) : (
+              <p className="text-grayc">{t("noStudentsMessage")}</p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
 
-      {/* Modal */ }
-  <AddModal
-    open={modal}
-    onClose={() => setModal(false)}
-    title={t("addStudentTitle")}
-    subtitle={t("addStudentSubtitle")}
-    submitLabel={t("addStudentSubmit")}
-    cancelLabel={t("addStudentCancel")}
-    onSubmit={handleSubmit}
-    fields={[
-      {
-        label: t("email"),
-        placeholder: t("emailPlaceholder"),
-        value: email,
-        onChange: (e) => setEmail(e.target.value),
-      },
-      {
-        label: t("space"),
-        element: (
-          <select
-            value={space}
-            onChange={(e) => setSpace(e.target.value)}
-            className="w-full border rounded px-3 py-2 text-black/80"
-          >
-            <option value="">{t("selectSpace")}</option>
-            {spacesList.map((s) => (
-              <option key={s.id_space} value={s.id_space}>
-                {s.nom_space}
-              </option>
-            ))}
-          </select>
-        ),
-      },
-    ]}
-  />
-    </div >
+      {/* Modal */}
+      <AddModal
+        open={modal}
+        onClose={() => setModal(false)}
+        title={t("addStudentTitle")}
+        subtitle={t("addStudentSubtitle")}
+        submitLabel={t("addStudentSubmit")}
+        cancelLabel={t("addStudentCancel")}
+        onSubmit={handleSubmit}
+        fields={[
+          {
+            label: t("email"),
+            placeholder: t("emailPlaceholder"),
+            value: email,
+            onChange: (e) => setEmail(e.target.value),
+          },
+          {
+            label: t("space"),
+            element: (
+              <select
+                value={space}
+                onChange={(e) => setSpace(e.target.value)}
+                className="w-full border rounded px-3 py-2 text-black/80"
+              >
+                <option value="">{t("selectSpace")}</option>
+                {spacesList.map((s) => (
+                  <option key={s.id_space} value={s.id_space}>
+                    {s.nom_space}
+                  </option>
+                ))}
+              </select>
+            ),
+          },
+        ]}
+      />
+    </div>
   );
 }
