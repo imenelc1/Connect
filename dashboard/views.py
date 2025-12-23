@@ -9,12 +9,17 @@ from django.db.models.functions import TruncDate
 from django.utils.timezone import now
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
+from exercices.models import Exercice
 from spaces.models import Space, SpaceEtudiant
+from spaces.views import etudiant_appartient_a_lespace
 from users.jwt_auth import IsAuthenticatedJWT
 from users.models import Utilisateur
 from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration, TentativeExercice
 from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta
+
+from rest_framework.exceptions import PermissionDenied
+
 
 
 @api_view(['POST'])
@@ -373,17 +378,51 @@ def list_tentatives(request):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 # ---------------- POST nouvelle tentative ----------------
-@api_view(['POST'])
-@permission_classes([IsAuthenticatedJWT])
-def create_tentative(request):
-    # On utilise le serializer d'écriture pour valider et créer/mettre à jour
-    serializer = TentativeExerciceWriteSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        tentative = serializer.save(utilisateur=request.user)
-        return Response(TentativeExerciceWriteSerializer(tentative).data, status=status.HTTP_201_CREATED)
-    else:
-        print(serializer.errors)  # <-- ajoute ça
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class create_tentative(APIView):
+    permission_classes = [IsAuthenticatedJWT]  # ou IsAuthenticatedJWT
+
+    def post(self, request):
+        user = request.user
+        exercice_id = request.data.get("exercice_id")
+
+        # Vérification de l'exercice
+        try:
+            exercice = Exercice.objects.get(id_exercice=exercice_id)
+        except Exercice.DoesNotExist:
+            return Response({"error": "Exercice non trouvé"}, status=404)
+
+        # Vérification que l'étudiant appartient à l'espace
+        if not etudiant_appartient_a_lespace(user, exercice):
+            raise PermissionDenied("Vous ne pouvez pas soumettre cet exercice")
+
+        # Calcul du temps passé
+        temps_passe_sec = request.data.get("temps_passe", 0)
+        temps_passe = timedelta(seconds=int(temps_passe_sec))
+
+        # Création ou mise à jour de la tentative
+        tentative, created = TentativeExercice.objects.update_or_create(
+            utilisateur=user,
+            exercice=exercice,
+            defaults={
+                "reponse": request.data.get("reponse", ""),
+                "output": request.data.get("output", ""),
+                "etat": request.data.get("etat", "brouillon"),
+                "temps_passe": temps_passe,
+            }
+        )
+
+        return Response({
+            "success": "Soumission acceptée",
+            "tentative": {
+                "id": tentative.id,
+                "etat": tentative.etat,
+                "reponse": tentative.reponse,
+                "temps_passe": tentative.temps_passe.total_seconds(),
+                "submitted_at": tentative.submitted_at,
+                "feedback": tentative.feedback
+            }
+        })
+
 
 
 @api_view(['GET'])
