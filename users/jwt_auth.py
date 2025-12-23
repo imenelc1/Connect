@@ -1,11 +1,10 @@
 import jwt
 from django.conf import settings
-from rest_framework import exceptions
-from .models import Utilisateur
+from rest_framework import exceptions, permissions, status
 from rest_framework.response import Response
-from rest_framework import status
 from functools import wraps
-from rest_framework import permissions
+from .models import Utilisateur
+
 
 def jwt_authenticate(request):
     """
@@ -17,12 +16,23 @@ def jwt_authenticate(request):
         raise exceptions.AuthenticationFailed('Token manquant')
 
     try:
-        token = auth_header.split(' ')[1]  # "Bearer <token>"
+        token = auth_header.split(' ')[1]  # Bearer <token>
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        user = Utilisateur.objects.get(id_utilisateur=payload['user_id'])
+
+        # ✅ GÉRER admin_id ET user_id
+        user_id = payload.get("user_id") or payload.get("admin_id")
+        if not user_id:
+            raise exceptions.AuthenticationFailed("Token invalide (id manquant)")
+
+        user = Utilisateur.objects.get(id_utilisateur=user_id)
         return user, payload
-    except (jwt.ExpiredSignatureError, jwt.DecodeError, Utilisateur.DoesNotExist):
-        raise exceptions.AuthenticationFailed('Token invalide')
+
+    except jwt.ExpiredSignatureError:
+        raise exceptions.AuthenticationFailed("Token expiré")
+    except jwt.DecodeError:
+        raise exceptions.AuthenticationFailed("Token invalide")
+    except Utilisateur.DoesNotExist:
+        raise exceptions.AuthenticationFailed("Utilisateur inexistant")
 
 
 def jwt_required(view_func):
@@ -35,9 +45,12 @@ def jwt_required(view_func):
             user, payload = jwt_authenticate(request)
             request.user = user
             request.user_role = payload.get("role")
-            request.user_id = payload.get("user_id")
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+            request.user_id = payload.get("user_id") or payload.get("admin_id")
+        except exceptions.AuthenticationFailed as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         return view_func(self, request, *args, **kwargs)
     return wrapper
 
@@ -51,7 +64,7 @@ class IsAuthenticatedJWT(permissions.BasePermission):
             user, payload = jwt_authenticate(request)
             request.user = user
             request.user_role = payload.get("role")
-            request.user_id = payload.get("user_id")
+            request.user_id = payload.get("user_id") or payload.get("admin_id")
             return True
         except exceptions.AuthenticationFailed:
             return False

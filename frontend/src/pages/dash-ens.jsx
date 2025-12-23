@@ -154,10 +154,10 @@ useEffect(() => {
           <Cards text="Active Courses" value="10" icon={<Clock3 size={18} />} bg="bg-grad-2" />
         </div>
 
-        {/* Learning curve */}
-        <div className="p-3 w-full" style={{ height: "250px" }}>
-          <LearningCurve />
-        </div>
+       {/* Learning curve */}
+      <div className="p-3 w-full" style={{ height: "330px" }}>
+        <LearningCurve />
+      </div>
 
         {/* Quick actions + Pie chart */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

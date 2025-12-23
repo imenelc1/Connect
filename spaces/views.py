@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from courses.models import Cours
 from courses.serializers import CoursSerializer
 from exercices.models import Exercice
+from rest_framework import exceptions
 
 from exercices.serializers import ExerciceSerializer
 from quiz.models import Quiz
@@ -45,6 +46,10 @@ class SpaceListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+
+        if not user or user.is_anonymous:
+            raise exceptions.NotAuthenticated("Token invalide ou expiré")
+
         return Space.objects.filter(utilisateur=user)
 
 # --- Détail / Update / Delete d'un espace ---
