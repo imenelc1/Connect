@@ -57,24 +57,36 @@ int main() {
   }, []);
 
   // ------------------- FETCH EXERCISE -------------------
-  useEffect(() => {
-    if (!exerciceId) return;
-    const fetchExercise = async () => {
-      try {
-        const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
-        if (!response.ok) throw new Error("Erreur lors de la récupération de l'exercice");
-        const data = await response.json();
-        setExercise(data);
-        setStartTime(Date.now());
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoadingExercise(false);
-      }
-    };
-    fetchExercise();
-  }, [exerciceId]);
-
+ useEffect(() => {
+     console.log(
+       "URL appelée :",
+       `http://localhost:8000/api/exercices/${exerciceId}/`
+     );
+     console.log("${exerciceId}/");
+     if (!exerciceId) return;
+     console.log(
+       "URL appelée :",
+       `http://localhost:8000/api/exercices/${exerciceId}/`
+     );
+     const fetchExercise = async () => {
+       try {
+         const response = await fetch(
+           `http://localhost:8000/api/exercices/${exerciceId}/`
+         );
+ 
+         if (!response.ok)
+           throw new Error("Erreur lors de la récupération de l'exercice");
+         const data = await response.json();
+         setExercise(data);
+       } catch (error) {
+         console.error(error);
+       } finally {
+         setLoadingExercise(false);
+       }
+     };
+ 
+     fetchExercise();
+   }, [exerciceId]);
   // ------------------- SAVE DRAFT AUTOMATIQUE -------------------
   useEffect(() => {
     if (!exerciceId || !userCode) return;

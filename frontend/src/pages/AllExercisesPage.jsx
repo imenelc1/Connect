@@ -24,7 +24,7 @@ const gradientMap = {
 
 
 export default function AllCoursesPage() {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
   const currentUserId = getCurrentUserId();
 
   const [exercises, setExercice] = useState([]);

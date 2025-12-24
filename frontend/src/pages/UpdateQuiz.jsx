@@ -42,6 +42,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     durationEnabled: false,
     duration: 30,
     passingScore: 0,
+    delais_entre_tentative: 0,
     questions: [],
   });
 
@@ -65,6 +66,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
           durationMinutes: q.duration_minutes,
           activerDuration: q.activerDuration,
           nbMaxTentative: q.nbMax_tentative,
+          delai_entre_tentatives: q.delai_entre_tentatives,
           exercice: {
             titre: q.exercice?.titre_exo || "",
             enonce: q.exercice?.enonce || "",
@@ -108,6 +110,7 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
       durationEnabled: quiz.activerDuration,
       duration: quiz.durationMinutes,
       passingScore: quiz.scoreMinimum,
+      delais_entre_tentative: quiz.delai_entre_tentatives,
       questions: quiz.questions.map(qst => ({
         id_qst:qst.id,
         text: qst.texte,
@@ -202,6 +205,7 @@ const handleUpdateQuiz = async () => {
         ? formatDuration(Number(quizData.duration))
         : null,
       nbMax_tentative: Number(quizData.maxAttempts || 0),
+      delai_entre_tentatives: Number(quizData.delais_entre_tentative || 0),
     });
 
     /* ===== QUESTIONS & OPTIONS ===== */
@@ -381,6 +385,9 @@ const handleUpdateQuiz = async () => {
           
                 <div className="px-6 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white">
                   {quizData.passingScore || 0} {t("scoreMinimum")}
+                </div>
+                 <div className="px-6 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white">
+                  {quizData.delais_entre_tentative || 0} {t("delais_entre_tentative")}
                 </div>
               </div>
           

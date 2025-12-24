@@ -6,11 +6,12 @@ from users.jwt_auth import jwt_required
 from django.utils import timezone
 
 from exercices.models import Exercice
+from users.models import Utilisateur
 from datetime import timedelta
 # Create your views here.
 from rest_framework import generics
 from quiz.models import Quiz, Question, Option, ReponseQuiz, ReponseQuestion
-from .serializers import QuestionSerializer, QuizSerializer, QuizSerializer1,  OptionSerializer
+from .serializers import QuestionSerializer,ReponseQuizSerializer, QuizSerializer, QuizSerializer1,  OptionSerializer, ExerciceSerializer1
 
 class QuizListCreateView(generics.ListCreateAPIView):
     queryset = Quiz.objects.all()
@@ -195,3 +196,46 @@ class QuizRecapAPIView(APIView):
         }
 
         return Response([data])
+    
+    
+    
+    
+
+#la derniere tenatative, pour recuperer le score informations sur la tentative
+
+@api_view(["GET"])
+def exercice_detail_with_quiz(request, exercice_id, utilisateur_id):
+    exercice = get_object_or_404(Exercice, id_exercice=exercice_id)
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=utilisateur_id)
+
+    # Récupérer la réponse de l'utilisateur pour ce quiz s'il existe
+    try:
+        quiz = exercice.quiz
+        reponse_quiz = ReponseQuiz.objects.filter(quiz=quiz, etudiant=utilisateur).last()
+    except Quiz.DoesNotExist:
+        reponse_quiz = None
+
+    serializer = ExerciceSerializer1(exercice, context={"reponse_quiz": reponse_quiz})
+    return Response(serializer.data)
+
+#toutes les tentatives, pour savoir si l'utilisateur peut refaire le quiz ou il a atteint le nombre max de tentative
+@api_view(["GET"])
+def toutes_les_tentatives_quiz(request, quiz_id, utilisateur_id):
+    """
+    Retourne toutes les tentatives d'un utilisateur pour un quiz donné,
+    triées par date_fin décroissante.
+    """
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=utilisateur_id)
+
+    # Récupérer toutes les tentatives terminées (ou pas, selon le besoin)
+    reponses_quiz = ReponseQuiz.objects.filter(
+        quiz=quiz,
+        etudiant=utilisateur
+    ).order_by('-date_fin')  # dernières tentatives en premier
+
+    if not reponses_quiz.exists():
+        return Response({"message": "Aucune tentative trouvée."}, status=404)
+
+    serializer = ReponseQuizSerializer(reponses_quiz, many=True)
+    return Response(serializer.data)

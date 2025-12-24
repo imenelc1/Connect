@@ -9,6 +9,16 @@ urlpatterns = [
  path('add-session/', views.add_session, name='add-session'),
  path('average-time/', views.average_time, name='average-time'),
  path('global-progress/', views.global_progress, name='global-progress'),
+ path('complete-lessons-bulk/', views.complete_lessons_bulk, name='complete-lessons-bulk'),
+ path('history/', views.GlobalProgressHistoryView.as_view(), name='global-progress-history'),
+ path("prof/active/count/", views.active_courses_count_prof, name="active-courses-count-prof"),
+ path ("add-session/prof/", views.add_session_prof, name="add-session-prof"),
+ path ("prof/average-time/", views.average_time_prof, name="average-time-prof"),
+ path ("global-progress/students/", views.global_progress_students, name="global-progress-students"),
+ path ("current-progress/students/", views.current_progress_students, name="current-progress-students"),
+ path("tentatives/", views.list_tentatives, name="list_tentatives"),
+ path("tentatives/create/", views.create_tentative, name="create_tentative"),
+ path("tentatives/id/<int:tentative_id>/", views.get_tentative, name="get-tentative"),
 
-
+ 
 ]

@@ -201,7 +201,7 @@ const navigate = useNavigate();
  const removeLesson = async (sectionId, lessonId) => {
      const confirmDelete = window.confirm("Tu es sûr de supprimer cette leçon?");
     if (!confirmDelete) return;
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
 
   try {
     // Appel API pour supprimer la leçon
@@ -253,7 +253,7 @@ const navigate = useNavigate();
   
 const handleSaveCourse = async (coursId) => {
   const currentUserId = getCurrentUserId();
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
 
   try {
     // --- Étape 1 : Mettre à jour le cours ---

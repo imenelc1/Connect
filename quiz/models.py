@@ -9,6 +9,7 @@ class Quiz(models.Model):
     activerDuration=models.BooleanField(default=True)
     duration=models.DurationField(null=True)
     nbMax_tentative=models.IntegerField(default=0)
+    delai_entre_tentatives = models.PositiveIntegerField( default=0)
 
 class Question(models.Model):
     id_qst = models.AutoField(primary_key=True)
