@@ -8,6 +8,7 @@ import IaAssistant from "../components/ui/IaAssistant";
 import UserCircle from "../components/common/UserCircle";
 import ThemeContext from "../context/ThemeContext";
 import api from "../services/courseService";
+import Navbar from "../components/common/NavBar";
 // Mapping des gradients par niveau
 const LEVEL_GRADIENT = {
   debutant: "bg-grad-2",
@@ -82,14 +83,12 @@ useEffect(() => {
 
   return (
     <div className="w-full min-h-screen bg-surface">
-
+    <Navbar />
       {/* ================= HEADER ================= */}
       <header className="w-full bg-surface py-6 px-6 shadow-sm">
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl md:text-2xl font-semibold text-blue">
-              Exercises
-            </h1>
+          
           </div>
 
           <div className="flex items-center gap-4">
@@ -106,7 +105,7 @@ useEffect(() => {
       {/* ================= LAYOUT ================= */}
       <div className="w-full flex">
         <div className="hidden md:block w-[300px] p-4 border-r border-blue/10 bg-surface">
-          <CoursesSidebarItem />
+         
         </div>
 
         {collapsed && (
@@ -151,9 +150,9 @@ useEffect(() => {
   className="mt-4 px-6 h-9 text-sm bg-blue text-white rounded-full mx-auto block !w-fit"
   onClick={() => {
     if (ex.categorie === "code") {
-      navigate(`/codeExo/${ex.id_exercice}`);
+      navigate(`/start-exerciseCode/${ex.id_exercice}`);
     } else {
-      alert("Cet exercice n'est pas de type code."); 
+      navigate(`/start-exercise/${ex.id_exercice}`);
     }
   }}
 />

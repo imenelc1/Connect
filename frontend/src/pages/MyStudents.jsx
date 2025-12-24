@@ -7,10 +7,15 @@ import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
-import { Bell, ChevronRight } from "lucide-react";
+import { Bell, ChevronRight,X } from "lucide-react";
 
-import { getSpacesStudents, createStudent, removeStudent } from "../services/studentService";
+import {
+  getSpacesStudents,
+  createStudent,
+  removeStudent,
+} from "../services/studentService";
 import { getSpaces } from "../services/spacesService";
+import { getCurrentProgressStudents } from "../services/progressionService";
 
 export default function MyStudents() {
   const { t } = useTranslation("myStudents");
@@ -22,6 +27,26 @@ export default function MyStudents() {
   const [modal, setModal] = useState(false);
   const [email, setEmail] = useState("");
   const [space, setSpace] = useState("");
+
+  const [studentsProgress, setStudentsProgress] = useState({});
+
+  useEffect(() => {
+    const fetchStudentsProgress = async () => {
+      try {
+        const data = await getCurrentProgressStudents();
+        // transformer en objet { studentId: progress }
+        const progressMap = {};
+        data.forEach((item) => {
+          progressMap[item.student_id] = item.progress;
+        });
+        setStudentsProgress(progressMap);
+      } catch (err) {
+        console.error("Erreur récupération progression étudiants :", err);
+      }
+    };
+
+    fetchStudentsProgress();
+  }, []);
 
   // -----------------------------
   // Récupérer les étudiants + espaces
@@ -83,7 +108,7 @@ export default function MyStudents() {
   // Ajout étudiant
   // -----------------------------
   const handleSubmit = async (e) => {
-    e.preventDefault();
+   
     if (!email || !space) return;
 
     try {
@@ -98,7 +123,7 @@ export default function MyStudents() {
       console.error("Erreur createStudent:", err);
       alert(
         err.response?.data?.error ||
-        "Une erreur est survenue lors de l'ajout de l'étudiant"
+          "Une erreur est survenue lors de l'ajout de l'étudiant"
       );
     }
   };
@@ -107,7 +132,12 @@ export default function MyStudents() {
   // Supprimer un étudiant
   // -----------------------------
   const handleRemove = async (studentId, spaceId) => {
-    if (!window.confirm("Voulez-vous vraiment supprimer cet étudiant de cet espace ?")) return;
+    if (
+      !window.confirm(
+        "Voulez-vous vraiment supprimer cet étudiant de cet espace ?"
+      )
+    )
+      return;
 
     try {
       await removeStudent(studentId, spaceId);
@@ -117,7 +147,7 @@ export default function MyStudents() {
       console.error("Erreur removeStudent:", err);
       alert(
         err.response?.data?.error ||
-        "Une erreur est survenue lors de la suppression"
+          "Une erreur est survenue lors de la suppression"
       );
     }
   };
@@ -130,7 +160,10 @@ export default function MyStudents() {
           {t("myStudentsTitle")}
         </h1>
         <div className="flex items-center gap-4 mr-8">
-          <Bell className="w-5 h-5 text-gray-600 cursor-pointer" fill="currentColor" />
+          <Bell
+            className="w-5 h-5 text-gray-600 cursor-pointer"
+            fill="currentColor"
+          />
           <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
         </div>
       </div>
@@ -163,8 +196,8 @@ export default function MyStudents() {
                     className={`p-6 rounded-2xl shadow-lg border border-white/10 ${randomGrad}
                       transition-transform duration-300 hover:scale-[1.03] hover:shadow-2xl`}
                   >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="flex gap-[150px]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-[180px]">
                         <div className="flex gap-5">
                           <UserCircle
                             initials={(st.prenom[0] || "") + (st.nom[0] || "")}
@@ -185,13 +218,16 @@ export default function MyStudents() {
                     {/* Badges espaces */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {st.spaces.map((spName, i) => (
-                        <span key={i} className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2">
+                        <span
+                          key={i}
+                          className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2"
+                        >
                           {spName}
                           <button
                             onClick={() => handleRemove(st.id, st.spacesIds[i])}
                             className="text-red-500 font-bold"
                           >
-                            ✕
+                          <X size={12}/>
                           </button>
                         </span>
                       ))}
@@ -200,8 +236,12 @@ export default function MyStudents() {
                     {/* Progress bar */}
                     <div className="w-full h-3 bg-grayc/20 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-black rounded-full"
-                        style={{ width: `${st.progress}%` }}
+                        className="h-full bg-grad-1 rounded-full"
+                        style={{
+                          width: `${
+                            studentsProgress[st.id]
+                          }%`,
+                        }}
                       ></div>
                     </div>
                   </div>

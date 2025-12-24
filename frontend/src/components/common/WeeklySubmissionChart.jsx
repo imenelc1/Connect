@@ -9,15 +9,24 @@ import {
 import { useTranslation } from "react-i18next";
 
 export default function WeeklySubmissionChart() {
-      const { t } = useTranslation("ProgressStudent");
+  const { t } = useTranslation("ProgressStudent");
+  // const data = [
+  //   { week: "Week 1", submissions: 100 },
+  //   { week: "Week 2", submissions: 95 },
+  //   { week: "Week 3", submissions: 60 },
+  //   { week: "Week 4", submissions: 100 },
+  //   { week: "Week 5", submissions: 78 },
+  //   { week: "Week 6", submissions: 80 },
+  // ];
   const data = [
-    { week: "Week 1", submissions: 100 },
-    { week: "Week 2", submissions: 95 },
-    { week: "Week 3", submissions: 60 },
-    { week: "Week 4", submissions: 100 },
-    { week: "Week 5", submissions: 78 },
-    { week: "Week 6", submissions: 80 },
+    { week: "1", submissions: 100 },
+    { week: "2", submissions: 95 },
+    { week: "3", submissions: 60 },
+    { week: "4", submissions: 100 },
+    { week: "5", submissions: 78 },
+    { week: "6", submissions: 80 },
   ];
+
 
   return (
     <div className="bg-white rounded-2xl shadow p-6 w-full">
@@ -26,9 +35,20 @@ export default function WeeklySubmissionChart() {
       <div className="w-full h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <XAxis dataKey="week" />
+            {/* <XAxis dataKey="week" /> */}
+            <XAxis
+              dataKey="week"
+              tickFormatter={(val) => `${t("ProgressStudent.Week")} ${val}`}
+            />
+
             <YAxis />
-            <Tooltip />
+            <Tooltip
+              formatter={(value) => [
+                value,
+                t("ProgressStudent.submissionsLabel"),
+              ]}
+            />
+
             <Bar dataKey="submissions" fill="rgb(var(--color-pink)" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

@@ -1,23 +1,4 @@
 {
-    "quiz": {
-    "info": "Quiz Information",
-    "preview": "Quiz Preview"
-  },
-   "selectCourse": "Select course",
-  "chooseCourse": "Choose a course",
-
-  "exercises": {
-    "visibility": "Visibility"
-  },
-   "select": {
-    "public": "Public",
-    "private": "Private"
-  },
-  "selectLevel": "Level",
-  "scoreMinimum": "Minimum score",
-  "maxAttempts": "Maximum attempts",
-  "enableDuration": "Enable duration",
-   "publishQuiz": "Publish quiz",
   "newQuiz": "NEW Quiz",
   "exitPreview": "Exit Preview",
   "noData": "No quiz data found.",

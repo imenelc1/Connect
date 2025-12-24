@@ -1,7 +1,7 @@
 {
   "title": "Gestion des instructeurs",
   "subtitle": "Gérez les instructeurs et le personnel enseignant",
-  "addInstructor": "+ Ajouter un instructeur",
+  "addInstructor": "Ajouter un instructeur",
   "search": "Rechercher un instructeur...",
   "instructor": "Instructeur",
   "email": "Email",

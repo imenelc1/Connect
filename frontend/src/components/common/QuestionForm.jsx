@@ -1,20 +1,55 @@
 import React from "react"; 
 import { useTranslation } from "react-i18next";
+import { Trash2 } from "lucide-react"; // icône poubelle
 
 export default function QuestionForm({ questions, onQuestionsChange }) {
   const { t } = useTranslation("createQuiz");
 
+  /* ================== QUESTION HANDLERS ================== */
   const updateQuestionText = (qIndex, text) => {
     const next = [...questions];
     next[qIndex].text = text;
     onQuestionsChange(next);
   };
-   const handleQuestionChange = (index, field, value) => {
-    const updated = [...questions];
-    updated[index][field] = value;
-    onQuestionsChange(updated);
+
+  const handleQuestionChange = (qIndex, field, value) => {
+    const next = [...questions];
+    next[qIndex][field] = value;
+    onQuestionsChange(next);
   };
 
+  const addQuestion = () => {
+    const next = [...questions];
+    next.push({
+      text: "",
+      points: 1,
+      answers: [
+        { text: "", isCorrect: false },
+        { text: "", isCorrect: false },
+      ],
+    });
+    onQuestionsChange(next);
+  };
+
+const removeQuestion = (qIndex) => {
+  const next = [...questions];
+  const removed = next[qIndex];
+
+  if (removed.id_qst) {
+    // Marquer pour suppression mais ne pas supprimer de l'array
+    removed._delete = true;
+  } else {
+    // Si c'est une question ajoutée et jamais sauvegardée, on peut la retirer
+    next.splice(qIndex, 1);
+  }
+
+  onQuestionsChange(next);
+};
+
+
+
+
+  /* ================== ANSWER HANDLERS ================== */
   const updateAnswerText = (qIndex, aIndex, text) => {
     const next = [...questions];
     next[qIndex].answers[aIndex].text = text;
@@ -24,6 +59,17 @@ export default function QuestionForm({ questions, onQuestionsChange }) {
   const addAnswer = (qIndex) => {
     const next = [...questions];
     next[qIndex].answers.push({ text: "", isCorrect: false });
+    onQuestionsChange(next);
+  };
+
+  const removeAnswer = (qIndex, aIndex) => {
+    const next = [...questions];
+    const [removed] = next[qIndex].answers.splice(aIndex, 1);
+
+    if (removed.id_option) {
+      next[qIndex].removedOptions = [...(next[qIndex].removedOptions || []), removed.id_option];
+    }
+
     onQuestionsChange(next);
   };
 
@@ -38,11 +84,18 @@ export default function QuestionForm({ questions, onQuestionsChange }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {questions.map((q, qIndex) => (
-        <div key={qIndex} className="rounded-xl shadow-sm p-4 bg-grad-3">
-          <h3 className="font-semibold mb-2">
-            {t("question")} {qIndex + 1}
-          </h3>
+      {questions.filter(q => !q._delete).map((q, qIndex) => (
+        <div key={qIndex} className="rounded-xl shadow-sm p-4 bg-grad-3 relative">
+          {/* Bouton trash question */}
+          <button
+            type="button"
+            onClick={() => removeQuestion(qIndex)}
+            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+          >
+            <Trash2 size={16} />
+          </button>
+
+          <h3 className="font-semibold mb-2">{t("question")} {qIndex + 1}</h3>
 
           {/* Question text */}
           <input
@@ -52,21 +105,22 @@ export default function QuestionForm({ questions, onQuestionsChange }) {
             placeholder={t("questionText")}
             className="w-full text-sm border rounded-xl px-3 py-2 text-black"
           />
-            {/* Score input */}
+
+          {/* Score input */}
           <input
             type="number"
             min={1}
             value={q.points || 1}
             onChange={(e) => handleQuestionChange(qIndex, "points", parseFloat(e.target.value) || 1)}
-            placeholder="Points for this question"
-            className="w-24 mb-2"
+            placeholder="Points"
+            className="w-24 mb-2 mt-2"
           />
 
           {/* Answers */}
           <div className="mt-3">
             <p className="text-sm mb-2">{t("answers")}</p>
             {q.answers.map((a, aIndex) => (
-              <div key={aIndex} className="flex items-center gap-2 mb-2">
+              <div key={aIndex} className="flex items-center gap-2 mb-2 relative">
                 {/* Radio button pour la réponse correcte */}
                 <input
                   type="radio"
@@ -90,6 +144,14 @@ export default function QuestionForm({ questions, onQuestionsChange }) {
                   className="flex-1 text-sm border rounded-xl px-3 py-2 text-black"
                   style={{ borderColor: "#e5e7eb", background: "white" }}
                 />
+                {/* Bouton trash option */}
+                <button
+                  type="button"
+                  onClick={() => removeAnswer(qIndex, aIndex)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))}
 
@@ -104,6 +166,15 @@ export default function QuestionForm({ questions, onQuestionsChange }) {
           </div>
         </div>
       ))}
+
+      {/* Ajouter une question */}
+      <button
+        type="button"
+        onClick={addQuestion}
+        className="px-4 py-2 rounded-lg text-white bg-grad-1 font-semibold hover:brightness-90 mt-4"
+      >
+        {t("addQuestion")}
+      </button>
     </div>
   );
 }

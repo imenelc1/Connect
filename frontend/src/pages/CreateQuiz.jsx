@@ -14,6 +14,8 @@ import ThemeButton from "../components/common/ThemeButton";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService"; // Make sure your API helper is here
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import Topbar from "../components/common/TopBar";
 import { FaClock, FaMedal, FaStar } from "react-icons/fa";
 
@@ -26,6 +28,12 @@ export default function CreateQuiz() {
   const { t,i18n } = useTranslation("createQuiz");
   const [activeStep, setActiveStep] = useState(1);
   const { toggleDarkMode } = useContext(ThemeContext);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+      useEffect(() => {
+         const handler = (e) => setSidebarCollapsed(e.detail);
+         window.addEventListener("sidebarChanged", handler);
+         return () => window.removeEventListener("sidebarChanged", handler);
+       }, []);
 
  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
@@ -43,7 +51,7 @@ export default function CreateQuiz() {
 
   maxAttempts: 0,
   durationEnabled: false,
-  duration: 30,
+  duration: 0,
 
   passingScore: 0,
 
@@ -176,11 +184,11 @@ const currentUserId = getCurrentUserId();
   const token = localStorage.getItem("token");
   const idToUse = exerciceIdParam || exerciceId; // fallback si param non fourni
 
-  if (!token || !idToUse) {
+  /*if (!token || !idToUse) {
     alert("Exercice non trouvé. Veuillez créer l'exercice d'abord.");
     return null;
   }
-
+*/
   try {
     const response = await api.post(
       "/quiz/",
@@ -214,12 +222,12 @@ const currentUserId = getCurrentUserId();
   }
 };
 /* step 3 les questions et option*/
-const handleSaveStep3 = async (exerciceId) => {
+const handleSaveStep3 = async (idQuiz) => {
   const token = localStorage.getItem("token");
-  if (!token || !exerciceId) {
+  /*if (!token || !exerciceId) {
     alert("Exercice non trouvé. Veuillez créer l'exercice et le quiz d'abord.");
     return null;
-  }
+  }*/
 
   try {
     for (const question of quizData.questions) {
@@ -230,7 +238,7 @@ const handleSaveStep3 = async (exerciceId) => {
           texte_qst: question.text,        // texte de la question
           reponse_correcte: question.answers.find(a => a.isCorrect)?.text || "",
           score: question.points || 1,
-          exercice: exerciceId,            // FK vers Exercice
+          exercice: idQuiz,            // FK vers Exercice
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -270,7 +278,7 @@ const handlePublishQuiz = async () => {
 
   // Step 2 : créer le quiz
   const quizId = await handleSaveStep2(exoId);
-  if (!quizId) return;
+ // if (!quizId) return;
 
   // Step 3 : créer les questions et options
   await handleSaveStep3(exoId);
@@ -282,26 +290,33 @@ const handlePublishQuiz = async () => {
   
   
   return (
-    <div className="w-full min-h-screen flex bg-primary/5">
+    <div className="w-full min-h-screen  bg-surface">
     
 
       {/* NAVBAR RESPONSIVE */}
-      <div className="hidden lg:block w-64 min-h-screen">
+       <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
+ <div className={`
+        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
+        ${sidebarCollapsed ? "ml-20" : "ml-64"}
+      `}>
         <div className="max-w-7xl mx-auto">
 
           {/* HEADER */}
-          <div className="flex justify-end">
-                   <UserCircle
-                     initials={initials}
-                     onToggleTheme={toggleDarkMode}
-                     onChangeLang={(lang) => i18n.changeLanguage(lang)}
-                   />
-                 </div>
+          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
          
                  <Topbar
                    steps={exerciseSteps}

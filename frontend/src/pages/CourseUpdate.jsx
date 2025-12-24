@@ -24,6 +24,12 @@ export default function CourseUpdate() {
   const { t, i18n } = useTranslation("courseInfo");
   const [activeStep, setActiveStep] = useState(1);
   const { toggleDarkMode } = useContext(ThemeContext);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+      useEffect(() => {
+         const handler = (e) => setSidebarCollapsed(e.detail);
+         window.addEventListener("sidebarChanged", handler);
+         return () => window.removeEventListener("sidebarChanged", handler);
+       }, []);
 
 const navigate = useNavigate();
   const toggleLanguage = () => {
@@ -346,12 +352,15 @@ const handleSaveCourse = async (coursId) => {
 
 
   return (
-    <div className="w-full min-h-screen flex bg-primary/5">
-      <div className="hidden lg:block w-64 min-h-screen">
+    <div className="w-full min-h-screen  bg-surface">
+      <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
-      <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
+     <div className={`
+        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
+        ${sidebarCollapsed ? "ml-20" : "ml-64"}
+      `}>
         <div className="flex justify-end">
           <UserCircle
             initials={initials}

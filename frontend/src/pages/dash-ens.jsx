@@ -22,6 +22,8 @@ import { useEffect, useState } from "react";
 
 // Imports for pie chart
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
+import progressionService from "../services/progressionService";
+
 
 export default function Dashboardens() {
   // Hook de traduction
@@ -53,6 +55,26 @@ useEffect(() => {
       console.error("Erreur profil :", err.response?.data || err);
     });
 }, []);
+
+const [avgTime, setAvgTime] = useState("");
+const [activeCourses, setActiveCourses] = useState("");
+
+  useEffect(() => {
+    // Récupérer le profil
+    api.get("profile/")
+      .then(res => setUser(res.data))
+      .catch(err => console.error(err));
+
+    // Récupérer le nombre de cours créés
+    progressionService.getActiveCoursesCountProf()
+      .then(count => setActiveCourses(count))
+      .catch(err => console.error(err));
+
+    // Récupérer le temps moyen passé
+    progressionService.getAverageTimeProf()
+      .then(avg => setAvgTime(avg.toFixed(2) + "h"))
+      .catch(err => console.error(err));
+  }, []);
 
   const dat = [
     {
@@ -136,14 +158,14 @@ useEffect(() => {
 
       {/* Quick stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-textc">
-        <Cards text={t("Dashboard.AverageS")} value="68%" icon={<TrendingDown size={18}/>} bg="bg-grad-2"/>
-        <Cards text={t("Dashboard.Success")} value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-3" />
-        <Cards text={t("Dashboard.AverageT")} value="4.2h" icon={<Book size={18} />} bg="bg-grad-4" />
-        <Cards text={t("Dashboard.ActiveC")}value="10" icon={<Clock3 size={18} />} bg="bg-grad-2" />
+        <Cards text="Average Student Progress" value="68%" icon={<TrendingDown size={18}/>} bg="bg-grad-2"/>
+        <Cards text="Success Rate" value="68%" icon={<CircleCheckBig size={18} />} bg="bg-grad-3" />
+        <Cards text="Average time spent" value={avgTime} icon={<Book size={18} />} bg="bg-grad-4" />
+        <Cards text="Active Courses" value={activeCourses} icon={<Clock3 size={18} />} bg="bg-grad-2" />
       </div>
 
       {/* Learning curve */}
-      <div className="p-3 w-full" style={{ height: "250px" }}>
+      <div className="p-3 w-full" style={{ height: "330px" }}>
         <LearningCurve />
       </div>
 
@@ -151,49 +173,44 @@ useEffect(() => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* Quick actions */}
-        <div>
-            <h2 className="text-xl text-muted font-bold mb-6">{t("Dashboard.Quick")}</h2>
+   <div>
+      <h2 className="text-xl text-muted font-bold mb-6">Quick Actions</h2>
+      <div className="bg-grad-1 text-center text-white rounded-3xl pl-6 shadow-lg">
+        <div className="flex flex-col">
+          <button
+            onClick={() => navigate("/CoursInfo")}
+            className="relative w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 rounded-tl-full transition"
+          >
+            <CirclePlus size={22} />
+            <span className="ml-16 text-xl font-bold">Create Course</span>
+          </button>
 
-            {/* Fond complètement opaque */}
-            <div className="bg-grad-1 text-center text-white rounded-3xl  pl-6 shadow-lg">
+          <button
+            onClick={() => navigate("/spaces")}
+            className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 transition"
+          >
+            <Activity size={22} />
+            <span className="ml-16 text-xl font-bold">My Spaces</span>
+          </button>
 
-              <div className="flex flex-col">
+          <button
+            onClick={() => navigate("/new-exercise")}
+            className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 transition"
+          >
+            <FolderPlus size={22} />
+            <span className="ml-16 text-xl font-bold">Publish Exercise</span>
+          </button>
 
-                {/* Create a course */}
-                <button className="relative w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 rounded-tl-full transition">
-
-                  <CirclePlus size={22} />
-
-                  <span className=" ml-16 text-xl font-bold ">{t("Dashboard.CreateC")}</span>
-                </button>
-
-                {/* My spaces */}
-                <button className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10  transition">
-
-                  <Activity size={22} />
-
-                  <span className="ml-16 text-xl font-bold">{t("Dashboard.Space")}</span>
-                </button>
-
-                {/* Publish exercise */}
-                <button className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10  transition">
-
-                  <FolderPlus size={22} />
-
-                  <span className=" ml-16 text-xl font-bold">{t("Dashboard.publish")}</span>
-                </button>
-
-                {/* Stats */}
-                <button className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30  hover:bg-white/10 rounded-bl-full transition">
-
-                  <TrendingDown size={22} />
-
-                  <span className=" ml-16 text-xl font-bold">{t("Dashboard.Stats")}</span>
-                </button>
-
-            </div>
-          </div>
+          <button
+            onClick={() => navigate("/stats")}
+            className="w-full pl-6 flex items-center gap-4 py-6 px-3 bg-white/30 hover:bg-white/10 rounded-bl-full transition"
+          >
+            <TrendingDown size={22} />
+            <span className="ml-16 text-xl font-bold">Stats</span>
+          </button>
         </div>
+      </div>
+    </div>
 
         {/* Pie chart */}
         <div className="rounded-2xl shadow-md p-4 flex flex-col items-center bg-card">
@@ -214,13 +231,13 @@ useEffect(() => {
 
           <div className="flex gap-4 text-xs mt-2">
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-rgb(var(--color-purple)) rounded-full"></span> {t("Dashboard.Published")}
+              <span className="w-2 h-2 bg-rgb(var(--color-purple)) rounded-full"></span> Published
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-rgb(var(--color-primary)) rounded-full"></span> {t("Dashboard.Draft")}
+              <span className="w-2 h-2 bg-rgb(var(--color-primary)) rounded-full"></span> Draft
             </div>
             <div className="flex items-center gap-1">
-              <span className="w-2 h-2 bg-rgb(var(--color-pink)) rounded-full"></span> {t("Dashboard.quizzes")}
+              <span className="w-2 h-2 bg-rgb(var(--color-pink)) rounded-full"></span> Quizzes
             </div>
           </div>
         </div>

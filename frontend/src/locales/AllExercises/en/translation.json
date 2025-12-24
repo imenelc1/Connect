@@ -5,5 +5,7 @@
     "Débutant": "Beginner",
     "Intermédiaire": "Intermediate",
     "Avancé": "Advanced"
-  }
+
+  },
+  "start":"Start"
 }

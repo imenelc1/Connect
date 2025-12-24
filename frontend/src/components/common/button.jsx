@@ -79,8 +79,8 @@ quizStart: `${base.replace("w-full", "w-auto")}
                text-sm px-4 py-2 transition`,
     manage: `
   px-5 py-2 
-  bg-white 
-  border border-gray-300 
+  bg-grad-4
+  text-muted 
   rounded-lg 
   hover:bg-gray-100 
   transition

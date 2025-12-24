@@ -18,5 +18,23 @@
   "or": "Or",
   "alreadyHaveAccount": "Already have an account?",
   "selectOption": "Select an option",
-  "googleSignIn": "Or sign in with Google"
+  "googleSignIn": "Or sign in with Google",
+  "requiredField": "This field is required",
+  "nicknameNumbers": "Name cannot contain numbers",
+  "fullnameNumbers": "First name cannot contain numbers",
+  "passwordMin": "Minimum 8 characters",
+  "passwordMismatch": "Passwords do not match",
+  "invalidEmail": "Invalid email format",
+  "emailRequired":"Email required",
+  "regnumberInvalid": "Invalid registration number (12 digits)",
+  "dobMinAge": "You must be at least 16 years old",
+  "fixErrors": "Please correct the errors",
+  "pwdRequired":"Password required",
+  "successSignUp": "Sign up successful!",
+  "formSubmitted": "Form submitted",
+  "networkError": "Network error",
+  "fieldMath": "Mathematics",
+  "fieldCS": "Computer Science",
+  "fieldST": "Science and Technology"
 }
+  

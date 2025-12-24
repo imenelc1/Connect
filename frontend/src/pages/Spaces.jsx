@@ -8,6 +8,8 @@ import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import { Folder, Bell } from "lucide-react";
 
 import { getSpaces, createSpace, deleteSpace } from "../services/spacesService";
@@ -16,9 +18,13 @@ import { getMySpaces } from "../services/studentSpacesService";
 import toast from "react-hot-toast";
 
 export default function SpacesPage() {
-  const { t } = useTranslation("Spaces");
+  const { t, i18n } = useTranslation("Spaces");
   const { toggleDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
+
+  // États pour la responsivité
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const storedUser = localStorage.getItem("user");
   const userData = JSON.parse(localStorage.getItem("user"));
@@ -35,6 +41,24 @@ export default function SpacesPage() {
   const [open, setOpen] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const [spaceDesc, setSpaceDesc] = useState("");
+
+  // Effet pour la responsivité
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Gestion de la sidebar
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+    
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
 
   // -------------------------
   // Fetch des espaces selon rôle
@@ -61,7 +85,7 @@ export default function SpacesPage() {
   // Création d'un espace (prof uniquement)
   // -------------------------
   const handleSubmit = async (e) => {
-    e.preventDefault();
+   
 
     if (!spaceName) {
       toast.error(t("spaceNameRequired"));
@@ -73,7 +97,7 @@ export default function SpacesPage() {
       (s) => s.nom_space.toLowerCase() === spaceName.trim().toLowerCase()
     );
     if (exists) {
-      toast.error(t("spaceNameExists")); // message si nom déjà pris
+      toast.error(t("spaceNameExists"));
       return;
     }
 
@@ -106,8 +130,8 @@ export default function SpacesPage() {
     if (!confirmDelete) return;
 
     try {
-      await deleteSpace(id_space); // appel API pour supprimer
-      setSpaces((prev) => prev.filter((s) => s.id_space !== id_space)); // mise à jour frontend
+      await deleteSpace(id_space);
+      setSpaces((prev) => prev.filter((s) => s.id_space !== id_space));
       toast.success(t("spaceDeleted"));
     } catch (err) {
       console.error("Erreur deleteSpace:", err);
@@ -122,17 +146,17 @@ export default function SpacesPage() {
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted ml-[250px]">
           {role === "prof" ? t("spacesTitle") : t("mySpacesTitle")}
         </h1>
-        <div className="flex items-center gap-4">
-          <Bell
-            className="w-5 h-5 text-gray-600 cursor-pointer"
-            fill="currentColor"
-          />
-          <UserCircle
-            initials={initials}
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
-          />
-        </div>
+        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
       </div>
 
       <div className="flex w-full min-h-screen bg-surface">

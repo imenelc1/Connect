@@ -1,12 +1,6 @@
 {
   "title": "Tableau de bord",
   "subtitle": "Bienvenue ! Voici ce qui se passe aujourd'hui.",
-  "stats": {
-    "totalStudents": "Total étudiants",
-    "activeCourses": "Cours actifs",
-    "totalExercises": "Exercices totaux",
-    "completionRate": "Taux de complétion"
-  },
   "recentActivity": "Activité récente",
   "validationCourses": "Cours à valider",
   "tabs": {
@@ -19,5 +13,11 @@
     "inspect": "Examiner",
     "approve": "Approuver",
     "reject": "Rejeter"
+  },
+   "stats": {
+    "totalStudents": "Total étudiants",
+    "activeCourses": "Total cours",
+    "totalExercises": "Total exercices",
+    "totalSpaces": "Total espaces"
   }
 }

@@ -2,7 +2,7 @@
   "title": "Bienvenue",
   "connect": "à Connect",
   "welcomeStudent": "Bienvenue cher étudiant !",
-  "welcomeInstructor": "Bienvenue cher enseignant !",
+  "welcomeInstructor": "Bienvenue cher instructeur !",
   "nickname": "Nom",
   "fullname": "Prénom",
   "email": "Email",
@@ -18,5 +18,23 @@
   "or": "Ou",
   "alreadyHaveAccount": "Vous avez déjà un compte ?",
   "selectOption": "Sélectionnez une option",
-  "googleSignIn": "Ou connectez-vous avec Google"
+  "googleSignIn": "Ou connectez-vous avec Google",
+  "requiredField": "Champ obligatoire",
+  "nicknameNumbers": "Le nom ne peut pas contenir de chiffres",
+  "fullnameNumbers": "Le prénom ne peut pas contenir de chiffres",
+  "passwordMin": "Minimum 8 caractères",
+  "passwordMismatch": "Les mots de passe ne correspondent pas",
+  "invalidEmail": "Format d'email invalide",
+   "emailRequired":"Email obligatoire",
+  "regnumberInvalid": "Matricule invalide (12 chiffres)",
+  "dobMinAge": "Vous devez avoir au moins 16 ans.",
+  "fixErrors": "Veuillez corriger les erreurs.",
+  "pwdRequired":"Mot de passe obligatoire",
+  "successSignUp": "Inscription réussie !",
+  "formSubmitted": "Formulaire envoyé", 
+  "networkError": "Erreur réseau",
+  "fieldMath": "Mathématiques",
+  "fieldCS": "Informatique",
+  "fieldST": "Sciences et Technologie"
+
 }

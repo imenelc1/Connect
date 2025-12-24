@@ -40,11 +40,11 @@ export default function ProgressStudent() {
     ];
 
     const gradeData = [
-        { week: "Week 1", grade: 72 },
-        { week: "Week 2", grade: 78 },
-        { week: "Week 3", grade: 83 },
-        { week: "Week 4", grade: 88 },
-        { week: "Week 5", grade: 85 },
+        { week: t("ProgressStudent.Week") + " 1", grade: 72 },
+        { week: t("ProgressStudent.Week") + " 2", grade: 78 },
+        { week: t("ProgressStudent.Week") + " 3", grade: 83 },
+        { week: t("ProgressStudent.Week") + " 4", grade: 88 },
+        { week: t("ProgressStudent.Week") + " 5", grade: 85 },
     ];
     const colorClasses = {
         green: {
@@ -112,45 +112,45 @@ export default function ProgressStudent() {
                         <p className="text-gray text-lg"> {t("ProgressStudent.AvarageG")}</p>
                         <div className="flex items-center gap-2 mt-1">
                             <p className="text-3xl sm:text-2xl font-semibold text-pink">16.5/20</p>
-                          
+
                         </div>
-                        <span className="flex text-sm mt-2">  <TrendingUp className="text-green " size={16}/>+2.8  {t("ProgressStudent.points")} </span>
+                        <span className="flex text-sm mt-2">  <TrendingUp className="text-green " size={16} />+2.8  {t("ProgressStudent.points")} </span>
                     </div>
 
                     {/* Right card */}
                     <div className="  flex-1 w-full ">
                         <div className="bg-card rounded-2xl  shadow p-6">
                             <h2 className=" font-semibold text-lg mb-4">
-                                 {t("ProgressStudent.mycourses")} ({courses.length}) </h2>
-                            
-                                {courses.map((course, idx) => (
-                                    <div key={idx} className=" p-4 rounded-xl shadow-sm">
+                                {t("ProgressStudent.mycourses")} ({courses.length}) </h2>
 
-                                        {/* Title + Activity */}
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <p className="font-lg text-gray">{course.title}</p>
+                            {courses.map((course, idx) => (
+                                <div key={idx} className=" p-4 rounded-xl shadow-sm">
 
-                                            </div>
-                                            {/* Progress bar */}
-                                            <div className="w-full h-2 bg-gray/20 rounded-full mt-3 overflow-hidden">
-                                                <div
-                                                    className={`h-full rounded-full ${colorClasses[course.color].bar}`}
-                                                    style={{ width: `${course.progress}%` }}
-                                                ></div>
-                                            </div>
+                                    {/* Title + Activity */}
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="font-lg text-gray">{course.title}</p>
 
-                                            {/* Percentage with same color */}
-                                            <span className={`text-sm font-semibold ${colorClasses[course.color].text}`}>
-                                                {course.progress}%
-                                            </span>
+                                        </div>
+                                        {/* Progress bar */}
+                                        <div className="w-full h-2 bg-gray/20 rounded-full mt-3 overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full ${colorClasses[course.color].bar}`}
+                                                style={{ width: `${course.progress}%` }}
+                                            ></div>
                                         </div>
 
-
-
+                                        {/* Percentage with same color */}
+                                        <span className={`text-sm font-semibold ${colorClasses[course.color].text}`}>
+                                            {course.progress}%
+                                        </span>
                                     </div>
-                                ))}
-                           
+
+
+
+                                </div>
+                            ))}
+
 
 
 

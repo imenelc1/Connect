@@ -4,16 +4,19 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from .models import Utilisateur, Etudiant, Enseignant, Administrateur, PasswordResetToken
+from courses.models import Cours
+from exercices.models import Exercice
+from spaces.models import Space
 from .serializers import UtilisateurSerializer, EtudiantSerializer, EnseignantSerializer, AdministrateurSerializer
 import jwt
 from django.conf import settings
 from datetime import datetime, timedelta
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import ProfileSerializer
-from .jwt_helpers import jwt_required, IsAuthenticatedJWT
+from .jwt_helpers import IsAuthenticatedJWT
 from django.core.mail import send_mail
 import uuid
-from django.core.mail import send_mail
+from rest_framework.permissions import BasePermission
 
 # -----------------------------
 # Constantes JWT manquantes
@@ -147,16 +150,40 @@ class AdminLoginView(APIView):
         try:
             admin = Administrateur.objects.get(email_admin=email)
             if admin.check_password(password):
+                # 🔥 Création du token JWT pour admin
+                payload = {
+                    "admin_id": admin.id_admin,
+                    "role": "admin",
+                    "exp": datetime.utcnow() + timedelta(hours=24)
+                }
+                token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+                if isinstance(token, bytes):
+                    token = token.decode("utf-8")
+
                 return Response({
                     "message": "Connexion admin réussie",
                     "id_admin": admin.id_admin,
-                    "email_admin": admin.email_admin
+                    "email_admin": admin.email_admin,
+                    "token": token
                 }, status=status.HTTP_200_OK)
 
             return Response({"error": "Mot de passe incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
 
         except Administrateur.DoesNotExist:
             return Response({"error": "Admin introuvable"}, status=status.HTTP_404_NOT_FOUND)
+
+class IsAdminJWT(BasePermission):
+    def has_permission(self, request, view):
+        auth = request.headers.get("Authorization")
+        if not auth:
+            return False
+
+        try:
+            token = auth.split(" ")[1]
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            return payload.get("role") == "admin"
+        except:
+            return False
 
 # -----------------------------
 # User Profile
@@ -254,3 +281,78 @@ def send_reset_email(user_email, token):
         [user_email],
         fail_silently=False,
     )
+
+class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user_role == "admin"
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT, IsAdmin])
+def admin_stats(request):
+    from courses.models import Cours
+    from exercices.models import Exercice
+    from spaces.models import Space
+    from .models import Etudiant
+
+    try:
+        data = {
+            "total_students": Etudiant.objects.count(),
+            "total_courses": Cours.objects.count(),
+            "total_exercises": Exercice.objects.count(),
+            "total_spaces": Space.objects.count(),
+        }
+        return Response(data, status=200)
+    except Exception as e:
+        return Response({"error": "Erreur serveur : " + str(e)}, status=500)
+
+# Permission custom pour ton JWT
+class IsAdminOrTeacherJWT(BasePermission):
+    def has_permission(self, request, view):
+        auth = request.headers.get("Authorization")
+        if not auth:
+            return False
+        try:
+            token = auth.split(" ")[1]
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            # Tu peux filtrer par rôle si besoin
+            return payload.get("role") in ["admin", "enseignant"]
+        except:
+            return False
+
+@api_view(["GET"])
+@permission_classes([IsAdminOrTeacherJWT])
+def get_enseignants(request):
+    enseignants = Enseignant.objects.select_related("utilisateur").all()
+    data = [
+        {
+            "id_utilisateur": e.utilisateur.id_utilisateur,
+            "nom": e.utilisateur.nom,
+            "prenom": e.utilisateur.prenom,
+        }
+        for e in enseignants
+    ]
+    return Response(data, status=200)
+
+@api_view(["GET"])
+@permission_classes([IsAdminOrTeacherJWT])
+def get_etudiants(request):
+    etudiants = Etudiant.objects.select_related("utilisateur").all()
+
+    data = []
+    for e in etudiants:
+        u = e.utilisateur
+        data.append({
+            "id": u.id_utilisateur,
+            "nom": u.nom,
+            "prenom": u.prenom,
+            "email": u.adresse_email,
+            "specialite": e.specialite,
+            "annee_etude": e.annee_etude,
+            "initials": f"{u.nom[0]}{u.prenom[0]}".upper(),
+            "joined": u.date_joined.strftime("%b %Y") if hasattr(u, "date_joined") else "—",
+            "courses": 0,      # 🔹 tu pourras le calculer plus tard
+            "progress": 0      # 🔹 idem
+        })
+
+    return Response(data, status=200)

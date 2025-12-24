@@ -2,7 +2,7 @@
 {
   "Dashboard": {
     "Welcome": "Welcome back" ,
-    "Alwaysp":"Always stay updated in your Instructor portal.",
+    "Always ":"Always stay updated in your Instructor portal.",
     "AverageS": "Average Student Progress",
     "Success": "Success Rate",
     "AverageT":"Average time spent",
@@ -10,7 +10,7 @@
     "coursep":"course progress",
     "Quick":"Quick actions",
     "CreateC":"Create a Course",
-    "Space":"Active spaces",
+    "Space":"My spaces",
     "publish":"Publish an exercise",
     "Stats":"Students Stats",
     "Published":"Published",

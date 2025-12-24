@@ -7,7 +7,7 @@ import {
 import { FiGlobe } from "react-icons/fi";
 
 import Input from "../components/common/Input";
-import Button from "../components/common/Button";
+import Button from "../components/common/Button.jsx";
 import AuthTabs from "../components/common/AuthTabs";
 import LogoComponent from "../components/common/LogoComponent";
 import Select from "../components/common/Select";
@@ -53,56 +53,56 @@ export default function StudentSignUp() {
     setFormData(prev => ({ ...prev, [name]: value }));
     setErrors(prev => ({ ...prev, [name]: "" }));
     if (name === "nickname" && /\d/.test(value))
-      setErrors(prev => ({ ...prev, nickname: "Le nom ne peut pas contenir de chiffres" }));
+      setErrors(prev => ({ ...prev, nickname: t("nicknameNumbers") }));
 
     if (name === "fullname" && /\d/.test(value))
-      setErrors(prev => ({ ...prev, fullname: "Le prénom ne peut pas contenir de chiffres" }));
+      setErrors(prev => ({ ...prev, fullname: t("fullnameNumbers")}));
 
 
     if (name === "password" && value.length < 8)
-      setErrors(prev => ({ ...prev, password: "Minimum 8 caractères" }));
+      setErrors(prev => ({ ...prev, password:  t("passwordMin")}));
 
     if (name === "confirm" && value !== formData.password)
-      setErrors(prev => ({ ...prev, confirm: "Les mots de passe ne correspondent pas" }));
+      setErrors(prev => ({ ...prev, confirm: t("passwordMismatch") }));
   };
 
   // VALIDATION
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.nickname) newErrors.nickname = "Champ obligatoire";
-    if (!formData.fullname) newErrors.fullname = "Champ obligatoire";
+    if (!formData.nickname) newErrors.nickname = t("requiredField");
+    if (!formData.fullname) newErrors.fullname = t("requiredField");
     if (/\d/.test(formData.nickname))
-      newErrors.nickname = "Le nom ne peut pas contenir de chiffres";
+      newErrors.nickname = t("nicknameNumbers");
 
     if (/\d/.test(formData.fullname))
-      newErrors.fullname = "Le prénom ne peut pas contenir de chiffres";
+      newErrors.fullname = t("fullnameNumbers");
 
 
     if (!formData.email)
-      newErrors.email = "Email obligatoire";
+      newErrors.email = t("emailRequired");
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      newErrors.email = "Format d'email invalide";
+      newErrors.email =  t("invalidEmail");
 
-    if (!formData.password) newErrors.password = "Mot de passe obligatoire";
-    if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères";
+    if (!formData.password) newErrors.password =  t("pwdRequired");
+    if (formData.password.length < 8) newErrors.password = t("passwordMin");
 
     if (formData.confirm !== formData.password)
-      newErrors.confirm = "Mot de passe non identique";
+      newErrors.confirm = t("passwordMismatch");
 
-    if (!formData.dob) newErrors.dob = "Champ obligatoire";
-    if (!formData.regnumber) newErrors.regnumber = "Champ obligatoire";
-    if (!formData.field) newErrors.field = "Champ obligatoire";
-    if (!formData.year) newErrors.year = "Champ obligatoire";
+    if (!formData.dob) newErrors.dob =  t("requiredField");
+    if (!formData.regnumber) newErrors.regnumber =  t("requiredField");
+    if (!formData.field) newErrors.field =  t("requiredField");
+    if (!formData.year) newErrors.year =  t("requiredField");
 
     if (formData.regnumber && !/^\d{12}$/.test(formData.regnumber))
-      newErrors.regnumber = "Matricule invalide (12 chiffres)";
+       newErrors.regnumber = t("regnumberInvalid");
 
     const birthDate = new Date(formData.dob);
     const minDate = new Date();
     minDate.setFullYear(minDate.getFullYear() - 16);
     if (birthDate > minDate)
-      newErrors.dob = "Vous devez avoir au moins 16 ans.";
+      newErrors.dob = t("dobMinAge");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -112,10 +112,10 @@ export default function StudentSignUp() {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    console.log("FORM SUBMITTED"); // Debug
+    console.log(t("formSubmitted")); // Debug
 
     if (!validateForm()) {
-      toast.error("Veuillez corriger les erreurs.");
+      toast.error(t("fixErrors"));
       return;
     }
 
@@ -148,7 +148,7 @@ export default function StudentSignUp() {
           role: res.data.role || res.data.user.role
         })
       );
-      toast.success("Inscription réussie !");
+      toast.success(t("successSignUp"));
       navigate("/dashboard-etu");
 
     } catch (err) {
@@ -177,18 +177,19 @@ export default function StudentSignUp() {
 
         setErrors(newErrors);
 
-        toast.error("Erreur : " + Object.values(newErrors)[0]);
+        toast.error(t("error") + ": " + Object.values(newErrors)[0]);
         return;
       }
 
-      toast.error("Erreur réseau");
+      toast.error(t("networkError"));
     }
   };
   const fieldOptions = [
-    { value: "math", label: "Mathematics" },
-    { value: "cs", label: "Computer Science" },
-    { value: "ST", label: "Science and Technology" },
-  ];
+  { value: "math", label: t("fieldMath") },
+  { value: "cs", label: t("fieldCS") },
+  { value: "ST", label: t("fieldST") },
+];
+
   const yearOptions = [
     { value: "L1", label: "L1" }, { value: "L2", label: "L2" }, { value: "L3", label: "L3" }, { value: "Ing1", label: "Ing1" }, { value: "Ing2", label: "Ing2" }, { value: "Ing3", label: "Ing3" }, { value: "Ing4", label: "Ing4" }, { value: "M1", label: "M1" }, { value: "M2", label: "M2" }
   ];

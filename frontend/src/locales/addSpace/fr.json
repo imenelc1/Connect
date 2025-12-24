@@ -1,7 +1,7 @@
 {
   "title": "Gestion des enseignants",
   "subtitle": "Gérer les enseignants et le personnel académique",
-  "toggleLang": "Changer la langue",
+  "toggleLang": "Changer de langue",
   "addInstructor": "Ajouter un enseignant",
   "search": "Rechercher un enseignant...",
   "instructor": "Enseignant",
@@ -18,7 +18,5 @@
   "modalEditSubtitle": "Modifiez les informations de l’enseignant",
   "create": "Créer",
   "update": "Mettre à jour",
-  "cancel": "Annuler",
-  "addSpace":"Ajouter un espace",
-  "editSpace":"Modifier l'espace"
+  "cancel": "Annuler"
 }

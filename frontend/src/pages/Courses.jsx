@@ -9,6 +9,8 @@ import CourseContent from "../components/ui/CourseContent.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import IaAssistant from "../components/ui/IaAssistant.jsx";
 import api from "../services/courseService";
+import progressionService from "../services/progressionService";
+
 
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
@@ -17,8 +19,11 @@ export default function Courses() {
   const location = useLocation();
 
   const storedUser = localStorage.getItem("user");
-  const userData = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-  const initials = userData ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase() : "";
+  const userData =
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const initials = userData
+    ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+    : "";
 
   const [sections, setSections] = useState([]);
   const [title, setTitle] = useState("");
@@ -29,13 +34,42 @@ export default function Courses() {
   const [courseProgress, setCourseProgress] = useState(0);
   const [initialLessonPage, setInitialLessonPage] = useState(0);
 
+  // **NOUVEAU** pour gérer la page par section
+  const [sectionPages, setSectionPages] = useState({});
+
   const lastLessonId = location.state?.lastLessonId;
+
+// Marquer une leçon comme visitée
+const markLessonVisited = async (lessonId) => {
+  try {
+    // Appel backend pour marquer la leçon
+    const res = await progressionService.completeLesson(lessonId);
+    
+    // Mettre à jour la progression globale du cours
+    if (res?.course_progress !== undefined) {
+      setCourseProgress(res.course_progress);
+    }
+
+    // Mettre à jour localement la leçon comme visitée
+    setSections(prev =>
+      prev.map((sec) => ({
+        ...sec,
+        lessons: sec.lessons.map((l) =>
+          l.id === lessonId ? { ...l, visited: true } : l
+        ),
+      }))
+    );
+  } catch (err) {
+    console.error("Erreur lors du marquage de la leçon :", err);
+  }
+};
+
 
   useEffect(() => {
     if (!coursId) return;
 
     const fetchCourse = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("token");
       try {
         const res = await api.get(`courses/courses/${coursId}/`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -47,36 +81,36 @@ export default function Courses() {
         setDuration(data.duration);
         setLevel(data.niveau_cour);
 
-        const fetchedSections = (data.sections || []).map(sec => ({
+        const fetchedSections = (data.sections || []).map((sec) => ({
           id: sec.id_section,
           title: sec.titre_section,
           description: sec.description || "",
           open: true,
           ordre: sec.ordre,
-          lessons: (sec.lecons || []).map(lec => ({
+          lessons: (sec.lecons || []).map((lec) => ({
             id: lec.id_lecon,
             title: lec.titre_lecon,
             content: lec.contenu_lecon,
             type: lec.type_lecon,
+            visited: lec.visited,
             preview:
               lec.type_lecon === "image"
                 ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
-                : null
-          }))
+                : null,
+          })),
         }));
 
-        /* 🔥 POSITIONNEMENT AUTOMATIQUE */
+        /* POSITIONNEMENT AUTOMATIQUE */
         if (lastLessonId) {
           const LESSONS_PER_PAGE = 2;
-
           for (let secIndex = 0; secIndex < fetchedSections.length; secIndex++) {
             const lessons = fetchedSections[secIndex].lessons;
-            const lessonIndex = lessons.findIndex(l => l.id === lastLessonId);
-
+            const lessonIndex = lessons.findIndex((l) => l.id === lastLessonId);
             if (lessonIndex !== -1) {
               setCurrentSectionIndex(secIndex);
               setInitialLessonPage(Math.floor(lessonIndex / LESSONS_PER_PAGE));
-              break; // stop dès qu’on trouve la leçon
+              setSectionPages({ [secIndex]: Math.floor(lessonIndex / LESSONS_PER_PAGE) });
+              break;
             }
           }
         }
@@ -89,6 +123,28 @@ export default function Courses() {
 
     fetchCourse();
   }, [coursId, lastLessonId]);
+
+  const updateSectionProgress = (sectionIndex, lessonId) => {
+    setSections((prev) =>
+      prev.map((sec, i) => {
+        if (i !== sectionIndex) return sec;
+
+        const updatedLessons = sec.lessons.map((lesson) =>
+          lesson.id === lessonId ? { ...lesson, visited: true } : lesson
+        );
+
+        const visitedCount = updatedLessons.filter((l) => l.visited).length;
+        const progress = Math.round((visitedCount / updatedLessons.length) * 100);
+
+        return {
+          ...sec,
+          lessons: updatedLessons,
+          progress,
+          completed: progress === 100,
+        };
+      })
+    );
+  };
 
   return (
     <div className="w-full bg-surface flex flex-col items-center">
@@ -103,26 +159,28 @@ export default function Courses() {
           <UserCircle
             initials={initials}
             onToggleTheme={toggleDarkMode}
-            onChangeLang={lang => i18n.changeLanguage(lang)}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
           />
         </div>
       </header>
+
       <div className="w-full max-w-7xl px-4 pb-10 flex flex-col lg:flex-row gap-6 relative">
-        <div className="block">
-          <CoursesSidebarItem
-            sections={sections}
-            currentSectionIndex={currentSectionIndex}
-            setCurrentSectionIndex={setCurrentSectionIndex}
-          />
-        </div>
+        <CoursesSidebarItem
+          sections={sections}
+          currentSectionIndex={currentSectionIndex}
+          setCurrentSectionIndex={setCurrentSectionIndex}
+        />
        <CourseContent
   course={{ title, description, level, duration, sections, id: coursId }}
   currentSectionIndex={currentSectionIndex}
   setCurrentSectionIndex={setCurrentSectionIndex}
   setSections={setSections}
-  setCourseProgress={setCourseProgress}
-  currentLessonPage={initialLessonPage} // Passe la page initiale
-  setCurrentLessonPage={setInitialLessonPage} // Permet de la mettre à jour depuis CourseContent
+  sectionPages={sectionPages}
+  setSectionPages={setSectionPages}
+  currentLessonPage={initialLessonPage}
+  setCurrentLessonPage={setInitialLessonPage}
+  updateSectionProgress={updateSectionProgress}
+  markLessonVisited={markLessonVisited} // <-- ici
 />
 
       </div>

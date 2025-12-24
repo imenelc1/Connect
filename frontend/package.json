@@ -14,6 +14,7 @@
     "@tiptap/react": "^3.13.0",
     "@tiptap/starter-kit": "^3.13.0",
     "axios": "^1.13.2",
+    "framer-motion": "^12.23.26",
     "html-parse-stringify": "^3.0.1",
     "i18next": "^25.6.3",
     "jwt-decode": "^4.0.0",
