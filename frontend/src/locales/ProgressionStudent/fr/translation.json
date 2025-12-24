@@ -1,7 +1,7 @@
 
 {
   "ProgressStudent": {
-     "AvarageG": "Note moyenne" ,
+     "AvarageG": "Score moyen" ,
     "Submission":"Taux de soumission",
     "Completed": "Complété",
     "points":"points du mois dernier",

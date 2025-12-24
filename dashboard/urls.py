@@ -22,6 +22,10 @@ urlpatterns = [
  path("tentatives/can-submit/<int:exercice_id>/", views.can_submit_exercice, name="can-submit-exercice"),
  path("student-exercises/<int:student_id>/", views.student_exercises, name="student-exercises"),
  path("student/<int:student_id>/", views.get_student, name="get-student"),
+ path("student/active-courses/<int:student_id>/", views.student_active_courses, name="student-active-courses"),
+ path("student/weekly-submission-chart/<int:student_id>/", views.weekly_submission_chart, name="weekly-submission-chart"),
+ path("student/student-weekly-submission-chart/", views.student_weekly_submission_chart, name="student-weekly-submission-chart"),
+ path("student/student-progress/", views.student_progress, name="student-progress"),
 
  
 ]

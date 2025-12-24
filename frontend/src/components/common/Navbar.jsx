@@ -39,7 +39,7 @@ export default function Navbar() {
     try {
       const storedUser = localStorage.getItem("user");
 
-      // 🔥 Empêcher le crash si la valeur est "undefined" ou vide
+      // Empêcher le crash si la valeur est "undefined" ou vide
       if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
         const parsed = JSON.parse(storedUser);
         userObj = parsed.user || parsed.utilisateur || parsed;
