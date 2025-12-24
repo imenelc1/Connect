@@ -10,10 +10,11 @@ from django.utils.timezone import now
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
+from exercices.serializers import ExerciceSerializer
 from spaces.models import Space, SpaceEtudiant
 from spaces.views import etudiant_appartient_a_lespace
-from users.jwt_auth import IsAuthenticatedJWT
-from users.models import Utilisateur
+from users.jwt_auth import IsAuthenticatedJWT, jwt_required
+from users.models import Etudiant, Utilisateur
 from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration, TentativeExercice
 from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta
@@ -107,7 +108,7 @@ def complete_lessons_bulk(request):
         completed_cours = LeconComplete.objects.filter(utilisateur=user, lecon__section__cours=cours).count()
         cours_progress = round((completed_cours / total_cours) * 100)
 
-        # ⚡ Correction : ajouter defaults pour éviter NOT NULL
+        #  Correction : ajouter defaults pour éviter NOT NULL
         pc, created = ProgressionCours.objects.get_or_create(
             utilisateur=user,
             cours=cours,
@@ -379,47 +380,46 @@ def list_tentatives(request):
 
 # ---------------- POST nouvelle tentative ----------------
 class create_tentative(APIView):
-    permission_classes = [IsAuthenticatedJWT]  # ou IsAuthenticatedJWT
+    permission_classes = [IsAuthenticatedJWT]
 
     def post(self, request):
         user = request.user
         exercice_id = request.data.get("exercice_id")
+        etat = request.data.get("etat", "brouillon")
 
-        # Vérification de l'exercice
+        # Vérification du rôle
+        if not hasattr(user, "etudiant"):
+            return Response({"error": "Seuls les étudiants peuvent participer aux exercices"}, status=403)
+
         try:
             exercice = Exercice.objects.get(id_exercice=exercice_id)
         except Exercice.DoesNotExist:
             return Response({"error": "Exercice non trouvé"}, status=404)
 
-        # Vérification que l'étudiant appartient à l'espace
-        if not etudiant_appartient_a_lespace(user, exercice):
+        # Bloquer UNIQUEMENT la soumission
+        if etat == "soumis" and not etudiant_appartient_a_lespace(user, exercice):
             raise PermissionDenied("Vous ne pouvez pas soumettre cet exercice")
 
-        # Calcul du temps passé
         temps_passe_sec = request.data.get("temps_passe", 0)
         temps_passe = timedelta(seconds=int(temps_passe_sec))
 
-        # Création ou mise à jour de la tentative
         tentative, created = TentativeExercice.objects.update_or_create(
             utilisateur=user,
             exercice=exercice,
             defaults={
                 "reponse": request.data.get("reponse", ""),
                 "output": request.data.get("output", ""),
-                "etat": request.data.get("etat", "brouillon"),
+                "etat": etat,
                 "temps_passe": temps_passe,
             }
         )
 
         return Response({
-            "success": "Soumission acceptée",
+            "success": "Tentative enregistrée",
             "tentative": {
                 "id": tentative.id,
                 "etat": tentative.etat,
-                "reponse": tentative.reponse,
-                "temps_passe": tentative.temps_passe.total_seconds(),
                 "submitted_at": tentative.submitted_at,
-                "feedback": tentative.feedback
             }
         })
 
@@ -436,3 +436,90 @@ def get_tentative(request, tentative_id):
     )
     serializer = TentativeExerciceReadSerializer(tentative)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def can_submit_exercice(request, exercice_id):
+    exercice = get_object_or_404(Exercice, id_exercice=exercice_id)
+    can_submit = etudiant_appartient_a_lespace(request.user, exercice)
+    return Response({"can_submit": can_submit})
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def get_student(request, student_id):
+    try:
+        etudiant = Etudiant.objects.select_related("utilisateur").get(utilisateur_id=student_id)
+    except Etudiant.DoesNotExist:
+        return Response({"error": "Étudiant introuvable"}, status=404)
+
+    u = etudiant.utilisateur
+    data = {
+        "id": u.id_utilisateur,
+        "nom": u.nom,
+        "prenom": u.prenom,
+        "adresse_email": u.adresse_email,
+        "specialite": etudiant.specialite,
+        "annee_etude": etudiant.annee_etude,
+    }
+    return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def student_exercises(request, student_id):
+    """
+    Récupère tous les exercices soumis par un étudiant
+    dans les espaces appartenant au professeur connecté.
+    """
+    prof = request.user
+
+    # Vérifier que l'étudiant existe
+    try:
+        student = Utilisateur.objects.get(id_utilisateur=student_id)
+    except Utilisateur.DoesNotExist:
+        return Response({"error": "Étudiant non trouvé"}, status=404)
+
+    # Espaces où le prof est propriétaire ET l'étudiant est inscrit
+    spaces = Space.objects.filter(
+        utilisateur=prof,
+        spaceetudiant__etudiant=student
+    ).distinct()
+
+    # Exercices liés à ces espaces et créés par ce prof
+    exercises = Exercice.objects.filter(
+        spaceexo__space__in=spaces,
+        utilisateur=prof
+    ).distinct()
+
+    # Récupérer la tentative de l’étudiant pour chaque exercice
+    results = []
+    for ex in exercises:
+        try:
+         tentative = TentativeExercice.objects.get(
+            exercice=ex,
+            utilisateur=student,
+            etat="soumis"
+        )
+        except TentativeExercice.DoesNotExist:
+         continue
+
+        results.append({
+        "id_exercice": ex.id_exercice,
+        "nom_exercice": ex.titre_exo,
+        "tentative": {
+            "etat": tentative.etat,
+            "reponse": tentative.reponse,
+            "output": tentative.output,
+            "submitted_at": tentative.submitted_at,
+            "score": tentative.score,
+        }
+    })
+
+    return Response(results)
+
+
+
+
+
+
+

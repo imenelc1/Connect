@@ -19,6 +19,9 @@ urlpatterns = [
  path("tentatives/", views.list_tentatives, name="list_tentatives"),
  path("tentatives/create/", views.create_tentative.as_view(), name="create_tentative"),
  path("tentatives/id/<int:tentative_id>/", views.get_tentative, name="get-tentative"),
+ path("tentatives/can-submit/<int:exercice_id>/", views.can_submit_exercice, name="can-submit-exercice"),
+ path("student-exercises/<int:student_id>/", views.student_exercises, name="student-exercises"),
+ path("student/<int:student_id>/", views.get_student, name="get-student"),
 
  
 ]
