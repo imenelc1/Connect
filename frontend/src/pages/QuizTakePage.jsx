@@ -8,37 +8,6 @@ import UserCircle from "../components/common/UserCircle";
 import { useNavigate, useParams } from "react-router-dom";
 import { getCurrentUserId } from "../hooks/useAuth";
 
-/* ================= TIMER (EN DEHORS !) ================= */
-function Timer({ minutes, onFinish }) {
-  const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
-
-  useEffect(() => {
-    if (secondsLeft <= 0) {
-      onFinish?.();
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setSecondsLeft((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [secondsLeft, onFinish]);
-
-  const formatTime = (s) => {
-    const m = String(Math.floor(s / 60)).padStart(2, "0");
-    const sec = String(s % 60).padStart(2, "0");
-    return `${m}:${sec}`;
-  };
-
-  return (
-    <div className="flex items-center gap-2 bg-blue px-4 py-2 rounded text-white">
-      <FaClock /> {formatTime(secondsLeft)}
-    </div>
-  );
-}
-
-/* ================= PAGE ================= */
 export function QuizTakePage() {
   const { t, i18n } = useTranslation("quiz2");
   const { exerciceId } = useParams();
@@ -49,7 +18,7 @@ export function QuizTakePage() {
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-
+  const [secondsLeft, setSecondsLeft] = useState(null); // Timer global
   const currentUserId = getCurrentUserId();
 
   /* ================= FETCH QUIZ ================= */
@@ -86,27 +55,45 @@ export function QuizTakePage() {
           })),
         });
 
+        setQuiz(formattedQuiz);
+
+        if (formattedQuiz.activerDuration) {
+          setSecondsLeft(formattedQuiz.durationMinutes * 60);
+        }
+
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, [exerciceId]);
 
-  if (loading || !quiz) return <p>Chargement...</p>;
+  /* ================= TIMER GLOBAL ================= */
+  useEffect(() => {
+    if (secondsLeft === null || !quiz?.activerDuration) return;
 
- const q = quiz.questions?.[currentQuestion];
+    if (secondsLeft <= 0) {
+      submitQuiz(); // soumission automatique
+      return;
+    }
 
-if (!q) {
-  return (
-    <p className="text-center text-red-500">
-      Aucune question disponible pour ce quiz
-    </p>
-  );
-}
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => prev - 1);
+    }, 1000);
 
+    return () => clearInterval(interval);
+  }, [secondsLeft, quiz]);
 
-  /* ================= LOGIQUE ================= */
-  const progressValue =
-    (Object.keys(answers).length / quiz.questions.length) * 100;
+  const formatTime = (totalSeconds) => {
+    const m = Math.floor(totalSeconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (totalSeconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  /* ================= LOGIQUE QUIZ ================= */
+  const q = quiz?.questions[currentQuestion];
+  const answeredCount = Object.keys(answers).length;
+  const progressValue = quiz ? (answeredCount / quiz.questions.length) * 100 : 0;
 
   const handleSelect = (questionId, optionId) => {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
@@ -114,22 +101,29 @@ if (!q) {
 
   const submitQuiz = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/quiz/quiz/submit/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          utilisateur: currentUserId,
-          quiz_id: quiz.quizId,
-          answers,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:8000/api/quiz/quiz/submit/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            utilisateur: currentUserId,
+            quiz_id: quiz.quizId,
+            answers: answers,
+          }),
+        }
+      );
 
-      const data = await res.json();
-      navigate(`/QuizRecape/${exerciceId}`, { state: data });
-    } catch {
+      const data = await response.json();
+
+      navigate(`/QuizRecape/${exerciceId}`, {
+        state: data,
+      });
+    } catch (err) {
+      console.error(err);
       alert("Erreur lors de la soumission du quiz");
     }
   };
@@ -138,16 +132,14 @@ if (!q) {
     if (!answers[q.id]) return;
 
     if (currentQuestion < quiz.questions.length - 1) {
-      setCurrentQuestion((prev) => prev + 1);
+      setCurrentQuestion(currentQuestion + 1);
     } else {
       submitQuiz();
     }
   };
 
   const prevQuestion = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion((prev) => prev - 1);
-    }
+    if (currentQuestion > 0) setCurrentQuestion(currentQuestion - 1);
   };
 
   /* ================= USER ================= */
@@ -161,6 +153,8 @@ if (!q) {
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
 
+  if (loading || !quiz) return <p>Chargement...</p>;
+
   /* ================= RENDER ================= */
   return (
     <div className="min-h-screen flex flex-col px-3 py-3">
@@ -172,22 +166,16 @@ if (!q) {
         />
       </div>
 
-      <h1 className="text-2xl font-bold text-center mb-6">
-        {quiz.exercice.titre}
-      </h1>
+      <h1 className="text-2xl font-bold text-center mb-6">{quiz.exercice.titre}</h1>
 
       <div className="rounded-2xl shadow-lg p-4 bg-grad-2">
+        {/* Stats */}
         <div className="flex justify-center gap-6 mb-6 text-white">
           {quiz.activerDuration && (
-            <Timer
-              minutes={quiz.durationMinutes || 0}
-              onFinish={() => {
-                alert("Le temps est écoulé !");
-                submitQuiz();
-              }}
-            />
+            <div className="flex items-center gap-2 bg-blue px-4 py-2 rounded text-white">
+              <FaClock /> {formatTime(secondsLeft)}
+            </div>
           )}
-
           <div className="flex items-center gap-2 bg-purple px-4 py-2 rounded">
             <FaMedal /> {quiz.scoreMinimum}%
           </div>
@@ -225,16 +213,8 @@ if (!q) {
         </div>
 
         <div className="flex justify-between">
-          <Button
-            text={`< ${t("prev")}`}
-            onClick={prevQuestion}
-            disabled={currentQuestion === 0}
-          />
-          <Button
-            text={`${t("next")} >`}
-            onClick={nextQuestion}
-            disabled={!answers[q.id]}
-          />
+          <Button text={`< ${t("prev")}`} onClick={prevQuestion} disabled={currentQuestion === 0} />
+          <Button text={`${t("next")} >`} onClick={nextQuestion} disabled={!answers[q.id]} />
         </div>
       </div>
     </div>

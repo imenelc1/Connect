@@ -52,6 +52,7 @@ export default function CreateQuiz() {
   maxAttempts: 0,
   durationEnabled: false,
   duration: 0,
+  delais_entre_tentative: 0,
 
   passingScore: 0,
 
@@ -197,6 +198,7 @@ const currentUserId = getCurrentUserId();
         scoreMinimum: quizData.passingScore,
         nbMax_tentative: quizData.maxAttempts || 0,
         activerDuration: quizData.durationEnabled,
+        delai_entre_tentatives: quizData.delais_entre_tentative || 0,
         duration: quizData.durationEnabled
           ? `00:${quizData.duration}:00`
           : null,
@@ -414,6 +416,10 @@ const handlePublishQuiz = async () => {
 
       <div className="px-6 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white">
         {quizData.passingScore || 0} {t("scoreMinimum")}
+      </div>
+
+      <div className="px-6 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white">
+        {quizData.delais_entre_tentative || 0} {t("delais_entre_tentative")}
       </div>
     </div>
 

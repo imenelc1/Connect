@@ -56,6 +56,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     specialite = serializers.SerializerMethodField()
     annee_etude = serializers.SerializerMethodField()
 
+    # Rendre les champs principaux facultatifs pour éviter les erreurs
+    nom = serializers.CharField(required=False, allow_null=True)
+    prenom = serializers.CharField(required=False, allow_null=True)
+    date_naissance = serializers.DateField(required=False, allow_null=True)
+    adresse_email = serializers.EmailField(required=False, allow_null=True)
+    matricule = serializers.CharField(required=False, allow_null=True)
+
     class Meta:
         model = Utilisateur
         fields = [
@@ -64,11 +71,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
 
     def get_role(self, obj):
-        if hasattr(obj, "etudiant"):
+        if hasattr(obj, "etudiant") and obj.etudiant is not None:
             return "etudiant"
-        elif hasattr(obj, "enseignant"):
+        elif hasattr(obj, "enseignant") and obj.enseignant is not None:
             return "enseignant"
-        elif hasattr(obj, "administrateur"):
+        elif hasattr(obj, "administrateur") and obj.administrateur is not None:
             return "admin"
         return None
 
