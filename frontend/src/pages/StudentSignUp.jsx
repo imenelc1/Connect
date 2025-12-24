@@ -73,7 +73,7 @@ export default function StudentSignUp() {
     if (!formData.nickname) newErrors.nickname = t("requiredField");
     if (!formData.fullname) newErrors.fullname = t("requiredField");
     if (/\d/.test(formData.nickname))
-      newErrors.nickname = t("nicknameNumbers");
+      newErrors.nickname = t("nicknameNumbers"); 
 
     if (/\d/.test(formData.fullname))
       newErrors.fullname = t("fullnameNumbers");

@@ -40,7 +40,7 @@ export default function LoginStudent() {
 
     // --- Validation frontend ---
     if (!email) return setErrorEmail(t("errors.emailRequired"));
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErrorEmail(t("errors.invalidEmail"));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return setErrorEmail(t("errors.emailNotFound"));
     if (!password) return setErrorPassword(t("errors.passwordRequired"));
     if (password.length < 8) return setErrorPassword(t("errors.passwordLength"));
 
@@ -94,8 +94,8 @@ export default function LoginStudent() {
       }
 
       // Erreur réseau
-      setErrorPassword("Erreur réseau");
-      toast.error("Erreur réseau");
+      setErrorPassword(t("errors.networkError"));
+      toast.error(t("errors.networkError"));
     }
   };
 

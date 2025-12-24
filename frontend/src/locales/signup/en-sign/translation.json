@@ -12,7 +12,7 @@
   "regnumber": "Registration Number",
   "field": "Field of Study",
   "year": "Academic Year",
-  "rank": "Rank",
+  "rank": "Academic rank",
   "signUp": "Sign Up",
   "signIn": "Sign In",
   "or": "Or",
@@ -20,8 +20,9 @@
   "selectOption": "Select an option",
   "googleSignIn": "Or sign in with Google",
   "requiredField": "This field is required",
-  "nicknameNumbers": "Name cannot contain numbers",
-  "fullnameNumbers": "First name cannot contain numbers",
+ "nicknameNumbers": "Last Name cannot contain numbers",   
+  "fullnameNumbers": "First  cannot contain numbers",  
+  "nameNumbers":"This field cannot contain digits",
   "passwordMin": "Minimum 8 characters",
   "passwordMismatch": "Passwords do not match",
   "invalidEmail": "Invalid email format",
@@ -35,6 +36,15 @@
   "networkError": "Network error",
   "fieldMath": "Mathematics",
   "fieldCS": "Computer Science",
-  "fieldST": "Science and Technology"
+  "fieldST": "Science and Technology",
+  "MinAgeInstructor": "You must be at least 25 years old",
+  "gradeRequired":"Required academic rank",
+  "prof":"Professor",
+  "MC":"Associate Professor ",
+  "MA":"Assistant Professor",
+  "regCond":"The registration number must contain only digits",
+  "invalidCaracters":"Invalid characters (only letters allowed)",
+  "selectField":"field of study",
+  "selectYear":"Year"
 }
   

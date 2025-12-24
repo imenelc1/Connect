@@ -25,16 +25,23 @@
   "passwordMin": "Minimum 8 caractères",
   "passwordMismatch": "Les mots de passe ne correspondent pas",
   "invalidEmail": "Format d'email invalide",
-   "emailRequired":"Email obligatoire",
+  "emailRequired": "Email obligatoire",
   "regnumberInvalid": "Matricule invalide (12 chiffres)",
   "dobMinAge": "Vous devez avoir au moins 16 ans.",
   "fixErrors": "Veuillez corriger les erreurs.",
-  "pwdRequired":"Mot de passe obligatoire",
+  "pwdRequired": "Mot de passe obligatoire",
   "successSignUp": "Inscription réussie !",
-  "formSubmitted": "Formulaire envoyé", 
+  "formSubmitted": "Formulaire envoyé",
   "networkError": "Erreur réseau",
   "fieldMath": "Mathématiques",
   "fieldCS": "Informatique",
-  "fieldST": "Sciences et Technologie"
-
+  "fieldST": "Sciences et Technologie",
+  "gradeRequired": "Grade obligatoire",
+  "prof": "Professeur",
+  "MC": "Maître de conférences ",
+  "MA": "Maître assistant",
+  "regCond": "Le matricule doit contenir uniquement des chiffres",
+  "invalidCaracters": "Caractères invalides (lettres uniquement)",
+  "selectField": "filière",
+  "selectYear":"Année d’étude"
 }
