@@ -49,6 +49,7 @@ class AdministrateurSerializer(serializers.ModelSerializer):
         admin.set_password(validated_data['mdp_admin'])
         admin.save()
         return admin
+    
 class ProfileSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
     grade = serializers.SerializerMethodField()
@@ -58,39 +59,24 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateur
         fields = [
-            'id_utilisateur',
-            'nom',
-            'prenom',
-            'date_naissance',
-            'adresse_email',
-            'matricule',
-            'role',
-            'grade',
-            'specialite',
-            'annee_etude'
+            'id_utilisateur', 'nom', 'prenom', 'date_naissance',
+            'adresse_email', 'matricule', 'role', 'grade', 'specialite', 'annee_etude'
         ]
 
-    # Détecter le rôle
     def get_role(self, obj):
         if hasattr(obj, "etudiant"):
             return "etudiant"
-        if hasattr(obj, "enseignant"):
+        elif hasattr(obj, "enseignant"):
             return "enseignant"
-        if hasattr(obj, "administrateur"):
+        elif hasattr(obj, "administrateur"):
             return "admin"
         return None
 
     def get_grade(self, obj):
-        if hasattr(obj, "enseignant"):
-            return obj.enseignant.grade
-        return None
+        return getattr(getattr(obj, "enseignant", None), "grade", None)
 
     def get_specialite(self, obj):
-        if hasattr(obj, "etudiant"):
-            return obj.etudiant.specialite
-        return None
+        return getattr(getattr(obj, "etudiant", None), "specialite", None)
 
     def get_annee_etude(self, obj):
-        if hasattr(obj, "etudiant"):
-            return obj.etudiant.annee_etude
-        return None
+        return getattr(getattr(obj, "etudiant", None), "annee_etude", None)

@@ -115,6 +115,30 @@ export default function TheoryExercisePage() {
     return "star-difficult";
   };
 
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  const storedUser = localStorage.getItem("user");
+  const userData =
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const initials = userData
+    ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+    : "";
+  const isStudent = userData.role === "etudiant";
+
+useEffect(() => {
+  if (!exerciceId) return;
+
+  fetch(`http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then(res => res.json())
+    .then(data => setCanSubmit(data.can_submit))
+    .catch(() => setCanSubmit(false));
+}, [exerciceId]);
+
+
   return (
     <div className="flex bg-[rgb(var(--color-surface))] min-h-screen">
       <div className="hidden lg:block">
@@ -216,7 +240,7 @@ export default function TheoryExercisePage() {
         </div>
 
         {/* BUTTONS */}
-        <div className="flex justify-around mb-5">
+           {isStudent && (<div className="flex justify-around mb-5">
           <button
             onClick={handleSaveDraft}
             disabled={loading}
@@ -227,15 +251,27 @@ export default function TheoryExercisePage() {
             Sauvegarder
           </button>
 
-          <button
-            onClick={handleSendSolution}
-            disabled={loading}
-            className="px-8 py-3 rounded-xl text-white font-semibold shadow-lg hover:opacity-90 transition text-sm sm:text-base"
-            style={{ backgroundImage: "var(--grad-1)" }}
-          >
-            {t("send_solution")}
-          </button>
-        </div>
+<button
+  onClick={handleSendSolution}
+  disabled={!canSubmit || loading}
+  className={`
+    px-8 py-3 rounded-xl font-semibold shadow-lg transition
+    ${!canSubmit || loading
+      ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
+      : "text-white hover:opacity-90"}
+  `}
+  style={
+    !canSubmit || loading
+      ? { backgroundImage: "none" }
+      : { backgroundImage: "var(--grad-1)" }
+  }
+>
+  {t("send_solution")}
+</button>
+
+
+
+        </div>)}
 
         {/* FEEDBACK */}
         <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24" style={{ backgroundImage: "var(--grad-8)" }}>

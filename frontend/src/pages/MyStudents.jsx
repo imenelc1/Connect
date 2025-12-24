@@ -17,6 +17,7 @@ import {
 import { getSpaces } from "../services/spacesService";
 import { getCurrentProgressStudents } from "../services/progressionService";
 
+
 export default function MyStudents() {
   const { t } = useTranslation("myStudents");
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -29,6 +30,8 @@ export default function MyStudents() {
   const [space, setSpace] = useState("");
 
   const [studentsProgress, setStudentsProgress] = useState({});
+
+  
 
   useEffect(() => {
     const fetchStudentsProgress = async () => {
@@ -208,10 +211,12 @@ export default function MyStudents() {
                           </h2>
                         </div>
 
-                        {/* RIGHT ARROW */}
-                        <Button className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10">
-                          <ChevronRight size={16} className="w-6 h-6" />
-                        </Button>
+                       <Button
+  className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10"
+  onClick={() => navigate(`/student-exercises/${st.id}`)}
+>
+  <ChevronRight size={16} className="w-6 h-6" />
+</Button>
                       </div>
                     </div>
 

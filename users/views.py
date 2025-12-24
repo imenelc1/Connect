@@ -195,8 +195,17 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticatedJWT]
 
     def get_object(self):
-        return self.request.user  # ✅ maintenant c'est toujours un objet Utilisateur
+        # Garantit que request.user est bien un objet Utilisateur ou None
+        if not hasattr(self.request, 'user') or self.request.user is None:
+            return None
+        return self.request.user
 
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        if not user:
+            return Response({"error": "Utilisateur introuvable"}, status=404)
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticatedJWT]  # JWT custom

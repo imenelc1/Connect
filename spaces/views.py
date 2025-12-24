@@ -267,3 +267,23 @@ def etudiant_appartient_a_lespace(user, exercice):
         etudiant=user,
         space__spaceexo__exercice=exercice
     ).distinct().exists()
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def my_space_exercises(request, space_id):
+    prof = request.user
+    try:
+        space = Space.objects.get(id_space=space_id, utilisateur=prof)
+    except Space.DoesNotExist:
+        return Response({"error": "Espace non trouvé ou non autorisé"}, status=404)
+
+    # Tous les exercices liés à cet espace
+    exercises = Exercice.objects.filter(
+        spaceexo__space=space,
+        utilisateur=prof
+    ).distinct()
+
+    serializer = ExerciceSerializer(exercises, many=True)
+    return Response(serializer.data)
+
