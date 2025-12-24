@@ -21,7 +21,7 @@
   "googleSignIn": "Or sign in with Google",
   "requiredField": "This field is required",
  "nicknameNumbers": "Last Name cannot contain numbers",   
-  "fullnameNumbers": "First  cannot contain numbers",  
+  "fullnameNumbers": "First Name cannot contain numbers",  
   "nameNumbers":"This field cannot contain digits",
   "passwordMin": "Minimum 8 characters",
   "passwordMismatch": "Passwords do not match",
