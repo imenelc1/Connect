@@ -56,8 +56,8 @@ export default function SpacesPage() {
   );
 
   const fields = [
-    { label: t("title"), placeholder: "Ex: Algorithm Masters", value: newSpace.title, onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }) },
-    { label: t("subtitle"), placeholder: "Describe your space...", value: newSpace.description, onChange: (e) => setNewSpace({ ...newSpace, description: e.target.value }) },
+    { label: t("editModalTitle"), placeholder: "Ex: Algorithm Masters", value: newSpace.title, onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }) },
+    { label: t("editModalSubtitle"), placeholder: t("subtitlePlaceholder"), value: newSpace.description, onChange: (e) => setNewSpace({ ...newSpace, description: e.target.value }) },
   ];
 
   const handleSubmit = (e) => {

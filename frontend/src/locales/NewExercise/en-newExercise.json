@@ -10,7 +10,9 @@
     "category_label": "Category",
     "duration_label": "Duration",
     "level_label": "Level",
-    "cours": "Course"
+    "cours": "Course",
+    "solution_label": "Solution (optional — visible only after completing the exercise)"
+
   },
   "select": {
     "placeholder": "Select",
@@ -45,5 +47,8 @@
     "level": "Level",
     "courseVisibility": "Visibility",
     "course_selected": "Selected course"
-  }
+  },
+  
+  
+    "solution_note": "This solution is only visible to the teacher. It will be revealed to the student only after they have completed the exercise."
 }

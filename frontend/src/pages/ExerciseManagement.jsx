@@ -56,7 +56,7 @@ export default function ExercisesManagement() {
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data)) {
-          console.error("Les exercices ne sont pas un tableau :", data);
+          console.error(t("errors.invalidData"), data);
           setExercises([]);
           return;
         }
@@ -76,7 +76,7 @@ export default function ExercisesManagement() {
         setExercises(formatted);
       })
       .catch((err) => {
-        console.error("Erreur chargement exercices :", err);
+        console.error(t("errors.fetchExercises"), err);
         setExercises([]);
       });
   }, []);

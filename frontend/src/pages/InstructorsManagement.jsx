@@ -11,22 +11,22 @@ import UserCircle from "../components/common/UserCircle";
 // Petit composant pour afficher les détails
 function DetailsModal({ open, onClose, instructor }) {
   if (!open || !instructor) return null;
-
+  const { t, i18n } = useTranslation("instructors");
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
       <div className="bg-card rounded-xl shadow-lg p-6 w-[400px]">
-        <h2 className="text-xl text-muted font-bold mb-4">Résumé de l'enseignant</h2>
+        <h2 className="text-xl text-muted font-bold mb-4">{t("instructorResume")}</h2>
         <ul className="text-sm text-gray space-y-2">
-          <li><strong>Prénom :</strong> {instructor.firstName}</li>
-          <li><strong>Nom :</strong> {instructor.lastName}</li>
-          <li><strong>Email :</strong> {instructor.email}</li>
-          <li><strong>Date de naissance :</strong> {instructor.birthdate}</li>
-          <li><strong>Rang :</strong> {instructor.rank}</li>
-          <li><strong>Matricule :</strong> {instructor.matricule}</li>
-          <li><strong>Mot de passe :</strong> {instructor.password}</li>
+          <li><strong>{t("firstName")} :</strong> {instructor.firstName}</li>
+          <li><strong>{t("lastName")} :</strong> {instructor.lastName}</li>
+          <li><strong>{t("email")} :</strong> {instructor.email}</li>
+          <li><strong>{t("birthdate")} :</strong> {instructor.birthdate}</li>
+          <li><strong>{t("rank")} :</strong> {instructor.rank}</li>
+          <li><strong>{t("matricule")} :</strong> {instructor.matricule}</li>
+          <li><strong>{t("password")} :</strong> {instructor.password}</li>
         </ul>
         <div className="mt-4 flex justify-end">
-          <Button variant="secondary" onClick={onClose}>Fermer</Button>
+          <Button variant="secondary" onClick={onClose}>{t("close")}</Button>
         </div>
       </div>
     </div>

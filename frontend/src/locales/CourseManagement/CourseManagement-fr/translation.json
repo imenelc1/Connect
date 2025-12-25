@@ -1,11 +1,10 @@
 {
   "title": "Gestion des cours",
-  "description": "Gérez tous vos cours ici.",
+  "description": "Gérez tous vos cours depuis ici.",
   "addCourseButton": "+ Ajouter un cours",
   "searchPlaceholder": "Rechercher un cours...",
   "submissions": "{{count}} étudiants",
   "validationButton": "Validation des cours",
-  
   "difficulty": {
     "Beginner": "Débutant",
     "Intermediate": "Intermédiaire",
@@ -14,7 +13,7 @@
   "modal": {
     "create": {
       "title": "Créer un cours",
-      "subtitle": "Remplissez les informations pour ajouter un cours.",
+      "subtitle": "Remplissez les informations pour ajouter un nouveau cours.",
       "submit": "Enregistrer le cours",
       "cancel": "Annuler"
     },
@@ -28,8 +27,23 @@
   "field": {
     "title": "Titre",
     "titlePlaceholder": "Titre du cours",
+    "description": "Description",
+    "descriptionPlaceholder": "Description du cours",
+    "duration": "Durée",
+    "durationPlaceholder": "Durée du cours (hh:mm:ss)",
     "category": "Catégorie",
     "categoryPlaceholder": "Catégorie",
-    "difficulty": "Niveau"
+    "teacher": "Enseignant",
+    "difficulty": "Niveau",
+    "teacherPlaceholder":"Sélectionner un enseignant "
+  },
+  "errors": {
+    "fetchCourses": "Erreur lors de la récupération des cours.",
+    "fetchTeachers": "Erreur lors de la récupération des enseignants.",
+    "createCourse": "Erreur lors de la création du cours.",
+    "editCourse": "Erreur lors de la modification du cours.",
+    "deleteCourse": "Erreur lors de la suppression du cours."
+  
   }
+
 }

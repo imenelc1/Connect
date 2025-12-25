@@ -5,9 +5,12 @@
     "badgesp":"Create and manage achievement badges",
     "buttonCreate": "Create Badges",
     "search": "Search badges ...",
-    "common":"Common",
-    "Rare":"Rare",
-    "Epic":"Epic",
+
+    "rarities": {
+      "common": "Common",
+      "rare": "Rare",
+      "epic": "Epic"
+    },
     "FirstSteps":"First Steps",
     "Completefist":"Complete your fist exercises",
     "earned":"Earned by",

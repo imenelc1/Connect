@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import feedbackService from "../../services/feedbackService";
-
+import FeedbackCard from "../common/FeedbackCard.jsx";
 export default function CourseContent({
   course,
   currentSectionIndex,

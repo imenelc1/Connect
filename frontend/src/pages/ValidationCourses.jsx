@@ -51,7 +51,7 @@ export default function ValidationCourses() {
         }
       );
 
-      if (!res.ok) throw new Error("Erreur récupération cours");
+      if (!res.ok) throw new Error(t("errors.fetchCourses"));
 
       const data = await res.json();
       setCourses(data);
@@ -75,7 +75,7 @@ export default function ValidationCourses() {
         }
       );
 
-      if (!res.ok) throw new Error("Erreur mise à jour statut");
+      if (!res.ok) throw new Error(t("errors.updateStatus"));
 
       // retirer le cours de la liste après validation/refus
       setCourses((prev) => prev.filter((c) => c.id_cours !== courseId));
