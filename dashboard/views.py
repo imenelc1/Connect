@@ -1,4 +1,5 @@
 from datetime import timedelta
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -7,10 +8,11 @@ from django.db.models import Sum, Avg
 from django.db.models.functions import TruncDate
 from django.utils.timezone import now
 from courses.models import Cours, Lecon
+from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from spaces.models import Space, SpaceEtudiant
 from users.jwt_auth import IsAuthenticatedJWT
 from users.models import Utilisateur
-from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration
+from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration, TentativeExercice
 from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta
 
@@ -358,37 +360,40 @@ def current_progress_students(request):
         })
 
     return Response(result)
-@api_view(["GET"])
+
+# exos
+
+# ---------------- GET toutes les tentatives ----------------
+@api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
-def last_lesson(request, course_id):
-    try:
-        user = request.user
+def list_tentatives(request):
+    user = request.user
+    tentatives = TentativeExercice.objects.filter(utilisateur=user)
+    serializer = TentativeExerciceReadSerializer(tentatives, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
-        if not user or user.is_anonymous:
-            return Response(
-                {"error": "Utilisateur non authentifié"},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+# ---------------- POST nouvelle tentative ----------------
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedJWT])
+def create_tentative(request):
+    # On utilise le serializer d'écriture pour valider et créer/mettre à jour
+    serializer = TentativeExerciceWriteSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        tentative = serializer.save(utilisateur=request.user)
+        return Response(TentativeExerciceWriteSerializer(tentative).data, status=status.HTTP_201_CREATED)
+    else:
+        print(serializer.errors)  # <-- ajoute ça
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        pc = ProgressionCours.objects.filter(
-            utilisateur=user,
-            cours_id=course_id
-        ).select_related("derniere_lecon__section").first()
 
-        if not pc or not pc.derniere_lecon:
-            return Response(None, status=status.HTTP_200_OK)
-
-        if not pc.derniere_lecon.section:
-            return Response(None, status=status.HTTP_200_OK)
-
-        return Response({
-            "id": pc.derniere_lecon.pk,          # ✅ utilisation de pk
-            "section_id": pc.derniere_lecon.section.pk
-        }, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        print("❌ ERREUR last_lesson :", e)
-        return Response(
-            {"error": "Erreur serveur last_lesson"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def get_tentative(request, tentative_id):
+    user = request.user
+    tentative = get_object_or_404(
+        TentativeExercice,
+        id=tentative_id,
+        utilisateur=user
+    )
+    serializer = TentativeExerciceReadSerializer(tentative)
+    return Response(serializer.data, status=status.HTTP_200_OK)

@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import CourseCard from "../components/common/CourseCard";
 import { Users, BookOpen, ClipboardList, LayoutGrid } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";

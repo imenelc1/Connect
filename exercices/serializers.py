@@ -18,12 +18,17 @@ class ExerciceSerializer(serializers.ModelSerializer):
                   'enonce', 'categorie',  'utilisateur', 'utilisateur_name', 'cours', 'visibilite_exo', 'visibilite_exo_label']
 
     def get_utilisateur_name(self, obj):
+     if obj.utilisateur:
         return f"{obj.utilisateur.nom} {obj.utilisateur.prenom}"
-    
+     return "Inconnu"
+
     def get_cours(self, obj):
-        return f"{obj.cours.titre_cours} " 
+     if obj.cours:
+        return obj.cours.titre_cour
+     return ""
+
     def get_visibilite_exo_label(self, obj):
-        return "public" if obj.visibilite_exo else "privé"
+        return "public" if obj.visibilite_exo else "private"
     
 
   

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { useTranslation } from "react-i18next";
 import { Eye, CheckCircle, XCircle, BookOpen } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";

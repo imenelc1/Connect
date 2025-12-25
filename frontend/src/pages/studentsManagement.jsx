@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import Button from "../components/common/Button";
 import ProgressBar from "../components/ui/ProgressBar";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Trash, SquarePen, Search, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 // Navigation entre routes (React Router)

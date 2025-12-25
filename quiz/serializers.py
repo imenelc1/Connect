@@ -12,7 +12,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True, read_only=True)
     class Meta:
         model = Question
-        fields = ['id_qst', 'texte_qst', 'reponse_correcte', 'score', 'options']
+        fields = ['id_qst', 'texte_qst', 'reponse_correcte', 'score', 'options', 'exercice']
 
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:

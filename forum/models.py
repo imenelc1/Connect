@@ -38,7 +38,7 @@ class Message(models.Model):
         ordering = ['date_publication']
    
     def __str__(self):
-        return f"Message {self.id_message} - {self.utilisateur.email[:20]}"
+        return f"Message {self.id_message} - {self.utilisateur.nom} {self.utilisateur.prenom}"
 
 
 class MessageLike(models.Model):  # NOUVEAU MODÈLE
@@ -64,7 +64,7 @@ class Commentaire(models.Model):
         ordering = ['date_commpub']
    
     def __str__(self):
-        return f"Commentaire {self.id_commentaire} - {self.utilisateur.email[:20]}"
+        return f"Commentaire {self.id_commentaire} - {self.utilisateur.nom} {self.utilisateur.prenom}"
 
 
 class Like(models.Model):

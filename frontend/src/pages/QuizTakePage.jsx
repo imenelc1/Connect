@@ -1,122 +1,170 @@
-import React, { useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { FaClock, FaMedal, FaStar } from "react-icons/fa";
 import ContentProgress from "../components/common/ContentProgress";
 import Button from "../components/common/Button";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
+import { useNavigate, useParams } from "react-router-dom";
+import { getCurrentUserId } from "../hooks/useAuth";
 
-export default function QuizPage2() {
-  const { t, i18n } = useTranslation("quiz2");
+/* ================= TIMER (EN DEHORS !) ================= */
+function Timer({ minutes, onFinish }) {
+  const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
 
-  const quiz = {
-    titre: t("title"),
-    description: t("description"),
-    duree: 30,
-    niveau: t("level"),
-    questions: [
-      {
-        id: 1,
-        texte: "Qu'est-ce qu'un algorithme ?",
-        options: [
-          "Un programme exécutable.",
-          "Une suite d'instructions logiques pour résoudre un problème",
-          "Une variable",
-        ],
-      },
-      {
-        id: 2,
-        texte: "Une boucle permet de…",
-        options: [
-          "Répéter des instructions",
-          "Créer une variable",
-          "Arrêter un programme",
-        ],
-      },
-      {
-        id: 3,
-        texte: "La boucle for est utilisée pour…",
-        options: [
-          "Parcourir une séquence",
-          "Créer une fonction",
-          "Afficher un message",
-        ],
-      },
-      {
-        id: 4,
-        texte: "La boucle while s’exécute tant que…",
-        options: [
-          "Une condition est vraie",
-          "Le programme est terminé",
-          "Une variable existe",
-        ],
-      },
-    ],
+  useEffect(() => {
+    if (secondsLeft <= 0) {
+      onFinish?.();
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [secondsLeft, onFinish]);
+
+  const formatTime = (s) => {
+    const m = String(Math.floor(s / 60)).padStart(2, "0");
+    const sec = String(s % 60).padStart(2, "0");
+    return `${m}:${sec}`;
   };
 
+  return (
+    <div className="flex items-center gap-2 bg-blue px-4 py-2 rounded text-white">
+      <FaClock /> {formatTime(secondsLeft)}
+    </div>
+  );
+}
+
+/* ================= PAGE ================= */
+export function QuizTakePage() {
+  const { t, i18n } = useTranslation("quiz2");
+  const { exerciceId } = useParams();
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
+
+  const [quiz, setQuiz] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
 
-  const answeredCount = Object.keys(answers).length;
+  const currentUserId = getCurrentUserId();
+
+  /* ================= FETCH QUIZ ================= */
+  useEffect(() => {
+    if (!exerciceId) return;
+
+    fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId}/`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Quiz non trouvé");
+        return res.json();
+      })
+      .then((data) => {
+        const q = Array.isArray(data) ? data[0] : data;
+
+        setQuiz({
+          quizId: q.id,
+          scoreMinimum: q.scoreMinimum,
+          durationMinutes: q.duration_minutes,
+          activerDuration: q.activerDuration,
+          nbMaxTentative: q.nbMax_tentative,
+          exercice: {
+            titre: q.exercice?.titre_exo,
+            enonce: q.exercice?.enonce,
+            niveau: q.exercice?.niveau_exo,
+          },
+          questions: q.questions.map((question) => ({
+            id: question.id_qst,
+            texte: question.texte_qst,
+            score: question.score,
+            options: question.options.map((opt) => ({
+              id: opt.id_option,
+              texte: opt.texte_option,
+            })),
+          })),
+        });
+
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [exerciceId]);
+
+  if (loading || !quiz) return <p>Chargement...</p>;
+
+ const q = quiz.questions?.[currentQuestion];
+
+if (!q) {
+  return (
+    <p className="text-center text-red-500">
+      Aucune question disponible pour ce quiz
+    </p>
+  );
+}
+
+
+  /* ================= LOGIQUE ================= */
   const progressValue =
-    (answeredCount / quiz.questions.length) * 100;
+    (Object.keys(answers).length / quiz.questions.length) * 100;
 
- const handleSelect = (questionId, option) => {
-  setAnswers((prev) => {
-    // Si on reclique sur l'option déjà sélectionnée => on la retire
-    if (prev[questionId] === option) {
-      const updated = { ...prev };
-      delete updated[questionId]; // On enlève la réponse
-      return updated;
+  const handleSelect = (questionId, optionId) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+  };
+
+  const submitQuiz = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/quiz/quiz/submit/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          utilisateur: currentUserId,
+          quiz_id: quiz.quizId,
+          answers,
+        }),
+      });
+
+      const data = await res.json();
+      navigate(`/QuizRecape/${exerciceId}`, { state: data });
+    } catch {
+      alert("Erreur lors de la soumission du quiz");
     }
-
-    // Sinon on sélectionne normalement
-    return {
-      ...prev,
-      [questionId]: option,
-    };
-  });
-};
-
+  };
 
   const nextQuestion = () => {
-    const q = quiz.questions[currentQuestion];
     if (!answers[q.id]) return;
 
     if (currentQuestion < quiz.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+      setCurrentQuestion((prev) => prev + 1);
+    } else {
+      submitQuiz();
     }
   };
 
   const prevQuestion = () => {
     if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
+      setCurrentQuestion((prev) => prev - 1);
     }
   };
 
-  const q = quiz.questions[currentQuestion];
-
+  /* ================= USER ================= */
   const storedUser = localStorage.getItem("user");
-  const { toggleDarkMode } = useContext(ThemeContext);
-
   const userData =
     storedUser && storedUser !== "undefined"
       ? JSON.parse(storedUser)
       : null;
 
   const initials = userData
-    ? `${userData.nom?.[0] || ""}${
-        userData.prenom?.[0] || ""
-      }`.toUpperCase()
+    ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
 
+  /* ================= RENDER ================= */
   return (
-    <div
-      className="min-h-screen flex flex-col px-3 sm:px-4 md:px-8 py-3 md:py-6"
-      style={{ background: "rgb(var(--color-bg))" }}
-    >
-      {/* User Circle */}
-      <div className="flex items-center justify-end">
+    <div className="min-h-screen flex flex-col px-3 py-3">
+      <div className="flex justify-end">
         <UserCircle
           initials={initials}
           onToggleTheme={toggleDarkMode}
@@ -124,93 +172,68 @@ export default function QuizPage2() {
         />
       </div>
 
-      <h1 className="text-xl md:text-3xl font-bold text-center mt-2 mb-4 md:mb-6 text-muted">
-        {quiz.titre}
+      <h1 className="text-2xl font-bold text-center mb-6">
+        {quiz.exercice.titre}
       </h1>
 
-      <div className="flex-1 w-full rounded-2xl shadow-lg mt-4 md:mt-10 p-4 md:p-6 bg-grad-2">
-        {/* Stats */}
-        <div className="flex flex-col-3 sm:flex-row sm:flex-wrap md:justify-center gap-4 sm:gap-6 md:gap-x-80 text-xs md:text-sm mb-6">
-          <div className="px-6 py-2 rounded-md shadow-sm flex items-center gap-4 justify-center bg-blue text-white">
-            <FaClock /> {quiz.duree} {t("minutes")}
+      <div className="rounded-2xl shadow-lg p-4 bg-grad-2">
+        <div className="flex justify-center gap-6 mb-6 text-white">
+          {quiz.activerDuration && (
+            <Timer
+              minutes={quiz.durationMinutes || 0}
+              onFinish={() => {
+                alert("Le temps est écoulé !");
+                submitQuiz();
+              }}
+            />
+          )}
+
+          <div className="flex items-center gap-2 bg-purple px-4 py-2 rounded">
+            <FaMedal /> {quiz.scoreMinimum}%
           </div>
-          <div className="px-6 py-2 rounded-md shadow-sm flex items-center gap-4 justify-center bg-purple text-white">
-            <FaMedal /> {quiz.questions.length} {t("points")}
-          </div>
-          <div
-            className="px-6 py-2 rounded-md shadow-sm flex items-center gap-4 justify-center"
-            style={{
-              background: "rgb(var(--color-pink))",
-              color: "white",
-            }}
-          >
-            <FaStar /> {quiz.niveau}
+
+          <div className="flex items-center gap-2 bg-pink px-4 py-2 rounded">
+            <FaStar /> {quiz.exercice.niveau}
           </div>
         </div>
 
-        {/* Progress */}
-        <p className="text-sm mb-1 text-[rgb(var(--color-gray))]">
-          {t("question")} {currentQuestion + 1} /{" "}
-          {quiz.questions.length}
+        <p className="text-sm mb-2">
+          {t("question")} {currentQuestion + 1} / {quiz.questions.length}
         </p>
+
         <ContentProgress value={progressValue} className="mb-6" />
 
-        {/* Question */}
-        <div className="rounded-xl shadow-sm p-3 md:p-4 bg-grad-3 mb-6">
-          <h3 className="font-semibold mb-1 flex items-center gap-2 text-sm md:text-base">
-            <div
-              className="w-6 h-6 flex items-center justify-center rounded-md text-white text-xs md:text-sm font-bold"
-              style={{
-                background: "rgb(var(--color-primary))",
-              }}
-            >
-              {currentQuestion + 1}
-            </div>
-            <span>{q.texte}</span>
-          </h3>
+        <div className="bg-white rounded-xl p-4 mb-6">
+          <h3 className="font-semibold mb-3">{q.texte}</h3>
 
-          <p className="text-xs md:text-sm text-[rgb(var(--color-gray))] mb-3">
-            1 {t("point")}
-          </p>
-
-          {/* Options */}
           <div className="flex flex-col gap-2">
-            {q.options.map((opt, index) => (
+            {q.options.map((opt) => (
               <label
-                key={index}
-                className="flex items-center gap-3 cursor-pointer border rounded-lg px-3 py-3 sm:py-2 shadow-sm bg-white active:scale-[0.98] transition-all"
+                key={opt.id}
+                className="flex items-center gap-3 border rounded-lg px-3 py-2 cursor-pointer"
               >
                 <input
                   type="radio"
                   name={`question-${q.id}`}
-                  checked={answers[q.id] === opt}
-                 onClick={() => handleSelect(q.id, opt)}
-                  className="accent-blue-500"
+                  checked={answers[q.id] === opt.id}
+                  onChange={() => handleSelect(q.id, opt.id)}
                 />
-                <span className="text-sm md:text-base text-black/70">
-                  {opt}
-                </span>
+                <span>{opt.texte}</span>
               </label>
             ))}
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-between w-full mt-4">
+        <div className="flex justify-between">
           <Button
             text={`< ${t("prev")}`}
             onClick={prevQuestion}
-            variant="quizPrev"
             disabled={currentQuestion === 0}
           />
           <Button
             text={`${t("next")} >`}
             onClick={nextQuestion}
-            variant="quizNext"
-            disabled={
-              currentQuestion ===
-                quiz.questions.length - 1 || !answers[q.id]
-            }
+            disabled={!answers[q.id]}
           />
         </div>
       </div>

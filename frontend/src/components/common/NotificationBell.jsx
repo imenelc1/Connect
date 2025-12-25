@@ -1,5 +1,5 @@
 // src/components/common/NotificationBell.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { Bell, Loader, Check, MessageSquare, BookOpen, Award, TrendingUp } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 
@@ -10,6 +10,7 @@ const NotificationBell = () => {
     loading, 
     unreadCount, 
     fetchNotifications, 
+    fetchUnreadCount,
     markAsRead, 
     markAllAsRead 
   } = useNotifications();
@@ -45,6 +46,10 @@ const NotificationBell = () => {
         return <Bell size={16} className="text-gray-500" />;
     }
   };
+  useEffect(() => {
+  fetchUnreadCount();
+}, [fetchUnreadCount]);
+
 const handleNotificationNavigation = (notif) => {
   switch (notif.module_source) {
 
@@ -89,6 +94,7 @@ const handleNotificationNavigation = (notif) => {
     }
   }
 };
+ const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   return (
     <div className="relative">
@@ -102,7 +108,9 @@ const handleNotificationNavigation = (notif) => {
         className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
         aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} non lues)` : ''}`}
       >
-        <Bell size={22} className="text-gray-700 dark:text-gray-300" />
+       <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center cursor-pointer hover:bg-bg/80 transition">
+             <Bell size={isMobile ? 14 : 16} />
+           </div>
         
         {unreadCount > 0 && (
          <span

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import { MessageSquare, TrendingUp, User, Plus } from "lucide-react";
 import "../styles/index.css";
