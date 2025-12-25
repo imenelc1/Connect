@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import CoursListCreateView, CoursesWithProgressView, UpdateLeconView,  CreateSectionView, CourseDetailView, CreateLeconView,  CreateCoursView, CoursDetailView, SectionListCreateView, LeconListCreateView, SectionDetailView, LeconDetailView
+from .views import CoursListCreateView, CoursSearchView, CoursesWithProgressView, UpdateLeconView,  CreateSectionView, CourseDetailView, CreateLeconView,  CreateCoursView, CoursDetailView, SectionListCreateView, LeconListCreateView, SectionDetailView, LeconDetailView
 from django.urls import path
 from .views import cours_list_api, delete_cours
 from rest_framework.routers import DefaultRouter
@@ -20,6 +20,8 @@ urlpatterns = [
     path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
     
     path('cours/progress/', CoursesWithProgressView.as_view(), name='courses-progress'),
+    #Rechrche âr titre de cours
+    path("cours", CoursSearchView.as_view(), name="cours-list"),
        
   
   

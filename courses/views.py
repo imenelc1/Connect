@@ -16,6 +16,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from datetime import timedelta
 import os
+from django.db.models import Q
 
 class CreateCoursView(APIView):
 
@@ -301,3 +302,20 @@ class MarkLessonVisitedView(APIView):
 
         LeconComplete.objects.get_or_create(utilisateur_id=request.user_id, lecon=lecon)
         return Response({"message": "Leçon marquée visitée"}, status=200)
+    
+    
+#Recherche par titre de cours
+class CoursSearchView(APIView):
+
+    def get(self, request):
+        search = request.GET.get("search", "")
+
+        cours = Cours.objects.all()
+        if search:
+            cours = cours.filter(
+                Q(titre_cour__icontains=search) |
+                Q(sections__titre_section__icontains=search)
+            ).distinct()
+
+        serializer = CoursSerializer(cours, many=True)
+        return Response(serializer.data)

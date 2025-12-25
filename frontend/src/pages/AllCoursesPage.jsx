@@ -31,12 +31,11 @@ export default function AllCoursesPage() {
   const { t } = useTranslation("allcourses");
   const { toggleDarkMode } = useContext(ThemeContext);
 
-
+  const [searchTerm, setSearchTerm] = useState(""); //pour la recherche
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
-  const initials = `${userData?.nom?.[0] || ""}${
-    userData?.prenom?.[0] || ""
-  }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+
 
   const [filterLevel, setFilterLevel] = useState("ALL");
   let filteredCourses =
@@ -106,10 +105,10 @@ export default function AllCoursesPage() {
         duration: c.duration_readable,
         author: c.utilisateur_name,
         initials: c.utilisateur_name
-          ?.split(" ")
-          .map((n) => n[0])
-          .join("")
-          .toUpperCase(),
+         .split(" ")
+            .map(n => n[0])
+            .join("")
+            .toUpperCase(),
         isMine: c.utilisateur === currentUserId,
         progress: c.progress ?? 0,
         action: c.action,
@@ -125,6 +124,43 @@ export default function AllCoursesPage() {
 
   fetchProgress();
 }, [currentUserId]);
+
+
+  //Useefect pour la recherche
+  useEffect(() => {
+  const controller = new AbortController();
+
+  fetch(
+    `http://localhost:8000/api/courses/cours?search=${searchTerm}`,
+    { signal: controller.signal }
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      const formatted = data.map((c) => ({
+        id: c.id_cours,
+        title: c.titre_cour,
+        description: c.description,
+        level: c.niveau_cour_label,
+        duration: c.duration_readable,
+        author: c.utilisateur_name,
+        initials: c.utilisateur_name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase(),
+        isMine: c.utilisateur === currentUserId,
+      }));
+      setCourses(formatted);
+    })
+    .catch((err) => {
+      if (err.name !== "AbortError") {
+        console.error("Erreur chargement cours :", err);
+      }
+    });
+
+  return () => controller.abort();
+}, [searchTerm]);
+
 
   const handleCompleteLesson = async (lessonId) => {
     try {
@@ -162,7 +198,11 @@ export default function AllCoursesPage() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
         </div>
-        <ContentSearchBar />
+      <ContentSearchBar
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+/>
+
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
             type="courses"
