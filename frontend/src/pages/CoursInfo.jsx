@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
-
+import { useNotifications } from "../context/NotificationContext";
 export default function CoursePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("courseInfo");
@@ -279,7 +279,11 @@ export default function CoursePage() {
       console.error("Erreur lors de l'enregistrement complet :", error);
     }
   };
-
+  useEffect(() => {
+    const handler = (e) => setSidebarCollapsed(e.detail);
+    window.addEventListener("sidebarChanged", handler);
+    return () => window.removeEventListener("sidebarChanged", handler);
+  }, []);
   if (authLoading) {
     return <div style={{ padding: 20 }}>Checking authentication...</div>;
   }

@@ -51,6 +51,8 @@ export default function QuizRecapPage() {
 
   if (loading) return <p>Chargement du quiz...</p>;
   if (!quiz) return <p>Quiz introuvable.</p>;
+  const totalPoints = quiz.quiz.questions ? quiz.quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
+
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8 bg-background">
@@ -80,15 +82,17 @@ export default function QuizRecapPage() {
 
         {/* Score */}
         <div className="text-3xl font-bold mb-4 text-textc">
-          {quiz.quiz.reponse_quiz_utilisateur?.score_total || 0} / {quiz.quiz.questions.length}
+          {quiz.quiz.reponse_quiz_utilisateur?.score_total || 0} / {totalPoints}
         </div>
 
         {/* Félicitations */}
-        {quiz.quiz.reponse_quiz_utilisateur?.score_total >= quiz.quiz.scoreMinimum ? (
-          <p className="text-green-600 text-xl mb-4">{t("congrats")}</p>
-        ) : (
-          <p className="text-red-600 text-xl mb-4">{t("tryAgain")}</p>
-        )}
+        {quiz.quiz.reponse_quiz_utilisateur?.score_total >= quiz.quiz.scoreMinimum ||
+ quiz.quiz.reponse_quiz_utilisateur?.score_total === totalPoints ? (
+  <p className="text-green-600 text-xl mb-4">{t("congrats")}</p>
+) : (
+  <p className="text-red-600 text-xl mb-4">{t("tryAgain")}</p>
+)}
+
 
         {/* Récapitulatif des réponses */}
         <h3 className="text-xl font-semibold text-textc mb-4">{t("recap")}</h3>
@@ -144,11 +148,7 @@ export default function QuizRecapPage() {
             variant="quizBack"
             onClick={() => navigate("/all-quizzes")}
           />
-          <Button
-            text={<span className="flex items-center gap-2"><FaRedoAlt /> {t("reset")}</span>}
-            variant="quizStart"
-            onClick={() => navigate(`/QuizTake/${exerciceId}`)}
-          />
+          
         </div>
 
       </div>

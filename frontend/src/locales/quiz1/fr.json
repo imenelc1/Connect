@@ -10,7 +10,7 @@
   "nombreQuestions": "Nombre de questions",
   "questions": "questions",
   "dureeEstimee": "Durée estimée",
-  "pointsTotaux": "Points totaux",
+  "pointsTotaux": "Note minimale pour valider le quiz",
   "start": "C’est parti ! 🚀",
   "back": "Retourner au menu",
   "testTranslation": "Ceci est un test de traduction"

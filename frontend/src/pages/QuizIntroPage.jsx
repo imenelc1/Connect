@@ -115,7 +115,7 @@ export default function QuizIntroPage() {
           )}
 
           <div className="flex items-center gap-2 bg-purple text-white px-4 py-2 rounded-md shadow-sm">
-            <FaMedal /> {quiz.points} / {totalPoints} {t("points")}
+            <FaMedal /> {totalPoints}  {t("points")}
           </div>
 
           <div
@@ -137,7 +137,7 @@ export default function QuizIntroPage() {
             </p>
           )}
           <p>
-            <strong>{t("pointsTotaux")} :</strong> {quiz.points} / {totalPoints} {t("points")}
+            <strong>{t("pointsTotaux")} :</strong> {quiz.points}/{totalPoints}{t("points")}
           </p>
         </div>
 

@@ -238,18 +238,6 @@ export default function TheoryExercisePage() {
             </div>
           </div>
         </div>
-      <div className="flex justify-around mb-5">
-          {/* SAVE DRAFT */}
-        <button
-          onClick={handleSaveDraft}
-          disabled={loading}
-          className="px-8 py-3 rounded-xl font-semibold shadow-md
-             bg-white border border-[rgb(var(--color-primary))]
-             text-[rgb(var(--color-primary))]
-             hover:bg-gray-50 transition text-sm sm:text-base"
-        >
-          Sauvegarder
-        </button>
 
         {/* BUTTONS */}
         {isStudent && (<div className="flex justify-around mb-5">
@@ -285,8 +273,6 @@ export default function TheoryExercisePage() {
 
         </div>)}
 
-      </div>
-       
         {/* FEEDBACK */}
         <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24" style={{ backgroundImage: "var(--grad-8)" }}>
           <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg mb-1">
@@ -306,11 +292,7 @@ export default function TheoryExercisePage() {
                   onClick={() => setRating(i)}
                   className={`cursor-pointer text-transparent bg-clip-text drop-shadow 
                     ${getStarGradient(i)} 
-                    ${
-                      (hover || rating) >= i
-                        ? "opacity-100 scale-110"
-                        : "opacity-40"
-                    } 
+                    ${(hover || rating) >= i ? "opacity-100 scale-110" : "opacity-40"} 
                     transition-all duration-150`}
                 >
                   ★
@@ -319,15 +301,9 @@ export default function TheoryExercisePage() {
             </div>
 
             <div className="flex justify-between w-full text-xs sm:text-sm font-medium mt-2">
-              <span className="w-24 text-left label-very-easy">
-                {t("labels.veryEasy")}
-              </span>
-              <span className="w-24 text-center label-moderate">
-                {t("labels.moderate")}
-              </span>
-              <span className="w-24 text-right label-very-difficult">
-                {t("labels.veryDifficult")}
-              </span>
+              <span className="w-24 text-left label-very-easy">{t("labels.veryEasy")}</span>
+              <span className="w-24 text-center label-moderate">{t("labels.moderate")}</span>
+              <span className="w-24 text-right label-very-difficult">{t("labels.veryDifficult")}</span>
             </div>
           </div>
 
