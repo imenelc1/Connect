@@ -52,4 +52,14 @@ class Migration(migrations.Migration):
                 ('exercice', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='exercices.exercice')),
             ],
         ),
+        migrations.CreateModel(
+            name='ReponseQuestion',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('correct', models.BooleanField(null=True)),
+                ('score_obtenu', models.FloatField(default=0)),
+                ('option_choisie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='quiz.option')),
+                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='quiz.question')),
+            ],
+        ),
     ]

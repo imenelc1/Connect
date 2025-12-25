@@ -1,16 +1,15 @@
 import { FiSend } from "react-icons/fi";
 import Input from "../components/common/Input";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import UserCircle from "../components/common/UserCircle";
 import { useContext, useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ThemeContext from "../context/ThemeContext";
 import Tabs from "../components/common/Tabs";
 import Button from "../components/common/Button";
 import ModernDropdown from "../components/common/ModernDropdown";
-import { Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
+import { Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare, Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
 
 // Fonction utilitaire pour déterminer la cible
@@ -93,9 +92,12 @@ export default function CommunityPage() {
   
   const messagesEndRef = useRef(null);
   const [posts, setPosts] = useState([]);
-
   const [forumTypeToCreate, setForumTypeToCreate] = useState("");
   
+  // États pour la responsivité
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
   const API_URL = window.location.hostname === "localhost" 
     ? "http://localhost:8000/api" 
     : "/api";
@@ -108,6 +110,23 @@ export default function CommunityPage() {
       setForumTypeToCreate("student-teacher");
     }
   }, [role]);
+
+  // Effet pour la responsivité
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+    
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (!userData || !token) {
@@ -906,31 +925,42 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background dark:bg-gray-900">
-      <Navbar />
-      
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
+    <div className="flex flex-col md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
       </div>
 
-      <div className="flex-1 ml-56 p-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-blue dark:text-blue-400">{t("community.title")}</h1>
-          <p className="mb-6 text-grayc dark:text-gray-400">
+      {/* Main content */}
+      <main className={`
+        flex-1 p-4 sm:p-6 pt-16 sm:pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+        {/* Header avec notifications et UserCircle */}
+        <div className="fixed top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-3 z-50">
+          <div className="bg-bg dark:bg-gray-700 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center cursor-pointer hover:bg-bg/80 transition">
+            <Bell size={isMobile ? 16 : 20} />
+          </div>
+          <UserCircle
+            size={isMobile ? "sm" : "md"}
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => {
+              const i18n = window.i18n;
+              if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+            }}
+          />
+        </div>
+
+        <header className="mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-blue dark:text-blue-400">{t("community.title")}</h1>
+          <p className="text-sm sm:text-base text-grayc dark:text-gray-400">
             {t("community.subtitle")}
           </p>
         </header>
 
         {/* Formulaire de création de forum */}
-        <div className="bg-card dark:bg-gray-800 shadow-lg rounded-3xl p-5 mb-8 border border-blue/20 dark:border-blue-800/30">
+        <div className="bg-card  shadow-lg rounded-2xl sm:rounded-3xl p-4 sm:p-5 mb-6 sm:mb-8 border border-blue/20 dark:border-blue-800/30">
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Titre du forum *
@@ -942,7 +972,7 @@ export default function CommunityPage() {
                 setNewPostTitle(e.target.value);
                 setError("");
               }}
-              className="bg-surface dark:bg-gray-700 text-textc dark:text-white border border-blue/20 dark:border-gray-600 rounded-xl px-5 py-3 font-semibold"
+              className="bg-surface dark:bg-gray-700 text-textc dark:text-white border border-blue/20 dark:border-gray-600 rounded-xl px-4 sm:px-5 py-2 sm:py-3 text-sm sm:text-base"
               disabled={isCreatingPost}
               maxLength={200}
             />
@@ -962,12 +992,12 @@ export default function CommunityPage() {
                 setNewPostContent(e.target.value);
                 setError("");
               }}
-              className="w-full bg-white dark:bg-gray-700 text-textc dark:text-white border border-grayc/20 dark:border-gray-600 rounded-xl px-5 py-3 h-40 resize-none
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition"
+              className="w-full bg-white dark:bg-gray-700 text-textc dark:text-white border border-grayc/20 dark:border-gray-600 rounded-xl px-4 sm:px-5 py-3 h-32 sm:h-40 resize-none
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition text-sm sm:text-base"
               disabled={isCreatingPost}
               maxLength={2000}
             />
-            <div className="flex justify-between mt-1">
+            <div className="flex flex-col sm:flex-row justify-between mt-1 gap-1">
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Ce message sera le point de départ de la discussion
               </p>
@@ -982,7 +1012,7 @@ export default function CommunityPage() {
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Publier pour :
             </label>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Options pour ENSEIGNANTS */}
               {role === "enseignant" && (
                 <>
@@ -990,10 +1020,10 @@ export default function CommunityPage() {
                     type="button"
                     variant={forumTypeToCreate === "teacher-teacher" ? "tabActive" : "tab"}
                     onClick={() => setForumTypeToCreate("teacher-teacher")}
-                    className="w-full justify-start"
+                    className="w-full justify-start text-left p-3 sm:p-4"
                   >
-                    <div className="text-left">
-                      <div className="font-medium">Aux enseignants</div>
+                    <div>
+                      <div className="font-medium text-sm sm:text-base">Aux enseignants</div>
                       <div className="text-xs mt-1 opacity-80">
                         Seulement entre enseignants
                       </div>
@@ -1004,10 +1034,10 @@ export default function CommunityPage() {
                     type="button"
                     variant={forumTypeToCreate === "teacher-student" ? "tabActive" : "tab"}
                     onClick={() => setForumTypeToCreate("teacher-student")}
-                    className="w-full justify-start"
+                    className="w-full justify-start text-left p-3 sm:p-4"
                   >
-                    <div className="text-left">
-                      <div className="font-medium">Aux étudiants</div>
+                    <div>
+                      <div className="font-medium text-sm sm:text-base">Aux étudiants</div>
                       <div className="text-xs mt-1 opacity-80">
                         Seulement pour les étudiants
                       </div>
@@ -1023,10 +1053,10 @@ export default function CommunityPage() {
                     type="button"
                     variant={forumTypeToCreate === "student-student" ? "tabActive" : "tab"}
                     onClick={() => setForumTypeToCreate("student-student")}
-                    className="w-full justify-start"
+                    className="w-full justify-start text-left p-3 sm:p-4"
                   >
-                    <div className="text-left">
-                      <div className="font-medium">Aux étudiants</div>
+                    <div>
+                      <div className="font-medium text-sm sm:text-base">Aux étudiants</div>
                       <div className="text-xs mt-1 opacity-80">
                         Seulement entre étudiants
                       </div>
@@ -1037,10 +1067,10 @@ export default function CommunityPage() {
                     type="button"
                     variant={forumTypeToCreate === "student-teacher" ? "tabActive" : "tab"}
                     onClick={() => setForumTypeToCreate("student-teacher")}
-                    className="w-full justify-start"
+                    className="w-full justify-start text-left p-3 sm:p-4"
                   >
-                    <div className="text-left">
-                      <div className="font-medium">Aux enseignants</div>
+                    <div>
+                      <div className="font-medium text-sm sm:text-base">Aux enseignants</div>
                       <div className="text-xs mt-1 opacity-80">
                         Seulement pour les enseignants
                       </div>
@@ -1058,8 +1088,8 @@ export default function CommunityPage() {
             </div>
           )}
           
-          <div className="flex justify-between items-center mt-4">
-            <div className="text-sm text-grayc dark:text-gray-400">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-4">
+            <div className="text-sm text-grayc dark:text-gray-400 order-2 sm:order-1">
               Posté par <span className="font-semibold">{initials}</span>
               <span className="ml-2 px-2 py-1 text-xs bg-blue/10 dark:bg-blue-900/30 text-blue dark:text-blue-300 rounded">
                 {role === "enseignant" ? "Enseignant" : "Étudiant"}
@@ -1069,7 +1099,7 @@ export default function CommunityPage() {
             <Button
               variant="send"
               text={isCreatingPost ? "Publication..." : t("community.send")}
-              className="!w-auto px-6 py-2"
+              className="!w-full sm:!w-auto px-6 py-2 order-1 sm:order-2"
               onClick={handleCreatePost}
               disabled={isCreatingPost || !newPostTitle.trim() || !newPostContent.trim()}
               icon={isCreatingPost ? <Loader className="animate-spin ml-2" size={16} /> : <FiSend className="ml-2" />}
@@ -1080,17 +1110,23 @@ export default function CommunityPage() {
         {/* Onglets */}
         <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <div className="flex justify-end mt-4 mb-8">
-          <ModernDropdown
-            value={forumType}
-            onChange={setForumType}
-            options={forumOptions.map(o => ({
-              ...o,
-              label: t(`forums.${o.value}`) || o.label
-            }))}
-            placeholder={t("forums.select") || "Sélectionner un type"}
-            disabled={isLoading}
-          />
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mt-4 mb-6 sm:mb-8">
+          <div className="text-sm text-grayc dark:text-gray-400">
+            {finalPosts.length} forum{finalPosts.length !== 1 ? 's' : ''}
+          </div>
+          <div className="w-full sm:w-auto">
+            <ModernDropdown
+              value={forumType}
+              onChange={setForumType}
+              options={forumOptions.map(o => ({
+                ...o,
+                label: t(`forums.${o.value}`) || o.label
+              }))}
+              placeholder={t("forums.select") || "Sélectionner un type"}
+              disabled={isLoading}
+              className="w-full sm:w-64"
+            />
+          </div>
         </div>
 
         {/* Message d'erreur global */}
@@ -1100,7 +1136,7 @@ export default function CommunityPage() {
           </div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6 pb-8">
           {isLoading ? (
             <div className="flex justify-center py-12">
               <Loader className="animate-spin dark:text-white" size={24} />
@@ -1117,24 +1153,24 @@ export default function CommunityPage() {
             </div>
           ) : (
             finalPosts.map((post) => (
-              <div key={post.id} className="bg-grad-2 dark:bg-gray-800 rounded-3xl p-6 shadow-md border border-blue/10 dark:border-gray-700">
+              <div key={post.id} className="bg-grad-2 dark:bg-gray-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md border border-blue/10 dark:border-gray-700">
                 {/* TOUT DANS LA MÊME CARTE */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="bg-grad-1 w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold">
+                <div className="flex items-start sm:items-center justify-between mb-4 gap-3">
+                  <div className="flex items-center space-x-3 flex-1">
+                    <div className="bg-grad-1 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base">
                       {post.authorInitials}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-blue dark:text-blue-400">{post.authorName}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-sm text-grayc dark:text-gray-400">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-blue dark:text-blue-400 text-sm sm:text-base truncate">{post.authorName}</h3>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mt-1">
+                        <p className="text-xs sm:text-sm text-grayc dark:text-gray-400">
                           {formatTimeAgo(post.time)}
                         </p>
-                        <span className={`px-2 py-1 text-xs rounded border ${getForumTypeClasses(post.type)}`}>
+                        <span className={`px-2 py-1 text-xs rounded border ${getForumTypeClasses(post.type)} inline-block w-fit`}>
                           {getForumTypeLabel(post.type)}
                         </span>
                         {post.type === "student-teacher" && (
-                          <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded border border-yellow-200 dark:border-yellow-800">
+                          <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded border border-yellow-200 dark:border-yellow-800 inline-block w-fit">
                             Question d'étudiant
                           </span>
                         )}
@@ -1142,20 +1178,20 @@ export default function CommunityPage() {
                     </div>
                   </div>
                   {post.isMine && (
-                    <span className="px-3 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full">
+                    <span className="px-2 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full shrink-0">
                       Votre forum
                     </span>
                   )}
                 </div>
                 
                 {/* Titre du forum */}
-                <h2 className="mb-4 text-textc dark:text-white font-bold text-lg">
+                <h2 className="mb-3 sm:mb-4 text-textc dark:text-white font-bold text-base sm:text-lg">
                   {post.title}
                 </h2>
                 
                 {/* Message initial */}
                 <div className="mb-4">
-                  <p className="text-textc dark:text-gray-300 whitespace-pre-wrap">
+                  <p className="text-textc dark:text-gray-300 whitespace-pre-wrap text-sm sm:text-base">
                     {post.initialMessage || 
                      (loadingMessages[post.id] ? (
                       <span className="italic text-gray-500 dark:text-gray-400">
@@ -1172,8 +1208,8 @@ export default function CommunityPage() {
                 </div>
                 
                 {/* Boutons d'interaction */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center space-x-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700 gap-3">
+                  <div className="flex items-center space-x-4 sm:space-x-6 w-full sm:w-auto justify-between sm:justify-start">
                     <button 
                       onClick={() => handleLike(post.id)}
                       className="flex items-center space-x-2 text-grayc dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50"
@@ -1182,11 +1218,11 @@ export default function CommunityPage() {
                       aria-pressed={post.userHasLiked}
                     >
                       <Heart 
-                        size={20} 
+                        size={isMobile ? 18 : 20} 
                         fill={post.userHasLiked ? "#ef4444" : "none"} 
                         color={post.userHasLiked ? "#ef4444" : "#6b7280"} 
                       />
-                      <span className={post.userHasLiked ? "text-red-500 dark:text-red-400 font-semibold" : ""}>
+                      <span className={`text-sm ${post.userHasLiked ? "text-red-500 dark:text-red-400 font-semibold" : ""}`}>
                         {post.likes} {post.likes === 1 ? 'like' : 'likes'}
                       </span>
                     </button>
@@ -1196,29 +1232,29 @@ export default function CommunityPage() {
                       className="flex items-center space-x-2 text-grayc dark:text-gray-400 hover:text-blue dark:hover:text-blue-400 transition-colors"
                       aria-expanded={expandedForums[post.id]}
                     >
-                      <MessageSquare size={18} />
-                      <span>
+                      <MessageSquare size={isMobile ? 16 : 18} />
+                      <span className="text-sm">
                         {expandedForums[post.id] ? 'Masquer' : 'Voir'} les messages
                         {!expandedForums[post.id] && messages[post.id]?.length > 1 && 
-                          ` (${messages[post.id].length - 1} autre${messages[post.id].length - 1 !== 1 ? 's' : ''})`
+                          ` (${messages[post.id].length - 1})`
                         }
                       </span>
                       {expandedForums[post.id] ? (
-                        <ChevronUp size={16} />
+                        <ChevronUp size={isMobile ? 14 : 16} />
                       ) : (
-                        <ChevronDown size={16} />
+                        <ChevronDown size={isMobile ? 14 : 16} />
                       )}
                     </button>
                   </div>
                   
                   {post.isMine && (
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                       <button 
                         onClick={() => setShowDeleteConfirm(post.id)}
                         disabled={deletingForumId === post.id}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-500 text-red-700 dark:text-red-300 
+                        className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-500 text-red-700 dark:text-red-300 
                                  hover:bg-red-100 dark:hover:bg-red-900/30 hover:border-red-600 hover:text-red-800 dark:hover:text-red-200 transition-colors 
-                                 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm w-full sm:w-auto text-sm"
                         aria-label="Supprimer le forum"
                       >
                         {deletingForumId === post.id ? (
@@ -1228,21 +1264,21 @@ export default function CommunityPage() {
                           </>
                         ) : (
                           <>
-                            <Trash2 size={16} />
+                            <Trash2 size={isMobile ? 14 : 16} />
                             Supprimer le forum
                           </>
                         )}
                       </button>
                       
                       {showDeleteConfirm === post.id && (
-                        <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-red-200 dark:border-red-800 p-4 z-10">
+                        <div className="absolute top-full left-0 right-0 sm:left-auto sm:right-0 mt-2 w-full sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-red-200 dark:border-red-800 p-4 z-10">
                           <div className="flex items-start gap-3 mb-4">
                             <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full">
                               <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
                             </div>
                             <div>
-                              <h4 className="font-semibold text-gray-800 dark:text-white">Supprimer ce forum ?</h4>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              <h4 className="font-semibold text-gray-800 dark:text-white text-sm sm:text-base">Supprimer ce forum ?</h4>
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                                 Cette action est irréversible. Tous les messages et commentaires seront supprimés.
                               </p>
                             </div>
@@ -1250,14 +1286,14 @@ export default function CommunityPage() {
                           <div className="flex justify-end gap-3">
                             <button
                               onClick={() => setShowDeleteConfirm(null)}
-                              className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                              className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                             >
                               Annuler
                             </button>
                             <button
                               onClick={() => handleDeleteForum(post.id)}
                               disabled={deletingForumId === post.id}
-                              className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                              className="px-3 sm:px-4 py-2 text-xs sm:text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                             >
                               {deletingForumId === post.id ? 'Suppression...' : 'Supprimer'}
                             </button>
@@ -1272,24 +1308,24 @@ export default function CommunityPage() {
                 <div className="mt-4">
                   <div className="flex items-center space-x-2">
                     <Input
-                      placeholder="Écrivez votre réponse... (max 2000 caractères)"
+                      placeholder="Écrivez votre réponse..."
                       value={newMessages[post.id] || ""}
                       onChange={(e) => setNewMessages(prev => ({ ...prev, [post.id]: e.target.value }))}
                       onKeyPress={(e) => e.key === 'Enter' && !postingMessage[post.id] && handlePostMessage(post.id)}
-                      className="flex-1 bg-white dark:bg-gray-700 text-textc dark:text-white border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2"
+                      className="flex-1 bg-white dark:bg-gray-700 text-textc dark:text-white border border-gray-300 dark:border-gray-600 rounded-full px-3 sm:px-4 py-2 text-sm"
                       disabled={postingMessage[post.id] || !token}
                       maxLength={2000}
                     />
                     <button
                       onClick={() => handlePostMessage(post.id)}
                       disabled={postingMessage[post.id] || !newMessages[post.id]?.trim() || !token}
-                      className="bg-blue dark:bg-blue-600 text-white p-2 rounded-full hover:bg-blue-dark dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-blue dark:bg-blue-600 text-white p-2 rounded-full hover:bg-blue-dark dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                       aria-label="Envoyer la réponse"
                     >
                       {postingMessage[post.id] ? (
-                        <Loader className="h-5 w-5 animate-spin" />
+                        <Loader className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
                       ) : (
-                        <Send size={18} />
+                        <Send size={isMobile ? 16 : 18} />
                       )}
                     </button>
                   </div>
@@ -1302,31 +1338,31 @@ export default function CommunityPage() {
                 
                 {/* Section des autres messages (dépliée) */}
                 {expandedForums[post.id] && messages[post.id]?.length > 1 && (
-                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <h4 className="text-lg font-semibold mb-4 text-gray-700 dark:text-gray-300">
+                  <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-700 dark:text-gray-300">
                       {messages[post.id].length - 1} réponse{messages[post.id].length - 1 !== 1 ? 's' : ''}
                     </h4>
                     
-                    <div className="mb-4 max-h-96 overflow-y-auto pr-2 scrollbar-thin">
+                    <div className="mb-4 max-h-80 sm:max-h-96 overflow-y-auto pr-2 scrollbar-thin">
                       {loadingMessages[post.id] ? (
-                        <div className="flex justify-center py-8">
-                          <Loader className="animate-spin" size={20} />
+                        <div className="flex justify-center py-6 sm:py-8">
+                          <Loader className="animate-spin" size={isMobile ? 16 : 20} />
                         </div>
                       ) : messages[post.id]?.length > 1 ? (
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           {messages[post.id].slice(1).map((message) => (
-                            <div key={message.id_message} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                            <div key={message.id_message} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4">
                               <div className="flex items-start space-x-3">
-                                <div className="w-8 h-8 rounded-full bg-blue/20 dark:bg-blue-900/40 flex items-center justify-center text-sm font-bold">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue/20 dark:bg-blue-900/40 flex items-center justify-center text-xs sm:text-sm font-bold shrink-0">
                                   {`${message.utilisateur_prenom?.[0] || ""}${message.utilisateur_nom?.[0] || ""}`.toUpperCase()}
                                 </div>
-                                <div className="flex-1">
-                                  <div className="flex items-center justify-between">
-                                    <div>
-                                      <span className="font-medium dark:text-white">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                                    <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                      <span className="font-medium dark:text-white text-sm truncate">
                                         {message.utilisateur_prenom} {message.utilisateur_nom}
                                       </span>
-                                      <span className="text-xs text-grayc dark:text-gray-400 ml-2">
+                                      <span className="text-xs text-grayc dark:text-gray-400">
                                         {formatTimeAgo(message.date_publication)}
                                       </span>
                                     </div>
@@ -1334,7 +1370,7 @@ export default function CommunityPage() {
                                       <button 
                                         onClick={() => handleLikeMessage(message.id_message, post.id)}
                                         disabled={likingMessageId === message.id_message || !token}
-                                        className="flex items-center space-x-1 text-grayc dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                                        className="flex items-center space-x-1 text-grayc dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50 text-xs sm:text-sm"
                                         aria-label={message.user_has_liked ? "Retirer le like" : "Ajouter un like"}
                                         aria-pressed={message.user_has_liked}
                                       >
@@ -1342,13 +1378,13 @@ export default function CommunityPage() {
                                           <Loader className="h-3 w-3 animate-spin" />
                                         ) : (
                                           <Heart 
-                                            size={14} 
+                                            size={isMobile ? 12 : 14} 
                                             fill={message.user_has_liked ? "#ef4444" : "none"} 
                                             color={message.user_has_liked ? "#ef4444" : "#6b7280"} 
                                           />
                                         )}
-                                        <span className={`text-xs ${message.user_has_liked ? "text-red-500 dark:text-red-400 font-semibold" : ""}`}>
-                                          {message.nombre_likes || 0} {message.nombre_likes === 1 ? 'like' : 'likes'}
+                                        <span className={`${message.user_has_liked ? "text-red-500 dark:text-red-400 font-semibold" : ""}`}>
+                                          {message.nombre_likes || 0}
                                         </span>
                                       </button>
                                       
@@ -1359,18 +1395,18 @@ export default function CommunityPage() {
                                             className="text-red-400 hover:text-red-600 text-xs px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                             aria-label="Supprimer le message"
                                           >
-                                            <Trash2 size={12} />
+                                            <Trash2 size={isMobile ? 10 : 12} />
                                           </button>
                                           
                                           {showDeleteCommentConfirm === message.id_message && (
-                                            <div className="absolute top-full right-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-red-200 dark:border-red-800 p-3 z-10">
-                                              <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                                            <div className="absolute top-full right-0 mt-1 w-56 sm:w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-red-200 dark:border-red-800 p-3 z-10">
+                                              <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mb-3">
                                                 Supprimer ce message ?
                                               </p>
                                               <div className="flex justify-end gap-2">
                                                 <button
                                                   onClick={() => setShowDeleteCommentConfirm(null)}
-                                                  className="px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                                                  className="px-2 sm:px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                                                 >
                                                   Annuler
                                                 </button>
@@ -1379,7 +1415,7 @@ export default function CommunityPage() {
                                                     // Fonction de suppression de message à implémenter
                                                     setShowDeleteCommentConfirm(null);
                                                   }}
-                                                  className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                                                  className="px-2 sm:px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
                                                 >
                                                   Supprimer
                                                 </button>
@@ -1391,105 +1427,85 @@ export default function CommunityPage() {
                                     </div>
                                   </div>
                                   
-                                  <p className="mt-2 text-textc dark:text-gray-300">{message.contenu_message}</p>
+                                  <p className="mt-2 text-textc dark:text-gray-300 text-sm">{message.contenu_message}</p>
                                   
                                   {/* SECTION COMMENTAIRES DU MESSAGE */}
-                                  <div className="mt-4">
+                                  <div className="mt-3 sm:mt-4">
                                     <button
                                       onClick={() => toggleMessageComments(message.id_message)}
-                                      className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mb-2"
+                                      className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mb-2"
                                       aria-expanded={expandedComments[message.id_message]}
                                     >
-                                      <MessageSquare size={14} />
+                                      <MessageSquare size={isMobile ? 12 : 14} />
                                       <span>{message.nombre_commentaires || 0} commentaire{message.nombre_commentaires !== 1 ? 's' : ''}</span>
                                       {expandedComments[message.id_message] ? (
-                                        <ChevronUp size={12} />
+                                        <ChevronUp size={isMobile ? 10 : 12} />
                                       ) : (
-                                        <ChevronDown size={12} />
+                                        <ChevronDown size={isMobile ? 10 : 12} />
                                       )}
                                     </button>
                                     
                                     {expandedComments[message.id_message] && (
-                                      <div className="ml-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
-                                        <div className="space-y-3 mb-4">
+                                      <div className="ml-2 border-l-2 border-gray-200 dark:border-gray-700 pl-3 sm:pl-4">
+                                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
                                           {message.commentaires?.map(comment => (
-                                            <div key={comment.id_commentaire} className="bg-gray-100 dark:bg-gray-800 rounded p-3">
-                                              <div className="flex justify-between items-start">
-                                                <div className="flex items-center gap-2">
-                                                  <div className="w-6 h-6 rounded-full bg-blue/20 dark:bg-blue-900/40 flex items-center justify-center text-xs font-bold">
+                                            <div key={comment.id_commentaire} className="bg-gray-100 dark:bg-gray-800 rounded p-2 sm:p-3">
+                                              <div className="flex justify-between items-start gap-2">
+                                                <div className="flex items-center gap-1 sm:gap-2 flex-1 min-w-0">
+                                                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue/20 dark:bg-blue-900/40 flex items-center justify-center text-xs font-bold shrink-0">
                                                     {`${comment.utilisateur_prenom?.[0] || ""}${comment.utilisateur_nom?.[0] || ""}`.toUpperCase()}
                                                   </div>
-                                                  <span className="font-medium text-sm dark:text-white">
-                                                    {comment.utilisateur_prenom} {comment.utilisateur_nom}
-                                                  </span>
-                                                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                    {formatTimeAgo(comment.date_commpub)}
-                                                  </span>
+                                                  <div className="min-w-0">
+                                                    <span className="font-medium dark:text-white text-xs sm:text-sm truncate block">
+                                                      {comment.utilisateur_prenom} {comment.utilisateur_nom}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                      {formatTimeAgo(comment.date_commpub)}
+                                                    </span>
+                                                  </div>
                                                 </div>
                                                 {comment.utilisateur === userId && (
-                                                  <div className="relative">
+                                                  <div className="relative shrink-0">
                                                     <button
                                                       onClick={() => setShowDeleteCommentConfirm(`comment_${comment.id_commentaire}`)}
                                                       disabled={deletingCommentId === comment.id_commentaire}
-                                                      className="text-red-400 hover:text-red-600 dark:hover:text-red-400 text-xs disabled:opacity-50"
+                                                      className="text-red-400 hover:text-red-600 dark:hover:text-red-400 text-xs disabled:opacity-50 p-1"
                                                       aria-label="Supprimer le commentaire"
                                                     >
                                                       {deletingCommentId === comment.id_commentaire ? (
                                                         <Loader className="h-3 w-3 animate-spin" />
                                                       ) : (
-                                                        <Trash2 size={12} />
+                                                        <Trash2 size={isMobile ? 10 : 12} />
                                                       )}
                                                     </button>
-                                                    
-                                                    {showDeleteCommentConfirm === `comment_${comment.id_commentaire}` && (
-                                                      <div className="absolute top-full right-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-red-200 dark:border-red-800 p-3 z-10">
-                                                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                                                          Supprimer ce commentaire ?
-                                                        </p>
-                                                        <div className="flex justify-end gap-2">
-                                                          <button
-                                                            onClick={() => setShowDeleteCommentConfirm(null)}
-                                                            className="px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                                                          >
-                                                            Annuler
-                                                          </button>
-                                                          <button
-                                                            onClick={() => handleDeleteComment(comment.id_commentaire, message.id_message, post.id)}
-                                                            className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
-                                                          >
-                                                            Supprimer
-                                                          </button>
-                                                        </div>
-                                                      </div>
-                                                    )}
                                                   </div>
                                                 )}
                                               </div>
-                                              <p className="mt-2 text-sm text-textc dark:text-gray-300">{comment.contenu_comm}</p>
+                                              <p className="mt-2 text-xs sm:text-sm text-textc dark:text-gray-300">{comment.contenu_comm}</p>
                                             </div>
                                           ))}
                                         </div>
                                         
                                         <div className="flex items-center gap-2">
                                           <Input
-                                            placeholder="Écrire un commentaire... (max 1000 caractères)"
+                                            placeholder="Écrire un commentaire..."
                                             value={newComments[message.id_message] || ""}
                                             onChange={(e) => setNewComments(prev => ({ ...prev, [message.id_message]: e.target.value }))}
                                             onKeyPress={(e) => e.key === 'Enter' && !postingComment[message.id_message] && handlePostComment(message.id_message, post.id)}
-                                            className="flex-1 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1.5"
+                                            className="flex-1 text-xs sm:text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full px-3 py-1.5"
                                             disabled={postingComment[message.id_message] || !token}
                                             maxLength={1000}
                                           />
                                           <button
                                             onClick={() => handlePostComment(message.id_message, post.id)}
                                             disabled={postingComment[message.id_message] || !newComments[message.id_message]?.trim() || !token}
-                                            className="bg-blue dark:bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-dark dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="bg-blue dark:bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-dark dark:hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                                             aria-label="Envoyer le commentaire"
                                           >
                                             {postingComment[message.id_message] ? (
-                                              <Loader className="h-4 w-4 animate-spin" />
+                                              <Loader className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                                             ) : (
-                                              <Send size={14} />
+                                              <Send size={isMobile ? 12 : 14} />
                                             )}
                                           </button>
                                         </div>
@@ -1508,9 +1524,9 @@ export default function CommunityPage() {
                           <div ref={messagesEndRef} />
                         </div>
                       ) : (
-                        <div className="text-center py-8 text-grayc dark:text-gray-400">
-                          <MessageSquare className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-2" />
-                          <p>Pas encore de réponses. Soyez le premier à répondre !</p>
+                        <div className="text-center py-6 sm:py-8 text-grayc dark:text-gray-400">
+                          <MessageSquare className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-300 dark:text-gray-600 mb-2" />
+                          <p className="text-sm">Pas encore de réponses. Soyez le premier à répondre !</p>
                         </div>
                       )}
                     </div>
@@ -1520,7 +1536,7 @@ export default function CommunityPage() {
             ))
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
