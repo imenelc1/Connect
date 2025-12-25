@@ -10,6 +10,7 @@ if defined _OLD_CODEPAGE (
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 <<<<<<< HEAD
 =======
@@ -44,6 +45,9 @@ set "VIRTUAL_ENV=C:\GP\Connect\venv"
 =======
 set VIRTUAL_ENV=C:\Users\BENZ\Connect\Connect\venv
 >>>>>>> origin/sonia
+=======
+set "VIRTUAL_ENV=C:\Users\hp\Connect\venv"
+>>>>>>> origin/acceuil
 
 if not defined PROMPT set PROMPT=$P$G
 

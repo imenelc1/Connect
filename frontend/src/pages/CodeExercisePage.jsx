@@ -20,7 +20,6 @@ export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
   const { exerciceId } = useParams();
-
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
@@ -40,8 +39,7 @@ int main() {
   const resetCode = () => setUserCode(defaultCode);
 
   const storedUser = localStorage.getItem("user");
-  const userData =
-    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const userData = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
@@ -244,11 +242,7 @@ int main() {
           <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0">
             <IaAssistant />
             <HeadMascotte />
-            <UserCircle
-              initials={initials}
-              onToggleTheme={toggleDarkMode}
-              onChangeLang={(lang) => i18n.changeLanguage(lang)}
-            />
+            <UserCircle initials={initials} onToggleTheme={toggleDarkMode} onChangeLang={(lang) => i18n.changeLanguage(lang)} />
           </div>
         </div>
 
@@ -355,17 +349,12 @@ int main() {
           {t("output.title")}
         </p>
         <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
-          {output.split("\n").map((line, i) => (
-            <div key={i}>{line}</div>
-          ))}
+          {output.split("\n").map((line, i) => <div key={i}>{line}</div>)}
         </div>
 
         {/* Assistant IA */}
         <div className="flex justify-center mb-16">
-          <button
-            onClick={() => setOpenAssistant(true)}
-            className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
-          >
+          <button onClick={() => setOpenAssistant(true)} className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm">
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgb(var(--color-gray-light))]">
               <MessageCircle
                 size={18}
@@ -376,6 +365,7 @@ int main() {
             <div className="text-[rgb(var(--color-primary))] font-medium">
               Besoin d'aide ? Discutez avec l'Assistant IA
             </div>
+            <div className="text-[rgb(var(--color-primary))] font-medium">Besoin d'aide ? Discutez avec l'Assistant IA</div>
           </button>
         </div>
 
@@ -390,11 +380,7 @@ int main() {
 // ----------------- ACTION BUTTON -----------------
 function ActionButton({ icon, label, bg, text = "white", onClick }) {
   return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-2 px-3 md:px-5 py-2 rounded-xl shadow-card hover:opacity-90 transition font-medium text-sm md:text-base"
-      style={{ backgroundImage: bg, color: text }}
-    >
+    <button onClick={onClick} className="flex items-center gap-2 px-3 md:px-5 py-2 rounded-xl shadow-card hover:opacity-90 transition font-medium text-sm md:text-base" style={{ backgroundImage: bg, color: text }}>
       {icon}
       <span>{label}</span>
     </button>

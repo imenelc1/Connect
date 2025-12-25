@@ -99,6 +99,8 @@ import translationFRSpacesPage from "./locales/addSpace/fr.json";
 import translationENSpacesPage from "./locales/addSpace/en.json";
 import translationFRInstructors from "./locales/addinstructors/fr.json";
 import translationENInstructors from "./locales/addinstructors/en.json";
+
+
 const resources = {
   fr: {
     translation: translationFR,
@@ -205,7 +207,7 @@ const resources = {
        BadgesManagement:translationnENbadgesManagement,
       StudentsManagement:translationnENStudentsManagement,
        space: translationENSpacesPage,
-      instructors: translationENInstructors,
+      instructors: translationENInstructors
 
 
   },

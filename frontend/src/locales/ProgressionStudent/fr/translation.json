@@ -1,18 +1,20 @@
-
 {
   "ProgressStudent": {
-     "AvarageG": "Score moyen" ,
-    "Submission":"Taux de soumission",
+    "AvarageG": "Note moyenne",
+    "Submission": "Taux de soumission",
     "Completed": "Complété",
-    "points":"points du mois dernier",
-    
+    "points": "points du mois dernier",
     "mycourses": "Mes cours",
     "Weekly": "Taux de soumission hebdomadaire",
-    "grade":"Informations sur les performances",
-    "positive":"Tendance positive",
-    "positivep1":"Vos performances se sont améliorées de  ",
-    "positivep2":"points au cours des ",
-    "positivep3":"dernières semaines.Continuez à encourager ces progrès!" 
-    , "joined":"Rejoint le"
+    "grade": "Informations sur les performances",
+    "positive": "Tendance positive",
+    "positivep1": "Vos performances se sont améliorées de  ",
+    "positivep2": "points au cours des ",
+    "positivep3": "dernières semaines.Continuez à encourager ces progrès!",
+    "joined": "Rejoint le",
+    "Week": "Semaine",
+     "level": "Note",
+     "submissionsLabel": "Soumissions"
+
   }
 }

@@ -14,6 +14,16 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name='ReponseQuiz',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('date_debut', models.DateTimeField(auto_now_add=True)),
+                ('date_fin', models.DateTimeField(blank=True, null=True)),
+                ('score_total', models.FloatField(default=0)),
+                ('terminer', models.BooleanField(default=False)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Question',
             fields=[
                 ('id_qst', models.AutoField(primary_key=True, serialize=False)),

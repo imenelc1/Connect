@@ -75,4 +75,11 @@ class Migration(migrations.Migration):
                 'unique_together': {('space', 'quiz')},
             },
         ),
+        migrations.CreateModel(
+            name='SpaceQuiz',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('date_ajout', models.DateTimeField(auto_now_add=True)),
+            ],
+        ),
     ]

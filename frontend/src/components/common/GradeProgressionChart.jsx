@@ -8,8 +8,10 @@ import {
   Area,
 } from "recharts";
 import"../../styles/index.css";
+import { useTranslation } from "react-i18next";
 
 export default function GradeProgressionChart({ data, title = "Grade Progression" }) {
+   const { t } = useTranslation("ProgressStudent");
   return (
     <div className="p-6 bg-white rounded-2xl shadow-md">
       <h2 className="font-semibold text-lg mb-4">{title}</h2>
@@ -27,7 +29,13 @@ export default function GradeProgressionChart({ data, title = "Grade Progression
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="week" />
             <YAxis />
-            <Tooltip />
+           
+            <Tooltip
+              formatter={(value) => [
+                value,
+                t("ProgressStudent.level"),
+              ]}
+            />
 
             <Area
               type="monotone"

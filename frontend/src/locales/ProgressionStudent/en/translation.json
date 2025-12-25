@@ -1,18 +1,20 @@
 {
   "ProgressStudent": {
-     "AvarageG": "Average Grade" ,
-    "Submission":"Submission Rate",
+    "AvarageG": "Average Grade",
+    "Submission": "Submission Rate",
     "Completed": "Completed",
-        "points":" points from last month",
-    
+    "points": " points from last month",
     "mycourses": "My Courses",
     "Weekly": "Weekly Submission Rate",
-    "grade":"Grade Progression Over Time",
-    "positive":"Positive Trend",
-    "positivep1":"Your performance has improved by  ",
-    "positivep2":"points over the past ",
-    "positivep3":"weeks.Keep encouraging this progress!" ,
-    "joined":"Joined on"
-     
+    "grade": "Grade Progression Over Time",
+    "positive": "Positive Trend",
+    "positivep1": "Your performance has improved by  ",
+    "positivep2": "points over the past ",
+    "positivep3": "weeks.Keep encouraging this progress!",
+    "joined": "Joined on",
+    "Week": "Week",
+     "level": "Grade",
+     "submissionsLabel": "Submissions"
+
   }
 }

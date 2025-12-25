@@ -17,7 +17,6 @@ import {
 import { getSpaces } from "../services/spacesService";
 import { getCurrentProgressStudents } from "../services/progressionService";
 
-
 export default function MyStudents() {
   const { t } = useTranslation("myStudents");
   const { toggleDarkMode } = useContext(ThemeContext);

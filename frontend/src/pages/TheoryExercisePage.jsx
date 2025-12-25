@@ -17,7 +17,7 @@ export default function TheoryExercisePage() {
   const [hover, setHover] = useState(0);
   const [answer, setAnswer] = useState("");
   const [exercise, setExercise] = useState(null);
-  const { exerciceId } = useParams(); 
+  const { exerciceId } = useParams();
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -125,18 +125,18 @@ export default function TheoryExercisePage() {
     : "";
   const isStudent = userData.role === "etudiant";
 
-useEffect(() => {
-  if (!exerciceId) return;
+  useEffect(() => {
+    if (!exerciceId) return;
 
-  fetch(`http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  })
-    .then(res => res.json())
-    .then(data => setCanSubmit(data.can_submit))
-    .catch(() => setCanSubmit(false));
-}, [exerciceId]);
+    fetch(`http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => setCanSubmit(data.can_submit))
+      .catch(() => setCanSubmit(false));
+  }, [exerciceId]);
 
 
   return (
@@ -240,7 +240,7 @@ useEffect(() => {
         </div>
 
         {/* BUTTONS */}
-           {isStudent && (<div className="flex justify-around mb-5">
+        {isStudent && (<div className="flex justify-around mb-5">
           <button
             onClick={handleSaveDraft}
             disabled={loading}
@@ -251,23 +251,23 @@ useEffect(() => {
             Sauvegarder
           </button>
 
-<button
-  onClick={handleSendSolution}
-  disabled={!canSubmit || loading}
-  className={`
+          <button
+            onClick={handleSendSolution}
+            disabled={!canSubmit || loading}
+            className={`
     px-8 py-3 rounded-xl font-semibold shadow-lg transition
     ${!canSubmit || loading
-      ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
-      : "text-white hover:opacity-90"}
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
+                : "text-white hover:opacity-90"}
   `}
-  style={
-    !canSubmit || loading
-      ? { backgroundImage: "none" }
-      : { backgroundImage: "var(--grad-1)" }
-  }
->
-  {t("send_solution")}
-</button>
+            style={
+              !canSubmit || loading
+                ? { backgroundImage: "none" }
+                : { backgroundImage: "var(--grad-1)" }
+            }
+          >
+            {t("send_solution")}
+          </button>
 
 
 
