@@ -34,3 +34,4 @@ export const removeStudent = async (studentId, spaceId) => {
 };
 
 export default { createStudent, getSpacesStudents };
+

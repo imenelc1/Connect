@@ -50,16 +50,16 @@ export default function Button({
     heroOutline: `${base} border border-[var(--color-primary)]
                   text-[var(--color-primary)] bg-white rounded-xl font-medium
                   hover:bg-[var(--color-bg)] px-12 py-2 transition`,
-    courseStart:`${base}
+    courseStart: `${base}
       rounded-full px-2 py-2  hover:bg-grad-1 hover:text-surface transition-all shadow-sm`,
-    createCourse :`${base} flex items-center gap-2
+    createCourse: `${base} flex items-center gap-2
       px-6 py-2 rounded-full bg-grad-3 text-white font-medium shadow-md
       hover:opacity-90 transition-all`,
-      tab: `flex items-center justify-center gap-2 px-5 py-2 rounded-full 
+    tab: `flex items-center justify-center gap-2 px-5 py-2 rounded-full 
       transition-all shadow bg-surface text-textc border border-grayc/20
       hover:bg-gray`,
 
-tabActive: `flex items-center justify-center gap-2 px-5 py-2 rounded-full
+    tabActive: `flex items-center justify-center gap-2 px-5 py-2 rounded-full
       shadow bg-blue text-white`,
 
 share: `${base} w-full h-14 bg-card border border-blue/20 shadow-sm rounded-full flex items-center px-6 text-grayc font-medium hover:bg-surface transition`,
@@ -73,11 +73,20 @@ quizStart: `${base.replace("w-full", "w-auto")}
   border border-gray-300 
   text-[rgb(var(--color-primary))] bg-white 
   font-medium hover:bg-[rgb(var(--color-bg))] disabled:opacity-50`,
-  mediumPlus: `${base.replace("w-full", "")
-                    .replace("py-2", "py-2.5")
-                    .replace("rounded-full", "rounded-md")}
+ mediumPlus: `${base.replace("w-full", "")
+      .replace("py-2", "py-2.5")
+      .replace("rounded-full", "rounded-md")}
                text-sm px-4 py-2 transition`,
-  
+    manage: `
+  px-5 py-2 
+  bg-grad-4
+  text-muted 
+  border border-gray-300 
+  rounded-lg 
+  hover:bg-gray-100 
+  transition
+  flex items-center justify-center
+`
 
   };
 

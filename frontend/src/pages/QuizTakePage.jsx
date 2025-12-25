@@ -6,20 +6,18 @@ import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import { useNavigate, useParams } from "react-router-dom";
-import { getCurrentUserId } from "../hooks/useAuth";
+
 
 export function QuizTakePage() {
   const { t, i18n } = useTranslation("quiz2");
   const { exerciceId } = useParams();
   const { toggleDarkMode } = useContext(ThemeContext);
-  const navigate = useNavigate();
-
+const navigate = useNavigate();
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [secondsLeft, setSecondsLeft] = useState(null); // Timer global
-  const currentUserId = getCurrentUserId();
 
   /* ================= FETCH QUIZ ================= */
   useEffect(() => {
@@ -56,11 +54,6 @@ export function QuizTakePage() {
         };
 
         setQuiz(formattedQuiz);
-
-        if (formattedQuiz.activerDuration) {
-          setSecondsLeft(formattedQuiz.durationMinutes * 60);
-        }
-
         setLoading(false);
       })
       .catch((err) => {
@@ -69,34 +62,14 @@ export function QuizTakePage() {
       });
   }, [exerciceId]);
 
-  /* ================= TIMER GLOBAL ================= */
-  useEffect(() => {
-    if (secondsLeft === null || !quiz?.activerDuration) return;
-
-    if (secondsLeft <= 0) {
-      submitQuiz(); // soumission automatique
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setSecondsLeft((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [secondsLeft, quiz]);
-
-  const formatTime = (totalSeconds) => {
-    const m = Math.floor(totalSeconds / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (totalSeconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  };
+  if (loading || !quiz) return <p>Chargement...</p>;
 
   /* ================= LOGIQUE QUIZ ================= */
-  const q = quiz?.questions[currentQuestion];
+  const q = quiz.questions[currentQuestion];
+
   const answeredCount = Object.keys(answers).length;
-  const progressValue = quiz ? (answeredCount / quiz.questions.length) * 100 : 0;
+  const progressValue =
+    (answeredCount / quiz.questions.length) * 100;
 
   const handleSelect = (questionId, optionId) => {
     setAnswers((prev) => ({
@@ -104,48 +77,21 @@ export function QuizTakePage() {
       [questionId]: optionId,
     }));
   };
-
-  const submitQuiz = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:8000/api/quiz/quiz/submit/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            utilisateur: currentUserId,
-            quiz_id: quiz.quizId,
-            answers: answers,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      navigate(`/QuizRecape/${exerciceId}`, {
-        state: data,
-      });
-    } catch (err) {
-      console.error(err);
-      alert("Erreur lors de la soumission du quiz");
-    }
-  };
-
-  const nextQuestion = () => {
-    if (!answers[q.id]) return;
+ const nextQuestion = () => {
+    if (!answers[q.id]) return; // si aucune option sélectionnée, on bloque
 
     if (currentQuestion < quiz.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+      setCurrentQuestion(currentQuestion + 1); // question suivante
     } else {
-      submitQuiz();
+      // dernière question → redirection
+      navigate(`/QuizRecape/${exerciceId}`);
     }
   };
 
   const prevQuestion = () => {
-    if (currentQuestion > 0) setCurrentQuestion(currentQuestion - 1);
+    if (currentQuestion > 0) {
+      setCurrentQuestion(currentQuestion - 1);
+    }
   };
 
   /* ================= USER ================= */
@@ -159,8 +105,38 @@ export function QuizTakePage() {
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
 
-  if (loading || !quiz) return <p>Chargement...</p>;
 
+
+/*=========cronometre==================*/
+function Timer({ minutes, onFinish }) {
+  const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) {
+      if (onFinish) onFinish();
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval); // cleanup
+  }, [secondsLeft, onFinish]);
+
+  const formatTime = (totalSeconds) => {
+    const m = Math.floor(totalSeconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (totalSeconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+    return (
+    <div className="flex items-center gap-2 bg-blue px-4 py-2 rounded text-white">
+      <FaClock /> {formatTime(secondsLeft)}
+    </div>
+  );
+}
   /* ================= RENDER ================= */
   return (
     <div className="min-h-screen flex flex-col px-3 py-3">
@@ -173,16 +149,24 @@ export function QuizTakePage() {
         />
       </div>
 
-      <h1 className="text-2xl font-bold text-center mb-6">{quiz.exercice.titre}</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">
+        {quiz.exercice.titre}
+      </h1>
 
       <div className="rounded-2xl shadow-lg p-4 bg-grad-2">
         {/* Stats */}
+       
         <div className="flex justify-center gap-6 mb-6 text-white">
-          {quiz.activerDuration && (
-            <div className="flex items-center gap-2 bg-blue px-4 py-2 rounded text-white">
-              <FaClock /> {formatTime(secondsLeft)}
-            </div>
-          )}
+        {quiz.activerDuration && (
+ <Timer
+    minutes={quiz.durationMinutes || 0}
+    onFinish={() => {
+      alert("Le temps est écoulé !");
+      // Tu peux aussi automatiquement passer à la page suivante ou soumettre le quiz
+      navigate("/all-quizzes");
+    }}
+  />
+)}
           <div className="flex items-center gap-2 bg-purple px-4 py-2 rounded">
             <FaMedal /> {quiz.scoreMinimum}%
           </div>
@@ -193,13 +177,16 @@ export function QuizTakePage() {
 
         {/* Progress */}
         <p className="text-sm mb-2">
-          {t("question")} {currentQuestion + 1} / {quiz.questions.length}
+          {t("question")} {currentQuestion + 1} /{" "}
+          {quiz.questions.length}
         </p>
         <ContentProgress value={progressValue} className="mb-6" />
 
         {/* Question */}
         <div className="bg-white rounded-xl p-4 mb-6">
-          <h3 className="font-semibold mb-3">{q.texte}</h3>
+          <h3 className="font-semibold mb-3">
+            {q.texte}
+          </h3>
 
           {/* Options */}
           <div className="flex flex-col gap-2">
@@ -222,8 +209,18 @@ export function QuizTakePage() {
 
         {/* Buttons */}
         <div className="flex justify-between">
-          <Button text={`< ${t("prev")}`} onClick={prevQuestion} disabled={currentQuestion === 0} />
-          <Button text={`${t("next")} >`} onClick={nextQuestion} disabled={!answers[q.id]} />
+          <Button
+            text={`< ${t("prev")}`}
+            onClick={prevQuestion}
+            disabled={currentQuestion === 0}
+          />
+          <Button
+            text={`${t("next")} >`}
+            onClick={nextQuestion}
+            disabled={
+              !answers[q.id]
+            }
+          />
         </div>
       </div>
     </div>

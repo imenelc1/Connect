@@ -13,6 +13,8 @@ import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import toast from "react-hot-toast";
 import { getCoursesProgress } from "../../src/services/progressionService";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import MyCoursesSelect from "../components/ui/MyCoursesSelect";
 import MyQuizzesSelect from "../components/ui/MyQuizzesSelect";
 import MyExercisesSelect from "../components/ui/MyExercisesSelect";
@@ -312,16 +314,20 @@ export default function SpaceDetails() {
           >
             <ArrowLeft size={16} /> {t("backToSpaces")}
           </button>
-          <div className="flex gap-4 items-center">
-            <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-              <Bell size={16} />
-            </div>
-            <UserCircle
-              initials={initials}
-              onToggleTheme={toggleDarkMode}
-              onChangeLang={lang => i18n.changeLanguage(lang)}
-            />
-          </div>
+          
+    
+      
+      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
         </div>
 
         {/* Space Info + Search */}

@@ -97,6 +97,12 @@ useEffect(() => {
     { label: t("exercises.info"), icon: FileText },
     { label: t("exercises.preview"), icon: Activity },
   ];
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+      useEffect(() => {
+         const handler = (e) => setSidebarCollapsed(e.detail);
+         window.addEventListener("sidebarChanged", handler);
+         return () => window.removeEventListener("sidebarChanged", handler);
+       }, []);
 
   // Save step 1
   const handleSaveStep1 = async (coursId) => {
@@ -139,14 +145,18 @@ useEffect(() => {
 
   
   return (
-    <div className="w-full min-h-screen flex bg-primary/5">
+    <div className="w-full min-h-screen  bg-surface">
       {/* SIDEBAR */}
-      <div className="hidden lg:block w-64 min-h-screen">
+
+       <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6">
+      <div className={`
+        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
+        ${sidebarCollapsed ? "ml-20" : "ml-64"}
+      `}>
         <div className="flex justify-end">
           <UserCircle
             initials={initials}

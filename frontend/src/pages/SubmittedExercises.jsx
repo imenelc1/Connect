@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-//import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/Navbar";
 import { CheckCircle, Clock, MessageCircle, Calendar, ChevronRight } from "lucide-react";
-import { getTentatives } from "../services/progressionService";
+import { getTentatives} from "../services/progressionService";
 import { useTranslation } from "react-i18next";
 
 export default function SubmittedExercises() {
@@ -19,6 +19,7 @@ export default function SubmittedExercises() {
 
         const formatted = data.map(t => ({
           id: t.id,
+          exerciceId: t.exercice.id_exercice, 
           title: t.exercice.titre_exo,
           description: t.exercice.enonce,
           type: t.exercice.type || "non-code", // ⚡ type pour savoir si on affiche </>
@@ -114,7 +115,9 @@ export default function SubmittedExercises() {
                   <ChevronRight
                     size={20}
                     className="text-primary cursor-pointer"
-                    onClick={() => window.location.href = `/exercise/${ex.id}`}
+                    onClick={() => window.location.href = `/submitted-exercise/${ex.id}`}
+
+
                   />
                 </div>
 

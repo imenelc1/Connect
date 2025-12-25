@@ -6,15 +6,16 @@ import Mascotte from "../components/common/Mascotte.jsx";
 import LogoComponent from "../components/common/LogoComponent";
 import api from "../services/api";
 import toast from "react-hot-toast";
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { FiGlobe, FiEye, FiEyeOff } from "react-icons/fi";
+import { FaEnvelope, FaLock } from "react-icons/fa";
+import {FiGlobe, FiEye, FiEyeOff } from "react-icons/fi";
+
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
 import Button from "../components/common/Button.jsx";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
 import ThemeContext from "../context/ThemeContext.jsx";
 import ThemeButton from "../components/common/ThemeButton";
-import AuthContext from "../context/AuthContext.jsx";
+import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginInstructor() {
@@ -68,17 +69,17 @@ export default function LoginInstructor() {
         role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
       });
       console.log("Login API response:", res.data);
-       const userWithRole = {
-      user_id: res.data.user.user_id,
-      nom: res.data.user.nom,
-      prenom: res.data.user.prenom,
-      email: res.data.user.email,
-      role: res.data.user.role,
-    };
+      const userWithRole = {
+        user_id: res.data.user.user_id,
+        nom: res.data.user.nom,
+        prenom: res.data.user.prenom,
+        email: res.data.user.email,
+        role: res.data.user.role,
+      };
 
       localStorage.setItem("user", JSON.stringify(userWithRole));
 
-      loginUser(res.data.token, userWithRole); 
+      loginUser(res.data.token, userWithRole);
 
 
       localStorage.setItem("currentUserId", res.data.user.id_utilisateur);
@@ -185,19 +186,20 @@ export default function LoginInstructor() {
               icon={<FaLock size={16} className="text-grayc" />}
               rightIcon={
                 showPassword ? (
-                  <FaEyeOff
+                  <FiEyeOff
                     size={18}
                     onClick={() => setShowPassword(false)}
                     className="cursor-pointer text-grayc"
                   />
                 ) : (
-                  <FaEye
+                  <FiEye
                     size={18}
                     onClick={() => setShowPassword(true)}
                     className="cursor-pointer text-grayc"
                   />
                 )
               }
+
             />
             <div className="flex justify-end -mt-4">
               <a

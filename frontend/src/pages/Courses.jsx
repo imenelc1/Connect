@@ -9,6 +9,8 @@ import CourseContent from "../components/ui/CourseContent.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import IaAssistant from "../components/ui/IaAssistant.jsx";
 import api from "../services/courseService";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import progressionService from "../services/progressionService";
 
 
@@ -39,30 +41,30 @@ export default function Courses() {
 
   const lastLessonId = location.state?.lastLessonId;
 
-// Marquer une leçon comme visitée
-const markLessonVisited = async (lessonId) => {
-  try {
-    // Appel backend pour marquer la leçon
-    const res = await progressionService.completeLesson(lessonId);
-    
-    // Mettre à jour la progression globale du cours
-    if (res?.course_progress !== undefined) {
-      setCourseProgress(res.course_progress);
-    }
+  // Marquer une leçon comme visitée
+  const markLessonVisited = async (lessonId) => {
+    try {
+      // Appel backend pour marquer la leçon
+      const res = await progressionService.completeLesson(lessonId);
 
-    // Mettre à jour localement la leçon comme visitée
-    setSections(prev =>
-      prev.map((sec) => ({
-        ...sec,
-        lessons: sec.lessons.map((l) =>
-          l.id === lessonId ? { ...l, visited: true } : l
-        ),
-      }))
-    );
-  } catch (err) {
-    console.error("Erreur lors du marquage de la leçon :", err);
-  }
-};
+      // Mettre à jour la progression globale du cours
+      if (res?.course_progress !== undefined) {
+        setCourseProgress(res.course_progress);
+      }
+
+      // Mettre à jour localement la leçon comme visitée
+      setSections(prev =>
+        prev.map((sec) => ({
+          ...sec,
+          lessons: sec.lessons.map((l) =>
+            l.id === lessonId ? { ...l, visited: true } : l
+          ),
+        }))
+      );
+    } catch (err) {
+      console.error("Erreur lors du marquage de la leçon :", err);
+    }
+  };
 
 
   useEffect(() => {
@@ -81,13 +83,13 @@ const markLessonVisited = async (lessonId) => {
         setDuration(data.duration);
         setLevel(data.niveau_cour);
 
-        const fetchedSections = (data.sections || []).map((sec) => ({
+        const fetchedSections = (data.sections || []).map(sec => ({
           id: sec.id_section,
           title: sec.titre_section,
           description: sec.description || "",
           open: true,
           ordre: sec.ordre,
-          lessons: (sec.lecons || []).map((lec) => ({
+          lessons: (sec.lecons || []).map(lec => ({
             id: lec.id_lecon,
             title: lec.titre_lecon,
             content: lec.contenu_lecon,
@@ -156,11 +158,15 @@ const markLessonVisited = async (lessonId) => {
           </div>
           <IaAssistant />
           <HeadMascotte />
-          <UserCircle
-            initials={initials}
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
-          />
+
+          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+            <NotificationBell />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => i18n.changeLanguage(lang)}
+            />
+          </div>
         </div>
       </header>
 
@@ -170,20 +176,20 @@ const markLessonVisited = async (lessonId) => {
           currentSectionIndex={currentSectionIndex}
           setCurrentSectionIndex={setCurrentSectionIndex}
         />
-       <CourseContent
-  course={{ title, description, level, duration, sections, id: coursId }}
-  currentSectionIndex={currentSectionIndex}
-  setCurrentSectionIndex={setCurrentSectionIndex}
-  setSections={setSections}
-  sectionPages={sectionPages}
-  setSectionPages={setSectionPages}
-  currentLessonPage={initialLessonPage}
-  setCurrentLessonPage={setInitialLessonPage}
-  updateSectionProgress={updateSectionProgress}
-  markLessonVisited={markLessonVisited} // <-- ici
-/>
-
       </div>
+      <CourseContent
+        course={{ title, description, level, duration, sections, id: coursId }}
+        currentSectionIndex={currentSectionIndex}
+        setCurrentSectionIndex={setCurrentSectionIndex}
+        setSections={setSections}
+        sectionPages={sectionPages}
+        setSectionPages={setSectionPages}
+        currentLessonPage={initialLessonPage}
+        setCurrentLessonPage={setInitialLessonPage}
+        updateSectionProgress={updateSectionProgress}
+        markLessonVisited={markLessonVisited} // <-- ici
+      />
+
     </div>
   );
 }

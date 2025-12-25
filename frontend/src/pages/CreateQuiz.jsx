@@ -14,6 +14,8 @@ import ThemeButton from "../components/common/ThemeButton";
 import { getCurrentUserId } from "../hooks/useAuth";
 import api from "../services/courseService"; // Make sure your API helper is here
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import Topbar from "../components/common/TopBar";
 import { FaClock, FaMedal, FaStar } from "react-icons/fa";
 
@@ -26,6 +28,12 @@ export default function CreateQuiz() {
   const { t,i18n } = useTranslation("createQuiz");
   const [activeStep, setActiveStep] = useState(1);
   const { toggleDarkMode } = useContext(ThemeContext);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+      useEffect(() => {
+         const handler = (e) => setSidebarCollapsed(e.detail);
+         window.addEventListener("sidebarChanged", handler);
+         return () => window.removeEventListener("sidebarChanged", handler);
+       }, []);
 
  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
@@ -44,7 +52,6 @@ export default function CreateQuiz() {
   maxAttempts: 0,
   durationEnabled: false,
   duration: 0,
-  delais_entre_tentative: 0,
 
   passingScore: 0,
 
@@ -190,7 +197,6 @@ const currentUserId = getCurrentUserId();
         scoreMinimum: quizData.passingScore,
         nbMax_tentative: quizData.maxAttempts || 0,
         activerDuration: quizData.durationEnabled,
-        delai_entre_tentatives: quizData.delais_entre_tentative || 0,
         duration: quizData.durationEnabled
           ? `00:${quizData.duration}:00`
           : null,
@@ -284,26 +290,33 @@ const handlePublishQuiz = async () => {
   
   
   return (
-    <div className="w-full min-h-screen flex bg-primary/5">
+    <div className="w-full min-h-screen  bg-surface">
     
 
       {/* NAVBAR RESPONSIVE */}
-      <div className="hidden lg:block w-64 min-h-screen">
+       <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col p-4 lg:p-8 gap-6 ">
+ <div className={`
+        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
+        ${sidebarCollapsed ? "ml-20" : "ml-64"}
+      `}>
         <div className="max-w-7xl mx-auto">
 
           {/* HEADER */}
-          <div className="flex justify-end">
-                   <UserCircle
-                     initials={initials}
-                     onToggleTheme={toggleDarkMode}
-                     onChangeLang={(lang) => i18n.changeLanguage(lang)}
-                   />
-                 </div>
+          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
          
                  <Topbar
                    steps={exerciseSteps}
@@ -401,10 +414,6 @@ const handlePublishQuiz = async () => {
 
       <div className="px-6 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white">
         {quizData.passingScore || 0} {t("scoreMinimum")}
-      </div>
-
-      <div className="px-6 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white">
-        {quizData.delais_entre_tentative || 0} {t("delais_entre_tentative")}
       </div>
     </div>
 

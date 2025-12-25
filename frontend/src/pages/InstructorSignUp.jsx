@@ -4,7 +4,6 @@ import Button from "../components/common/Button.jsx";
 import AuthTabs from "../components/common/AuthTabs";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
 import Mascotte from "../components/common/Mascotte.jsx";
-import Select from "../components/common/Select";
 import api from "../services/api";
 
 import LogoComponent from "../components/common/LogoComponent";
@@ -15,12 +14,10 @@ import {
   FaCalendarAlt, FaLock, FaEnvelope, FaUser, FaGraduationCap
 } from "react-icons/fa";
 
-import { FiGlobe } from "react-icons/fi";
 
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
-import ThemeButton from "../components/common/ThemeButton";
 import ModernDropdown from "../components/common/ModernDropdown.jsx";
 const InstructorSignUp = () => {
   const [formData, setFormData] = useState({
@@ -280,9 +277,9 @@ const { loginUser } = useContext(AuthContext);
           <h2 className="text-2xl font-semibold text-center mb-6"><span className="text-textc">{t("title")}</span><span>  </span><span className="text-muted">{t("connect")}</span></h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
-
               <Input label={t("nickname")} name="nickname" value={formData.nickname} onChange={handleChange} placeholder={t("nickname")} icon={<FaUser />} error={errors.nickname} />
+
+              <Input label={t("fullname")} name="fullname" value={formData.fullname} onChange={handleChange} placeholder={t("fullname")} icon={<FaUser />} error={errors.fullname} />
             </div>
 
             <Input label={t("email")} name="email" type="email" value={formData.email} onChange={handleChange} placeholder={t("email")} icon={<FaEnvelope />} error={errors.email} />

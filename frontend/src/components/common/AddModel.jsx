@@ -1,36 +1,38 @@
-// import React from "react";
 import Button from "./Button.jsx";
-import Input from "../common/Input";
+import ThemeContext from "../../context/ThemeContext";
+import React, {  useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function AddModal({
-  open,          // bool : contrôle l'affichage du modal
-  onClose,       // fonction : fermeture du modal
-  title = "",    // titre dynamique
-  subtitle,      // sous-titre
-  fields = [],   // tableau d'inputs dynamiques
-  submitLabel,   // texte du bouton submit
-  cancelLabel = "Cancel", // texte du bouton cancel
-  onSubmit       // fonction appelée lors du submit
+  open,
+  onClose,
+  title = "",
+  subtitle,
+  fields = [],
+  submitLabel,
+  cancelLabel = "Cancel",
+  onSubmit,
 }) {
-
-  // → Si le modal doit être masqué, on ne retourne rien
   if (!open) return null;
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const navigate = useNavigate();
+  
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 px-3">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl relative">
+    <div className="fixed inset-0 bg-black/40 flex justify-center items-start z-50 px-4 py-6 overflow-auto">
+      <div className="bg-card rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl relative transform transition-all duration-300 mt-6 sm:mt-12">
 
-        {/* ✖ Bouton de fermeture (en haut à droite) */}
+        {/* Bouton de fermeture */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-4 text-gray-400 hover:text-gray-600 text-xl"
+          className="absolute -top-3 -right-3 z-10 text-gray-400 hover:text-gray-600 transition-colors duration-200 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-md"
         >
-          ✕
+          <span className="text-xl">&times;</span>
         </button>
 
-        {/*  En-tête du modal */}
-        <h2 className="text-lg font-semibold mb-1 text-primary">{title}</h2>
-        <p className="text-sm text-textc mb-4">{subtitle}</p>
+        {/* Header */}
+        <h2 className="text-2xl font-bold mb-2 text-muted">{title}</h2>
+        {subtitle && <p className="text-gray-500 mb-6">{subtitle}</p>}
 
         {/* FORMULAIRE */}
         <form className="space-y-5" onSubmit={(e) => {
@@ -48,49 +50,42 @@ export default function AddModal({
             - element → si fourni, remplace l’input (ex: <select>)
           */}
           {fields.map((field, index) => (
-            <div key={index} className="flex flex-col gap-1">
-
-              {/* Label en gras */}
-              <label className="font-semibold text-black/50">
-                {field.label}
-              </label>
-
-              {/* Si field.element existe → on l'affiche 
-                  (ex : un <select> personnalisé)
-                 Sinon → on affiche un input classique */}
+            <div key={index} className="flex flex-col gap-2">
+              <label className="font-medium text-grad-2">{field.label}</label>
               {field.element ? (
-                field.element
+                <div className="w-full">{field.element}</div>
               ) : (
                 <input
                   type={field.type || "text"}
                   placeholder={field.placeholder}
                   value={field.value}
                   onChange={field.onChange}
-                  className="w-62 bg-gray-100 rounded-md px-3 py-2
-                             focus:outline-none focus:ring-2 focus:ring-primary text-black/80"
+                  className="w-full bg-gray-50 rounded-lg px-4 py-2 text-gray-800
+                             border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary
+                             focus:border-primary transition duration-200 placeholder-gray-400"
                 />
               )}
             </div>
           ))}
 
-          {/* BOUTONS ACTIONS */}
-          <div className="flex justify-end gap-3 mt-6">
-
-            {/* Bouton annuler */}
-            <Button variant="outline" onClick={onClose} className="!px-4 !py-2 !w-auto !h-auto !text-sm">
+          {/* Boutons */}
+          <div className="flex justify-end gap-3 mt-6 flex-wrap">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="!px-5 !py-2 !w-auto !text-sm hover:bg-gray-100 transition"
+            >
               {cancelLabel}
             </Button>
-
-            {/* Bouton submit */}
-           <Button variant="primary" type="submit" className="!px-4 !py-2 !w-40 !h-auto !text-sm">
-  {submitLabel}
-</Button>
-
-
+            <Button
+              variant="primary"
+              type="submit"
+              className="!px-6 !py-2 !w-40 !text-sm hover:scale-105 transition"
+            >
+              {submitLabel}
+            </Button>
           </div>
-
         </form>
-
       </div>
     </div>
   );
