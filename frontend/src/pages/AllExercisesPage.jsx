@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/NavBar.jsx";
 import { Plus, Bell } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
@@ -149,12 +149,12 @@ export default function AllExercisesPage() {
           )}
         </div>
 
-      <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-  {filteredExercises.map((exercise) => (
-    <ExerciseCard key={exercise.id} exercise={exercise} />
+        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
+          {filteredExercises.map((exercise) => (
+            <ExerciseCard key={exercise.id} exercise={exercise} />
 
-  ))}
-</div>
+          ))}
+        </div>
 
       </main>
     </div>

@@ -38,7 +38,16 @@ export default function QuizIntroPage() {
         duration: q.duration_minutes,
         points: q.scoreMinimum,
         question: q.questions.length,
-        activer:q.activerDuration
+        activer:q.activerDuration,
+        questions: q.questions.map((question) => ({
+          id: question.id_qst,
+          texte: question.texte_qst,
+          score: question.score,
+          options: question.options.map((opt) => ({
+            id: opt.id_option,
+            texte: opt.texte_option,
+          })),
+        })),
       });
       setQuiz(formatted);
 
@@ -50,6 +59,7 @@ export default function QuizIntroPage() {
     });
 });
 
+const totalPoints = quiz.questions ? quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
 
   /* ================= LOADING ================= */
 
@@ -105,7 +115,7 @@ export default function QuizIntroPage() {
   )}
 
           <div className="flex items-center gap-2 bg-purple text-white px-4 py-2 rounded-md shadow-sm">
-            <FaMedal /> {quiz.points} {t("points")}
+            <FaMedal /> {totalPoints}  {t("points")}
           </div>
 
           <div
@@ -127,7 +137,7 @@ export default function QuizIntroPage() {
     </p>
   )}
           <p>
-            <strong>{t("pointsTotaux")} :</strong> {quiz.points} {t("points")}
+            <strong>{t("pointsTotaux")} :</strong> {quiz.points}/{totalPoints}{t("points")}
           </p>
         </div>
 

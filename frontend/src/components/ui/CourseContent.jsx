@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import feedbackService from "../../services/feedbackService";
+import FeedbackCard from "../common/FeedbackCard.jsx";
 export default function CourseContent({
   course,
   currentSectionIndex,
@@ -15,9 +16,7 @@ export default function CourseContent({
   const { t } = useTranslation("courses");
   const { title, sections } = course;
   const courseId = course.id || "default";
-const [afficherNom, setAfficherNom] = useState(false);
-const [allFeedbacks, setAllFeedbacks] = useState([]);
-const [loadingFeedbacks, setLoadingFeedbacks] = useState(true);
+
   // Timer
   const [secondsSpent, setSecondsSpent] = useState(() => {
     return parseInt(localStorage.getItem(`courseTimer_${courseId}`) || "0", 10);
@@ -42,14 +41,14 @@ useEffect(() => {
 
       const formatted = data.map((f) => ({
         id: f.id_feedback,
+        initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
         comment: f.contenu,
         stars: f.etoile,
-        nomComplet: f.afficher_nom
-          ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-          : "Utilisateur anonyme",
-        initials: f.afficher_nom
-          ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
-          : "??",
+        nomComplet: f.utilisateur_nom && f.utilisateur_prenom
+  ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+  : f.utilisateur_nom || "Utilisateur anonyme",
+
+
       }));
 
       setAllFeedbacks(formatted);
@@ -73,19 +72,18 @@ useEffect(() => {
       .padStart(2, "0")}`;
   };
 
-  // Gestion des leçons et pages
+  // Leçons
   const LESSONS_PER_PAGE = 2;
   const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
   const lessons = section?.lessons || [];
   const totalLessonPages = Math.ceil(lessons.length / LESSONS_PER_PAGE);
-
   const currentLessonPage = sectionPages?.[currentSectionIndex] ?? 0;
   const currentLessons = lessons.slice(
     currentLessonPage * LESSONS_PER_PAGE,
     currentLessonPage * LESSONS_PER_PAGE + LESSONS_PER_PAGE
   );
 
-  // Marquer les leçons visitées
+  // Marquer leçons visitées
   useEffect(() => {
     currentLessons.forEach((lesson) => {
       if (!lesson.visited) {
@@ -106,9 +104,8 @@ useEffect(() => {
   };
 
   const nextLessonPage = () => {
-    if (currentLessonPage < totalLessonPages - 1) {
-      goToLessonPage(currentLessonPage + 1);
-    } else if (currentSectionIndex < sections.length - 1) {
+    if (currentLessonPage < totalLessonPages - 1) goToLessonPage(currentLessonPage + 1);
+    else if (currentSectionIndex < sections.length - 1) {
       const nextIndex = currentSectionIndex + 1;
       setCurrentSectionIndex(nextIndex);
 
@@ -136,7 +133,9 @@ useEffect(() => {
     currentSectionIndex === sections.length - 1 &&
     currentLessonPage === totalLessonPages - 1;
 
-   
+  // Feedback dynamique depuis backend
+  const [allFeedbacks, setAllFeedbacks] = useState([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(true);
   const [page, setPage] = useState(0);
   const feedbacksPerPage = 3;
   const totalPages = Math.ceil(allFeedbacks.length / feedbacksPerPage);
@@ -147,55 +146,82 @@ useEffect(() => {
 
   const [feedback, setFeedback] = useState("");
   const [rating, setRating] = useState(0);
-  // Remplacer l'ancien handleSubmit par celui-ci
-const handleSubmit = async () => {
-  if (!feedback || rating === 0) {
-    alert("Veuillez écrire un feedback et donner une note");
-    return;
-  }
+  const [afficherNom, setAfficherNom] = useState(false);
 
-  try {
-    await feedbackService.createFeedback({
-      contenu: feedback,
-      etoile: rating,
-      object_id: courseId,
-      content_type_string: "courses.cours",
-      afficher_nom: afficherNom,
-    });
+  useEffect(() => {
+    if (!courseId) return;
 
-    // Rafraîchir les feedbacks
-     const refreshed = await feedbackService.getFeedbacks(courseId);
-    setAllFeedbacks(
-      refreshed.map((f) => ({
-        id: f.id_feedback,
-        comment: f.contenu,
-        stars: f.etoile,
-        nomComplet: f.afficher_nom
-          ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-          : "Utilisateur anonyme",
-        initials: f.afficher_nom
-          ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
-          : "??",
-      }))
-    );
+    const fetchFeedbacks = async () => {
+      setLoadingFeedbacks(true);
+      try {
+        const data = await feedbackService.getFeedbacks(courseId);
 
+        const formatted = data.map((f) => ({
+          id: f.id_feedback,
+          comment: f.contenu,
+          stars: f.etoile,
+          nomComplet: f.afficher_nom
+            ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+            : "Utilisateur anonyme",
+          initials: f.afficher_nom
+            ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
+            : "??",
+        }));
 
-    // Nettoyer le formulaire
-     setFeedback("");
-    setRating(0);
-    setAfficherNom(false);
-  } catch (err) {
-    console.error(err);
-    alert("Erreur lors de l'envoi");
-  }
-};
+        setAllFeedbacks(formatted);
+      } catch (err) {
+        console.error("Erreur chargement feedbacks", err);
+      } finally {
+        setLoadingFeedbacks(false);
+      }
+    };
 
+    fetchFeedbacks();
+  }, [courseId]);
 
+  const handleSubmit = async () => {
+    if (!feedback || rating === 0) {
+      alert("Veuillez écrire un feedback et donner une note");
+      return;
+    }
 
+    try {
+      await feedbackService.createFeedback({
+        contenu: feedback,
+        etoile: rating,
+        object_id: courseId,
+        content_type_string: "courses.cours",
+        afficher_nom: afficherNom,
+      });
 
-  // Render
+      // Rafraîchir
+      const refreshed = await feedbackService.getFeedbacks(courseId);
+      setAllFeedbacks(
+        refreshed.map((f) => ({
+          id: f.id_feedback,
+          comment: f.contenu,
+          stars: f.etoile,
+          nomComplet: f.afficher_nom
+            ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+            : "Utilisateur anonyme",
+          initials: f.afficher_nom
+            ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
+            : "??",
+        }))
+      );
+
+      setFeedback("");
+      setRating(0);
+      setAfficherNom(false);
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de l'envoi");
+    }
+  };
+
   return (
     <div className="bg-card rounded-3xl border border-blue/20 p-4 sm:p-8 shadow-sm">
+      {/* Header */}
       <div className="px-2 mb-6">
         <h1 className="text-xl sm:text-3xl font-bold text-muted">{title}</h1>
         <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm">
@@ -208,6 +234,7 @@ const handleSubmit = async () => {
         </div>
       </div>
 
+      {/* Lessons */}
       <div className="bg-card rounded-3xl border border-blue/20 p-4 sm:p-8 shadow-sm">
         {currentLessons.length > 0 ? (
           currentLessons.map((lesson) => (
@@ -229,6 +256,7 @@ const handleSubmit = async () => {
         )}
       </div>
 
+      {/* Navigation */}
       <div className="flex flex-row gap-2 sm:gap-3 mt-4">
         <button
           onClick={prevLessonPage}
@@ -237,7 +265,6 @@ const handleSubmit = async () => {
         >
           <ChevronLeft size={14} className="sm:w-4 sm:h-4" /> {t("chapitrePrec")}
         </button>
-
         <button
           onClick={nextLessonPage}
           className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-xs sm:text-base shadow ${
@@ -251,7 +278,7 @@ const handleSubmit = async () => {
         </button>
       </div>
 
-            {/* Quiz */}
+      {/* Quiz */}
       <div className="mt-10 w-full">
         <div className="w-full bg-grad-1 text-white p-4 sm:p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between shadow">
           <div className="text-left mb-4 md:mb-0">
@@ -276,19 +303,21 @@ const handleSubmit = async () => {
           </button>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 flex-1 px-4 sm:px-6">
-            {currentFeedbacks.map((f) => (
-              <div key={f.id} className="relative bg-grad-1 rounded-3xl p-4 sm:p-6 text-white shadow-lg">
-                <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center text-sm sm:text-lg font-semibold mb-4">
-                  {f.initials}
-                </div>
-                <p className="text-xs sm:text-sm leading-relaxed opacity-90">{f.comment}</p>
-                <div className="flex gap-1 text-yellow-300 text-base sm:text-xl mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i}>{i < f.stars ? "★" : "☆"}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
+            {loadingFeedbacks ? (
+  <p className="col-span-3 text-center text-gray-300">
+    Chargement des feedbacks...
+  </p>
+) : currentFeedbacks.length === 0 ? (
+  <p className="col-span-3 text-center text-gray-300">
+    Aucun feedback pour ce cours
+  </p>
+) : (
+  currentFeedbacks.map((f) => (
+  <FeedbackCard key={f.id} feedback={f} />
+))
+
+)}
+
           </div>
 
           <button
@@ -301,21 +330,13 @@ const handleSubmit = async () => {
         </div>
 
         <h3 className="text-lg sm:text-xl font-bold text-muted mb-3">{t("yourFeedback")}</h3>
-        
-        <div className="flex items-center gap-2 mb-4">
-  <label className="flex items-center gap-2">
-  <input
-    type="checkbox"
-    checked={afficherNom}
-    onChange={(e) => setAfficherNom(e.target.checked)}
-  />
-  Afficher mon nom
-</label>
 
-  <label htmlFor="afficherNom" className="text-sm text-gray-700">
-    Afficher mon nom
-  </label>
-</div>
+        <div className="flex items-center gap-2 mb-4">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={afficherNom} onChange={(e) => setAfficherNom(e.target.checked)} />
+            Afficher mon nom
+          </label>
+        </div>
 
         <textarea
           className="w-full h-36 sm:h-48 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
@@ -344,7 +365,6 @@ const handleSubmit = async () => {
           </button>
         </div>
       </div>
-      
     </div>
   );
 }

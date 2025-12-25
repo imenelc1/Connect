@@ -39,7 +39,7 @@ export default function Navbar() {
     try {
       const storedUser = localStorage.getItem("user");
 
-      // 🔥 Empêcher le crash si la valeur est "undefined" ou vide
+      // Empêcher le crash si la valeur est "undefined" ou vide
       if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
         const parsed = JSON.parse(storedUser);
         userObj = parsed.user || parsed.utilisateur || parsed;
@@ -112,6 +112,9 @@ export default function Navbar() {
     "/all-exercises",
     "/new-exercise",
     "/exercise-preview",
+    "/start-exerciseCode",
+    "/ListeExercices",
+    "/start-exercise"
   ];
 
   const quizRoutes = [
@@ -162,7 +165,7 @@ export default function Navbar() {
         />
 
         {!collapsed && (
-          <div className="flex flex-col leading-tight ml-2 -mt-1">
+          <div className="hidden md:flex  flex flex-col leading-tight ml-2 -mt-1">
             <span className="text-textc font-semibold text-xs capitalize">
               {t(userData.role)}
             </span>

@@ -1,14 +1,14 @@
 {
   "ProgressExercice": {
-     "AvarageG": "Average Grade" ,
+     "AvarageG": "Average Score" ,
     "Submission":"Submission Rate",
-    "Completed": "Completed",
+    "Completed": "Completed courses",
      "exercice":"Exercise",
      "Progression":"Progress",
     "completedexo": "Completed Exercises",
-    "courses": "Courses",
+    "courses": "Active Courses",
     "Weekly": "Weekly Submission Rate",
-    "grade":"Grade Progression Over Time",
+    "grade":"Score Progression Over Time",
     "performance":"Performance Insights",
     "positive":"Positive Trend",
     "positivep1":"The students has improved by ",

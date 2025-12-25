@@ -1,7 +1,7 @@
 {
   "title": "Instructors Management",
   "subtitle": "Manage instructors and teaching staff",
-  "addInstructor": "+ Add Instructor",
+  "addInstructor": "Add Instructor",
   "search": "Search instructors...",
   "instructor": "Instructor",
   "email": "Email",

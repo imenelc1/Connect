@@ -1,156 +1,150 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import Logo from "../components/common/LogoComponent";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaClock, FaMedal, FaStar } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
+import Button from "../components/common/Button";
+import { FaTrophy, FaRedoAlt, FaHome } from "react-icons/fa";
+
 
 export default function QuizPreview() {
-  const { state } = useLocation();
-  const quiz = state?.quizData;
+  const [quiz, setQuiz] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("createQuiz");
+  const { exerciceId } = useParams();
 
-  const [answers, setAnswers] = useState({});
+  useEffect(() => {
+    if (!exerciceId) return;
 
-  if (!quiz) {
-    return <div className="p-8">{t("noData")}</div>;
-  }
+    fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId}/`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Quiz non trouvé");
+        return res.json();
+      })
+      .then((data) => {
+        const q = Array.isArray(data) ? data[0] : data;
 
-  const totalPoints = quiz.questions.reduce((sum, q) => sum + (q.points || 1), 0);
+        setQuiz({
+          id: q.id,
+          scoreMinimum: q.scoreMinimum,
+          durationMinutes: q.duration_minutes,
+          activerDuration: q.activerDuration,
+          nbMaxTentative: q.nbMax_tentative,
+          exercice: {
+            titre: q.exercice?.titre_exo,
+            enonce: q.exercice?.enonce,
+            niveau: q.exercice?.niveau_exo,
+          },
+          questions: q.questions.map((question) => ({
+            id: question.id_qst,
+            texte: question.texte_qst,
+            score: question.score,
+            options: question.options.map((opt) => ({
+              id: opt.id_option,
+              texte: opt.texte_option,
+            })),
+          })),
+        });
 
-  const handleAnswerChange = (questionIndex, answerIndex) => {
-    setAnswers((prev) => ({ ...prev, [questionIndex]: answerIndex }));
-  };
-
-  const handleSubmit = () => {
-    alert(t("sendQuiz"));
-  };
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [exerciceId]);
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
+    i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
   };
 
+  if (loading) return <div className="p-8">Loading...</div>;
+  if (!quiz) return <div className="p-8">{t("noData")}</div>;
+
+  const totalPoints = quiz.questions.reduce(
+    (sum, q) => sum + q.score,
+    0
+  );
+
   return (
-    <div
-      className="min-h-screen flex flex-col px-4 md:px-8 py-4 md:py-6"
-      style={{ background: "rgb(var(--color-bg))" }}
-    >
+    <div className="min-h-screen px-4 md:px-8 py-6 bg-[rgb(var(--color-bg))]">
 
-      {/* HEADER RIGHT ACTIONS */}
-      <div className="absolute top-4 right-4 flex items-center gap-3">
-
-        {/* SWITCH LANGUE */}
+      {/* ACTIONS */}
+      <div className="absolute top-4 right-4 flex gap-3">
         <div
           onClick={toggleLanguage}
-          className="cursor-pointer p-2 rounded-md shadow-sm bg-white/20 backdrop-blur hover:bg-white/30 transition"
+          className="cursor-pointer p-2 rounded-md bg-white/20 hover:bg-white/30"
         >
           <Globe size={18} />
         </div>
 
-        {/* EXIT PREVIEW */}
-        <button
-          onClick={() => navigate("/create-quiz")}
-          className="px-3 md:px-4 py-2 rounded-md shadow-md text-white text-xs md:text-sm font-medium"
-          style={{ background: "rgb(var(--color-primary))" }}
-        >
-          {t("exitPreview")}
-        </button>
-
+        
       </div>
 
-      {/* TITLE */}
-      <h1 className="text-xl md:text-3xl font-bold text-center mt-10 mb-4 md:mb-6 text-muted">
-        {quiz.title || t("title")}
+      {/* TITRE */}
+      <h1 className="text-2xl md:text-3xl font-bold text-center mt-10 text-muted">
+        {quiz.exercice.titre}
       </h1>
 
-      {/* DESCRIPTION */}
-      <p className="text-sm text-grayc mb-4 md:mb-6 px-2 text-left">
-        {quiz.description || t("description")}
+      {/* ENONCÉ */}
+      <p className="text-grayc mt-4 max-w-3xl mx-auto">
+        {quiz.exercice.enonce}
       </p>
 
-      {/* OVERVIEW */}
-      <div className="flex-1 w-full rounded-2xl shadow-lg mt-4 md:mt-10 p-4 md:p-6 bg-grad-2">
+      {/* INFOS */}
+      <div className="flex justify-center gap-6 mt-8 text-sm">
 
-        {/* TOP INFO CARDS */}
-        <div className="flex flex-col md:flex-row md:justify-center gap-3 md:gap-x-80 text-xs md:text-sm mb-6">
+        <div className="flex items-center gap-2 bg-blue text-white px-6 py-2 rounded-md">
+  <FaClock />
+  {quiz.activerDuration
+    ? `${quiz.durationMinutes} ${t("minutes")}`
+    : t("nonLimited")}
+</div>
 
-          <div className="px-6 md:px-8 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-blue text-white">
-            <FaClock /> {quiz.duration} {t("minutes")}
-          </div>
-
-          <div
-            className="px-6 md:px-8 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-purple text-white"
-          >
-            <FaMedal /> {totalPoints} {t("points")}
-          </div>
-
-          <div
-            className="px-6 md:px-8 py-2 rounded-md shadow-sm flex items-center gap-2 justify-center"
-            style={{ background: "rgb(var(--color-pink))", color: "white" }}
-          >
-            <FaStar /> {quiz.level || t("level")}
-          </div>
-
+        <div className="flex items-center gap-2 bg-purple text-white px-6 py-2 rounded-md">
+          <FaMedal /> {totalPoints} {t("points")}
         </div>
 
-        {/* QUESTIONS */}
-        <div className="flex flex-col gap-4">
-          {quiz.questions.map((q, index) => (
-            <div key={index} className="rounded-xl shadow-sm p-3 md:p-4 bg-grad-3">
+        <div className="flex items-center gap-2 bg-pink text-white px-6 py-2 rounded-md">
+          <FaStar /> {quiz.exercice.niveau}
+        </div>
 
-              <h3 className="font-semibold mb-1 flex items-center gap-2 text-sm md:text-base">
-                <div
-                  className="w-5 h-5 md:w-6 md:h-6 flex items-center justify-center rounded-md text-white text-xs md:text-sm font-bold"
-                  style={{ background: "rgb(var(--color-primary))" }}
+      </div>
+
+      {/* QUESTIONS */}
+      <div className="mt-10 max-w-4xl mx-auto flex flex-col gap-4">
+
+        {quiz.questions.map((q, index) => (
+          <div
+            key={q.id}
+            className="bg-white rounded-xl shadow p-4"
+          >
+            <h3 className="font-semibold mb-2">
+              {index + 1}. {q.texte}
+            </h3>
+
+            <p className="text-xs text-grayc mb-3">
+              {q.score} {t("points")}
+            </p>
+
+            <ul className="flex flex-col gap-2">
+              {q.options.map((opt) => (
+                <li
+                  key={opt.id}
+                  className="border rounded-md px-3 py-2 bg-gray-50"
                 >
-                  {index + 1}
-                </div>
-                <span>{q.text || t("questionText")}</span>
-              </h3>
-
-              <p className="text-xs md:text-sm text-grayc mb-2">
-                {q.points || 1} {t("points")}
-              </p>
-
-              <div className="flex flex-col gap-2">
-                {q.answers.map((a, i) => (
-                  <label
-                    key={i}
-                    className="flex items-center gap-3 cursor-pointer border rounded-md px-3 py-2 shadow-sm bg-white"
-                  >
-                    <input
-                      type="radio"
-                      name={`question-${index}`}
-                      checked={answers[index] === i}
-                      onChange={() => handleAnswerChange(index, i)}
-                      className="accent-blue-500"
-                    />
-                    <span className="text-sm md:text-base text-black/50">
-                      {a.text || t("answerOption")}
-                    </span>
-                  </label>
-                ))}
-              </div>
-
-            </div>
-          ))}
-        </div>
-
+                  {opt.texte}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+<Button
+            text={<span className="flex items-center gap-2"><FaHome /> {t("backMenu")}</span>}
+            variant="quizBack"
+            onClick={() => navigate("/all-quizzes")}
+          />
       </div>
-
-      {/* SUBMIT */}
-      <div className="mt-6 text-center">
-        <button
-          onClick={handleSubmit}
-          className="px-5 md:px-6 py-2 md:py-3 rounded-xl text-white text-sm md:text-base font-medium"
-          style={{ background: "rgb(var(--color-primary))" }}
-        >
-          {t("sendQuiz")}
-        </button>
-      </div>
-
+      
     </div>
   );
 }

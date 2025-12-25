@@ -1,5 +1,5 @@
 // src/pages/ExercisePage.jsx
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { MessageCircle, Globe } from "lucide-react";
 import { MdAutoAwesome } from "react-icons/md";
@@ -8,10 +8,8 @@ import { useParams } from "react-router-dom";
 import NavBar from "../components/common/NavBar";
 import Mascotte from "../assets/head_mascotte.svg";
 import AssistantIA from "./AssistantIA";
-
 import progressionService from "../services/progressionService";
 import toast from "react-hot-toast";
-
 
 export default function TheoryExercisePage() {
   const [openAssistant, setOpenAssistant] = useState(false);
@@ -19,20 +17,15 @@ export default function TheoryExercisePage() {
   const [hover, setHover] = useState(0);
   const [answer, setAnswer] = useState("");
   const [exercise, setExercise] = useState(null);
-  const { exerciceId } = useParams(); // Récupération de l'ID de l'exercice
-  const [loadingExercise, setLoadingExercise] = useState(false);
-
+  const { exerciceId } = useParams(); 
+  const [loadingExercise, setLoadingExercise] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState(null); // pour stocker le feedback après soumission
+  const [feedback, setFeedback] = useState(null);
 
-  // au début du composant
   const [startTime, setStartTime] = useState(Date.now());
 
-  // On initialise le timer au chargement de l'exercice
   useEffect(() => {
-    if (exercise) {
-      setStartTime(Date.now());
-    }
+    if (exercise) setStartTime(Date.now());
   }, [exercise]);
 
   // Fonction utilitaire pour calculer le temps passé en secondes
@@ -45,24 +38,19 @@ export default function TheoryExercisePage() {
     try {
       setLoading(true);
 
-     const res = await progressionService.createTentative({
-  exercice_id: exercise.id_exercice, // <-- nom exact du serializer
-  reponse: answer,
-  output: "",        // facultatif, mais le serializer attend ce champ
-  etat: "brouillon",
-  temps_passe: getTempsPasse(),
-});
+      const res = await progressionService.createTentative({
+        exercice_id: exercise.id_exercice,
+        reponse: answer,
+        output: "",
+        etat: "brouillon",
+        temps_passe: getTempsPasse(),
+      });
 
-
-
-      console.log("Brouillon sauvegardé:", res.data || res);
       setFeedback(res.data?.feedback || "Brouillon sauvegardé !");
       toast.success("Solution sauvegardée !");
-
     } catch (error) {
       console.error("Erreur lors de la sauvegarde :", error.response || error);
       toast.error("Erreur lors de la sauvegarde");
-
     } finally {
       setLoading(false);
     }
@@ -75,21 +63,24 @@ export default function TheoryExercisePage() {
     try {
       setLoading(true);
 
-       const res = await progressionService.submitTentative({
-  exercice_id: exercise.id_exercice, // <-- nom exact du serializer
-  reponse: answer,
-  output: "",        // facultatif, mais le serializer attend ce champ
-  etat: "soumis",
-  temps_passe: getTempsPasse(),
-});
+      const res = await progressionService.submitTentative({
+        exercice_id: exercise.id_exercice,
+        reponse: answer,
+        output: "",
+        etat: "soumis",
+        temps_passe: getTempsPasse(),
+      });
 
-
-      console.log("Solution envoyée:", res.data || res);
       setFeedback(res.data?.feedback || "Solution envoyée !");
       toast.success("Solution envoyée !");
     } catch (error) {
       console.error("Erreur lors de l'envoi :", error.response || error);
-      toast.error("Erreur lors de l'envoi");
+
+      if (error.response && error.response.status === 403) {
+        toast.error("Vous n'êtes pas autorisé à soumettre cet exercice !");
+      } else {
+        toast.error("Erreur lors de l'envoi");
+      }
     } finally {
       setLoading(false);
     }
@@ -97,24 +88,12 @@ export default function TheoryExercisePage() {
 
   // ------------------- FETCH EXERCISE -------------------
   useEffect(() => {
-    console.log(
-      "URL appelée :",
-      `http://localhost:8000/api/exercices/${exerciceId}/`
-    );
-    console.log("${exerciceId}/");
     if (!exerciceId) return;
-    console.log(
-      "URL appelée :",
-      `http://localhost:8000/api/exercices/${exerciceId}/`
-    );
+
     const fetchExercise = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/exercices/${exerciceId}/`
-        );
-
-        if (!response.ok)
-          throw new Error("Erreur lors de la récupération de l'exercice");
+        const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
+        if (!response.ok) throw new Error("Erreur lors de la récupération de l'exercice");
         const data = await response.json();
         setExercise(data);
       } catch (error) {
@@ -128,11 +107,7 @@ export default function TheoryExercisePage() {
   }, [exerciceId]);
 
   const { t, i18n } = useTranslation("exercisePage");
-
-  const switchLang = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-  };
+  const switchLang = () => i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
 
   const getStarGradient = (i) => {
     if (i <= 2) return "star-very-easy";
@@ -140,9 +115,32 @@ export default function TheoryExercisePage() {
     return "star-difficult";
   };
 
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  const storedUser = localStorage.getItem("user");
+  const userData =
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const initials = userData
+    ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+    : "";
+  const isStudent = userData.role === "etudiant";
+
+useEffect(() => {
+  if (!exerciceId) return;
+
+  fetch(`http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then(res => res.json())
+    .then(data => setCanSubmit(data.can_submit))
+    .catch(() => setCanSubmit(false));
+}, [exerciceId]);
+
+
   return (
     <div className="flex bg-[rgb(var(--color-surface))] min-h-screen">
-      {/* NAVBAR */}
       <div className="hidden lg:block">
         <NavBar />
       </div>
@@ -150,7 +148,6 @@ export default function TheoryExercisePage() {
         <NavBar />
       </div>
 
-      {/* PAGE CONTENT */}
       <div className="flex-1 lg:ml-72 px-4 sm:px-6 md:px-10 lg:px-12 py-6 sm:py-8 md:py-10 w-full">
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 md:gap-0">
@@ -158,14 +155,12 @@ export default function TheoryExercisePage() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[rgb(var(--color-primary))] mb-2">
               {t("exercise_title")}
             </h1>
-
             <p className="text-[rgb(var(--color-text))] text-base sm:text-lg md:text-xl font-medium">
               {t("question_title")}
             </p>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
-            {/* SWITCH LANG */}
             <button
               onClick={switchLang}
               className="p-2 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-gray-light))] rounded-xl shadow hover:brightness-95 transition flex items-center justify-center"
@@ -173,7 +168,6 @@ export default function TheoryExercisePage() {
               <Globe size={18} className="text-[rgb(var(--color-primary))]" />
             </button>
 
-            {/* ASSISTANT IA BUTTON */}
             <button
               onClick={() => setOpenAssistant(true)}
               className="flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl bg-[rgb(var(--color-primary))] text-white font-medium shadow-md hover:brightness-110 transition text-xs sm:text-sm md:text-base"
@@ -199,24 +193,20 @@ export default function TheoryExercisePage() {
                   {exercise.titre_exo}
                 </span>
               </p>
-
               <p className="text-[rgb(var(--color-gray))] mt-2 text-sm sm:text-base">
                 {exercise.enonce}
               </p>
             </>
           ) : (
-            <p className="text-red-500 text-sm">
-              Impossible de charger l'exercice.
-            </p>
+            <p className="text-red-500 text-sm">Impossible de charger l'exercice.</p>
           )}
         </div>
 
-        {/* SECTION TITLE */}
+        {/* SOLUTION AREA */}
         <h2 className="text-lg sm:text-xl font-semibold text-[rgb(var(--color-primary))] mb-3">
           {t("your_solution")}
         </h2>
 
-        {/* MODERN ANSWER AREA - Théorie */}
         <div className="relative w-full mb-10">
           <textarea
             value={answer}
@@ -224,8 +214,6 @@ export default function TheoryExercisePage() {
             placeholder={t("write_here")}
             className="w-full min-h-[150px] sm:min-h-[200px] md:min-h-[250px] p-5 rounded-2xl border border-gray-300 bg-white text-[rgb(var(--color-text))] text-base sm:text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:shadow-md resize-none transition-all duration-200 hover:shadow-md"
           />
-
-          {/* Counter in top-right corner */}
           <div className="absolute top-2 right-4 text-xs text-gray-400">
             {answer.length} / 1000 | {answer.split("\n").length} {t("lines")}
           </div>
@@ -240,7 +228,6 @@ export default function TheoryExercisePage() {
             >
               <MdAutoAwesome size={18} />
             </div>
-
             <div>
               <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg">
                 Tip
@@ -251,46 +238,50 @@ export default function TheoryExercisePage() {
             </div>
           </div>
         </div>
-      <div className="flex justify-around mb-5">
-          {/* SAVE DRAFT */}
-        <button
-          onClick={handleSaveDraft}
-          disabled={loading}
-          className="px-8 py-3 rounded-xl font-semibold shadow-md
-             bg-white border border-[rgb(var(--color-primary))]
-             text-[rgb(var(--color-primary))]
-             hover:bg-gray-50 transition text-sm sm:text-base"
-        >
-          Sauvegarder
-        </button>
 
-        {/* SEND SOLUTION */}
-        <button
-          onClick={handleSendSolution}
-          disabled={loading}
-          className="px-8 py-3 rounded-xl text-white font-semibold shadow-lg
-             hover:opacity-90 transition text-sm sm:text-base"
-          style={{ backgroundImage: "var(--grad-1)" }}
-        >
-          {t("send_solution")}
-        </button>
+        {/* BUTTONS */}
+           {isStudent && (<div className="flex justify-around mb-5">
+          <button
+            onClick={handleSaveDraft}
+            disabled={loading}
+            className="px-8 py-3 rounded-xl font-semibold shadow-md
+            bg-white border border-[rgb(var(--color-primary))]
+            text-[rgb(var(--color-primary))]"
+          >
+            Sauvegarder
+          </button>
 
-      </div>
-       
+<button
+  onClick={handleSendSolution}
+  disabled={!canSubmit || loading}
+  className={`
+    px-8 py-3 rounded-xl font-semibold shadow-lg transition
+    ${!canSubmit || loading
+      ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
+      : "text-white hover:opacity-90"}
+  `}
+  style={
+    !canSubmit || loading
+      ? { backgroundImage: "none" }
+      : { backgroundImage: "var(--grad-1)" }
+  }
+>
+  {t("send_solution")}
+</button>
+
+
+
+        </div>)}
+
         {/* FEEDBACK */}
-        <div
-          className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24"
-          style={{ backgroundImage: "var(--grad-8)" }}
-        >
+        <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24" style={{ backgroundImage: "var(--grad-8)" }}>
           <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg mb-1">
             {t("feedback_title")}
           </p>
-
           <p className="text-[rgb(var(--color-gray))] text-xs sm:text-sm mb-6 sm:mb-8">
             {t("feedback_subtitle")}
           </p>
 
-          {/* STARS */}
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
             <div className="flex gap-3 text-2xl sm:text-3xl">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -301,11 +292,7 @@ export default function TheoryExercisePage() {
                   onClick={() => setRating(i)}
                   className={`cursor-pointer text-transparent bg-clip-text drop-shadow 
                     ${getStarGradient(i)} 
-                    ${
-                      (hover || rating) >= i
-                        ? "opacity-100 scale-110"
-                        : "opacity-40"
-                    } 
+                    ${(hover || rating) >= i ? "opacity-100 scale-110" : "opacity-40"} 
                     transition-all duration-150`}
                 >
                   ★
@@ -314,15 +301,9 @@ export default function TheoryExercisePage() {
             </div>
 
             <div className="flex justify-between w-full text-xs sm:text-sm font-medium mt-2">
-              <span className="w-24 text-left label-very-easy">
-                {t("labels.veryEasy")}
-              </span>
-              <span className="w-24 text-center label-moderate">
-                {t("labels.moderate")}
-              </span>
-              <span className="w-24 text-right label-very-difficult">
-                {t("labels.veryDifficult")}
-              </span>
+              <span className="w-24 text-left label-very-easy">{t("labels.veryEasy")}</span>
+              <span className="w-24 text-center label-moderate">{t("labels.moderate")}</span>
+              <span className="w-24 text-right label-very-difficult">{t("labels.veryDifficult")}</span>
             </div>
           </div>
 
@@ -347,19 +328,17 @@ export default function TheoryExercisePage() {
         </div>
       </div>
 
-      {/* ASSISTANT IA FULL SCREEN MOBILE / POPUP DESKTOP */}
+      {/* ASSISTANT IA */}
       {openAssistant && (
-        <div>
-          {/* MOBILE = FULL SCREEN */}
+        <>
           <div className="fixed inset-0 z-50 lg:hidden bg-white">
             <AssistantIA onClose={() => setOpenAssistant(false)} fullscreen />
           </div>
 
-          {/* DESKTOP = POPUP */}
           <div className="hidden lg:block fixed bottom-6 right-6 w-[380px] z-50">
             <AssistantIA onClose={() => setOpenAssistant(false)} />
           </div>
-        </div>
+        </>
       )}
     </div>
   );

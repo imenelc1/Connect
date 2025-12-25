@@ -81,7 +81,6 @@ quizStart: `${base.replace("w-full", "w-auto")}
   px-5 py-2 
   bg-grad-4
   text-muted 
-  border border-gray-300 
   rounded-lg 
   hover:bg-gray-100 
   transition

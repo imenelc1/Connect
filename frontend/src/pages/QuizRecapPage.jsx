@@ -1,81 +1,58 @@
-import React, { useEffect, useState, useContext } from "react";
-import { FaClock, FaMedal, FaStar, FaTrophy, FaRedoAlt, FaHome } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaTrophy, FaRedoAlt, FaHome } from "react-icons/fa";
 import Button from "../components/common/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
-import "../styles/index.css";
+import { getCurrentUserId } from "../hooks/useAuth";
 
 export default function QuizRecapPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation("quiz3");
   const { exerciceId } = useParams();
+  const currentUserId = getCurrentUserId();
+  const { t } = useTranslation("quiz3");
 
-  // Bouton test traduction
+  const [quiz, setQuiz] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Changement de langue
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
     i18n.changeLanguage(newLang);
     localStorage.setItem("lang", newLang);
   };
 
-  const quiz = {
-    titre: t("title"),
-    duree: 30,
-    niveau: t(`levels.${t("levelKey")}`),
-    pointsTotal: 4,
-    score: 75,
-    pointsObtenus: 3,
-    questions: [
-      {
-        id: 1,
-        texte: "Qu'est-ce qu'un algorithme ?",
-        points: 1,
-        options: [
-          "Une suite d'instructions logiques pour résoudre un problème",
-          "Un langage de programmation",
-          "Un ordinateur",
-        ],
-        reponse: "Une suite d'instructions logiques pour résoudre un problème",
-        bonneReponse: "Une suite d'instructions logiques pour résoudre un problème",
-      },
-      {
-        id: 2,
-        texte: "Une boucle permet de…",
-        points: 1,
-        options: [
-          "Créer une variable",
-          "Répéter une action tant qu'une condition est vraie",
-          "Arrêter un programme",
-        ],
-        reponse: "Créer une variable",
-        bonneReponse: "Répéter une action tant qu'une condition est vraie",
-      },
-      {
-        id: 3,
-        texte: "La boucle for est utilisée pour…",
-        points: 1,
-        options: [
-          "Parcourir une séquence",
-          "Créer une fonction",
-          "Afficher un texte",
-        ],
-        reponse: "Parcourir une séquence",
-        bonneReponse: "Parcourir une séquence",
-      },
-      {
-        id: 4,
-        texte: "La boucle while s’exécute tant que…",
-        points: 1,
-        options: [
-          "Une condition est vraie",
-          "Un nombre est pair",
-          "Un fichier existe",
-        ],
-        reponse: "Une condition est vraie",
-        bonneReponse: "Une condition est vraie",
-      },
-    ],
-  };
+  // ================= FETCH QUIZ + RÉPONSES =================
+  useEffect(() => {
+    const fetchQuizRecap = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/quiz/exercice/${exerciceId}/utilisateur/${currentUserId}/`,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error("Quiz non trouvé");
+        const data = await res.json();
+        setQuiz(data); // l'API renvoie directement un objet
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
+    };
+
+    fetchQuizRecap();
+  }, [exerciceId, currentUserId]);
+
+  if (loading) return <p>Chargement du quiz...</p>;
+  if (!quiz) return <p>Quiz introuvable.</p>;
+  const totalPoints = quiz.quiz.questions ? quiz.quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
+
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8 bg-background">
@@ -93,83 +70,73 @@ export default function QuizRecapPage() {
 
       {/* Titre */}
       <h1 className="text-3xl md:text-4xl font-bold text-primary mb-6">
-        {quiz.titre}
+        {quiz.titre_exo}
       </h1>
 
       {/* Carte principale */}
       <div className="rounded-2xl shadow-lg p-8 w-full max-w-3xl flex flex-col items-center text-center mb-10 bg-blue_primary_light">
-        
         {/* Icône */}
         <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-4xl shadow-md mb-2">
           <FaTrophy size={40} />
         </div>
 
         {/* Score */}
-        <div className="text-3xl font-bold mb-4 text-textc">{quiz.score}%</div>
+        <div className="text-3xl font-bold mb-4 text-textc">
+          {quiz.quiz.reponse_quiz_utilisateur?.score_total || 0} / {totalPoints}
+        </div>
 
         {/* Félicitations */}
-        <h2 className="text-2xl font-semibold mb-2 text-grayc">{t("congrats")}</h2>
-        <p className="text-base mb-6 text-grayc">
-          {t("youScored")} <strong>{quiz.pointsObtenus}</strong> {t("points")} {t("outOf")} <strong>{quiz.pointsTotal}</strong>
-        </p>
+        {quiz.quiz.reponse_quiz_utilisateur?.score_total >= quiz.quiz.scoreMinimum ||
+ quiz.quiz.reponse_quiz_utilisateur?.score_total === totalPoints ? (
+  <p className="text-green-600 text-xl mb-4">{t("congrats")}</p>
+) : (
+  <p className="text-red-600 text-xl mb-4">{t("tryAgain")}</p>
+)}
 
-        {/* Tags */}
-        <div className="flex flex-wrap justify-center gap-16 mb-8 text-sm md:text-base">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-md shadow-sm bg-blue text-white">
-            <FaClock /> {quiz.duree} {t("minutes")}
-          </div>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-md shadow-sm bg-purple text-white">
-            <FaMedal /> {quiz.pointsTotal} {t("points")}
-          </div>
-          <div className="flex items-center gap-2 px-4 py-2 rounded-md shadow-sm bg-pink text-white">
-            <FaStar /> {quiz.niveau}
-          </div>
-        </div>
 
         {/* Récapitulatif des réponses */}
         <h3 className="text-xl font-semibold text-textc mb-4">{t("recap")}</h3>
         <div className="w-full max-w-3xl flex flex-col gap-6">
-          {quiz.questions.map((q, index) => (
-            <div key={q.id} className="bg-card rounded-xl p-6 shadow-md text-left text-textc border border-blue">
-              
+          {quiz.quiz.questions.map((q, index) => (
+            <div key={q.id_qst} className="bg-card rounded-xl p-6 shadow-md text-left text-textc border border-blue">
+
               {/* Numéro + question */}
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-6 h-6 flex items-center justify-center rounded-md text-white font-bold text-sm bg-primary">
                   {index + 1}
                 </div>
-                <p className="font-semibold">{q.texte}</p>
+                <p className="font-semibold">{q.texte_qst}</p>
               </div>
 
               {/* Points */}
-              <p className="text-sm text-grayc mb-2">{q.points} {t("point")}</p>
+              <p className="text-sm text-grayc mb-2">{q.score} {t("point")}</p>
 
               {/* Options */}
-              <div className="flex flex-col gap-2">
-                {q.options.map((opt, i) => {
-                  const isSelected = opt === q.reponse;
-                  const isCorrect = opt === q.bonneReponse;
+    <div className="flex flex-col gap-2">
+  {q.options.map((opt) => {
+    const isSelected = q.reponse_utilisateur?.option_choisie?.id_option === opt.id_option;
+    const isCorrect = opt.texte_option === q.reponse_correcte;
 
-                  let classes = "rounded-md p-1 border border-blue text-textc bg-white";
-                  let label = "";
+    let classes = "rounded-md p-2 border border-gray-300 bg-white ";
 
-                  if (isSelected && isCorrect) {
-                    classes = "rounded-md p-1 border border-blue bg-blue_primary_light text-textc";
-                    label = `${t("yourAnswer")}: `;
-                  } else if (isSelected && !isCorrect) {
-                    classes = "rounded-md p-1 border border-pink bg-pink_clair text-textc";
-                    label = `${t("yourAnswer")}: `;
-                  } else if (!isSelected && isCorrect && q.reponse !== q.bonneReponse) {
-                    classes = "rounded-md p-1 border border-blue bg-blue_primary_light text-textc";
-                    label = `${t("correctAnswer")}: `;
-                  }
+    if (isCorrect) {
+      // La bonne réponse en vert
+      classes = "rounded-md p-2 border border-green bg-green";
+    }
 
-                  return (
-                    <div key={i} className={classes}>
-                      {label}{opt}
-                    </div>
-                  );
-                })}
-              </div>
+    if (isSelected && !isCorrect) {
+      // Réponse choisie mais incorrecte en rouge
+      classes = "rounded-md p-2 border border-red bg-red";
+    }
+
+    return (
+      <div key={opt.id_option} className={classes}>
+        {opt.texte_option}
+      </div>
+    );
+  })}
+</div>
+
             </div>
           ))}
         </div>
@@ -177,24 +144,13 @@ export default function QuizRecapPage() {
         {/* Boutons */}
         <div className="flex flex-col md:flex-row gap-36 mt-10">
           <Button
-            text={
-              <span className="flex items-center gap-2">
-                <FaHome /> {t("backMenu")}
-              </span>
-            }
+            text={<span className="flex items-center gap-2"><FaHome /> {t("backMenu")}</span>}
             variant="quizBack"
             onClick={() => navigate("/all-quizzes")}
           />
-          <Button
-            text={
-              <span className="flex items-center gap-2">
-                <FaRedoAlt /> {t("reset")}
-              </span>
-            }
-            variant="quizStart"
-            onClick={() => navigate(`/QuizTake/${exerciceId}`)}
-          />
+          
         </div>
+
       </div>
     </div>
   );

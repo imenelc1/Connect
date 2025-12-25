@@ -6,8 +6,7 @@ import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
 import IaAssistant from "../components/ui/IaAssistant";
 import NavBar from "../components/common/NavBar";
-import AssistantIA from "../pages/AssistantIA";
-
+import AssistantIA from "./AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import axios from "axios";
@@ -21,7 +20,7 @@ export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
   const { exerciceId } = useParams();
-  
+
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
@@ -41,13 +40,18 @@ int main() {
   const resetCode = () => setUserCode(defaultCode);
 
   const storedUser = localStorage.getItem("user");
-  const userData = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const userData =
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const sidebarWidth = sidebarCollapsed ? -200 : -50;
+
+  const isStudent = userData.role === "etudiant";
+
+
 
   // Gestion sidebar
   useEffect(() => {
@@ -61,8 +65,11 @@ int main() {
     if (!exerciceId) return;
     const fetchExercise = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
-        if (!response.ok) throw new Error("Erreur lors de la récupération de l'exercice");
+        const response = await fetch(
+          `http://localhost:8000/api/exercices/${exerciceId}/`
+        );
+        if (!response.ok)
+          throw new Error("Erreur lors de la récupération de l'exercice");
         const data = await response.json();
         setExercise(data);
         setStartTime(Date.now());
@@ -128,6 +135,24 @@ int main() {
     }
   };
 
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  useEffect(() => {
+    if (!exerciceId) return;
+
+    fetch(
+      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => setCanSubmit(data.can_submit))
+      .catch(() => setCanSubmit(false));
+  }, [exerciceId]);
+
   // ------------------- RUN CODE -------------------
   const runCode = async () => {
     setIsRunning(true);
@@ -141,7 +166,8 @@ int main() {
         { signal: controllerRef.current.signal }
       );
 
-      const result = res.data.stdout ?? res.data.stderr ?? "Aucune sortie pour le moment...";
+      const result =
+        res.data.stdout ?? res.data.stderr ?? "Aucune sortie pour le moment...";
       setOutput(result);
 
       // Sauvegarde immédiate après exécution
@@ -196,7 +222,10 @@ int main() {
 
   // ------------------- JSX -------------------
   return (
-    <div className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface" style={{ marginLeft: sidebarWidth }}>
+    <div
+      className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
+      style={{ marginLeft: sidebarWidth }}
+    >
       <div className="hidden lg:block">
         <NavBar />
       </div>
@@ -215,7 +244,11 @@ int main() {
           <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0">
             <IaAssistant />
             <HeadMascotte />
-            <UserCircle initials={initials} onToggleTheme={toggleDarkMode} onChangeLang={(lang) => i18n.changeLanguage(lang)} />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => i18n.changeLanguage(lang)}
+            />
           </div>
         </div>
 
@@ -223,11 +256,17 @@ int main() {
         <div className="w-full p-6 rounded-2xl bg-grad-3 mb-6 md:mb-10">
           {exercise ? (
             <>
-              <p className="font-semibold text-muted text-[20px]">Exercice: {exercise.titre_exo}</p>
-              <p className="mt-3 text-muted text-sm md:text-base">{exercise.enonce}</p>
+              <p className="font-semibold text-muted text-[20px]">
+                Exercice: {exercise.titre_exo}
+              </p>
+              <p className="mt-3 text-muted text-sm md:text-base">
+                {exercise.enonce}
+              </p>
             </>
           ) : (
-            <p className="text-red-500 text-sm">Impossible de charger l'exercice.</p>
+            <p className="text-red-500 text-sm">
+              Impossible de charger l'exercice.
+            </p>
           )}
         </div>
 
@@ -247,40 +286,102 @@ int main() {
             theme="vs-dark"
             value={userCode}
             onChange={setUserCode}
-            options={{ fontSize: 15, minimap: { enabled: false }, scrollBeyondLastLine: false, automaticLayout: true }}
+            options={{
+              fontSize: 15,
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+            }}
           />
         </div>
 
         {/* Buttons */}
         <div className="flex flex-wrap justify-center gap-4 mb-10">
-          <ActionButton icon={<Play size={18} />} label={isRunning ? "Exécution..." : t("buttons.run")} bg="var(--grad-button)" onClick={runCode} />
-          <ActionButton icon={<Square size={18} />} label={t("buttons.stop")} bg="linear-gradient(135deg,#ba68c8ff)" onClick={stopCode} />
-          <ActionButton icon={<Bug size={18} />} label={t("buttons.debug")} bg="linear-gradient(135deg,#A3AAED,#6A76E0)" onClick={debugCode} />
-          <ActionButton icon={<RotateCw size={18} />} label={t("buttons.reset")} bg="linear-gradient(#FFFFFF,#A3AAED,#A3AAED)" text="rgb(var(--color-text))" onClick={resetCode} />
+          <ActionButton
+            icon={<Play size={18} />}
+            label={isRunning ? "Exécution..." : t("buttons.run")}
+            bg="var(--grad-button)"
+            onClick={runCode}
+          />
+          <ActionButton
+            icon={<Square size={18} />}
+            label={t("buttons.stop")}
+            bg="linear-gradient(135deg,#ba68c8ff)"
+            onClick={stopCode}
+          />
+          <ActionButton
+            icon={<Bug size={18} />}
+            label={t("buttons.debug")}
+            bg="linear-gradient(135deg,#A3AAED,#6A76E0)"
+            onClick={debugCode}
+          />
+          <ActionButton
+            icon={<RotateCw size={18} />}
+            label={t("buttons.reset")}
+            bg="linear-gradient(#FFFFFF,#A3AAED,#A3AAED)"
+            text="rgb(var(--color-text))"
+            onClick={resetCode}
+          />
         </div>
 
-        <div className="flex justify-center gap-4">
-           <ActionButton icon={<MdAutoAwesome size={18} />} label={t("buttons.saveDraft")} bg="var(--grad-button)" onClick={handleSaveDraft} />
-          <ActionButton icon={<Play size={18} />} label={t("buttons.submit")} bg="linear-gradient(135deg,#ba68c8ff)" onClick={handleSubmit} />
-        </div>
+       {isStudent && (
+  <div className="flex justify-center gap-4">
+    <ActionButton
+      icon={<MdAutoAwesome size={18} />}
+      label={t("buttons.saveDraft")}
+      bg="var(--grad-button)"
+      onClick={handleSaveDraft}
+    />
+    <button
+      onClick={handleSubmit}
+      disabled={!canSubmit}
+      className={`
+        px-8 py-3 rounded-xl font-semibold shadow-lg transition
+        ${!canSubmit
+          ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
+          : "text-white hover:opacity-90"
+        }
+      `}
+      style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
+    >
+      {t("send_solution")}
+    </button>
+  </div>
+)}
+
 
         {/* Output */}
-        <p className="text-lg md:text-xl font-semibold text-muted mb-3">{t("output.title")}</p>
+        <p className="text-lg md:text-xl font-semibold text-muted mb-3">
+          {t("output.title")}
+        </p>
         <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
-          {output.split("\n").map((line, i) => <div key={i}>{line}</div>)}
+          {output.split("\n").map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
         </div>
 
         {/* Assistant IA */}
         <div className="flex justify-center mb-16">
-          <button onClick={() => setOpenAssistant(true)} className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm">
+          <button
+            onClick={() => setOpenAssistant(true)}
+            className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
+          >
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgb(var(--color-gray-light))]">
-              <MessageCircle size={18} strokeWidth={1.7} className="text-[rgb(var(--color-primary))]" />
+              <MessageCircle
+                size={18}
+                strokeWidth={1.7}
+                className="text-[rgb(var(--color-primary))]"
+              />
             </div>
-            <div className="text-[rgb(var(--color-primary))] font-medium">Besoin d'aide ? Discutez avec l'Assistant IA</div>
+            <div className="text-[rgb(var(--color-primary))] font-medium">
+              Besoin d'aide ? Discutez avec l'Assistant IA
+            </div>
           </button>
         </div>
 
-        {openAssistant && <AssistantIA onClose={() => setOpenAssistant(false)} />}
+        {openAssistant && (
+          <AssistantIA onClose={() => setOpenAssistant(false)} />
+        )}
       </div>
     </div>
   );
@@ -289,7 +390,11 @@ int main() {
 // ----------------- ACTION BUTTON -----------------
 function ActionButton({ icon, label, bg, text = "white", onClick }) {
   return (
-    <button onClick={onClick} className="flex items-center gap-2 px-3 md:px-5 py-2 rounded-xl shadow-card hover:opacity-90 transition font-medium text-sm md:text-base" style={{ backgroundImage: bg, color: text }}>
+    <button
+      onClick={onClick}
+      className="flex items-center gap-2 px-3 md:px-5 py-2 rounded-xl shadow-card hover:opacity-90 transition font-medium text-sm md:text-base"
+      style={{ backgroundImage: bg, color: text }}
+    >
       {icon}
       <span>{label}</span>
     </button>

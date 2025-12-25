@@ -165,7 +165,7 @@ useEffect(() => {
                     {students.map((s, index) => (
                         <div
                             key={index}
-                            className="bg-grad-3 border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between"
+                            className="bg-grad-2  rounded-2xl p-6 shadow-sm flex flex-col justify-between"
                         >
                             {/* Card header */}
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
@@ -175,7 +175,7 @@ useEffect(() => {
                                     </div>
                                     <div className="truncate">
                                         <h2 className="font-semibold text-lg truncate">{s.name}</h2>
-                                        <p className="text-sm text-gray-500 truncate">{s.email}</p>
+                                        <p className="text-sm text-grayc truncate">{s.email}</p>
                                     </div>
                                 </div>
 
@@ -191,13 +191,13 @@ useEffect(() => {
                             </div>
 
                             {/* Courses */}
-                            <p className="text-sm text-gray-500 mb-2">
+                            <p className="text-sm text-grayc mb-2">
                                 {t("StudentsManagement.Encolled")} {s.courses}
                             </p>
 
                             {/* Progress */}
                             <div className="mb-2">
-                                <div className="flex justify-between text-sm text-gray-500 mb-1">
+                                <div className="flex justify-between text-sm text-gray-400 mb-1">
                                     <span>{t("StudentsManagement.Overal")}</span>
                                     <span>{s.progress}%</span>
                                 </div>
@@ -205,7 +205,7 @@ useEffect(() => {
                             </div>
 
                             {/* Joined */}
-                            <div className="flex justify-between text-sm text-gray-500 mt-4">
+                            <div className="flex justify-between text-sm text-grayc mt-4">
                                 <span>{t("StudentsManagement.joined")}</span>
                                 <span className="font-medium">{s.joined}</span>
                             </div>

@@ -23,9 +23,10 @@ const gradientMap = {
 
 
 export default function AllQuizzesPage() {
-  const token = localStorage.getItem("access_token");
+  const token = localStorage.getItem("token");
   const currentUserId = getCurrentUserId();
   const [quizzes, setQuizzez] = useState([]);
+  const [tentativesByQuiz, setTentativesByQuiz] = useState({});
 
 
   useEffect(() => {
@@ -34,7 +35,10 @@ export default function AllQuizzesPage() {
       .then(data => {
         const formatted = data.map(c => ({
           id: c.exercice?.id_exercice,
+          quizId:c.id,
           title: c.exercice?.titre_exo,
+          nbMax_tentative:c.nbMax_tentative,
+          delai_entre_tentatives:c.delai_entre_tentatives,
           description: c.exercice?.enonce,
           level: c.exercice?.niveau_exercice_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
           author: c.exercice?.utilisateur_name,
@@ -45,12 +49,46 @@ export default function AllQuizzesPage() {
             .map(n => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.exercice?.utilisateur === currentUserId //NEWDED GHR ISMINE //
+          isMine: c.exercice?.utilisateur === currentUserId 
         }));
         setQuizzez(formatted);
+        
       })
       .catch(err => console.error("Erreur chargement quiz :", err));
   }, []);
+
+
+  useEffect(() => {
+  if (!currentUserId || quizzes.length === 0) return;
+
+  const fetchTentatives = async () => {
+    try {
+      const results = {};
+
+      await Promise.all(
+        quizzes.map(async (quiz) => {
+          const res = await fetch(
+            `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${currentUserId}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const data = await res.json();
+          results[quiz.quizId] = data;
+        })
+      );
+
+      setTentativesByQuiz(results);
+    } catch (err) {
+      console.error("Erreur chargement tentatives :", err);
+    }
+  };
+
+  fetchTentatives();
+  }, [quizzes, currentUserId, token]);
 
 
 
@@ -60,16 +98,12 @@ export default function AllQuizzesPage() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const { t } = useTranslation("allQuizzes");
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
   const [filterLevel, setFilterLevel] = useState("ALL");
-  /*const filteredList =
-    filterLevel === "ALL"
-      ? quizzes
-      : quizzes.filter((q) => q.level === filterLevel);*/
-
+ 
   const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
 
  let filteredList =
@@ -83,6 +117,54 @@ const navigate = useNavigate();
   if (userRole === "enseignant" && categoryFilter === "mine") {
     filteredList = filteredList.filter((q) => q.isMine);
   }
+
+
+  const quizzesWithAttempts = filteredList.map((quiz) => {
+    const tentatives = tentativesByQuiz[quiz.quizId] || [];
+
+    let isBlocked = false;
+    let minutesRestantes = 0;
+    let tentativesRestantes = null;
+
+    // 1️⃣ Limite du nombre de tentatives
+    if (quiz.nbMax_tentative > 0) {
+      tentativesRestantes = quiz.nbMax_tentative - tentatives.length;
+      if (tentativesRestantes <= 0) {
+        isBlocked = true;
+      }
+    }
+
+    // 2️⃣ Délai entre tentatives
+    if (
+      !isBlocked &&
+      tentatives.length > 0 &&
+      quiz.delai_entre_tentatives
+    ) {
+      const last = tentatives[0]; // la plus récente
+      if (last.date_fin) {
+        const lastEnd = new Date(last.date_fin);
+        const now = new Date();
+
+        const diffMs =
+          lastEnd.getTime() +
+          quiz.delai_entre_tentatives * 60 * 1000 -
+          now.getTime();
+
+        if (diffMs > 0) {
+          isBlocked = true;
+          minutesRestantes = Math.ceil(diffMs / 60000);
+        }
+      }
+    }
+
+    return {
+      ...quiz,
+      tentatives,
+      isBlocked,
+      minutesRestantes,
+      tentativesRestantes,
+    };
+  });
 
 
 
@@ -136,7 +218,7 @@ const navigate = useNavigate();
   const { toggleDarkMode } = useContext(ThemeContext);
 
    return (
-    <div className="flex min-h-screen bg-background dark:bg-gray-900">
+    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
       <Navbar />
       
       <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
@@ -183,18 +265,21 @@ const navigate = useNavigate();
           )}
         </div>
 
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-          {filteredList.map((quiz, idx) => (
-            <ContentCard
-              key={idx}
-              className={gradientMap[quiz.level]}
-              course={quiz}
-              role={userRole}
-              showProgress={userRole === "etudiant"}
-              onDelete={handleDeleteQuiz}
-            />
-          ))}
-        </div>
+       <div
+  className="grid gap-6"
+  style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}
+>
+  {quizzesWithAttempts.map((quiz, idx) => (
+    <ContentCard
+      key={idx}
+      className={gradientMap[quiz.level]}
+      course={quiz}
+      role={userRole}
+      showProgress={userRole === "etudiant"}
+      onDelete={handleDeleteQuiz}
+    />
+  ))}
+</div>
       </main>
     </div>
   );

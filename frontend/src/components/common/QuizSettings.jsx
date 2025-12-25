@@ -119,6 +119,20 @@ const handleChange = (field, value) => {
           />
         </div>
 
+         {/* duree  entre deux tentative */}
+        <div className="flex flex-col gap-2">
+          <label>{t("delais_entre_tentative")}</label>
+          <input
+            type="number"
+            min={0}
+            value={quizData.delais_entre_tentative || 0}
+            onChange={(e) =>
+              handleChange("delais_entre_tentative", parseInt(e.target.value) || 0)
+            }
+          />
+        </div>
+
+
         {/* DURÉE */}
         <div className="flex items-center gap-2">
           <input

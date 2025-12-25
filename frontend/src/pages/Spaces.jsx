@@ -159,131 +159,109 @@ export default function SpacesPage() {
       </div>
       </div>
 
-      {/* Main Content */}
-      <main className={`
-        flex-1 p-6 pt-10 space-y-5 transition-all duration-300
-        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-      `}>
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-muted">
-              {role === "prof" ? t("spacesTitle") : t("mySpacesTitle")}
-            </h1>
-            <p className="text-gray">
-              {role === "prof" ? t("manageSpaces") : t("viewSpaces")}
-            </p>
-          </div>
-          
-          <div className="flex gap-4 items-center">
-            <div className="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center">
-              <Bell className="w-5 h-5 text-gray-600" />
-            </div>
-            <UserCircle
-              onToggleTheme={toggleDarkMode}
-              onChangeLang={(lang) => i18n.changeLanguage(lang)}
-            />
-          </div>
-        </div>
+      <div className="flex w-full min-h-screen bg-surface">
+        {/* Sidebar */}
+        <Navbar />
 
-        {/* Bouton Ajouter un espace (prof seulement) */}
-        {role === "prof" && (
-          <div className="flex justify-end mb-6">
-            <Button
-              variant="primary"
-              className="!w-auto px-6 py-2 rounded-xl"
-              onClick={() => setOpen(true)}
-            >
-              {t("createSpaceButton")}
-            </Button>
-          </div>
-        )}
-
-        {/* Liste des espaces */}
-        <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6">
-          {spaces.length > 0 ? (
-            spaces.map((item) => (
-              <div
-                key={item.id_space}
-                className="bg-grad-3 border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition"
+        {/* Contenu principal */}
+        <div className="flex-1 p-4 sm:p-6 ml-0 lg:ml-56 transition-all duration-300">
+          {/* Bouton Ajouter un espace (prof seulement) */}
+          {role === "prof" && (
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+              <Button
+                variant="primary"
+                className="!px-4 !py-2 !text-white !w-auto ml-auto whitespace-nowrap"
+                onClick={() => setOpen(true)}
               >
-                <Cards2
-                  icon={
-                    <div className="w-12 h-12 flex items-center justify-center bg-grad-1 rounded-lg text-white">
-                      <Folder size={25} />
-                    </div>
-                  }
-                  title={item.nom_space || "No title"}
-                  description={item.description || ""}
-                  status={
-                    role === "prof"
-                      ? `${t("created")} ${new Date(
-                        item.date_creation
-                      ).toLocaleDateString()}`
-                      : ""
-                  }
-                  showArrow={true}
-                  onArrowClick={() =>
-                    navigate(`/CourseDetails/${item.id_space}`)
-                  }
-                  extraActions={
-                    role === "prof" && (
-                      <div className="absolute top-4 right-4">
-                        <button
-                          onClick={() => handleDeleteSpace(item.id_space)}
-                          className="text-gray-500 hover:text-red-500 transition"
-                          title={t("deleteSpace")}
-                        >
-                          <FiTrash2 size={18} />
-                        </button>
-                      </div>
-                    )
-                  }
-                />
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-10">
-              <p className="text-gray-500 text-lg">
-                {role === "prof" ? t("noSpacesMessage") : t("noStudentSpaces")}
-              </p>
+                {t("createSpaceButton")}
+              </Button>
             </div>
           )}
-        </div>
-      </main>
 
-      {/* Modal d'ajout espace (prof uniquement) */}
-      {role === "prof" && (
-        <AddModal
-          open={open}
-          onClose={() => setOpen(false)}
-          title={t("modalTitle")}
-          subtitle={t("modalSubtitle")}
-          submitLabel={t("modalSubmit")}
-          cancelLabel={t("modalCancel")}
-          fields={[
-            {
-              label: t("fieldSpaceName"),
-              placeholder: t("fieldSpaceNamePlaceholder"),
-              value: spaceName,
-              onChange: (e) => setSpaceName(e.target.value),
-            },
-            {
-              label: t("fieldDescription"),
-              element: (
-                <textarea
-                  placeholder={t("fieldDescriptionPlaceholder")}
-                  value={spaceDesc}
-                  onChange={(e) => setSpaceDesc(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                  rows={4}
-                />
-              ),
-            },
-          ]}
-          onSubmit={handleSubmit}
-        />
-      )}
+          {/* Liste des espaces */}
+          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+            {spaces.length > 0 ? (
+              spaces.map((item) => (
+                <div
+                  key={item.id_space}
+                  className="rounded-xl shadow p-2 bg-grad-3"
+                >
+                  <Cards2
+                    icon={
+                      <div className="w-12 h-12 flex items-center justify-center bg-grad-1 rounded-md text-white">
+                        <Folder size={25} />
+                      </div>
+                    }
+                    title={item.nom_space || "No title"}
+                    description={item.description || ""}
+                    status={
+                      role === "prof"
+                        ? `${t("created")} ${new Date(
+                          item.date_creation
+                        ).toLocaleDateString()}`
+                        : ""
+                    }
+                    showArrow={true}
+                    onArrowClick={() =>
+                      navigate(`/CourseDetails/${item.id_space}`)
+                    }
+                    extraActions={
+                      role === "prof" && (   // <-- condition ajoutée
+                        <div className="">
+                          <FiTrash2
+                            size={18}
+                            className="cursor-pointer text-grayc hover:text-red-500 mt-20 ml-5"
+                            onClick={() => handleDeleteSpace(item.id_space)}
+                            title={t("deleteSpace")}
+                          />
+                        </div>
+                      )
+                    }
+                  />
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">
+                {role === "prof" ? t("noSpacesMessage") : t("noStudentSpaces")}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Modal d'ajout espace (prof uniquement) */}
+        {role === "prof" && (
+          <AddModal
+            open={open}
+            onClose={() => setOpen(false)}
+            title={t("modalTitle")}
+            subtitle={t("modalSubtitle")}
+            submitLabel={t("modalSubmit")}
+            cancelLabel={t("modalCancel")}
+            fields={[
+              {
+                label: t("fieldSpaceName"),
+                placeholder: t("fieldSpaceNamePlaceholder"),
+                value: spaceName,
+                onChange: (e) => setSpaceName(e.target.value),
+              },
+              {
+                label: t("fieldDescription"),
+                element: (
+                  <textarea
+                    placeholder={t("fieldDescriptionPlaceholder")}
+                    value={spaceDesc}
+                    onChange={(e) => setSpaceDesc(e.target.value)}
+                    className="w-full bg-grad-3 dark:bg-gray-700 rounded-md px-3 py-2
+                             focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                    rows={4}
+                  />
+                ),
+              },
+            ]}
+            onSubmit={handleSubmit}
+          />
+        )}
+      </div>
     </div>
   );
 }
