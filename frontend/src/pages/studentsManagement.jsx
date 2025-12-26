@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Button from "../components/common/Button";
 import ProgressBar from "../components/ui/ProgressBar";
 import Navbar from "../components/common/NavBar";
-import { Trash, SquarePen, UserPlus } from "lucide-react";
+import { Trash2, SquarePen, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ThemeContext from "../context/ThemeContext";
@@ -176,7 +176,7 @@ export default function StudentsManagement() {
                     <SquarePen size={20} />
                   </button>
                   <button className="text-red hover:opacity-80">
-                    <Trash size={20} />
+                    <Trash2 size={20} />
                   </button>
                 </div>
               </div>

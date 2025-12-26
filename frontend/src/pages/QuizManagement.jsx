@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Pencil, Trash2, FileText } from "lucide-react";
+import {  Trash2, FileText,SquarePen } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 // Navigation entre routes (React Router)
@@ -216,17 +216,11 @@ export default function QuizzesManagement() {
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <button
-                                            className="text-muted hover:opacity-80"
-                                            onClick={() => handleEdit(q)}
-                                        >
-                                            <Pencil size={18} />
+                                        <button className="text-muted hover:opacity-80">
+                                            <SquarePen size={20} />
                                         </button>
-                                        <button
-                                            className="text-red hover:opacity-80"
-                                            onClick={() => handleDelete(q.id)}
-                                        >
-                                            <Trash2 size={18} />
+                                        <button className="text-red hover:opacity-80">
+                                            <Trash2 size={20} />
                                         </button>
                                     </div>
                                 </div>
