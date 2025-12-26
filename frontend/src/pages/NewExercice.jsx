@@ -105,8 +105,7 @@ export default function NewExercise() {
           categorie: category,
           cours: selectedCourseId,
           visibilite_exo: courseVisibility === "private" ? false : true,
-
-          solution: solution || null, // 🔹 optionnel
+          solution: solution || null,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -35,7 +35,6 @@ def list_forums(request):
     serializer = ForumSerializer(forums, many=True)
     return Response(serializer.data)
 
-
 # forum/views.py
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])

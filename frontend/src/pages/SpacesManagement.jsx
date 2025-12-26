@@ -65,24 +65,6 @@ export default function SpacesPage() {
     };
   }, []);
 
-  // Effet pour la responsivité
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Gestion de la sidebar
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("sidebarChanged", handleSidebarChange);
-    
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("sidebarChanged", handleSidebarChange);
-    };
-  }, []);
-
   const filteredSpaces = spaces.filter((s) =>
     s.title.toLowerCase().includes(search.toLowerCase())
   );

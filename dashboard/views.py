@@ -5,12 +5,13 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.models import Sum, Avg
+from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
 from exercices.serializers import ExerciceSerializer
+from quiz.models import ReponseQuiz
 from spaces.models import Space, SpaceEtudiant, SpaceExo
 from spaces.views import etudiant_appartient_a_lespace
 from users.jwt_auth import IsAuthenticatedJWT, jwt_required
@@ -718,3 +719,136 @@ def student_progress(request):
         "submitted_exercises": submitted_exercises,
         "submission_rate": submission_rate,
     })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def student_progress_score(request):
+    user = request.user
+    start_date = now().date() - timedelta(days=6)  # 7 derniers jours
+
+    # Récupérer toutes les tentatives terminées de l'étudiant sur les 7 derniers jours
+    quizzes = ReponseQuiz.objects.filter(
+        etudiant=user,
+        date_debut__date__gte=start_date,
+        terminer=True
+    ).order_by('date_debut')
+
+    # Préparer un dictionnaire pour stocker le total obtenu et le total max par jour
+    daily_scores = {}
+    for i in range(7):
+        day = start_date + timedelta(days=i)
+        daily_scores[day] = {'obtained': 0, 'max': 0}
+
+    # Calculer pour chaque quiz
+    for rq in quizzes:
+        day = rq.date_debut.date()
+        score_obtenu = rq.score_total
+        score_max = rq.quiz.exercice.questions.aggregate(total=Sum('score'))['total'] or 0
+
+        daily_scores[day]['obtained'] += score_obtenu
+        daily_scores[day]['max'] += score_max
+
+    # Préparer les données pour le graphique
+    data = []
+    for day, scores in daily_scores.items():
+        avg_score = (scores['obtained'] / scores['max'] * 100) if scores['max'] > 0 else 0
+        data.append({
+            "day": day.strftime("%a"),  # Affiche le jour abrégé (Mon, Tue, ...)
+            "grade": round(avg_score, 2)
+        })
+
+    return Response(data)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def student_average_score(request):
+    user = request.user
+    reponses = ReponseQuiz.objects.filter(etudiant=user, terminer=True)
+    total_percentages = 0
+    count = 0
+
+    for rq in reponses:
+        max_score = rq.quiz.exercice.questions.aggregate(total=Sum("score"))["total"] or 0
+        if max_score > 0:
+            percent = (rq.score_total / max_score) * 100
+            total_percentages += percent
+            count += 1
+
+    average = round(total_percentages / count, 2) if count > 0 else 0
+    return Response({"average_score": average})
+
+
+# ---------------- SCORE MOYEN D'UN ÉTUDIANT SELON ESPACES DU PROF ----------------
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def student_average_score_prof(request, student_id):
+    prof = request.user
+    try:
+        student = Utilisateur.objects.get(id_utilisateur=student_id)
+    except Utilisateur.DoesNotExist:
+        return Response({"error": "Étudiant introuvable"}, status=404)
+
+    # Espaces du prof auxquels l'étudiant appartient
+    spaces = Space.objects.filter(utilisateur=prof, spaceetudiant__etudiant=student).distinct()
+
+    # Quiz de ces espaces
+    quizzes = ReponseQuiz.objects.filter(
+        etudiant=student,
+        quiz__spacequiz__space__in=spaces,
+        terminer=True
+    ).distinct()
+
+    total_percentages = 0
+    count = 0
+    for rq in quizzes:
+        max_score = rq.quiz.exercice.questions.aggregate(total=Sum("score"))["total"] or 0
+        if max_score > 0:
+            total_percentages += (rq.score_total / max_score) * 100
+            count += 1
+
+    average = round(total_percentages / count, 2) if count > 0 else 0
+    return Response({"average_score": average})
+
+
+# ---------------- PROGRESSION DES SCORES (7 DERNIERS JOURS) ----------------
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def student_progress_score_prof(request, student_id):
+    prof = request.user
+    try:
+        student = Utilisateur.objects.get(id_utilisateur=student_id)
+    except Utilisateur.DoesNotExist:
+        return Response({"error": "Étudiant introuvable"}, status=404)
+
+    start_date = now().date() - timedelta(days=6)  # derniers 7 jours
+
+    # Espaces du prof auxquels l'étudiant appartient
+    spaces = Space.objects.filter(utilisateur=prof, spaceetudiant__etudiant=student).distinct()
+
+    quizzes = ReponseQuiz.objects.filter(
+        etudiant=student,
+        quiz__spacequiz__space__in=spaces,
+        terminer=True,
+        date_debut__date__gte=start_date
+    ).distinct().order_by('date_debut')
+
+    # Préparer un dictionnaire pour total obtenu / max par jour
+    daily_scores = {start_date + timedelta(days=i): {'obtained': 0, 'max': 0} for i in range(7)}
+
+    for rq in quizzes:
+        day = rq.date_debut.date()
+        score_obtenu = rq.score_total
+        score_max = rq.quiz.exercice.questions.aggregate(total=Sum('score'))['total'] or 0
+        daily_scores[day]['obtained'] += score_obtenu
+        daily_scores[day]['max'] += score_max
+
+    data = []
+    for day, scores in daily_scores.items():
+        avg_score = (scores['obtained'] / scores['max'] * 100) if scores['max'] > 0 else 0
+        data.append({
+            "day": day.strftime("%a"), 
+            "grade": round(avg_score, 2)
+        })
+
+    return Response(data, status=status.HTTP_200_OK)
