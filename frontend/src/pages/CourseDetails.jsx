@@ -102,24 +102,36 @@ export default function SpaceDetails() {
               }))
           );
         } else if (activeStep === 2) {
-          // Quizzes
-          const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/quizzes/`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          });
-          const data = await res.json();
-          setSpaceQuizzes(
-            (data || []).filter(q => q.quiz).map(q => ({
-              id: q.quiz.id,
-              title: q.quiz.exercice?.titre_exo || "Sans titre",
-              description: q.quiz.exercice?.enonce || "",
-              level: q.quiz.exercice?.niveau_exercice_label || "",
-              author: q.quiz.exercice?.utilisateur_name || "Inconnu",
-              date: q.quiz.exercice?.date_creation || "",
-              progress: q.progress ?? 0,
-              isMine: q.quiz.exercice?.utilisateur === userData?.id,
-            }))
-          );
-        } else if (activeStep === 3) {
+  // Quizzes
+  const res = await fetch("http://localhost:8000/api/quiz/api/quiz/", {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  const data = await res.json();
+
+  const formatted = data.map(q => ({
+    id: q.exercice?.id_exercice,
+    quizId: q.id,
+    title: q.exercice?.titre_exo || "Sans titre",
+    description: q.exercice?.enonce || "",
+    level: q.exercice?.niveau_exercice_label || "",
+    author: q.exercice?.utilisateur_name || "Inconnu",
+    date: q.exercice?.date_creation || "",
+    progress: q.progress ?? 0,
+    isMine: q.exercice?.utilisateur === userData?.id,
+    activer: q.activerDuration,
+    duration: q.duration_minutes,
+    nbMax_tentative: q.nbMax_tentative,
+    delai_entre_tentatives: q.delai_entre_tentatives,
+    initials: q.exercice?.utilisateur_name
+      ?.split(" ")
+      .map(n => n[0])
+      .join("")
+      .toUpperCase(),
+  }));
+
+  setSpaceQuizzes(formatted);
+}
+ else if (activeStep === 3) {
           // Exercises
           const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -147,6 +159,59 @@ export default function SpaceDetails() {
     fetchItems();
   }, [id, activeStep, userData?.id]);
 
+  useEffect(() => {
+  if (!userData?.id || spaceQuizzes.length === 0) return;
+
+  const fetchTentatives = async () => {
+    const results = {};
+    await Promise.all(
+      spaceQuizzes.map(async quiz => {
+        const res = await fetch(
+          `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${userData.id}/`,
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          }
+        );
+        const data = await res.json();
+        results[quiz.quizId] = data;
+      })
+    );
+    setSpaceQuizzes(prev => prev.map(q => ({
+      ...q,
+      tentatives: results[q.quizId] || []
+    })));
+  };
+
+  fetchTentatives();
+}, [spaceQuizzes, userData?.id]);
+
+
+const quizzesWithAttempts = spaceQuizzes.map(q => {
+  const tentatives = q.tentatives || [];
+  let isBlocked = false;
+  let minutesRestantes = 0;
+  let tentativesRestantes = null;
+
+  if (q.nbMax_tentative > 0) {
+    tentativesRestantes = q.nbMax_tentative - tentatives.length;
+    if (tentativesRestantes <= 0) isBlocked = true;
+  }
+
+  if (!isBlocked && tentatives.length > 0 && q.delai_entre_tentatives) {
+    const lastEnd = new Date(tentatives[0].date_fin);
+    const now = new Date();
+    const diffMs = lastEnd.getTime() + q.delai_entre_tentatives * 60 * 1000 - now.getTime();
+    if (diffMs > 0) {
+      isBlocked = true;
+      minutesRestantes = Math.ceil(diffMs / 60000);
+    }
+  }
+
+  return { ...q, isBlocked, minutesRestantes, tentativesRestantes };
+});
+
+
+
   // --- Fetch my items for modal ---
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -173,18 +238,13 @@ export default function SpaceDetails() {
           author: c.utilisateur_name,
         })));
 
-       setMyQuizzes(
-  (quizzesData || [])
-    .filter(q => q.id)
-    .map(q => ({
-      id: q.id,
-      title: q.exercice?.titre_exo?.trim() || "Sans titre",
-      description: q.exercice?.enonce || "",
-      level: q.exercice?.niveau_exercice_label || "",
-      author: q.exercice?.utilisateur_name || "",
-    }))
-);
-
+        setMyQuizzes((quizzesData || []).filter(q => q.exercice && q.exercice.id_exercice).map(q => ({
+          id: q.exercice.id_exercice,
+          title: q.exercice.titre_exo?.trim() || "Sans titre",
+          description: q.exercice.enonce || "",
+          level: q.exercice.niveau_exercice_label || "",
+          author: q.exercice.utilisateur_name || "",
+        })));
 
         setMyExercises((exercisesData || []).filter(e => e.id_exercice).map(e => ({
           id: e.id_exercice,
@@ -384,43 +444,57 @@ export default function SpaceDetails() {
     gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3}, minmax(0, 1fr))`,
   }}
 >
-  {/* COURSES & QUIZZES */}
-  {activeStep !== 3 &&
-    filteredItems.map(item => (
+  {/* COURSES */}
+{activeStep === 1 &&
+  filteredItems.map(item => (
+    <ContentCard
+      key={`course-${item.id}`}
+      course={{
+        ...item,
+        initials: item.author
+          ? item.author
+              .split(" ")
+              .map(n => n[0])
+              .join("")
+              .toUpperCase()
+          : "",
+        duration: item.date ? `Créé le ${item.date}` : "",
+      }}
+      role={userRole}
+      showProgress={userRole === "etudiant"}
+      type="course"
+      className={gradientMap[item.level] ?? "bg-grad-1"}
+      onDelete={id => setSpaceCourses(spaceCourses.filter(c => c.id !== id))}
+      onClick={() => {
+        if (userRole === "etudiant") navigate(`/courses/${item.id}/start`);
+        else navigate(`/courses/${item.id}`);
+      }}
+    />
+  ))}
+
+{/* QUIZZES */}
+{activeStep === 2 &&
+  quizzesWithAttempts
+    .filter(q => filterLevel === "ALL" || q.level === filterLevel)
+    .filter(q => q.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .map(quiz => (
       <ContentCard
-        key={`${activeStep}-${item.id}`}
-        course={{
-          ...item,
-          initials: item.author
-            ? item.author
-                .split(" ")
-                .map(n => n[0])
-                .join("")
-                .toUpperCase()
-            : "",
-          duration: item.date ? `Créé le ${item.date}` : "",
-        }}
+        key={`quiz-${quiz.id}`}
+        course={quiz}
         role={userRole}
-        showProgress={userRole === "etudiant" && activeStep === 1}
-        type={activeStep === 1 ? "course" : "quiz"}
-        className={gradientMap[item.level] ?? "bg-grad-1"}
-        onDelete={id => {
-          if (activeStep === 1)
-            setSpaceCourses(spaceCourses.filter(c => c.id !== id));
-          else if (activeStep === 2)
-            setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
-        }}
+        showProgress={userRole === "etudiant"}
+        className={gradientMap[quiz.level] ?? "bg-grad-1"}
+        onDelete={id =>
+          setSpaceQuizzes(prev => prev.filter(c => c.id !== id))
+        }
         onClick={() => {
-          if (userRole === "etudiant") {
-            if (activeStep === 1) navigate(`/courses/${item.id}/start`);
-            else navigate(`/quizzes/${item.id}/start`);
-          } else {
-            if (activeStep === 1) navigate(`/courses/${item.id}`);
-            else navigate(`/quizzes/${item.id}`);
-          }
+          if (userRole === "etudiant") navigate(`/quizzes/${quiz.id}/start`);
+          else navigate(`/quizzes/${quiz.id}`);
         }}
       />
     ))}
+
+
 
   {/* EXERCISES */}
   {activeStep === 3 &&
