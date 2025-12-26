@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import progressionService from "../services/progressionService";
 
-
+import NotificationBell from "../components/common/NotificationBell";
 export default function Dashboardens() {
   // Hook de traduction
   const { t, i18n } = useTranslation("Dashboard");
@@ -129,20 +129,18 @@ const [activeCourses, setActiveCourses] = useState("");
           <Input placeholder={t("Dashboard.Search")} icon={<Search size={16} />} />
         </form>
 
-        <div className="flex items-center gap-3">
-          <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center">
-            <Bell size={16} />
-          </div>
-
-                   {/* User Circle */}
-                <UserCircle
-                  initials={initials}
-                  onToggleTheme={toggleDarkMode}
-                  onChangeLang={(lang) => i18n.changeLanguage(lang)}
-                />
-        </div>
+          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
       </header>
-
       {/* Welcome banner */}
       <div className="relative bg-grad-1 text-white p-4 rounded-2xl shadow-md flex flex-col lg:flex-row justify-between items-center gap-3">
         <div className="flex flex-col">

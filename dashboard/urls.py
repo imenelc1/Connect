@@ -27,5 +27,11 @@ urlpatterns = [
  path("student/student-weekly-submission-chart/", views.student_weekly_submission_chart, name="student-weekly-submission-chart"),
  path("student/student-progress/", views.student_progress, name="student-progress"),
 
+ path("student/student-progress-score/", views.student_progress_score, name="student-averg-score"),
+ path("student/student-average-score/", views.student_average_score, name="student-average-score"),
+ 
+ path("student/student-progress-score-prof/<int:student_id>/", views.student_progress_score_prof, name="student-progress-score-prof"),
+ path("student/student-average-score-prof/<int:student_id>/", views.student_average_score_prof, name="student-average-score-prof"),
+
  
 ]

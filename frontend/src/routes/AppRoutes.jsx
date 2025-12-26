@@ -63,7 +63,7 @@ import ForumManagement from "../pages/forumManagement.jsx";
 import SpacesManagement from "../pages/SpacesManagement.jsx";
 import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 import StudentsManagement from "../pages/studentsManagement.jsx";
-
+import UpdateQuiz from "../pages/UpdateQuiz.jsx";
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -120,14 +120,14 @@ export default function AppRoutes() {
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
        
 
-        {/* ========= QUIZZES ========= */}
+         {/* ========= QUIZZES ========= */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/quiz-preview" element={<QuizPreview />} />
         <Route path="/quiz-intro/:exerciceId" element={<QuizIntroPage />} />
         <Route path="/quizTake/:exerciceId" element={<QuizTakePage />} />
         <Route path="/QuizRecape/:exerciceId" element={<QuizRecapPage />} />
-
+        <Route path="/quiz/edit/:exerciceId" element={<UpdateQuiz />} />
         {/* ========= ADMIN ========= */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/CourseManagement" element={<CoursesManagement />} />

@@ -17,6 +17,7 @@ from .jwt_helpers import IsAuthenticatedJWT
 from django.core.mail import send_mail
 import uuid
 from rest_framework.permissions import BasePermission
+from django.http import JsonResponse
 
 # -----------------------------
 # Constantes JWT manquantes
@@ -194,8 +195,17 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticatedJWT]
 
     def get_object(self):
-        return self.request.user  # ✅ maintenant c'est toujours un objet Utilisateur
+        # Garantit que request.user est bien un objet Utilisateur ou None
+        if not hasattr(self.request, 'user') or self.request.user is None:
+            return None
+        return self.request.user
 
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        if not user:
+            return Response({"error": "Utilisateur introuvable"}, status=404)
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
 
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticatedJWT]  # JWT custom
@@ -329,10 +339,14 @@ def get_enseignants(request):
             "id_utilisateur": e.utilisateur.id_utilisateur,
             "nom": e.utilisateur.nom,
             "prenom": e.utilisateur.prenom,
+            "email": e.utilisateur.adresse_email,
+            "date_naissance": e.utilisateur.date_naissance,
+            "grade": e.grade,
+            "matricule": e.utilisateur.matricule
         }
         for e in enseignants
     ]
-    return Response(data, status=200)
+    return JsonResponse(data, safe=False)
 
 @api_view(["GET"])
 @permission_classes([IsAdminOrTeacherJWT])

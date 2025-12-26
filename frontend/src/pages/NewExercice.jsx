@@ -20,13 +20,15 @@ export default function NewExercise() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("newExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
+  const [solution, setSolution] = useState("");
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-      useEffect(() => {
-         const handler = (e) => setSidebarCollapsed(e.detail);
-         window.addEventListener("sidebarChanged", handler);
-         return () => window.removeEventListener("sidebarChanged", handler);
-       }, []);
-    
+  useEffect(() => {
+    const handler = (e) => setSidebarCollapsed(e.detail);
+    window.addEventListener("sidebarChanged", handler);
+    return () => window.removeEventListener("sidebarChanged", handler);
+  }, []);
+
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
@@ -100,12 +102,14 @@ export default function NewExercise() {
           enonce: statement,
           niveau_exo: level,
           utilisateur: currentUserId,
-          categorie: category,           // obligatoire
-          cours: selectedCourseId,       // obligatoire, ID du cours
+          categorie: category,
+          cours: selectedCourseId,
           visibilite_exo: courseVisibility === "private" ? false : true,
+          solution: solution || null,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
 
       const exoId = res.data.id_exercice;
       navigate("/all-exercises");
@@ -118,11 +122,11 @@ export default function NewExercise() {
   };
 
 
-  
+
   return (
     <div className="w-full min-h-screen  bg-surface">
       {/* SIDEBAR */}
-       <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
+      <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
@@ -175,6 +179,34 @@ export default function NewExercise() {
               rows={6}
               className="w-full rounded-3xl border border-grayc px-5 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-10 resize-none text-black bg-secondary/10"
             />
+            <label className="block text-textc font-semibold mb-2">
+              {t("form.solution_label")}
+            </label>
+
+            <textarea
+              name="solution"
+              placeholder={t("form.solution_placeholder") || "Écrire la solution ici (facultatif)"}
+              value={solution}
+              onChange={(e) => setSolution(e.target.value)}
+              rows={5}
+              className="w-full rounded-3xl border border-grayc px-5 py-3 shadow-sm
+             focus:outline-none focus:ring-2 focus:ring-primary mb-4
+             resize-none text-black bg-secondary/10"
+            />
+
+            <p
+              className="
+    mb-3 px-4 py-2 rounded-2xl text-sm shadow-card
+    bg-[rgb(var(--color-blue-primary-light))] 
+    text-[rgb(var(--color-blue))] 
+    border border-[rgb(var(--color-blue))]
+  "
+            >
+              {t("solution_note")}
+            </p>
+
+
+
 
             {/* GRID */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
