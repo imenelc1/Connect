@@ -14,7 +14,6 @@ import Button from "../components/common/Button";
 import ModernDropdown from "../components/common/ModernDropdown";
 import NotificationBell from "../components/common/NotificationBell";
 
-// CORRECTION DES CHEMINS D'IMPORT
 import {
   getCibleFromForumType,
   validateForumData,
@@ -24,8 +23,8 @@ import {
   formatTimeAgo
 } from "../utils/formUtils";
 
-import PostCreationForm from "../components/community/PostCreationForm";  // Changé de "../components" à "../../components"
-import ForumList from "../components/community/ForumList";  // Changé de "../components" à "../../components"
+import PostCreationForm from "../components/community/PostCreationForm";
+import ForumList from "../components/community/ForumList";
 
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState("recent");
@@ -56,41 +55,32 @@ export default function CommunityPage() {
   );
 
   const forumOptions = useMemo(() => {
-  // Options de base
-  const baseOptions = [
-    { value: "all", label: t("forums.all") || "Tous les forums" },
-    { value: "teacher-teacher", label: t("forums.teacher-teacher") || "Enseignants ↔ Enseignants" },
-    { value: "student-student", label: t("forums.student-student") || "Étudiants ↔ Étudiants" },
-  ];
-  
-  // Ajouter l'option groupée avec le label approprié selon le rôle
-  if (role === "enseignant") {
+    // OPTIONS EXACTES COMME DEMANDÉ :
+    
+    if (role === "enseignant") {
+      return [
+        { value: "all", label: "Tous les forums" },
+        { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
+        { value: "teacher-student", label: "Enseignants ↔ Étudiants" }  // Regroupe teacher-student + student-teacher
+      ];
+    } 
+    else if (role === "etudiant") {
+      return [
+        { value: "all", label: "Tous les forums" },
+        { value: "student-student", label: "Étudiants ↔ Étudiants" },
+        { value: "student-teacher", label: "Étudiants ↔ Enseignants" }  // Regroupe teacher-student + student-teacher
+      ];
+    }
+    
+    // Pour admin ou autres rôles (au cas où)
     return [
-      ...baseOptions,
-      { 
-        value: "cross-teacher-view", 
-        label: t("forums.cross-teacher-view") || "Enseignants ↔ Étudiants",
-        types: ["teacher-student", "student-teacher"]
-      }
+      { value: "all", label: "Tous les forums" },
+      { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
+      { value: "teacher-student", label: "Enseignant → Étudiants" },
+      { value: "student-student", label: "Étudiants ↔ Étudiants" },
+      { value: "student-teacher", label: "Étudiant → Enseignants" }
     ];
-  } else if (role === "etudiant") {
-    return [
-      ...baseOptions,
-      { 
-        value: "cross-student-view", 
-        label: t("forums.cross-student-view") || "Étudiants ↔ Enseignants",
-        types: ["teacher-student", "student-teacher"]
-      }
-    ];
-  }
-  
-  // Pour admin ou autres rôles, montrer tout séparément
-  return [
-    ...baseOptions,
-    { value: "teacher-student", label: t("forums.teacher-student") || "Enseignant → Étudiants" },
-    { value: "student-teacher", label: t("forums.student-teacher") || "Étudiant → Enseignants" }
-  ];
-}, [role, t]);
+  }, [role]);
 
   useEffect(() => {
     if (role === "enseignant") {
@@ -236,33 +226,54 @@ export default function CommunityPage() {
   }, [token, role, userId, API_URL, checkAllForumLikes]);
 
   const getFilteredPosts = useCallback(() => {
-  let filtered = [...posts];
+    let filtered = [...posts];
 
-  if (forumType !== "all") {
-    // Gérer les options groupées
-    if (forumType === "cross-teacher-view" || forumType === "cross-student-view") {
-      // Pour la vue groupée, montrer teacher-student ET student-teacher
-      filtered = filtered.filter(post => 
-        post.type === "teacher-student" || post.type === "student-teacher"
-      );
-    } else {
-      // Filtre normal
-      filtered = filtered.filter(post => post.type === forumType);
+    if (forumType !== "all") {
+      // Gérer les options spéciales du dropdown
+      if (role === "enseignant" && forumType === "teacher-student") {
+        // Pour enseignant : "Enseignants ↔ Étudiants" = teacher-student + student-teacher
+        filtered = filtered.filter(post => 
+          post.type === "teacher-student" || post.type === "student-teacher"
+        );
+      } 
+      else if (role === "etudiant" && forumType === "student-teacher") {
+        // Pour étudiant : "Étudiants ↔ Enseignants" = teacher-student + student-teacher
+        filtered = filtered.filter(post => 
+          post.type === "teacher-student" || post.type === "student-teacher"
+        );
+      }
+      else {
+        // Filtre normal par type exact
+        filtered = filtered.filter(post => post.type === forumType);
+      }
     }
-  }
 
-  switch (activeTab) {
-    case "popular":
-      return [...filtered].sort((a, b) => b.likes - a.likes);
-    case "myforums":
-      return [...filtered].filter(post => post.isMine)
-                         .sort((a, b) => new Date(b.time) - new Date(a.time));
-    default:
-      return [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
-  }
-}, [posts, forumType, activeTab]);
+    switch (activeTab) {
+      case "popular":
+        return [...filtered].sort((a, b) => b.likes - a.likes);
+      case "myforums":
+        return [...filtered].filter(post => post.isMine)
+                           .sort((a, b) => new Date(b.time) - new Date(a.time));
+      default:
+        return [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
+    }
+  }, [posts, forumType, activeTab, role]);
 
   const finalPosts = useMemo(() => getFilteredPosts(), [getFilteredPosts]);
+
+  // Fonction pour obtenir le label du type de forum dans l'affichage des posts
+  const getDisplayForumTypeLabel = useCallback((type) => {
+    if (role === "enseignant") {
+      if (type === "teacher-student" || type === "student-teacher") {
+        return "Enseignants ↔ Étudiants";
+      }
+    } else if (role === "etudiant") {
+      if (type === "teacher-student" || type === "student-teacher") {
+        return "Étudiants ↔ Enseignants";
+      }
+    }
+    return getForumTypeLabel(type);
+  }, [role, getForumTypeLabel]);
 
   if (!userData || !token) {
     return (
@@ -325,11 +336,8 @@ export default function CommunityPage() {
           <ModernDropdown
             value={forumType}
             onChange={setForumType}
-            options={forumOptions.map(o => ({
-              ...o,
-              label: t(`forums.${o.value}`) || o.label
-            }))}
-            placeholder={t("forums.select") || "Sélectionner un type"}
+            options={forumOptions}
+            placeholder="Sélectionner un type"
             disabled={isLoading}
           />
         </div>
@@ -347,7 +355,7 @@ export default function CommunityPage() {
           userId={userId}
           setError={setError}
           triggerNotificationEvent={triggerNotificationEvent}
-          getForumTypeLabel={getForumTypeLabel}
+          getForumTypeLabel={getDisplayForumTypeLabel}  // Utiliser la fonction adaptée
           getForumTypeClasses={getForumTypeClasses}
           formatTimeAgo={formatTimeAgo}
           t={t}
