@@ -5,9 +5,11 @@
     "badgesp":"Créer et gérer des badges de réussite",
     "buttonCreate": "Créer des badges",
     "search": "Rechercher des badges ...",
-    "common":"Commun",
-    "Rare":"Rare",
-    "Epic":"Épique",
+    "rarities": {
+      "common": "Commun",
+      "rare": "Rare",
+      "epic": "Épique"
+    },
     "FirstSteps":"Premiers pas",
     "Completefist":"Complétez vos exercices de poing",
     "earned":"Gagné par",

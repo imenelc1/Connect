@@ -27,8 +27,22 @@
   "field": {
     "title": "Title",
     "titlePlaceholder": "Course title",
+    "description": "Description",
+    "descriptionPlaceholder": "Course description",
+    "duration": "Duration",
+    "durationPlaceholder": "Course duration (hh:mm:ss)",
     "category": "Category",
     "categoryPlaceholder": "Category",
-    "difficulty": "Level"
+    "difficulty": "Level",
+    "teacher": "Instructor",
+    "teacherPlaceholder":"Select an Instructor"
+    
+  },
+  "errors": {
+    "fetchCourses": "Error fetching courses.",
+    "fetchTeachers": "Error fetching teachers.",
+    "createCourse": "Error creating course.",
+    "editCourse": "Error editing course.",
+    "deleteCourse": "Error deleting course."
   }
 }

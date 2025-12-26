@@ -17,5 +17,13 @@
   "create": "Créer",
   "update": "Mettre à jour",
   "cancel": "Annuler",
-  "toggleLang": "Passer en EN"
+  "toggleLang": "Passer en EN",
+  "firstName":"Prénom",
+  "lastName":"Nom",
+  "birthdate":"Date de naissance",
+  "rank":"Grade",
+  "matricule":"Matricule",
+  "password":"Mot de passe",
+  "instructorResume":"Résumé de l'enseignant",
+  "close":"Fermer"
 }

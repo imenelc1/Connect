@@ -55,19 +55,14 @@ class ProfileSerializer(serializers.ModelSerializer):
     grade = serializers.SerializerMethodField()
     specialite = serializers.SerializerMethodField()
     annee_etude = serializers.SerializerMethodField()
-
-    # Rendre les champs principaux facultatifs pour éviter les erreurs
-    nom = serializers.CharField(required=False, allow_null=True)
-    prenom = serializers.CharField(required=False, allow_null=True)
-    date_naissance = serializers.DateField(required=False, allow_null=True)
-    adresse_email = serializers.EmailField(required=False, allow_null=True)
-    matricule = serializers.CharField(required=False, allow_null=True)
+    joined = serializers.DateTimeField(source='date_inscription', format="%Y-%m-%d")  # ← AJOUTÉ
 
     class Meta:
         model = Utilisateur
         fields = [
             'id_utilisateur', 'nom', 'prenom', 'date_naissance',
-            'adresse_email', 'matricule', 'role', 'grade', 'specialite', 'annee_etude'
+            'adresse_email', 'matricule', 'role', 'grade', 'specialite',
+            'annee_etude', 'joined'
         ]
 
     def get_role(self, obj):
