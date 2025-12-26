@@ -53,13 +53,17 @@ export default function AllExercisesPage() {
           categorie: c.categorie,
           description: c.enonce,
           author: c.utilisateur_name,
+          author_id:c.utilisateur,
+          visibilite_exo:c.visibilite_exo,
           coursId: c.cours, // pour navigation vers le cours si besoin
           initials: c.utilisateur_name
             .split(" ")
             .map(n => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId
+          isMine: c.utilisateur === currentUserId,
+          visible: c.visibilite_exo === true || c.utilisateur === currentUserId, // <-- Nouveau champ
+
         }));
         setExercises(formatted);
       })
@@ -87,13 +91,17 @@ export default function AllExercisesPage() {
         categorie: c.categorie,
         description: c.enonce,
         author: c.utilisateur_name,
+        author_id:c.utilisateur,
         coursId: c.cours,
+        visibilite_exo:c.visibilite_exo,
         initials: c.utilisateur_name
           .split(" ")
           .map(n => n[0])
           .join("")
           .toUpperCase(),
-        isMine: c.utilisateur === currentUserId
+        isMine: c.utilisateur === currentUserId,
+        visible: c.visibilite_exo === true || c.utilisateur === currentUserId, // <-- Nouveau champ
+
       }));
       setExercises(formatted);
     })
@@ -145,6 +153,8 @@ export default function AllExercisesPage() {
   if (userRole === "enseignant" && categoryFilter === "mine") {
     filteredExercises = filteredExercises.filter(ex => ex.isMine);
   }
+  filteredExercises = filteredExercises.filter((ex) => ex.visible);
+
 
   return (
     <div className="flex bg-surface min-h-screen">

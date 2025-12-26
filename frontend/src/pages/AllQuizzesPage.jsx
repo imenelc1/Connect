@@ -62,6 +62,8 @@ export default function AllQuizzesPage() {
           level: c.exercice?.niveau_exercice_label,
           categorie: c.exercice?.categorie,
           author: c.exercice?.utilisateur_name,
+          author_id: c.exercice?.utilisateur,
+          visibilite_exo:c.exercice?.visibilite_exo,
           initials: c.exercice?.utilisateur_name
             .split(" ")
             .map(n => n[0])
@@ -71,8 +73,10 @@ export default function AllQuizzesPage() {
           nbMax_tentative: c.nbMax_tentative,
           delai_entre_tentatives: c.delai_entre_tentatives,
           activer: c.activerDuration,
-          duration: c.duration_minutes
-        }));
+          duration: c.duration_minutes,
+          visible: c.exercice?.visibilite_exo === true || c.exercice?.utilisateur === currentUserId, // <-- Nouveau champ
+
+        }))
 
         setQuizzes(formatted);
       } catch (err) {
@@ -152,7 +156,8 @@ export default function AllQuizzesPage() {
     if (userRole === "enseignant" && categoryFilter === "mine") {
       list = list.filter(q => q.isMine);
     }
-
+    list = list.filter((q) => q.visible);
+    console.log({list});
     return list;
   }, [quizzesWithAttempts, filterLevel, categoryFilter, userRole]);
 

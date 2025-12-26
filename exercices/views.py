@@ -32,7 +32,7 @@ class CreateExoView(APIView):
 
 @api_view(['GET'])
 def Exercice_list_api(request):
-    exercice = Exercice.objects.filter(visibilite_exo=True).exclude(categorie="quiz")
+    exercice = Exercice.objects.filter().exclude(categorie="quiz")
     serializer = ExerciceSerializer(exercice, many=True)
     return Response(serializer.data)
 
@@ -71,7 +71,7 @@ def delete_exercice(request, pk):
 
 class ExerciceParCoursView(APIView):
     def get(self, request, cours_id):
-        exercices = Exercice.objects.filter(cours_id=cours_id, visibilite_exo=True).exclude(categorie="quiz")
+        exercices = Exercice.objects.filter(cours_id=cours_id).exclude(categorie="quiz")
         serializer = ExerciceSerializer(exercices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -86,7 +86,7 @@ class ExerciceSearchAPIView(APIView):
         search = request.GET.get("search", "").strip()
         categorie = request.GET.get("categorie", "").strip()
 
-        exercices = Exercice.objects.filter(quiz__isnull=True, visibilite_exo=True)
+        exercices = Exercice.objects.filter(quiz__isnull=True)
 
         if search:
             exercices = exercices.filter(
@@ -95,7 +95,7 @@ class ExerciceSearchAPIView(APIView):
             )
 
         if categorie:
-            exercices = exercices.filter(categorie__icontains=categorie)
+            exercices = exercices.filter(categorie__icontains=categorie).exclude(categorie="quiz")
 
         serializer = ExerciceSerializer(exercices, many=True)
         return Response(serializer.data)

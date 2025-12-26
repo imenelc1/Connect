@@ -274,6 +274,7 @@ class CoursesWithProgressView(APIView):
                 "niveau_cour_label": niveau_label,
                 "utilisateur": course.utilisateur.id_utilisateur,
                 "utilisateur_name": course.utilisateur.nom,
+                "visibilite_cour": course.visibilite_cour,
                 "duration_readable": (
                     course.get_duration_display()
                     if hasattr(course, 'get_duration_display')
