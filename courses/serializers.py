@@ -10,7 +10,7 @@ class CoursSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cours
         fields = ['id_cours', 'titre_cour', 'niveau_cour', 'niveau_cour_label',
-                  'description', 'duration', 'duration_readable', 'utilisateur_name', 'utilisateur']
+                  'description', 'duration', 'duration_readable', 'utilisateur_name', 'utilisateur', 'visibilite_cour']
 
     def get_utilisateur_name(self, obj):
         return f"{obj.utilisateur.nom} {obj.utilisateur.prenom}"
@@ -76,7 +76,7 @@ class CourseSerializer2(serializers.ModelSerializer):
 
     class Meta:
         model = Cours
-        fields = ['id_cours', 'titre_cour', 'description', 'duration', 'niveau_cour', 'sections']
+        fields = ['id_cours', 'titre_cour', 'description', 'duration', 'niveau_cour', 'sections', 'visibilite_cour']
 
     def get_sections(self, obj):
         # On transmet le context aux sections imbriquées
@@ -103,4 +103,4 @@ class CourseUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Cours
-        fields = ['id_cours', 'titre_cour', 'description', 'duration', 'niveau_cour', 'sections']
+        fields = ['id_cours', 'titre_cour', 'description', 'duration', 'niveau_cour', 'sections', 'visibilite_cour']

@@ -17,6 +17,7 @@ from django.conf import settings
 from datetime import timedelta
 import os
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.db.models import Q
 
 class CreateCoursView(APIView):
 
@@ -273,6 +274,7 @@ class CoursesWithProgressView(APIView):
                 "niveau_cour_label": niveau_label,
                 "utilisateur": course.utilisateur.id_utilisateur,
                 "utilisateur_name": course.utilisateur.nom,
+                "visibilite_cour": course.visibilite_cour,
                 "duration_readable": (
                     course.get_duration_display()
                     if hasattr(course, 'get_duration_display')
@@ -331,3 +333,20 @@ def update_course_status(request, pk):
     return Response(
         {"message": "Statut mis à jour", "status": course.status}
     )
+    
+    
+#Recherche par titre de cours
+class CoursSearchView(APIView):
+
+    def get(self, request):
+        search = request.GET.get("search", "")
+
+        cours = Cours.objects.all()
+        if search:
+            cours = cours.filter(
+                Q(titre_cour__icontains=search) |
+                Q(sections__titre_section__icontains=search)
+            ).distinct()
+
+        serializer = CoursSerializer(cours, many=True)
+        return Response(serializer.data)
