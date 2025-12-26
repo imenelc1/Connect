@@ -219,24 +219,40 @@ def space_quizzes(request, space_id):
     except Space.DoesNotExist:
         return Response({"error": "Space not found"}, status=404)
 
+    # -------- GET --------
     if request.method == "GET":
         print("space_quizzes GET called", space_id)
         space_quizzes = SpaceQuiz.objects.filter(space=space)
         serializer = SpaceQuizSerializer(space_quizzes, many=True)
         return Response(serializer.data)
 
+    # -------- POST --------
     elif request.method == "POST":
         quiz_id = request.data.get("quiz")
         if not quiz_id:
-            return Response({"error": "exercice field required"}, status=400)
+            return Response(
+                {"error": "quiz field required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             quiz = Quiz.objects.get(id=quiz_id)
         except Quiz.DoesNotExist:
-            return Response({"error": "Exercice not found"}, status=404)
+            return Response(
+                {"error": "Quiz not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        space_quizzes, created = SpaceQuiz.objects.get_or_create(space=space, quiz=quiz)
-        serializer = SpaceQuizSerializer(space_quizzes)
-        return Response(serializer.data, status=201 if created else 200)
+        #  empêcher le doublon
+        if SpaceQuiz.objects.filter(space=space, quiz=quiz).exists():
+            return Response(
+                {"error": "Ce quiz est déjà ajouté à cet espace"},
+                status=status.HTTP_409_CONFLICT
+            )
+
+        space_quiz = SpaceQuiz.objects.create(space=space, quiz=quiz)
+        serializer = SpaceQuizSerializer(space_quiz)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
