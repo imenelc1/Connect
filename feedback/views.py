@@ -2,12 +2,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics, permissions
-
 from users.jwt_helpers import IsAuthenticatedJWT
-from .models import Notification, Feedback
-from .serializers import NotificationSerializer, FeedbackSerializer
+from .models import Notification, Feedback, FeedbackExercice
+from .serializers import NotificationSerializer, FeedbackSerializer, FeedbackExerciceSerializer
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
+
 
 # ----- FEEDBACK -----
 class FeedbackListCreateView(generics.ListCreateAPIView):
@@ -114,3 +114,14 @@ def mark_notification_read(request, notif_id):
             {"error": str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+class FeedbackExerciceListCreateView(generics.ListCreateAPIView):
+    serializer_class = FeedbackExerciceSerializer
+    permission_classes = [IsAuthenticatedJWT]
+
+    def get_queryset(self):
+        tentative_ids = self.request.query_params.getlist('tentative_ids')
+        return FeedbackExercice.objects.filter(tentative_id__in=tentative_ids)
+
+    def perform_create(self, serializer):
+        serializer.save(auteur=self.request.user)

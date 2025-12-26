@@ -18,6 +18,7 @@ export default function StudentExercice() {
   const token = localStorage.getItem("token");
   const BACKEND_URL = "http://127.0.0.1:8000";
   const navigate = useNavigate();
+  const [feedbacks, setFeedbacks] = useState({}); // ← bien défini ici
 
   useEffect(() => {
     const fetchData = async () => {
@@ -140,22 +141,23 @@ const completedRatio = `${submittedCount}/${totalExercises}`;
           {exercises.length === 0 && <p className="text-gray-500">{t("noExercises")}</p>}
 
           {exercises.map((ex) => {
-            const tentative = ex.tentative;
-            return (
-              <TaskCard
-                key={ex.id_exercice}
-                title={ex.nom_exercice}
-                date={
-                  tentative.submitted_at
-                    ? new Date(tentative.submitted_at).toLocaleString()
-                    : ""
-                }
-                etat={tentative.etat}
-                code={tentative.reponse || ""}
-                feedback=""
-              />
-            );
-          })}
+  const tentative = ex.tentative;
+  const feedback = feedbacks[tentative.id] || "";
+
+  return (
+    <TaskCard
+      key={ex.id_exercice}
+      title={ex.nom_exercice}
+      date={tentative.submitted_at ? new Date(tentative.submitted_at).toLocaleString() : ""}
+      etat={tentative.etat}
+      code={tentative.reponse || ""}
+      feedback={feedback}
+      exerciceId={ex.id_exercice}        // ← IMPORTANT
+      tentativeId={tentative.id}         // ← IMPORTANT
+    />
+  );
+})}
+
         </div>
       </div>
     </div>

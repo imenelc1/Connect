@@ -3,7 +3,9 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from users.models import Utilisateur
-
+from users.models import Utilisateur
+from exercices.models import Exercice
+from dashboard.models import TentativeExercice
 
 class Feedback(models.Model):
     id_feedback = models.AutoField(primary_key=True)
@@ -104,3 +106,20 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"Notification {self.id_notif} - {self.module_source}.{self.action_type}"
+
+
+
+class FeedbackExercice(models.Model):
+    id = models.AutoField(primary_key=True)
+    contenu = models.TextField()
+    exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE, related_name='feedbacks')
+    tentative = models.ForeignKey(TentativeExercice, on_delete=models.CASCADE, related_name='feedbacks')
+    auteur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "feedback_exercice"
+        ordering = ['-date_creation']
+
+    def __str__(self):
+        return f"Feedback {self.id} par {self.auteur.get_full_name()} sur {self.exercice.titre_exo}"

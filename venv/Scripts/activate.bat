@@ -8,46 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-set VIRTUAL_ENV=D:\ProjetGP\Connect\venv
-=======
-<<<<<<< HEAD
-=======
->>>>>>> origin/back-forum-amina
-=======
->>>>>>> origin/back-forum-amina
->>>>>>> main
-set "VIRTUAL_ENV=D:\GP\Connect\venv"
-=======
-set "VIRTUAL_ENV=C:\Users\Logitech inf Tazmalt\Desktop\Connect\venv"
->>>>>>> d76af9709473bc7d3a6c707973740bf43b6e9937
-<<<<<<< HEAD
-=======
-set "VIRTUAL_ENV=C:\GP\Connect\venv"
->>>>>>> Stashed changes
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> origin/back-forum-amina
-=======
->>>>>>> origin/back-forum-amina
-=======
->>>>>>> origin/back-forum-amina
->>>>>>> main
-=======
-set VIRTUAL_ENV=C:\Users\BENZ\Connect\Connect\venv
->>>>>>> origin/sonia
-=======
-set "VIRTUAL_ENV=C:\Users\hp\Connect\venv"
->>>>>>> origin/acceuil
+set "VIRTUAL_ENV=C:\Users\Logitech inf Tazmalt\Connect\venv"
 
 if not defined PROMPT set PROMPT=$P$G
 
