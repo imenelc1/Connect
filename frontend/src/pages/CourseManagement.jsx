@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Pencil, Trash2, BookOpen } from "lucide-react";
+import { SquarePen, Trash2, BookOpen } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -207,23 +207,7 @@ export default function CoursesManagement() {
             <p className="text-gray">{t("description")}</p>
           </div>
 
-          <div className="flex gap-4 items-center">
-            <div className="flex gap-4">
-              <Button
-                text={t("addCourseButton")}
-                variant="primary"
-                className="px-4 py-2 sm:px-6 sm:py-3 sm:px-6 sm:py-3 whitespace-nowrap text-sm sm:text-base"
-                onClick={() => setCreateModal(true)}
-              />
-              <Button
-                text={t("validationButton")}
-                variant="primary"
-                className="px-4 py-2 sm:px-6 sm:py-3 whitespace-nowrap text-sm sm:text-base"
-                onClick={() => navigate("/ValidationCourses")}
-              />
-            </div>
 
-          </div>
         </div>
 
         {/* Search */}
@@ -258,10 +242,10 @@ export default function CoursesManagement() {
                 </div>
                 <span
                   className={`px-3 py-1 text-xs font-medium rounded-full ${item.niveau_cour === "debutant"
-                      ? "bg-muted/20 text-muted"
-                      : item.niveau_cour === "intermediaire"
-                        ? "bg-secondary/20 text-secondary"
-                        : "bg-pink/20 text-pink"
+                    ? "bg-muted/20 text-muted"
+                    : item.niveau_cour === "intermediaire"
+                      ? "bg-secondary/20 text-secondary"
+                      : "bg-pink/20 text-pink"
                     }`}
                 >
                   {item.niveau_cour === "debutant"
@@ -280,19 +264,11 @@ export default function CoursesManagement() {
 
               <div className="flex justify-end mt-auto pt-4">
                 <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => openEdit(item)}
-                    className="p-2 text-muted hover:bg-gray-100 rounded-lg hover:opacity-80 transition"
-                  >
-                    <Pencil size={18} />
+                  <button className="text-muted hover:opacity-80">
+                    <SquarePen size={20} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(item.id_cours)}
-                    className="p-2 text-red hover:bg-red-50 rounded-lg hover:opacity-80 transition"
-                  >
-                    <Trash2 size={18} />
+                  <button className="text-red hover:opacity-80">
+                    <Trash2 size={20} />
                   </button>
                 </div>
               </div>

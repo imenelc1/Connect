@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Pencil, Trash2, FileText } from "lucide-react";
+import {  Trash2, FileText,SquarePen } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 // Navigation entre routes (React Router)
@@ -12,41 +12,101 @@ import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import ContentSearchBar from "../components/common/ContentSearchBar";
+import api from "../services/api";
 
 export default function QuizzesManagement() {
     const { t, i18n } = useTranslation("QuizManagement");
     const navigate = useNavigate();
     const { toggleDarkMode } = useContext(ThemeContext);
-    
+
     // États pour la responsivité
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    
+
     const [search, setSearch] = useState("");
     const [createModal, setCreateModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
     const [selectedQuiz, setSelectedQuiz] = useState(null);
+    const difficultyBgMap = {
+        debutant: "bg-grad-2",
+        intermediaire: "bg-grad-3",
+        avance: "bg-grad-4",
+    };
 
-    const [quizzes, setQuizzes] = useState([
-        { id: 1, icon: <FileText size={22} />, title: "C Fundamentals Quiz", subtitle: "Introduction to C", questions: 20, attempts: 456, score: 78 },
-        { id: 2, icon: <FileText size={22} />, title: "Pointers & Memory", subtitle: "Advanced C Techniques", questions: 15, attempts: 234, score: 65 },
-        { id: 3, icon: <FileText size={22} />, title: "Sorting Algorithms", subtitle: "Algorithm Design", questions: 25, attempts: 312, score: 72 },
-        { id: 4, icon: <FileText size={22} />, title: "Data Structures Final", subtitle: "Data Structures", questions: 30, attempts: 287, score: 81 },
-        { id: 5, icon: <FileText size={22} />, title: "Recursion Practice", subtitle: "Algorithm Design", questions: 18, attempts: 198, score: 68 },
-    ]);
+
+    const [quizzes, setQuizzes] = useState([]);
+    useEffect(() => {
+        const fetchQuizzes = async () => {
+            try {
+                const token = localStorage.getItem("admin_token");
+
+                const res = await fetch("http://127.0.0.1:8000/api/quiz/api/quiz/", {
+
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+                console.log("Quiz backend:", data);
+
+                setQuizzes(
+                    data.map((q) => ({
+                        id: q.id,
+                        title: q.exercice?.titre_exo || "Sans titre",
+                        subtitle: q.exercice?.enonce || "",
+                        questions: q.questions?.length || 0,
+                        attempts: q.nbMax_tentative || 0,
+                        score: q.scoreMinimum || 0,
+                        niveau_exo: q.exercice?.niveau_exo || "debutant",
+                        icon: <FileText size={22} />,
+                    }))
+                );
+
+            } catch (err) {
+                console.error("Erreur chargement quiz:", err);
+            }
+        };
+
+        fetchQuizzes();
+    }, []);
+
 
     // Effet pour la responsivité
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
         };
-        
+
         // Gestion de la sidebar
         const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-        
+
         window.addEventListener("resize", handleResize);
         window.addEventListener("sidebarChanged", handleSidebarChange);
-        
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("sidebarChanged", handleSidebarChange);
+        };
+    }, []);
+
+    // Effet pour la responsivité
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        // Gestion de la sidebar
+        const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("sidebarChanged", handleSidebarChange);
+
         return () => {
             window.removeEventListener("resize", handleResize);
             window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -114,7 +174,6 @@ export default function QuizzesManagement() {
                         <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
                         <p className="text-gray">{t("subtitle")}</p>
                     </div>
-                    
                     <div className="flex gap-4 items-center">
                         <Button
                             text={t("createButton")}
@@ -122,7 +181,6 @@ export default function QuizzesManagement() {
                             className="!w-auto px-6 py-2 rounded-xl"
                             onClick={() => setCreateModal(true)}
                         />
-                      
                     </div>
                 </div>
 
@@ -143,8 +201,9 @@ export default function QuizzesManagement() {
                         .map((q) => (
                             <div
                                 key={q.id}
-                                className="bg-grad-2  rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col"
+                                className={`${difficultyBgMap[q.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
                             >
+
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className="w-12 h-12 flex items-center justify-center bg-pink/20 text-pink rounded-xl">
@@ -157,17 +216,11 @@ export default function QuizzesManagement() {
                                     </div>
 
                                     <div className="flex gap-3">
-                                        <button 
-                                            className="text-muted hover:opacity-80"
-                                            onClick={() => handleEdit(q)}
-                                        >
-                                            <Pencil size={18} />
+                                        <button className="text-muted hover:opacity-80">
+                                            <SquarePen size={20} />
                                         </button>
-                                        <button 
-                                            className="text-red hover:opacity-80"
-                                            onClick={() => handleDelete(q.id)}
-                                        >
-                                            <Trash2 size={18} />
+                                        <button className="text-red hover:opacity-80">
+                                            <Trash2 size={20} />
                                         </button>
                                     </div>
                                 </div>
