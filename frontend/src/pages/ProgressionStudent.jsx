@@ -97,19 +97,30 @@ export default function ProgressStudent() {
  useEffect(() => {
   const fetchSubmittedExercises = async () => {
     try {
-      const data = await getTentatives(); // ⚡ appelle ton service
+      const data = await getTentatives();
       if (!data) return;
 
-      const submitted = data
-        .filter((t) => t.etat === "soumis" && t.exercice) // on s'assure qu'il y a un exercice
-        .map((t) => ({
-          id: t.id,
-          title: t.exercice.titre_exo || "Untitled",
-          submitted_at: t.submitted_at || t.created_at,
-          feedback: t.feedback || "",
-        }));
+      const latestByExercise = {};
 
-      setSubmittedExercisesList(submitted);
+      data.forEach((t) => {
+        if (t.etat !== "soumis" || !t.exercice) return;
+
+        const exId = t.exercice.id_exercice;
+
+        if (
+          !latestByExercise[exId] ||
+          new Date(t.submitted_at) > new Date(latestByExercise[exId].submitted_at)
+        ) {
+          latestByExercise[exId] = {
+            id: t.id,
+            title: t.exercice.titre_exo || "Untitled",
+            submitted_at: t.submitted_at,
+            feedback: t.feedback || "",
+          };
+        }
+      });
+
+      setSubmittedExercisesList(Object.values(latestByExercise));
     } catch (err) {
       console.error("Erreur récupération tentatives :", err);
     }

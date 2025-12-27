@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate} from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/common/NavBar";
 import UserCircle from "../components/common/UserCircle";
@@ -29,19 +29,24 @@ export default function StudentExercice() {
         );
         setStudent(studentRes.data || {});
 
-        // Exercices + stats
+        // Exercices + tentatives
         const exRes = await axios.get(
           `${BACKEND_URL}/api/dashboard/student-exercises/${studentId}/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        setExercises(
-          (exRes.data.exercises || []).filter(
-            (ex) => ex.tentative && ex.tentative.etat === "soumis"
-          )
-        );
+        // exRes.data.exercises contient maintenant toutes les tentatives
+        const exercisesData = exRes.data.exercises || [];
+        setExercises(exercisesData);
         setTotalExercises(exRes.data.total_exercises || 0);
-        setSubmittedCount(exRes.data.submitted_count || 0);
+
+        // Calcul du nombre soumis
+        let submitted = 0;
+        exercisesData.forEach((ex) => {
+          if (ex.tentatives?.some((t) => t.etat === "soumis")) submitted += 1;
+        });
+        setSubmittedCount(submitted);
+
       } catch (err) {
         console.error("Erreur fetch StudentExercice:", err);
         setStudent({});
@@ -60,18 +65,11 @@ export default function StudentExercice() {
   const initials = ((prenom || "").charAt(0) + (nom || "").charAt(0)).toUpperCase();
   const joinedDate = date_joined ? new Date(date_joined).toLocaleDateString() : "";
 
- // Calculs
-const submissionRate = totalExercises > 0
-  ? Math.round((submittedCount / totalExercises) * 100)
-  : 0;
-
-// Completed = soumis / total
-const completedRatio = `${submittedCount}/${totalExercises}`;
-
-
-  const reviewedCount = exercises.filter((ex) => ex.tentative.output).length;
-  
-
+  // Stats
+  const submissionRate = totalExercises > 0
+    ? Math.round((submittedCount / totalExercises) * 100)
+    : 0;
+  const completedRatio = `${submittedCount}/${totalExercises}`;
 
   return (
     <div className="flex flex-col lg:flex-row bg-primary/10 min-h-screen">
@@ -92,70 +90,63 @@ const completedRatio = `${submittedCount}/${totalExercises}`;
             </div>
           </div>
 
-{/* Stats */}
-<div className="flex flex-col sm:flex-row gap-4 sm:gap-16 mt-4 sm:mt-6 text-center justify-center">
-  {/* Submission % */}
-  <div>
-    <p className="text-xl sm:text-2xl font-bold text-purple">{submissionRate}%</p>
-    <p className="text-gray">{t("exerciceStudent.Submission")}</p>
-  </div>
+          {/* Stats */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-16 mt-4 sm:mt-6 text-center justify-center">
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-purple">{submissionRate}%</p>
+              <p className="text-gray">{t("exerciceStudent.Submission")}</p>
+            </div>
 
-  {/* Completed = soumis / total */}
-  <div>
-    <p className="text-xl sm:text-2xl font-bold text-pink">{completedRatio}</p>
-    <p className="text-gray">{t("exerciceStudent.Completed")}</p>
-  </div>
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-pink">{completedRatio}</p>
+              <p className="text-gray">{t("exerciceStudent.Completed")}</p>
+            </div>
 
-  {/* Évalués (placeholder) */}
-  <div>
-    <p className="text-xl sm:text-2xl font-bold text-primary">00</p>
-    <p className="text-gray">évalués</p>
-  </div>
-</div>
-
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-primary">00</p>
+              <p className="text-gray">évalués</p>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
         <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-full sm:max-w-5xl py-2 px-4 sm:px-6 bg-gradient-to-r from-primary/30 to-purple rounded-full mb-6 sm:mb-8">
-          <span
-            role="button"
-            className="px-12 py-1 bg-card text-gray/10 font-semibold rounded-full mb-2 sm:mb-0"
-          >
+          <span className="px-12 py-1 bg-card text-gray/10 font-semibold rounded-full mb-2 sm:mb-0">
             {t("exerciceStudent.exercice")}
           </span>
 
           <span
-  role="button"
-  className="px-12 py-1 text-gray/10 rounded-full"
-  onClick={() => navigate(`/students/${studentId}/progression`)}
->
-  {t("exerciceStudent.Progression")}
-</span>
-
-
+            role="button"
+            className="px-12 py-1 text-gray/10 rounded-full"
+            onClick={() => navigate(`/students/${studentId}/progression`)}
+          >
+            {t("exerciceStudent.Progression")}
+          </span>
         </div>
 
-        {/* Exercices soumis */}
+        {/* Exercices + toutes les tentatives */}
         <div className="flex flex-col gap-6 sm:gap-8 max-w-full sm:max-w-5xl mx-auto">
           {exercises.length === 0 && <p className="text-gray-500">{t("noExercises")}</p>}
 
-          {exercises.map((ex) => {
-            const tentative = ex.tentative;
-            return (
-              <TaskCard
-                key={ex.id_exercice}
-                title={ex.nom_exercice}
-                date={
-                  tentative.submitted_at
-                    ? new Date(tentative.submitted_at).toLocaleString()
-                    : ""
-                }
-                etat={tentative.etat}
-                code={tentative.reponse || ""}
-                feedback=""
-              />
-            );
-          })}
+          {exercises.map((ex) => (
+            <div key={ex.id_exercice} className="mb-6">
+              <h3 className="font-semibold text-lg mb-2">{ex.nom_exercice}</h3>
+              {ex.tentatives && ex.tentatives.length > 0 ? (
+                ex.tentatives.map((t, idx) => (
+                  <TaskCard
+                    key={idx}
+                    title={`Tentative ${idx + 1}`}
+                    date={t.submitted_at ? new Date(t.submitted_at).toLocaleString() : ""}
+                    etat={t.etat}
+                    code={t.reponse || ""}
+                    feedback={t.score !== null ? `Score: ${t.score}` : ""}
+                  />
+                ))
+              ) : (
+                <p className="text-gray-400">Aucune tentative</p>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

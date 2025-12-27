@@ -151,7 +151,7 @@ export default function AllExercisesPage() {
 
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredExercises.map((exercise) => (
-            <ExerciseCard key={exercise.id} exercise={exercise} />
+            <ExerciseCard key={exercise.id} exercise={exercise} isOwner={exercise.isMine} onDelete={handleDeleteExo} />
 
           ))}
         </div>

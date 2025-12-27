@@ -545,7 +545,6 @@ def get_student(request, student_id):
     return Response(data)
 
 
-#prog coté proff
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def student_exercises(request, student_id):
@@ -569,29 +568,32 @@ def student_exercises(request, student_id):
     ).distinct()
 
     total_exercises = exercises.count()
-
-    results = []
     submitted_count = 0
 
+    results = []
+
     for ex in exercises:
-        tentative = TentativeExercice.objects.filter(
+        # toutes les tentatives de l’étudiant pour cet exercice, triées par date décroissante
+        tentatives = TentativeExercice.objects.filter(
             exercice=ex,
             utilisateur=student
-        ).first()
+        ).order_by("-submitted_at")
 
-        if tentative and tentative.etat == "soumis":
-            submitted_count += 1
+        # compter combien ont été soumises
+        submitted_count += tentatives.filter(etat="soumis").count()
 
         results.append({
             "id_exercice": ex.id_exercice,
             "nom_exercice": ex.titre_exo,
-            "tentative": {
-                "etat": tentative.etat,
-                "reponse": tentative.reponse,
-                "output": tentative.output,
-                "submitted_at": tentative.submitted_at,
-                "score": tentative.score,
-            } if tentative else None
+            "tentatives": [
+                {
+                    "etat": t.etat,
+                    "reponse": t.reponse,
+                    "output": t.output,
+                    "submitted_at": t.submitted_at,
+                    "score": t.score,
+                } for t in tentatives
+            ]
         })
 
     return Response({
@@ -599,7 +601,6 @@ def student_exercises(request, student_id):
         "submitted_count": submitted_count,
         "exercises": results
     })
-
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
@@ -639,13 +640,9 @@ def weekly_submission_chart(request, student_id):
     prof = request.user
 
     today = now().date()
-    # Lundi de la semaine courante (ISO)
     start_of_this_week = today - timedelta(days=today.weekday())
-
-    # On remonte à 6 semaines au total
     start_date = start_of_this_week - timedelta(weeks=5)
 
-    # Espaces du prof où l’étudiant est inscrit
     spaces = Space.objects.filter(
         utilisateur=prof,
         spaceetudiant__etudiant_id=student_id
@@ -656,14 +653,12 @@ def weekly_submission_chart(request, student_id):
         spaceexo__space__in=spaces
     ).distinct()
 
-    total_exercises = exercises.count() or 1
+    total_exercises = exercises.count() or 1  # éviter division par 0
 
-    # Initialisation des semaines (LUNDI → DIMANCHE)
     data = []
     for i in range(6):
         week_start = start_date + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)
-
         data.append({
             "week": f"Week {i+1}",
             "start_date": week_start.isoformat(),
@@ -680,15 +675,16 @@ def weekly_submission_chart(request, student_id):
         )
         .annotate(week_start=TruncWeek("submitted_at"))
         .values("week_start")
-        .annotate(submissions_count=Count("id"))
+        .annotate(
+            exercises_count=Count("exercice", distinct=True)
+        )
     )
 
-    # Mapping propre
     for s in submissions:
         week_index = (s["week_start"].date() - start_date).days // 7
         if 0 <= week_index < 6:
             data[week_index]["submissions"] = round(
-                s["submissions_count"] / total_exercises * 100
+                (s["exercises_count"] / total_exercises) * 100
             )
 
     return Response(data)
@@ -698,56 +694,66 @@ def weekly_submission_chart(request, student_id):
 @permission_classes([IsAuthenticatedJWT])
 def student_weekly_submission_chart(request):
     user = request.user
-    today = now().date()
 
-    # Lundi de la semaine courante
+    # Lundi de la semaine courante (timezone-safe)
+    today = now()
     start_of_this_week = today - timedelta(days=today.weekday())
-    # On remonte à 6 semaines
+    start_of_this_week = start_of_this_week.replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+    # On remonte à 6 semaines (incluant la semaine courante)
     start_date = start_of_this_week - timedelta(weeks=5)
 
-    # Tous les espaces où l'étudiant est inscrit
+    # Espaces où l'étudiant est inscrit
     spaces = Space.objects.filter(spaceetudiant__etudiant=user).distinct()
 
-    # Tous les exercices disponibles pour l'étudiant dans ces espaces
-    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
+    # Exercices accessibles à l'étudiant
+    exercises = Exercice.objects.filter(
+        spaceexo__space__in=spaces
+    ).distinct()
 
-    total_exercises = exercises.count() or 1  # éviter division par 0
+    total_exercises = exercises.count()
 
-    # Initialisation des 6 semaines (LUNDI → DIMANCHE)
+    if total_exercises == 0:
+        return Response([], status=status.HTTP_200_OK)
+
+    # Initialisation des 6 semaines
     data = []
     for i in range(6):
         week_start = start_date + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)
         data.append({
-            "week": f"Week {i+1}",
-            "start_date": week_start.isoformat(),
-            "end_date": week_end.isoformat(),
+            "week": f"Week {i + 1}",
+            "start_date": week_start.date().isoformat(),
+            "end_date": week_end.date().isoformat(),
             "submissions": 0
         })
 
-    # Récupérer les tentatives soumises par l'étudiant pour ces exercices
+    # Tentatives soumises par semaine (EXERCICES DISTINCTS)
     submissions = (
         TentativeExercice.objects.filter(
             utilisateur=user,
             exercice__in=exercises,
             etat="soumis",
-            submitted_at__date__gte=start_date
+            submitted_at__gte=start_date
         )
         .annotate(week_start=TruncWeek("submitted_at"))
         .values("week_start")
-        .annotate(submissions_count=Count("id"))
+        .annotate(exos_soumis=Count("exercice", distinct=True))
         .order_by("week_start")
     )
 
-    # Mapper chaque soumission dans la bonne semaine et convertir en %
+    # Remplissage des semaines
     for s in submissions:
-        week_index = (s["week_start"].date() - start_date).days // 7
+        week_index = int((s["week_start"] - start_date).days / 7)
         if 0 <= week_index < 6:
             data[week_index]["submissions"] = round(
-                s["submissions_count"] / total_exercises * 100
+                (s["exos_soumis"] / total_exercises) * 100
             )
 
     return Response(data, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET'])
