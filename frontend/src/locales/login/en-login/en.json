@@ -22,7 +22,8 @@
   "passwordUpdated": "Password updated successfully",
   "error": "An error occurred",
   "updatePassword": "Update Password",
-  "language": "Language"
+  "language": "Language",
+  "api":"Login API response:"
   },
   "errors": {
     "emailNotFound": "Email address not found",
@@ -31,7 +32,8 @@
      "emailRequired": "Email is required",
     "passwordRequired": "Password is required",
     "passwordLength": "Password must be at least 8 characters",
-    "passwordMatch": "Passwords do not match"
+    "passwordMatch": "Passwords do not match",
+   "back":"Erreur backend"
   },
   "success": {
     "login": "Login successful!"

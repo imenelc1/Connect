@@ -95,6 +95,24 @@ export default function QuizzesManagement() {
         };
     }, []);
 
+    // Effet pour la responsivité
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        // Gestion de la sidebar
+        const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("sidebarChanged", handleSidebarChange);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("sidebarChanged", handleSidebarChange);
+        };
+    }, []);
+
     // CREATE QUIZ
     const [newQuiz, setNewQuiz] = useState({ title: "", description: "" });
     const submitCreate = (e) => {
@@ -156,7 +174,6 @@ export default function QuizzesManagement() {
                         <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
                         <p className="text-gray">{t("subtitle")}</p>
                     </div>
-
                     <div className="flex gap-4 items-center">
                         <Button
                             text={t("createButton")}
@@ -164,7 +181,6 @@ export default function QuizzesManagement() {
                             className="!w-auto px-6 py-2 rounded-xl"
                             onClick={() => setCreateModal(true)}
                         />
-
                     </div>
                 </div>
 

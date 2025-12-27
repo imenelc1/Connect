@@ -19,7 +19,7 @@ export default function ModernDropdown({ value, onChange, options, placeholder, 
       {/* BOUTON COMPACT */}
       <button type="button" style={style}
         className="flex items-center justify-between min-w-[115px] px-3 py-1.5
-                   rounded-lg bg-white border border-primary/20 shadow-sm
+                   rounded-lg bg-white dark:bg-grad-2 border border-primary/20 shadow-sm
                    text-primary text-sm font-medium cursor-pointer
                    hover:bg-gray-50 transition-all duration-200
                    focus:ring-2 focus:ring-supp"

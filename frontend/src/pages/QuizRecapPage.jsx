@@ -51,6 +51,8 @@ export default function QuizRecapPage() {
 
   if (loading) return <p>Chargement du quiz...</p>;
   if (!quiz) return <p>Quiz introuvable.</p>;
+  const totalPoints = quiz.quiz.questions ? quiz.quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
+
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8 bg-background">
@@ -80,15 +82,17 @@ export default function QuizRecapPage() {
 
         {/* Score */}
         <div className="text-3xl font-bold mb-4 text-textc">
-          {quiz.quiz.reponse_quiz_utilisateur?.score_total || 0} / {quiz.quiz.questions.length}
+          {quiz.quiz.reponse_quiz_utilisateur?.score_total || 0} / {totalPoints}
         </div>
 
         {/* Félicitations */}
-        {quiz.quiz.reponse_quiz_utilisateur?.score_total >= quiz.quiz.scoreMinimum ? (
-          <p className="text-green-600 text-xl mb-4">{t("congrats")}</p>
-        ) : (
-          <p className="text-red-600 text-xl mb-4">{t("tryAgain")}</p>
-        )}
+        {quiz.quiz.reponse_quiz_utilisateur?.score_total >= quiz.quiz.scoreMinimum ||
+ quiz.quiz.reponse_quiz_utilisateur?.score_total === totalPoints ? (
+  <p className="text-green-600 text-xl mb-4">{t("congrats")}</p>
+) : (
+  <p className="text-red-600 text-xl mb-4">{t("tryAgain")}</p>
+)}
+
 
         {/* Récapitulatif des réponses */}
         <h3 className="text-xl font-semibold text-textc mb-4">{t("recap")}</h3>
@@ -108,30 +112,30 @@ export default function QuizRecapPage() {
               <p className="text-sm text-grayc mb-2">{q.score} {t("point")}</p>
 
               {/* Options */}
-    <div className="flex flex-col gap-2">
-  {q.options.map((opt) => {
-    const isSelected = q.reponse_utilisateur?.option_choisie?.id_option === opt.id_option;
-    const isCorrect = opt.texte_option === q.reponse_correcte;
+              <div className="flex flex-col gap-2">
+                {q.options.map((opt) => {
+                  const isSelected = q.reponse_utilisateur?.option_choisie?.id_option === opt.id_option;
+                  const isCorrect = opt.texte_option === q.reponse_correcte;
 
-    let classes = "rounded-md p-2 border border-gray-300 bg-white ";
+                  let classes = "rounded-md p-2 border border-gray-300 bg-white ";
 
-    if (isCorrect) {
-      // La bonne réponse en vert
-      classes = "rounded-md p-2 border border-green bg-green";
-    }
+                  if (isCorrect) {
+                    // La bonne réponse en vert
+                    classes = "rounded-md p-2 border border-green bg-green";
+                  }
 
-    if (isSelected && !isCorrect) {
-      // Réponse choisie mais incorrecte en rouge
-      classes = "rounded-md p-2 border border-red bg-red";
-    }
+                  if (isSelected && !isCorrect) {
+                    // Réponse choisie mais incorrecte en rouge
+                    classes = "rounded-md p-2 border border-red bg-red";
+                  }
 
-    return (
-      <div key={opt.id_option} className={classes}>
-        {opt.texte_option}
-      </div>
-    );
-  })}
-</div>
+                  return (
+                    <div key={opt.id_option} className={classes}>
+                      {opt.texte_option}
+                    </div>
+                  );
+                })}
+              </div>
 
             </div>
           ))}
@@ -144,11 +148,7 @@ export default function QuizRecapPage() {
             variant="quizBack"
             onClick={() => navigate("/all-quizzes")}
           />
-          <Button
-            text={<span className="flex items-center gap-2"><FaRedoAlt /> {t("reset")}</span>}
-            variant="quizStart"
-            onClick={() => navigate(`/QuizTake/${exerciceId}`)}
-          />
+          
         </div>
 
       </div>

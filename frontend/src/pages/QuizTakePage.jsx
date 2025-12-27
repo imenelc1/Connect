@@ -177,7 +177,7 @@ export function QuizTakePage() {
             </div>
           )}
           <div className="flex items-center gap-2 bg-purple px-4 py-2 rounded">
-            <FaMedal /> {quiz.scoreMinimum}%
+            <FaMedal /> {quiz.scoreMinimum}
           </div>
 
           <div className="flex items-center gap-2 bg-pink px-4 py-2 rounded">

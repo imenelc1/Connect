@@ -67,14 +67,14 @@ const { loginUser } = useContext(AuthContext);
     // validations en direct par champ (pour UX immédiate)
     if (name === "password") {
       if (value.length < 8) {
-        setErrors(prev => ({ ...prev, password: "Minimum 8 caractères" }));
+        setErrors(prev => ({ ...prev, password: t("passwordMin") }));
       } else {
         setErrors(prev => ({ ...prev, password: "" }));
       }
 
       // si confirm existant, vérifie cohérence
       if (formData.confirm && formData.confirm !== value) {
-        setErrors(prev => ({ ...prev, confirm: "Les mots de passe ne correspondent pas" }));
+        setErrors(prev => ({ ...prev, confirm: t("passwordMismatch") }));
       } else if (formData.confirm && formData.confirm === value) {
         setErrors(prev => ({ ...prev, confirm: "" }));
       }
@@ -82,20 +82,20 @@ const { loginUser } = useContext(AuthContext);
 
     if (name === "confirm") {
       if (value !== formData.password) {
-        setErrors(prev => ({ ...prev, confirm: "Les mots de passe ne correspondent pas" }));
+        setErrors(prev => ({ ...prev, confirm: t("passwordMismatch") }));
       } else {
         setErrors(prev => ({ ...prev, confirm: "" }));
       }
     }
 
     if ((name === "nickname" || name === "fullname") && /\d/.test(value)) {
-      setErrors(prev => ({ ...prev, [name]: "Ne doit pas contenir de chiffres" }));
+      setErrors(prev => ({ ...prev, [name]:  t("nameNumbers") }));
     } else if (name === "nickname" || name === "fullname") {
       // clear only if it matches name rules
       if (value.trim() === "") {
         setErrors(prev => ({ ...prev, [name]: "" })); // keep required handled in final validate
       } else if (!nameRegex.test(value)) {
-        setErrors(prev => ({ ...prev, [name]: "Caractères invalides (lettres seulement)" }));
+        setErrors(prev => ({ ...prev, [name]: t("invalidCaracters") }));
       } else {
         setErrors(prev => ({ ...prev, [name]: "" }));
       }
@@ -103,7 +103,7 @@ const { loginUser } = useContext(AuthContext);
 
     if (name === "email") {
       if (value && !emailRegex.test(value)) {
-        setErrors(prev => ({ ...prev, email: "Format d'email invalide" }));
+        setErrors(prev => ({ ...prev, email: t("invalidEmail") }));
       } else {
         setErrors(prev => ({ ...prev, email: "" }));
       }
@@ -111,10 +111,10 @@ const { loginUser } = useContext(AuthContext);
 
     if (name === "regnumber") {
       if (value && !/^\d*$/.test(value)) {
-        setErrors(prev => ({ ...prev, regnumber: "Le matricule doit contenir uniquement des chiffres" }));
+        setErrors(prev => ({ ...prev, regnumber: t("regCond") }));
       } else if (value && !matriculeRegex.test(value)) {
         // si longueur différente de 12, message moins brutal
-        setErrors(prev => ({ ...prev, regnumber: "Matricule : 12 chiffres attendus" }));
+        setErrors(prev => ({ ...prev, regnumber: t("regnumberInvalid") }));
       } else {
         setErrors(prev => ({ ...prev, regnumber: "" }));
       }
@@ -126,7 +126,7 @@ const { loginUser } = useContext(AuthContext);
         const minDate = new Date();
         minDate.setFullYear(minDate.getFullYear() - 25); // 25 ans minimum
         if (birthDate > minDate) {
-          setErrors(prev => ({ ...prev, dob: "Vous devez avoir au moins 25 ans." }));
+          setErrors(prev => ({ ...prev, dob: t("MinAgeInstructor") }));
         } else {
           setErrors(prev => ({ ...prev, dob: "" }));
         }
@@ -140,32 +140,32 @@ const { loginUser } = useContext(AuthContext);
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.nickname.trim()) newErrors.nickname = "Pseudo obligatoire.";
-    else if (!nameRegex.test(formData.nickname)) newErrors.nickname = "Le pseudo ne doit contenir que des lettres.";
+    if (!formData.nickname.trim()) newErrors.nickname = t("requiredField");
+    else if (!nameRegex.test(formData.nickname)) newErrors.nickname = t("nicknameNumbers");
 
-    if (!formData.fullname.trim()) newErrors.fullname = "Nom complet obligatoire.";
-    else if (!nameRegex.test(formData.fullname)) newErrors.fullname = "Le nom complet ne doit contenir que des lettres.";
+    if (!formData.fullname.trim()) newErrors.fullname = t("requiredField");
+    else if (!nameRegex.test(formData.fullname)) newErrors.fullname = t("fullnameNumbers");
 
-    if (!formData.email.trim()) newErrors.email = "Email obligatoire.";
-    else if (!emailRegex.test(formData.email)) newErrors.email = "Format email invalide.";
+    if (!formData.email.trim()) newErrors.email = t("emailRequired");
+    else if (!emailRegex.test(formData.email)) newErrors.email = t("invalidEmail");
 
-    if (!formData.password.trim()) newErrors.password = "Mot de passe obligatoire.";
-    else if (formData.password.length < 8) newErrors.password = "Minimum 8 caractères.";
+    if (!formData.password.trim()) newErrors.password = t("pwdRequired");
+    else if (formData.password.length < 8) newErrors.password = t("passwordMin");
 
-    if (formData.confirm !== formData.password) newErrors.confirm = "Mot de passe non identique";
+    if (formData.confirm !== formData.password) newErrors.confirm =  t("passwordMismatch");
 
-    if (!formData.dob) newErrors.dob = "Champ obligatoire";
+    if (!formData.dob) newErrors.dob = t("requiredField");
     else {
       const birthDate = new Date(formData.dob);
       const minDate = new Date();
       minDate.setFullYear(minDate.getFullYear() - 25);
-      if (birthDate > minDate) newErrors.dob = "Vous devez avoir au moins 25 ans.";
+      if (birthDate > minDate) newErrors.dob = t("MinAgeInstructor");
     }
 
-    if (!formData.regnumber) newErrors.regnumber = "Champ obligatoire";
-    else if (!matriculeRegex.test(formData.regnumber)) newErrors.regnumber = "Matricule invalide (12 chiffres)";
+    if (!formData.regnumber) newErrors.regnumber = t("requiredField");
+    else if (!matriculeRegex.test(formData.regnumber)) newErrors.regnumber = t("regnumberInvalid");
 
-    if (!formData.rank) newErrors.rank = "Grade obligatoire";
+    if (!formData.rank) newErrors.rank = t("gradeRequired");
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -176,7 +176,7 @@ const { loginUser } = useContext(AuthContext);
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error("Veuillez corriger les erreurs.");
+      toast.error(t("fixErrors"));
       return;
     }
 
@@ -207,7 +207,7 @@ const { loginUser } = useContext(AuthContext);
       };
       localStorage.setItem("user", JSON.stringify(userWithRole));
 
-      toast.success("Inscription réussie !");
+      toast.success(t("successSignUp"));
       navigate("/dashboard-ens"); // ✅ navigation via react-router
 
     } catch (err) {
@@ -233,7 +233,7 @@ const { loginUser } = useContext(AuthContext);
         return;
       }
 
-      toast.error("Erreur réseau. Vérifiez Django.");
+      toast.error(t("networkError"));
     }
   };
 
@@ -297,9 +297,9 @@ const { loginUser } = useContext(AuthContext);
               value={formData.rank}
               onChange={(val) => setFormData({ ...formData, rank: val })}
               options={[
-                { value: "Prof", label: "Professor" },
-                { value: "maitre conf", label: "Maitre de conférences" },
-                { value: "maitre ass", label: "Maitre assistant" }
+                { value: "Prof", label: t("prof") },
+                { value: "maitre conf", label: t("MC") },
+                { value: "maitre ass", label: t("MA") }
               ]}
               placeholder={t("rank")}
             />

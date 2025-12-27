@@ -1,15 +1,15 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Menu, X } from "lucide-react"; // Ajout d'icônes mobiles
 
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import BadgeHeader from "../components/common/BadgeHeader";
 import BadgeStats from "../components/common/BadgeStats";
 import BadgeTabs from "../components/common/BadgeTabs";
 import BadgeGrid from "../components/common/BadgeGrid";
 import BadgeFooter from "../components/common/BadgeFooter";
 import ThemeContext from "../context/ThemeContext";
-
-
+import UserCircle from "../components/common/UserCircle"; // Ajout
 import { MdAutoAwesome } from "react-icons/md";
 
 // List of badges
@@ -153,7 +153,6 @@ import {
   FaRocket,
   FaFire,
 } from "react-icons/fa";
-import BadgeButton from "../components/common/BadgeButton";
 
 const getBadgeIcon = (title) => {
   switch (title) {
@@ -201,21 +200,17 @@ const getBadgeIcon = (title) => {
 export default function Badges() {
   const [activeTab, setActiveTab] = useState("all");
   const { t, i18n } = useTranslation("courses");
-
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-    localStorage.setItem("lang", newLang);
-  };
-
   const { toggleDarkMode } = useContext(ThemeContext);
 
-  const storedUser = localStorage.getItem("user");
+  // États pour la responsivité
+  const [isMobile, setIsMobile] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Si storedUser est null, vide ou "undefined", on renvoie null
+  // Récupération des données utilisateur
+  const storedUser = localStorage.getItem("user");
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-
   const userRole = userData?.role ?? null;
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
@@ -232,7 +227,20 @@ export default function Badges() {
   const streakPct = 60;
   const xpPct = 45;
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Gestion de la responsivité
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
@@ -240,38 +248,52 @@ export default function Badges() {
     return () => window.removeEventListener("sidebarChanged", handler);
   }, []);
 
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "fr" ? "en" : "fr";
+    i18n.changeLanguage(newLang);
+    localStorage.setItem("lang", newLang);
+  };
+
   return (
     <>
-      <div className="bg-surface">
+      <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
         <Navbar />
 
+       
+
+       
+
+     
+        <main
+  className={`
+    flex-1 p-4 sm:p-6 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+    ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+    pt-12 ml-16 md:pt-10 /* Ajustement crucial pour mobile */
+  `}
+>
+      
+        {/* BadgeHeader - maintenant visible sur mobile */}
         <BadgeHeader />
 
-        <main
-          className={`
-        p-6 pt-10 min-h-screen text-textc transition-all duration-300
-        ${sidebarCollapsed ? "ml-20" : "ml-64"}
-      `}
-        >
-          {/* Stats */}
-          <BadgeStats
-            unlockedCount={unlockedCount}
-            totalBadges={totalBadges}
-            progressPct={progressPct}
-            streakPct={streakPct}
-            xpPct={xpPct}
-          />
+        {/* Stats */}
+        <BadgeStats
+          unlockedCount={unlockedCount}
+          totalBadges={totalBadges}
+          progressPct={progressPct}
+          streakPct={streakPct}
+          xpPct={xpPct}
+        />
 
-          {/* Tabs */}
-          <BadgeTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        {/* Tabs */}
+        <BadgeTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          {/* Badge grid */}
-          <BadgeGrid badges={filteredBadges} getBadgeIcon={getBadgeIcon} />
+        {/* Badge grid */}
+        <BadgeGrid badges={filteredBadges} getBadgeIcon={getBadgeIcon} />
 
-          {/* Footer */}
-          <BadgeFooter />
-        </main>
-      </div>
-    </>
-  );
+        {/* Footer */}
+        <BadgeFooter />
+      </main>
+    </div>
+  </>
+);
 }

@@ -13,6 +13,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import progressionService from "../services/progressionService";
+import Input from "../components/common/Input";
 
 import Editor from "@monaco-editor/react";
 
@@ -20,7 +21,6 @@ export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
   const { exerciceId } = useParams();
-
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
@@ -50,6 +50,7 @@ int main() {
   const sidebarWidth = sidebarCollapsed ? -200 : -50;
 
   const isStudent = userData.role === "etudiant";
+  const [overwrite, setOverwrite] = useState(false);
 
 
 
@@ -119,21 +120,40 @@ int main() {
     }
   };
 
-  const handleSubmit = async () => {
-    try {
-      await progressionService.submitTentative({
-        exercice_id: exerciceId,
-        reponse: userCode,
-        output,
-        etat: "soumis",
-        temps_passe: Math.floor((Date.now() - startTime) / 1000),
-      });
-      toast.success("Exercice soumis");
-    } catch (err) {
-      console.error(err);
-      toast.error("Erreur lors de la soumission");
+const handleSubmit = async () => {
+  try {
+    await progressionService.submitTentative({
+      exercice_id: exerciceId,
+      reponse: userCode,
+      output,
+      etat: "soumis",
+      overwrite,
+      temps_passe: Math.floor((Date.now() - startTime) / 1000),
+    });
+    toast.success("Exercice soumis");
+
+    // Vérifier à nouveau si l'on peut soumettre
+    const res = await fetch(
+      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    const data = await res.json();
+    setCanSubmit(data.can_submit);
+
+    if (!data.can_submit) {
+      toast.error("Toutes les tentatives ont été utilisées !");
     }
-  };
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Erreur lors de la soumission");
+  }
+};
+
 
   const [canSubmit, setCanSubmit] = useState(false);
 
@@ -323,6 +343,7 @@ int main() {
             onClick={resetCode}
           />
         </div>
+
 
        {isStudent && (
   <div className="flex justify-center gap-4">

@@ -69,7 +69,7 @@ class TentativeExercice(models.Model):
             self.submitted_at = timezone.now()
         super().save(*args, **kwargs)
     class Meta:
-        unique_together = ('utilisateur', 'exercice')
+        ordering = ['-created_at'] 
 
 
 

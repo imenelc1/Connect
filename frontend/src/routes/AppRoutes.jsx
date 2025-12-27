@@ -123,7 +123,7 @@ export default function AppRoutes() {
          {/* ========= QUIZZES ========= */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
-        <Route path="/quiz-preview" element={<QuizPreview />} />
+        <Route path="/quiz-preview/:exerciceId" element={<QuizPreview />} />
         <Route path="/quiz-intro/:exerciceId" element={<QuizIntroPage />} />
         <Route path="/quizTake/:exerciceId" element={<QuizTakePage />} />
         <Route path="/QuizRecape/:exerciceId" element={<QuizRecapPage />} />

@@ -22,7 +22,8 @@
     "confirmPassword": "Confirmer le mot de passe",
     "passwordUpdated": "Mot de passe mis à jour avec succès",
     "error": "Une erreur est survenue",
-    "language": "Langue"
+    "language": "Langue",
+     "api":"Reponse api login:"
   },
   "errors": {
     "emailNotFound": "Adresse email inconnue",

@@ -7,11 +7,11 @@ import {
   ResponsiveContainer,
   Area,
 } from "recharts";
-
-
+import"../../styles/index.css";
+import { useTranslation } from "react-i18next";
 
 export default function GradeProgressionChart({ data, title = "Grade Progression" }) {
- 
+   const { t } = useTranslation("ProgressStudent");
   return (
     <div className="p-6 bg-white rounded-2xl shadow-md">
       <h2 className="font-semibold text-lg mb-4">{title}</h2>
