@@ -16,7 +16,7 @@ class CreateExoView(APIView):
     @jwt_required
     def post(self, request):
         data = request.data.copy()
-        data["utilisateur"] = request.user_id  # 🟩 automatique, sécurisé
+        data["utilisateur"] = request.user_id  
 
         serializer = ExerciceSerializer1(data=data)
 
@@ -39,9 +39,16 @@ def Exercice_list_api(request):
 
 
 
+
 class ExerciceListCreateView(generics.ListCreateAPIView):
     queryset = Exercice.objects.all()
     serializer_class = ExerciceSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 
 # Détail, modification, suppression
 class ExerciceDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -71,6 +78,17 @@ def delete_exercice(request, pk):
 
 class ExerciceParCoursView(APIView):
     def get(self, request, cours_id):
+        exercices = Exercice.objects.filter(
+            cours_id=cours_id,
+            visibilite_exo=True
+        ).exclude(categorie="quiz")
+
+        serializer = ExerciceSerializer(
+            exercices,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
         exercices = Exercice.objects.filter(cours_id=cours_id).exclude(categorie="quiz")
         serializer = ExerciceSerializer(exercices, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

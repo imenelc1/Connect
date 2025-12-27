@@ -6,11 +6,12 @@ import { Users, BookOpen, ClipboardList, LayoutGrid } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import ContentFilters from "../components/common/ContentFilters";
+import ActivityCharts from "../components/common/ActivityCharts";
 
 export default function DashboardAdmin() {
   const { toggleDarkMode } = useContext(ThemeContext);
   const { t, i18n } = useTranslation("DashboardAdmin");
-  
+
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -23,13 +24,13 @@ export default function DashboardAdmin() {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     // Gestion de la sidebar
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -71,7 +72,7 @@ export default function DashboardAdmin() {
     total_exercises: 0,
     total_spaces: 0,
   });
-  
+
   const stats = [
     {
       title: t("stats.totalStudents"),
@@ -89,7 +90,7 @@ export default function DashboardAdmin() {
       icon: <ClipboardList className="text-pink" size={40} />,
     },
     {
-      title: t("stats.totalSpaces"), 
+      title: t("stats.totalSpaces"),
       value: statsData.total_spaces,
       icon: <LayoutGrid className="text-blue" size={40} />,
     },
@@ -111,7 +112,7 @@ export default function DashboardAdmin() {
     { name: "David Lee", action: "Earned 'Master of Algo'", time: "1 hour ago" },
     { name: "Emma Wilson", action: "Posted in Recursion", time: "2 hours ago" },
   ];
-  
+
   useEffect(() => {
     fetch("http://localhost:8000/api/users/admin/stats/", {
       headers: {
@@ -144,7 +145,7 @@ export default function DashboardAdmin() {
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
             <p className="text-gray">{t("subtitle")}</p>
           </div>
-          
+
           <UserCircle
             onToggleTheme={toggleDarkMode}
             onChangeLang={(lang) => i18n.changeLanguage(lang)}
@@ -154,7 +155,7 @@ export default function DashboardAdmin() {
         {/* STATS WITH PROTOTYPE COLORS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, i) => (
-            <div 
+            <div
               key={i}
               className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition flex justify-between items-center bg-gradient-to-br ${statGradients[i]}`}
             >
@@ -171,7 +172,7 @@ export default function DashboardAdmin() {
 
         {/* GRID: ACTIVITY + COURSES */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
+
           {/* LEFT: Recent Activity */}
           <div className="bg-card  rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-muted mb-4">{t("recentActivity")}</h2>
@@ -194,39 +195,8 @@ export default function DashboardAdmin() {
 
           {/* RIGHT: COURSES VALIDATION */}
           <div className="bg-card  rounded-2xl p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-muted mb-4">{t("validationCourses")}</h2>
+            <ActivityCharts />
 
-            {/* TABS */}
-            <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
-              {["pending", "approved", "rejected"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                   className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm
-                    ${activeTab === tab 
-                       ? "text-white bg-primary shadow-md"
-                  : "text-primary/70 "
-                    }`}
-                >
-                  {t(`tabs.${tab}`)} ({coursesByTab[tab].length})
-                </button>
-              ))}
-            </div>
-    
-
-
-                     
-
-            {/* COURSES LIST */}
-            <div className="flex flex-col gap-4">
-              {courses.length === 0 ? (
-                <p className="text-gray text-sm italic text-center py-4">{t("noCourses")}</p>
-              ) : (
-                courses.map((course) => (
-                  <CourseCard key={course.id} course={course} />
-                ))
-              )}
-            </div>
           </div>
         </div>
       </main>

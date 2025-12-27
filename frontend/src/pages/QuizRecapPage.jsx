@@ -112,30 +112,30 @@ export default function QuizRecapPage() {
               <p className="text-sm text-grayc mb-2">{q.score} {t("point")}</p>
 
               {/* Options */}
-    <div className="flex flex-col gap-2">
-  {q.options.map((opt) => {
-    const isSelected = q.reponse_utilisateur?.option_choisie?.id_option === opt.id_option;
-    const isCorrect = opt.texte_option === q.reponse_correcte;
+              <div className="flex flex-col gap-2">
+                {q.options.map((opt) => {
+                  const isSelected = q.reponse_utilisateur?.option_choisie?.id_option === opt.id_option;
+                  const isCorrect = opt.texte_option === q.reponse_correcte;
 
-    let classes = "rounded-md p-2 border border-gray-300 bg-white ";
+                  let classes = "rounded-md p-2 border border-gray-300 bg-white ";
 
-    if (isCorrect) {
-      // La bonne réponse en vert
-      classes = "rounded-md p-2 border border-green bg-green";
-    }
+                  if (isCorrect) {
+                    // La bonne réponse en vert
+                    classes = "rounded-md p-2 border border-green bg-green";
+                  }
 
-    if (isSelected && !isCorrect) {
-      // Réponse choisie mais incorrecte en rouge
-      classes = "rounded-md p-2 border border-red bg-red";
-    }
+                  if (isSelected && !isCorrect) {
+                    // Réponse choisie mais incorrecte en rouge
+                    classes = "rounded-md p-2 border border-red bg-red";
+                  }
 
-    return (
-      <div key={opt.id_option} className={classes}>
-        {opt.texte_option}
-      </div>
-    );
-  })}
-</div>
+                  return (
+                    <div key={opt.id_option} className={classes}>
+                      {opt.texte_option}
+                    </div>
+                  );
+                })}
+              </div>
 
             </div>
           ))}

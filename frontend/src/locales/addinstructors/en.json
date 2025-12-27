@@ -17,5 +17,13 @@
   "create": "Create",
   "update": "Update",
   "cancel": "Cancel",
-  "toggleLang": "Switch to FR"
+  "toggleLang": "Switch to FR",
+  "firstName":"Firt Name",
+  "lastName":"Last Name",
+  "birthdate":"Birthdate",
+  "rank":"Academic Rank",
+  "matricule":"Registration number",
+  "password":"Password",
+  "instructorResume":"Instructor Summary",
+  "close":"Close"
 }

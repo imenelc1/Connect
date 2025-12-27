@@ -20,7 +20,6 @@ export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
   const { exerciceId } = useParams();
-
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);

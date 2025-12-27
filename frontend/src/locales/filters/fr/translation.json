@@ -15,5 +15,7 @@
   "myExercises": "Mes exercices",
   "allExercises": "Tous les exercices",
   "myQuizzes": "Mes quiz",
-  "allQuizzes": "Tous les quiz"
+  "allQuizzes": "Tous les quiz",
+   "searchPlaceholder":"Rechecher..."
+
 }

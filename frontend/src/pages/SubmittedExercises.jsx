@@ -80,13 +80,13 @@ export default function SubmittedExercises() {
             onClick={() => setFilter("Soumis")}
             className={`border px-3 py-1 rounded ${filter === "Soumis" ? "bg-primary text-white" : "bg-bg text-primary"}`}
           >
-            Soumis
+            {t("submitted")}
           </button>
           <button
             onClick={() => setFilter("Brouillon")}
             className={`border px-3 py-1 rounded ${filter === "Brouillon" ? "bg-primary text-white" : "bg-bg text-primary"}`}
           >
-            Brouillon
+             {t("brouillon")}
           </button>
         </div>
 
@@ -171,7 +171,7 @@ export default function SubmittedExercises() {
           <div className="flex items-center justify-between bg-grad-3 border border-secondary2 p-5 rounded-xl">
             <div className="flex items-center gap-3">
               <CheckCircle className="text-secondary" size={20} />
-              <span className="font-regular text-md">Soumis</span>
+              <span className="font-regular text-md">{t("submitted")}</span>
             </div>
             <span className="text-md font-bold text-secondary">
               {exercises.filter(e => e.status === "Soumis").length}
@@ -181,7 +181,7 @@ export default function SubmittedExercises() {
           <div className="flex items-center justify-between bg-grad-4 border border-pink p-5 rounded-xl">
             <div className="flex items-center gap-3">
               <Clock className="text-pink" size={20} />
-              <span className="font-regular text-md">Brouillon</span>
+              <span className="font-regular text-md">{t("brouillon")}</span>
             </div>
             <span className="text-md font-bold text-pink">
               {exercises.filter(e => e.status === "Brouillon").length}

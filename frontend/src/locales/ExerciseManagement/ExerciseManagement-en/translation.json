@@ -1,6 +1,6 @@
 {
   "title": "Exercises Management",
-  "description": "Manage coding exercises and problems",
+  "description": "Manage coding exercises and problems.",
   "searchPlaceholder": "Search exercises...",
   "difficulty": {
     "easy": "Easy",
@@ -11,13 +11,13 @@
   "modal": {
     "create": {
       "title": "Add New Exercise",
-      "subtitle": "Fill the form to add a new exercise",
+      "subtitle": "Fill the form to add a new exercise.",
       "submit": "Add Exercise",
       "cancel": "Cancel"
     },
     "edit": {
       "title": "Edit Exercise",
-      "subtitle": "Modify the exercise information",
+      "subtitle": "Modify the exercise information.",
       "submit": "Update",
       "cancel": "Cancel"
     }
@@ -27,7 +27,15 @@
     "title": "Title",
     "category": "Category",
     "titlePlaceholder": "Exercise title",
-    "categoryPlaceholder": "Category",
-    "difficulty":"Difficulty"
+    "categoryPlaceholder": "Select category",
+    "difficulty": "Difficulty"
+  },
+  "errors": {
+    "fetchExercises": "Error fetching exercises.",
+    "createExercise": "Error creating exercise.",
+    "editExercise": "Error updating exercise.",
+    "deleteExercise": "Error deleting exercise.",
+  "invalidData": "Exercises data is not an array:"
+   
   }
 }

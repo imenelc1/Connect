@@ -21,7 +21,9 @@ export default function ProgressExercice() {
   const [totalExercises, setTotalExercises] = useState(0);
   const [submittedCount, setSubmittedCount] = useState(0);
   const [courses, setCourses] = useState([]);
-  const [gradeData, setGradeData] = useState([]);
+  const [averageScore, setAverageScore] = useState(null);
+  const [progressScoreData, setProgressScoreData] = useState([]);
+
   // Stats dynamiques
 
   const submissionRate =
@@ -29,13 +31,7 @@ export default function ProgressExercice() {
       ? Math.round((submittedCount / totalExercises) * 100)
       : 0;
   const completedRatio = `${submittedCount}/${totalExercises}`;
-  const averageGrade =
-    gradeData.length > 0
-      ? (
-          gradeData.reduce((sum, g) => sum + g.grade, 0) / gradeData.length
-        ).toFixed(1)
-      : "—";
-
+ 
   const token = localStorage.getItem("token");
   const BACKEND_URL = "http://127.0.0.1:8000";
 
@@ -68,10 +64,7 @@ export default function ProgressExercice() {
           }
         );
         setCourses(res.data.courses || []);
-        setGradeData(exRes.data.grade_data || []);
-
         setExercises(submittedEx);
-        setGradeData(exRes.data.grade_data || []);
         setTotalExercises(exRes.data.total_exercises || submittedEx.length);
         setSubmittedCount(exRes.data.submitted_count || submittedEx.length);
       } catch (err) {
@@ -79,13 +72,40 @@ export default function ProgressExercice() {
         setStudent({});
         setExercises([]);
         setCourses([]);
-        setGradeData([]);
         setTotalExercises(0);
         setSubmittedCount(0);
+        setAverageScore(null);
+        setProgressScoreData([]);
       }
     };
 
     fetchData();
+  }, [studentId, token]);
+
+  useEffect(() => {
+    const fetchProfStats = async () => {
+      try {
+        // Moyenne des scores
+        const avgRes = await axios.get(
+          `${BACKEND_URL}/api/dashboard/student/student-average-score-prof/${studentId}/`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setAverageScore(avgRes.data.average_score);
+
+        // Progression des scores
+        const progressRes = await axios.get(
+          `${BACKEND_URL}/api/dashboard/student/student-progress-score-prof/${studentId}/`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setProgressScoreData(progressRes.data);
+      } catch (err) {
+        console.error("Erreur récupération stats prof :", err);
+        setAverageScore(null);
+        setProgressScoreData([]);
+      }
+    };
+
+    fetchProfStats();
   }, [studentId, token]);
 
   if (!student) return <p>Erreur : étudiant introuvable</p>;
@@ -109,6 +129,8 @@ export default function ProgressExercice() {
     purple: { bar: "bg-purple", text: "text-purple" },
   };
 
+  
+  
   return (
     <div className="flex flex-col lg:flex-row bg-primary/10 min-h-screen">
       <Navbar />
@@ -136,12 +158,15 @@ export default function ProgressExercice() {
 
           {/* Stats */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-16 mt-4 sm:mt-6 text-center justify-center">
-            <div>
-              <p className="text-xl sm:text-2xl font-bold text-primary">
-                {averageGrade}
-              </p>
-              <p className="text-gray">{t("ProgressExercice.AvarageG")}</p>
-            </div>
+     <div>
+  <p className="text-xl sm:text-2xl font-bold text-pink">
+  {averageScore !== null ? averageScore : "—"}
+</p>
+
+  <p className="text-gray">{t("ProgressExercice.AvarageG")}</p>
+</div>
+
+
             <div>
               <p className="text-xl sm:text-2xl font-bold text-purple">
                 {submissionRate}%
@@ -291,12 +316,13 @@ export default function ProgressExercice() {
           </div>
         </div>
 
-        <div className="mt-4">
-          <GradeProgressionChart
-            data={gradeData}
-            title={t("ProgressExercice.grade")}
-          />
-        </div>
+     <div className="mt-4">
+  <GradeProgressionChart
+    data={progressScoreData}
+    title={t("ProgressExercice.grade")}
+  />
+</div>
+
         <div className="mt-6 bg-card p-6 rounded-lg">
           <h2 className="font-semibold text-lg mb-3">
             {" "}

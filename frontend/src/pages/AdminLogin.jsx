@@ -109,7 +109,7 @@ export default function AdminLogin() {
               }
               className={errorPassword ? "border-blue-500" : ""}
             />
-            <Button text="Se connecter" type="submit" />
+            <Button text={t("login.signIn")} type="submit" />
           </form>
         </div>
 

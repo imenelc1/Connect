@@ -43,21 +43,21 @@ export default function LoginInstructor() {
 
     // --- Validation frontend ---
     if (!email) {
-      setErrorEmail("Email obligatoire");
+      setErrorEmail(t("errors.emailRequired"));
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setErrorEmail("Format email invalide");
+      setErrorEmail(t("errors.emailNotFound"));
       return;
     }
 
     if (!password) {
-      setErrorPassword("Mot de passe obligatoire");
+      setErrorPassword("errors.passwordRequired");
       return;
     }
     if (password.length < 8) {
-      setErrorPassword("Minimum 8 caractères");
+      setErrorPassword(t("errors.passwordLength"));
       return;
     }
 
@@ -68,7 +68,7 @@ export default function LoginInstructor() {
         password,
         role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant
       });
-      console.log("Login API response:", res.data);
+      console.log(t("login.api"), res.data);
       const userWithRole = {
         user_id: res.data.user.user_id,
         nom: res.data.user.nom,
@@ -85,14 +85,14 @@ export default function LoginInstructor() {
       localStorage.setItem("currentUserId", res.data.user.id_utilisateur);
       localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garder si utile
 
-      console.log("Login API response:", res.data);
+      console.log(t("login.api"), res.data);
 
-      toast.success("Connexion réussie !");
+      toast.success(t("success.login"));
       navigate("/dashboard-ens");
 
     } catch (error) {
       const backend = error.response?.data;
-      console.log("Erreur backend login enseignant:", backend);
+      console.log(t("errors.back"), backend);
 
       if (backend && typeof backend === "object") {
         const newErrors = {};
@@ -120,7 +120,7 @@ export default function LoginInstructor() {
         return;
       }
 
-      setErrorPassword("Erreur réseau");
+      setErrorPassword(t("errors.networkError"));
     }
   };
 

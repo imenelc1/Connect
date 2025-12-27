@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from courses.serializers import CoursSerializer
+from exercices.models import Exercice
 from exercices.serializers import ExerciceSerializer
 from quiz.serializers import QuizSerializer, QuizSerializer1
 from .models import Space, SpaceEtudiant, SpaceCour, SpaceExo, SpaceQuiz
@@ -61,3 +62,11 @@ class SpaceQuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpaceQuiz
         fields = ['id', 'space', 'quiz', 'date_ajout']
+
+class ExerciceSerializer(serializers.ModelSerializer):
+    espace = SpaceSerializer(read_only=True)  # ou PrimaryKeyRelatedField
+    class Meta:
+        model = Exercice
+        fields = ['id_exercice', 'titre_exo', 'enonce', 'espace']
+
+

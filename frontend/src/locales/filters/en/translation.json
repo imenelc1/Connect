@@ -14,6 +14,9 @@
   "myExercises": "My Exercises",
   "allExercises": "All Exercises",
   "myQuizzes": "My Quizzes",
-  "allQuizzes": "All Quizzes"
+  "allQuizzes": "All Quizzes",
+  "searchPlaceholder":"Search..."
+
+
 
 }

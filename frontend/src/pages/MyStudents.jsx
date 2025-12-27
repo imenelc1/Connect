@@ -7,7 +7,7 @@ import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
-import { Bell, ChevronRight,X } from "lucide-react";
+import { Bell, ChevronRight, X } from "lucide-react";
 
 import {
   getSpacesStudents,
@@ -31,7 +31,26 @@ export default function MyStudents() {
 
   const [studentsProgress, setStudentsProgress] = useState({});
 
-  
+
+
+  useEffect(() => {
+    const fetchStudentsProgress = async () => {
+      try {
+        const data = await getCurrentProgressStudents();
+        // transformer en objet { studentId: progress }
+        const progressMap = {};
+        data.forEach((item) => {
+          progressMap[item.student_id] = item.progress;
+        });
+        setStudentsProgress(progressMap);
+      } catch (err) {
+        console.error("Erreur récupération progression étudiants :", err);
+      }
+    };
+
+    fetchStudentsProgress();
+  }, []);
+
 
   useEffect(() => {
     const fetchStudentsProgress = async () => {
@@ -111,7 +130,7 @@ export default function MyStudents() {
   // Ajout étudiant
   // -----------------------------
   const handleSubmit = async (e) => {
-   
+
     if (!email || !space) return;
 
     try {
@@ -126,7 +145,7 @@ export default function MyStudents() {
       console.error("Erreur createStudent:", err);
       alert(
         err.response?.data?.error ||
-          "Une erreur est survenue lors de l'ajout de l'étudiant"
+        "Une erreur est survenue lors de l'ajout de l'étudiant"
       );
     }
   };
@@ -150,7 +169,7 @@ export default function MyStudents() {
       console.error("Erreur removeStudent:", err);
       alert(
         err.response?.data?.error ||
-          "Une erreur est survenue lors de la suppression"
+        "Une erreur est survenue lors de la suppression"
       );
     }
   };
@@ -211,12 +230,12 @@ export default function MyStudents() {
                           </h2>
                         </div>
 
-                       <Button
-  className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10"
-  onClick={() => navigate(`/student-exercises/${st.id}`)}
->
-  <ChevronRight size={16} className="w-6 h-6" />
-</Button>
+                        <Button
+                          className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10"
+                          onClick={() => navigate(`/student-exercises/${st.id}`)}
+                        >
+                          <ChevronRight size={16} className="w-6 h-6" />
+                        </Button>
                       </div>
                     </div>
 
@@ -232,7 +251,7 @@ export default function MyStudents() {
                             onClick={() => handleRemove(st.id, st.spacesIds[i])}
                             className="text-red-500 font-bold"
                           >
-                          <X size={12}/>
+                            <X size={12} />
                           </button>
                         </span>
                       ))}
@@ -243,9 +262,8 @@ export default function MyStudents() {
                       <div
                         className="h-full bg-grad-1 rounded-full"
                         style={{
-                          width: `${
-                            studentsProgress[st.id]
-                          }%`,
+                          width: `${studentsProgress[st.id]
+                            }%`,
                         }}
                       ></div>
                     </div>

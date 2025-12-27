@@ -1,6 +1,6 @@
 
 from django.urls import path
-from .views import CoursListCreateView, CoursSearchView, CoursesWithProgressView, UpdateLeconView,  CreateSectionView, CourseDetailView, CreateLeconView,  CreateCoursView, CoursDetailView, SectionListCreateView, LeconListCreateView, SectionDetailView, LeconDetailView
+from .views import CoursListCreateView, CoursesWithProgressView, MarkLessonVisitedView, UpdateLeconView,  CreateSectionView, CourseDetailView, CreateLeconView,  CreateCoursView, CoursDetailView, SectionListCreateView, LeconListCreateView, SectionDetailView, LeconDetailView, update_course_status,CoursSearchView
 from django.urls import path
 from .views import cours_list_api, delete_cours
 from rest_framework.routers import DefaultRouter
@@ -18,9 +18,14 @@ urlpatterns = [
     path('createLesson/', CreateLeconView.as_view(), name='create_lesson'),    
     path('Lesson/<int:pk>/', UpdateLeconView.as_view(), name='update_lesson_img'),      
     path('courses/<int:pk>/', CourseDetailView.as_view(), name='course-detail'),
+
     
     path('cours/progress/', CoursesWithProgressView.as_view(), name='courses-progress'),
-    #Rechrche âr titre de cours
+    path("admin/courses/", cours_list_api, name="admin-courses"),
+    path("admin/courses/create/", CreateCoursView.as_view(), name="create-cours"),
+    path("admin/courses/<int:pk>/", CoursDetailView.as_view(), name="cours-detail"),
+    path('lessons/<int:lesson_id>/visited/', MarkLessonVisitedView.as_view(), name='lesson-visited'),
+    path("courses/admin/<int:pk>/status/", update_course_status,name="update_course_status"),
     path("cours", CoursSearchView.as_view(), name="cours-list"),
        
   

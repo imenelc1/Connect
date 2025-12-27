@@ -8,7 +8,7 @@ import "../styles/index.css";
 export default function QuizIntroPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("quiz1");
-  const { exerciceId  } = useParams();
+  const { exerciceId } = useParams();
 
   const [lang, setLang] = useState("fr");
   const [quiz, setQuiz] = useState([]);
@@ -21,50 +21,50 @@ export default function QuizIntroPage() {
   };
 
   useEffect(() => {
-  fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId }/`)
-    .then(res => {
-      if (!res.ok) throw new Error("Quiz non trouvé");
-      return res.json();
-    })
-    .then(data => {
-      const q = Array.isArray(data) ? data[0] : data;
+    fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId}/`)
+      .then(res => {
+        if (!res.ok) throw new Error("Quiz non trouvé");
+        return res.json();
+      })
+      .then(data => {
+        const q = Array.isArray(data) ? data[0] : data;
 
-      const formatted=({
-        quizId: q.id,                         // ✅ ID DU QUIZ
-        //exerciceId: q.exercice?.exercice_id,
-        title: q.exercice?.titre_exo,
-        description: q.exercice?.enonce,
-        level: q.exercice?.niveau_exo,
-        duration: q.duration_minutes,
-        points: q.scoreMinimum,
-        question: q.questions.length,
-        activer:q.activerDuration,
-        questions: q.questions.map((question) => ({
-          id: question.id_qst,
-          texte: question.texte_qst,
-          score: question.score,
-          options: question.options.map((opt) => ({
-            id: opt.id_option,
-            texte: opt.texte_option,
+        const formatted = ({
+          quizId: q.id,                         // ✅ ID DU QUIZ
+          //exerciceId: q.exercice?.exercice_id,
+          title: q.exercice?.titre_exo,
+          description: q.exercice?.enonce,
+          level: q.exercice?.niveau_exo,
+          duration: q.duration_minutes,
+          points: q.scoreMinimum,
+          question: q.questions.length,
+          activer: q.activerDuration,
+          questions: q.questions.map((question) => ({
+            id: question.id_qst,
+            texte: question.texte_qst,
+            score: question.score,
+            options: question.options.map((opt) => ({
+              id: opt.id_option,
+              texte: opt.texte_option,
+            })),
           })),
-        })),
+        });
+        setQuiz(formatted);
+
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
       });
-      setQuiz(formatted);
+  });
 
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error(err);
-      setLoading(false);
-    });
-});
-
-const totalPoints = quiz.questions ? quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
+  const totalPoints = quiz.questions ? quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
 
   /* ================= LOADING ================= */
 
   /* ================= NOT FOUND ================= */
-  
+
 
   return (
     <div
@@ -108,11 +108,11 @@ const totalPoints = quiz.questions ? quiz.questions.reduce((acc, q) => acc + q.s
 
         {/* STATS */}
         <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-10 text-sm md:text-base mb-16">
-            {quiz.activer && (
-    <div className="flex items-center gap-2 bg-blue text-white px-4 py-2 rounded-md shadow-sm">
-      <FaClock /> {quiz.duration} {t("minutes")}
-    </div>
-  )}
+          {quiz.activer && (
+            <div className="flex items-center gap-2 bg-blue text-white px-4 py-2 rounded-md shadow-sm">
+              <FaClock /> {quiz.duration} {t("minutes")}
+            </div>
+          )}
 
           <div className="flex items-center gap-2 bg-purple text-white px-4 py-2 rounded-md shadow-sm">
             <FaMedal /> {totalPoints}  {t("points")}
@@ -129,13 +129,13 @@ const totalPoints = quiz.questions ? quiz.questions.reduce((acc, q) => acc + q.s
         {/* DETAILS */}
         <div className="bg-white rounded-xl shadow-md p-8 text-sm md:text-base mb-16 w-full max-w-2xl mx-auto text-center">
           <p className="mb-3">
-            <strong>{t("nombreQuestions")} :</strong> {quiz.question } {t("questions")}
+            <strong>{t("nombreQuestions")} :</strong> {quiz.question} {t("questions")}
           </p>
-       {quiz.activer && (
-    <p className="mb-3">
-      <strong>{t("dureeEstimee")} :</strong> {quiz.duration} {t("minutes")}
-    </p>
-  )}
+          {quiz.activer && (
+            <p className="mb-3">
+              <strong>{t("dureeEstimee")} :</strong> {quiz.duration} {t("minutes")}
+            </p>
+          )}
           <p>
             <strong>{t("pointsTotaux")} :</strong> {quiz.points}/{totalPoints}{t("points")}
           </p>

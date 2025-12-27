@@ -2,6 +2,8 @@
     "submittedExercises": "Exercices soumis",
     "total": "Total",
     "all": "Tous",
+     "submitted":"Soumis",
+    "brouillon":"Brouillon",
     "reviewed": "Revu",
     "pendingReview": "En attente",
     "showDetails": "Voir les détails",
