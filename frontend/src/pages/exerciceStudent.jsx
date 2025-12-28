@@ -18,6 +18,7 @@ export default function StudentExercice() {
   const token = localStorage.getItem("token");
   const BACKEND_URL = "http://127.0.0.1:8000";
   const navigate = useNavigate();
+  const [feedbacks, setFeedbacks] = useState({}); // ← bien défini ici
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,25 +129,25 @@ export default function StudentExercice() {
         <div className="flex flex-col gap-6 sm:gap-8 max-w-full sm:max-w-5xl mx-auto">
           {exercises.length === 0 && <p className="text-gray-500">{t("noExercises")}</p>}
 
-          {exercises.map((ex) => (
-            <div key={ex.id_exercice} className="mb-6">
-              <h3 className="font-semibold text-lg mb-2">{ex.nom_exercice}</h3>
-              {ex.tentatives && ex.tentatives.length > 0 ? (
-                ex.tentatives.map((t, idx) => (
-                  <TaskCard
-                    key={idx}
-                    title={`Tentative ${idx + 1}`}
-                    date={t.submitted_at ? new Date(t.submitted_at).toLocaleString() : ""}
-                    etat={t.etat}
-                    code={t.reponse || ""}
-                    feedback={t.score !== null ? `Score: ${t.score}` : ""}
-                  />
-                ))
-              ) : (
-                <p className="text-gray-400">Aucune tentative</p>
-              )}
-            </div>
-          ))}
+          {exercises.map((ex) => {
+            const tentative = ex.tentatives?.[0] || {};
+            const feedback = feedbacks[tentative.id] || "";
+
+            return (
+              <TaskCard
+                key={ex.id_exercice}
+                title={ex.nom_exercice}
+                date={tentative.submitted_at ? new Date(tentative.submitted_at).toLocaleString() : ""}
+                etat={tentative.etat || ""}
+                code={tentative.reponse || ""}
+                feedback={feedback}
+                exerciceId={ex.id_exercice}
+                tentativeId={tentative.id}
+              />
+            );
+          })}
+
+
         </div>
       </div>
     </div>

@@ -34,6 +34,7 @@ class ForumSerializer(serializers.ModelSerializer):
             'utilisateur_prenom',
             'type',
             'titre_forum',
+            'contenu_forum',
             'cible', 
             'date_creation',
             'nombre_messages',

@@ -46,4 +46,20 @@ class Migration(migrations.Migration):
                 'ordering': ['-date_creation'],
             },
         ),
+        migrations.CreateModel(
+            name='Feedback',
+            fields=[
+                ('id_feedback', models.AutoField(primary_key=True, serialize=False)),
+                ('contenu', models.TextField()),
+                ('etoile', models.PositiveSmallIntegerField()),
+                ('afficher_nom', models.BooleanField(default=False)),
+                ('object_id', models.PositiveIntegerField()),
+                ('date_creation', models.DateTimeField(auto_now_add=True)),
+                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
+            ],
+            options={
+                'db_table': 'feedback',
+                'ordering': ['-date_creation'],
+            },
+        ),
     ]

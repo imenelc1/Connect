@@ -7,6 +7,8 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import ContentFilters from "../components/common/ContentFilters";
 import ActivityCharts from "../components/common/ActivityCharts";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 
 export default function DashboardAdmin() {
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -18,7 +20,8 @@ export default function DashboardAdmin() {
 
   const [activeTab, setActiveTab] = useState("pending");
   const token = localStorage.getItem("admin_token");
-
+  const adminData = JSON.parse(localStorage.getItem("admin")) || {};
+  const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
   // Effet pour la responsivité
   useEffect(() => {
     const handleResize = () => {
@@ -27,7 +30,6 @@ export default function DashboardAdmin() {
 
     // Gestion de la sidebar
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
 
@@ -145,11 +147,18 @@ export default function DashboardAdmin() {
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
             <p className="text-gray">{t("subtitle")}</p>
           </div>
-
-          <UserCircle
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
-          />
+          
+          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+                  <NotificationBell />
+                  <UserCircle
+                    initials={initials}
+                    onToggleTheme={toggleDarkMode}
+                    onChangeLang={(lang) => {
+                      const i18n = window.i18n;
+                      if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+                    }}
+                  />
+                </div>
         </div>
 
         {/* STATS WITH PROTOTYPE COLORS */}
