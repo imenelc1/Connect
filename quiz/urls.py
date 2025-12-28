@@ -24,7 +24,7 @@ urlpatterns = [
         name="exercice-detail-quiz_All"
     ),
 
-   path("student/quizzes-faits/<int:student_id>/", quizzes_faits_par_etudiant, name="quizzes-faits"),
+   path("student/quizzes-faits/", quizzes_faits_par_etudiant, name="quizzes-faits"),
 
 
 

@@ -115,7 +115,7 @@ export default function AppRoutes() {
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
         <Route path="/progress-exercice" element={<ProgressExercice />} />
        
-        <Route path="/progress-student/:studentId" element={<ProgressStudent />} />
+        <Route path="/progress-student" element={<ProgressStudent />} />
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />

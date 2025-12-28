@@ -3,6 +3,7 @@ import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import feedbackService from "../../services/feedbackService";
 import FeedbackCard from "../common/FeedbackCard.jsx";
+import { useNavigate } from "react-router-dom";
 export default function CourseContent({
   course,
   currentSectionIndex,
@@ -16,6 +17,7 @@ export default function CourseContent({
   const { t } = useTranslation("courses");
   const { title, sections } = course;
   const courseId = course.id || "default";
+  const navigate = useNavigate();
 
   // Timer
   const [secondsSpent, setSecondsSpent] = useState(() => {
@@ -256,6 +258,18 @@ useEffect(() => {
         )}
       </div>
 
+            {isLastPage && (
+        <div className="mb-4 p-4  text-center">
+          <p className="text-green-700 font-semibold text-sm sm:text-base">
+             Cours terminé !
+          </p>
+          <p className="text-muted text-xs sm:text-sm mt-1">
+            Vous progressez, continuez ainsi
+          </p>
+        </div>
+      )}
+
+
       {/* Navigation */}
       <div className="flex flex-row gap-2 sm:gap-3 mt-4">
         <button
@@ -265,17 +279,24 @@ useEffect(() => {
         >
           <ChevronLeft size={14} className="sm:w-4 sm:h-4" /> {t("chapitrePrec")}
         </button>
-        <button
-          onClick={nextLessonPage}
-          className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-xs sm:text-base shadow ${
-            isLastPage
-              ? "bg-supp/80 text-white hover:bg-supp/90 focus:bg-supp/30"
-              : "bg-blue text-white hover:bg-blue/90"
-          }`}
-        >
-          {isLastPage ? "Terminer" : t("ChapitreSuiv")}
-          {!isLastPage && <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
-        </button>
+      <button
+        onClick={() => {
+          if (isLastPage) {
+            navigate(-1); 
+          } else {
+            nextLessonPage();
+          }
+        }}
+        className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-xs sm:text-base shadow ${
+          isLastPage
+            ? "bg-supp/80 text-white hover:bg-supp/90 focus:bg-supp/30"
+            : "bg-blue text-white hover:bg-blue/90"
+        }`}
+      >
+        {isLastPage ? "Terminer" : t("ChapitreSuiv")}
+        {!isLastPage && <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
+      </button>
+
       </div>
 
       {/* Quiz */}

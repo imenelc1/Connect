@@ -149,7 +149,7 @@ useEffect(() => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://127.0.0.1:8000/api/quiz/student/quizzes-faits/${studentId}/`,
+        `http://127.0.0.1:8000/api/quiz/student/quizzes-faits/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setQuizzes(res.data || []);

@@ -292,7 +292,7 @@ export default function Badges() {
           <span
             role="button"
             className="px-12 py-1 text-gray/10 rounded-full font-semibold mb-2 sm:mb-0"
-             onClick={() => navigate(`/progress-student/${studentId}`)}
+             onClick={() => navigate("/progress-student")}
           >
             {t("Progression")}
           </span>
