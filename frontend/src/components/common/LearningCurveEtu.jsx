@@ -7,39 +7,40 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Legend
 } from "recharts";
 import progressionService from "../../services/progressionService";
 
 export default function LearningCurve({ title }) {
   const [data, setData] = useState([]);
 
-useEffect(() => {
-  const fetchHistory = async () => {
-    try {
-      const history = await progressionService.getGlobalProgressHistory();
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const history = await progressionService.getGlobalProgressHistory();
 
-      // garder seulement les 7 derniers jours
-      const last7 = history.slice(-7);
+        // garder seulement les 7 derniers jours
+        const last7 = history.slice(-7);
 
-      const formatted = last7.map(item => {
-        const d = new Date(item.date);
-        return {
-          day: d.toLocaleDateString("fr-FR", { weekday: "short" }),
-          progression: Number(item.progression)
-        };
-      });
+        // Préparer deux séries : cours et quiz
+        const formatted = last7.map(item => {
+          const d = new Date(item.date);
+          return {
+            day: d.toLocaleDateString("fr-FR", { weekday: "short" }),
+            progression_cours: Number(item.progression_cours || 0),
+            progression_quiz: Number(item.progression_quiz || 0)
+          };
+        });
 
-      setData(formatted);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+        setData(formatted);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  fetchHistory();
-}, []);
-
-
+    fetchHistory();
+  }, []);
 
   return (
     <div className="bg-card p-6 rounded-2xl shadow w-full h-full">
@@ -57,12 +58,22 @@ useEffect(() => {
               border: "1px solid rgb(var(--color-surface))"
             }}
           />
+          <Legend />
           <Line
             type="monotone"
-            dataKey="progression" // correspond à ton API
+            dataKey="progression_cours"
             stroke="rgb(var(--color-muted))"
             strokeWidth={3}
             dot={{ r: 3 }}
+            name="Cours"
+          />
+          <Line
+            type="monotone"
+            dataKey="progression_quiz"
+            stroke="rgb(var(--color-purple))"
+            strokeWidth={3}
+            dot={{ r: 3 }}
+            name="Quizs"
           />
         </LineChart>
       </ResponsiveContainer>

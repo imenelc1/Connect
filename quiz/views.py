@@ -2,8 +2,10 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from dashboard.models import ProgressionHistory
 from users.jwt_auth import jwt_required
 from django.utils import timezone
+from django.db.models import Sum
 
 from exercices.models import Exercice
 from users.models import Utilisateur
@@ -107,6 +109,24 @@ class QuizSubmitView(APIView):
         tentative.terminer = True
         tentative.date_fin = timezone.now() 
         tentative.save()
+
+        score_max = quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        # 🔹 progression en %
+        avancement = round((score_total / score_max) * 100) if score_max > 0 else 0
+
+        # 🔹 historique de progression du quiz
+        ProgressionHistory.objects.create(
+            utilisateur=request.user,
+            cours=quiz.exercice.cours,
+            quiz=quiz,
+            type_contenu="quiz",
+            avancement=avancement,
+            temps_passe=timedelta(seconds=0)
+        )
+        
 
         return Response({
             "score": score_total,
@@ -239,3 +259,44 @@ def toutes_les_tentatives_quiz(request, quiz_id, utilisateur_id):
 
     serializer = ReponseQuizSerializer(reponses_quiz, many=True)
     return Response(serializer.data)
+
+
+
+@api_view(["GET"])
+def quizzes_faits_par_etudiant(request, utilisateur_id):
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=utilisateur_id)
+
+    # Dernière tentative par quiz
+    tentatives = (
+        ReponseQuiz.objects
+        .filter(etudiant=utilisateur, terminer=True)
+        .order_by("quiz_id", "-date_fin")
+        .distinct("quiz_id") 
+    )
+
+    data = []
+
+    for tentative in tentatives:
+        quiz = tentative.quiz
+
+        # score max du quiz
+        score_max = quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        progression = round(
+            (tentative.score_total / score_max) * 100
+        ) if score_max > 0 else 0
+
+        data.append({
+            "quiz_id": quiz.id,
+            "exercice_id": quiz.exercice.id_exercice,
+            "titre_exercice": quiz.exercice.titre_exo,
+            "score_obtenu": tentative.score_total,
+            "score_max": score_max,
+            "progression": progression,
+            "reussi": tentative.score_total >= quiz.scoreMinimum,
+            "date_fin": tentative.date_fin,
+        })
+
+    return Response(data)
