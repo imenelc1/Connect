@@ -24,6 +24,15 @@
             "description": {
                 "label": "Chapitre",
                 "placeholder": "Entrez le nom du chapitre"
+            },
+            "visibiliteLabel": "Quiz visible pour les etudiants",
+            "visibilite": "visibilité",
+            "difficulty":
+            {
+                "label": "Dificulté",
+                "easy" :"Facile",
+                "medium": "Moyen",
+                "hard":"Difficile"
             }
         }
     }

@@ -7,7 +7,8 @@ import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 // Navigation entre routes (React Router)
 import { useNavigate } from "react-router-dom";
-
+import api from "../services/courseService";
+import { toast } from 'react-hot-toast';
 // Thème global (dark/light mode)
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
@@ -29,24 +30,18 @@ export default function ExercisesManagement() {
 
   // LISTE
   const [exercises, setExercises] = useState([]);
-  const [createModal, setCreateModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
 
-  const [newExercise, setNewExercise] = useState({
-    titre_exo: "",
-    categorie: "",
-    enonce: "",
-    niveau_exo: "debutant",
-    cours: 1,
-  });
 
   const [editValues, setEditValues] = useState({
     titre_exo: "",
     categorie: "",
     enonce: "",
     niveau_exo: "debutant",
+    visibilite_exo: false,
     cours: 1,
+    utilisateur:1
   });
 
 
@@ -71,9 +66,11 @@ export default function ExercisesManagement() {
           cours: ex.cours,
           utilisateur: ex.utilisateur,
           utilisateur_name: ex.utilisateur_name,
+          visibilite_exo: ex.visibilite_exo, //est un boolean
         }));
 
         setExercises(formatted);
+        
       })
       .catch((err) => {
         console.error(t("errors.fetchExercises"), err);
@@ -87,25 +84,7 @@ export default function ExercisesManagement() {
     (e.titre_exo || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  /* ================= CREATE ================= */
-  const submitCreate = (e) => {
-    e.preventDefault();
-
-    fetch("http://localhost:8000/api/exercices/create/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify(newExercise),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setExercises([...exercises, data]);
-        setCreateModal(false);
-        setNewExercise({ titre_exo: "", categorie: "", enonce: "", niveau_exo: "debutant", cours: 1 });
-      });
-  };
+  
 
   /* ================= EDIT ================= */
   const openEdit = (ex) => {
@@ -116,31 +95,59 @@ export default function ExercisesManagement() {
       enonce: ex.enonce,
       niveau_exo: ex.niveau_exo,
       cours: ex.cours,
+      visibilite_exo:ex.visibilite_exo,
+      utilisateur:ex.utilisateur,
     });
     setEditModal(true);
   };
+  const token = localStorage.getItem("admin_token"); // JWT admin
 
-  const submitEdit = (e) => {
-    e.preventDefault();
 
-    fetch(`http://localhost:8000/api/exercices/${selectedExercise.id_exercice}/`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+const submitEdit = async () => {
+  if (!selectedExercise) return;
+
+  const token = localStorage.getItem("admin_token"); // ou "token"
+
+ console.log({selectedExercise});
+
+  try {
+    const res = await api.put(
+      `exercices/${selectedExercise.id_exercice}/`,
+      {
+        titre_exo: editValues.titre_exo,
+        enonce: editValues.enonce,
+        niveau_exo: editValues.niveau_exo,
+        categorie: editValues.categorie,
+        visibilite_exo: editValues.visibilite_exo,
+        utilisateur: editValues.utilisateur,
+        cours:editValues.cours
       },
-      body: JSON.stringify(editValues),
-    })
-      .then((res) => res.json())
-      .then((updated) => {
-        setExercises(
-          exercises.map((ex) =>
-            ex.id_exercice === updated.id_exercice ? updated : ex
-          )
-        );
-        setEditModal(false);
-      });
-  };
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // ✅ Toast ou alert succès
+    toast.success("Exercice mis à jour avec succès !");
+
+    // Mettre à jour la liste localement
+    const updatedExo = res.data;
+    setExercises((prev) =>
+      prev.map((ex) =>
+        ex.id_exercice === updatedExo.id_exercice ? updatedExo : ex
+      )
+    );
+
+    // Fermer modal
+    setEditModal(false);
+    setSelectedExercise(null);
+
+    return updatedExo.id_exercice;
+  } catch (err) {
+    console.error("Erreur mise à jour:", err.response?.data || err.message);
+    alert("Erreur lors de la mise à jour de l'exercice");
+    return null;
+  }
+};
+
 
   /* ================= DELETE ================= */
   const handleDelete = (id) => {
@@ -179,7 +186,6 @@ export default function ExercisesManagement() {
     intermediaire: "bg-grad-3",
     avance: "bg-grad-4",
   };
-
 
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -281,15 +287,23 @@ export default function ExercisesManagement() {
     },
     {
       label: t("field.category"),
-      placeholder: t("field.categoryPlaceholder"),
-      value: editValues.categorie,               // ✅ correct
-      onChange: (e) => setEditValues({ ...editValues, categorie: e.target.value }),
+      element:(
+        <select
+        value= {editValues.categorie}   
+        onChange={ (e) => setEditValues({ ...editValues, categorie: e.target.value })}
+        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="code">{t("categorie.code")}</option>
+          <option value="question_cours">{t("categorie.question_cours")}</option>
+        </select>
+      )
+     
     },
     {
       label: t("field.difficulty"),
       element: (
         <select
-          value={editValues.niveau_exo}          // ✅ correct
+          value={editValues.niveau_exo}          
           onChange={(e) => setEditValues({ ...editValues, niveau_exo: e.target.value })}
           className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         >
@@ -299,6 +313,25 @@ export default function ExercisesManagement() {
         </select>
       ),
     },
+    {
+      label: t("field.visibilite"),
+      element: (
+      <label className="flex items-center gap-2 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={editValues.visibilite_exo}   // ✅ checked
+        onChange={(e) =>
+          setEditValues({
+            ...editValues,
+            visibilite_exo: e.target.checked, // ✅ boolean
+          })
+        }
+      />
+      <span>{t("field.visibiliteLabel")}</span>
+      </label>
+    ),
+  }
+
   ]}
 />
 
