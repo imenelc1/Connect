@@ -16,7 +16,7 @@
     "Editprofile": "Modifier le profil",
     "SaveChanges": "Sauvegarder les modifications",
     "Role": {
-      "Professor": "Professeur",
+      "Professor": "Enseignant ",
       "Student": "Étudiant"
     }
   },
@@ -25,7 +25,7 @@
     "LightMode": "Mode clair",
     "DarkMode": "Mode sombre",
     "Brightp": "Plus lumineux et clair",
-    "Easyp": "Plus facile pour les yeux",
+    "Easyp": "Plus agréable pour les yeux",
     "Language": "Langue",
     "Selectp": "Sélectionnez votre langue préférée",
     "French": "Français",
@@ -39,7 +39,7 @@
     "UpdatePass": "Mettre à jour le mot de passe",
     "DangerZone": "Zone de danger",
     "HDelete": "Supprimer votre compte",
-    "deleteP": "Cette action est irréversible. Tous vos données seront perdues.",
+    "deleteP": "Cette action est irréversible. Toutes vos données seront perdues.",
     "DeleteAccount": "Supprimer le compte"
   },
   "Errors": {
@@ -48,9 +48,11 @@
     "PasswordsMismatch": "Les mots de passe ne correspondent pas",
     "EmailRequired": "Email obligatoire",
     "EmailInvalid": "Format d'email invalide",
-    "PasswordUpdateSuccess": "Mot de passe mis à jour avec succès !",
+        "PasswordUpdateSuccess": "Mot de passe mis à jour avec succès !",
+    "ProfileUpdateSuccess":"Profil mis à jour avec succès !",
     "PasswordUpdateFailed": "Erreur lors de la mise à jour du mot de passe",
-    "ProfileLoadFailed": "Impossible de charger le profil utilisateur"
+    "ProfileLoadFailed": "Impossible de charger le profil utilisateur",
+    "ProfileUpdateFailed": "Erreur lors de la mise à jour du profil"
   },
   "Global": {
     "Loading": "Chargement..."

@@ -1,5 +1,6 @@
 {
   "spacesTitle": "Espaces",
+  "mySpacesTitle": "Mes espaces",
   "createSpaceButton": "+ Créer un espace",
   "modalTitle": "Créer un nouvel espace",
   "modalSubtitle": "Remplissez les informations pour créer un espace",
@@ -10,5 +11,14 @@
   "fieldDescription": "Description",
   "fieldDescriptionPlaceholder": "Entrez la description de l'espace",
   "created": "Créé le ",
-  "mySpacesTitle":"Mes Spaces"
+  "noSpacesMessage": "Aucun espace n'a encore été créé.",
+  "noStudentSpaces": "Vous n'êtes inscrit à aucun espace.",
+  "spaceNameRequired": "Le nom de l'espace est requis.",
+  "spaceNameExists": "Un espace avec ce nom existe déjà.",
+  "spaceCreated": "Espace créé avec succès !",
+  "spaceCreationFailed": "Une erreur est survenue lors de la création de l'espace.",
+  "confirmDeleteSpace": "Êtes-vous sûr de vouloir supprimer cet espace ?",
+  "spaceDeleted": "Espace supprimé avec succès !",
+  "spaceDeleteFailed": "Une erreur est survenue lors de la suppression de l'espace.",
+  "deleteSpace": "Supprimer l'espace"
 }
