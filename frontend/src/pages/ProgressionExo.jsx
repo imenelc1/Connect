@@ -23,7 +23,6 @@ export default function ProgressExercice() {
 
   const [totalExercises, setTotalExercises] = useState(0);
   const [submittedCount, setSubmittedCount] = useState(0);
-
   const token = localStorage.getItem("token");
   const BACKEND_URL = "http://127.0.0.1:8000";
 
@@ -75,6 +74,8 @@ export default function ProgressExercice() {
         setCourses([]);
         setTotalExercises(0);
         setSubmittedCount(0);
+        setAverageScore(null);
+        setProgressScoreData([]);
       }
     };
 
@@ -97,7 +98,6 @@ export default function ProgressExercice() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setProgressScoreData(progressRes.data);
-
       } catch (err) {
         console.error("Erreur récupération stats prof :", err);
         setAverageScore(null);
@@ -118,6 +118,8 @@ export default function ProgressExercice() {
   const submissionRate = totalExercises > 0 ? Math.round((submittedCount / totalExercises) * 100) : 0;
   const completedRatio = `${submittedCount}/${totalExercises}`;
 
+  
+  
   return (
     <div className="flex flex-col lg:flex-row bg-primary/10 min-h-screen">
       <Navbar />

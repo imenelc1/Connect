@@ -144,7 +144,8 @@ export default function ExercisesManagement() {
 
   /* ================= DELETE ================= */
   const handleDelete = (id) => {
-    fetch(`http://localhost:8000/api/exercices/delete/${id}/`, {
+    if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
+    fetch(`http://localhost:8000/api/exercices/${id}/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -245,11 +246,11 @@ export default function ExercisesManagement() {
 
               <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
                 <span>{t("submissions", { count: item.submissions })}</span>
-                <div className="flex gap-3">
-                  <button className="text-muted hover:opacity-80">
+                <div className="flex gap-3" >
+                  <button className="text-muted hover:opacity-80" onClick={()=> openEdit(item)}>
                     <SquarePen size={20} />
                   </button>
-                  <button className="text-red hover:opacity-80">
+                  <button className="text-red hover:opacity-80" onClick={()=> handleDelete(item.id_exercice)}>
                     <Trash2 size={20} />
                   </button>
                 </div>
@@ -261,81 +262,46 @@ export default function ExercisesManagement() {
       </main>
 
       {/* Modals */}
-      <AddModal
-        open={createModal}
-        onClose={() => setCreateModal(false)}
-        title={t("modal.create.title")}
-        subtitle={t("modal.create.subtitle")}
-        submitLabel={t("modal.create.submit")}
-        cancelLabel={t("modal.create.cancel")}
-        onSubmit={submitCreate}
-        fields={[
-          {
-            label: t("field.title"),
-            placeholder: t("field.titlePlaceholder"),
-            value: newExercise.title,
-            onChange: (e) => setNewExercise({ ...newExercise, title: e.target.value }),
-          },
-          {
-            label: t("field.category"),
-            placeholder: t("field.categoryPlaceholder"),
-            value: newExercise.category,
-            onChange: (e) => setNewExercise({ ...newExercise, category: e.target.value }),
-          },
-          {
-            label: t("field.difficulty"),
-            element: (
-              <select
-                value={newExercise.difficulty}
-                onChange={(e) => setNewExercise({ ...newExercise, difficulty: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="easy">{t("difficulty.easy")}</option>
-                <option value="medium">{t("difficulty.medium")}</option>
-                <option value="hard">{t("difficulty.hard")}</option>
-              </select>
-            ),
-          },
-        ]}
-      />
+    
 
       <AddModal
-        open={editModal}
-        onClose={() => setEditModal(false)}
-        title={t("modal.edit.title")}
-        subtitle={t("modal.edit.subtitle")}
-        submitLabel={t("modal.edit.submit")}
-        cancelLabel={t("modal.edit.cancel")}
-        onSubmit={submitEdit}
-        fields={[
-          {
-            label: t("field.title"),
-            placeholder: t("field.titlePlaceholder"),
-            value: editValues.title,
-            onChange: (e) => setEditValues({ ...editValues, title: e.target.value }),
-          },
-          {
-            label: t("field.category"),
-            placeholder: t("field.categoryPlaceholder"),
-            value: editValues.category,
-            onChange: (e) => setEditValues({ ...editValues, category: e.target.value }),
-          },
-          {
-            label: t("field.difficulty"),
-            element: (
-              <select
-                value={editValues.difficulty}
-                onChange={(e) => setEditValues({ ...editValues, difficulty: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="easy">{t("difficulty.easy")}</option>
-                <option value="medium">{t("difficulty.medium")}</option>
-                <option value="hard">{t("difficulty.hard")}</option>
-              </select>
-            ),
-          },
-        ]}
-      />
+  open={editModal}
+  onClose={() => setEditModal(false)}
+  title={t("modal.edit.title")}
+  subtitle={t("modal.edit.subtitle")}
+  submitLabel={t("modal.edit.submit")}
+  cancelLabel={t("modal.edit.cancel")}
+  onSubmit={submitEdit}
+  fields={[
+    {
+      label: t("field.title"),
+      placeholder: t("field.titlePlaceholder"),
+      value: editValues.titre_exo,               // ✅ correct
+      onChange: (e) => setEditValues({ ...editValues, titre_exo: e.target.value }),
+    },
+    {
+      label: t("field.category"),
+      placeholder: t("field.categoryPlaceholder"),
+      value: editValues.categorie,               // ✅ correct
+      onChange: (e) => setEditValues({ ...editValues, categorie: e.target.value }),
+    },
+    {
+      label: t("field.difficulty"),
+      element: (
+        <select
+          value={editValues.niveau_exo}          // ✅ correct
+          onChange={(e) => setEditValues({ ...editValues, niveau_exo: e.target.value })}
+          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          <option value="debutant">{t("difficulty.easy")}</option>
+          <option value="intermediaire">{t("difficulty.medium")}</option>
+          <option value="avance">{t("difficulty.hard")}</option>
+        </select>
+      ),
+    },
+  ]}
+/>
+
     </div>
   );
 }

@@ -154,39 +154,55 @@ export default function CoursesManagement() {
     setEditModal(true);
   };
 
-  const submitEdit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`http://localhost:8000/api/cours/${selectedCourse.id_cours}/`, {
+  const submitEdit = async () => {
+  if (!selectedCourse) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:8000/api/courses/${selectedCourse.id_cours}/`,
+      {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editValues),
-      });
-      if (!res.ok) throw new Error(t("errors.editCourse"));
-      const data = await res.json();
-      setCourses(courses.map(c => (c.id_cours === data.id_cours ? data : c)));
-      setEditModal(false);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+      }
+    );
+
+    if (!res.ok) throw new Error();
+
+    const data = await res.json();
+
+    setCourses((prev) =>
+      prev.map((c) =>
+        c.id_cours === data.id_cours ? data : c
+      )
+    );
+
+    setEditModal(false);
+    setSelectedCourse(null);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   // DELETE
-  const handleDelete = async (id_cours) => {
+   const handleDeleteCourse = async (courseId) => {
+    if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/delete_cours/${id_cours}/`, {
+      await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) setCourses(courses.filter(c => c.id_cours !== id_cours));
-      else console.error(t("errors.deleteCourse"));
+      setCourses((prev) => prev.filter((c) => c.id !== courseId));
     } catch (err) {
-      console.error(err);
+      console.error("Erreur suppression :", err);
+      alert("Erreur lors de la suppression");
     }
   };
+
 
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -264,11 +280,11 @@ export default function CoursesManagement() {
 
               <div className="flex justify-end mt-auto pt-4">
                 <div className="flex gap-3">
-                  <button className="text-muted hover:opacity-80">
+                  <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
                     <SquarePen size={20} />
                   </button>
-                  <button className="text-red hover:opacity-80">
-                    <Trash2 size={20} />
+                  <button className="text-red hover:opacity-80" onClick={()=>handleDeleteCourse(item.id_cours)}>
+                    <Trash2 size={20}  />
                   </button>
                 </div>
               </div>
@@ -277,58 +293,7 @@ export default function CoursesManagement() {
         </div>
       </main>
 
-      {/* CREATE MODAL */}
-      <AddModal
-        open={createModal}
-        onClose={() => setCreateModal(false)}
-        title={t("modal.create.title")}
-        subtitle={t("modal.create.subtitle")}
-        submitLabel={t("modal.create.submit")}
-        cancelLabel={t("modal.create.cancel")}
-        onSubmit={submitCreate}
-        fields={[
-          {
-            label: t("field.title"),
-            placeholder: t("field.titlePlaceholder"),
-            value: newCourse.titre_cour,
-            onChange: (e) => setNewCourse({ ...newCourse, titre_cour: e.target.value }),
-          },
-          {
-            label: t("field.description"),
-            placeholder: t("field.descriptionPlaceholder"),
-            value: newCourse.description,
-            onChange: (e) => setNewCourse({ ...newCourse, description: e.target.value }),
-          },
-          {
-            label: t("field.duration"),
-            placeholder: t("field.durationPlaceholder"),
-            value: newCourse.duration,
-            onChange: (e) => setNewCourse({ ...newCourse, duration: e.target.value }),
-          },
-          {
-            label: t("field.teacher"),
-            element: (
-              <ModernDropdown
-                value={newCourse.utilisateur}
-                onChange={(value) => setNewCourse({ ...newCourse, utilisateur: value })}
-                options={teacherOptions}
-                placeholder={t("field.teacherPlaceholder")}
-              />
-            ),
-          },
-          {
-            label: t("field.difficulty"),
-            element: (
-              <ModernDropdown
-                value={newCourse.niveau_cour}
-                onChange={(value) => setNewCourse({ ...newCourse, niveau_cour: value })}
-                options={difficultyOptions}
-                placeholder={t("field.difficulty")}
-              />
-            ),
-          },
-        ]}
-      />
+     
 
       {/* EDIT MODAL */}
       <AddModal
