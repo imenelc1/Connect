@@ -104,7 +104,7 @@ export default function ContentCard({
     } else if (pageType === "exercise") {
       navigate(`/exercices/edit/${course.id}`);
     } else if (pageType === "quiz") {
-      navigate(`/QuizIntro/${course.id}`);
+      navigate(`/quiz/edit/${course.id}`);
     } else {
       navigate(`/Seecourses/${course.id}`);
     }

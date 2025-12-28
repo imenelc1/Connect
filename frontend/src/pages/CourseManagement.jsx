@@ -12,6 +12,7 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
+import { toast } from 'react-hot-toast';
 
 export default function CoursesManagement() {
   const navigate = useNavigate();
@@ -176,6 +177,7 @@ export default function CoursesManagement() {
     );
 
     if (!res.ok) throw new Error();
+    toast.success("Cours mis à jour avec succès !");
 
     const data = await res.json();
 
@@ -339,17 +341,7 @@ export default function CoursesManagement() {
             value: editValues.duration,
             onChange: (e) => setEditValues({ ...editValues, duration: e.target.value }),
           },
-          {
-            label: t("field.teacher"),
-            element: (
-              <ModernDropdown
-                value={editValues.utilisateur}
-                onChange={(value) => setEditValues({ ...editValues, utilisateur: value })}
-                options={teacherOptions}
-                placeholder={t("field.teacherPlaceholder")}
-              />
-            ),
-          },
+         
           {
             label: t("field.difficulty"),
             element: (

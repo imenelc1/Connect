@@ -7,6 +7,10 @@
     "medium": "Moyen",
     "hard": "Difficile"
   },
+  "categorie":{
+    "code": "code",
+    "question_cours": "questions du cours"
+  },
   "addExerciseButton": "+ Ajouter un exercice",
   "modal": {
     "create": {
@@ -28,7 +32,10 @@
     "category": "Catégorie",
     "titlePlaceholder": "Titre de l'exercice",
     "categoryPlaceholder": "Sélectionner une catégorie",
-    "difficulty": "Difficulté"
+    "difficulty": "Difficulté",
+    "visibilite": "visibilité",
+    "visibiliteLabel": "Exercice visible par les étudiants"
+
   },
   "errors": {
     "fetchExercises": "Erreur lors du chargement des exercices.",

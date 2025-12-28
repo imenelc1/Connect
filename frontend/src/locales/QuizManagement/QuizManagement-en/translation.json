@@ -24,6 +24,15 @@
             "description": {
                 "label": "Chapitre",
                 "placeholder": "Enter the name of the chapiter"
+            },
+            "visibiliteLabel": "Quiz visible for students",
+            "visibilite": "visibility",
+            "difficulty":
+            {
+                "label": "Difficulty",
+                "easy" :"Easy",
+                "medium": "Medium",
+                "hard":"Hard"
             }
         }
     }
