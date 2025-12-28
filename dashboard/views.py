@@ -1,4 +1,5 @@
 from datetime import timedelta
+from django.utils import timezone
 from django.utils.timezone import now
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
@@ -11,7 +12,7 @@ from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
 from exercices.serializers import ExerciceSerializer
-from quiz.models import ReponseQuiz
+from quiz.models import Question, Quiz, ReponseQuestion, ReponseQuiz
 from spaces.models import Space, SpaceEtudiant, SpaceExo
 from spaces.views import etudiant_appartient_a_lespace
 from users.jwt_auth import IsAuthenticatedJWT, jwt_required
@@ -82,7 +83,7 @@ def complete_lesson(request, lecon_id):
     pc.save()
 
     # Historique
-    create_progress_history(user, cours, pc.avancement_cours, pc.temps_passe)
+    create_progress_history(user, cours, pc.temps_passe)
 
     return Response({
         "section_progress": section_progress,
@@ -200,46 +201,210 @@ def active_courses_count(request):
     return Response({"active_courses": count})
 
 
+from django.db.models import Sum
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def add_session(request):
-    user = request.user
-    duration = request.data.get("duration", 0)
-    if duration <= 0:
-        return Response({"error": "Invalid duration"}, status=400)
-    SessionDuration.objects.create(utilisateur=user, duration=duration)
-    return Response({"message": "Session added successfully"})
+    if not request.user.is_authenticated:
+        return Response(status=401)
+
+    duration = int(request.data.get("duration", 0))
+    if duration < 1:
+        return Response({"ignored": True})
+
+    # Vérifier si l'utilisateur a une session récente non enregistrée
+    recent_sessions = SessionDuration.objects.filter(
+        utilisateur=request.user
+    ).order_by('-date')[:1]  # dernière session
+
+    if recent_sessions and (duration < 300):  # si courte, cumuler
+        last_session = recent_sessions[0]
+        last_session.duration += duration
+        last_session.save()
+        return Response({"saved": True, "cumulative": True})
+    else:
+        SessionDuration.objects.create(
+            utilisateur=request.user,
+            duration=duration
+        )
+        return Response({"saved": True, "cumulative": False})
+
+
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
-def average_time(request):
-    avg_duration = SessionDuration.objects.filter(utilisateur=request.user).aggregate(avg=Avg('duration'))['avg'] or 0
-    return Response({"average_duration": avg_duration})
+def daily_time(request):
+    today = timezone.now().date()
+    total_seconds = (
+        SessionDuration.objects
+        .filter(utilisateur=request.user, date__date=today)
+        .aggregate(total=Sum('duration'))['total']
+        or 0
+    )
+
+    hours = int(total_seconds // 3600)
+    minutes = int((total_seconds % 3600) // 60)
+    seconds = int(total_seconds % 60)
+
+    return Response({
+        "total_seconds": total_seconds,
+        "readable": f"{hours}h {minutes}min {seconds}s"
+    })
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def success_rate(request):
+    user = request.user
+
+    # Tous les quiz tentés par l'étudiant
+    tentatives = ReponseQuiz.objects.filter(etudiant=user, terminer=True)
+    total_quizzes = tentatives.count()
+
+    if total_quizzes == 0:
+        return Response({"success_rate": 0})
+
+    # Nombre de quiz réussis (score_total >= scoreMinimum)
+    passed_quizzes = tentatives.filter(score_total__gte=F('quiz__scoreMinimum')).count()
+
+    rate = (passed_quizzes / total_quizzes) * 100
+    return Response({"success_rate": round(rate, 1)})
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def student_total_tentatives(request, student_id):
+    try:
+        student = Utilisateur.objects.get(id_utilisateur=student_id)
+    except Utilisateur.DoesNotExist:
+        return Response({"error": "Étudiant introuvable"}, status=404)
+
+    # Tous les espaces où l'étudiant est inscrit
+    spaces = Space.objects.filter(spaceetudiant__etudiant=student).distinct()
+
+    # Tous les exercices accessibles à l'étudiant via ces espaces
+    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
+
+    total_exercises = exercises.count()
+
+    # Nombre de tentatives soumises, sans compter les doublons par exercice
+    nb_tentatives = (
+        TentativeExercice.objects
+        .filter(utilisateur=student, exercice__in=exercises, etat="soumis")
+        .values('exercice')  # regroupe par exercice
+        .distinct()
+        .count()
+    )
+
+    return Response({
+        "student_id": student_id,
+        "total_submitted_attempts": nb_tentatives,
+        "total_exercises": total_exercises
+    })
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def global_progress(request):
     user = request.user
 
-    result = ProgressionCours.objects.filter(
-        utilisateur=user
-    ).aggregate(global_progress=Avg("avancement_cours"))
+    # ---- Cours ----
+    courses = Cours.objects.all()
+    total_courses = courses.count() or 1
+    total_course_progress = 0
+    for course in courses:
+        prog = ProgressionCours.objects.filter(utilisateur=user, cours=course).first()
+        total_course_progress += prog.avancement_cours if prog else 0
 
-    return Response({
-        "global_progress": round(result["global_progress"] or 0)
-    })
+    # ---- Exercices ----
+    exercises = Exercice.objects.all()
+    total_exercises = exercises.count() or 1
+    total_exercise_progress = 0
+    for ex in exercises:
+        # On ne compte qu'une tentative max par exercice
+        has_attempt = TentativeExercice.objects.filter(utilisateur=user, exercice=ex).exists()
+        total_exercise_progress += 100 if has_attempt else 0
+
+    # ---- Quiz ----
+    quizzes = Quiz.objects.all()
+    total_quizzes = quizzes.count() or 1
+    total_quiz_progress = 0
+
+    for quiz in quizzes:
+        questions = Question.objects.filter(exercice=quiz.exercice)
+        total_quiz_points = sum(q.score for q in questions) or 1
+
+        # On prend uniquement la dernière tentative pour ce quiz
+        last_rq = ReponseQuiz.objects.filter(etudiant=user, quiz=quiz).order_by('-date_fin').first()
+        student_score = 0
+        if last_rq:
+            student_score = last_rq.reponses.aggregate(total=Sum('score_obtenu'))['total'] or 0
+
+        total_quiz_progress += (student_score / total_quiz_points) * 100
+
+    # ---- Moyenne globale ----
+    global_progress = (
+        (total_course_progress / total_courses) +
+        (total_exercise_progress / total_exercises) +
+        (total_quiz_progress / total_quizzes)
+    ) / 3
+
+    return Response({"global_progress": round(global_progress)})
+
+def calculate_global_course_progress(user):
+    total_courses = Cours.objects.count() or 1
+
+    done_courses = ProgressionCours.objects.filter(
+        utilisateur=user,
+        avancement_cours__gte=90
+    ).count()
+
+    return (done_courses / total_courses) * 100
 
 
-def create_progress_history(user, cours, avancement, temps_passe):
-    """
-    Crée une entrée dans ProgressionHistory
-    """
+def calculate_global_quiz_progress(user):
+    total_quizzes = Quiz.objects.count() or 1
+
+    done_quizzes = (
+        ReponseQuiz.objects
+        .filter(etudiant=user)
+        .values("quiz")
+        .distinct()
+        .count()
+    )
+
+    return (done_quizzes / total_quizzes) * 100
+
+
+
+def create_progress_history(user, cours, temps_passe):
+    global_progress = calculate_global_course_progress(user)
+
     ProgressionHistory.objects.create(
         utilisateur=user,
         cours=cours,
-        avancement=avancement,
+        type_contenu="cours",
+        avancement=global_progress,
         temps_passe=temps_passe
     )
+
+
+def create_quiz_progress_history(user, quiz, temps_passe):
+    global_progress = calculate_global_quiz_progress(user)
+
+    ProgressionHistory.objects.create(
+        utilisateur=user,
+        cours=quiz.exercice.cours,
+        quiz=quiz,
+        type_contenu="quiz",
+        avancement=global_progress,
+        temps_passe=temps_passe
+    )
+
+
 
 
 # 🔹 Historique global (7 derniers jours)
@@ -248,28 +413,37 @@ class GlobalProgressHistoryView(APIView):
 
     def get(self, request):
         user = request.user
-        start_date = now().date() - timedelta(days=6)  # 7 derniers jours
+        start_date = now().date() - timedelta(days=6)
 
-        progressions = (
+        qs = (
             ProgressionHistory.objects
             .filter(utilisateur=user, created_at__date__gte=start_date)
             .annotate(day=TruncDate("created_at"))
-            .values("day")
-            .annotate(progression=Avg("avancement"))
-            .order_by("day")
+            .values("day", "type_contenu")
+            .annotate(avg_progress=Avg("avancement"))
         )
 
-        # Remplir les jours manquants à 0
-        days = [(start_date + timedelta(days=i)) for i in range(7)]
-        data = []
-        prog_dict = {p["day"]: round(p["progression"]) for p in progressions}
+        # Structure par jour
+        days = [start_date + timedelta(days=i) for i in range(7)]
+        data = {d: {"progression_cours": 0, "progression_quiz": 0} for d in days}
+
+        for row in qs:
+            day = row["day"]
+            if row["type_contenu"] == "cours":
+                data[day]["progression_cours"] = round(row["avg_progress"])
+            elif row["type_contenu"] == "quiz":
+                data[day]["progression_quiz"] = round(row["avg_progress"])
+
+        # Format final
+        result = []
         for d in days:
-            data.append({
+            result.append({
                 "date": d.strftime("%Y-%m-%d"),
-                "progression": prog_dict.get(d, 0)
+                "progression_cours": data[d]["progression_cours"],
+                "progression_quiz": data[d]["progression_quiz"]
             })
 
-        return Response(data)
+        return Response(result)
 
 
 @api_view(['GET'])
@@ -280,15 +454,6 @@ def active_courses_count_prof(request):
     count = Cours.objects.filter(utilisateur=user).count()
     return Response({"active_courses": count})
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticatedJWT])
-def add_session_prof(request):
-    user = request.user
-    duration = request.data.get("duration", 0)
-    if duration <= 0:
-        return Response({"error": "Invalid duration"}, status=400)
-    SessionDuration.objects.create(utilisateur=user, duration=duration)
-    return Response({"message": "Session added successfully"})
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
@@ -302,54 +467,110 @@ def average_time_prof(request):
 def global_progress_students(request):
     prof = request.user
 
-    # Espaces du prof
     spaces = Space.objects.filter(utilisateur=prof)
 
-    # Cours dans ces espaces
     courses = Cours.objects.filter(spacecour__space__in=spaces).distinct()
 
-    # Étudiants inscrits dans ces espaces
     students = Utilisateur.objects.filter(
-    id_utilisateur__in=SpaceEtudiant.objects.filter(space__in=spaces).values_list("etudiant_id", flat=True)
-)
+        id_utilisateur__in=SpaceEtudiant.objects.filter(
+            space__in=spaces
+        ).values_list("etudiant_id", flat=True)
+    )
 
-    # Historique des progressions pour ces étudiants et cours
+    # ===== PROGRESSION COURS =====
     progressions = ProgressionHistory.objects.filter(
         utilisateur__in=students,
         cours__in=courses
     ).annotate(day=TruncDate("created_at"))
 
-    # Préparer la période : derniers 7 jours
+    course_progress = {}
+    for p in progressions:
+        course_progress.setdefault(p.day, {})[p.utilisateur_id] = p.avancement
+
+    # ===== PROGRESSION QUIZ =====
+    quiz_answers = ReponseQuiz.objects.filter(
+    etudiant__in=students,
+    quiz__spacequiz__space__in=spaces,
+    terminer=True
+   ).annotate(day=TruncDate("date_fin"))
+
+
+    quiz_progress = {}
+    for rq in quiz_answers:
+        max_score = rq.quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        if max_score > 0:
+            percent = (rq.score_total / max_score) * 100
+            quiz_progress.setdefault(rq.day, {}).setdefault(
+                rq.etudiant_id, []
+            ).append(percent)
+
+    # ===== DERNIERS 7 JOURS =====
     today = now().date()
     start_date = today - timedelta(days=6)
-    days = [(start_date + timedelta(days=i)) for i in range(7)]
+    days = [start_date + timedelta(days=i) for i in range(7)]
 
-    #  Construire un dictionnaire {jour: {student_id: progression}}
-    progress_dict = {}
-    for p in progressions:
-        day_key = p.day
-        if day_key not in progress_dict:
-            progress_dict[day_key] = {}
-        progress_dict[day_key][p.utilisateur_id] = p.avancement
-        
-    # Calculer la moyenne quotidienne en incluant tous les étudiants
     result = []
+
     for d in days:
-        daily_progress = progress_dict.get(d, {})
-        total_progress = sum(daily_progress.get(u.pk, 0) for u in students)
-        avg = round(total_progress / students.count()) if students.exists() else 0
+        # cours
+        course_total = sum(
+            course_progress.get(d, {}).get(s.pk, 0)
+            for s in students
+        )
+        course_avg = round(
+            course_total / students.count(), 2
+        ) if students.exists() else 0
+
+        # quiz
+        quiz_day = quiz_progress.get(d, {})
+        quiz_total = 0
+        for s in students:
+            scores = quiz_day.get(s.pk, [])
+            quiz_total += sum(scores) / len(scores) if scores else 0
+
+        quiz_avg = round(
+            quiz_total / students.count(), 2
+        ) if students.exists() else 0
+
         result.append({
             "date": d.strftime("%Y-%m-%d"),
-            "progression": avg
+            "course_progress": course_avg,
+            "quiz_progress": quiz_avg
         })
 
     return Response(result)
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def professor_content_counts_global(request):
+    prof = request.user
+
+    # Total cours créés par le prof
+    courses_count = Cours.objects.filter(utilisateur=prof).count()
+
+    # Total exercices créés par le prof **qui ne sont pas des quiz**
+    exercises_count = Exercice.objects.filter(utilisateur=prof).exclude(quiz__isnull=False).count()
+
+    # Total quizs créés par le prof via les exercices
+    quizzes_count = Quiz.objects.filter(exercice__utilisateur=prof).count()
+
+    return Response({
+        "courses_count": courses_count,
+        "exercises_count": exercises_count,
+        "quizzes_count": quizzes_count
+    })
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def current_progress_students(request):
     prof = request.user
 
+    # Étudiants des espaces du prof
     spaces = Space.objects.filter(utilisateur=prof)
     students = Utilisateur.objects.filter(
         id_utilisateur__in=SpaceEtudiant.objects.filter(space__in=spaces).values_list("etudiant_id", flat=True)
@@ -357,15 +578,49 @@ def current_progress_students(request):
     courses = Cours.objects.filter(spacecour__space__in=spaces).distinct()
 
     result = []
+
     for student in students:
-        prog_avg = ProgressionCours.objects.filter(
-            utilisateur=student,
-            cours__in=courses
-        ).aggregate(avg_prog=Avg("avancement_cours"))["avg_prog"] or 0
+        # ---- Cours ----
+        total_course_progress = 0
+        total_courses = 0
+        for course in courses:
+            prog = ProgressionCours.objects.filter(utilisateur=student, cours=course).first()
+            if prog:
+                total_course_progress += prog.avancement_cours
+            total_courses += 1  # on compte tous les cours, même sans progression
+        total_courses = total_courses or 1
+        course_progress = total_course_progress / total_courses
+
+        # ---- Exercices ----
+        exercises = Exercice.objects.filter(cours__in=courses).exclude(quiz__isnull=False)
+        total_exercise_progress = 0
+        total_exercises = exercises.count() or 1
+        for ex in exercises:
+            attempt = TentativeExercice.objects.filter(utilisateur=student, exercice=ex).first()
+            total_exercise_progress += 100 if attempt else 0
+        exercise_progress = total_exercise_progress / total_exercises
+
+        # ---- Quiz ----
+        quizzes = Quiz.objects.filter(exercice__cours__in=courses)
+        total_quiz_progress = 0
+        total_quizzes = quizzes.count() or 1
+        for quiz in quizzes:
+            last_rq = ReponseQuiz.objects.filter(etudiant=student, quiz=quiz).order_by('-date_fin').first()
+            if last_rq:
+                questions = Question.objects.filter(exercice=quiz.exercice)
+                total_quiz_points = sum(q.score for q in questions) or 1
+                student_score = last_rq.reponses.aggregate(total=Sum('score_obtenu'))['total'] or 0
+                total_quiz_progress += (student_score / total_quiz_points) * 100
+            else:
+                total_quiz_progress += 0
+        quiz_progress = total_quiz_progress / total_quizzes
+
+        # ---- Moyenne globale ----
+        global_progress = (course_progress + exercise_progress + quiz_progress) / 3
 
         result.append({
             "student_id": student.id_utilisateur,
-            "progress": round(prog_avg)
+            "progress": round(global_progress)
         })
 
     return Response(result)
@@ -381,7 +636,6 @@ def list_tentatives(request):
     serializer = TentativeExerciceReadSerializer(tentatives, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-# ---------------- POST nouvelle tentative ----------------
 class create_tentative(APIView):
     permission_classes = [IsAuthenticatedJWT]
 
@@ -389,20 +643,26 @@ class create_tentative(APIView):
         user = request.user
         exercice_id = request.data.get("exercice_id")
         etat = request.data.get("etat", "brouillon")
+        overwrite = request.data.get("overwrite", False)  # si on veut écraser dernière tentative
 
         # Vérification du rôle
         if not hasattr(user, "etudiant"):
-            return Response({"error": "Seuls les étudiants peuvent participer aux exercices"}, status=403)
+            return Response(
+                {"error": "Seuls les étudiants peuvent participer aux exercices"},
+                status=403
+            )
 
+        # Récupération de l'exercice
         try:
             exercice = Exercice.objects.get(id_exercice=exercice_id)
         except Exercice.DoesNotExist:
             return Response({"error": "Exercice non trouvé"}, status=404)
 
-        # Bloquer UNIQUEMENT la soumission
+        # Vérification appartenance à l'espace pour les soumissions
         if etat == "soumis" and not etudiant_appartient_a_lespace(user, exercice):
             raise PermissionDenied("Vous ne pouvez pas soumettre cet exercice")
 
+        # Temps passé
         temps_passe_sec = request.data.get("temps_passe", 0)
         temps_passe = timedelta(seconds=int(temps_passe_sec))
 
@@ -413,17 +673,67 @@ class create_tentative(APIView):
             "temps_passe": temps_passe,
         }
 
-        tentative, created = TentativeExercice.objects.update_or_create(
-            utilisateur=user,
-            exercice=exercice,
-            defaults=defaults
-        )
+        if etat == "brouillon":
+            # Toujours un seul brouillon par étudiant et exercice
+            tentative, created = TentativeExercice.objects.update_or_create(
+                utilisateur=user,
+                exercice=exercice,
+                etat="brouillon",
+                defaults=defaults
+            )
 
-        #  Mettre à jour la date de soumission seulement ici
-        if etat == "soumis":
-            tentative.submitted_at = now()
-            tentative.save(update_fields=["submitted_at"])
+        elif etat == "soumis":
+            # Vérifier si un brouillon existe
+            brouillon = TentativeExercice.objects.filter(
+                utilisateur=user,
+                exercice=exercice,
+                etat="brouillon"
+            ).first()
 
+            if brouillon:
+                # Transformer le brouillon en soumis
+                brouillon.etat = "soumis"
+                brouillon.reponse = defaults["reponse"]
+                brouillon.output = defaults["output"]
+                brouillon.temps_passe = defaults["temps_passe"]
+                brouillon.submitted_at = now()
+                brouillon.save(update_fields=["etat", "reponse", "output", "temps_passe", "submitted_at"])
+                tentative = brouillon
+            else:
+                # Compter les soumissions existantes
+                nb_soumissions = TentativeExercice.objects.filter(
+                    utilisateur=user,
+                    exercice=exercice,
+                    etat="soumis"
+                ).count()
+
+                if exercice.max_soumissions != 0 and nb_soumissions >= exercice.max_soumissions:
+                    if not overwrite:
+                        return Response({"error": "Limite de soumissions atteinte"}, status=400)
+                    else:
+                        # Écraser la dernière soumission
+                        last_submission = TentativeExercice.objects.filter(
+                            utilisateur=user,
+                            exercice=exercice,
+                            etat="soumis"
+                        ).order_by("-submitted_at").first()
+                        last_submission.reponse = defaults["reponse"]
+                        last_submission.output = defaults["output"]
+                        last_submission.temps_passe = defaults["temps_passe"]
+                        last_submission.submitted_at = now()
+                        last_submission.save(update_fields=["reponse", "output", "temps_passe", "submitted_at"])
+                        tentative = last_submission
+                else:
+                    # Créer nouvelle tentative soumis
+                    tentative = TentativeExercice.objects.create(
+                        utilisateur=user,
+                        exercice=exercice,
+                        etat="soumis",
+                        reponse=defaults["reponse"],
+                        output=defaults["output"],
+                        temps_passe=defaults["temps_passe"],
+                        submitted_at=now()
+                    )
 
         return Response({
             "success": "Tentative enregistrée",
@@ -432,9 +742,7 @@ class create_tentative(APIView):
                 "etat": tentative.etat,
                 "submitted_at": tentative.submitted_at,
             }
-        })
-
-
+        }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
@@ -452,8 +760,25 @@ def get_tentative(request, tentative_id):
 @permission_classes([IsAuthenticatedJWT])
 def can_submit_exercice(request, exercice_id):
     exercice = get_object_or_404(Exercice, id_exercice=exercice_id)
-    can_submit = etudiant_appartient_a_lespace(request.user, exercice)
-    return Response({"can_submit": can_submit})
+
+    # Vérifier si l'étudiant appartient à l'espace
+    if not etudiant_appartient_a_lespace(request.user, exercice):
+        return Response({"can_submit": False}, status=status.HTTP_200_OK)
+
+    # Compter uniquement les tentatives soumises
+    nb_soumissions = TentativeExercice.objects.filter(
+        exercice=exercice,
+        utilisateur=request.user,
+        etat='soumis'
+    ).count()
+
+    if exercice.max_soumissions != 0 and nb_soumissions >= exercice.max_soumissions:
+        # L'étudiant a atteint la limite
+        return Response({"can_submit": False}, status=status.HTTP_200_OK)
+
+    # Sinon, il peut soumettre
+    return Response({"can_submit": True}, status=status.HTTP_200_OK)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
@@ -475,7 +800,6 @@ def get_student(request, student_id):
     return Response(data)
 
 
-#prog coté proff
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def student_exercises(request, student_id):
@@ -499,29 +823,32 @@ def student_exercises(request, student_id):
     ).distinct()
 
     total_exercises = exercises.count()
-
-    results = []
     submitted_count = 0
 
+    results = []
+
     for ex in exercises:
-        tentative = TentativeExercice.objects.filter(
+        # toutes les tentatives de l’étudiant pour cet exercice, triées par date décroissante
+        tentatives = TentativeExercice.objects.filter(
             exercice=ex,
             utilisateur=student
-        ).first()
+        ).order_by("-submitted_at")
 
-        if tentative and tentative.etat == "soumis":
-            submitted_count += 1
+        # compter combien ont été soumises
+        submitted_count += tentatives.filter(etat="soumis").count()
 
         results.append({
             "id_exercice": ex.id_exercice,
             "nom_exercice": ex.titre_exo,
-            "tentative": {
-                "etat": tentative.etat,
-                "reponse": tentative.reponse,
-                "output": tentative.output,
-                "submitted_at": tentative.submitted_at,
-                "score": tentative.score,
-            } if tentative else None
+            "tentatives": [
+                {
+                    "etat": t.etat,
+                    "reponse": t.reponse,
+                    "output": t.output,
+                    "submitted_at": t.submitted_at,
+                    "score": t.score,
+                } for t in tentatives
+            ]
         })
 
     return Response({
@@ -529,7 +856,6 @@ def student_exercises(request, student_id):
         "submitted_count": submitted_count,
         "exercises": results
     })
-
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
@@ -569,13 +895,9 @@ def weekly_submission_chart(request, student_id):
     prof = request.user
 
     today = now().date()
-    # Lundi de la semaine courante (ISO)
     start_of_this_week = today - timedelta(days=today.weekday())
-
-    # On remonte à 6 semaines au total
     start_date = start_of_this_week - timedelta(weeks=5)
 
-    # Espaces du prof où l’étudiant est inscrit
     spaces = Space.objects.filter(
         utilisateur=prof,
         spaceetudiant__etudiant_id=student_id
@@ -586,14 +908,12 @@ def weekly_submission_chart(request, student_id):
         spaceexo__space__in=spaces
     ).distinct()
 
-    total_exercises = exercises.count() or 1
+    total_exercises = exercises.count() or 1  # éviter division par 0
 
-    # Initialisation des semaines (LUNDI → DIMANCHE)
     data = []
     for i in range(6):
         week_start = start_date + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)
-
         data.append({
             "week": f"Week {i+1}",
             "start_date": week_start.isoformat(),
@@ -610,15 +930,16 @@ def weekly_submission_chart(request, student_id):
         )
         .annotate(week_start=TruncWeek("submitted_at"))
         .values("week_start")
-        .annotate(submissions_count=Count("id"))
+        .annotate(
+            exercises_count=Count("exercice", distinct=True)
+        )
     )
 
-    # Mapping propre
     for s in submissions:
         week_index = (s["week_start"].date() - start_date).days // 7
         if 0 <= week_index < 6:
             data[week_index]["submissions"] = round(
-                s["submissions_count"] / total_exercises * 100
+                (s["exercises_count"] / total_exercises) * 100
             )
 
     return Response(data)
@@ -628,56 +949,66 @@ def weekly_submission_chart(request, student_id):
 @permission_classes([IsAuthenticatedJWT])
 def student_weekly_submission_chart(request):
     user = request.user
-    today = now().date()
 
-    # Lundi de la semaine courante
+    # Lundi de la semaine courante (timezone-safe)
+    today = now()
     start_of_this_week = today - timedelta(days=today.weekday())
-    # On remonte à 6 semaines
+    start_of_this_week = start_of_this_week.replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+    # On remonte à 6 semaines (incluant la semaine courante)
     start_date = start_of_this_week - timedelta(weeks=5)
 
-    # Tous les espaces où l'étudiant est inscrit
+    # Espaces où l'étudiant est inscrit
     spaces = Space.objects.filter(spaceetudiant__etudiant=user).distinct()
 
-    # Tous les exercices disponibles pour l'étudiant dans ces espaces
-    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
+    # Exercices accessibles à l'étudiant
+    exercises = Exercice.objects.filter(
+        spaceexo__space__in=spaces
+    ).distinct()
 
-    total_exercises = exercises.count() or 1  # éviter division par 0
+    total_exercises = exercises.count()
 
-    # Initialisation des 6 semaines (LUNDI → DIMANCHE)
+    if total_exercises == 0:
+        return Response([], status=status.HTTP_200_OK)
+
+    # Initialisation des 6 semaines
     data = []
     for i in range(6):
         week_start = start_date + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)
         data.append({
-            "week": f"Week {i+1}",
-            "start_date": week_start.isoformat(),
-            "end_date": week_end.isoformat(),
+            "week": f"Week {i + 1}",
+            "start_date": week_start.date().isoformat(),
+            "end_date": week_end.date().isoformat(),
             "submissions": 0
         })
 
-    # Récupérer les tentatives soumises par l'étudiant pour ces exercices
+    # Tentatives soumises par semaine (EXERCICES DISTINCTS)
     submissions = (
         TentativeExercice.objects.filter(
             utilisateur=user,
             exercice__in=exercises,
             etat="soumis",
-            submitted_at__date__gte=start_date
+            submitted_at__gte=start_date
         )
         .annotate(week_start=TruncWeek("submitted_at"))
         .values("week_start")
-        .annotate(submissions_count=Count("id"))
+        .annotate(exos_soumis=Count("exercice", distinct=True))
         .order_by("week_start")
     )
 
-    # Mapper chaque soumission dans la bonne semaine et convertir en %
+    # Remplissage des semaines
     for s in submissions:
-        week_index = (s["week_start"].date() - start_date).days // 7
+        week_index = int((s["week_start"] - start_date).days / 7)
         if 0 <= week_index < 6:
             data[week_index]["submissions"] = round(
-                s["submissions_count"] / total_exercises * 100
+                (s["exos_soumis"] / total_exercises) * 100
             )
 
     return Response(data, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET'])
@@ -852,3 +1183,78 @@ def student_progress_score_prof(request, student_id):
         })
 
     return Response(data, status=status.HTTP_200_OK)
+
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def quiz_success_rate_prof(request):
+    prof = request.user
+
+    spaces = Space.objects.filter(utilisateur=prof)
+
+    attempts = ReponseQuiz.objects.filter(
+        quiz__spacequiz__space__in=spaces,
+        terminer=True
+    )
+
+    total_attempts = attempts.count()
+    if total_attempts == 0:
+        return Response({"success_rate": 0})
+
+    success_count = 0
+
+    for rq in attempts:
+        max_score = rq.quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        if max_score > 0:
+            percentage = (rq.score_total / max_score) * 100
+            if percentage >= 50:   # 👈 seuil de réussite
+                success_count += 1
+
+    success_rate = round((success_count / total_attempts) * 100, 2)
+
+    return Response({"success_rate": success_rate})
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def all_students_submissions(request):
+    prof = request.user
+
+    # Tous les espaces du prof
+    spaces = Space.objects.filter(utilisateur=prof)
+
+    # Tous les étudiants dans ces espaces
+    student_ids = set(spaces.values_list("spaceetudiant__etudiant__id_utilisateur", flat=True))
+    students = Utilisateur.objects.filter(id_utilisateur__in=student_ids)
+
+    # Tous les exercices du prof dans ces espaces
+    exercises = Exercice.objects.filter(utilisateur=prof, spaceexo__space__in=spaces).distinct()
+    total_exercises = exercises.count()
+
+    result = []
+
+    for student in students:
+        # compter chaque exercice au maximum 1 fois même s'il y a plusieurs tentatives
+        submitted_count = TentativeExercice.objects.filter(
+            exercice__in=exercises,
+            utilisateur=student,
+            etat="soumis"
+        ).values("exercice").distinct().count()
+
+        result.append({
+            "student_id": student.id_utilisateur,
+            "nom": student.nom,
+            "prenom": student.prenom,
+            "submitted_count": submitted_count
+        })
+
+    return Response({
+        "total_exercises": total_exercises,
+        "students": result
+    })

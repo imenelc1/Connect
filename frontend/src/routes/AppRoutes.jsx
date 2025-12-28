@@ -87,7 +87,7 @@ export default function AppRoutes() {
         {/* ========= COMMON ========= */}
         <Route path="/settings" element={<Setting />} />
         <Route path="/community" element={<CommunityPage />} />
-        <Route path="/badges" element={<Badges />} />
+        <Route path="/badges" element={<Badges/>} />
         <Route path="/my-students" element={<MyStudents />} />
         <Route path="/spaces" element={<Spaces />} />
 
@@ -114,7 +114,8 @@ export default function AppRoutes() {
         <Route path="/submitted-exercise/:tentativeId" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
         <Route path="/progress-exercice" element={<ProgressExercice />} />
-        <Route path="/progress-student" element={<ProgressStudent />} />
+       
+        <Route path="/progress-student/:studentId" element={<ProgressStudent />} />
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />

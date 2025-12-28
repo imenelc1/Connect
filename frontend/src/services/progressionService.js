@@ -61,11 +61,30 @@ export const addSession = async (duration) => {
   return res.data;
 };
 
-// Temps moyen passé
-export const getAverageTime = async () => {
-  const res = await api.get("dashboard/average-time/", { headers: getAuthHeader() });
-  return res.data.average_duration; 
+const API_URL = "http://127.0.0.1:8000/api/dashboard/";
+
+const getDailyTime = async () => {
+  const token = localStorage.getItem("token");
+  const res = await axios.get(API_URL + "daily-time/", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.data;
 };
+
+export const getSuccessRate = async () => {
+  const res = await api.get("dashboard/success-rate/", { headers: getAuthHeader() });
+  return res.data.success_rate;
+};
+
+export const getSubmittedExercises = async (studentId) => {
+  if (!studentId) throw new Error("User id not provided");
+
+  const res = await api.get(`dashboard/student-total-tentatives/${studentId}/`, { headers: getAuthHeader() });
+  return res.data;
+};
+
+
+
 
 export const getGlobalProgress = async () => {
   const res = await api.get("dashboard/global-progress/", { headers: getAuthHeader() });
@@ -185,7 +204,8 @@ export const getTentativeById = async (tentativeId) => {
   completeLessonsBulk,
   getActiveCoursesCount,
   addSession,
-  getAverageTime,
+  getDailyTime,
+  getSuccessRate,
   getGlobalProgress,
   updateLastLesson,
   resetCourseProgress,

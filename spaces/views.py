@@ -15,6 +15,8 @@ from quiz.serializers import QuizSerializer, QuizSerializer1
 from users.models import Utilisateur
 from .models import Space, SpaceCour, SpaceEtudiant, SpaceExo, SpaceQuiz
 from .serializers import (
+    MyExerciseSerializer,
+    MyQuizSerializer,
     SpaceCourSerializer,
     SpaceExoSerializer,
     SpaceQuizSerializer,
@@ -133,23 +135,38 @@ def my_courses(request):
 @permission_classes([IsAuthenticatedJWT])
 def my_exercises(request):
     prof = request.user
-    exercises = Exercice.objects.filter(utilisateur=prof)
-    serializer = ExerciceSerializer(exercises, many=True)
-    return Response(serializer.data)
+    # uniquement les exercices qui n'ont pas de quiz associé
+    exercises = Exercice.objects.filter(utilisateur=prof).exclude(quiz__isnull=False)
+    serializer = MyExerciseSerializer(exercises, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def my_quizzes(request):
     prof = request.user
-    quizzes = Quiz.objects.filter(exercice__utilisateur=prof)
-    serializer = QuizSerializer1(quizzes, many=True)  
-    print("mes quizzes ", serializer.data)
+    space_id = request.query_params.get("space_id")  # facultatif
 
-    print("serializer.data", serializer.data)
+    # Tous les quizzes du prof
+    quizzes = Quiz.objects.filter(exercice__utilisateur=prof).exclude(exercice__isnull=True)
 
+    if space_id:
+        try:
+            space = Space.objects.get(id_space=space_id, utilisateur=prof)
+            # Exclure ceux déjà dans l'espace
+            quizzes_in_space_ids = SpaceQuiz.objects.filter(space=space).values_list('quiz_id', flat=True)
+            quizzes = quizzes.exclude(id__in=quizzes_in_space_ids)
+        except Space.DoesNotExist:
+            return Response({"error": "Espace non trouvé ou non autorisé"}, status=404)
 
+    serializer = MyQuizSerializer(quizzes, many=True)
     return Response(serializer.data)
+
+
+
+
+
 
 
 
@@ -252,6 +269,7 @@ def space_quizzes(request, space_id):
 
         space_quiz = SpaceQuiz.objects.create(space=space, quiz=quiz)
         serializer = SpaceQuizSerializer(space_quiz)
+        
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

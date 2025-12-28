@@ -16,7 +16,8 @@ class ExerciceSerializer1(serializers.ModelSerializer):
             'solution',
             'categorie',
             'utilisateur',
-            'cours'
+            'cours',
+            'max_soumissions',
         ]
 
 
@@ -42,7 +43,8 @@ class ExerciceSerializer(serializers.ModelSerializer):
             'utilisateur_name',
             'cours',
             'visibilite_exo',
-            'visibilite_exo_label'
+            'visibilite_exo_label',
+            'max_soumissions', 
         ]
 
     def get_utilisateur_name(self, obj):
@@ -52,18 +54,18 @@ class ExerciceSerializer(serializers.ModelSerializer):
 
     def get_visibilite_exo_label(self, obj):
         return "public" if obj.visibilite_exo else "private"
-    
+
     def get_solution(self, obj):
         request = self.context.get('request')
 
         if not request or not request.user.is_authenticated:
-         return None
+            return None
 
         user = request.user
 
         # le prof voit toujours la solution
         if obj.utilisateur == user:
-          return obj.solution
+            return obj.solution
 
         # l’étudiant voit la solution s’il a AU MOINS une tentative
         tentative = TentativeExercice.objects.filter(
@@ -74,8 +76,9 @@ class ExerciceSerializer(serializers.ModelSerializer):
         if tentative:
             return obj.solution
 
-        #sinon
+        # sinon
         return None
+
 
 
   

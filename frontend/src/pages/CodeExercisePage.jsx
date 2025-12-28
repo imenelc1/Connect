@@ -12,6 +12,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import progressionService from "../services/progressionService";
+import Input from "../components/common/Input";
 
 import Editor from "@monaco-editor/react";
 import ExerciseContext from "../context/ExerciseContext";
@@ -20,7 +21,6 @@ export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
   const { exerciceId } = useParams();
-
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
@@ -51,6 +51,7 @@ int main() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const sidebarWidth = sidebarCollapsed ? -200 : -50;
   const isStudent = userData?.role === "etudiant";
+  const [overwrite, setOverwrite] = useState(false);
 
   // -------- Notifications --------
   const sendNotification = (message, type = "info") => {
@@ -97,7 +98,7 @@ int main() {
           etat: "brouillon",
           temps_passe: Math.floor((Date.now() - startTime) / 1000),
         });
-      } catch {}
+      } catch { }
     }, 1000);
     return () => clearTimeout(timer);
   }, [userCode, output, exerciceId, startTime]);
@@ -121,7 +122,7 @@ int main() {
         );
         if (res.data.stderr)
           sendNotification("Erreur détectée — vérifie la syntaxe", "hint");
-      } catch {}
+      } catch { }
     }, 10000);
     return () => clearTimeout(t);
   }, [userCode]);
@@ -150,14 +151,33 @@ int main() {
         reponse: userCode,
         output,
         etat: "soumis",
+        overwrite,
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
       toast.success("Exercice soumis");
-      sendNotification("Exercice soumis !");
-    } catch {
+
+      // Vérifier à nouveau si l'on peut soumettre
+      const res = await fetch(
+        `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const data = await res.json();
+      setCanSubmit(data.can_submit);
+
+      if (!data.can_submit) {
+        toast.error("Toutes les tentatives ont été utilisées !");
+      }
+
+    } catch (err) {
+      console.error(err);
       toast.error("Erreur lors de la soumission");
     }
   };
+
 
   const [canSubmit, setCanSubmit] = useState(false);
   useEffect(() => {
@@ -232,199 +252,200 @@ int main() {
   // ------------------- JSX -------------------
   return (
     <ExerciseContext.Provider value={exerciseContextValue}>
-    <div
-      className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
-      style={{ marginLeft: sidebarWidth }}
-    >
+      <div
+        className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
+        style={{ marginLeft: sidebarWidth }}
+      >
         <div className="hidden lg:block">
           <NavBar />
         </div>
 
-      <div className="flex-1 p-4 md:p-8 lg:ml-72 transition-all duration-300 ml-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center mb-10 gap-6 md:gap-0">
-          <div className="flex-1">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-muted mb-2">
-              {t("header.title")}
-            </h1>
-            <p className="text-[rgb(var(--color-text))] text-lg md:text-xl opacity-80">
-              {t("header.subtitle")}
-            </p>
-          </div>
+        <div className="flex-1 p-4 md:p-8 lg:ml-72 transition-all duration-300 ml-10">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center mb-10 gap-6 md:gap-0">
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-muted mb-2">
+                {t("header.title")}
+              </h1>
+              <p className="text-[rgb(var(--color-text))] text-lg md:text-xl opacity-80">
+                {t("header.subtitle")}
+              </p>
+            </div>
 
-          <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0 relative">
-           <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
-  <HeadMascotte />
-  
-  {/* Notifications */}
-<div className="fixed top-20 right-6 flex flex-col gap-3 z-[9999]">
-  {notifications.map((n) => (
-    <div
-      key={n.id}
-      className={`
+            <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0 relative">
+              <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
+                <HeadMascotte />
+
+                {/* Notifications */}
+                <div className="fixed top-20 right-6 flex flex-col gap-3 z-[9999]">
+                  {notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className={`
         px-4 py-2 rounded-2xl shadow-card border backdrop-blur
         animate-slide-in flex items-center gap-2
-        ${
-          n.type === "error"
-            ? "bg-[rgb(var(--color-red))]/90 border-red-300 text-white"
-            : n.type === "hint"
-            ? "bg-[rgb(var(--color-secondary2))]/90 border-[rgb(var(--color-blue))]/40 text-white"
-            : "bg-[rgb(var(--color-primary))]/90 border-[rgb(var(--color-gray-light))]/40 text-white"
-        }
+        ${n.type === "error"
+                          ? "bg-[rgb(var(--color-red))]/90 border-red-300 text-white"
+                          : n.type === "hint"
+                            ? "bg-[rgb(var(--color-secondary2))]/90 border-[rgb(var(--color-blue))]/40 text-white"
+                            : "bg-[rgb(var(--color-primary))]/90 border-[rgb(var(--color-gray-light))]/40 text-white"
+                        }
       `}
-    >
-      {n.type === "hint" && "💡"}
-      {n.type === "error" && "⚠️"}
-      {n.type === "info" && "🤖"}
-      <span>{n.message}</span>
-    </div>
-  ))}
-</div>
-  <UserCircle
-    initials={initials}
-    onToggleTheme={toggleDarkMode}
-    onChangeLang={(lang) => i18n.changeLanguage(lang)}
-  />
-</div>
+                    >
+                      {n.type === "hint" && "💡"}
+                      {n.type === "error" && "⚠️"}
+                      {n.type === "info" && "🤖"}
+                      <span>{n.message}</span>
+                    </div>
+                  ))}
+                </div>
+                <UserCircle
+                  initials={initials}
+                  onToggleTheme={toggleDarkMode}
+                  onChangeLang={(lang) => i18n.changeLanguage(lang)}
+                />
+              </div>
 
+            </div>
           </div>
-        </div>
 
-        {/* Exercise Card */}
-        <div className="w-full p-6 rounded-2xl bg-grad-3 mb-6 md:mb-10">
-          {exercise ? (
-            <>
-              <p className="font-semibold text-muted text-[20px]">
-                Exercice: {exercise.titre_exo}
+          {/* Exercise Card */}
+          <div className="w-full p-6 rounded-2xl bg-grad-3 mb-6 md:mb-10">
+            {exercise ? (
+              <>
+                <p className="font-semibold text-muted text-[20px]">
+                  Exercice: {exercise.titre_exo}
+                </p>
+                <p className="mt-3 text-muted text-sm md:text-base">
+                  {exercise.enonce}
+                </p>
+              </>
+            ) : (
+              <p className="text-red-500 text-sm">
+                Impossible de charger l'exercice.
               </p>
-              <p className="mt-3 text-muted text-sm md:text-base">
-                {exercise.enonce}
-              </p>
-            </>
-          ) : (
-            <p className="text-red-500 text-sm">
-              Impossible de charger l'exercice.
-            </p>
-          )}
-        </div>
-
-        {/* Editor */}
-        <div className="relative rounded-2xl overflow-hidden shadow-lg mb-10 bg-[#0d1117]">
-          <div className="h-11 flex items-center justify-between px-5 bg-gray-800 border-b border-gray-700">
-            <span className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-              <span className="w-3 h-3 bg-yellow-400 rounded-full"></span>
-              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-            </span>
-            <span className="font-medium text-sm text-gray-300">main.c</span>
+            )}
           </div>
-          <Editor
-            height="400px"
-            language="c"
-            theme="vs-dark"
-            value={userCode}
-            onChange={setUserCode}
-            options={{
-              fontSize: 15,
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              automaticLayout: true,
-            }}
-          />
-        </div>
 
-        {/* Buttons */}
-        <div className="flex flex-wrap justify-center gap-4 mb-10">
-          <ActionButton
-            icon={<Play size={18} />}
-            label={isRunning ? "Exécution..." : t("buttons.run")}
-            bg="var(--grad-button)"
-            onClick={runCode}
-          />
-          <ActionButton
-            icon={<Square size={18} />}
-            label={t("buttons.stop")}
-            bg="linear-gradient(135deg,#ba68c8ff)"
-            onClick={stopCode}
-          />
-          <ActionButton
-            icon={<Bug size={18} />}
-            label={t("buttons.debug")}
-            bg="linear-gradient(135deg,#A3AAED,#6A76E0)"
-            onClick={debugCode}
-          />
-          <ActionButton
-            icon={<RotateCw size={18} />}
-            label={t("buttons.reset")}
-            bg="linear-gradient(#FFFFFF,#A3AAED,#A3AAED)"
-            text="rgb(var(--color-text))"
-            onClick={resetCode}
-          />
-        </div>
-
-        {isStudent && (
-          <div className="flex justify-center gap-4">
-            <ActionButton
-              icon={<MdAutoAwesome size={18} />}
-              label={t("buttons.saveDraft")}
-              bg="var(--grad-button)"
-              onClick={handleSaveDraft}
+          {/* Editor */}
+          <div className="relative rounded-2xl overflow-hidden shadow-lg mb-10 bg-[#0d1117]">
+            <div className="h-11 flex items-center justify-between px-5 bg-gray-800 border-b border-gray-700">
+              <span className="flex items-center gap-2">
+                <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                <span className="w-3 h-3 bg-yellow-400 rounded-full"></span>
+                <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+              </span>
+              <span className="font-medium text-sm text-gray-300">main.c</span>
+            </div>
+            <Editor
+              height="400px"
+              language="c"
+              theme="vs-dark"
+              value={userCode}
+              onChange={setUserCode}
+              options={{
+                fontSize: 15,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+              }}
             />
+          </div>
+
+          {/* Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mb-10">
+            <ActionButton
+              icon={<Play size={18} />}
+              label={isRunning ? "Exécution..." : t("buttons.run")}
+              bg="var(--grad-button)"
+              onClick={runCode}
+            />
+            <ActionButton
+              icon={<Square size={18} />}
+              label={t("buttons.stop")}
+              bg="linear-gradient(135deg,#ba68c8ff)"
+              onClick={stopCode}
+            />
+            <ActionButton
+              icon={<Bug size={18} />}
+              label={t("buttons.debug")}
+              bg="linear-gradient(135deg,#A3AAED,#6A76E0)"
+              onClick={debugCode}
+            />
+            <ActionButton
+              icon={<RotateCw size={18} />}
+              label={t("buttons.reset")}
+              bg="linear-gradient(#FFFFFF,#A3AAED,#A3AAED)"
+              text="rgb(var(--color-text))"
+              onClick={resetCode}
+            />
+          </div>
+
+
+          {isStudent && (
+            <div className="flex justify-center gap-4">
+              <ActionButton
+                icon={<MdAutoAwesome size={18} />}
+                label={t("buttons.saveDraft")}
+                bg="var(--grad-button)"
+                onClick={handleSaveDraft}
+              />
+              <button
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                className={`
+        px-8 py-3 rounded-xl font-semibold shadow-lg transition
+        ${!canSubmit
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
+                    : "text-white hover:opacity-90"
+                  }
+      `}
+                style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
+              >
+                {t("send_solution")}
+              </button>
+            </div>
+          )}
+
+
+          {/* Output */}
+          <p className="text-lg md:text-xl font-semibold text-muted mb-3">
+            {t("output.title")}
+          </p>
+          <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
+            {output.split("\n").map((line, i) => (
+              <div key={i}>{line}</div>
+            ))}
+          </div>
+
+          {/* Assistant IA */}
+          <div className="flex justify-center mb-16">
             <button
-              onClick={handleSubmit}
-              disabled={!canSubmit}
-              className={`
-                px-8 py-3 rounded-xl font-semibold shadow-lg transition
-                ${!canSubmit
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
-                  : "text-white hover:opacity-90"
-                }
-              `}
-              style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
+              onClick={() => setOpenAssistant(true)}
+              className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
             >
-              {t("send_solution")}
+              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgb(var(--color-gray-light))]">
+                <MessageCircle
+                  size={18}
+                  strokeWidth={1.7}
+                  className="text-[rgb(var(--color-primary))]"
+                />
+              </div>
+              <div className="text-[rgb(var(--color-primary))] font-medium">
+                Besoin d'aide ? Discutez avec l'Assistant IA
+              </div>
             </button>
           </div>
-        )}
 
-        {/* Output */}
-        <p className="text-lg md:text-xl font-semibold text-muted mb-3">
-          {t("output.title")}
-        </p>
-        <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
-          {output.split("\n").map((line, i) => (
-            <div key={i}>{line}</div>
-          ))}
+          {openAssistant && (
+            <AssistantIA onClose={() => setOpenAssistant(false)} />
+          )}
+
         </div>
+      </div>
 
-        {/* Assistant IA */}
-        <div className="flex justify-center mb-16">
-          <button
-            onClick={() => setOpenAssistant(true)}
-            className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
-          >
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgb(var(--color-gray-light))]">
-              <MessageCircle
-                size={18}
-                strokeWidth={1.7}
-                className="text-[rgb(var(--color-primary))]"
-              />
-            </div>
-            <div className="text-[rgb(var(--color-primary))] font-medium">
-              Besoin d'aide ? Discutez avec l'Assistant IA
-            </div>
-          </button>
-        </div>
-
-        {openAssistant && (
-  <AssistantIA onClose={() => setOpenAssistant(false)} />
-)}
-
-</div> {/* ferme: div className="flex-1 p-4 md:p-8 lg:ml-72 ..." */}
-</div> {/* ferme: div className="flex-1 p-4 md:p-8 bg-surface" */}
-
-</ExerciseContext.Provider>
-);
+    </ExerciseContext.Provider>
+  );
 }
 // ----------------- ACTION BUTTON -----------------
 function ActionButton({ icon, label, bg, text = "white", onClick }) {
