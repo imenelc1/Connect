@@ -88,6 +88,30 @@ setAvgSubmission(avg);
   fetchSubmissions();
 }, []);
 
+const [successRate, setSuccessRate] = useState(0);
+useEffect(() => {
+  const fetchSuccessRate = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        "http://127.0.0.1:8000/api/dashboard/quiz_success_rate_prof/",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setSuccessRate(res.data.success_rate);
+    } catch (err) {
+      console.error("Erreur success rate:", err);
+    }
+  };
+
+  fetchSuccessRate();
+}, []);
+
+
 
 
   useEffect(() => {
@@ -117,12 +141,13 @@ setAvgSubmission(avg);
  useEffect(() => {
   if (!user) return;
 
+  const token = localStorage.getItem("token");
+
   const addSession = async () => {
     try {
-      const token = localStorage.getItem("token");
       await axios.post(
         "http://127.0.0.1:8000/api/dashboard/add-session/",
-        { duration: 60 }, // 60 sec ou valeur selon ton intervalle
+        { duration: 60 },
         { headers: { Authorization: `Bearer ${token}` } }
       );
     } catch (err) {
@@ -132,19 +157,20 @@ setAvgSubmission(avg);
 
   const fetchDailyTime = async () => {
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.get(
         "http://127.0.0.1:8000/api/dashboard/daily-time/",
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log("Data récupérée :", res.data);
       setDailyTime(res.data.total_seconds || 0);
     } catch (err) {
       console.error("Erreur fetching daily time:", err);
     }
   };
 
-  // Ajouter session et récupérer le temps toutes les 60 sec
+  // 1️⃣ On récupère le temps **une première fois immédiatement**
+  fetchDailyTime();
+
+  // 2️⃣ On ajoute la session et relance le fetch toutes les 60 sec
   addSession();
   const interval = setInterval(async () => {
     await addSession();
@@ -153,6 +179,34 @@ setAvgSubmission(avg);
 
   return () => clearInterval(interval);
 }, [user]);
+
+
+
+
+const [contentCounts, setContentCounts] = useState({
+  courses_count: 0,
+  exercises_count: 0,
+  quizzes_count: 0
+});
+
+useEffect(() => {
+  const fetchContentCounts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        "http://127.0.0.1:8000/api/dashboard/professor_content_counts_global",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setContentCounts(res.data);
+      console.log("chart", res.data);
+    } catch (err) {
+      console.error("Erreur fetching content counts:", err);
+    }
+  };
+
+  fetchContentCounts();
+}, []);
+
 
 
 
@@ -203,11 +257,12 @@ const formatTimeStyled = (secs) => {
   ];
 
   // Chart data
-  const data = [
-    { name: "Published", value: 46 },
-    { name: "Draft", value: 10 },
-    { name: "Quizzes", value: 82 },
-  ];
+const chartData = [
+  { name: "Courses", value: contentCounts.courses_count },
+  { name: "Exercises", value: contentCounts.exercises_count},
+  { name: "Quizzes", value: contentCounts.quizzes_count }
+];
+
 
   if (loading) {
     return (
@@ -271,21 +326,21 @@ const formatTimeStyled = (secs) => {
         {/* Quick stats */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 text-textc">
           <Cards 
-            text="Average Student Progress" 
+            text="Avg. Submission Rate" 
             value={`${avgSubmission}%`} 
             icon={<TrendingDown size={isMobile ? 16 : 18}/>} 
             bg="bg-grad-2"
             isMobile={isMobile}
           />
           <Cards 
-            text="Success Rate" 
-            value="68%" 
+            text="Quizzes Success Rate" 
+            value={`${successRate}%`} 
             icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
             bg="bg-grad-3" 
             isMobile={isMobile}
           />
           <Cards 
-            text="Average time spent" 
+            text="Time Spent Today" 
             value={formatTimeStyled(dailyTime)} 
             icon={<Book size={isMobile ? 16 : 18} />} 
             bg="bg-grad-4" 
@@ -349,33 +404,35 @@ const formatTimeStyled = (secs) => {
           </div>
 
           {/* Pie chart */}
-          <div className="rounded-2xl shadow-md p-4 flex flex-col items-center bg-card">
-            <PieChart width={isMobile ? 180 : 220} height={isMobile ? 180 : 220}>
-              <Pie
-                dataKey="value"
-                data={data}
-                outerRadius={isMobile ? 70 : 90}
-                paddingAngle={2}
-                label={({ value }) => value}
-                labelStyle={{ fontSize: isMobile ? 10 : 12 }}
-              >
-                <Cell fill="rgb(var(--color-purple))" />
-                <Cell fill="rgb(var(--color-blue))" />
-                <Cell fill="rgb(var(--color-pink))" />
-              </Pie>
-            </PieChart>
+          <div className="rounded-2xl shadow-md  flex flex-col items-center bg-card">
+<PieChart width={isMobile ? 180 : 240} height={isMobile ? 180 : 220} className="mt-8">
+  <Pie
+    dataKey="value"
+    data={chartData}
+    outerRadius={isMobile ? 70 : 85}
+    paddingAngle={0}
+    label={({ value }) => value}
+    labelStyle={{ fontSize: isMobile ? 10 : 12 }}
+  >
+    <Cell fill="rgb(var(--color-purple))" />
+    <Cell fill="rgb(var(--color-blue))" />
+    <Cell fill="rgb(var(--color-pink))" />
+  </Pie>
+</PieChart>
 
-            <div className="flex flex-wrap gap-3 sm:gap-4 text-xs mt-2 justify-center">
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span> Published
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span> Draft
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span> Quizzes
-              </div>
-            </div>
+
+         <div className="flex flex-wrap gap-3 sm:gap-4 text-xs mt-2 justify-center">
+  <div className="flex items-center gap-1">
+    <span className="w-6 h-1 bg-purple rounded-full"></span> Courses
+  </div>
+  <div className="flex items-center gap-1">
+    <span className="w-6 h-1 bg-blue rounded-full"></span> Exercises
+  </div>
+  <div className="flex items-center gap-1">
+    <span className="w-6 h-1 bg-pink rounded-full"></span> Quizzes
+  </div>
+</div>
+
           </div>
         </div>
 

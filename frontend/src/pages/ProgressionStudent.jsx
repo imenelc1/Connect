@@ -36,34 +36,6 @@ export default function ProgressStudent() {
   };
 
 
-useEffect(() => {
-  const fetchDashboard = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-      const BACKEND_URL = "http://127.0.0.1:8000";
-
-      const res = await axios.get(`${BACKEND_URL}/api/dashboard/student/${studentId}/progress/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = res.data;
-      console.log("student:", data.student);
-
-      setStudent(data.student || {});
-      setCourses(data.courses || []);
-      setGradeData(data.grade_data || []);
-      setTotalExercises(data.total_exercises || 0);
-      setSubmittedExercises(data.submitted_exercises || 0);
-    } catch (err) {
-      console.error("Erreur fetching dashboard:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (studentId) fetchDashboard();
-}, [studentId]);
 
 
 
@@ -168,6 +140,27 @@ useEffect(() => {
 
   fetchSubmittedExercises();
 }, []);
+
+
+useEffect(() => {
+
+
+  const fetchQuizzes = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `http://127.0.0.1:8000/api/quiz/student/quizzes-faits/${studentId}/`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setQuizzes(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchQuizzes();
+}, [studentId]);
+
 
 
 
@@ -297,8 +290,9 @@ useEffect(() => {
               className="flex justify-between items-center p-3 rounded-lg shadow-sm bg-gray/10 hover:bg-gray/20 transition"
             >
               <div className="flex items-center gap-2">
-                <CheckCircle size={18} className="text-purple" />
+                
                 <p className="font-medium text-gray">{quiz.titre_exercice}</p>
+                <CheckCircle size={5} className="text-purple" />
               </div>
 
               <div className="flex flex-col items-end text-right text-sm text-gray">
@@ -306,7 +300,7 @@ useEffect(() => {
                   {quiz.score_obtenu}/{quiz.score_max} pts
                 </span>
                 <span className="text-xs mt-1">
-                  {quiz.progression}% {quiz.reussi ? <CheckCircle/> : ""}
+                 {quiz.reussi ? <CheckCircle size={14} className="text-purple"/> : ""}
                 </span>
                 <span className="text-xs mt-1 text-gray-400">
                   {new Date(quiz.date_fin).toLocaleString()}

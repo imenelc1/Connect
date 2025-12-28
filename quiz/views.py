@@ -262,31 +262,38 @@ def toutes_les_tentatives_quiz(request, quiz_id, utilisateur_id):
 
 
 
-@api_view(["GET"])
-def quizzes_faits_par_etudiant(request, utilisateur_id):
-    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=utilisateur_id)
+from django.db.models import OuterRef
 
-    # Dernière tentative par quiz
-    tentatives = (
-        ReponseQuiz.objects
-        .filter(etudiant=utilisateur, terminer=True)
-        .order_by("quiz_id", "-date_fin")
-        .distinct("quiz_id") 
-    )
+@api_view(["GET"])
+def quizzes_faits_par_etudiant(request, student_id):
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=student_id)
+
+    # Dernière tentative de chaque quiz
+    last_attempts = ReponseQuiz.objects.filter(
+        etudiant=utilisateur,
+        quiz=OuterRef('quiz')
+    ).order_by('-date_fin')
+
+    # Récupérer toutes les tentatives terminées
+    tentatives = ReponseQuiz.objects.filter(
+        etudiant=utilisateur,
+        terminer=True
+    ).order_by('-date_fin')
+
+    quizzes_done = {}
+    for t in tentatives:
+        if t.quiz_id not in quizzes_done:
+            quizzes_done[t.quiz_id] = t  # première occurrence = dernière tentative
 
     data = []
 
-    for tentative in tentatives:
+    for tentative in quizzes_done.values():
         quiz = tentative.quiz
 
         # score max du quiz
-        score_max = quiz.exercice.questions.aggregate(
-            total=Sum("score")
-        )["total"] or 0
+        score_max = quiz.exercice.questions.aggregate(total=Sum("score"))["total"] or 0
 
-        progression = round(
-            (tentative.score_total / score_max) * 100
-        ) if score_max > 0 else 0
+        progression = round((tentative.score_total / score_max) * 100) if score_max > 0 else 0
 
         data.append({
             "quiz_id": quiz.id,

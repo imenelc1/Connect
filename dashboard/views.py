@@ -83,7 +83,7 @@ def complete_lesson(request, lecon_id):
     pc.save()
 
     # Historique
-    create_progress_history(user, cours, pc.avancement_cours, pc.temps_passe)
+    create_progress_history(user, cours, pc.temps_passe)
 
     return Response({
         "section_progress": section_progress,
@@ -354,46 +354,56 @@ def global_progress(request):
 
     return Response({"global_progress": round(global_progress)})
 
+def calculate_global_course_progress(user):
+    total_courses = Cours.objects.count() or 1
+
+    done_courses = ProgressionCours.objects.filter(
+        utilisateur=user,
+        avancement_cours__gte=90
+    ).count()
+
+    return (done_courses / total_courses) * 100
+
+
+def calculate_global_quiz_progress(user):
+    total_quizzes = Quiz.objects.count() or 1
+
+    done_quizzes = (
+        ReponseQuiz.objects
+        .filter(etudiant=user)
+        .values("quiz")
+        .distinct()
+        .count()
+    )
+
+    return (done_quizzes / total_quizzes) * 100
 
 
 
-def create_progress_history(user, cours, avancement, temps_passe):
-    """
-    Crée une entrée dans ProgressionHistory
-    """
+def create_progress_history(user, cours, temps_passe):
+    global_progress = calculate_global_course_progress(user)
+
     ProgressionHistory.objects.create(
         utilisateur=user,
         cours=cours,
-        avancement=avancement,
+        type_contenu="cours",
+        avancement=global_progress,
         temps_passe=temps_passe
     )
 
 
 def create_quiz_progress_history(user, quiz, temps_passe):
-    """
-    Crée une entrée dans ProgressionHistory pour un quiz.
-    - La progression est calculée en % du score total obtenu / score total du quiz
-    """
-    # Récupérer les questions du quiz
-    questions = quiz.exercice.questions.all()  # car chaque quiz est lié à un exercice
-    total_score = sum(q.score for q in questions) or 1  # éviter div par 0
-
-    # Récupérer la dernière tentative de l'étudiant
-    last_attempt = ReponseQuiz.objects.filter(etudiant=user, quiz=quiz).order_by('-date_fin').first()
-    student_score = 0
-    if last_attempt:
-        student_score = last_attempt.reponses.aggregate(total=Sum('score_obtenu'))['total'] or 0
-
-    progression_percent = (student_score / total_score) * 100
+    global_progress = calculate_global_quiz_progress(user)
 
     ProgressionHistory.objects.create(
         utilisateur=user,
-        cours=quiz.exercice.cours,  # si tu veux relier au cours
-        type_contenu="quiz",
+        cours=quiz.exercice.cours,
         quiz=quiz,
-        avancement=progression_percent,
+        type_contenu="quiz",
+        avancement=global_progress,
         temps_passe=temps_passe
     )
+
 
 
 
@@ -457,54 +467,110 @@ def average_time_prof(request):
 def global_progress_students(request):
     prof = request.user
 
-    # Espaces du prof
     spaces = Space.objects.filter(utilisateur=prof)
 
-    # Cours dans ces espaces
     courses = Cours.objects.filter(spacecour__space__in=spaces).distinct()
 
-    # Étudiants inscrits dans ces espaces
     students = Utilisateur.objects.filter(
-    id_utilisateur__in=SpaceEtudiant.objects.filter(space__in=spaces).values_list("etudiant_id", flat=True)
-)
+        id_utilisateur__in=SpaceEtudiant.objects.filter(
+            space__in=spaces
+        ).values_list("etudiant_id", flat=True)
+    )
 
-    # Historique des progressions pour ces étudiants et cours
+    # ===== PROGRESSION COURS =====
     progressions = ProgressionHistory.objects.filter(
         utilisateur__in=students,
         cours__in=courses
     ).annotate(day=TruncDate("created_at"))
 
-    # Préparer la période : derniers 7 jours
+    course_progress = {}
+    for p in progressions:
+        course_progress.setdefault(p.day, {})[p.utilisateur_id] = p.avancement
+
+    # ===== PROGRESSION QUIZ =====
+    quiz_answers = ReponseQuiz.objects.filter(
+    etudiant__in=students,
+    quiz__spacequiz__space__in=spaces,
+    terminer=True
+   ).annotate(day=TruncDate("date_fin"))
+
+
+    quiz_progress = {}
+    for rq in quiz_answers:
+        max_score = rq.quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        if max_score > 0:
+            percent = (rq.score_total / max_score) * 100
+            quiz_progress.setdefault(rq.day, {}).setdefault(
+                rq.etudiant_id, []
+            ).append(percent)
+
+    # ===== DERNIERS 7 JOURS =====
     today = now().date()
     start_date = today - timedelta(days=6)
-    days = [(start_date + timedelta(days=i)) for i in range(7)]
+    days = [start_date + timedelta(days=i) for i in range(7)]
 
-    #  Construire un dictionnaire {jour: {student_id: progression}}
-    progress_dict = {}
-    for p in progressions:
-        day_key = p.day
-        if day_key not in progress_dict:
-            progress_dict[day_key] = {}
-        progress_dict[day_key][p.utilisateur_id] = p.avancement
-        
-    # Calculer la moyenne quotidienne en incluant tous les étudiants
     result = []
+
     for d in days:
-        daily_progress = progress_dict.get(d, {})
-        total_progress = sum(daily_progress.get(u.pk, 0) for u in students)
-        avg = round(total_progress / students.count()) if students.exists() else 0
+        # cours
+        course_total = sum(
+            course_progress.get(d, {}).get(s.pk, 0)
+            for s in students
+        )
+        course_avg = round(
+            course_total / students.count(), 2
+        ) if students.exists() else 0
+
+        # quiz
+        quiz_day = quiz_progress.get(d, {})
+        quiz_total = 0
+        for s in students:
+            scores = quiz_day.get(s.pk, [])
+            quiz_total += sum(scores) / len(scores) if scores else 0
+
+        quiz_avg = round(
+            quiz_total / students.count(), 2
+        ) if students.exists() else 0
+
         result.append({
             "date": d.strftime("%Y-%m-%d"),
-            "progression": avg
+            "course_progress": course_avg,
+            "quiz_progress": quiz_avg
         })
 
     return Response(result)
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def professor_content_counts_global(request):
+    prof = request.user
+
+    # Total cours créés par le prof
+    courses_count = Cours.objects.filter(utilisateur=prof).count()
+
+    # Total exercices créés par le prof **qui ne sont pas des quiz**
+    exercises_count = Exercice.objects.filter(utilisateur=prof).exclude(quiz__isnull=False).count()
+
+    # Total quizs créés par le prof via les exercices
+    quizzes_count = Quiz.objects.filter(exercice__utilisateur=prof).count()
+
+    return Response({
+        "courses_count": courses_count,
+        "exercises_count": exercises_count,
+        "quizzes_count": quizzes_count
+    })
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def current_progress_students(request):
     prof = request.user
 
+    # Étudiants des espaces du prof
     spaces = Space.objects.filter(utilisateur=prof)
     students = Utilisateur.objects.filter(
         id_utilisateur__in=SpaceEtudiant.objects.filter(space__in=spaces).values_list("etudiant_id", flat=True)
@@ -512,15 +578,49 @@ def current_progress_students(request):
     courses = Cours.objects.filter(spacecour__space__in=spaces).distinct()
 
     result = []
+
     for student in students:
-        prog_avg = ProgressionCours.objects.filter(
-            utilisateur=student,
-            cours__in=courses
-        ).aggregate(avg_prog=Avg("avancement_cours"))["avg_prog"] or 0
+        # ---- Cours ----
+        total_course_progress = 0
+        total_courses = 0
+        for course in courses:
+            prog = ProgressionCours.objects.filter(utilisateur=student, cours=course).first()
+            if prog:
+                total_course_progress += prog.avancement_cours
+            total_courses += 1  # on compte tous les cours, même sans progression
+        total_courses = total_courses or 1
+        course_progress = total_course_progress / total_courses
+
+        # ---- Exercices ----
+        exercises = Exercice.objects.filter(cours__in=courses).exclude(quiz__isnull=False)
+        total_exercise_progress = 0
+        total_exercises = exercises.count() or 1
+        for ex in exercises:
+            attempt = TentativeExercice.objects.filter(utilisateur=student, exercice=ex).first()
+            total_exercise_progress += 100 if attempt else 0
+        exercise_progress = total_exercise_progress / total_exercises
+
+        # ---- Quiz ----
+        quizzes = Quiz.objects.filter(exercice__cours__in=courses)
+        total_quiz_progress = 0
+        total_quizzes = quizzes.count() or 1
+        for quiz in quizzes:
+            last_rq = ReponseQuiz.objects.filter(etudiant=student, quiz=quiz).order_by('-date_fin').first()
+            if last_rq:
+                questions = Question.objects.filter(exercice=quiz.exercice)
+                total_quiz_points = sum(q.score for q in questions) or 1
+                student_score = last_rq.reponses.aggregate(total=Sum('score_obtenu'))['total'] or 0
+                total_quiz_progress += (student_score / total_quiz_points) * 100
+            else:
+                total_quiz_progress += 0
+        quiz_progress = total_quiz_progress / total_quizzes
+
+        # ---- Moyenne globale ----
+        global_progress = (course_progress + exercise_progress + quiz_progress) / 3
 
         result.append({
             "student_id": student.id_utilisateur,
-            "progress": round(prog_avg)
+            "progress": round(global_progress)
         })
 
     return Response(result)
@@ -1089,44 +1189,36 @@ def student_progress_score_prof(request, student_id):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
-def all_students_average_score_prof(request):
+def quiz_success_rate_prof(request):
     prof = request.user
 
-    # Récupérer tous les étudiants qui appartiennent aux espaces du prof
     spaces = Space.objects.filter(utilisateur=prof)
-    student_ids = set(
-        spaces.values_list("spaceetudiant__etudiant__id_utilisateur", flat=True)
+
+    attempts = ReponseQuiz.objects.filter(
+        quiz__spacequiz__space__in=spaces,
+        terminer=True
     )
-    students = Utilisateur.objects.filter(id_utilisateur__in=student_ids)
 
-    result = []
+    total_attempts = attempts.count()
+    if total_attempts == 0:
+        return Response({"success_rate": 0})
 
-    for student in students:
-        # Quiz de ces espaces pour cet étudiant
-        quizzes = ReponseQuiz.objects.filter(
-            etudiant=student,
-            quiz__spacequiz__space__in=spaces,
-            terminer=True
-        ).distinct()
+    success_count = 0
 
-        total_percentages = 0
-        count = 0
-        for rq in quizzes:
-            max_score = rq.quiz.exercice.questions.aggregate(total=Sum("score"))["total"] or 0
-            if max_score > 0:
-                total_percentages += (rq.score_total / max_score) * 100
-                count += 1
+    for rq in attempts:
+        max_score = rq.quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
 
-        average = round(total_percentages / count, 2) if count > 0 else 0
+        if max_score > 0:
+            percentage = (rq.score_total / max_score) * 100
+            if percentage >= 50:   # 👈 seuil de réussite
+                success_count += 1
 
-        result.append({
-            "student_id": student.id_utilisateur,
-            "nom": student.nom,
-            "prenom": student.prenom,
-            "average_score": average
-        })
+    success_rate = round((success_count / total_attempts) * 100, 2)
 
-    return Response(result, status=200)
+    return Response({"success_rate": success_rate})
+
 
 
 @api_view(["GET"])

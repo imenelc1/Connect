@@ -35,6 +35,12 @@ urlpatterns = [
  path("student/student-average-score-prof/<int:student_id>/", views.student_average_score_prof, name="student-average-score-prof"),
 
 path("all-students-submissions/", views.all_students_submissions, name="all-students-submissions"),
+path("quiz_success_rate_prof/", views.quiz_success_rate_prof, name="quiz_success_rate_prof"),
+path("professor_content_counts_global/", views.professor_content_counts_global, name="professor_content_counts_global"),
+
+
+
+
 
 
  

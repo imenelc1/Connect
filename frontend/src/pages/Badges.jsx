@@ -11,6 +11,7 @@ import BadgeFooter from "../components/common/BadgeFooter";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle"; // Ajout
 import { MdAutoAwesome } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 // List of badges
 const badges = [
@@ -227,6 +228,9 @@ export default function Badges() {
   const streakPct = 60;
   const xpPct = 45;
 
+  const studentId = userData?.id_utilisateur;
+  
+  const navigate = useNavigate();
   // Gestion de la responsivité
   useEffect(() => {
     const checkMobile = () => {
@@ -254,6 +258,8 @@ export default function Badges() {
     localStorage.setItem("lang", newLang);
   };
 
+  
+
   return (
     <>
       <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -274,6 +280,23 @@ export default function Badges() {
       
         {/* BadgeHeader - maintenant visible sur mobile */}
         <BadgeHeader />
+
+        <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-full sm:max-w-5xl py-2 px-4 sm:px-6 bg-gradient-to-r from-primary/30 to-purple rounded-full mb-6 sm:mb-8">
+          <span
+            role="button"
+            className="px-12 py-1 text-gray/10 font-semibold bg-card  rounded-full mb-2 sm:mb-0"
+           
+          >
+            {t("Badges")}
+          </span>
+          <span
+            role="button"
+            className="px-12 py-1 text-gray/10 rounded-full font-semibold mb-2 sm:mb-0"
+             onClick={() => navigate(`/progress-student/${studentId}`)}
+          >
+            {t("Progression")}
+          </span>
+        </div>
 
         {/* Stats */}
         <BadgeStats
