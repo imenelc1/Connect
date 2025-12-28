@@ -4,7 +4,6 @@ import { MdAutoAwesome } from "react-icons/md";
 
 import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
-import IaAssistant from "../components/ui/IaAssistant";
 import NavBar from "../components/common/NavBar";
 import AssistantIA from "./AssistantIA";
 import { useTranslation } from "react-i18next";
@@ -15,11 +14,13 @@ import toast from "react-hot-toast";
 import progressionService from "../services/progressionService";
 
 import Editor from "@monaco-editor/react";
+import ExerciseContext from "../context/ExerciseContext";
 
 export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
   const { exerciceId } = useParams();
+
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
@@ -35,45 +36,48 @@ int main() {
   const [startTime, setStartTime] = useState(Date.now());
   const controllerRef = useRef(null);
 
+  const [notifications, setNotifications] = useState([]);
   const defaultCode = userCode;
   const resetCode = () => setUserCode(defaultCode);
 
   const storedUser = localStorage.getItem("user");
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const sidebarWidth = sidebarCollapsed ? -200 : -50;
+  const isStudent = userData?.role === "etudiant";
 
-  const isStudent = userData.role === "etudiant";
+  // -------- Notifications --------
+  const sendNotification = (message, type = "info") => {
+    const id = Date.now();
+    setNotifications((prev) => [...prev, { id, message, type }]);
+    setTimeout(
+      () => setNotifications((prev) => prev.filter((n) => n.id !== id)),
+      5000
+    );
+    if (type === "hint") setOpenAssistant(true);
+  };
 
-
-
-  // Gestion sidebar
-  useEffect(() => {
-    const handler = (e) => setSidebarCollapsed(e.detail);
-    window.addEventListener("sidebarChanged", handler);
-    return () => window.removeEventListener("sidebarChanged", handler);
-  }, []);
-
-  // ------------------- FETCH EXERCISE -------------------
+  // -------- Fetch Exercise --------
   useEffect(() => {
     if (!exerciceId) return;
     const fetchExercise = async () => {
       try {
-        const response = await fetch(
+        const res = await fetch(
           `http://localhost:8000/api/exercices/${exerciceId}/`
         );
-        if (!response.ok)
-          throw new Error("Erreur lors de la récupération de l'exercice");
-        const data = await response.json();
+        if (!res.ok) throw new Error();
+        const data = await res.json();
         setExercise(data);
         setStartTime(Date.now());
-      } catch (error) {
-        console.error(error);
+        sendNotification("Exercice chargé !");
+      } catch {
+        sendNotification("Impossible de charger l'exercice", "error");
       } finally {
         setLoadingExercise(false);
       }
@@ -81,7 +85,7 @@ int main() {
     fetchExercise();
   }, [exerciceId]);
 
-  // ------------------- SAVE DRAFT AUTOMATIQUE -------------------
+  // -------- Auto-save draft --------
   useEffect(() => {
     if (!exerciceId || !userCode) return;
     const timer = setTimeout(async () => {
@@ -89,19 +93,40 @@ int main() {
         await progressionService.createTentative({
           exercice_id: exerciceId,
           reponse: userCode,
-          output: output || "Aucune sortie pour le moment...",
+          output,
           etat: "brouillon",
           temps_passe: Math.floor((Date.now() - startTime) / 1000),
         });
-        console.log("Brouillon sauvegardé automatiquement");
-      } catch (err) {
-        console.error("Erreur lors de la sauvegarde automatique :", err);
-      }
+      } catch {}
     }, 1000);
     return () => clearTimeout(timer);
   }, [userCode, output, exerciceId, startTime]);
 
-  // ------------------- HANDLE SAVE DRAFT / SUBMIT -------------------
+  // -------- Inactivity hint --------
+  useEffect(() => {
+    const t = setTimeout(
+      () => sendNotification("Tu as besoin d'un indice ?", "hint"),
+      60000
+    );
+    return () => clearTimeout(t);
+  }, [userCode]);
+
+  // -------- Realtime syntax hint --------
+  useEffect(() => {
+    const t = setTimeout(async () => {
+      try {
+        const res = await axios.post(
+          "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+          { source_code: userCode, language_id: 49 }
+        );
+        if (res.data.stderr)
+          sendNotification("Erreur détectée — vérifie la syntaxe", "hint");
+      } catch {}
+    }, 10000);
+    return () => clearTimeout(t);
+  }, [userCode]);
+
+  // -------- Save & Submit --------
   const handleSaveDraft = async () => {
     try {
       await progressionService.createTentative({
@@ -112,8 +137,8 @@ int main() {
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
       toast.success("Code sauvegardé");
-    } catch (err) {
-      console.error(err);
+      sendNotification("Brouillon sauvegardé !");
+    } catch {
       toast.error("Erreur lors de la sauvegarde");
     }
   };
@@ -128,31 +153,25 @@ int main() {
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
       toast.success("Exercice soumis");
-    } catch (err) {
-      console.error(err);
+      sendNotification("Exercice soumis !");
+    } catch {
       toast.error("Erreur lors de la soumission");
     }
   };
 
   const [canSubmit, setCanSubmit] = useState(false);
-
   useEffect(() => {
     if (!exerciceId) return;
-
     fetch(
       `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
     )
-      .then((res) => res.json())
-      .then((data) => setCanSubmit(data.can_submit))
+      .then((r) => r.json())
+      .then((d) => setCanSubmit(d.can_submit))
       .catch(() => setCanSubmit(false));
   }, [exerciceId]);
 
-  // ------------------- RUN CODE -------------------
+  // -------- Run / Debug / Stop --------
   const runCode = async () => {
     setIsRunning(true);
     setOutput("Exécution en cours...");
@@ -164,70 +183,62 @@ int main() {
         { source_code: userCode, language_id: 49 },
         { signal: controllerRef.current.signal }
       );
-
       const result =
         res.data.stdout ?? res.data.stderr ?? "Aucune sortie pour le moment...";
       setOutput(result);
-
-      // Sauvegarde immédiate après exécution
-      await progressionService.createTentative({
-        exercice_id: exerciceId,
-        reponse: userCode,
-        output: result,
-        etat: "brouillon",
-        temps_passe: Math.floor((Date.now() - startTime) / 1000),
-      });
+      sendNotification("Exécution terminée !");
     } catch (e) {
-      if (axios.isCancel(e)) {
-        setOutput("Exécution stoppée");
-      } else {
-        setOutput("Erreur lors de l'exécution du code");
-      }
+      setOutput(
+        axios.isCancel(e) ? "Exécution stoppée" : "Erreur pendant l'exécution"
+      );
     }
     setIsRunning(false);
   };
 
-  // ------------------- DEBUG CODE -------------------
   const debugCode = async () => {
     setIsRunning(true);
-    setOutput("Analyse du code...");
     try {
       const res = await axios.post(
         "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
         { source_code: userCode, language_id: 49 }
       );
-
       if (res.data.stderr) {
         setOutput("Erreur détectée :\n\n" + res.data.stderr);
+        sendNotification("Bug détecté", "hint");
       } else {
-        setOutput(" Aucun bug détecté !");
+        setOutput("Aucun bug détecté");
       }
-    } catch (e) {
-      setOutput("Erreur lors du debug");
+    } finally {
+      setIsRunning(false);
     }
-    setIsRunning(false);
   };
 
   const stopCode = () => {
-    if (controllerRef.current) controllerRef.current.abort();
+    controllerRef.current?.abort();
     setIsRunning(false);
   };
 
-  const switchLang = () => {
-    const newLang = i18n.language === "fr" ? "en" : "fr";
-    i18n.changeLanguage(newLang);
-    localStorage.setItem("lang", newLang);
+  // ---------- Contexte partagé ----------
+  const exerciseContextValue = {
+    id: exerciceId,
+    titre: exercise?.titre_exo,
+    enonce: exercise?.enonce,
+    code: userCode,
+    output,
+    onHintRequest: () => setOpenAssistant(true),
   };
+
 
   // ------------------- JSX -------------------
   return (
+    <ExerciseContext.Provider value={exerciseContextValue}>
     <div
       className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
       style={{ marginLeft: sidebarWidth }}
     >
-      <div className="hidden lg:block">
-        <NavBar />
-      </div>
+        <div className="hidden lg:block">
+          <NavBar />
+        </div>
 
       <div className="flex-1 p-4 md:p-8 lg:ml-72 transition-all duration-300 ml-10">
         {/* Header */}
@@ -240,18 +251,46 @@ int main() {
               {t("header.subtitle")}
             </p>
           </div>
-          <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0">
-            <IaAssistant />
-            <HeadMascotte />
-            <UserCircle
-              initials={initials}
-              onToggleTheme={toggleDarkMode}
-              onChangeLang={(lang) => i18n.changeLanguage(lang)}
-            />
+
+          <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0 relative">
+           <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
+  <HeadMascotte />
+  
+  {/* Notifications */}
+<div className="fixed top-20 right-6 flex flex-col gap-3 z-[9999]">
+  {notifications.map((n) => (
+    <div
+      key={n.id}
+      className={`
+        px-4 py-2 rounded-2xl shadow-card border backdrop-blur
+        animate-slide-in flex items-center gap-2
+        ${
+          n.type === "error"
+            ? "bg-[rgb(var(--color-red))]/90 border-red-300 text-white"
+            : n.type === "hint"
+            ? "bg-[rgb(var(--color-secondary2))]/90 border-[rgb(var(--color-blue))]/40 text-white"
+            : "bg-[rgb(var(--color-primary))]/90 border-[rgb(var(--color-gray-light))]/40 text-white"
+        }
+      `}
+    >
+      {n.type === "hint" && "💡"}
+      {n.type === "error" && "⚠️"}
+      {n.type === "info" && "🤖"}
+      <span>{n.message}</span>
+    </div>
+  ))}
+</div>
+  <UserCircle
+    initials={initials}
+    onToggleTheme={toggleDarkMode}
+    onChangeLang={(lang) => i18n.changeLanguage(lang)}
+  />
+</div>
+
           </div>
         </div>
 
-        {/* Exercise card */}
+        {/* Exercise Card */}
         <div className="w-full p-6 rounded-2xl bg-grad-3 mb-6 md:mb-10">
           {exercise ? (
             <>
@@ -323,31 +362,30 @@ int main() {
           />
         </div>
 
-       {isStudent && (
-  <div className="flex justify-center gap-4">
-    <ActionButton
-      icon={<MdAutoAwesome size={18} />}
-      label={t("buttons.saveDraft")}
-      bg="var(--grad-button)"
-      onClick={handleSaveDraft}
-    />
-    <button
-      onClick={handleSubmit}
-      disabled={!canSubmit}
-      className={`
-        px-8 py-3 rounded-xl font-semibold shadow-lg transition
-        ${!canSubmit
-          ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
-          : "text-white hover:opacity-90"
-        }
-      `}
-      style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
-    >
-      {t("send_solution")}
-    </button>
-  </div>
-)}
-
+        {isStudent && (
+          <div className="flex justify-center gap-4">
+            <ActionButton
+              icon={<MdAutoAwesome size={18} />}
+              label={t("buttons.saveDraft")}
+              bg="var(--grad-button)"
+              onClick={handleSaveDraft}
+            />
+            <button
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+              className={`
+                px-8 py-3 rounded-xl font-semibold shadow-lg transition
+                ${!canSubmit
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
+                  : "text-white hover:opacity-90"
+                }
+              `}
+              style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
+            >
+              {t("send_solution")}
+            </button>
+          </div>
+        )}
 
         {/* Output */}
         <p className="text-lg md:text-xl font-semibold text-muted mb-3">
@@ -379,13 +417,15 @@ int main() {
         </div>
 
         {openAssistant && (
-          <AssistantIA onClose={() => setOpenAssistant(false)} />
-        )}
-      </div>
-    </div>
-  );
-}
+  <AssistantIA onClose={() => setOpenAssistant(false)} />
+)}
 
+</div> {/* ferme: div className="flex-1 p-4 md:p-8 lg:ml-72 ..." */}
+</div> {/* ferme: div className="flex-1 p-4 md:p-8 bg-surface" */}
+
+</ExerciseContext.Provider>
+);
+}
 // ----------------- ACTION BUTTON -----------------
 function ActionButton({ icon, label, bg, text = "white", onClick }) {
   return (
