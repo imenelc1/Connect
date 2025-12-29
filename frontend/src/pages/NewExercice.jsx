@@ -108,6 +108,7 @@ export default function NewExercise() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+
       const exoId = res.data.id_exercice;
       navigate("/all-exercises");
       return exoId;

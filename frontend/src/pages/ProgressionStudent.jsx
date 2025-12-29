@@ -106,60 +106,60 @@ export default function ProgressStudent() {
   }, []);
 
   // ------------------ FETCH SUBMITTED EXERCISES ------------------
- useEffect(() => {
-  const fetchSubmittedExercises = async () => {
-    try {
-      const data = await getTentatives();
-      if (!data) return;
+  useEffect(() => {
+    const fetchSubmittedExercises = async () => {
+      try {
+        const data = await getTentatives();
+        if (!data) return;
 
-      const latestByExercise = {};
+        const latestByExercise = {};
 
-      data.forEach((t) => {
-        if (t.etat !== "soumis" || !t.exercice) return;
+        data.forEach((t) => {
+          if (t.etat !== "soumis" || !t.exercice) return;
 
-        const exId = t.exercice.id_exercice;
+          const exId = t.exercice.id_exercice;
 
-        if (
-          !latestByExercise[exId] ||
-          new Date(t.submitted_at) > new Date(latestByExercise[exId].submitted_at)
-        ) {
-          latestByExercise[exId] = {
-            id: t.id,
-            title: t.exercice.titre_exo || "Untitled",
-            submitted_at: t.submitted_at,
-            feedback: t.feedback || "",
-          };
-        }
-      });
+          if (
+            !latestByExercise[exId] ||
+            new Date(t.submitted_at) > new Date(latestByExercise[exId].submitted_at)
+          ) {
+            latestByExercise[exId] = {
+              id: t.id,
+              title: t.exercice.titre_exo || "Untitled",
+              submitted_at: t.submitted_at,
+              feedback: t.feedback || "",
+            };
+          }
+        });
 
-      setSubmittedExercisesList(Object.values(latestByExercise));
-    } catch (err) {
-      console.error("Erreur récupération tentatives :", err);
-    }
-  };
+        setSubmittedExercisesList(Object.values(latestByExercise));
+      } catch (err) {
+        console.error("Erreur récupération tentatives :", err);
+      }
+    };
 
-  fetchSubmittedExercises();
-}, []);
-
-
-useEffect(() => {
+    fetchSubmittedExercises();
+  }, []);
 
 
-  const fetchQuizzes = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        `http://127.0.0.1:8000/api/quiz/student/quizzes-faits/${studentId}/`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setQuizzes(res.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  useEffect(() => {
 
-  fetchQuizzes();
-}, [studentId]);
+
+    const fetchQuizzes = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          `http://127.0.0.1:8000/api/quiz/student/quizzes-faits/${studentId}/`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setQuizzes(res.data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchQuizzes();
+  }, [studentId]);
 
 
 
@@ -208,111 +208,111 @@ useEffect(() => {
         )}
 
 
-      <div className="flex flex-col lg:flex-row gap-6">
-{/* Submitted Exercises Card */}
-<div className="bg-card p-6 rounded-2xl shadow w-full lg:w-80 mb-6">
-  <h2 className="font-semibold text-lg mb-4">{t("SubmittedExercises")}</h2>
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Submitted Exercises Card */}
+          <div className="bg-card p-6 rounded-2xl shadow w-full lg:w-80 mb-6">
+            <h2 className="font-semibold text-lg mb-4">{t("SubmittedExercises")}</h2>
 
-  {submittedExercisesList?.length > 0 ? (
-    <div className="flex flex-col gap-3 max-h-80 overflow-y-auto">
-      {submittedExercisesList.map((ex) => (
-        <div
-          key={ex.id}
-          className="flex justify-between items-center p-3 rounded-lg shadow-sm bg-gray/10 hover:bg-gray/20 transition"
-        >
-          <div className="flex items-center gap-2">
-            <CheckCircle size={18} className="text-pink" />
-            <p className="font-medium text-gray">{ex.title}</p>
-          </div>
+            {submittedExercisesList?.length > 0 ? (
+              <div className="flex flex-col gap-3 max-h-80 overflow-y-auto">
+                {submittedExercisesList.map((ex) => (
+                  <div
+                    key={ex.id}
+                    className="flex justify-between items-center p-3 rounded-lg shadow-sm bg-gray/10 hover:bg-gray/20 transition"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CheckCircle size={18} className="text-pink" />
+                      <p className="font-medium text-gray">{ex.title}</p>
+                    </div>
 
-          <div className="flex flex-col items-end text-right text-sm text-gray">
-            <span>
-              {new Date(ex.submitted_at).toLocaleString(undefined, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-            {ex.feedback && (
-              <span className="text-xs text-primary mt-1">{ex.feedback}</span>
+                    <div className="flex flex-col items-end text-right text-sm text-gray">
+                      <span>
+                        {new Date(ex.submitted_at).toLocaleString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      {ex.feedback && (
+                        <span className="text-xs text-primary mt-1">{ex.feedback}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray text-sm">No exercises submitted yet</p>
             )}
           </div>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-gray text-sm">No exercises submitted yet</p>
-  )}
-</div>
 
-        {/* Courses List */}
-        <div className="flex-1 w-full">
-          <div className="bg-card rounded-2xl shadow p-6 mb-6">
-            <h2 className="font-semibold text-lg mb-4">
-              {t("ProgressStudent.mycourses")} ({courses?.length ?? 0})
-            </h2>
+          {/* Courses List */}
+          <div className="flex-1 w-full">
+            <div className="bg-card rounded-2xl shadow p-6 mb-6">
+              <h2 className="font-semibold text-lg mb-4">
+                {t("ProgressStudent.mycourses")} ({courses?.length ?? 0})
+              </h2>
 
-            {courses?.map((course, idx) => (
-              <div key={idx} className="p-4 rounded-xl shadow-sm mb-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-lg text-gray mr-3">{course.title}</p>
+              {courses?.map((course, idx) => (
+                <div key={idx} className="p-4 rounded-xl shadow-sm mb-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-lg text-gray mr-3">{course.title}</p>
+                    </div>
+                    <div className="w-full h-2 bg-gray/20 rounded-full m-3 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${colorClasses[course.color]?.bar}`}
+                        style={{ width: `${course.progress ?? 0}%` }}
+                      ></div>
+                    </div>
+                    <span className={`text-sm font-semibold ${colorClasses[course.color]?.text}`}>
+                      {course.progress ?? 0}%
+                    </span>
                   </div>
-                  <div className="w-full h-2 bg-gray/20 rounded-full m-3 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${colorClasses[course.color]?.bar}`}
-                      style={{ width: `${course.progress ?? 0}%` }}
-                    ></div>
-                  </div>
-                  <span className={`text-sm font-semibold ${colorClasses[course.color]?.text}`}>
-                    {course.progress ?? 0}%
-                  </span>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
 
         {/* Charts */}
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
           <div className="bg-card p-6 rounded-2xl shadow w-full lg:w-96 mb-6">
-      <h2 className="font-semibold text-lg mb-4">Quizs terminés</h2>
+            <h2 className="font-semibold text-lg mb-4">Quizs terminés</h2>
 
-      {quizzes.length > 0 ? (
-        <div className="flex flex-col gap-3 max-h-80 overflow-y-auto">
-          {quizzes.map((quiz) => (
-            <div
-              key={quiz.quiz_id}
-              className="flex justify-between items-center p-3 rounded-lg shadow-sm bg-gray/10 hover:bg-gray/20 transition"
-            >
-              <div className="flex items-center gap-2">
-                
-                <p className="font-medium text-gray">{quiz.titre_exercice}</p>
-                <CheckCircle size={5} className="text-purple" />
-              </div>
+            {quizzes.length > 0 ? (
+              <div className="flex flex-col gap-3 max-h-80 overflow-y-auto">
+                {quizzes.map((quiz) => (
+                  <div
+                    key={quiz.quiz_id}
+                    className="flex justify-between items-center p-3 rounded-lg shadow-sm bg-gray/10 hover:bg-gray/20 transition"
+                  >
+                    <div className="flex items-center gap-2">
 
-              <div className="flex flex-col items-end text-right text-sm text-gray">
-                <span>
-                  {quiz.score_obtenu}/{quiz.score_max} pts
-                </span>
-                <span className="text-xs mt-1">
-                 {quiz.reussi ? <CheckCircle size={14} className="text-purple"/> : ""}
-                </span>
-                <span className="text-xs mt-1 text-gray-400">
-                  {new Date(quiz.date_fin).toLocaleString()}
-                </span>
+                      <p className="font-medium text-gray">{quiz.titre_exercice}</p>
+                      <CheckCircle size={5} className="text-purple" />
+                    </div>
+
+                    <div className="flex flex-col items-end text-right text-sm text-gray">
+                      <span>
+                        {quiz.score_obtenu}/{quiz.score_max} pts
+                      </span>
+                      <span className="text-xs mt-1">
+                        {quiz.reussi ? <CheckCircle size={14} className="text-purple" /> : ""}
+                      </span>
+                      <span className="text-xs mt-1 text-gray-400">
+                        {new Date(quiz.date_fin).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray text-sm">Aucun quiz terminé pour l'instant</p>
-      )}
-    </div>
+            ) : (
+              <p className="text-gray text-sm">Aucun quiz terminé pour l'instant</p>
+            )}
+          </div>
 
           <WeeklySubmissionChart totalExercises={totalExercises} submitted={submittedExercises} />
         </div>

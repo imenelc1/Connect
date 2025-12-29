@@ -1010,7 +1010,6 @@ def student_weekly_submission_chart(request):
     return Response(data, status=status.HTTP_200_OK)
 
 
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
 def student_progress(request):

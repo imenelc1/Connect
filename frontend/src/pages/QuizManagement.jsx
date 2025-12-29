@@ -51,8 +51,8 @@ export default function QuizzesManagement() {
             subtitle: q.exercice?.enonce || "",
             questions: q.questions?.length || 0,
             attempts: q.nbMax_tentative || 0,
-            cours:q.exercice?.cours,
-            utilisateur:q.exercice?.utilisateur,
+            cours: q.exercice?.cours,
+            utilisateur: q.exercice?.utilisateur,
             score: q.scoreMinimum || 0,
             visibilite_exo: q.exercice?.visibilite_exo,
             niveau_exo: q.exercice?.niveau_exo || "debutant",
@@ -82,52 +82,52 @@ export default function QuizzesManagement() {
   // ================= Edit Quiz =================
 
 
-// ================= Edit Quiz =================
-const handleEdit = (quiz) => {
-  setSelectedQuiz(quiz);
-  setEditValues({ 
-    title: quiz.title, 
-    niveau_exo: quiz.niveau_exo,
-    visibilite_exo: quiz.visibilite_exo,
- });
-  setEditModal(true);
-};
+  // ================= Edit Quiz =================
+  const handleEdit = (quiz) => {
+    setSelectedQuiz(quiz);
+    setEditValues({
+      title: quiz.title,
+      niveau_exo: quiz.niveau_exo,
+      visibilite_exo: quiz.visibilite_exo,
+    });
+    setEditModal(true);
+  };
 
-const submitEdit = async (e) => {
-  //e.preventDefault();
-  if (!selectedQuiz) return;
+  const submitEdit = async (e) => {
+    //e.preventDefault();
+    if (!selectedQuiz) return;
 
-  try {
-    await api.put(
-      `exercices/${selectedQuiz.exerciceId}/`,
-      {
-        titre_exo: editValues.title,
-        niveau_exo: editValues.niveau_exo,
-        categorie: selectedQuiz.categorie,
-        cours: selectedQuiz.cours,
-        enonce:selectedQuiz.subtitle,
-        utilisateur: selectedQuiz.utilisateur,
-        visibilite_exo: selectedQuiz.visibilite_exo,
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    toast.success("Quiz mis à jour avec succès !");
+    try {
+      await api.put(
+        `exercices/${selectedQuiz.exerciceId}/`,
+        {
+          titre_exo: editValues.title,
+          niveau_exo: editValues.niveau_exo,
+          categorie: selectedQuiz.categorie,
+          cours: selectedQuiz.cours,
+          enonce: selectedQuiz.subtitle,
+          utilisateur: selectedQuiz.utilisateur,
+          visibilite_exo: selectedQuiz.visibilite_exo,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Quiz mis à jour avec succès !");
 
-    setQuizzes((prev) =>
-      prev.map((q) =>
-        q.id === selectedQuiz.id
-          ? { ...q, title: editValues.title, niveau_exo: editValues.niveau_exo }
-          : q
-      )
-    );
+      setQuizzes((prev) =>
+        prev.map((q) =>
+          q.id === selectedQuiz.id
+            ? { ...q, title: editValues.title, niveau_exo: editValues.niveau_exo }
+            : q
+        )
+      );
 
-    setEditModal(false);
-    setSelectedQuiz(null);
-  } catch (err) {
-    console.error("Erreur mise à jour:", err.response?.data || err.message);
-    alert("Erreur lors de la mise à jour du quiz");
-  }
-};
+      setEditModal(false);
+      setSelectedQuiz(null);
+    } catch (err) {
+      console.error("Erreur mise à jour:", err.response?.data || err.message);
+      alert("Erreur lors de la mise à jour du quiz");
+    }
+  };
 
   // ================= Delete Quiz =================
   const handleDeleteQuiz = async (exerciceId) => {
@@ -152,9 +152,8 @@ const submitEdit = async (e) => {
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
       <Navbar />
       <main
-        className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${
-          !isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""
-        }`}
+        className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""
+          }`}
       >
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
@@ -224,62 +223,62 @@ const submitEdit = async (e) => {
       </main>
 
       {/* Edit Modal */}
-     <AddModal
-  open={editModal}
-  onClose={() => setEditModal(false)}
-  title={t("modal.editTitle")}
-  subtitle={t("modal.editSubtitle")}
-  submitLabel={t("modal.submitEdit")}
-  cancelLabel={t("modal.cancel")}
-  onSubmit={submitEdit}
-  fields={
-    selectedQuiz
-      ? [
-          {
-            label: t("modal.fields.title.label"),
-            placeholder: t("modal.fields.title.placeholder"),
-            value: editValues.title,
-            onChange: (e) =>
-              setEditValues({ ...editValues, title: e.target.value }),
-          },
-          {
-            label: t("modal.fields.difficulty.label"),
-            element: (
-              <select
-                value={editValues.niveau_exo}
-                onChange={(e) =>
-                  setEditValues({ ...editValues, niveau_exo: e.target.value })
-                }
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="debutant">{t("modal.fields.difficulty.easy")}</option>
-                <option value="intermediaire">{t("modal.fields.difficulty.medium")}</option>
-                <option value="avance">{t("modal.fields.difficulty.hard")}</option>
-              </select>
-            ),
-          },
-          {
-            label: t("modal.fields.visibilite"),
-            element: (
-            <label className="flex items-center gap-2 cursor-pointer">
-            <input
-                type="checkbox"
-                checked={editValues.visibilite_exo}   // ✅ checked
-                onChange={(e) =>
-                setEditValues({
-                    ...editValues,
-                    visibilite_exo: e.target.checked, // ✅ boolean
-                })
-                }
-            />
-            <span>{t("modal.fields.visibiliteLabel")}</span>
-            </label>
-            ),
-            }
-        ]
-      : []
-  }
-/>
+      <AddModal
+        open={editModal}
+        onClose={() => setEditModal(false)}
+        title={t("modal.editTitle")}
+        subtitle={t("modal.editSubtitle")}
+        submitLabel={t("modal.submitEdit")}
+        cancelLabel={t("modal.cancel")}
+        onSubmit={submitEdit}
+        fields={
+          selectedQuiz
+            ? [
+              {
+                label: t("modal.fields.title.label"),
+                placeholder: t("modal.fields.title.placeholder"),
+                value: editValues.title,
+                onChange: (e) =>
+                  setEditValues({ ...editValues, title: e.target.value }),
+              },
+              {
+                label: t("modal.fields.difficulty.label"),
+                element: (
+                  <select
+                    value={editValues.niveau_exo}
+                    onChange={(e) =>
+                      setEditValues({ ...editValues, niveau_exo: e.target.value })
+                    }
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="debutant">{t("modal.fields.difficulty.easy")}</option>
+                    <option value="intermediaire">{t("modal.fields.difficulty.medium")}</option>
+                    <option value="avance">{t("modal.fields.difficulty.hard")}</option>
+                  </select>
+                ),
+              },
+              {
+                label: t("modal.fields.visibilite"),
+                element: (
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editValues.visibilite_exo}   // ✅ checked
+                      onChange={(e) =>
+                        setEditValues({
+                          ...editValues,
+                          visibilite_exo: e.target.checked, // ✅ boolean
+                        })
+                      }
+                    />
+                    <span>{t("modal.fields.visibiliteLabel")}</span>
+                  </label>
+                ),
+              }
+            ]
+            : []
+        }
+      />
     </div>
   );
 }

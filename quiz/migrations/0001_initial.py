@@ -16,16 +16,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ReponseQuiz',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date_debut', models.DateTimeField(auto_now_add=True)),
-                ('date_fin', models.DateTimeField(blank=True, null=True)),
-                ('score_total', models.FloatField(default=0)),
-                ('terminer', models.BooleanField(default=False)),
-            ],
-        ),
-        migrations.CreateModel(
             name='Question',
             fields=[
                 ('id_qst', models.AutoField(primary_key=True, serialize=False)),
@@ -56,6 +46,18 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='ReponseQuiz',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('date_debut', models.DateTimeField(auto_now_add=True)),
+                ('date_fin', models.DateTimeField(blank=True, null=True)),
+                ('score_total', models.FloatField(default=0)),
+                ('terminer', models.BooleanField(default=False)),
+                ('etudiant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tentatives_quiz', to=settings.AUTH_USER_MODEL)),
+                ('quiz', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tentatives', to='quiz.quiz')),
+            ],
+        ),
+        migrations.CreateModel(
             name='ReponseQuestion',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -63,6 +65,7 @@ class Migration(migrations.Migration):
                 ('score_obtenu', models.FloatField(default=0)),
                 ('option_choisie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='quiz.option')),
                 ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='quiz.question')),
+                ('reponse_quiz', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reponses', to='quiz.reponsequiz')),
             ],
         ),
     ]

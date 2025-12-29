@@ -38,6 +38,7 @@ export default function WeeklySubmissionChart({ studentId = null }) {
   }, [studentId, token]);
 
 
+
   return (
     <div className="bg-white rounded-2xl shadow p-6 w-full">
       <h2 className="font-semibold text-lg mb-4">
