@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -7,49 +8,76 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
-export default function WeeklySubmissionChart() {
+export default function WeeklySubmissionChart({ studentId = null }) {
   const { t } = useTranslation("ProgressStudent");
-  // const data = [
-  //   { week: "Week 1", submissions: 100 },
-  //   { week: "Week 2", submissions: 95 },
-  //   { week: "Week 3", submissions: 60 },
-  //   { week: "Week 4", submissions: 100 },
-  //   { week: "Week 5", submissions: 78 },
-  //   { week: "Week 6", submissions: 80 },
-  // ];
-  const data = [
-    { week: "1", submissions: 100 },
-    { week: "2", submissions: 95 },
-    { week: "3", submissions: 60 },
-    { week: "4", submissions: 100 },
-    { week: "5", submissions: 78 },
-    { week: "6", submissions: 80 },
-  ];
+  const [weeklyData, setWeeklyData] = useState([]);
+  const token = localStorage.getItem("token");
+  const BACKEND_URL = "http://127.0.0.1:8000";
+
+  useEffect(() => {
+    const fetchWeeklyData = async () => {
+      try {
+        const url = studentId
+          ? `${BACKEND_URL}/api/dashboard/student/weekly-submission-chart/${studentId}/`
+          : `${BACKEND_URL}/api/dashboard/student/student-weekly-submission-chart/`;
+
+        const res = await axios.get(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setWeeklyData(res.data || []);
+        console.log("Weekly data:", res.data); // 🔹 Vérification
+      } catch (err) {
+        console.error("Erreur fetching weekly submissions:", err);
+        setWeeklyData([]);
+      }
+    };
+
+    fetchWeeklyData();
+  }, [studentId, token]);
+
 
 
   return (
     <div className="bg-white rounded-2xl shadow p-6 w-full">
-      <h2 className="font-semibold text-lg mb-4">{t("ProgressStudent.Weekly")}</h2>
+      <h2 className="font-semibold text-lg mb-4">
+        {t("ProgressStudent.Weekly")}
+      </h2>
 
       <div className="w-full h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
-            {/* <XAxis dataKey="week" /> */}
-            <XAxis
-              dataKey="week"
-              tickFormatter={(val) => `${t("ProgressStudent.Week")} ${val}`}
-            />
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={weeklyData}>
+          
 
             <YAxis />
-            <Tooltip
-              formatter={(value) => [
-                value,
-                t("ProgressStudent.submissionsLabel"),
-              ]}
-            />
+           <XAxis dataKey="label" />  {/* label = "Week 1", "Week 2", ... */}
+<Tooltip
+  content={({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const week = payload[0].payload;
+      // Affichage des dates dans le tooltip seulement
+      const start = new Date(week.start_date);
+      const end = new Date(week.end_date);
+      return (
+        <div className="bg-white p-2 rounded shadow border">
+          <p className="font-semibold">
+            {start.toLocaleDateString()} - {end.toLocaleDateString()}
+          </p>
+          <p>Submissions: {week.submissions}%</p>
+        </div>
+      );
+    }
+    return null;
+  }}
+/>
 
-            <Bar dataKey="submissions" fill="rgb(var(--color-pink)" radius={[8, 8, 0, 0]} />
+            <Bar
+              dataKey="submissions"
+              fill="rgb(var(--color-purple))"
+              radius={[8, 8, 0, 0]}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>

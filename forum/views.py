@@ -7,23 +7,35 @@ from .serializers import ForumSerializer, MessageSerializer, CommentaireSerializ
 from users.jwt_helpers import IsAuthenticatedJWT
 
 # ========== FORUMS ==========
+from django.db.models import Q
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
 def list_forums(request):
-    """Liste tous les forums visibles par l'utilisateur"""
+    role = getattr(request, "user_role", None)
     user = request.user
+    filtre = request.GET.get("filtre", "tous")
 
-    if hasattr(user, 'etudiant'):
-        forums = Forum.objects.filter(cible='etudiants').order_by('-date_creation')
-    elif hasattr(user, 'enseignant'):
-        forums = Forum.objects.filter(cible='enseignants').order_by('-date_creation')
+    if role == "admin":
+        forums = Forum.objects.all()
+    elif role == "etudiant":
+        forums = Forum.objects.filter(
+            Q(cible="etudiants") | Q(cible="enseignants", utilisateur=user)
+        )
+    elif role == "enseignant":
+        forums = Forum.objects.filter(
+            Q(cible="enseignants") | Q(cible="etudiants", utilisateur=user)
+        )
     else:
-        forums = Forum.objects.none()  # ou admins si besoin
+        return Response([], status=200)
 
+    if filtre == "mes_forums":
+        forums = forums.filter(utilisateur=user)
+
+    forums = forums.order_by("-date_creation")
     serializer = ForumSerializer(forums, many=True, context={'request': request})
     return Response(serializer.data)
-
-
 
 # forum/views.py
 @api_view(['POST'])
@@ -205,30 +217,37 @@ def forum_messages(request, forum_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def create_message(request, forum_id):
-    """Crée un nouveau message dans un forum"""
     try:
         forum = Forum.objects.get(pk=forum_id)
     except Forum.DoesNotExist:
-        return Response(
-            {'error': 'Forum introuvable'}, 
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({'error': 'Forum introuvable'}, status=404)
 
     user = request.user
+    role = getattr(request, "user_role", None)
 
-    # 🔒 Vérification des droits selon la cible du forum
-    if forum.cible == 'etudiants' and not hasattr(user, 'etudiant'):
-        return Response({'error': 'Accès interdit'}, status=status.HTTP_403_FORBIDDEN)
+    # 🔐 Admin → toujours autorisé
+    if role == "admin":
+        pass
 
-    if forum.cible == 'enseignants' and not hasattr(user, 'enseignant'):
-        return Response({'error': 'Accès interdit'}, status=status.HTTP_403_FORBIDDEN)
+    # 👨‍🎓 Étudiant
+    elif role == "etudiant":
+        if forum.cible not in ["etudiants", "enseignants"]:
+            return Response({'error': 'Accès interdit'}, status=403)
+
+    # 👨‍🏫 Enseignant
+    elif role == "enseignant":
+        if forum.cible != "enseignants":
+            return Response({'error': 'Accès interdit'}, status=403)
+
+    else:
+        return Response({'error': 'Rôle invalide'}, status=403)
 
     serializer = MessageSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         serializer.save(forum=forum, utilisateur=user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=201)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=400)
 
 
 @api_view(['DELETE'])

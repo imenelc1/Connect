@@ -17,7 +17,7 @@ export default function TheoryExercisePage() {
   const [hover, setHover] = useState(0);
   const [answer, setAnswer] = useState("");
   const [exercise, setExercise] = useState(null);
-  const { exerciceId } = useParams(); 
+  const { exerciceId } = useParams();
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -57,34 +57,52 @@ export default function TheoryExercisePage() {
   };
 
   // ------------------- SEND SOLUTION -------------------
-  const handleSendSolution = async () => {
-    if (!exercise) return;
+ const handleSendSolution = async () => {
+  if (!exercise) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await progressionService.submitTentative({
-        exercice_id: exercise.id_exercice,
-        reponse: answer,
-        output: "",
-        etat: "soumis",
-        temps_passe: getTempsPasse(),
-      });
+    const res = await progressionService.submitTentative({
+      exercice_id: exercise.id_exercice,
+      reponse: answer,
+      output: "",
+      etat: "soumis",
+      temps_passe: getTempsPasse(),
+    });
 
-      setFeedback(res.data?.feedback || "Solution envoyée !");
-      toast.success("Solution envoyée !");
-    } catch (error) {
-      console.error("Erreur lors de l'envoi :", error.response || error);
+    setFeedback(res.data?.feedback || "Solution envoyée !");
+    toast.success("Solution envoyée !");
 
-      if (error.response && error.response.status === 403) {
-        toast.error("Vous n'êtes pas autorisé à soumettre cet exercice !");
-      } else {
-        toast.error("Erreur lors de l'envoi");
+    //Vérifier si on peut encore soumettre
+    const canSubmitRes = await fetch(
+      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       }
-    } finally {
-      setLoading(false);
+    );
+    const canSubmitData = await canSubmitRes.json();
+    setCanSubmit(canSubmitData.can_submit);
+
+    if (!canSubmitData.can_submit) {
+      toast.error("Toutes les tentatives ont été utilisées !");
     }
-  };
+
+  } catch (error) {
+    console.error("Erreur lors de l'envoi :", error.response || error);
+
+    if (error.response && error.response.status === 403) {
+      toast.error("Vous n'êtes pas autorisé à soumettre cet exercice !");
+    } else {
+      toast.error("Erreur lors de l'envoi");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // ------------------- FETCH EXERCISE -------------------
   useEffect(() => {
@@ -114,6 +132,32 @@ export default function TheoryExercisePage() {
     if (i <= 4) return "star-moderate";
     return "star-difficult";
   };
+
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  const storedUser = localStorage.getItem("user");
+  const userData =
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  const initials = userData
+    ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
+    : "";
+  const isStudent = userData.role === "etudiant";
+
+  
+
+  useEffect(() => {
+    if (!exerciceId) return;
+
+    fetch(`http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then(res => res.json())
+      .then(data => setCanSubmit(data.can_submit))
+      .catch(() => setCanSubmit(false));
+  }, [exerciceId]);
+
 
   return (
     <div className="flex bg-[rgb(var(--color-surface))] min-h-screen">
@@ -216,7 +260,7 @@ export default function TheoryExercisePage() {
         </div>
 
         {/* BUTTONS */}
-        <div className="flex justify-around mb-5">
+        {isStudent && (<div className="flex justify-around mb-5">
           <button
             onClick={handleSaveDraft}
             disabled={loading}
@@ -229,13 +273,25 @@ export default function TheoryExercisePage() {
 
           <button
             onClick={handleSendSolution}
-            disabled={loading}
-            className="px-8 py-3 rounded-xl text-white font-semibold shadow-lg hover:opacity-90 transition text-sm sm:text-base"
-            style={{ backgroundImage: "var(--grad-1)" }}
+            disabled={!canSubmit || loading}
+            className={`
+    px-8 py-3 rounded-xl font-semibold shadow-lg transition
+    ${!canSubmit || loading
+                ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 pointer-events-none"
+                : "text-white hover:opacity-90"}
+  `}
+            style={
+              !canSubmit || loading
+                ? { backgroundImage: "none" }
+                : { backgroundImage: "var(--grad-1)" }
+            }
           >
             {t("send_solution")}
           </button>
-        </div>
+
+
+
+        </div>)}
 
         {/* FEEDBACK */}
         <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24" style={{ backgroundImage: "var(--grad-8)" }}>

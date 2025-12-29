@@ -27,6 +27,7 @@ export default function Cards({ icon, title, text, gradient }) {
       <h3 className="text-base font-bold uppercase whitespace-nowrap text-text">
         {t(title)}
       </h3>
+      
 
       {/* Texte descriptif */}
       <p className="text-left text-base opacity-90 text-text">

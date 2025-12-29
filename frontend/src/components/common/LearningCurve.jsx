@@ -6,7 +6,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Legend
 } from "recharts";
 import progressionService from "../../services/progressionService";
 
@@ -20,13 +21,14 @@ export default function LearningCurveProf({ title = "Moyenne progression des ét
         const history = await progressionService.getGlobalProgressStudents();
         console.log("Historique brut prof :", history);
 
-        // Formater les dates en jours courts et progression en nombre
+        // Formater les dates en jours courts et progression en nombres
         const formatted = history.map(item => {
           const [year, month, day] = item.date.split("-");
           const d = new Date(year, month - 1, day);
           return {
             day: d.toLocaleDateString("fr-FR", { weekday: "short" }),
-            progression: Number(item.progression)
+            course_progress: Number(item.course_progress || 0),
+            quiz_progress: Number(item.quiz_progress || 0)
           };
         });
 
@@ -56,12 +58,22 @@ export default function LearningCurveProf({ title = "Moyenne progression des ét
               }}
               formatter={(value) => `${value}%`}
             />
+            <Legend verticalAlign="top" height={36} />
             <Line
               type="monotone"
-              dataKey="progression"
+              dataKey="course_progress"
+              stroke="rgb(var(--color-blue))"
+              strokeWidth={3}
+              dot={{ r: 3 }}
+              name="Cours"
+            />
+            <Line
+              type="monotone"
+              dataKey="quiz_progress"
               stroke="rgb(var(--color-purple))"
               strokeWidth={3}
               dot={{ r: 3 }}
+              name="Quiz"
             />
           </LineChart>
         </ResponsiveContainer>

@@ -44,13 +44,14 @@ INSTALLED_APPS = [
     # Apps du projet
     'users',
     'courses.apps.CoursesConfig',
-    'exercices',
-    'quiz',
+    'exercices.app.ExercicesConfig',
+    'quiz.app.QuizConfig',
     'forum.apps.ForumConfig',
     'ia',
     'dashboard',
     'feedback',
     'spaces.apps.SpacesConfig',
+    'badges',
     # API et CORS
     'rest_framework',
     'corsheaders',
@@ -124,7 +125,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'connect',  # Nom de ta base PostgreSQL
         'USER': 'postgres',    # Ton nom d’utilisateur PostgreSQL
-        'PASSWORD': 'insecurebutswag',  # Celui que tu as choisi à l’installation
+        'PASSWORD': 'imene',  # Celui que tu as choisi à l’installation
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -149,11 +150,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        
-    ],
+     ]
 }
+
+
 
 
 

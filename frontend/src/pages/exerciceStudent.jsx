@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 import Navbar from "../components/common/NavBar";
 import UserCircle from "../components/common/UserCircle";
 import TaskCard from "../components/common/TaskCard";
@@ -7,98 +9,145 @@ import { useTranslation } from "react-i18next";
 
 export default function StudentExercice() {
   const { t } = useTranslation("exerciceStudent");
+  const { studentId } = useParams();
+  const [student, setStudent] = useState(null);
+  const [exercises, setExercises] = useState([]);
+  const [totalExercises, setTotalExercises] = useState(0);
+  const [submittedCount, setSubmittedCount] = useState(0);
+
+  const token = localStorage.getItem("token");
+  const BACKEND_URL = "http://127.0.0.1:8000";
+  const navigate = useNavigate();
+  const [feedbacks, setFeedbacks] = useState({}); // ← bien défini ici
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Info étudiant
+        const studentRes = await axios.get(
+          `${BACKEND_URL}/api/dashboard/student/${studentId}/`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setStudent(studentRes.data || {});
+
+        // Exercices + tentatives
+        const exRes = await axios.get(
+          `${BACKEND_URL}/api/dashboard/student-exercises/${studentId}/`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        // exRes.data.exercises contient maintenant toutes les tentatives
+        const exercisesData = exRes.data.exercises || [];
+        setExercises(exercisesData);
+        setTotalExercises(exRes.data.total_exercises || 0);
+
+        // Calcul du nombre soumis
+        let submitted = 0;
+        exercisesData.forEach((ex) => {
+          if (ex.tentatives?.some((t) => t.etat === "soumis")) submitted += 1;
+        });
+        setSubmittedCount(submitted);
+
+      } catch (err) {
+        console.error("Erreur fetch StudentExercice:", err);
+        setStudent({});
+        setExercises([]);
+        setTotalExercises(0);
+        setSubmittedCount(0);
+      }
+    };
+
+    fetchData();
+  }, [studentId, token]);
+
+  if (!student) return <p>Loading...</p>;
+
+  const { nom = "—", prenom = "—", adresse_email = "—", date_joined = null } = student;
+  const initials = ((prenom || "").charAt(0) + (nom || "").charAt(0)).toUpperCase();
+  const joinedDate = date_joined ? new Date(date_joined).toLocaleDateString() : "";
+
+  // Stats
+  const submissionRate = totalExercises > 0
+    ? Math.round((submittedCount / totalExercises) * 100)
+    : 0;
+  const completedRatio = `${submittedCount}/${totalExercises}`;
 
   return (
-    <div className="flex flex-col lg:flex-row bg-primary/10 min-h-screen ">
-
-      {/* Sidebar */}
+    <div className="flex flex-col lg:flex-row bg-primary/10 min-h-screen">
       <Navbar />
-
-      {/* Main content */}
       <div className="flex-1 p-4 sm:p-8 lg:ml-56">
-
-        {/* Profile Header */}
-        <div className="bg-white rounded-3xl shadow-md p-6 sm:p-8 mb-6 sm:mb-8 w-full max-w-full lg:max-w-5xl mx-auto">
+        {/* Header étudiant */}
+        <div className="mb-6 sm:mb-8 bg-white rounded-3xl shadow-md p-6 w-full max-w-full lg:max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center sm:gap-6">
-            <UserCircle />
-
+            <UserCircle initials={initials} className="w-14 h-14" />
             <div className="mt-4 sm:mt-0 text-center sm:text-left">
-              <h2 className="text-xl sm:text-2xl font-semibold">Meriem Hamouche</h2>
-              <p className="text-gray text-sm sm:text-base">merry@school.fr</p>
-              <p className="text-gray   text-xs sm:text-sm">Joined on Sept 15, 2024</p>
+              <h2 className="text-xl sm:text-2xl font-semibold text-black">
+                {nom} {prenom}
+              </h2>
+              <p className="text-gray text-sm sm:text-base">{adresse_email}</p>
+              {joinedDate && (
+                <p className="text-gray text-xs sm:text-sm">Joined on {joinedDate}</p>
+              )}
             </div>
           </div>
 
           {/* Stats */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-16 mt-4 sm:mt-6 text-center justify-center">
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-primary">16.5</p>
-              <p className="text-gray">{t("exerciceStudent.AvarageG")}</p>
-            </div>
-            <div>
-              <p className="text-xl sm:text-2xl font-bold text-purple">95%</p>
+              <p className="text-xl sm:text-2xl font-bold text-purple">{submissionRate}%</p>
               <p className="text-gray">{t("exerciceStudent.Submission")}</p>
             </div>
+
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-pink">17/20</p>
+              <p className="text-xl sm:text-2xl font-bold text-pink">{completedRatio}</p>
               <p className="text-gray">{t("exerciceStudent.Completed")}</p>
+            </div>
+
+            <div>
+              <p className="text-xl sm:text-2xl font-bold text-primary">00</p>
+              <p className="text-gray">évalués</p>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
         <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-full sm:max-w-5xl py-2 px-4 sm:px-6 bg-gradient-to-r from-primary/30 to-purple rounded-full mb-6 sm:mb-8">
-          <span  role="button" className="px-12 py-1 bg-card text-gray/10 font-semibold rounded-full mb-2 sm:mb-0">
+          <span className="px-12 py-1 bg-card text-gray/10 font-semibold rounded-full mb-2 sm:mb-0">
             {t("exerciceStudent.exercice")}
           </span>
-          <span  role="button" className="px-12 py-1 text-gray/10 rounded-full">
+
+          <span
+            role="button"
+            className="px-12 py-1 text-gray/10 rounded-full"
+            onClick={() => navigate(`/students/${studentId}/progression`)}
+          >
             {t("exerciceStudent.Progression")}
           </span>
         </div>
 
-        {/* Tasks Section */}
+        {/* Exercices + toutes les tentatives */}
         <div className="flex flex-col gap-6 sm:gap-8 max-w-full sm:max-w-5xl mx-auto">
-          <TaskCard
-            title="Binary Search Implementation"
-            date="oct 27,2024,2:30 PM"
-            etat={t("exerciceStudent.Pending")}
-            code={`function binarySearch(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
+          {exercises.length === 0 && <p className="text-gray-500">{t("noExercises")}</p>}
 
-  while (left <= right) {
-    let mid = Math.floor((left + right) / 2);
+          {exercises.map((ex) => {
+            const tentative = ex.tentatives?.[0] || {};
+            const feedback = feedbacks[tentative.id] || "";
 
-    if (arr[mid] === target) {
-      return mid;
-    } else if (arr[mid] < target) {
-      left = mid + 1;
-    } else {
-      right = mid - 1;
-    }
-  }
+            return (
+              <TaskCard
+                key={ex.id_exercice}
+                title={ex.nom_exercice}
+                date={tentative.submitted_at ? new Date(tentative.submitted_at).toLocaleString() : ""}
+                etat={tentative.etat || ""}
+                code={tentative.reponse || ""}
+                feedback={feedback}
+                exerciceId={ex.id_exercice}
+                tentativeId={tentative.id}
+              />
+            );
+          })}
 
-  return -1;
-}`}
-          />
-          <TaskCard
-            title="Bubble Sort Algorithm"
-            date="oct 27,2024,2:30 PM"
-            etat={t("exerciceStudent.Reviewect")}
-            code={`function BBDEsort(arr) {
-  for (let i = 0; i < arr.length; i++) {
-    for (let j = 0; j < arr.length - i - 1; j++) {
-      if (arr[j] > arr[j + 1]) {
-        let tmp = arr[j];
-        arr[j] = arr[j + 1];
-        arr[j + 1] = tmp;
-      }
-    }
-  }
-  return arr;
-}`}
-            feedback="Excellent implementation! Your code is clean and well-commented."
-          />
+
         </div>
       </div>
     </div>

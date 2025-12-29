@@ -7,6 +7,10 @@
     "medium": "Medium",
     "hard": "Hard"
   },
+  "categorie":{
+    "code": "code",
+    "question_cours": "course questions"
+  },
   "addExerciseButton": "+ Add Exercise",
   "modal": {
     "create": {
@@ -28,7 +32,9 @@
     "category": "Category",
     "titlePlaceholder": "Exercise title",
     "categoryPlaceholder": "Select category",
-    "difficulty": "Difficulty"
+    "difficulty": "Difficulty",
+    "visibilite": "visibilite",
+    "visibiliteLabel": "Visible to students "
   },
   "errors": {
     "fetchExercises": "Error fetching exercises.",

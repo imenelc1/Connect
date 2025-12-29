@@ -3,12 +3,14 @@ from exercices.models import Exercice
 from users.models import Utilisateur
 
 
+
 class Quiz(models.Model):
     scoreMinimum=models.IntegerField()
     exercice = models.OneToOneField(Exercice, on_delete=models.CASCADE)
     activerDuration=models.BooleanField(default=True)
     duration=models.DurationField(null=True)
     nbMax_tentative=models.IntegerField(default=0)
+    delai_entre_tentatives = models.PositiveIntegerField( default=0)
 
 class Question(models.Model):
     id_qst = models.AutoField(primary_key=True)

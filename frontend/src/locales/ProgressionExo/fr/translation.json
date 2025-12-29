@@ -1,15 +1,15 @@
 {
   "ProgressExercice": {
-       "AvarageG": "Note moyenne" ,
+       "AvarageG": "Score moyen" ,
     "Submission":"Taux de soumission",
     
-    "Completed": "Complété",
+    "Completed": "Cours complétés",
      "exercice":"Exercice",
      "Progression":"Progression",
     "completedexo": "Exercices terminés",
-    "courses": "Cours",
+    "courses": "Cours actifs",
     "Weekly": "Taux de soumission hebdomadaire",
-    "grade":"Progression des notes au fil du temps",
+    "grade":"Progression des scores au fil du temps",
     "performance":"Informations sur les performances",
     "positive":"Tendance positive",
      "positivep1":"Les élèves se sont améliorés de ",

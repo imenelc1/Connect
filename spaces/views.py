@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from courses.models import Cours
 from courses.serializers import CoursSerializer
 from exercices.models import Exercice
+from rest_framework import exceptions
 
 from exercices.serializers import ExerciceSerializer
 from quiz.models import Quiz
@@ -14,6 +15,8 @@ from quiz.serializers import QuizSerializer, QuizSerializer1
 from users.models import Utilisateur
 from .models import Space, SpaceCour, SpaceEtudiant, SpaceExo, SpaceQuiz
 from .serializers import (
+    MyExerciseSerializer,
+    MyQuizSerializer,
     SpaceCourSerializer,
     SpaceExoSerializer,
     SpaceQuizSerializer,
@@ -44,8 +47,12 @@ class SpaceListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedJWT]
 
     def get_queryset(self):
-        user = self.request.user
-        return Space.objects.filter(utilisateur=user)
+        # Pour les admins, renvoyer tous les espaces
+        if getattr(self.request, "user_role", None) == "admin":
+            return Space.objects.all()
+        
+        # Sinon, les espaces du prof connecté
+        return Space.objects.filter(utilisateur=self.request.user)
 
 # --- Détail / Update / Delete d'un espace ---
 class SpaceDetailView(generics.RetrieveDestroyAPIView):
@@ -128,23 +135,38 @@ def my_courses(request):
 @permission_classes([IsAuthenticatedJWT])
 def my_exercises(request):
     prof = request.user
-    exercises = Exercice.objects.filter(utilisateur=prof)
-    serializer = ExerciceSerializer(exercises, many=True)
-    return Response(serializer.data)
+    # uniquement les exercices qui n'ont pas de quiz associé
+    exercises = Exercice.objects.filter(utilisateur=prof).exclude(quiz__isnull=False)
+    serializer = MyExerciseSerializer(exercises, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def my_quizzes(request):
     prof = request.user
-    quizzes = Quiz.objects.filter(exercice__utilisateur=prof)
-    serializer = QuizSerializer1(quizzes, many=True)  
-    print("mes quizzes ", serializer.data)
+    space_id = request.query_params.get("space_id")  # facultatif
 
-    print("serializer.data", serializer.data)
+    # Tous les quizzes du prof
+    quizzes = Quiz.objects.filter(exercice__utilisateur=prof).exclude(exercice__isnull=True)
 
+    if space_id:
+        try:
+            space = Space.objects.get(id_space=space_id, utilisateur=prof)
+            # Exclure ceux déjà dans l'espace
+            quizzes_in_space_ids = SpaceQuiz.objects.filter(space=space).values_list('quiz_id', flat=True)
+            quizzes = quizzes.exclude(id__in=quizzes_in_space_ids)
+        except Space.DoesNotExist:
+            return Response({"error": "Espace non trouvé ou non autorisé"}, status=404)
 
+    serializer = MyQuizSerializer(quizzes, many=True)
     return Response(serializer.data)
+
+
+
+
+
 
 
 
@@ -214,24 +236,41 @@ def space_quizzes(request, space_id):
     except Space.DoesNotExist:
         return Response({"error": "Space not found"}, status=404)
 
+    # -------- GET --------
     if request.method == "GET":
         print("space_quizzes GET called", space_id)
         space_quizzes = SpaceQuiz.objects.filter(space=space)
         serializer = SpaceQuizSerializer(space_quizzes, many=True)
         return Response(serializer.data)
 
+    # -------- POST --------
     elif request.method == "POST":
         quiz_id = request.data.get("quiz")
         if not quiz_id:
-            return Response({"error": "exercice field required"}, status=400)
+            return Response(
+                {"error": "quiz field required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         try:
             quiz = Quiz.objects.get(id=quiz_id)
         except Quiz.DoesNotExist:
-            return Response({"error": "Exercice not found"}, status=404)
+            return Response(
+                {"error": "Quiz not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        space_quizzes, created = SpaceQuiz.objects.get_or_create(space=space, quiz=quiz)
-        serializer = SpaceQuizSerializer(space_quizzes)
-        return Response(serializer.data, status=201 if created else 200)
+        #  empêcher le doublon
+        if SpaceQuiz.objects.filter(space=space, quiz=quiz).exists():
+            return Response(
+                {"error": "Ce quiz est déjà ajouté à cet espace"},
+                status=status.HTTP_409_CONFLICT
+            )
+
+        space_quiz = SpaceQuiz.objects.create(space=space, quiz=quiz)
+        serializer = SpaceQuizSerializer(space_quiz)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
@@ -262,3 +301,23 @@ def etudiant_appartient_a_lespace(user, exercice):
         etudiant=user,
         space__spaceexo__exercice=exercice
     ).distinct().exists()
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def my_space_exercises(request, space_id):
+    prof = request.user
+    try:
+        space = Space.objects.get(id_space=space_id, utilisateur=prof)
+    except Space.DoesNotExist:
+        return Response({"error": "Espace non trouvé ou non autorisé"}, status=404)
+
+    # Tous les exercices liés à cet espace
+    exercises = Exercice.objects.filter(
+        spaceexo__space=space,
+        utilisateur=prof
+    ).distinct()
+
+    serializer = ExerciceSerializer(exercises, many=True)
+    return Response(serializer.data)
+

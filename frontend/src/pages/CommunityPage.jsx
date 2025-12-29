@@ -33,7 +33,11 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState([]);
   const [forumType, setForumType] = useState("all");
   const [forumTypeToCreate, setForumTypeToCreate] = useState("");
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> origin/main
   const navigate = useNavigate();
   const { t } = useTranslation("community");
   const { fetchUnreadCount } = useNotifications();
@@ -42,6 +46,7 @@ export default function CommunityPage() {
   const token = localStorage.getItem("access") || localStorage.getItem("token");
   const role = userData?.role;
   const userId = userData?.user_id;
+<<<<<<< HEAD
 
   const API_URL = window.location.hostname === "localhost"
     ? "http://localhost:8000/api"
@@ -50,12 +55,23 @@ export default function CommunityPage() {
   const { toggleDarkMode } = useContext(ThemeContext);
 
   const initials = useMemo(() =>
+=======
+  
+  const API_URL = window.location.hostname === "localhost" 
+    ? "http://localhost:8000/api" 
+    : "/api";
+
+  const { toggleDarkMode } = useContext(ThemeContext);
+  
+  const initials = useMemo(() => 
+>>>>>>> origin/main
     `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase(),
     [userData?.nom, userData?.prenom]
   );
 
   const forumOptions = useMemo(() => {
     // OPTIONS EXACTES COMME DEMANDÉ :
+<<<<<<< HEAD
 
     if (role === "enseignant") {
       return [
@@ -79,6 +95,31 @@ export default function CommunityPage() {
       { value: "teacher-student", label: t("forums.teacher-student") },
       { value: "student-student", label: t("forums.student-student") },
       { value: "student-teacher", label: t("forums.student-teacher") }
+=======
+    
+    if (role === "enseignant") {
+      return [
+        { value: "all", label: "Tous les forums" },
+        { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
+        { value: "teacher-student", label: "Enseignants ↔ Étudiants" }  // Regroupe teacher-student + student-teacher
+      ];
+    } 
+    else if (role === "etudiant") {
+      return [
+        { value: "all", label: "Tous les forums" },
+        { value: "student-student", label: "Étudiants ↔ Étudiants" },
+        { value: "student-teacher", label: "Étudiants ↔ Enseignants" }  // Regroupe teacher-student + student-teacher
+      ];
+    }
+    
+    // Pour admin ou autres rôles (au cas où)
+    return [
+      { value: "all", label: "Tous les forums" },
+      { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
+      { value: "teacher-student", label: "Enseignant → Étudiants" },
+      { value: "student-student", label: "Étudiants ↔ Étudiants" },
+      { value: "student-teacher", label: "Étudiant → Enseignants" }
+>>>>>>> origin/main
     ];
   }, [role]);
 
@@ -137,12 +178,20 @@ export default function CommunityPage() {
 
   const fetchForums = useCallback(async () => {
     if (!token) {
+<<<<<<< HEAD
       // "Token manquant - Veuillez vous reconnecter"
       setError(t("errors.Tokerror"));
       setIsLoading(false);
       return;
     }
 
+=======
+      setError("Token manquant - Veuillez vous reconnecter");
+      setIsLoading(false);
+      return;
+    }
+    
+>>>>>>> origin/main
     try {
       const response = await fetch(`${API_URL}/forums/`, {
         headers: {
@@ -150,6 +199,7 @@ export default function CommunityPage() {
           'Content-Type': 'application/json'
         }
       });
+<<<<<<< HEAD
 
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
@@ -157,11 +207,24 @@ export default function CommunityPage() {
 
       const forums = await response.json();
 
+=======
+      
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+      
+      const forums = await response.json();
+      
+>>>>>>> origin/main
       // Filtrer selon les règles de visibilité
       const visibleForums = forums.filter(forum => {
         const forumType = forum.type;
         const creatorRole = forum.utilisateur_role || (forum.utilisateur === userId ? role : null);
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> origin/main
         if (role === "etudiant") {
           // Étudiant voit :
           // 1. Forums envoyés aux étudiants (teacher-student, student-student)
@@ -173,6 +236,7 @@ export default function CommunityPage() {
             return creatorRole === "etudiant";
           }
           return false; // teacher-teacher invisible
+<<<<<<< HEAD
         }
         else if (role === "enseignant") {
           // Enseignant voit :
@@ -190,6 +254,25 @@ export default function CommunityPage() {
         return true; // admin voit tout
       });
 
+=======
+        } 
+        else if (role === "enseignant") {
+          // Enseignant voit :
+          // 1. Forums envoyés aux enseignants (teacher-teacher, student-teacher)
+          // 2. Forums envoyés aux étudiants SEULEMENT si créé par enseignant (teacher-student)
+          if (forumType === "teacher-teacher" || forumType === "student-teacher") {
+            return true;
+          }
+          if (forumType === "teacher-student") {
+            return creatorRole === "enseignant";
+          }
+          return false; // student-student invisible
+        }
+        
+        return true; // admin voit tout
+      });
+      
+>>>>>>> origin/main
       const transformedForums = visibleForums.map(forum => ({
         id: forum.id_forum,
         authorInitials: `${forum.utilisateur_nom?.[0] || ""}${forum.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
@@ -207,6 +290,7 @@ export default function CommunityPage() {
         contenu_forum: forum.contenu_forum || "",
         creatorRole: forum.utilisateur_role || (forum.utilisateur === userId ? role : null)
       }));
+<<<<<<< HEAD
 
       const forumsWithLikes = await checkAllForumLikes(transformedForums);
 
@@ -216,6 +300,16 @@ export default function CommunityPage() {
       //  "Impossible de charger les forums. Vérifiez votre connexion.
       console.error(t("errors.forumError"), error);
       setError();
+=======
+      
+      const forumsWithLikes = await checkAllForumLikes(transformedForums);
+      
+      setPosts(forumsWithLikes);
+      setError("");
+    } catch (error) {
+      console.error("Erreur chargement forums:", error);
+      setError("Impossible de charger les forums. Vérifiez votre connexion.");
+>>>>>>> origin/main
       setPosts([]);
     } finally {
       setIsLoading(false);
@@ -235,6 +329,7 @@ export default function CommunityPage() {
       // Gérer les options spéciales du dropdown
       if (role === "enseignant" && forumType === "teacher-student") {
         // Pour enseignant : "Enseignants ↔ Étudiants" = teacher-student + student-teacher
+<<<<<<< HEAD
         filtered = filtered.filter(post =>
           post.type === "teacher-student" || post.type === "student-teacher"
         );
@@ -242,6 +337,15 @@ export default function CommunityPage() {
       else if (role === "etudiant" && forumType === "student-teacher") {
         // Pour étudiant : "Étudiants ↔ Enseignants" = teacher-student + student-teacher
         filtered = filtered.filter(post =>
+=======
+        filtered = filtered.filter(post => 
+          post.type === "teacher-student" || post.type === "student-teacher"
+        );
+      } 
+      else if (role === "etudiant" && forumType === "student-teacher") {
+        // Pour étudiant : "Étudiants ↔ Enseignants" = teacher-student + student-teacher
+        filtered = filtered.filter(post => 
+>>>>>>> origin/main
           post.type === "teacher-student" || post.type === "student-teacher"
         );
       }
@@ -256,7 +360,11 @@ export default function CommunityPage() {
         return [...filtered].sort((a, b) => b.likes - a.likes);
       case "myforums":
         return [...filtered].filter(post => post.isMine)
+<<<<<<< HEAD
           .sort((a, b) => new Date(b.time) - new Date(a.time));
+=======
+                           .sort((a, b) => new Date(b.time) - new Date(a.time));
+>>>>>>> origin/main
       default:
         return [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
     }
@@ -268,11 +376,19 @@ export default function CommunityPage() {
   const getDisplayForumTypeLabel = useCallback((type) => {
     if (role === "enseignant") {
       if (type === "teacher-student" || type === "student-teacher") {
+<<<<<<< HEAD
         return t("forums.teacher-student");
       }
     } else if (role === "etudiant") {
       if (type === "teacher-student" || type === "student-teacher") {
         return t("forums.student-teacher");
+=======
+        return "Enseignants ↔ Étudiants";
+      }
+    } else if (role === "etudiant") {
+      if (type === "teacher-student" || type === "student-teacher") {
+        return "Étudiants ↔ Enseignants";
+>>>>>>> origin/main
       }
     }
     return getForumTypeLabel(type);
@@ -341,7 +457,11 @@ export default function CommunityPage() {
             value={forumType}
             onChange={setForumType}
             options={forumOptions}
+<<<<<<< HEAD
             placeholder={t("forums.select")}
+=======
+            placeholder="Sélectionner un type"
+>>>>>>> origin/main
             disabled={isLoading}
           />
         </div>

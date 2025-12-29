@@ -1,16 +1,28 @@
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from dashboard.models import ProgressionHistory
 from users.jwt_auth import jwt_required
 from django.utils import timezone
+from django.db.models import Sum
 
 from exercices.models import Exercice
+from users.models import Utilisateur
 from datetime import timedelta
 # Create your views here.
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from quiz.models import Quiz, Question, Option, ReponseQuiz, ReponseQuestion
-from .serializers import QuestionSerializer, QuizSerializer, QuizSerializer1,  OptionSerializer
+from .serializers import QuestionSerializer,ReponseQuizSerializer, QuizSerializer, QuizSerializer1,  OptionSerializer, ExerciceSerializer1
+
+
+
+from rest_framework.decorators import api_view, permission_classes
+from users.jwt_auth import IsAuthenticatedJWT  
+from rest_framework.response import Response
 
 class QuizListCreateView(generics.ListCreateAPIView):
     queryset = Quiz.objects.all()
@@ -107,6 +119,24 @@ class QuizSubmitView(APIView):
         tentative.date_fin = timezone.now() 
         tentative.save()
 
+        score_max = quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        # 🔹 progression en %
+        avancement = round((score_total / score_max) * 100) if score_max > 0 else 0
+
+        # 🔹 historique de progression du quiz
+        ProgressionHistory.objects.create(
+            utilisateur=request.user,
+            cours=quiz.exercice.cours,
+            quiz=quiz,
+            type_contenu="quiz",
+            avancement=avancement,
+            temps_passe=timedelta(seconds=0)
+        )
+        
+
         return Response({
             "score": score_total,
             "scoreMinimum": quiz.scoreMinimum,
@@ -195,3 +225,118 @@ class QuizRecapAPIView(APIView):
         }
 
         return Response([data])
+    
+    
+    
+    
+
+#la derniere tenatative, pour recuperer le score informations sur la tentative
+
+@api_view(["GET"])
+def exercice_detail_with_quiz(request, exercice_id, utilisateur_id):
+    exercice = get_object_or_404(Exercice, id_exercice=exercice_id)
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=utilisateur_id)
+
+    # Récupérer la réponse de l'utilisateur pour ce quiz s'il existe
+    try:
+        quiz = exercice.quiz
+        reponse_quiz = ReponseQuiz.objects.filter(quiz=quiz, etudiant=utilisateur).last()
+    except Quiz.DoesNotExist:
+        reponse_quiz = None
+
+    serializer = ExerciceSerializer1(exercice, context={"reponse_quiz": reponse_quiz})
+    return Response(serializer.data)
+
+#toutes les tentatives, pour savoir si l'utilisateur peut refaire le quiz ou il a atteint le nombre max de tentative
+@api_view(["GET"])
+def toutes_les_tentatives_quiz(request, quiz_id, utilisateur_id):
+    """
+    Retourne toutes les tentatives d'un utilisateur pour un quiz donné,
+    triées par date_fin décroissante.
+    """
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=utilisateur_id)
+
+    # Récupérer toutes les tentatives terminées (ou pas, selon le besoin)
+    reponses_quiz = ReponseQuiz.objects.filter(
+        quiz=quiz,
+        etudiant=utilisateur
+    ).order_by('-date_fin')  # dernières tentatives en premier
+
+    if not reponses_quiz.exists():
+        return Response({"message": "Aucune tentative trouvée."}, status=404)
+
+    serializer = ReponseQuizSerializer(reponses_quiz, many=True)
+    return Response(serializer.data)
+
+
+
+#Recherche dans quiz par titre, enonce
+class QuizSearchAPIView(APIView):
+    """
+    Retourne uniquement les Quiz (exercices avec Quiz)
+    filtrés par titre, énoncé ou catégorie.
+    """
+
+    def get(self, request):
+        search = request.GET.get("search", "").strip()
+        categorie = request.GET.get("categorie", "").strip()
+
+        quizzes = Quiz.objects.select_related("exercice").all()
+
+        if search:
+            quizzes = quizzes.filter(
+                Q(exercice__titre_exo__icontains=search) |
+                Q(exercice__enonce__icontains=search)
+            )
+
+        if categorie:
+            quizzes = quizzes.filter(exercice__categorie__icontains=categorie)
+
+        serializer = QuizSerializer1(quizzes, many=True)
+        return Response(serializer.data)
+from django.db.models import OuterRef
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def quizzes_faits_par_etudiant(request):
+    """
+    Récupère les quizzes terminés par l'utilisateur connecté.
+    Retourne pour chaque quiz la dernière tentative et les infos utiles.
+    """
+    utilisateur = request.user  # User authentifié
+    if utilisateur.is_anonymous:
+        return Response({"detail": "Authentication credentials were not provided."}, status=401)
+
+    # Récupérer toutes les tentatives terminées de l’utilisateur
+    tentatives = ReponseQuiz.objects.filter(
+        etudiant=utilisateur,
+        terminer=True
+    ).order_by('-date_fin')
+
+    # Garder uniquement la dernière tentative par quiz
+    quizzes_done = {}
+    for t in tentatives:
+        if t.quiz_id not in quizzes_done:
+            quizzes_done[t.quiz_id] = t  # première occurrence = dernière tentative
+
+    # Préparer les données à renvoyer
+    data = []
+    for tentative in quizzes_done.values():
+        quiz = tentative.quiz
+
+        score_max = quiz.exercice.questions.aggregate(total=Sum("score"))["total"] or 0
+        progression = round((tentative.score_total / score_max) * 100) if score_max > 0 else 0
+
+        data.append({
+            "quiz_id": quiz.id,
+            "exercice_id": quiz.exercice.id_exercice,
+            "titre_exercice": quiz.exercice.titre_exo,
+            "score_obtenu": tentative.score_total,
+            "score_max": score_max,
+            "progression": progression,
+            "reussi": tentative.score_total >= quiz.scoreMinimum,
+            "date_fin": tentative.date_fin,
+        })
+
+    return Response(data)

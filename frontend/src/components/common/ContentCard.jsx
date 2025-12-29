@@ -84,9 +84,12 @@ export default function ContentCard({
       } else {
         navigate(`/start-exercise/${course.id}`);
       }
-    } else if (pageType === "quiz") {
+    } else if ((pageType === "quiz") && (role=== "etudiant")) {
       navigate(`/quiz-intro/${course.id}`);
-    } else {
+    } else if ((pageType === "quiz") && (role=== "enseignant")){
+      navigate(`/quiz-preview/${course.id}`);
+    }
+    else {
       navigate(`/Seecourses/${course.id}`);
     }
   };
@@ -101,7 +104,7 @@ export default function ContentCard({
     } else if (pageType === "exercise") {
       navigate(`/exercices/edit/${course.id}`);
     } else if (pageType === "quiz") {
-      navigate(`/QuizIntro/${course.id}`);
+      navigate(`/quiz/edit/${course.id}`);
     } else {
       navigate(`/Seecourses/${course.id}`);
     }
@@ -181,8 +184,8 @@ export default function ContentCard({
             <p className="text-sm text-red-500 font-semibold whitespace-nowrap">
               {course.tentativesRestantes !== null &&
               course.tentativesRestantes <= 0
-                ? "🚫 Nombre maximum de tentatives atteint"
-                : `⏳ Réessayez dans ${course.minutesRestantes} min`}
+                ? " Nombre maximum de tentatives atteint"
+                : `Réessayez dans ${course.minutesRestantes} min`}
             </p>
           ) : (
             <Button

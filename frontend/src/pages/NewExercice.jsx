@@ -20,13 +20,14 @@ export default function NewExercise() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("newExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
+  const [solution, setSolution] = useState("");
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-      useEffect(() => {
-         const handler = (e) => setSidebarCollapsed(e.detail);
-         window.addEventListener("sidebarChanged", handler);
-         return () => window.removeEventListener("sidebarChanged", handler);
-       }, []);
-    
+  useEffect(() => {
+    const handler = (e) => setSidebarCollapsed(e.detail);
+    window.addEventListener("sidebarChanged", handler);
+    return () => window.removeEventListener("sidebarChanged", handler);
+  }, []);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
@@ -47,7 +48,7 @@ export default function NewExercise() {
 
   const currentUserId = getCurrentUserId();
 
-
+  const [maxSoumissions, setMaxSoumissions] = useState(0); // 0 = illimité
 
   const [courses, setCourses] = useState([]);
   useEffect(() => {
@@ -65,11 +66,9 @@ export default function NewExercise() {
       .catch((err) => console.error("Erreur chargement cours :", err));
   }, []);
 
-
-
-
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
-    }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
   const exerciseSteps = [
     { label: t("exercises.info"), icon: FileText },
@@ -100,37 +99,43 @@ export default function NewExercise() {
           enonce: statement,
           niveau_exo: level,
           utilisateur: currentUserId,
-          categorie: category,           // obligatoire
-          cours: selectedCourseId,       // obligatoire, ID du cours
+          categorie: category,
+          cours: selectedCourseId,
           visibilite_exo: courseVisibility === "private" ? false : true,
+          solution: solution || null,
+          max_soumissions: maxSoumissions,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
 
       const exoId = res.data.id_exercice;
       navigate("/all-exercises");
       return exoId;
     } catch (err) {
-      console.error("Erreur création cours :", err.response?.data || err.message);
+      console.error(
+        "Erreur création cours :",
+        err.response?.data || err.message
+      );
       alert("Erreur lors de la création de l'exercice");
       return null;
     }
   };
 
-
-  
   return (
     <div className="w-full min-h-screen  bg-surface">
       {/* SIDEBAR */}
-       <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
+      <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
       {/* MAIN CONTENT */}
-      <div className={`
+      <div
+        className={`
         p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
         ${sidebarCollapsed ? "ml-20" : "ml-64"}
-      `}>
+      `}
+      >
         <div className="flex justify-end">
           <UserCircle
             initials={initials}
@@ -145,7 +150,6 @@ export default function NewExercise() {
           setActiveStep={setActiveStep}
           className="flex justify-between"
         />
-
 
         {/* FORM */}
         {activeStep === 1 && (
@@ -175,9 +179,37 @@ export default function NewExercise() {
               rows={6}
               className="w-full rounded-3xl border border-grayc px-5 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-10 resize-none text-black bg-secondary/10"
             />
+            <label className="block text-textc font-semibold mb-2">
+              {t("form.solution_label")}
+            </label>
+
+            <textarea
+              name="solution"
+              placeholder={
+                t("form.solution_placeholder") ||
+                "Écrire la solution ici (facultatif)"
+              }
+              value={solution}
+              onChange={(e) => setSolution(e.target.value)}
+              rows={5}
+              className="w-full rounded-3xl border border-grayc px-5 py-3 shadow-sm
+             focus:outline-none focus:ring-2 focus:ring-primary mb-4
+             resize-none text-black bg-secondary/10"
+            />
+
+            <p
+              className="
+    mb-3 px-4 py-2 rounded-2xl text-sm shadow-card
+    bg-[rgb(var(--color-blue-primary-light))] 
+    text-[rgb(var(--color-blue))] 
+    border border-[rgb(var(--color-blue))]
+  "
+            >
+              {t("solution_note")}
+            </p>
 
             {/* GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-10 mb-16">
               {/* CATEGORY */}
               <div className="flex flex-col">
                 <label className="block text-textc font-semibold mb-2">
@@ -189,7 +221,10 @@ export default function NewExercise() {
                   placeholder={t("select.placeholder")}
                   options={[
                     { value: "code", label: t("select.code") },
-                    { value: "question_cours", label: t("select.question_cours") },
+                    {
+                      value: "question_cours",
+                      label: t("select.question_cours"),
+                    },
                   ]}
                 />
               </div>
@@ -209,10 +244,11 @@ export default function NewExercise() {
                     { value: "avance", label: t("select.advanced") },
                   ]}
                 />
-
               </div>
               <div className="flex flex-col ">
-                <label className="font-medium mb-2">{t("exercises.visibility")}</label>
+                <label className="font-medium mb-2">
+                  {t("exercises.visibility")}
+                </label>
                 <ModernDropdown
                   value={courseVisibility}
                   onChange={setCourseVisibility}
@@ -241,6 +277,22 @@ export default function NewExercise() {
                   ]}
                 />
               </div>
+
+               <div className="flex flex-col w-150px">
+                <label className="block text-textc font-semibold">
+                  {t("max soumissions") ||
+                    "Nombre max de soumissions (0 = illimité)"}
+                </label>
+               <Input
+                type="number"
+                min={0}
+                value={maxSoumissions}
+                onChange={(e) => setMaxSoumissions(Number(e.target.value))}
+                placeholder="0"
+                className="w-36 border border-grayc shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 bg-secondary/10"
+              />
+
+              </div>
             </div>
 
             {/* BUTTONS */}
@@ -266,7 +318,6 @@ export default function NewExercise() {
           <div className="w-full flex flex-col items-center gap-10">
             {/* ---------- RÉSUMÉ INFOS GÉNÉRALES ---------- */}
             <div className="w-full max-w-4xl bg-grad-3 border text-nav rounded-3xl shadow-sm p-8">
-
               <h3 className="text-lg font-bold text-nav mb-4">
                 {t("course.summary_title")}
               </h3>
@@ -282,13 +333,22 @@ export default function NewExercise() {
                   <strong>{t("course.level")} :</strong> {level}
                 </p>
                 <p>
-                  <strong>{t("course.courseVisibility")} :</strong> {courseVisibility}
+                  <strong>{t("course.courseVisibility")} :</strong>{" "}
+                  {courseVisibility}
                 </p>
                 <p>
-                  <strong>{t("course.course_selected")} :</strong> {
-                    courses.find(c => c.id === selectedCourseId)?.title || "-"
-                  }
+                  <strong>{t("course.course_selected")} :</strong>{" "}
+                  {courses.find((c) => c.id === selectedCourseId)?.title || "-"}
                 </p>
+
+                <p>
+                <strong>{t("max soumissions") || "Max soumissions"} :</strong> {maxSoumissions === 0 ? "Illimité" : maxSoumissions}
+              </p>
+
+              <p>
+                  <strong>{t("solution")} :</strong> {solution || "-"}
+                </p>
+
               </div>
 
               {/* BADGE NIVEAU */}

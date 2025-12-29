@@ -10,7 +10,7 @@
   "nombreQuestions": "Number of questions",
   "questions": "questions",
   "dureeEstimee": "Estimated duration",
-  "pointsTotaux": "Total points",
+  "pointsTotaux": "Minimum required score for the quiz",
   "start": "Let's start! 🚀",
   "back": "Back to menu",
   "testTranslation": "This is a translation test"

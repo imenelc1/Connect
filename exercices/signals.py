@@ -1,38 +1,39 @@
+# exercices/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.contenttypes.models import ContentType
 from .models import Exercice
-from spaces.models import SpaceCour, SpaceEtudiant
-from feedback.utils import create_notification
+from feedback.models import Notification
+from users.models import Utilisateur
 
 @receiver(post_save, sender=Exercice)
-def notify_students_new_exercice(sender, instance, created, **kwargs):
+def notify_students_on_exercice_create(sender, instance, created, **kwargs):
     if not created:
         return
 
     exercice = instance
-    professeur = exercice.utilisateur
-    cours = exercice.cours
+    prof = exercice.utilisateur
+    content_type = ContentType.objects.get_for_model(Exercice)
+    notifications = []
 
-    if exercice.visibilite_exo:
-        # Exercice public → tous les étudiants
-        from users.models import Utilisateur
-        students = Utilisateur.objects.filter(role='etudiant')
-    else:
-        # Exercice privé → étudiants des espaces contenant ce cours
-        space_ids = SpaceCour.objects.filter(cours=cours).values_list('space_id', flat=True)
-        students = Utilisateur.objects.filter(
-            spaceetudiant__space_id__in=space_ids
-        ).distinct()
-
-    for student in students:
-        try:
-            create_notification(
-                destinataire=student,
-                envoyeur=professeur,
-                content_object=exercice,
-                action_type='new_exercice',
-                module_source='exercice',
-                message=f"{professeur.prenom} a publié l'exercice '{exercice.titre_exo}'."
+    if exercice.visibilite_exo:  # public
+        etudiants = Utilisateur.objects.filter(etudiant__isnull=False)
+        for etudiant in etudiants:
+            notifications.append(
+                Notification(
+                    message_notif=f"Nouveau exercice public : {exercice.titre_exo}",
+                    utilisateur_destinataire=etudiant,
+                    utilisateur_envoyeur=prof,
+                    content_type=content_type,
+                    object_id=exercice.pk,  # ← utilise pk ici
+                    action_type="exercice_created",
+                    module_source="exercice",
+                    extra_data={"titre_exo": exercice.titre_exo, "public": True}
+                )
             )
-        except Exception as e:
-            print(f"Erreur notification exercice pour {student}: {e}")
+    else:
+        print("🔒 Exercice privé, aucune notification envoyée")
+
+    if notifications:
+        Notification.objects.bulk_create(notifications)
+        print(f"✅ {len(notifications)} notifications créées")
