@@ -58,8 +58,8 @@ export default function ContentCard({
     (location.pathname.includes("courses")
       ? "course"
       : location.pathname.includes("exercises")
-      ? "exercise"
-      : "quiz");
+        ? "exercise"
+        : "quiz");
 
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
@@ -73,8 +73,8 @@ export default function ContentCard({
       pageType === "course"
         ? t("checkCourse")
         : pageType === "exercise"
-        ? t("checkExercise")
-        : t("checkQuiz"),
+          ? t("checkExercise")
+          : t("checkQuiz"),
   };
 
   const handleStart = () => {
@@ -84,9 +84,12 @@ export default function ContentCard({
       } else {
         navigate(`/start-exercise/${course.id}`);
       }
-    } else if (pageType === "quiz") {
+    } else if ((pageType === "quiz") && (role=== "etudiant")) {
       navigate(`/quiz-intro/${course.id}`);
-    } else {
+    } else if ((pageType === "quiz") && (role=== "enseignant")){
+      navigate(`/quiz-preview/${course.id}`);
+    }
+    else {
       navigate(`/Seecourses/${course.id}`);
     }
   };
@@ -95,17 +98,17 @@ export default function ContentCard({
     navigate(`/ListeExercices/${course.id}`);
   };
 
-const handleEdit = () => {
-  if (pageType === "course") {
-    navigate(`/courses/edit/${course.id}`);
-  } else if (pageType === "exercise") {
-    navigate(`/exercices/edit/${course.id}`);
-  } else if (pageType === "quiz") {
-    navigate(`/QuizIntro/${course.id}`);
-  } else {
-    navigate(`/Seecourses/${course.id}`);
-  }
-};
+  const handleEdit = () => {
+    if (pageType === "course") {
+      navigate(`/courses/edit/${course.id}`);
+    } else if (pageType === "exercise") {
+      navigate(`/exercices/edit/${course.id}`);
+    } else if (pageType === "quiz") {
+      navigate(`/quiz/edit/${course.id}`);
+    } else {
+      navigate(`/Seecourses/${course.id}`);
+    }
+  };
 
 
   const handleRestart = async () => {
@@ -146,13 +149,12 @@ const handleEdit = () => {
             </div>
             <span className="text-sm">{course.author}</span>
           </div>
-          <span className="text-xs text-gray-400">
-            {pageType === "exercise"
-              ? course.categorie
-              : pageType === "quiz" && course.duration
-              ? `${course.duration} min`
-              : course.duration}
-          </span>
+         <span className="text-xs text-gray-400">
+  {pageType === "exercise" && course.categorie}
+  {pageType === "quiz" && course.duration && `${course.duration} min`}
+  {pageType === "course" && course.duration}
+</span>
+
         </div>
 
         {showProgress && (
@@ -165,138 +167,168 @@ const handleEdit = () => {
       </div>
 
       {/* FOOTER */}
-      <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        {role === "etudiant" && (
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            {/* ======= Quiz ======= */}
-            {pageType === "quiz" ? (
-              <div className="flex gap-2">
-                <Button
-                  variant="courseStart"
-                  className={`${buttonStyles[course.level]} !w-auto px-4 py-2`}
-                  onClick={handleStart}
-                >
-                  {progress > 0 ? labels.continue : labels.start}
-                </Button>
-                {progress > 0 && (
-                  <Button
-                    variant="heroOutline"
-                    className="!w-auto px-4 py-2"
-                    onClick={handleRestart}
-                  >
-                    {labels.restart}
-                  </Button>
-                )}
-              </div>
-            ) : (
-              /* ======= Courses & Exercises ======= */
-              <>
-                {progress === 0 && (
-                  <>
-                    <Button
-                      variant="heroPrimary"
-                      className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${levelStyles[course.level]}`}
-                      onClick={() => navigate(`/Seecourses/${course.id}`)}
-                    >
-                      {labels.start}
-                    </Button>
-                    <Button
-                      variant="heroPrimary"
-                      className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${buttonStyles[course.level]}`}
-                      onClick={seeExercises}
-                    >
-                      {t("checkExos")}
-                    </Button>
-                  </>
-                )}
+     {/* FOOTER */}
+<div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
-                {progress > 0 && progress < 100 && (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <Button
-                        variant="heroOutline"
-                        className="px-4 py-2 whitespace-nowrap"
-                        onClick={handleRestart}
-                      >
-                        {labels.restart}
-                      </Button>
-                      <Button
-                        variant="heroPrimary"
-                        className={`px-2 py-2 whitespace-nowrap ${levelStyles[course.level]}`}
-                        onClick={seeExercises}
-                      >
-                        {t("checkExos")}
-                      </Button>
-                    </div>
+  {/* ================= ETUDIANT ================= */}
+  {role === "etudiant" && (
+    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
 
-                    <div>
-                      <Button
-                        variant="heroPrimary"
-                        className={`px-4 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
-                        onClick={() =>
-                          navigate(`/Seecourses/${course.id}`, {
-                            state: { lastLessonId: course.lastLessonId },
-                          })
-                        }
-                      >
-                        {labels.continue}
-                      </Button>
-                    </div>
-                  </div>
-                )}
+      {/* ================= QUIZ ================= */}
+      {pageType === "quiz" ? (
+        <div className="flex flex-col sm:flex-row gap-2">
 
-                {progress >= 100 && (
-                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                    <Button
-                      variant="heroOutline"
-                      className="px-4 py-2 whitespace-nowrap"
-                      onClick={handleRestart}
-                    >
-                      {labels.restart}
-                    </Button>
-                    <Button
-                      variant="heroPrimary"
-                      className={`px-3 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
-                      onClick={seeExercises}
-                    >
-                      {t("checkExos")}
-                    </Button>
-                  </div>
-                )}
-
-                
-              </>
-            )}
-          </div>
-        )}
-
-        {role === "enseignant" && (
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* Quiz bloqué */}
+          {course.isBlocked ? (
+            <p className="text-sm text-red-500 font-semibold whitespace-nowrap">
+              {course.tentativesRestantes !== null &&
+              course.tentativesRestantes <= 0
+                ? " Nombre maximum de tentatives atteint"
+                : `Réessayez dans ${course.minutesRestantes} min`}
+            </p>
+          ) : (
             <Button
               variant="courseStart"
               className={`px-4 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
               onClick={handleStart}
             >
-              {labels.check}
+              {progress > 0 ? labels.continue : labels.start}
             </Button>
+          )}
 
-            {course.isMine && (
-              <div className="flex gap-2 ml-2">
-                <FiEdit
-                  size={18}
-                  className="cursor-pointer text-grayc hover:text-primary"
-                  onClick={handleEdit}
-                />
-                <FiTrash2
-                  size={18}
-                  className="cursor-pointer text-grayc hover:text-red-500"
-                  onClick={() => onDelete(course.id)}
-                />
-              </div>
+          {/* Restart quiz */}
+          {!course.isBlocked && progress > 0 && (
+            <Button
+              variant="heroOutline"
+              className="px-4 py-2 whitespace-nowrap"
+              onClick={handleRestart}
+            >
+              {labels.restart}
+            </Button>
+          )}
+
+          {/* Tentatives restantes */}
+          {course.tentativesRestantes !== null &&
+            course.tentativesRestantes > 0 && (
+              <p className="text-xs text-gray-400 whitespace-nowrap self-center">
+                Tentatives restantes : {course.tentativesRestantes}
+              </p>
             )}
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        /* ================= COURSES & EXERCISES ================= */
+        <>
+          {/* ===== Début ===== */}
+          {progress === 0 && (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="heroPrimary"
+                className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${levelStyles[course.level]}`}
+                onClick={() => navigate(`/Seecourses/${course.id}`)}
+              >
+                {labels.start}
+              </Button>
+
+              <Button
+                variant="heroPrimary"
+                className={`px-4 py-2 min-w-[100px] whitespace-nowrap ${buttonStyles[course.level]}`}
+                onClick={seeExercises}
+              >
+                {t("checkExos")}
+              </Button>
+            </div>
+          )}
+
+          {/* ===== En cours ===== */}
+          {progress > 0 && progress < 100 && (
+            <div className="flex flex-col gap-2">
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  variant="heroOutline"
+                  className="px-4 py-2 whitespace-nowrap"
+                  onClick={handleRestart}
+                >
+                  {labels.restart}
+                </Button>
+
+                <Button
+                  variant="heroPrimary"
+                  className={`px-4 py-2 whitespace-nowrap ${levelStyles[course.level]}`}
+                  onClick={seeExercises}
+                >
+                  {t("checkExos")}
+                </Button>
+              </div>
+
+              <Button
+                variant="heroPrimary"
+                className={`px-4 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
+                onClick={() =>
+                  navigate(`/Seecourses/${course.id}`, {
+                    state: { lastLessonId: course.lastLessonId },
+                  })
+                }
+              >
+                {labels.continue}
+              </Button>
+            </div>
+          )}
+
+          {/* ===== Terminé ===== */}
+          {progress >= 100 && (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="heroOutline"
+                className="px-4 py-2 whitespace-nowrap"
+                onClick={handleRestart}
+              >
+                {labels.restart}
+              </Button>
+
+              <Button
+                variant="heroPrimary"
+                className={`px-4 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
+                onClick={seeExercises}
+              >
+                {t("checkExos")}
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )}
+
+  {/* ================= ENSEIGNANT ================= */}
+  {role === "enseignant" && (
+    <div className="flex items-center gap-3 w-full sm:w-auto">
+      <Button
+        variant="courseStart"
+        className={`px-4 py-2 whitespace-nowrap ${buttonStyles[course.level]}`}
+        onClick={handleStart}
+      >
+        {labels.check}
+      </Button>
+
+      {course.isMine && (
+        <div className="flex gap-2 ml-2">
+          <FiEdit
+            size={18}
+            className="cursor-pointer text-grayc hover:text-primary"
+            onClick={handleEdit}
+          />
+          <FiTrash2
+            size={18}
+            className="cursor-pointer text-grayc hover:text-red-500"
+            onClick={() => onDelete(course.id)}
+          />
+        </div>
+      )}
+    </div>
+  )}
+</div>
+
     </div>
   );
 }

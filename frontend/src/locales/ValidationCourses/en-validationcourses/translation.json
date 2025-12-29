@@ -19,5 +19,10 @@
     "inspect": "Review",
     "approve": "Approve",
     "reject": "Reject"
-  }
+  },
+   "errors": {
+    "fetchCourses": "Error while fetching courses.",
+    "updateStatus": "Error while updating course status.",
+    "unauthorized": "You are not authorized to perform this action."
+}
 }

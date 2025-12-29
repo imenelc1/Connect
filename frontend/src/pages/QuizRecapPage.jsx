@@ -4,10 +4,12 @@ import Button from "../components/common/Button";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
+import { getCurrentUserId } from "../hooks/useAuth";
 
 export default function QuizRecapPage() {
   const navigate = useNavigate();
   const { exerciceId } = useParams();
+  const currentUserId = getCurrentUserId();
   const { t } = useTranslation("quiz3");
 
   const [quiz, setQuiz] = useState(null);
@@ -20,35 +22,37 @@ export default function QuizRecapPage() {
     localStorage.setItem("lang", newLang);
   };
 
-  /* ================= FETCH QUIZ + RÉPONSES ================= */
- useEffect(() => {
-  const fetchQuizRecap = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8000/api/quiz/${exerciceId}/recap/`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+  // ================= FETCH QUIZ + RÉPONSES =================
+  useEffect(() => {
+    const fetchQuizRecap = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/quiz/exercice/${exerciceId}/utilisateur/${currentUserId}/`,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
-      if (!res.ok) throw new Error("Quiz non trouvé");
-      const data = await res.json();
-      setQuiz(data[0]); // le backend renvoie un tableau
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-    }
-  };
+        if (!res.ok) throw new Error("Quiz non trouvé");
+        const data = await res.json();
+        setQuiz(data); // l'API renvoie directement un objet
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
+    };
 
-  fetchQuizRecap();
-}, [exerciceId]);
+    fetchQuizRecap();
+  }, [exerciceId, currentUserId]);
 
   if (loading) return <p>Chargement du quiz...</p>;
   if (!quiz) return <p>Quiz introuvable.</p>;
+  const totalPoints = quiz.quiz.questions ? quiz.quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
+
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-8 bg-background">
@@ -66,7 +70,7 @@ export default function QuizRecapPage() {
 
       {/* Titre */}
       <h1 className="text-3xl md:text-4xl font-bold text-primary mb-6">
-        {quiz.exercice?.titre_exo}
+        {quiz.titre_exo}
       </h1>
 
       {/* Carte principale */}
@@ -78,20 +82,22 @@ export default function QuizRecapPage() {
 
         {/* Score */}
         <div className="text-3xl font-bold mb-4 text-textc">
-          {quiz.tentative?.score_total || 0} / {quiz.questions.length}
+          {quiz.quiz.reponse_quiz_utilisateur?.score_total || 0} / {totalPoints}
         </div>
 
         {/* Félicitations */}
-        {quiz.tentative?.score_total >= quiz.scoreMinimum ? (
-          <p className="text-green-600 text-xl mb-4">{t("congrats")}</p>
-        ) : (
-          <p className="text-red-600 text-xl mb-4">{t("tryAgain")}</p>
-        )}
+        {quiz.quiz.reponse_quiz_utilisateur?.score_total >= quiz.quiz.scoreMinimum ||
+ quiz.quiz.reponse_quiz_utilisateur?.score_total === totalPoints ? (
+  <p className="text-green-600 text-xl mb-4">{t("congrats")}</p>
+) : (
+  <p className="text-red-600 text-xl mb-4">{t("tryAgain")}</p>
+)}
+
 
         {/* Récapitulatif des réponses */}
         <h3 className="text-xl font-semibold text-textc mb-4">{t("recap")}</h3>
         <div className="w-full max-w-3xl flex flex-col gap-6">
-          {quiz.questions.map((q, index) => (
+          {quiz.quiz.questions.map((q, index) => (
             <div key={q.id_qst} className="bg-card rounded-xl p-6 shadow-md text-left text-textc border border-blue">
 
               {/* Numéro + question */}
@@ -108,17 +114,19 @@ export default function QuizRecapPage() {
               {/* Options */}
               <div className="flex flex-col gap-2">
                 {q.options.map((opt) => {
-                  const isSelected = opt.id_option === q.student_answer_id;
+                  const isSelected = q.reponse_utilisateur?.option_choisie?.id_option === opt.id_option;
                   const isCorrect = opt.texte_option === q.reponse_correcte;
 
-                  let classes = "rounded-md p-1 border border-gray-300 bg-white text-textc";
+                  let classes = "rounded-md p-2 border border-gray-300 bg-white ";
 
-                  if (isSelected && isCorrect) {
-                    classes = "rounded-md p-1 border border-blue bg-blue-200 text-white";
-                  } else if (isSelected && !isCorrect) {
-                    classes = "rounded-md p-1 border border-red-500 bg-red-200 text-white";
-                  } else if (!isSelected && isCorrect) {
-                    classes = "rounded-md p-1 border border-blue-300 bg-blue-100 text-textc";
+                  if (isCorrect) {
+                    // La bonne réponse en vert
+                    classes = "rounded-md p-2 border border-green bg-green";
+                  }
+
+                  if (isSelected && !isCorrect) {
+                    // Réponse choisie mais incorrecte en rouge
+                    classes = "rounded-md p-2 border border-red bg-red";
                   }
 
                   return (
@@ -128,6 +136,7 @@ export default function QuizRecapPage() {
                   );
                 })}
               </div>
+
             </div>
           ))}
         </div>
@@ -139,11 +148,7 @@ export default function QuizRecapPage() {
             variant="quizBack"
             onClick={() => navigate("/all-quizzes")}
           />
-          <Button
-            text={<span className="flex items-center gap-2"><FaRedoAlt /> {t("reset")}</span>}
-            variant="quizStart"
-            onClick={() => navigate(`/QuizTake/${exerciceId}`)}
-          />
+          
         </div>
 
       </div>

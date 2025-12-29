@@ -173,13 +173,18 @@ export default function SpaceDetails() {
           author: c.utilisateur_name,
         })));
 
-        setMyQuizzes((quizzesData || []).filter(q => q.exercice && q.exercice.id_exercice).map(q => ({
-          id: q.exercice.id_exercice,
-          title: q.exercice.titre_exo?.trim() || "Sans titre",
-          description: q.exercice.enonce || "",
-          level: q.exercice.niveau_exercice_label || "",
-          author: q.exercice.utilisateur_name || "",
-        })));
+       setMyQuizzes(
+  (quizzesData || [])
+    .filter(q => q.id)
+    .map(q => ({
+      id: q.id,
+      title: q.exercice?.titre_exo?.trim() || "Sans titre",
+      description: q.exercice?.enonce || "",
+      level: q.exercice?.niveau_exercice_label || "",
+      author: q.exercice?.utilisateur_name || "",
+    }))
+);
+
 
         setMyExercises((exercisesData || []).filter(e => e.id_exercice).map(e => ({
           id: e.id_exercice,

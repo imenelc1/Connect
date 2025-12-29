@@ -63,7 +63,7 @@ import ForumManagement from "../pages/forumManagement.jsx";
 import SpacesManagement from "../pages/SpacesManagement.jsx";
 import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 import StudentsManagement from "../pages/studentsManagement.jsx";
-
+import UpdateQuiz from "../pages/UpdateQuiz.jsx";
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -93,7 +93,8 @@ export default function AppRoutes() {
 
         {/* ========= COURSES ========= */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
-        <Route path="/course-details/:id" element={<CourseDetails />} />
+        <Route path="/CourseDetails/:id" element={<CourseDetails />} />
+        <Route path="/course-details" element={<CourseDetails />} />
         <Route path="/Seecourses/:id" element={<Courses />} />
         <Route path="/courses/edit/:id" element={<CourseUpdate />} />
         <Route path="/courses" element={<CourseUpdate />} />
@@ -103,7 +104,11 @@ export default function AppRoutes() {
         <Route path="/all-exercises" element={<AllExercisesPage />} />
         <Route path="/ListeExercices" element={<CourseExercisesPage />} />
         <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
+
         <Route path="/student-exercice" element={<StudentExercice />} />
+        <Route path="/student-exercises/:studentId" element={<StudentExercice />} />
+        <Route path="/students/:studentId/progression" element={<ProgressExercice />} />
+        
         <Route path="/start-exercise/:exerciceId" element={<TheoryExercisePage />} />
         <Route path="/start-exerciseCode/:exerciceId" element={<CodeExercisePage />} />
         <Route path="/submitted-exercise/:tentativeId" element={<SubmittedExercise />} />
@@ -115,14 +120,14 @@ export default function AppRoutes() {
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
        
 
-        {/* ========= QUIZZES ========= */}
+         {/* ========= QUIZZES ========= */}
         <Route path="/all-quizzes" element={<AllQuizzesPage />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
-        <Route path="/quiz-preview" element={<QuizPreview />} />
+        <Route path="/quiz-preview/:exerciceId" element={<QuizPreview />} />
         <Route path="/quiz-intro/:exerciceId" element={<QuizIntroPage />} />
         <Route path="/quizTake/:exerciceId" element={<QuizTakePage />} />
         <Route path="/QuizRecape/:exerciceId" element={<QuizRecapPage />} />
-
+        <Route path="/quiz/edit/:exerciceId" element={<UpdateQuiz />} />
         {/* ========= ADMIN ========= */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/CourseManagement" element={<CoursesManagement />} />

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Search, Pencil, Trash2, Code } from "lucide-react";
+import { Search, SquarePen, Trash2, Code } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 // Navigation entre routes (React Router)
@@ -56,7 +56,7 @@ export default function ExercisesManagement() {
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data)) {
-          console.error("Les exercices ne sont pas un tableau :", data);
+          console.error(t("errors.invalidData"), data);
           setExercises([]);
           return;
         }
@@ -76,7 +76,7 @@ export default function ExercisesManagement() {
         setExercises(formatted);
       })
       .catch((err) => {
-        console.error("Erreur chargement exercices :", err);
+        console.error(t("errors.fetchExercises"), err);
         setExercises([]);
       });
   }, []);
@@ -199,15 +199,7 @@ export default function ExercisesManagement() {
             <p className="text-gray">{t("description")}</p>
           </div>
 
-          <div className="flex gap-4 items-center">
-            <Button
-              text={t("addExerciseButton")}
-              variant="primary"
-              className="!w-auto px-6 py-2 rounded-xl"
-              onClick={() => setCreateModal(true)}
-            />
 
-          </div>
         </div>
 
         {/* Search */}
@@ -225,7 +217,7 @@ export default function ExercisesManagement() {
           {filtered.map((item) => (
             <div
               key={item.id_exercice}
-              className={`${ difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
+              className={`${difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
             >
               <div className="flex justify-between items-center mb-4">
                 <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
@@ -233,10 +225,10 @@ export default function ExercisesManagement() {
                 </div>
                 <span
                   className={`px-3 py-1 text-xs font-medium rounded-full ${item.niveau_exo === "debutant"
-                      ? "bg-muted/20 text-muted"
-                      : item.niveau_exo === "intermediaire"
-                        ? "bg-pink/20 text-pink"
-                        : "bg-purple/20 text-purple"
+                    ? "bg-muted/20 text-muted"
+                    : item.niveau_exo === "intermediaire"
+                      ? "bg-pink/20 text-pink"
+                      : "bg-purple/20 text-purple"
                     }`}
                 >
                   {item.niveau_exercice_label}
@@ -254,17 +246,11 @@ export default function ExercisesManagement() {
               <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
                 <span>{t("submissions", { count: item.submissions })}</span>
                 <div className="flex gap-3">
-                  <button
-                    className="text-muted hover:opacity-80"
-                    onClick={() => openEdit(item)}
-                  >
-                    <Pencil size={18} />
+                  <button className="text-muted hover:opacity-80">
+                    <SquarePen size={20} />
                   </button>
-                  <button
-                    className="text-red hover:opacity-80"
-                    onClick={() => handleDelete(item.id_exercice)}
-                  >
-                    <Trash2 size={18} />
+                  <button className="text-red hover:opacity-80">
+                    <Trash2 size={20} />
                   </button>
                 </div>
               </div>

@@ -15,7 +15,7 @@ export default function TaskCard({ title, date, etat, code, feedback }) {
             <Calendar size={16} /> {date}
           </span>
         </div>
-        <span className="flex items-center text-sm p-1 bg-purple rounded-full text-primary mt-2 sm:mt-0 gap-1">
+        <span className="flex items-center text-sm p-1 bg-purple rounded-full text-white mt-2 sm:mt-0 gap-1">
           <Clock size={16} /> {etat}
         </span>
       </div>
@@ -23,9 +23,6 @@ export default function TaskCard({ title, date, etat, code, feedback }) {
       {/* Code Block */}
       <pre className="bg-primary/20 p-4 sm:p-6 rounded-2xl text-sm leading-relaxed overflow-x-auto">
         <code>
-          <h4 className="text-primary font-semibold">
-            {t("exerciceStudent.Submitted")}:
-          </h4>
           <p className="font-semibold">{t("exerciceStudent.Solution")}:</p>
           {code}
         </code>

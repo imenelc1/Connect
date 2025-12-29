@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Button from "../components/common/Button";
 import Cards from "../components/common/Cards-Dash";
-import { Search, TrendingDown, CircleCheckBig, Clock3, Book, CirclePlus, FolderPlus, Activity, Bell } from "lucide-react";
-import Navbar from "../components/common/Navbar";
+import { Search, TrendingDown, CircleCheckBig, Clock3, Book, CirclePlus, FolderPlus, Activity } from "lucide-react";
+import Navbar from "../components/common/NavBar";
 import Input from "../components/common/Input";
 import LearningCurve from "../components/common/LearningCurve";
 import NotificationItem from "../components/common/AcivityFeed";
@@ -12,23 +12,20 @@ import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
-import { PieChart, Pie, Cell, Tooltip } from "recharts";
+import api from "../services/api"; 
+import { PieChart, Pie, Cell } from "recharts";
 import progressionService from "../services/progressionService";
 import NotificationBell from "../components/common/NotificationBell";
 
 export default function Dashboardens() {
-  // Hook de traduction
   const { t, i18n } = useTranslation("Dashboard");
-
-  // Récupérer darkMode depuis ThemeContext
-  const { toggleDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
+  const { toggleDarkMode } = useContext(ThemeContext);
 
   // États pour la responsivité
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
   const storedUser = localStorage.getItem("user");
   const userData = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
 
@@ -46,13 +43,12 @@ export default function Dashboardens() {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-
-    // Gestion de la sidebar
+    
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-
+    
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-
+    
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -119,26 +115,27 @@ export default function Dashboardens() {
   ];
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-primary/10">
-      <div className="text-muted">Chargement...</div>
-    </div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-primary/10">
+        <div className="text-muted">Chargement...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+        <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* Sidebar */}
       <div>
         <Navbar />
       </div>
 
       {/* Main content */}
-      <main className={`
+       <main className={`
         flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-
           {/* User + Bell */}
           <div className="flex items-center gap-3 order-1 sm:order-2 mt-0 sm:mt-0 self-end sm:self-auto">
             <NotificationBell />
@@ -159,9 +156,9 @@ export default function Dashboardens() {
               className="w-full"
             />
           </form>
-
         </header>
 
+    
 
         {/* Welcome banner */}
         <div className="relative bg-grad-1 text-white p-4 rounded-2xl shadow-md flex flex-col lg:flex-row justify-between items-center gap-3 sm:gap-4">
@@ -177,48 +174,45 @@ export default function Dashboardens() {
         </div>
 
         {/* Quick stats */}
-
-       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 text-textc">
-          <Cards
-            text="Average Student Progress"
-            value="68%"
-            icon={<TrendingDown size={isMobile ? 16 : 18} />}
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 text-textc">
+          <Cards 
+            text="Average Student Progress" 
+            value="68%" 
+            icon={<TrendingDown size={isMobile ? 16 : 18}/>} 
             bg="bg-grad-2"
             isMobile={isMobile}
           />
-          <Cards
-            text="Success Rate"
-            value="68%"
-            icon={<CircleCheckBig size={isMobile ? 16 : 18} />}
-            bg="bg-grad-3"
+          <Cards 
+            text="Success Rate" 
+            value="68%" 
+            icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
+            bg="bg-grad-3" 
             isMobile={isMobile}
           />
-          <Cards
-            text="Average time spent"
-            value={avgTime}
-            icon={<Book size={isMobile ? 16 : 18} />}
-            bg="bg-grad-4"
+          <Cards 
+            text="Average time spent" 
+            value={avgTime} 
+            icon={<Book size={isMobile ? 16 : 18} />} 
+            bg="bg-grad-4" 
             isMobile={isMobile}
           />
-          <Cards
-            text="Active Courses"
-            value={activeCourses}
-            icon={<Clock3 size={isMobile ? 16 : 18} />}
-            bg="bg-grad-2"
+          <Cards 
+            text="Active Courses" 
+            value={activeCourses} 
+            icon={<Clock3 size={isMobile ? 16 : 18} />} 
+            bg="bg-grad-2" 
             isMobile={isMobile}
           />
         </div>
 
-
-
         {/* Learning curve */}
-        <div className="p-3 w-full" style={{ height: "360px" }}>
+        <div className="p-3 w-full" style={{ height: isMobile ? "280px" : "330px" }}>
           <LearningCurve />
         </div>
 
         {/* Quick actions + Pie chart */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
+          
           {/* Quick actions */}
           <div>
             <h2 className="text-lg sm:text-xl text-muted font-bold mb-4 sm:mb-6">Quick Actions</h2>
@@ -274,7 +268,6 @@ export default function Dashboardens() {
                 <Cell fill="rgb(var(--color-blue))" />
                 <Cell fill="rgb(var(--color-pink))" />
               </Pie>
-              <Tooltip />
             </PieChart>
 
             <div className="flex flex-wrap gap-3 sm:gap-4 text-xs mt-2 justify-center">
@@ -294,18 +287,20 @@ export default function Dashboardens() {
         {/* Activity feed */}
         <div className="bg-card p-4 rounded-2xl mb-4">
           <h2 className="text-lg font-bold mb-1">{t("Dashboard.ActivityF")}</h2>
-          <p className="text-grayc text-xs mb-2">1st Feb Monday - 7th Feb Sunday</p>
+          <p className="text-gray-500 text-xs mb-4">1st Feb Monday - 7th Feb Sunday</p>
 
-          {dat.map((item, index) => (
-            <NotificationItem
-              key={index}
-              title={item.title}
-              date={item.date}
-              day={item.day}
-              time={item.time}
-              isMobile={isMobile}
-            />
-          ))}
+          <div className="space-y-3">
+            {dat.map((item, index) => (
+              <NotificationItem
+                key={index}
+                title={item.title}
+                date={item.date}
+                day={item.day}
+                time={item.time}
+                isMobile={isMobile}
+              />
+            ))}
+          </div>
         </div>
       </main>
     </div>

@@ -20,7 +20,7 @@ const handleChange = (field, value) => {
   const myCourses = courses.filter((c) => c.isMine);
 
   return (
-    <div className="rounded-3xl shadow-xl p-6 max-w-[20rem] border border-white/10 backdrop-blur bg-grad-3">
+    <div className="rounded-3xl shadow-xl p-6 max-w-[20rem] border border-white/10 backdrop-blur bg-grad-3 text-black">
       <h2 className="text-lg font-semibold mb-4">
         {t("quizSettings")}
       </h2>
@@ -118,6 +118,20 @@ const handleChange = (field, value) => {
             }
           />
         </div>
+
+         {/* duree  entre deux tentative */}
+        <div className="flex flex-col gap-2">
+          <label>{t("delais_entre_tentative")}</label>
+          <input
+            type="number"
+            min={0}
+            value={quizData.delais_entre_tentative || 0}
+            onChange={(e) =>
+              handleChange("delais_entre_tentative", parseInt(e.target.value) || 0)
+            }
+          />
+        </div>
+
 
         {/* DURÉE */}
         <div className="flex items-center gap-2">

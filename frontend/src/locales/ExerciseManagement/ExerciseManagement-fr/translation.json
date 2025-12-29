@@ -1,6 +1,6 @@
 {
   "title": "Gestion des exercices",
-  "description": "Gérez les exercices et problèmes de codage",
+  "description": "Gérez les exercices et problèmes de codage.",
   "searchPlaceholder": "Rechercher des exercices...",
   "difficulty": {
     "easy": "Facile",
@@ -11,13 +11,13 @@
   "modal": {
     "create": {
       "title": "Ajouter un nouvel exercice",
-      "subtitle": "Remplissez le formulaire pour ajouter un nouvel exercice",
+      "subtitle": "Remplissez le formulaire pour ajouter un nouvel exercice.",
       "submit": "Ajouter l'exercice",
       "cancel": "Annuler"
     },
     "edit": {
       "title": "Modifier l'exercice",
-      "subtitle": "Modifiez les informations de l'exercice",
+      "subtitle": "Modifiez les informations de l'exercice.",
       "submit": "Mettre à jour",
       "cancel": "Annuler"
     }
@@ -27,7 +27,14 @@
     "title": "Titre",
     "category": "Catégorie",
     "titlePlaceholder": "Titre de l'exercice",
-    "categoryPlaceholder": "Catégorie",
-    "difficulty":"Difficulté"
+    "categoryPlaceholder": "Sélectionner une catégorie",
+    "difficulty": "Difficulté"
+  },
+  "errors": {
+    "fetchExercises": "Erreur lors du chargement des exercices.",
+    "createExercise": "Erreur lors de la création de l'exercice.",
+    "editExercise": "Erreur lors de la modification de l'exercice.",
+    "deleteExercise": "Erreur lors de la suppression de l'exercice.",
+    "invalidData": "Les exercices ne sont pas un tableau :"
   }
 }

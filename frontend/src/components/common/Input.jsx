@@ -1,7 +1,6 @@
-import React,{useContext} from "react";
-import ThemeContext from "../../context/ThemeContext";
+import React from "react";
+
 export default function Input({ 
-  
   label, 
   icon, 
   rightIcon, 
@@ -10,7 +9,6 @@ export default function Input({
   
   ...props 
 }) {
-   const { toggleDarkMode } = useContext(ThemeContext);
 
   return (
     <div className="flex flex-col mb-4 appearance-none text-secondary">
@@ -21,8 +19,8 @@ export default function Input({
 
       {/* On applique les styles par défaut + les overrides */}
       <div
-        className={`flex items-center  rounded-full px-4 py-2 
-          bg-card text-black
+        className={`flex items-center border rounded-full px-4 py-2 
+          bg-white text-black
           ${error ? "border-red-500" : "border-gray-300"}
           focus-within:ring-2 focus-within:ring-sky-300
           ${className}   // <-- Permet l’override

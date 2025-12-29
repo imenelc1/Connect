@@ -2,6 +2,7 @@
 import React from "react";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const levelStyles = {
   Débutant: "bg-blue text-white",
@@ -20,6 +21,7 @@ export default function ExerciseCard({ exercise }) {
 
   if (!exercise) return null;
 
+  const { t } = useTranslation("allExercises");
   return (
     <div className={`shadow-md p-6 rounded-3xl flex flex-col justify-between h-full transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1 ${levelcard[exercise.level]}`}>
       <div className={`flex flex-col flex-1`}>

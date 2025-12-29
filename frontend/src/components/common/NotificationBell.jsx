@@ -94,7 +94,6 @@ const handleNotificationNavigation = (notif) => {
     }
   }
 };
- const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   return (
     <div className="relative">
@@ -108,9 +107,7 @@ const handleNotificationNavigation = (notif) => {
         className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
         aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} non lues)` : ''}`}
       >
-       <div className="bg-bg w-7 h-7 rounded-full flex items-center justify-center cursor-pointer hover:bg-bg/80 transition">
-             <Bell size={isMobile ? 14 : 16} />
-           </div>
+        <Bell size={22} className="text-gray-700 dark:text-gray-300" />
         
         {unreadCount > 0 && (
          <span

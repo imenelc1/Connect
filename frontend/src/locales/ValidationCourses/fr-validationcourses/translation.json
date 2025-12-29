@@ -19,5 +19,10 @@
     "inspect": "Examiner",
     "approve": "Approuver",
     "reject": "Rejeter"
+  },
+  "errors": {
+    "fetchCourses": "Erreur lors du chargement des cours.",
+    "updateStatus": "Erreur lors de la mise à jour du statut du cours.",
+    "unauthorized": "Vous n’êtes pas autorisé à effectuer cette action."
   }
 }

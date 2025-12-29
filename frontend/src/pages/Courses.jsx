@@ -11,7 +11,6 @@ import IaAssistant from "../components/ui/IaAssistant.jsx";
 import api from "../services/courseService";
 import progressionService from "../services/progressionService";
 
-
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
   const { toggleDarkMode } = useContext(ThemeContext);

@@ -1,201 +1,270 @@
-import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/NavBar";
-import { Plus, Bell } from "lucide-react";
-import ContentCard from "../components/common/ContentCard";
-import Button from "../components/common/Button";
-import ContentFilters from "../components/common/ContentFilters";
-import ContentSearchBar from "../components/common/ContentSearchBar";
-import ThemeContext from "../context/ThemeContext";
-import UserCircle from "../components/common/UserCircle";
-import { useTranslation } from "react-i18next";
-import ThemeButton from "../components/common/ThemeButton";
-import { getCurrentUserId } from "../hooks/useAuth";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
-import { useNavigate } from "react-router-dom";
+  import React, { useEffect, useState, useContext, useMemo } from "react";
+  import Navbar from "../components/common/NavBar";
+  import { Plus, Bell } from "lucide-react";
+  import ContentCard from "../components/common/ContentCard";
+  import Button from "../components/common/Button";
+  import ContentFilters from "../components/common/ContentFilters";
+  import ContentSearchBar from "../components/common/ContentSearchBar";
+  import ThemeContext from "../context/ThemeContext";
+  import UserCircle from "../components/common/UserCircle";
+  import { useTranslation } from "react-i18next";
+  import NotificationBell from "../components/common/NotificationBell";
+  import { getCurrentUserId } from "../hooks/useAuth";
+  import { useNavigate } from "react-router-dom";
 
+  const gradientMap = {
+    Débutant: "bg-grad-2",
+    Intermédiaire: "bg-grad-3",
+    Avancé: "bg-grad-4",
+  };
 
-const gradientMap = {
-  Débutant: "bg-grad-2",
-  Intermédiaire: "bg-grad-3",
-  Avancé: "bg-grad-4",
-};
+  export default function AllQuizzesPage() {
+    const token = localStorage.getItem("token");
+    const currentUserId = getCurrentUserId();
+    const navigate = useNavigate();
+    const { t } = useTranslation("allQuizzes");
+    const { toggleDarkMode } = useContext(ThemeContext);
 
+    const userData = JSON.parse(localStorage.getItem("user"));
+    const userRole = userData?.user?.role ?? userData?.role;
+    const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
-export default function AllQuizzesPage() {
-  const token = localStorage.getItem("access_token");
-  const currentUserId = getCurrentUserId();
-  const [quizzes, setQuizzez] = useState([]);
+    const [quizzes, setQuizzes] = useState([]);
+    const [tentativesByQuiz, setTentativesByQuiz] = useState({});
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterLevel, setFilterLevel] = useState("ALL");
+    const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
+      const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  useEffect(() => {
-    fetch("http://localhost:8000/api/quiz/api/quiz/")
-      .then(res => res.json())
-      .then(data => {
-        const formatted = data.map(c => ({
-          id: c.exercice?.id_exercice,
-          title: c.exercice?.titre_exo,
-          description: c.exercice?.enonce,
-          level: c.exercice?.niveau_exercice_label, // ATTENTION : django = 'beginner' ? 'intermediate' ?
-          author: c.exercice?.utilisateur_name,
-          activer:c.activerDuration,
-          duration: c.duration_minutes,
-          initials: c.exercice?.utilisateur_name
-            .split(" ")
-            .map(n => n[0])
-            .join("")
-            .toUpperCase(),
-          isMine: c.exercice?.utilisateur === currentUserId //NEWDED GHR ISMINE //
-        }));
-        setQuizzez(formatted);
-      })
-      .catch(err => console.error("Erreur chargement quiz :", err));
-  }, []);
+    const sidebarWidth = sidebarCollapsed ? 60 : 240;
+    const getGridCols = () => {
+      if (windowWidth < 640) return 1;
+      if (windowWidth < 1024) return 2;
+      return 3;
+    };
 
+    // 🔹 Fetch quiz depuis le backend (initial + recherche)
+    useEffect(() => {
+      const controller = new AbortController();
 
+      const fetchQuizzes = async () => {
+        try {
+          const url = `http://localhost:8000/api/quiz/api/quiz?search=${searchTerm}`;
+          const res = await fetch(url, { signal: controller.signal });
+          const data = await res.json();
 
+          const formatted = data.map(c => ({
+            id: c.exercice?.id_exercice,
+            quizId: c.id,
+            title: c.exercice?.titre_exo,
+            description: c.exercice?.enonce,
+            level: c.exercice?.niveau_exercice_label,
+            categorie: c.exercice?.categorie,
+            author: c.exercice?.utilisateur_name,
+            author_id: c.exercice?.utilisateur,
+            visibilite_exo:c.exercice?.visibilite_exo,
+            initials: c.exercice?.utilisateur_name
+              .split(" ")
+              .map(n => n[0])
+              .join("")
+              .toUpperCase(),
+            isMine: c.exercice?.utilisateur === currentUserId,
+            nbMax_tentative: c.nbMax_tentative,
+            delai_entre_tentatives: c.delai_entre_tentatives,
+            activer: c.activerDuration,
+            duration: c.duration_minutes,
+            visible: c.exercice?.visibilite_exo === true || c.exercice?.utilisateur === currentUserId, // <-- Nouveau champ
 
+          }))
 
+          setQuizzes(formatted);
+        } catch (err) {
+          if (err.name !== "AbortError") console.error(err);
+        }
+      };
 
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const userRole = userData?.user?.role ?? userData?.role;
-  const { t } = useTranslation("allQuizzes");
-const navigate = useNavigate();
+      fetchQuizzes();
+      return () => controller.abort();
+    }, [searchTerm, currentUserId]);
 
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+    // 🔹 Fetch tentatives pour chaque quiz affiché
+    useEffect(() => {
+      if (!currentUserId || quizzes.length === 0) return;
 
-  const [filterLevel, setFilterLevel] = useState("ALL");
-  /*const filteredList =
-    filterLevel === "ALL"
-      ? quizzes
-      : quizzes.filter((q) => q.level === filterLevel);*/
+      const fetchTentatives = async () => {
+        try {
+          const results = {};
+          await Promise.all(
+            quizzes.map(async quiz => {
+              const res = await fetch(
+                `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${currentUserId}/`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              const data = await res.json();
+              results[quiz.quizId] = data;
+            })
+          );
+          setTentativesByQuiz(results);
+        } catch (err) {
+          console.error("Erreur chargement tentatives :", err);
+        }
+      };
 
-  const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
+      fetchTentatives();
+    }, [quizzes, currentUserId, token]);
 
- let filteredList =
+    // 🔹 Calcul quizzesWithAttempts
+    const quizzesWithAttempts = useMemo(() => {
+      return quizzes.map(quiz => {
+        const tentatives = tentativesByQuiz[quiz.quizId] || [];
 
-    // 1️⃣ Filtrer par niveau
-    filterLevel === "ALL"
-      ? quizzes
-      : quizzes.filter((q) => q.level === filterLevel);
+        let isBlocked = false;
+        let minutesRestantes = 0;
+        let tentativesRestantes = null;
 
-  // 2️⃣ Filtrer par catégorie ("mine" ou "all") pour enseignants
-  if (userRole === "enseignant" && categoryFilter === "mine") {
-    filteredList = filteredList.filter((q) => q.isMine);
-  }
+        if (quiz.nbMax_tentative > 0) {
+          tentativesRestantes = quiz.nbMax_tentative - tentatives.length;
+          if (tentativesRestantes <= 0) isBlocked = true;
+        }
 
+        if (!isBlocked && tentatives.length > 0 && quiz.delai_entre_tentatives) {
+          const last = tentatives[0];
+          if (last.date_fin) {
+            const lastEnd = new Date(last.date_fin);
+            const now = new Date();
+            const diffMs =
+              lastEnd.getTime() + quiz.delai_entre_tentatives * 60 * 1000 - now.getTime();
+            if (diffMs > 0) {
+              isBlocked = true;
+              minutesRestantes = Math.ceil(diffMs / 60000);
+            }
+          }
+        }
 
-
-
-
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const handleDeleteQuiz = async (exoId) => {
-    const confirmDelete = window.confirm("Tu es sûr de supprimer cet exercice?");
-    if (!confirmDelete) return;
-
-    // Appel API
-    try {
-      await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        return { ...quiz, tentatives, isBlocked, minutesRestantes, tentativesRestantes };
       });
+    }, [quizzes, tentativesByQuiz]);
 
-      // Mise à jour du state
-      setQuizzez(prev => prev.filter(c => c.id !== exoId));
-    } catch (err) {
-      console.error("Erreur suppression :", err);
-      alert("Erreur lors de la suppression");
-    }
-  };
+    // 🔹 Filtres et recherche finale (niveau + catégorie)
+    const filteredList = useMemo(() => {
+      let list =
+        filterLevel === "ALL"
+          ? quizzesWithAttempts
+          : quizzesWithAttempts.filter(q => q.level === filterLevel);
+
+      if (userRole === "enseignant" && categoryFilter === "mine") {
+        list = list.filter(q => q.isMine);
+      }
+      list = list.filter((q) => q.visible);
+      console.log({list});
+      return list;
+    }, [quizzesWithAttempts, filterLevel, categoryFilter, userRole]);
+
+    // 🔹 Delete quiz
+    const handleDeleteQuiz = async (exoId) => {
+      if (!window.confirm("Tu es sûr de supprimer cet exercice?")) return;
+      try {
+        await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setQuizzes(prev => prev.filter(c => c.id !== exoId));
+      } catch (err) {
+        console.error("Erreur suppression :", err);
+        alert("Erreur lors de la suppression");
+      }
+    };
+
+    // 🔹 Sidebar & resize
+    useEffect(() => {
+      const handler = (e) => setSidebarCollapsed(e.detail);
+      window.addEventListener("sidebarChanged", handler);
+      return () => window.removeEventListener("sidebarChanged", handler);
+    }, []);
+
+    useEffect(() => {
+      const resizeHandler = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", resizeHandler);
+      return () => window.removeEventListener("resize", resizeHandler);
+    }, []);
+
+    return (
+      <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+            {/* Sidebar */}
+            <div>
+              <Navbar />
+            </div>
+       
+
+         {/* Main content */}
+      <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+     <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+  {/* Titre */}
+  <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
+    {t("quizzesTitle")}
+  </h1>
+
+  {/* Notifications + User */}
+  <div className="flex items-center gap-3">
+    <NotificationBell />
+    <UserCircle
+      initials={initials}
+      onToggleTheme={toggleDarkMode}
+      onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
+    />
+  </div>
+</header>
 
 
-
-  useEffect(() => {
-    const handler = (e) => setSidebarCollapsed(e.detail);
-    window.addEventListener("sidebarChanged", handler);
-    return () => window.removeEventListener("sidebarChanged", handler);
-  }, []);
-
-  useEffect(() => {
-    const resizeHandler = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", resizeHandler);
-    return () => window.removeEventListener("resize", resizeHandler);
-  }, []);
-
-  const sidebarWidth = sidebarCollapsed ? 60 : 240;
-
-  const getGridCols = () => {
-    if (windowWidth < 640) return 1;
-    if (windowWidth < 1024) return 2;
-    return 3;
-  };
-
-  const { toggleDarkMode } = useContext(ThemeContext);
-
-   return (
-    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
-      <Navbar />
-      
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
-
-      <main
-        className="flex-1 p-4 md:p-8 transition-all duration-300"
-        style={{ marginLeft: sidebarWidth }}
-      >
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-muted">{t("quizzesTitle")}</h1>
-        </div>
-
-        <ContentSearchBar />
-
-        <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
-          <ContentFilters
-            type="quizzes"
-            userRole={userRole}
-            onFilterChange={setFilterLevel}   // ✔️ correction
-            activeFilter={filterLevel}  
-            categoryFilter={categoryFilter}        // ← bien passer le state
-            setCategoryFilter={setCategoryFilter}      // ✔️ correction
-            showCompletedFilter={userRole === "etudiant"}
+          <ContentSearchBar
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
           />
 
-          {userRole === "enseignant" && (
-            <Button variant="courseStart"
-              onClick={() => navigate("/create-quiz")}
-
-              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all">
-              <Plus size={18} />
-              {t("createQuizBtn")}
-            </Button>
-          )}
-        </div>
-
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
-          {filteredList.map((quiz, idx) => (
-            <ContentCard
-              key={idx}
-              className={gradientMap[quiz.level]}
-              course={quiz}
-              role={userRole}
-              showProgress={userRole === "etudiant"}
-              onDelete={handleDeleteQuiz}
+          <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
+            <ContentFilters
+              type="quizzes"
+              userRole={userRole}
+              onFilterChange={setFilterLevel}
+              activeFilter={filterLevel}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              showCompletedFilter={userRole === "etudiant"}
             />
-          ))}
-        </div>
-      </main>
-    </div>
-  );
-}
+
+            {userRole === "enseignant" && (
+              <Button
+                variant="courseStart"
+                onClick={() => navigate("/create-quiz")}
+                className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
+              >
+                <Plus size={18} /> {t("createQuizBtn")}
+              </Button>
+            )}
+          </div>
+
+          <div
+            className="grid gap-6"
+            style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}
+          >
+            {filteredList.map((quiz, idx) => (
+              <ContentCard
+                key={idx}
+                className={gradientMap[quiz.level]}
+                course={quiz}
+                role={userRole}
+                showProgress={userRole === "etudiant"}
+                onDelete={handleDeleteQuiz}
+              />
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }

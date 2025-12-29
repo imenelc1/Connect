@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Pencil, Trash2, BookOpen } from "lucide-react";
+import { SquarePen, Trash2, BookOpen } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -15,11 +15,11 @@ export default function CoursesManagement() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("CoursesManagement");
   const { toggleDarkMode } = useContext(ThemeContext);
-  
+
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
+
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
   const [createModal, setCreateModal] = useState(false);
@@ -60,20 +60,20 @@ export default function CoursesManagement() {
     Intermédiaire: "bg-grad-3",
     Avancé: "bg-grad-4",
   };
- 
+
 
   // Effet pour la responsivité
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     // Gestion de la sidebar
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -87,7 +87,7 @@ export default function CoursesManagement() {
         const res = await fetch("http://localhost:8000/api/courses/admin/courses/", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) throw new Error("Erreur récupération cours");
+        if (!res.ok) throw new Error(t("errors.fetchCourses"));
         const data = await res.json();
         setCourses(data);
       } catch (err) {
@@ -104,7 +104,7 @@ export default function CoursesManagement() {
         const res = await fetch("http://localhost:8000/api/users/enseignants/", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) throw new Error("Erreur récupération enseignants");
+        if (!res.ok) throw new Error(t("errors.fetchTeachers"));
         const data = await res.json();
         setTeachers(data);
       } catch (err) {
@@ -131,7 +131,7 @@ export default function CoursesManagement() {
         },
         body: JSON.stringify(newCourse),
       });
-      if (!res.ok) throw new Error("Erreur création cours");
+      if (!res.ok) throw new Error(t("errors.createCourse"));
       const data = await res.json();
       setCourses([...courses, data]);
       setNewCourse({ titre_cour: "", niveau_cour: "debutant", description: "", duration: "00:30:00", utilisateur: "" });
@@ -165,7 +165,7 @@ export default function CoursesManagement() {
         },
         body: JSON.stringify(editValues),
       });
-      if (!res.ok) throw new Error("Erreur modification cours");
+      if (!res.ok) throw new Error(t("errors.editCourse"));
       const data = await res.json();
       setCourses(courses.map(c => (c.id_cours === data.id_cours ? data : c)));
       setEditModal(false);
@@ -182,7 +182,7 @@ export default function CoursesManagement() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) setCourses(courses.filter(c => c.id_cours !== id_cours));
-      else console.error("Erreur suppression cours");
+      else console.error(t("errors.deleteCourse"));
     } catch (err) {
       console.error(err);
     }
@@ -206,24 +206,8 @@ export default function CoursesManagement() {
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
             <p className="text-gray">{t("description")}</p>
           </div>
-          
-          <div className="flex gap-4 items-center">
-            <div className="flex gap-4">
-              <Button
-                text={t("addCourseButton")}
-                variant="primary"
-                className="px-4 py-2 sm:px-6 sm:py-3 sm:px-6 sm:py-3 whitespace-nowrap text-sm sm:text-base"
-                onClick={() => setCreateModal(true)}
-              />
-              <Button
-                text={t("validationButton")}
-                variant="primary"
-                className="px-4 py-2 sm:px-6 sm:py-3 whitespace-nowrap text-sm sm:text-base"
-                onClick={() => navigate("/ValidationCourses")}
-              />
-            </div>
-           
-          </div>
+
+
         </div>
 
         {/* Search */}
@@ -237,36 +221,40 @@ export default function CoursesManagement() {
         </div>
 
         {/* Grid */}
-       
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 box-border">
 
           {filtered.map((item) => (
-           <div
-           key={item.id_cours}
-           className={`
+            <div
+              key={item.id_cours}
+              className={`
              w-full sm:w-auto  // prend toute la largeur sur mobile, auto sur sm+
              max-w-[85%] sm:max-w-none  // limite la largeur à 90% sur mobile
              rounded-2xl  p-4 sm:p-6
              shadow-sm hover:shadow-md flex flex-col
              ${gradientMap[item.niveau_cour_label] || "bg-white"}
            `}
-         >
-         
+            >
+
               <div className="flex justify-between items-center mb-4">
                 <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
                   <BookOpen size={24} className="text-muted" />
                 </div>
                 <span
-                  className={`px-3 py-1 text-xs font-medium rounded-full ${
-                    item.niveau_cour === "debutant"
-                      ? "bg-muted/20 text-muted"
-                      : item.niveau_cour === "intermediaire"
+                  className={`px-3 py-1 text-xs font-medium rounded-full ${item.niveau_cour === "debutant"
+                    ? "bg-muted/20 text-muted"
+                    : item.niveau_cour === "intermediaire"
                       ? "bg-secondary/20 text-secondary"
                       : "bg-pink/20 text-pink"
-                  }`}
+                    }`}
                 >
-                  {item.niveau_cour_label}
+                  {item.niveau_cour === "debutant"
+                    ? t("difficulty.Beginner")
+                    : item.niveau_cour === "intermediaire"
+                      ? t("difficulty.Intermediate")
+                      : t("difficulty.Advanced")}
                 </span>
+
               </div>
 
               <h3 className="font-semibold text-lg mb-2 truncate">{item.titre_cour}</h3>
@@ -276,19 +264,11 @@ export default function CoursesManagement() {
 
               <div className="flex justify-end mt-auto pt-4">
                 <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => openEdit(item)}
-                    className="p-2 text-muted hover:bg-gray-100 rounded-lg hover:opacity-80 transition"
-                  >
-                    <Pencil size={18} />
+                  <button className="text-muted hover:opacity-80">
+                    <SquarePen size={20} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(item.id_cours)}
-                    className="p-2 text-red hover:bg-red-50 rounded-lg hover:opacity-80 transition"
-                  >
-                    <Trash2 size={18} />
+                  <button className="text-red hover:opacity-80">
+                    <Trash2 size={20} />
                   </button>
                 </div>
               </div>
@@ -332,7 +312,7 @@ export default function CoursesManagement() {
                 value={newCourse.utilisateur}
                 onChange={(value) => setNewCourse({ ...newCourse, utilisateur: value })}
                 options={teacherOptions}
-                placeholder="Sélectionner un enseignant"
+                placeholder={t("field.teacherPlaceholder")}
               />
             ),
           },
@@ -385,7 +365,7 @@ export default function CoursesManagement() {
                 value={editValues.utilisateur}
                 onChange={(value) => setEditValues({ ...editValues, utilisateur: value })}
                 options={teacherOptions}
-                placeholder="Sélectionner un enseignant"
+                placeholder={t("field.teacherPlaceholder")}
               />
             ),
           },

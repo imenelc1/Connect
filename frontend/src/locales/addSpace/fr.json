@@ -1,22 +1,18 @@
 {
-  "title": "Gestion des enseignants",
-  "subtitle": "Gérer les enseignants et le personnel académique",
+  "title": "Gestion des Espaces",
+  "subtitle": "Gérer les espaces",
   "toggleLang": "Changer de langue",
-  "addInstructor": "Ajouter un enseignant",
-  "search": "Rechercher un enseignant...",
-  "instructor": "Enseignant",
-  "firstName": "Prénom",
-  "lastName": "Nom",
-  "email": "Email",
-  "birthdate": "Date de naissance",
-  "rank": "Rang",
-  "matricule": "Matricule",
-  "actions": "Actions",
-  "modalAddTitle": "Ajouter un nouvel enseignant",
-  "modalAddSubtitle": "Remplissez les détails pour créer le profil de l’enseignant",
-  "modalEditTitle": "Modifier un enseignant",
-  "modalEditSubtitle": "Modifiez les informations de l’enseignant",
+  "addSpace": "Ajouter un Espace",
+  "editSpace": "Modifier vos espaces",
+  "editSubtitle": "Modifiez les informations de l’espace",
   "create": "Créer",
   "update": "Mettre à jour",
-  "cancel": "Annuler"
+  "cancel": "Annuler",
+  "editModalTitle":"Titre de l'espace",
+  "editModalSubtitle":"Description de l'espace",
+  "subtitlePlaceholder":"Décrivez votre espace",
+  "modalTitle": "Créer un nouvel espace",
+  "modalSubtitle": "Remplissez les informations pour créer un espace"
+
+  
 }

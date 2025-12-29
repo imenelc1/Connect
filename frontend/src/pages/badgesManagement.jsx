@@ -198,13 +198,10 @@ export default function BadgesManagement() {
                   <Award className="w-7 h-7 text-white" />
                 </div>
 
-                <span
-                  className={`h-6 px-3 py-1 text-xs font-medium rounded-full ${getTypeColor(
-                    b.type
-                  )}`}
-                >
-                  {t(b.type)}
+                <span className={`h-6 px-3 py-1 text-xs font-medium rounded-full ${getTypeColor(b.type)}`}>
+                  {t(`BadgesManagement.rarities.${b.type}`)}
                 </span>
+
 
               </div>
 
