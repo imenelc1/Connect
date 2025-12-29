@@ -194,20 +194,28 @@ class IsAdminJWT(BasePermission):
 # User Profile
 # -----------------------------
 
+from .serializers import ProfileSerializer, AdminProfileSerializer
+from .models import Administrateur, Utilisateur
+
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
-    serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticatedJWT]
 
     def get_object(self):
-        # Garantit que request.user est bien un objet Utilisateur ou None
-        if not hasattr(self.request, 'user') or self.request.user is None:
-            return None
         return self.request.user
+
+    def get_serializer_class(self):
+        user = self.get_object()
+
+        # 👇 Si c'est un administrateur → serializer admin
+        if isinstance(user, Administrateur):
+            return AdminProfileSerializer
+        
+        # 👇 Sinon → serializer utilisateur normal
+        return ProfileSerializer
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()
-        if not user:
-            return Response({"error": "Utilisateur introuvable"}, status=404)
         serializer = self.get_serializer(user)
         return Response(serializer.data)
 
