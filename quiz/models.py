@@ -3,6 +3,7 @@ from exercices.models import Exercice
 from users.models import Utilisateur
 
 
+
 class Quiz(models.Model):
     scoreMinimum=models.IntegerField()
     exercice = models.OneToOneField(Exercice, on_delete=models.CASCADE)

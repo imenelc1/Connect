@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
+from badges.views import check_course_badges
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
@@ -60,7 +61,7 @@ def complete_lesson(request, lecon_id):
     ).count()
     cours_progress = round((completed_cours / total_cours) * 100) if total_cours > 0 else 0
 
-    # Récupérer ou créer la progression du cours (⚠️ defaults obligatoires)
+    # Récupérer ou créer la progression du cours
     pc, _ = ProgressionCours.objects.get_or_create(
         utilisateur=user,
         cours=cours,
@@ -79,7 +80,8 @@ def complete_lesson(request, lecon_id):
     duration = request.data.get("duration", 0)
     if duration and duration > 0:
         pc.temps_passe = (pc.temps_passe or timedelta(seconds=0)) + timedelta(seconds=duration)
-
+    
+    check_course_badges(user, pc)
     pc.save()
 
     # Historique
@@ -139,6 +141,8 @@ def complete_lessons_bulk(request):
     else:
         cours_progress = 0
 
+
+    check_course_badges(user, pc)
     return Response({
         "course_progress": cours_progress,
         "temps_passe": pc.temps_passe.total_seconds() if cours else 0
@@ -187,6 +191,8 @@ def reset_progress(request, cours_id):
         pc.derniere_lecon = None
         pc.save()
 
+
+        check_course_badges(student, pc)
         return Response({"status": "success", "progress": 0})
     except ProgressionCours.DoesNotExist:
         return Response({"status": "error", "message": "Progression not found"}, status=404)
@@ -892,57 +898,53 @@ def student_active_courses(request, student_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def weekly_submission_chart(request, student_id):
-    prof = request.user
+    today = localtime(now())  # datetime complet et timezone-safe
 
-    today = now().date()
-    start_of_this_week = today - timedelta(days=today.weekday())
-    start_date = start_of_this_week - timedelta(weeks=5)
+    # Espaces et exercices accessibles à l'étudiant
+    spaces = Space.objects.filter(spaceetudiant__etudiant_id=student_id).distinct()
+    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
+    total_exercises = exercises.count() or 1  # éviter division par zéro
 
-    spaces = Space.objects.filter(
-        utilisateur=prof,
-        spaceetudiant__etudiant_id=student_id
-    ).distinct()
-
-    exercises = Exercice.objects.filter(
-        utilisateur=prof,
-        spaceexo__space__in=spaces
-    ).distinct()
-
-    total_exercises = exercises.count() or 1  # éviter division par 0
-
-    data = []
+    # 6 périodes glissantes de 7 jours
+    periods = []
     for i in range(6):
-        week_start = start_date + timedelta(weeks=i)
-        week_end = week_start + timedelta(days=6)
-        data.append({
-            "week": f"Week {i+1}",
-            "start_date": week_start.isoformat(),
-            "end_date": week_end.isoformat(),
+        period_end = today - timedelta(days=i*7)
+        period_start = period_end - timedelta(days=6)
+        periods.append({
+            "label": f"Week {6-i}",
+            "start_datetime": period_start,
+            "end_datetime": period_end,
             "submissions": 0
         })
+    periods = list(reversed(periods))  # du plus ancien au plus récent
 
-    submissions = (
-        TentativeExercice.objects.filter(
-            exercice__in=exercises,
-            utilisateur_id=student_id,
-            etat="soumis",
-            submitted_at__date__gte=start_date
-        )
-        .annotate(week_start=TruncWeek("submitted_at"))
-        .values("week_start")
-        .annotate(
-            exercises_count=Count("exercice", distinct=True)
-        )
-    )
+    # Récupération des soumissions depuis le début de la période la plus ancienne
+    start_datetime = periods[0]["start_datetime"]
+    submissions = TentativeExercice.objects.filter(
+        utilisateur_id=student_id,
+        exercice__in=exercises,
+        etat="soumis",
+        submitted_at__gte=start_datetime
+    ).values("submitted_at").annotate(count=Count("exercice", distinct=True))
 
+    # Attribution aux bonnes périodes
     for s in submissions:
-        week_index = (s["week_start"].date() - start_date).days // 7
-        if 0 <= week_index < 6:
-            data[week_index]["submissions"] = round(
-                (s["exercises_count"] / total_exercises) * 100
-            )
+        sub_dt = localtime(s["submitted_at"])
+        count = s["count"]
+        for p in periods:
+            if p["start_datetime"] <= sub_dt <= p["end_datetime"]:
+                p["submissions"] += count
+                break
 
-    return Response(data)
+    # Calcul en % et conversion en ISO pour JSON
+    for p in periods:
+        p["submissions"] = round((p["submissions"] / total_exercises) * 100)
+        p["start_date"] = p["start_datetime"].isoformat()
+        p["end_date"] = p["end_datetime"].isoformat()
+        del p["start_datetime"]
+        del p["end_datetime"]
+
+    return Response(periods, status=200)
 
 
 @api_view(["GET"])
@@ -950,64 +952,57 @@ def weekly_submission_chart(request, student_id):
 def student_weekly_submission_chart(request):
     user = request.user
 
-    # Lundi de la semaine courante (timezone-safe)
-    today = now()
-    start_of_this_week = today - timedelta(days=today.weekday())
-    start_of_this_week = start_of_this_week.replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+    # Date et heure locale actuelles
+    today = localtime(now())
+    end_of_today = today.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # On remonte à 6 semaines (incluant la semaine courante)
-    start_date = start_of_this_week - timedelta(weeks=5)
-
-    # Espaces où l'étudiant est inscrit
-    spaces = Space.objects.filter(spaceetudiant__etudiant=user).distinct()
-
-    # Exercices accessibles à l'étudiant
-    exercises = Exercice.objects.filter(
-        spaceexo__space__in=spaces
-    ).distinct()
-
-    total_exercises = exercises.count()
-
-    if total_exercises == 0:
-        return Response([], status=status.HTTP_200_OK)
-
-    # Initialisation des 6 semaines
-    data = []
+    # Périodes glissantes de 7 jours sur 6 semaines
+    periods = []
     for i in range(6):
-        week_start = start_date + timedelta(weeks=i)
-        week_end = week_start + timedelta(days=6)
-        data.append({
-            "week": f"Week {i + 1}",
-            "start_date": week_start.date().isoformat(),
-            "end_date": week_end.date().isoformat(),
+        period_end = end_of_today - timedelta(days=i*7)
+        period_start = period_end - timedelta(days=6)
+        periods.append({
+           "label": f"Week {6-i}",
+            "start_datetime": period_start,
+            "end_datetime": period_end,
             "submissions": 0
         })
+    periods = list(reversed(periods))  # du plus ancien au plus récent
 
-    # Tentatives soumises par semaine (EXERCICES DISTINCTS)
-    submissions = (
-        TentativeExercice.objects.filter(
-            utilisateur=user,
-            exercice__in=exercises,
-            etat="soumis",
-            submitted_at__gte=start_date
-        )
-        .annotate(week_start=TruncWeek("submitted_at"))
-        .values("week_start")
-        .annotate(exos_soumis=Count("exercice", distinct=True))
-        .order_by("week_start")
-    )
+    # Exercices accessibles à l'étudiant
+    spaces = Space.objects.filter(spaceetudiant__etudiant=user).distinct()
+    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
+    total_exercises = exercises.count() or 1  # éviter division par zéro
 
-    # Remplissage des semaines
+    # Récupération des soumissions depuis le début de la plus ancienne période
+    start_datetime = periods[0]["start_datetime"]
+    submissions = TentativeExercice.objects.filter(
+        utilisateur=user,
+        exercice__in=exercises,
+        etat="soumis",
+        submitted_at__gte=start_datetime
+    ).values("submitted_at").annotate(count=Count("exercice", distinct=True))
+
+    # Attribution des soumissions aux bonnes périodes
     for s in submissions:
-        week_index = int((s["week_start"] - start_date).days / 7)
-        if 0 <= week_index < 6:
-            data[week_index]["submissions"] = round(
-                (s["exos_soumis"] / total_exercises) * 100
-            )
+        sub_dt = localtime(s["submitted_at"])
+        count = s["count"]
+        for p in periods:
+            if p["start_datetime"] <= sub_dt <= p["end_datetime"]:
+                p["submissions"] += count
+                break
 
-    return Response(data, status=status.HTTP_200_OK)
+    # Calcul en %
+    for p in periods:
+        p["submissions"] = round((p["submissions"] / total_exercises) * 100)
+        # Transformer les datetime en ISO pour JSON
+        p["start_date"] = p["start_datetime"].isoformat()
+        p["end_date"] = p["end_datetime"].isoformat()
+        del p["start_datetime"]
+        del p["end_datetime"]
+
+    return Response(periods)
+
 
 
 @api_view(['GET'])

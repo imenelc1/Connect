@@ -28,6 +28,7 @@ export default function WeeklySubmissionChart({ studentId = null }) {
         });
 
         setWeeklyData(res.data || []);
+        console.log("Weekly data:", res.data); // 🔹 Vérification
       } catch (err) {
         console.error("Erreur fetching weekly submissions:", err);
         setWeeklyData([]);
@@ -46,37 +47,39 @@ export default function WeeklySubmissionChart({ studentId = null }) {
       </h2>
 
       <div className="w-full h-64">
-<ResponsiveContainer width="100%" height={250}>
-  <BarChart data={weeklyData}>
-    <XAxis dataKey="week" />
-    <YAxis />
-    <Tooltip
-      content={({ active, payload, label }) => {
-        if (active && payload && payload.length) {
-          const week = payload[0].payload;
-          const start = new Date(week.start_date);
-          const end = new Date(week.end_date);
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={weeklyData}>
+          
 
-          const range = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+            <YAxis />
+           <XAxis dataKey="label" />  {/* label = "Week 1", "Week 2", ... */}
+<Tooltip
+  content={({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const week = payload[0].payload;
+      // Affichage des dates dans le tooltip seulement
+      const start = new Date(week.start_date);
+      const end = new Date(week.end_date);
+      return (
+        <div className="bg-white p-2 rounded shadow border">
+          <p className="font-semibold">
+            {start.toLocaleDateString()} - {end.toLocaleDateString()}
+          </p>
+          <p>Submissions: {week.submissions}%</p>
+        </div>
+      );
+    }
+    return null;
+  }}
+/>
 
-          return (
-            <div className="bg-white p-2 rounded shadow border">
-              <p className="font-semibold">{range}</p>
-              <p>Submissions: {week.submissions}%</p>
-            </div>
-          );
-        }
-        return null;
-      }}
-    />
-    <Bar
-      dataKey="submissions"
-      fill="rgb(var(--color-purple))"
-      radius={[8, 8, 0, 0]}
-    />
-  </BarChart>
-</ResponsiveContainer>
-
+            <Bar
+              dataKey="submissions"
+              fill="rgb(var(--color-purple))"
+              radius={[8, 8, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

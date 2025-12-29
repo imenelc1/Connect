@@ -25,7 +25,7 @@ urlpatterns = [
     ),
     path("api/quiz", QuizSearchAPIView.as_view(), name="quiz-list"),
 
-   path("student/quizzes-faits/<int:student_id>/", quizzes_faits_par_etudiant, name="quizzes-faits"),
+   path("student/quizzes-faits/", quizzes_faits_par_etudiant, name="quizzes-faits"),
 
 
 
