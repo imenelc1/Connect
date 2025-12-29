@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Pencil, Trash2, BookOpen } from "lucide-react";
+import { SquarePen, Trash2, BookOpen } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -10,16 +10,22 @@ import ContentSearchBar from "../components/common/ContentSearchBar";
 import ModernDropdown from "../components/common/ModernDropdown";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
+import { toast } from 'react-hot-toast';
 
 export default function CoursesManagement() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("CoursesManagement");
   const { toggleDarkMode } = useContext(ThemeContext);
   
+  const adminData = JSON.parse(localStorage.getItem("admin")) || {};
+  const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
+
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
+
   const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
   const [createModal, setCreateModal] = useState(false);
@@ -60,20 +66,20 @@ export default function CoursesManagement() {
     Intermédiaire: "bg-grad-3",
     Avancé: "bg-grad-4",
   };
- 
+
 
   // Effet pour la responsivité
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     // Gestion de la sidebar
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -87,7 +93,7 @@ export default function CoursesManagement() {
         const res = await fetch("http://localhost:8000/api/courses/admin/courses/", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) throw new Error("Erreur récupération cours");
+        if (!res.ok) throw new Error(t("errors.fetchCourses"));
         const data = await res.json();
         setCourses(data);
       } catch (err) {
@@ -104,7 +110,7 @@ export default function CoursesManagement() {
         const res = await fetch("http://localhost:8000/api/users/enseignants/", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) throw new Error("Erreur récupération enseignants");
+        if (!res.ok) throw new Error(t("errors.fetchTeachers"));
         const data = await res.json();
         setTeachers(data);
       } catch (err) {
@@ -131,7 +137,7 @@ export default function CoursesManagement() {
         },
         body: JSON.stringify(newCourse),
       });
-      if (!res.ok) throw new Error("Erreur création cours");
+      if (!res.ok) throw new Error(t("errors.createCourse"));
       const data = await res.json();
       setCourses([...courses, data]);
       setNewCourse({ titre_cour: "", niveau_cour: "debutant", description: "", duration: "00:30:00", utilisateur: "" });
@@ -154,45 +160,73 @@ export default function CoursesManagement() {
     setEditModal(true);
   };
 
-  const submitEdit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`http://localhost:8000/api/cours/${selectedCourse.id_cours}/`, {
+  const submitEdit = async () => {
+  if (!selectedCourse) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:8000/api/courses/${selectedCourse.id_cours}/`,
+      {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editValues),
-      });
-      if (!res.ok) throw new Error("Erreur modification cours");
-      const data = await res.json();
-      setCourses(courses.map(c => (c.id_cours === data.id_cours ? data : c)));
-      setEditModal(false);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+      }
+    );
+
+    if (!res.ok) throw new Error();
+    toast.success("Cours mis à jour avec succès !");
+
+    const data = await res.json();
+
+    setCourses((prev) =>
+      prev.map((c) =>
+        c.id_cours === data.id_cours ? data : c
+      )
+    );
+
+    setEditModal(false);
+    setSelectedCourse(null);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   // DELETE
-  const handleDelete = async (id_cours) => {
+   const handleDeleteCourse = async (courseId) => {
+    if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/delete_cours/${id_cours}/`, {
+      await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) setCourses(courses.filter(c => c.id_cours !== id_cours));
-      else console.error("Erreur suppression cours");
+      setCourses((prev) => prev.filter((c) => c.id !== courseId));
     } catch (err) {
-      console.error(err);
+      console.error("Erreur suppression :", err);
+      alert("Erreur lors de la suppression");
     }
   };
+
 
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* Sidebar */}
       <div>
         <Navbar />
+        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
       </div>
 
       {/* Main Content */}
@@ -206,24 +240,8 @@ export default function CoursesManagement() {
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
             <p className="text-gray">{t("description")}</p>
           </div>
-          
-          <div className="flex gap-4 items-center">
-            <div className="flex gap-4">
-              <Button
-                text={t("addCourseButton")}
-                variant="primary"
-                className="px-4 py-2 sm:px-6 sm:py-3 sm:px-6 sm:py-3 whitespace-nowrap text-sm sm:text-base"
-                onClick={() => setCreateModal(true)}
-              />
-              <Button
-                text={t("validationButton")}
-                variant="primary"
-                className="px-4 py-2 sm:px-6 sm:py-3 whitespace-nowrap text-sm sm:text-base"
-                onClick={() => navigate("/ValidationCourses")}
-              />
-            </div>
-           
-          </div>
+
+
         </div>
 
         {/* Search */}
@@ -237,36 +255,40 @@ export default function CoursesManagement() {
         </div>
 
         {/* Grid */}
-       
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 box-border">
 
           {filtered.map((item) => (
-           <div
-           key={item.id_cours}
-           className={`
+            <div
+              key={item.id_cours}
+              className={`
              w-full sm:w-auto  // prend toute la largeur sur mobile, auto sur sm+
              max-w-[85%] sm:max-w-none  // limite la largeur à 90% sur mobile
              rounded-2xl  p-4 sm:p-6
              shadow-sm hover:shadow-md flex flex-col
              ${gradientMap[item.niveau_cour_label] || "bg-white"}
            `}
-         >
-         
+            >
+
               <div className="flex justify-between items-center mb-4">
                 <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
                   <BookOpen size={24} className="text-muted" />
                 </div>
                 <span
-                  className={`px-3 py-1 text-xs font-medium rounded-full ${
-                    item.niveau_cour === "debutant"
-                      ? "bg-muted/20 text-muted"
-                      : item.niveau_cour === "intermediaire"
+                  className={`px-3 py-1 text-xs font-medium rounded-full ${item.niveau_cour === "debutant"
+                    ? "bg-muted/20 text-muted"
+                    : item.niveau_cour === "intermediaire"
                       ? "bg-secondary/20 text-secondary"
                       : "bg-pink/20 text-pink"
-                  }`}
+                    }`}
                 >
-                  {item.niveau_cour_label}
+                  {item.niveau_cour === "debutant"
+                    ? t("difficulty.Beginner")
+                    : item.niveau_cour === "intermediaire"
+                      ? t("difficulty.Intermediate")
+                      : t("difficulty.Advanced")}
                 </span>
+
               </div>
 
               <h3 className="font-semibold text-lg mb-2 truncate">{item.titre_cour}</h3>
@@ -276,19 +298,11 @@ export default function CoursesManagement() {
 
               <div className="flex justify-end mt-auto pt-4">
                 <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => openEdit(item)}
-                    className="p-2 text-muted hover:bg-gray-100 rounded-lg hover:opacity-80 transition"
-                  >
-                    <Pencil size={18} />
+                  <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
+                    <SquarePen size={20} />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(item.id_cours)}
-                    className="p-2 text-red hover:bg-red-50 rounded-lg hover:opacity-80 transition"
-                  >
-                    <Trash2 size={18} />
+                  <button className="text-red hover:opacity-80" onClick={()=>handleDeleteCourse(item.id_cours)}>
+                    <Trash2 size={20}  />
                   </button>
                 </div>
               </div>
@@ -297,58 +311,7 @@ export default function CoursesManagement() {
         </div>
       </main>
 
-      {/* CREATE MODAL */}
-      <AddModal
-        open={createModal}
-        onClose={() => setCreateModal(false)}
-        title={t("modal.create.title")}
-        subtitle={t("modal.create.subtitle")}
-        submitLabel={t("modal.create.submit")}
-        cancelLabel={t("modal.create.cancel")}
-        onSubmit={submitCreate}
-        fields={[
-          {
-            label: t("field.title"),
-            placeholder: t("field.titlePlaceholder"),
-            value: newCourse.titre_cour,
-            onChange: (e) => setNewCourse({ ...newCourse, titre_cour: e.target.value }),
-          },
-          {
-            label: t("field.description"),
-            placeholder: t("field.descriptionPlaceholder"),
-            value: newCourse.description,
-            onChange: (e) => setNewCourse({ ...newCourse, description: e.target.value }),
-          },
-          {
-            label: t("field.duration"),
-            placeholder: t("field.durationPlaceholder"),
-            value: newCourse.duration,
-            onChange: (e) => setNewCourse({ ...newCourse, duration: e.target.value }),
-          },
-          {
-            label: t("field.teacher"),
-            element: (
-              <ModernDropdown
-                value={newCourse.utilisateur}
-                onChange={(value) => setNewCourse({ ...newCourse, utilisateur: value })}
-                options={teacherOptions}
-                placeholder="Sélectionner un enseignant"
-              />
-            ),
-          },
-          {
-            label: t("field.difficulty"),
-            element: (
-              <ModernDropdown
-                value={newCourse.niveau_cour}
-                onChange={(value) => setNewCourse({ ...newCourse, niveau_cour: value })}
-                options={difficultyOptions}
-                placeholder={t("field.difficulty")}
-              />
-            ),
-          },
-        ]}
-      />
+     
 
       {/* EDIT MODAL */}
       <AddModal
@@ -378,17 +341,7 @@ export default function CoursesManagement() {
             value: editValues.duration,
             onChange: (e) => setEditValues({ ...editValues, duration: e.target.value }),
           },
-          {
-            label: t("field.teacher"),
-            element: (
-              <ModernDropdown
-                value={editValues.utilisateur}
-                onChange={(value) => setEditValues({ ...editValues, utilisateur: value })}
-                options={teacherOptions}
-                placeholder="Sélectionner un enseignant"
-              />
-            ),
-          },
+         
           {
             label: t("field.difficulty"),
             element: (

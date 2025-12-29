@@ -9,6 +9,7 @@ import { getTentatives } from "../services/progressionService";
 import axios from "axios";
 import { CheckCircle } from "lucide-react";
 import { useParams } from "react-router-dom";
+import api from "../services/apiGenerale";
 
 export default function ProgressStudent() {
   const { t } = useTranslation("ProgressStudent");
@@ -147,12 +148,9 @@ useEffect(() => {
 
   const fetchQuizzes = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        `http://127.0.0.1:8000/api/quiz/student/quizzes-faits/`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setQuizzes(res.data || []);
+      api.get("quiz/student/quizzes-faits/") // baseURL déjà /api/
+   .then(res => console.log(res.data))
+   .catch(err => console.error(err.response?.status, err.response?.data));
     } catch (err) {
       console.error(err);
     }

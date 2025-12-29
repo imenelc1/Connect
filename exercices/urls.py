@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateExoView, delete_exercice,  ExerciceListCreateView, ExerciceParCoursView, ExerciceDetailView, Exercice_list_api
+from .views import CreateExoView, delete_exercice, ExerciceSearchAPIView,  ExerciceListCreateView, ExerciceParCoursView, ExerciceDetailView, Exercice_list_api
 
 urlpatterns = [
     
@@ -8,6 +8,7 @@ urlpatterns = [
     path('create/', CreateExoView.as_view(), name='create_exercice'),
     path('<int:pk>/', ExerciceDetailView.as_view(), name='Exercice-detail'),
     path('cours/<int:cours_id>/exercices/', ExerciceParCoursView.as_view(), name='exercices_par_cours'),
-    path("exercice/<int:pk>/delete/", delete_exercice)   
+    path("exercice/<int:pk>/delete/", delete_exercice) ,  
+    path("exo", ExerciceSearchAPIView.as_view(), name="exo-list"),
 
 ]

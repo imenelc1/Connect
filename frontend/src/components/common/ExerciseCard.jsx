@@ -1,6 +1,7 @@
 import React from "react";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { Pencil, Trash2 } from "lucide-react";
 
@@ -22,6 +23,7 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
 
   if (!exercise) return null;
 
+  const { t } = useTranslation("allExercises");
   const handleDelete = async () => {
     if (!window.confirm("Supprimer cet exercice ?")) return;
 

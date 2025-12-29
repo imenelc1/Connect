@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
+from badges.views import check_course_badges
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
@@ -60,7 +61,7 @@ def complete_lesson(request, lecon_id):
     ).count()
     cours_progress = round((completed_cours / total_cours) * 100) if total_cours > 0 else 0
 
-    # Récupérer ou créer la progression du cours (⚠️ defaults obligatoires)
+    # Récupérer ou créer la progression du cours
     pc, _ = ProgressionCours.objects.get_or_create(
         utilisateur=user,
         cours=cours,
@@ -79,7 +80,8 @@ def complete_lesson(request, lecon_id):
     duration = request.data.get("duration", 0)
     if duration and duration > 0:
         pc.temps_passe = (pc.temps_passe or timedelta(seconds=0)) + timedelta(seconds=duration)
-
+    
+    check_course_badges(user, pc)
     pc.save()
 
     # Historique
@@ -139,6 +141,8 @@ def complete_lessons_bulk(request):
     else:
         cours_progress = 0
 
+
+    check_course_badges(user, pc)
     return Response({
         "course_progress": cours_progress,
         "temps_passe": pc.temps_passe.total_seconds() if cours else 0
@@ -187,6 +191,8 @@ def reset_progress(request, cours_id):
         pc.derniere_lecon = None
         pc.save()
 
+
+        check_course_badges(student, pc)
         return Response({"status": "success", "progress": 0})
     except ProgressionCours.DoesNotExist:
         return Response({"status": "error", "message": "Progression not found"}, status=404)

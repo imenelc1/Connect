@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from dashboard.models import ProgressionHistory
-from users.jwt_auth import jwt_required, IsAuthenticatedJWT
+from users.jwt_auth import jwt_required
 from django.utils import timezone
 from django.db.models import Sum
 
@@ -13,8 +14,15 @@ from users.models import Utilisateur
 from datetime import timedelta
 # Create your views here.
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from quiz.models import Quiz, Question, Option, ReponseQuiz, ReponseQuestion
 from .serializers import QuestionSerializer,ReponseQuizSerializer, QuizSerializer, QuizSerializer1,  OptionSerializer, ExerciceSerializer1
+
+
+
+from rest_framework.decorators import api_view, permission_classes
+from users.jwt_auth import IsAuthenticatedJWT  
+from rest_framework.response import Response
 
 class QuizListCreateView(generics.ListCreateAPIView):
     queryset = Quiz.objects.all()
@@ -260,6 +268,34 @@ def toutes_les_tentatives_quiz(request, quiz_id, utilisateur_id):
 
     serializer = ReponseQuizSerializer(reponses_quiz, many=True)
     return Response(serializer.data)
+
+
+
+#Recherche dans quiz par titre, enonce
+class QuizSearchAPIView(APIView):
+    """
+    Retourne uniquement les Quiz (exercices avec Quiz)
+    filtrés par titre, énoncé ou catégorie.
+    """
+
+    def get(self, request):
+        search = request.GET.get("search", "").strip()
+        categorie = request.GET.get("categorie", "").strip()
+
+        quizzes = Quiz.objects.select_related("exercice").all()
+
+        if search:
+            quizzes = quizzes.filter(
+                Q(exercice__titre_exo__icontains=search) |
+                Q(exercice__enonce__icontains=search)
+            )
+
+        if categorie:
+            quizzes = quizzes.filter(exercice__categorie__icontains=categorie)
+
+        serializer = QuizSerializer1(quizzes, many=True)
+        return Response(serializer.data)
+    
 
 
 

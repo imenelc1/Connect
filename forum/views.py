@@ -7,32 +7,39 @@ from .serializers import ForumSerializer, MessageSerializer, CommentaireSerializ
 from users.jwt_helpers import IsAuthenticatedJWT
 
 # ========== FORUMS ==========
+from django.db.models import Q
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
 def list_forums(request):
-
     role = getattr(request, "user_role", None)
+    user = request.user
+    filtre = request.GET.get("filtre", "tous")  # valeur par défaut : tous
 
-    # 🔐 ADMIN → VOIT TOUT
+    forums = Forum.objects.none()
+
     if role == "admin":
-        forums = Forum.objects.all().order_by("-date_creation")
-
-    # 👨‍🎓 ÉTUDIANT
+        forums = Forum.objects.all()
     elif role == "etudiant":
         forums = Forum.objects.filter(
-            cible__in=["etudiants", "enseignants"]
-        ).order_by("-date_creation")
-
-    # 👨‍🏫 ENSEIGNANT
+            Q(cible="etudiants") | 
+            Q(cible="enseignants", utilisateur=user)
+        )
     elif role == "enseignant":
         forums = Forum.objects.filter(
-            cible="enseignants"
-        ).order_by("-date_creation")
-
+            Q(cible="enseignants") | 
+            Q(cible="etudiants", utilisateur=user)
+        )
     else:
-        forums = Forum.objects.none()
+        return Response([], status=200)
 
-    serializer = ForumSerializer(forums, many=True)
+    # Optionnel : appliquer des filtres supplémentaires comme "mes_forums"
+    if filtre == "mes_forums":
+        forums = forums.filter(utilisateur=user)
+
+    forums = forums.order_by("-date_creation")
+    serializer = ForumSerializer(forums, many=True, context={'request': request})
     return Response(serializer.data)
 
 # forum/views.py

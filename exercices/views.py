@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from django.db.models import Q
 # Create your views here.
 from rest_framework import generics
 from .models import Exercice
@@ -32,15 +32,8 @@ class CreateExoView(APIView):
 
 @api_view(['GET'])
 def Exercice_list_api(request):
-    exercices = Exercice.objects.filter(
-        visibilite_exo=True
-    ).exclude(categorie="quiz")
-
-    serializer = ExerciceSerializer(
-        exercices,
-        many=True,
-        context={'request': request}
-    )
+    exercice = Exercice.objects.filter().exclude(categorie="quiz")
+    serializer = ExerciceSerializer(exercice, many=True)
     return Response(serializer.data)
 
 
@@ -96,3 +89,31 @@ class ExerciceParCoursView(APIView):
             context={'request': request}
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+        exercices = Exercice.objects.filter(cours_id=cours_id).exclude(categorie="quiz")
+        serializer = ExerciceSerializer(exercices, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+#Recherche exercice par titre, enonce, categorie
+class ExerciceSearchAPIView(APIView):
+    """
+    Retourne les exercices filtrés par titre, énoncé ou catégorie.
+    """
+
+    def get(self, request):
+        search = request.GET.get("search", "").strip()
+        categorie = request.GET.get("categorie", "").strip()
+
+        exercices = Exercice.objects.filter(quiz__isnull=True)
+
+        if search:
+            exercices = exercices.filter(
+                Q(titre_exo__icontains=search) |
+                Q(enonce__icontains=search)
+            )
+
+        if categorie:
+            exercices = exercices.filter(categorie__icontains=categorie).exclude(categorie="quiz")
+
+        serializer = ExerciceSerializer(exercices, many=True)
+        return Response(serializer.data)

@@ -100,7 +100,7 @@ export default function Setting() {
             });
             setUser(formData);
             setIsEditing(false);
-            toast.success(t("Messages.ProfileUpdateSuccess"));
+            toast.success(t("Errors.ProfileUpdateSuccess"));
         } catch (error) {
             console.error(t("Errors.ProfileUpdateFailed"), error);
             toast.error(t("Errors.ProfileUpdateFailed"));
@@ -139,14 +139,14 @@ export default function Setting() {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
-            setPasswordSuccess(t("Messages.PasswordUpdateSuccess"));
+            setPasswordSuccess(t("Errors.PasswordUpdateSuccess"));
             setPasswordError("");
-            toast.success(t("Messages.PasswordUpdateSuccess"));
+            toast.success(t("Errors.PasswordUpdateSuccess"));
             setTimeout(() => setPasswordSuccess(""), 3000);
         } catch (error) {
-            console.error(t("Messages.PasswordUpdateFailed"), error);
-            setPasswordError(t("Messages.PasswordUpdateFailed"));
-            toast.error(t("Messages.PasswordUpdateFailed"));
+            console.error(t("Errors.PasswordUpdateFailed"), error);
+            setPasswordError(t("Errors.PasswordUpdateFailed"));
+            toast.error(t("Errors.PasswordUpdateFailed"));
         }
     };
 
@@ -238,7 +238,7 @@ export default function Setting() {
                             {user?.adresse_email}
                         </p>
                         <span className="inline-block mt-1 bg-primary/20 text-primary text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
-                            {user?.role === "enseignant" ? t("Profile.Professor") : t("Profile.Student")}
+                            {user?.role === "enseignant" ? t("Profile.Role.Professor") : t("Profile.Role.Student")}
                         </span>
                     </div>
                 </div>

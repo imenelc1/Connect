@@ -115,14 +115,14 @@ export default function AppRoutes() {
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
         <Route path="/progress-exercice" element={<ProgressExercice />} />
        
-        <Route path="/progress-student" element={<ProgressStudent />} />
+        <Route path="/progress-student/" element={<ProgressStudent />} />
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
        
 
          {/* ========= QUIZZES ========= */}
-        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
+       <Route path="/all-quizzes" element={<AllQuizzesPage />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/quiz-preview/:exerciceId" element={<QuizPreview />} />
         <Route path="/quiz-intro/:exerciceId" element={<QuizIntroPage />} />

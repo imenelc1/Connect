@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
 from courses.models import Cours
 from feedback.models import Notification
-from users.models import Utilisateur
+from users.models import Utilisateur, Administrateur
 from spaces.models import SpaceCour, SpaceEtudiant
 
 @receiver(post_save, sender=Cours)
@@ -39,7 +39,6 @@ def notify_students_on_course_publish(sender, instance, created, **kwargs):
             )
     else:
         # --- Cours privé : notifier seulement les étudiants des espaces du prof ---
-        # Récupérer tous les espaces du prof
         espaces_prof = cours.utilisateur.space_set.all()
         for espace in espaces_prof:
             etudiants = Utilisateur.objects.filter(
@@ -66,6 +65,26 @@ def notify_students_on_course_publish(sender, instance, created, **kwargs):
                         }
                     )
                 )
+
+    # --- Notifications pour tous les admins ---
+    admins = Administrateur.objects.all()
+    for admin in admins:
+        notifications.append(
+            Notification(
+                message_notif=f"Nouveau cours publié : {cours.titre_cour}",
+                admin_destinataire=admin,
+                utilisateur_envoyeur=prof,
+                content_type=content_type,
+                object_id=cours.id_cours,
+                action_type="course_published",
+                module_source="cours",
+                extra_data={
+                    "cours_titre": cours.titre_cour,
+                    "niveau": cours.niveau_cour,
+                    "public": cours.visibilite_cour,
+                }
+            )
+        )
 
     if notifications:
         Notification.objects.bulk_create(notifications)

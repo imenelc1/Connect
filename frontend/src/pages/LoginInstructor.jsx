@@ -53,7 +53,7 @@ export default function LoginInstructor() {
     }
 
     if (!password) {
-      setErrorPassword("errors.passwordRequired");
+      setErrorPassword(t("errors.passwordRequired"));
       return;
     }
     if (password.length < 8) {
@@ -87,7 +87,7 @@ export default function LoginInstructor() {
 
       console.log(t("login.api"), res.data);
 
-      toast.success(t("login.success"));
+      toast.success(t("success.login"));
       navigate("/dashboard-ens");
 
     } catch (error) {
