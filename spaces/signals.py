@@ -2,7 +2,32 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from feedback.utils import create_notification
-from .models import SpaceEtudiant, SpaceCour, SpaceExo, SpaceQuiz
+from .models import SpaceEtudiant, SpaceCour, SpaceExo, SpaceQuiz, Space
+
+from users.models import Administrateur
+
+@receiver(post_save, sender=Space)
+def notify_admin_new_space(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    space = instance
+    creator = space.utilisateur
+
+    admins = Administrateur.objects.all()
+
+    for admin in admins:
+        try:
+            create_notification(
+                admin_destinataire=admin,
+                envoyeur=creator,
+                content_object=space,
+                action_type='space_created',
+                module_source='space',
+                message=f"{creator.prenom} a créé un nouvel espace : '{space.nom_space}'."
+            )
+        except Exception as e:
+            print(f"Erreur notif admin création space: {e}")
 
 # --- 1️⃣ Étudiant ajouté à un espace ---
 @receiver(post_save, sender=SpaceEtudiant)
@@ -106,3 +131,28 @@ def notify_students_new_quiz(sender, instance, created, **kwargs):
             )
         except Exception as e:
             print(f"Erreur notification quiz ajouté à l'espace pour {student}: {e}")
+
+
+from users.models import Administrateur
+
+@receiver(post_save, sender=Space)
+def notify_admin_new_space(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    space = instance
+    creator = space.utilisateur
+    admins = Administrateur.objects.all()
+
+    for admin in admins:
+        try:
+            create_notification(
+                destinataire=admin,  # admin reçoit la notif
+                envoyeur=creator,    # le créateur du space
+                content_object=space,
+                action_type='space_created',
+                module_source='space',
+                message=f"{creator.prenom} a créé un nouvel espace : '{space.nom_space}'."
+            )
+        except Exception as e:
+            print(f"Erreur notif admin création space: {e}")

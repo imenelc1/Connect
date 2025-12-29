@@ -12,7 +12,8 @@ import { useNavigate } from "react-router-dom";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import ContentSearchBar from "../components/common/ContentSearchBar";
-
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 export default function ExercisesManagement() {
   // SEARCH contrôlé
   const [search, setSearch] = useState("");
@@ -24,7 +25,8 @@ export default function ExercisesManagement() {
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
+  const adminData = JSON.parse(localStorage.getItem("admin")) || {};
+  const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
 
 
   // LISTE
@@ -182,9 +184,20 @@ export default function ExercisesManagement() {
 
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      {/* Sidebar */}
+       {/* Sidebar */}
       <div>
         <Navbar />
+        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
       </div>
 
       {/* Main Content */}
