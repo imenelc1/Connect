@@ -1,20 +1,59 @@
 {
   "community": {
     "title": "Communauté",
-    "subtitle": "Échangez avec d'autres enseignants et partagez votre expérience",
+    "subtitle": "Échangez avec les autres et partagez votre expérience",
     "placeholder": "Partagez avec la communauté...",
     "send": "Envoyer"
   },
   "tabs": {
-    "recent": "Récent",
-    "popular": "Populaire",
+    "recent": "Récents",
+    "popular": "Populaires",
     "myforums": "Mes forums"
   },
   "forums": {
-    "select": "Choisir un type de forum",
+    "select": "Sélectionner le type de forum",
     "all": "Tous les forums",
     "teacher-teacher": "Enseignant ↔ Enseignant",
     "teacher-student": "Enseignant ↔ Étudiant",
     "student-student": "Étudiant ↔ Étudiant"
+  },
+  "actions": {
+    "like": "Like",
+    "likes": "Likes",
+    "comment": "Commentaire",
+    "comments": "Commentaires",
+    "deleteForum": "Supprimer le forum",
+    "deleteComment": "Supprimer le commentaire",
+    "cancel": "Annuler",
+    "sendMessage": "Envoyer la réponse",
+    "sendComment": "Envoyer le commentaire",
+    "yourForum": "Votre forum",
+    "studentQuestion": "Question d'étudiant",
+    "hideMessages": "Masquer les messages",
+    "showMessages": "Voir les messages"
+  },
+  "placeholders": {
+    "writeResponse": "Écrivez votre réponse... (max 2000 caractères)",
+    "writeComment": "Écrire un commentaire... (max 1000 caractères)"
+  },
+  "messages": {
+    "deleteForumConfirm": "Supprimer ce forum ? Cette action est irréversible. Tous les messages et commentaires seront supprimés.",
+    "deleteCommentConfirm": "Supprimer ce commentaire ?"
+  },
+  "notifications": {
+    "posting": "Envoi en cours...",
+    "deleting": "Suppression...",
+    "likesCount": "{{count}} like",
+    "likesCount_plural": "{{count}} likes",
+    "commentsCount": "{{count}} commentaire",
+    "commentsCount_plural": "{{count}} commentaires",
+    "characters": "{{count}}/2000 caractères",
+    "commentCharacters": "{{count}}/1000 caractères"
+  },
+  "errors":{
+    "delError":"Erreur lors d la Suppression:",
+    "delNetworkerror":"Erreur réseau lors de la suppression:",
+    "likeError":"Erreur lors du like",
+    "likeNetworkerror":"Erreur réseau lors du like:"
   }
 }

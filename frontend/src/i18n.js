@@ -99,6 +99,9 @@ import translationFRSpacesPage from "./locales/addSpace/fr.json";
 import translationENSpacesPage from "./locales/addSpace/en.json";
 import translationFRInstructors from "./locales/addinstructors/fr.json";
 import translationENInstructors from "./locales/addinstructors/en.json";
+import translationFRNotification from "./locales/notifications/fr-notif/translation.json"
+import translationENNotification from "./locales/notifications/en-notif/translation.json"
+
 
 
 const resources = {
@@ -156,7 +159,8 @@ const resources = {
     DashboardAdmin: translationFRDashboardAdmin,
      ForumManagement:translationnFRforumManagement,
      BadgesManagement:translationnFRbadgesManagement,
-    StudentsManagement:translationnFRStudentsManagement
+    StudentsManagement:translationnFRStudentsManagement,
+    notifications:translationFRNotification
     },
 
   en: {
@@ -207,7 +211,8 @@ const resources = {
        BadgesManagement:translationnENbadgesManagement,
       StudentsManagement:translationnENStudentsManagement,
        space: translationENSpacesPage,
-      instructors: translationENInstructors
+      instructors: translationENInstructors,
+      notifications:translationENNotification
 
 
   },

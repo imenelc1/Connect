@@ -1,20 +1,61 @@
-{
+ 
+ {
   "community": {
-    "title": "Community",
-    "subtitle": "Exchange with other instructors and share your experience",
-    "placeholder": "Share with the community...",
-    "send": "Send"
-  },
-  "tabs": {
-    "recent": "Recent",
-    "popular": "Popular",
-    "myforums": "My Forums"
-  },
-  "forums": {
-    "select": "Select forum type",
-    "all": "All forums",
-    "teacher-teacher": "Teacher ↔ Teacher",
-    "teacher-student": "Teacher ↔ Student",
-    "student-student": "Student ↔ Student"
+      "title": "Community",
+      "subtitle": "Exchange with others and share your experience",
+      "placeholder": "Share with the community...",
+      "send": "Send",
+       "notConnected": "Not connected",
+    "pleaseLogin": "Please log in",
+    "login": "Log in"
+    },
+    "tabs": {
+      "recent": "Recent",
+      "popular": "Popular",
+      "myforums": "My Forums"
+    },
+    "forums": {
+      "select": "Select forum type",
+      "all": "All forums",
+      "teacher-teacher": "Instructor ↔ Instructor",
+      "teacher-student": "Instructor ↔ Student",
+      "student-student": "Student ↔ Student",
+      "student-teacher":"Student ↔ Instructor"
+    },
+    "actions": {
+      "like": "Like",
+      "likes": "Likes",
+      "comment": "Comment",
+      "comments": "Comments",
+      "deleteForum": "Delete forum",
+      "deleteComment": "Delete comment",
+      "cancel": "Cancel",
+      "sendMessage": "Send reply",
+      "sendComment": "Send comment",
+      "yourForum": "Your forum",
+      "studentQuestion": "Student question",
+      "hideMessages": "Hide messages",
+      "showMessages": "Show messages"
+     
+    },
+    "placeholders": {
+      "writeResponse": "Write your reply... (max 2000 characters)",
+      "writeComment": "Write a comment... (max 1000 characters)"
+    },
+    "messages": {
+      "deleteForumConfirm": "Delete this forum? This action is irreversible. All messages and comments will be deleted.",
+      "deleteCommentConfirm": "Delete this comment?"
+    },
+    "notifications": {
+      "posting": "Posting...",
+      "deleting": "Deleting...",
+      "likesCount": "{{count}} like",
+      "likesCount_plural": "{{count}} likes",
+      "commentsCount": "{{count}} comment",
+      "commentsCount_plural": "{{count}} comments",
+      "characters": "{{count}}/2000 characters",
+      "commentCharacters": "{{count}}/1000 characters"
+    }
   }
-}
+  
+  

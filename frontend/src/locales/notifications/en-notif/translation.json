@@ -1,0 +1,20 @@
+{
+
+    "title": "Notifications",
+    "aria": "Notifications ({{count}} unread)",
+    "unread": "{{count}} unread",
+    "markAll": "Mark all as read",
+    "markAllRead": "Mark all as read",
+    "refresh": "Refresh",
+    "loading": "Loading notifications...",
+    "empty": "No notifications",
+    "emptyHint": "You will see new activities here",
+    "viewAll": "View all notifications",
+    "from": "From:",
+    "recently": "recently",
+    "justNow": "just now",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} h ago",
+    "daysAgo": "{{count}} d ago"
+  
+}
