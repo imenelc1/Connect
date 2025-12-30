@@ -118,8 +118,8 @@ export default function ProgressExercice() {
   const submissionRate = totalExercises > 0 ? Math.round((submittedCount / totalExercises) * 100) : 0;
   const completedRatio = `${submittedCount}/${totalExercises}`;
 
-  
-  
+
+
   return (
     <div className="flex flex-col lg:flex-row bg-primary/10 min-h-screen">
       <Navbar />

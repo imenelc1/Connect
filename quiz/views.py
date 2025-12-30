@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from dashboard.models import ProgressionHistory
@@ -295,10 +295,6 @@ class QuizSearchAPIView(APIView):
 
         serializer = QuizSerializer1(quizzes, many=True)
         return Response(serializer.data)
-    
-
-
-
 from django.db.models import OuterRef
 
 @api_view(["GET"])

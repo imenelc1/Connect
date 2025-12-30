@@ -179,4 +179,3 @@ def get_utilisateur_from_request(request):
             return admin, "admin"
         except Administrateur.DoesNotExist:
             return None, None
-

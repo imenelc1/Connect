@@ -1,0 +1,59 @@
+from badges.models import Badge
+
+# Badge 1 : Course Explorer
+Badge.objects.create(
+    nom="Course Explorer",
+    description="Complete your first course",
+    condition="Terminer 1 cours",
+    categorie="progress",
+    numpoints=50,
+    icone="badges/course_explorer.png"  
+)
+
+# Badge 2 : Halfway There
+Badge.objects.create(
+    nom="Halfway There",
+    description="Reach 50% completion in a course",
+    condition="Atteindre 50% d'un cours",
+    categorie="progress",
+    numpoints=100,
+    icone="badges/halfway_there.png" 
+)
+
+Badge.objects.create(
+    nom="Dedicated Learner",
+    description="Complete 3 full courses",
+    condition="Terminer 3 cours complets",
+    categorie="progress",
+    numpoints=200,
+    icone="badges/dedicated_learner.png"
+)
+
+# Badge : Marathon Coder
+Badge.objects.create(
+    nom="Marathon Coder",
+    description="Pass 10 hours on the platform in a single day",
+    condition="Passer 10 heures dans la plateforme en une seule journée",
+    categorie="progress",
+    numpoints=150,
+    icone="badges/marathon_coder.png"
+
+Badge.objects.create(
+    nom="First Steps",
+    description="Complete your first exercise",
+    condition="Terminer 1 exercice",
+    categorie="progress",
+    numpoints=20,
+    icone="badges/first_steps.png"
+)
+
+
+Badge.objects.create(
+    nom="Problem Solver",
+    description="Submit 10 exercise solutions",
+    condition="Soumettre 10 solutions",
+    categorie="success",
+    numpoints=150,
+    icone="badges/problem_solver.png" 
+)
+

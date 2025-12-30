@@ -47,12 +47,12 @@ class SpaceListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedJWT]
 
     def get_queryset(self):
-        user = self.request.user
-
-        if not user or user.is_anonymous:
-            raise exceptions.NotAuthenticated("Token invalide ou expiré")
-
-        return Space.objects.filter(utilisateur=user)
+        # Pour les admins, renvoyer tous les espaces
+        if getattr(self.request, "user_role", None) == "admin":
+            return Space.objects.all()
+        
+        # Sinon, les espaces du prof connecté
+        return Space.objects.filter(utilisateur=self.request.user)
 
 # --- Détail / Update / Delete d'un espace ---
 class SpaceDetailView(generics.RetrieveDestroyAPIView):

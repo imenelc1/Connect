@@ -144,24 +144,18 @@ export default function ProgressStudent() {
 
 
 useEffect(() => {
-
-
   const fetchQuizzes = async () => {
     try {
-      api.get("quiz/student/quizzes-faits/") // baseURL déjà /api/
-   .then(res => console.log(res.data))
-   .catch(err => console.error(err.response?.status, err.response?.data));
+      const res = await api.get("quiz/student/quizzes-faits/");
+      console.log("Quizzes fetched:", res.data); // pour debug
+      setQuizzes(res.data); // <-- important, mettre à jour le state
     } catch (err) {
-      console.error(err);
+      console.error(err.response?.status, err.response?.data);
     }
   };
 
   fetchQuizzes();
 }, [studentId]);
-
-
-
-
 
 
 
@@ -290,7 +284,7 @@ useEffect(() => {
               <div className="flex items-center gap-2">
                 
                 <p className="font-medium text-gray">{quiz.titre_exercice}</p>
-                <CheckCircle size={5} className="text-purple" />
+               
               </div>
 
               <div className="flex flex-col items-end text-right text-sm text-gray">

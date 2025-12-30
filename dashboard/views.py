@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
-from badges.views import check_course_badges
+from badges.views import check_course_badges, check_first_steps_badge, check_marathon_coder_badge, check_problem_solver_badge
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
@@ -234,6 +234,8 @@ def add_session(request):
             utilisateur=request.user,
             duration=duration
         )
+
+        check_marathon_coder_badge(request.user)
         return Response({"saved": True, "cumulative": False})
 
 
@@ -259,7 +261,6 @@ def daily_time(request):
         "total_seconds": total_seconds,
         "readable": f"{hours}h {minutes}min {seconds}s"
     })
-
 
 
 @api_view(['GET'])
@@ -649,28 +650,23 @@ class create_tentative(APIView):
         user = request.user
         exercice_id = request.data.get("exercice_id")
         etat = request.data.get("etat", "brouillon")
-        overwrite = request.data.get("overwrite", False)  # si on veut écraser dernière tentative
+        overwrite = request.data.get("overwrite", False)
 
-        # Vérification du rôle
         if not hasattr(user, "etudiant"):
             return Response(
                 {"error": "Seuls les étudiants peuvent participer aux exercices"},
                 status=403
             )
 
-        # Récupération de l'exercice
         try:
             exercice = Exercice.objects.get(id_exercice=exercice_id)
         except Exercice.DoesNotExist:
             return Response({"error": "Exercice non trouvé"}, status=404)
 
-        # Vérification appartenance à l'espace pour les soumissions
         if etat == "soumis" and not etudiant_appartient_a_lespace(user, exercice):
             raise PermissionDenied("Vous ne pouvez pas soumettre cet exercice")
 
-        # Temps passé
-        temps_passe_sec = request.data.get("temps_passe", 0)
-        temps_passe = timedelta(seconds=int(temps_passe_sec))
+        temps_passe = timedelta(seconds=int(request.data.get("temps_passe", 0)))
 
         defaults = {
             "reponse": request.data.get("reponse", ""),
@@ -679,8 +675,8 @@ class create_tentative(APIView):
             "temps_passe": temps_passe,
         }
 
+        # ================= BROUILLON =================
         if etat == "brouillon":
-            # Toujours un seul brouillon par étudiant et exercice
             tentative, created = TentativeExercice.objects.update_or_create(
                 utilisateur=user,
                 exercice=exercice,
@@ -688,8 +684,11 @@ class create_tentative(APIView):
                 defaults=defaults
             )
 
-        elif etat == "soumis":
-            # Vérifier si un brouillon existe
+            #First Steps OK même en brouillon
+            check_first_steps_badge(user)
+
+        # ================= SOUMIS =================
+        else:
             brouillon = TentativeExercice.objects.filter(
                 utilisateur=user,
                 exercice=exercice,
@@ -697,49 +696,27 @@ class create_tentative(APIView):
             ).first()
 
             if brouillon:
-                # Transformer le brouillon en soumis
                 brouillon.etat = "soumis"
                 brouillon.reponse = defaults["reponse"]
                 brouillon.output = defaults["output"]
-                brouillon.temps_passe = defaults["temps_passe"]
+                brouillon.temps_passe = temps_passe
                 brouillon.submitted_at = now()
-                brouillon.save(update_fields=["etat", "reponse", "output", "temps_passe", "submitted_at"])
+                brouillon.save()
                 tentative = brouillon
             else:
-                # Compter les soumissions existantes
-                nb_soumissions = TentativeExercice.objects.filter(
+                tentative = TentativeExercice.objects.create(
                     utilisateur=user,
                     exercice=exercice,
-                    etat="soumis"
-                ).count()
+                    etat="soumis",
+                    reponse=defaults["reponse"],
+                    output=defaults["output"],
+                    temps_passe=temps_passe,
+                    submitted_at=now()
+                )
 
-                if exercice.max_soumissions != 0 and nb_soumissions >= exercice.max_soumissions:
-                    if not overwrite:
-                        return Response({"error": "Limite de soumissions atteinte"}, status=400)
-                    else:
-                        # Écraser la dernière soumission
-                        last_submission = TentativeExercice.objects.filter(
-                            utilisateur=user,
-                            exercice=exercice,
-                            etat="soumis"
-                        ).order_by("-submitted_at").first()
-                        last_submission.reponse = defaults["reponse"]
-                        last_submission.output = defaults["output"]
-                        last_submission.temps_passe = defaults["temps_passe"]
-                        last_submission.submitted_at = now()
-                        last_submission.save(update_fields=["reponse", "output", "temps_passe", "submitted_at"])
-                        tentative = last_submission
-                else:
-                    # Créer nouvelle tentative soumis
-                    tentative = TentativeExercice.objects.create(
-                        utilisateur=user,
-                        exercice=exercice,
-                        etat="soumis",
-                        reponse=defaults["reponse"],
-                        output=defaults["output"],
-                        temps_passe=defaults["temps_passe"],
-                        submitted_at=now()
-                    )
+            # BADGES après une vraie soumission
+            check_first_steps_badge(user)
+            check_problem_solver_badge(user)
 
         return Response({
             "success": "Tentative enregistrée",
@@ -749,6 +726,7 @@ class create_tentative(APIView):
                 "submitted_at": tentative.submitted_at,
             }
         }, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
@@ -898,17 +876,13 @@ def student_active_courses(request, student_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def weekly_submission_chart(request, student_id):
-    today = localtime(now())  # datetime complet et timezone-safe
-
-    # Espaces et exercices accessibles à l'étudiant
-    spaces = Space.objects.filter(spaceetudiant__etudiant_id=student_id).distinct()
-    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
-    total_exercises = exercises.count() or 1  # éviter division par zéro
+    today = localtime(now())
+    end_of_today = today.replace(hour=23, minute=59, second=59, microsecond=999999)
 
     # 6 périodes glissantes de 7 jours
     periods = []
     for i in range(6):
-        period_end = today - timedelta(days=i*7)
+        period_end = end_of_today - timedelta(days=i*7)
         period_start = period_end - timedelta(days=6)
         periods.append({
             "label": f"Week {6-i}",
@@ -918,33 +892,29 @@ def weekly_submission_chart(request, student_id):
         })
     periods = list(reversed(periods))  # du plus ancien au plus récent
 
-    # Récupération des soumissions depuis le début de la période la plus ancienne
-    start_datetime = periods[0]["start_datetime"]
-    submissions = TentativeExercice.objects.filter(
-        utilisateur_id=student_id,
-        exercice__in=exercises,
-        etat="soumis",
-        submitted_at__gte=start_datetime
-    ).values("submitted_at").annotate(count=Count("exercice", distinct=True))
+    # Exercices accessibles à l'étudiant
+    spaces = Space.objects.filter(spaceetudiant__etudiant_id=student_id).distinct()
+    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
+    total_exercises = exercises.count() or 1  # éviter division par zéro
 
-    # Attribution aux bonnes périodes
-    for s in submissions:
-        sub_dt = localtime(s["submitted_at"])
-        count = s["count"]
-        for p in periods:
-            if p["start_datetime"] <= sub_dt <= p["end_datetime"]:
-                p["submissions"] += count
-                break
-
-    # Calcul en % et conversion en ISO pour JSON
+    # Calcul des soumissions uniques par exercice par semaine
     for p in periods:
-        p["submissions"] = round((p["submissions"] / total_exercises) * 100)
+        week_submissions = TentativeExercice.objects.filter(
+            utilisateur_id=student_id,
+            exercice__in=exercises,
+            etat="soumis",
+            submitted_at__date__range=(p["start_datetime"].date(), p["end_datetime"].date())
+        ).values("exercice_id").distinct().count()
+
+        p["submissions"] = round((week_submissions / total_exercises) * 100)
+
+        # Transformer datetime en ISO pour JSON
         p["start_date"] = p["start_datetime"].isoformat()
         p["end_date"] = p["end_datetime"].isoformat()
         del p["start_datetime"]
         del p["end_datetime"]
 
-    return Response(periods, status=200)
+    return Response(periods)
 
 
 @api_view(["GET"])
@@ -952,17 +922,16 @@ def weekly_submission_chart(request, student_id):
 def student_weekly_submission_chart(request):
     user = request.user
 
-    # Date et heure locale actuelles
     today = localtime(now())
     end_of_today = today.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # Périodes glissantes de 7 jours sur 6 semaines
+    # Définir 6 périodes glissantes de 7 jours
     periods = []
     for i in range(6):
         period_end = end_of_today - timedelta(days=i*7)
         period_start = period_end - timedelta(days=6)
         periods.append({
-           "label": f"Week {6-i}",
+            "label": f"Week {6-i}",
             "start_datetime": period_start,
             "end_datetime": period_end,
             "submissions": 0
@@ -974,35 +943,24 @@ def student_weekly_submission_chart(request):
     exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
     total_exercises = exercises.count() or 1  # éviter division par zéro
 
-    # Récupération des soumissions depuis le début de la plus ancienne période
-    start_datetime = periods[0]["start_datetime"]
-    submissions = TentativeExercice.objects.filter(
-        utilisateur=user,
-        exercice__in=exercises,
-        etat="soumis",
-        submitted_at__gte=start_datetime
-    ).values("submitted_at").annotate(count=Count("exercice", distinct=True))
-
-    # Attribution des soumissions aux bonnes périodes
-    for s in submissions:
-        sub_dt = localtime(s["submitted_at"])
-        count = s["count"]
-        for p in periods:
-            if p["start_datetime"] <= sub_dt <= p["end_datetime"]:
-                p["submissions"] += count
-                break
-
-    # Calcul en %
+    # Récupérer les tentatives uniques par exercice et par semaine
     for p in periods:
-        p["submissions"] = round((p["submissions"] / total_exercises) * 100)
-        # Transformer les datetime en ISO pour JSON
+        week_submissions = TentativeExercice.objects.filter(
+            utilisateur=user,
+            exercice__in=exercises,
+            etat="soumis",
+            submitted_at__date__range=(p["start_datetime"].date(), p["end_datetime"].date())
+        ).values("exercice_id").distinct().count()
+
+        p["submissions"] = round((week_submissions / total_exercises) * 100)
+
+        # Transformer datetime en ISO
         p["start_date"] = p["start_datetime"].isoformat()
         p["end_date"] = p["end_datetime"].isoformat()
         del p["start_datetime"]
         del p["end_datetime"]
 
     return Response(periods)
-
 
 
 

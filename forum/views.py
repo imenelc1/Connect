@@ -15,26 +15,21 @@ from django.db.models import Q
 def list_forums(request):
     role = getattr(request, "user_role", None)
     user = request.user
-    filtre = request.GET.get("filtre", "tous")  # valeur par défaut : tous
-
-    forums = Forum.objects.none()
+    filtre = request.GET.get("filtre", "tous")
 
     if role == "admin":
         forums = Forum.objects.all()
     elif role == "etudiant":
         forums = Forum.objects.filter(
-            Q(cible="etudiants") | 
-            Q(cible="enseignants", utilisateur=user)
+            Q(cible="etudiants") | Q(cible="enseignants", utilisateur=user)
         )
     elif role == "enseignant":
         forums = Forum.objects.filter(
-            Q(cible="enseignants") | 
-            Q(cible="etudiants", utilisateur=user)
+            Q(cible="enseignants") | Q(cible="etudiants", utilisateur=user)
         )
     else:
         return Response([], status=200)
 
-    # Optionnel : appliquer des filtres supplémentaires comme "mes_forums"
     if filtre == "mes_forums":
         forums = forums.filter(utilisateur=user)
 

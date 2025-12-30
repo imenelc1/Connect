@@ -82,3 +82,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_annee_etude(self, obj):
         return getattr(getattr(obj, "etudiant", None), "annee_etude", None)
+
+class AdminProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Administrateur
+        fields = ['id_admin', 'email_admin']
