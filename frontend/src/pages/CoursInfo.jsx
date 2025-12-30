@@ -494,7 +494,7 @@ export default function CoursePage() {
                           onChange={(e) => updateLessonTitle(section.id, lesson.id, e.target.value)}
                           className="flex-1 !bg-white"
                         />
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 md:ml-[350px] ">
                           <ModernDropdown
                             value={lesson.type || "text"}
                             onChange={(value) =>

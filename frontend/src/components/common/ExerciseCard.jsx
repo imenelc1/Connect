@@ -5,25 +5,42 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { Pencil, Trash2 } from "lucide-react";
 
+/* ===================== STYLES ===================== */
 const levelStyles = {
   Débutant: "bg-blue text-white",
   Intermédiaire: "bg-purple text-white",
   Avancé: "bg-pink text-white",
 };
 
-const levelcard = {
+const levelCardBg = {
   Débutant: "bg-grad-2",
   Intermédiaire: "bg-grad-3",
   Avancé: "bg-grad-4",
 };
 
+const initialsBgMap = {
+  Débutant: "bg-blue",
+  Intermédiaire: "bg-purple",
+  Avancé: "bg-pink",
+};
+
+/* ===================== UTILS ===================== */
+const getInitials = (name = "") =>
+  name
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+
+/* ===================== COMPONENT ===================== */
 export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const { t } = useTranslation("allExercises");
 
   if (!exercise) return null;
 
-  const { t } = useTranslation("allExercises");
   const handleDelete = async () => {
     if (!window.confirm("Supprimer cet exercice ?")) return;
 
@@ -43,9 +60,9 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
 
   return (
     <div
-      className={`shadow-md p-6 rounded-3xl flex flex-col justify-between h-48 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${levelcard[exercise.level]}`}
+      className={`shadow-md p-6 rounded-3xl flex flex-col justify-between h-56 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${levelCardBg[exercise.level]}`}
     >
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
       <div>
         <div className="flex justify-between items-start">
           <h2 className="font-semibold text-lg">{exercise.title}</h2>
@@ -60,57 +77,74 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
         <p className="text-grayc mt-3 line-clamp-3">
           {exercise.description}
         </p>
+
+        {/* ================= AUTHOR ================= */}
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-8 h-8 rounded-full ${initialsBgMap[exercise.level]} text-white flex items-center justify-center text-xs font-semibold`}
+            >
+              {getInitials(exercise.author)}
+            </div>
+            <span className="text-sm text-grayc">
+              {exercise.author}
+            </span>
+          </div>
+
+          <span className="text-xs text-gray-400">
+            {exercise.categorie}
+          </span>
+        </div>
       </div>
 
-      {/* FOOTER */}
-<div className="flex justify-between items-center mt-4 gap-3">
-  {!isOwner ? (
-    /* ÉTUDIANT */
-    <Button
-      variant="start"
-      className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
-      onClick={() => {
-        exercise.categorie === "code"
-          ? navigate(`/start-exerciseCode/${exercise.id}`)
-          : navigate(`/start-exercise/${exercise.id}`);
-      }}
-    >
-      Commencer
-    </Button>
-  ) : (
-    /* PROF */
-    <Button
-      variant="start"
-      className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
-        onClick={() => {
-        exercise.categorie === "code"
-          ? navigate(`/start-exerciseCode/${exercise.id}`)
-          : navigate(`/start-exercise/${exercise.id}`);
-      }}
-    >
-      Check quiz
-    </Button>
-  )}
+      {/* ================= FOOTER ================= */}
+      <div className="flex justify-between items-center mt-4 gap-3">
+        {!isOwner ? (
+          /* ===== ÉTUDIANT ===== */
+          <Button
+            variant="start"
+            className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
+            onClick={() => {
+              exercise.categorie === "code"
+                ? navigate(`/start-exerciseCode/${exercise.id}`)
+                : navigate(`/start-exercise/${exercise.id}`);
+            }}
+          >
+            {t("startExercise")}
+          </Button>
+        ) : (
+          /* ===== ENSEIGNANT ===== */
+          <Button
+            variant="start"
+            className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
+            onClick={() => {
+              exercise.categorie === "code"
+                ? navigate(`/start-exerciseCode/${exercise.id}`)
+                : navigate(`/start-exercise/${exercise.id}`);
+            }}
+          >
+            Check quiz
+          </Button>
+        )}
 
-  {isOwner && (
-    <div className="flex gap-3">
-      <button
-        onClick={() => navigate(`/exercices/edit/${exercise.id}`)}
-        className="text-gray-600 hover:text-blue-600 transition"
-      >
-        <Pencil size={18} />
-      </button>
+        {isOwner && (
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate(`/exercices/edit/${exercise.id}`)}
+              className="text-gray-600 hover:text-blue-600 transition"
+            >
+              <Pencil size={18} />
+            </button>
 
-      <button
-        onClick={handleDelete}
-        className="text-gray-600 hover:text-red-600 transition"
-      >
-        <Trash2 size={18} />
-      </button>
-    </div>
-  )}
-</div>
-
+            <button
+              onClick={handleDelete}
+              className="text-gray-600 hover:text-red-600 transition"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
