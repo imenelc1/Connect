@@ -49,7 +49,8 @@ export default function SubmittedExercises() {
               exerciceId: t.exercice.id_exercice, 
               title: t.exercice.titre_exo,
               description: t.exercice.enonce,
-              type: t.exercice.type || "non-code",
+              // UTILISATION DE categorie COMME DANS LE DEUXIÈME FICHIER
+              categorie: t.exercice.categorie || "non-code",
               status: t.etat === "soumis" ? "Soumis" : t.etat === "brouillon" ? "Brouillon" : "Corrigé",
               submittedDate: t.submitted_at || t.created_at,
               language: t.exercice.language || "C",
@@ -134,7 +135,7 @@ export default function SubmittedExercises() {
           </button>
         </div>
 
-        {/* LIST OF CARDS */}
+        {/* LIST OF CARDS - AVEC SPINNER DE CHARGEMENT ET MESSAGE QUAND VIDE */}
         <div className="flex flex-col gap-5 mt-6">
           {loading ? (
             <div className="flex justify-center py-10">
@@ -165,14 +166,15 @@ export default function SubmittedExercises() {
                     {ex.description}
                   </p>
 
-                  {/* ArrowRight clickable */}
+                  {/* ArrowRight clickable - NAVIGATION DIFFÉRENCIÉE PAR CATÉGORIE */}
                   <div className="flex justify-between items-center mt-4">
                     <div className="flex flex-wrap items-center gap-4 text-textc text-sm">
                       <div className="flex items-center gap-1">
                         <Calendar size={14} className="text-primary" /> 
                         {formatDate(ex.submittedDate)}
                       </div>
-                      {ex.type === "code" && (
+                      {/* Type code badge - BASÉ SUR categorie */}
+                      {ex.categorie === "code" && (
                         <div className="flex items-center gap-1">
                           <span className="text-primary font-bold">{`</>`}</span> {ex.language}
                         </div>
@@ -199,18 +201,17 @@ export default function SubmittedExercises() {
                     <ChevronRight
                       size={20}
                       className="text-primary cursor-pointer hover:text-primary/80"
-                      onClick={() => window.location.href = `/submitted-exercise/${ex.id}`}
+                      // NAVIGATION DIFFÉRENCIÉE PAR CATÉGORIE COMME DANS LE DEUXIÈME FICHIER
+                      onClick={() => {
+                        ex.categorie === "code"
+                          ? window.location.href = `/submitted-exercise/${ex.id}`
+                          : window.location.href = `/submitted-exercise-theory/${ex.id}`;
+                      }}
                     />
                   </div>
 
-                  {/* Détails supplémentaires (dépliables) */}
+                  {/* Détails supplémentaires (dépliables) - MOINS DE DÉTAILS COMME DANS LE DEUXIÈME */}
                   <div className={`${isExpanded ? "block" : "hidden"} sm:block mt-4 space-y-3`}>
-                    {/* Description complète */}
-                    <div className="bg-white/50 p-3 rounded-lg">
-                      <h3 className="font-semibold text-sm mb-1">Énoncé complet :</h3>
-                      <p className="text-textc text-sm whitespace-pre-wrap">{ex.description}</p>
-                    </div>
-
                     {/* Feedback (si disponible) */}
                     {ex.hasFeedback && (
                       <div className="flex flex-col">
@@ -225,14 +226,6 @@ export default function SubmittedExercises() {
                             {ex.feedback || t("noFeedback") || "Aucun feedback pour le moment"}
                           </p>
                         </div>
-                      </div>
-                    )}
-
-                    {/* Output (si code) */}
-                    {ex.type === "code" && ex.output && (
-                      <div className="bg-gray-100 p-3 rounded-lg">
-                        <h3 className="font-semibold text-sm mb-1">Output :</h3>
-                        <pre className="text-xs text-gray-700 whitespace-pre-wrap">{ex.output}</pre>
                       </div>
                     )}
                   </div>
@@ -250,8 +243,8 @@ export default function SubmittedExercises() {
           )}
         </div>
 
-        {/* BOTTOM STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-10">
+        {/* BOTTOM STATS - 2 STATISTIQUES COMME DANS LE DEUXIÈME FICHIER */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
           <div className="flex items-center justify-between bg-grad-3 border border-secondary2 p-5 rounded-xl">
             <div className="flex items-center gap-3">
               <CheckCircle className="text-secondary" size={20} />
@@ -269,16 +262,6 @@ export default function SubmittedExercises() {
             </div>
             <span className="text-md font-bold text-pink">
               {exercises.filter(e => e.status === "Brouillon").length}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between bg-green-50 border border-green-200 p-5 rounded-xl">
-            <div className="flex items-center gap-3">
-              <MessageCircle className="text-green-600" size={20} />
-              <span className="font-regular text-md">Avec feedback</span>
-            </div>
-            <span className="text-md font-bold text-green-600">
-              {exercises.filter(e => e.hasFeedback).length}
             </span>
           </div>
         </div>

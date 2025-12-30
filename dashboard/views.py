@@ -1289,4 +1289,3 @@ def all_students_submissions(request):
         "students": result
     })
 
-
