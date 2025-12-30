@@ -49,8 +49,10 @@
     "EmailRequired": "Email is required",
     "EmailInvalid": "Invalid email format",
     "PasswordUpdateSuccess": "Password updated successfully!",
+    "ProfileUpdateSuccess": "Profile updated successfully!",
     "PasswordUpdateFailed": "Failed to update password",
-    "ProfileLoadFailed": "Cannot load user profile"
+    "ProfileLoadFailed": "Cannot load user profile",
+    "ProfileUpdateFailed": "Failed to update profile"
   },
   "Global": {
     "Loading": "Loading..."

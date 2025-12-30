@@ -41,7 +41,7 @@ export default function ExercisesManagement() {
     niveau_exo: "debutant",
     visibilite_exo: false,
     cours: 1,
-    utilisateur:1
+    utilisateur: 1
   });
 
 
@@ -70,7 +70,6 @@ export default function ExercisesManagement() {
         }));
 
         setExercises(formatted);
-        
       })
       .catch((err) => {
         console.error(t("errors.fetchExercises"), err);
@@ -84,7 +83,6 @@ export default function ExercisesManagement() {
     (e.titre_exo || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  
 
   /* ================= EDIT ================= */
   const openEdit = (ex) => {
@@ -95,58 +93,58 @@ export default function ExercisesManagement() {
       enonce: ex.enonce,
       niveau_exo: ex.niveau_exo,
       cours: ex.cours,
-      visibilite_exo:ex.visibilite_exo,
-      utilisateur:ex.utilisateur,
+      visibilite_exo: ex.visibilite_exo,
+      utilisateur: ex.utilisateur,
     });
     setEditModal(true);
   };
   const token = localStorage.getItem("admin_token"); // JWT admin
 
 
-const submitEdit = async () => {
-  if (!selectedExercise) return;
+  const submitEdit = async () => {
+    if (!selectedExercise) return;
 
-  const token = localStorage.getItem("admin_token"); // ou "token"
+    const token = localStorage.getItem("admin_token"); // ou "token"
 
- console.log({selectedExercise});
+    console.log({ selectedExercise });
 
-  try {
-    const res = await api.put(
-      `exercices/${selectedExercise.id_exercice}/`,
-      {
-        titre_exo: editValues.titre_exo,
-        enonce: editValues.enonce,
-        niveau_exo: editValues.niveau_exo,
-        categorie: editValues.categorie,
-        visibilite_exo: editValues.visibilite_exo,
-        utilisateur: editValues.utilisateur,
-        cours:editValues.cours
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    try {
+      const res = await api.put(
+        `exercices/${selectedExercise.id_exercice}/`,
+        {
+          titre_exo: editValues.titre_exo,
+          enonce: editValues.enonce,
+          niveau_exo: editValues.niveau_exo,
+          categorie: editValues.categorie,
+          visibilite_exo: editValues.visibilite_exo,
+          utilisateur: editValues.utilisateur,
+          cours: editValues.cours
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    // ✅ Toast ou alert succès
-    toast.success("Exercice mis à jour avec succès !");
+      // ✅ Toast ou alert succès
+      toast.success("Exercice mis à jour avec succès !");
 
-    // Mettre à jour la liste localement
-    const updatedExo = res.data;
-    setExercises((prev) =>
-      prev.map((ex) =>
-        ex.id_exercice === updatedExo.id_exercice ? updatedExo : ex
-      )
-    );
+      // Mettre à jour la liste localement
+      const updatedExo = res.data;
+      setExercises((prev) =>
+        prev.map((ex) =>
+          ex.id_exercice === updatedExo.id_exercice ? updatedExo : ex
+        )
+      );
 
-    // Fermer modal
-    setEditModal(false);
-    setSelectedExercise(null);
+      // Fermer modal
+      setEditModal(false);
+      setSelectedExercise(null);
 
-    return updatedExo.id_exercice;
-  } catch (err) {
-    console.error("Erreur mise à jour:", err.response?.data || err.message);
-    alert("Erreur lors de la mise à jour de l'exercice");
-    return null;
-  }
-};
+      return updatedExo.id_exercice;
+    } catch (err) {
+      console.error("Erreur mise à jour:", err.response?.data || err.message);
+      alert("Erreur lors de la mise à jour de l'exercice");
+      return null;
+    }
+  };
 
 
   /* ================= DELETE ================= */
@@ -253,10 +251,10 @@ const submitEdit = async () => {
               <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
                 <span>{t("submissions", { count: item.submissions })}</span>
                 <div className="flex gap-3" >
-                  <button className="text-muted hover:opacity-80" onClick={()=> openEdit(item)}>
+                  <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
                     <SquarePen size={20} />
                   </button>
-                  <button className="text-red hover:opacity-80" onClick={()=> handleDelete(item.id_exercice)}>
+                  <button className="text-red hover:opacity-80" onClick={() => handleDelete(item.id_exercice)}>
                     <Trash2 size={20} />
                   </button>
                 </div>
@@ -268,72 +266,72 @@ const submitEdit = async () => {
       </main>
 
       {/* Modals */}
-    
+
 
       <AddModal
-  open={editModal}
-  onClose={() => setEditModal(false)}
-  title={t("modal.edit.title")}
-  subtitle={t("modal.edit.subtitle")}
-  submitLabel={t("modal.edit.submit")}
-  cancelLabel={t("modal.edit.cancel")}
-  onSubmit={submitEdit}
-  fields={[
-    {
-      label: t("field.title"),
-      placeholder: t("field.titlePlaceholder"),
-      value: editValues.titre_exo,               // ✅ correct
-      onChange: (e) => setEditValues({ ...editValues, titre_exo: e.target.value }),
-    },
-    {
-      label: t("field.category"),
-      element:(
-        <select
-        value= {editValues.categorie}   
-        onChange={ (e) => setEditValues({ ...editValues, categorie: e.target.value })}
-        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="code">{t("categorie.code")}</option>
-          <option value="question_cours">{t("categorie.question_cours")}</option>
-        </select>
-      )
-     
-    },
-    {
-      label: t("field.difficulty"),
-      element: (
-        <select
-          value={editValues.niveau_exo}          
-          onChange={(e) => setEditValues({ ...editValues, niveau_exo: e.target.value })}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-        >
-          <option value="debutant">{t("difficulty.easy")}</option>
-          <option value="intermediaire">{t("difficulty.medium")}</option>
-          <option value="avance">{t("difficulty.hard")}</option>
-        </select>
-      ),
-    },
-    {
-      label: t("field.visibilite"),
-      element: (
-      <label className="flex items-center gap-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={editValues.visibilite_exo}   // ✅ checked
-        onChange={(e) =>
-          setEditValues({
-            ...editValues,
-            visibilite_exo: e.target.checked, // ✅ boolean
-          })
-        }
-      />
-      <span>{t("field.visibiliteLabel")}</span>
-      </label>
-    ),
-  }
+        open={editModal}
+        onClose={() => setEditModal(false)}
+        title={t("modal.edit.title")}
+        subtitle={t("modal.edit.subtitle")}
+        submitLabel={t("modal.edit.submit")}
+        cancelLabel={t("modal.edit.cancel")}
+        onSubmit={submitEdit}
+        fields={[
+          {
+            label: t("field.title"),
+            placeholder: t("field.titlePlaceholder"),
+            value: editValues.titre_exo,               // ✅ correct
+            onChange: (e) => setEditValues({ ...editValues, titre_exo: e.target.value }),
+          },
+          {
+            label: t("field.category"),
+            element: (
+              <select
+                value={editValues.categorie}
+                onChange={(e) => setEditValues({ ...editValues, categorie: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="code">{t("categorie.code")}</option>
+                <option value="question_cours">{t("categorie.question_cours")}</option>
+              </select>
+            )
 
-  ]}
-/>
+          },
+          {
+            label: t("field.difficulty"),
+            element: (
+              <select
+                value={editValues.niveau_exo}
+                onChange={(e) => setEditValues({ ...editValues, niveau_exo: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="debutant">{t("difficulty.easy")}</option>
+                <option value="intermediaire">{t("difficulty.medium")}</option>
+                <option value="avance">{t("difficulty.hard")}</option>
+              </select>
+            ),
+          },
+          {
+            label: t("field.visibilite"),
+            element: (
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editValues.visibilite_exo}   // ✅ checked
+                  onChange={(e) =>
+                    setEditValues({
+                      ...editValues,
+                      visibilite_exo: e.target.checked, // ✅ boolean
+                    })
+                  }
+                />
+                <span>{t("field.visibiliteLabel")}</span>
+              </label>
+            ),
+          }
+
+        ]}
+      />
 
     </div>
   );

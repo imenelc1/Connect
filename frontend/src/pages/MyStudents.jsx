@@ -63,7 +63,7 @@ export default function MyStudents() {
         });
         setStudentsProgress(progressMap);
       } catch (err) {
-        console.error("Erreur récupération progression étudiants :", err);
+        console.error(t("Errors.FetchProgress"), err);
       }
     };
 
@@ -83,7 +83,7 @@ export default function MyStudents() {
           const id = st.etudiant?.id_utilisateur || st.id;
           const prenom = st.etudiant?.prenom || "";
           const nom = st.etudiant?.nom || "";
-          const spaceName = st.space?.nom_space || "Espace inconnu";
+          const spaceName = st.space?.nom_space || t("Errors.unknownSpace");
           const spaceId = st.space?.id_space || st.space_id;
 
           if (!studentsMap[id]) {
@@ -135,7 +135,7 @@ export default function MyStudents() {
 
     try {
       await createStudent({ email, space_id: space });
-      alert("Étudiant ajouté avec succès !");
+      alert(t("Messages.StudentAdded"));
       setModal(false);
       setEmail("");
       setSpace("");
@@ -145,7 +145,8 @@ export default function MyStudents() {
       console.error("Erreur createStudent:", err);
       alert(
         err.response?.data?.error ||
-        "Une erreur est survenue lors de l'ajout de l'étudiant"
+        // "Une erreur est survenue lors de l'ajout de l'étudiant"
+        t("Errors.addStudent")
       );
     }
   };
@@ -156,20 +157,22 @@ export default function MyStudents() {
   const handleRemove = async (studentId, spaceId) => {
     if (
       !window.confirm(
-        "Voulez-vous vraiment supprimer cet étudiant de cet espace ?"
+        // "Voulez-vous vraiment supprimer cet étudiant de cet espace ?"
+        t("Confirmations.RemoveStudent")
       )
     )
       return;
 
     try {
       await removeStudent(studentId, spaceId);
-      alert("Étudiant supprimé avec succès !");
+      alert(t("Messages.StudentRemoved"));
       fetchStudents();
     } catch (err) {
       console.error("Erreur removeStudent:", err);
       alert(
         err.response?.data?.error ||
-        "Une erreur est survenue lors de la suppression"
+        // "Une erreur est survenue lors de la suppression"
+        t("Messages.DeleteError")
       );
     }
   };
@@ -230,11 +233,11 @@ export default function MyStudents() {
                           </h2>
                         </div>
 
-                        <Button
-                          className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10"
-                          onClick={() => navigate(`/student-exercises/${st.id}`)}
-                        >
+                        {/* RIGHT ARROW */}
+                        <Button className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10"
+                        onClick={() => navigate(`/student-exercises/${st.id}`)}>
                           <ChevronRight size={16} className="w-6 h-6" />
+                          
                         </Button>
                       </div>
                     </div>

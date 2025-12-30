@@ -1,6 +1,9 @@
+# quiz/apps.py
 from django.apps import AppConfig
 
-
-class QuizesConfig(AppConfig):
+class QuizConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'Quiz'
+    name = 'quiz'
+
+    def ready(self):
+        import quiz.signals  # 🔥 IMPORTANT

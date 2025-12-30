@@ -33,7 +33,7 @@ class Utilisateur(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_inscription = models.DateTimeField(auto_now_add=True)
-
+    must_change_password = models.BooleanField(default=False)
     USERNAME_FIELD = 'adresse_email'
     REQUIRED_FIELDS = ['nom', 'prenom']
 

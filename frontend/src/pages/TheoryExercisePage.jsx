@@ -57,34 +57,52 @@ export default function TheoryExercisePage() {
   };
 
   // ------------------- SEND SOLUTION -------------------
-  const handleSendSolution = async () => {
-    if (!exercise) return;
+ const handleSendSolution = async () => {
+  if (!exercise) return;
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await progressionService.submitTentative({
-        exercice_id: exercise.id_exercice,
-        reponse: answer,
-        output: "",
-        etat: "soumis",
-        temps_passe: getTempsPasse(),
-      });
+    const res = await progressionService.submitTentative({
+      exercice_id: exercise.id_exercice,
+      reponse: answer,
+      output: "",
+      etat: "soumis",
+      temps_passe: getTempsPasse(),
+    });
 
-      setFeedback(res.data?.feedback || "Solution envoyée !");
-      toast.success("Solution envoyée !");
-    } catch (error) {
-      console.error("Erreur lors de l'envoi :", error.response || error);
+    setFeedback(res.data?.feedback || "Solution envoyée !");
+    toast.success("Solution envoyée !");
 
-      if (error.response && error.response.status === 403) {
-        toast.error("Vous n'êtes pas autorisé à soumettre cet exercice !");
-      } else {
-        toast.error("Erreur lors de l'envoi");
+    //Vérifier si on peut encore soumettre
+    const canSubmitRes = await fetch(
+      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       }
-    } finally {
-      setLoading(false);
+    );
+    const canSubmitData = await canSubmitRes.json();
+    setCanSubmit(canSubmitData.can_submit);
+
+    if (!canSubmitData.can_submit) {
+      toast.error("Toutes les tentatives ont été utilisées !");
     }
-  };
+
+  } catch (error) {
+    console.error("Erreur lors de l'envoi :", error.response || error);
+
+    if (error.response && error.response.status === 403) {
+      toast.error("Vous n'êtes pas autorisé à soumettre cet exercice !");
+    } else {
+      toast.error("Erreur lors de l'envoi");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // ------------------- FETCH EXERCISE -------------------
   useEffect(() => {
@@ -124,6 +142,8 @@ export default function TheoryExercisePage() {
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
   const isStudent = userData.role === "etudiant";
+
+  
 
   useEffect(() => {
     if (!exerciceId) return;

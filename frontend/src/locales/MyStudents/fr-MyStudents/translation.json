@@ -12,6 +12,24 @@
   "studentID": "ID Étudiant",
   "studentIDPlaceholder": "ST_00129",
   "space": "Espace",
+   "selectSpace": "Sélectionner un espace",
   "active": "Actif",
-  "lastActive": "il y a {{time}}"
+  "lastActive": "il y a {{time}}",
+    "noStudentsMessage": "Aucun étudiant trouvé.",
+      "Messages": {
+    "StudentAdded": "Étudiant ajouté avec succès !",
+    "StudentRemoved": "Étudiant supprimé avec succès !"
+  },
+   "Errors": {
+    "FetchProgress": "Erreur lors de la récupération de la progression des étudiants",
+    "FetchStudents": "Erreur lors du chargement des étudiants",
+    "FetchSpaces": "Erreur lors du chargement des espaces",
+    "AddStudent": "Une erreur est survenue lors de l'ajout de l'étudiant",
+    "RemoveStudent": "Une erreur est survenue lors de la suppression de l'étudiant",
+    "unknownSpace":"Espace inconnu"
+  },
+
+   "Confirmations": {
+    "RemoveStudent": "Voulez-vous vraiment supprimer cet étudiant de cet espace ?"
+  }
 }

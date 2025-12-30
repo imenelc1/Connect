@@ -26,7 +26,7 @@ urlpatterns = [
     path("admin/courses/<int:pk>/", CoursDetailView.as_view(), name="cours-detail"),
     path('lessons/<int:lesson_id>/visited/', MarkLessonVisitedView.as_view(), name='lesson-visited'),
     path("courses/admin/<int:pk>/status/", update_course_status,name="update_course_status"),
-    path("cours", CoursSearchView.as_view(), name="cours-list"),
+     path("cours", CoursSearchView.as_view(), name="cours-list"),
        
   
   

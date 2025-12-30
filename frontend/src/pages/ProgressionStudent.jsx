@@ -8,11 +8,14 @@ import { TrendingUp } from "lucide-react";
 import { getTentatives } from "../services/progressionService";
 import axios from "axios";
 import { CheckCircle } from "lucide-react";
+import { useParams } from "react-router-dom";
+import api from "../services/apiGenerale";
 
 export default function ProgressStudent() {
   const { t } = useTranslation("ProgressStudent");
 
   const [student, setStudent] = useState(null);
+  const { studentId } = useParams();
   const [courses, setCourses] = useState([]);
   const [gradeData, setGradeData] = useState([]);
   const [totalExercises, setTotalExercises] = useState(0);
@@ -21,6 +24,10 @@ export default function ProgressStudent() {
   const [quizProgressData, setQuizProgressData] = useState([]);
   const [submittedExercisesList, setSubmittedExercisesList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const studentIdParam = useParams().studentId;
+  const [quizzes, setQuizzes] = useState([]);
+
+
 
   const colorClasses = {
     green: { bar: "bg-green", text: "text-green" },
@@ -28,6 +35,10 @@ export default function ProgressStudent() {
     purple: { bar: "bg-purple", text: "text-purple" },
     pink: { bar: "bg-pink", text: "text-pink" },
   };
+
+
+
+
 
   // ------------------ FETCH DASHBOARD ------------------
   useEffect(() => {
@@ -42,6 +53,8 @@ export default function ProgressStudent() {
         });
 
         const data = res.data;
+        console.log("student:", data.student);
+
         setStudent(data.student || {});
         setCourses(data.courses || []);
         setGradeData(data.grade_data || []);
@@ -97,19 +110,30 @@ export default function ProgressStudent() {
  useEffect(() => {
   const fetchSubmittedExercises = async () => {
     try {
-      const data = await getTentatives(); // ⚡ appelle ton service
+      const data = await getTentatives();
       if (!data) return;
 
-      const submitted = data
-        .filter((t) => t.etat === "soumis" && t.exercice) // on s'assure qu'il y a un exercice
-        .map((t) => ({
-          id: t.id,
-          title: t.exercice.titre_exo || "Untitled",
-          submitted_at: t.submitted_at || t.created_at,
-          feedback: t.feedback || "",
-        }));
+      const latestByExercise = {};
 
-      setSubmittedExercisesList(submitted);
+      data.forEach((t) => {
+        if (t.etat !== "soumis" || !t.exercice) return;
+
+        const exId = t.exercice.id_exercice;
+
+        if (
+          !latestByExercise[exId] ||
+          new Date(t.submitted_at) > new Date(latestByExercise[exId].submitted_at)
+        ) {
+          latestByExercise[exId] = {
+            id: t.id,
+            title: t.exercice.titre_exo || "Untitled",
+            submitted_at: t.submitted_at,
+            feedback: t.feedback || "",
+          };
+        }
+      });
+
+      setSubmittedExercisesList(Object.values(latestByExercise));
     } catch (err) {
       console.error("Erreur récupération tentatives :", err);
     }
@@ -117,6 +141,28 @@ export default function ProgressStudent() {
 
   fetchSubmittedExercises();
 }, []);
+
+
+useEffect(() => {
+
+
+  const fetchQuizzes = async () => {
+    try {
+      api.get("quiz/student/quizzes-faits/") // baseURL déjà /api/
+   .then(res => console.log(res.data))
+   .catch(err => console.error(err.response?.status, err.response?.data));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchQuizzes();
+}, [studentId]);
+
+
+
+
+
 
 
   const submissionRate =
@@ -199,7 +245,6 @@ export default function ProgressStudent() {
   )}
 </div>
 
-
         {/* Courses List */}
         <div className="flex-1 w-full">
           <div className="bg-card rounded-2xl shadow p-6 mb-6">
@@ -231,7 +276,42 @@ export default function ProgressStudent() {
 
 
         {/* Charts */}
-        <div className="mt-6">
+        <div className="flex flex-col lg:flex-row gap-6 mt-6">
+          <div className="bg-card p-6 rounded-2xl shadow w-full lg:w-96 mb-6">
+      <h2 className="font-semibold text-lg mb-4">Quizs terminés</h2>
+
+      {quizzes.length > 0 ? (
+        <div className="flex flex-col gap-3 max-h-80 overflow-y-auto">
+          {quizzes.map((quiz) => (
+            <div
+              key={quiz.quiz_id}
+              className="flex justify-between items-center p-3 rounded-lg shadow-sm bg-gray/10 hover:bg-gray/20 transition"
+            >
+              <div className="flex items-center gap-2">
+                
+                <p className="font-medium text-gray">{quiz.titre_exercice}</p>
+                <CheckCircle size={5} className="text-purple" />
+              </div>
+
+              <div className="flex flex-col items-end text-right text-sm text-gray">
+                <span>
+                  {quiz.score_obtenu}/{quiz.score_max} pts
+                </span>
+                <span className="text-xs mt-1">
+                 {quiz.reussi ? <CheckCircle size={14} className="text-purple"/> : ""}
+                </span>
+                <span className="text-xs mt-1 text-gray-400">
+                  {new Date(quiz.date_fin).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray text-sm">Aucun quiz terminé pour l'instant</p>
+      )}
+    </div>
+
           <WeeklySubmissionChart totalExercises={totalExercises} submitted={submittedExercises} />
         </div>
         <div className="mt-4">

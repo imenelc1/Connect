@@ -1,12 +1,14 @@
 import ModernDropdown from "../common/ModernDropdown";
 
 export default function MyQuizzesSelect({ items, selectedItemId, onChange, existingItems }) {
-  // Transformer les items filtrés en options pour ModernDropdown
+  // Récupérer les IDs des quizzes déjà dans l'espace
+  const existingIds = new Set(existingItems.map(q => q.id));
+
   const options = items
-    .filter(q => !existingItems.some(e => e.id === q.id))
+    .filter(q => q && q.id && !existingIds.has(q.id))  // ignorer les undefined et ceux déjà ajoutés
     .map(q => ({
       value: q.id,
-      label: q.title?.trim() || "Sans titre",
+      label: q.title?.trim() || "Sans titre"
     }));
 
   return (

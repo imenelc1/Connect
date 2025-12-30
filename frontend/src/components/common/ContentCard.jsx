@@ -149,12 +149,13 @@ export default function ContentCard({
             </div>
             <span className="text-sm">{course.author}</span>
           </div>
-         <span className="text-xs text-gray-400">
-  {pageType === "exercise" && course.categorie}
-  {pageType === "quiz" && course.duration && `${course.duration} min`}
-  {pageType === "course" && course.duration}
-</span>
-
+          <span className="text-xs text-gray-400">
+            {pageType === "exercise"
+              ? course.categorie
+              : pageType === "quiz" && course.duration
+                ? `${course.duration} min`
+                : course.duration}
+          </span>
         </div>
 
         {showProgress && (

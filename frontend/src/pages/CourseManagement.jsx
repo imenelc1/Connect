@@ -10,12 +10,17 @@ import ContentSearchBar from "../components/common/ContentSearchBar";
 import ModernDropdown from "../components/common/ModernDropdown";
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
+import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext";
 import { toast } from 'react-hot-toast';
 
 export default function CoursesManagement() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("CoursesManagement");
   const { toggleDarkMode } = useContext(ThemeContext);
+  
+  const adminData = JSON.parse(localStorage.getItem("admin")) || {};
+  const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
 
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -211,6 +216,17 @@ export default function CoursesManagement() {
       {/* Sidebar */}
       <div>
         <Navbar />
+        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
+      </div>
       </div>
 
       {/* Main Content */}

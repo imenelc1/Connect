@@ -51,24 +51,22 @@ export default function AllCoursesPage() {
     }
   };
 
-  useEffect(() => {
-    const handler = (e) => setSidebarCollapsed(e.detail);
-    window.addEventListener("sidebarChanged", handler);
-    return () => window.removeEventListener("sidebarChanged", handler);
-  }, []);
-
+  // Handle window resize
   useEffect(() => {
     const resizeHandler = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", resizeHandler);
     return () => window.removeEventListener("resize", resizeHandler);
   }, []);
 
+  // Sidebar collapsed
+  useEffect(() => {
+    const handler = (e) => setSidebarCollapsed(e.detail);
+    window.addEventListener("sidebarChanged", handler);
+    return () => window.removeEventListener("sidebarChanged", handler);
+  }, []);
+
   const sidebarWidth = sidebarCollapsed ? 60 : 240;
-  const getGridCols = () => {
-    if (windowWidth < 640) return 1;
-    if (windowWidth < 1024) return 2;
-    return 3;
-  };
+  const getGridCols = () => (windowWidth < 640 ? 1 : windowWidth < 1024 ? 2 : 3);
 
   // Fetch courses
   useEffect(() => {
@@ -205,33 +203,33 @@ export default function AllCoursesPage() {
         >
           {filteredCourses.map((course, idx) => (
             <ContentCard
-  key={idx}
-  className={gradientMap[course.level]}
-  course={course}
-  role={userRole}
-  showProgress={userRole === "etudiant"}
-  onDelete={handleDeleteCourse}
->
-  {userRole === "etudiant" && (
-    <Button
-      variant="courseStart"
-      className="mt-2 w-full"
-      onClick={() => {
-        if (course.action === "start") {
-          navigate(`/course/${course.id_cours}/lesson/first`);
-        } else if (course.action === "continue") {
-          navigate(`/course/${course.id_cours}/lesson/${course.last_lesson_id}`);
-        } else if (course.action === "restart") {
-          navigate(`/course/${course.id_cours}/lesson/first`);
-        }
-      }}
-    >
-      {course.action === "start" && t("startCourse")}
-      {course.action === "continue" && t("continueCourse")}
-      {course.action === "restart" && t("restartCourse")}
-    </Button>
-  )}
-</ContentCard>
+              key={idx}
+              className={gradientMap[course.level]}
+              course={course}
+              role={userRole}
+              showProgress={userRole === "etudiant"}
+              onDelete={handleDeleteCourse}
+            >
+              {userRole === "etudiant" && (
+                <Button
+                  variant="courseStart"
+                  className="mt-2 w-full"
+                  onClick={() => {
+                    if (course.action === "start") {
+                      navigate(`/course/${course.id_cours}/lesson/first`);
+                    } else if (course.action === "continue") {
+                      navigate(`/course/${course.id_cours}/lesson/${course.last_lesson_id}`);
+                    } else if (course.action === "restart") {
+                      navigate(`/course/${course.id_cours}/lesson/first`);
+                    }
+                  }}
+                >
+                  {course.action === "start" && t("startCourse")}
+                  {course.action === "continue" && t("continueCourse")}
+                  {course.action === "restart" && t("restartCourse")}
+                </Button>
+              )}
+            </ContentCard>
 
           ))}
         </div>

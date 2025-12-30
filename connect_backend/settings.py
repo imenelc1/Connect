@@ -40,20 +40,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     # Apps du projet
     'users',
-    'courses',
-    'exercices',
-    'quiz',
-    'forum',
+    'courses.apps.CoursesConfig',
+    'exercices.app.ExercicesConfig',
+    'quiz.app.QuizConfig',
+    'forum.apps.ForumConfig',
     'ia',
     'dashboard',
     'feedback',
-    'spaces',
+    'spaces.apps.SpacesConfig',
     'badges',
     # API et CORS
     'rest_framework',
     'corsheaders',
+    'django_extensions',
 ]
 
 
@@ -148,11 +150,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        
-    ],
+     ]
 }
+
+
 
 
 

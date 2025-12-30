@@ -21,6 +21,7 @@ import CommunityPage from "../pages/CommunityPage";
 import Badges from "../pages/Badges";
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
+import WelcomeResetPassword from "../pages/WelcomeResetPassword.jsx";
 
 /* ================= COURSES ================= */
 import AllCoursesPage from "../pages/AllCoursesPage";
@@ -87,9 +88,11 @@ export default function AppRoutes() {
         {/* ========= COMMON ========= */}
         <Route path="/settings" element={<Setting />} />
         <Route path="/community" element={<CommunityPage />} />
-        <Route path="/badges" element={<Badges />} />
+        <Route path="/badges" element={<Badges/>} />
         <Route path="/my-students" element={<MyStudents />} />
         <Route path="/spaces" element={<Spaces />} />
+        <Route path="/welcome-reset-password/:token" element={<WelcomeResetPassword />} />
+
 
         {/* ========= COURSES ========= */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
@@ -114,14 +117,15 @@ export default function AppRoutes() {
         <Route path="/submitted-exercise/:tentativeId" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
         <Route path="/progress-exercice" element={<ProgressExercice />} />
-        <Route path="/progress-student" element={<ProgressStudent />} />
+       
+        <Route path="/progress-student/" element={<ProgressStudent />} />
         <Route path="/new-exercise" element={<NewExercise />} />
         <Route path="/exercise-preview" element={<ExercisePreview />} />
         <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
        
 
          {/* ========= QUIZZES ========= */}
-        <Route path="/all-quizzes" element={<AllQuizzesPage />} />
+       <Route path="/all-quizzes" element={<AllQuizzesPage />} />
         <Route path="/create-quiz" element={<CreateQuiz />} />
         <Route path="/quiz-preview/:exerciceId" element={<QuizPreview />} />
         <Route path="/quiz-intro/:exerciceId" element={<QuizIntroPage />} />

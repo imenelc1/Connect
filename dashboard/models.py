@@ -1,8 +1,18 @@
 from datetime import timedelta
 from django.db import models
+from quiz.models import Quiz
 from users.models import Utilisateur
 from courses.models import Cours, Lecon
 from exercices.models import Exercice
+from datetime import timedelta
+
+class LeconComplete(models.Model):
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    lecon = models.ForeignKey(Lecon, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('utilisateur', 'lecon')
 
 class LeconComplete(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
@@ -60,7 +70,7 @@ class TentativeExercice(models.Model):
             self.submitted_at = timezone.now()
         super().save(*args, **kwargs)
     class Meta:
-        unique_together = ('utilisateur', 'exercice')
+        ordering = ['-created_at'] 
 
 
 
@@ -76,12 +86,22 @@ class SessionDuration(models.Model):
 # Historique pour dashboard / graphiques
 class ProgressionHistory(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-    cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
+    cours = models.ForeignKey(Cours, on_delete=models.CASCADE, null=True, blank=True)
 
-    avancement = models.FloatField()
+    TYPE_CHOICES = [
+        ("cours", "Cours"),
+        ("quiz", "Quiz"),
+    ]
+    type_contenu = models.CharField(max_length=10, choices=TYPE_CHOICES, default="cours")
+
+    quiz = models.ForeignKey("quiz.Quiz", on_delete=models.CASCADE, null=True, blank=True)
+
+    avancement = models.FloatField()  # % de progression pour cours, score ou % pour quiz
     temps_passe = models.DurationField()
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["created_at"]
+
+

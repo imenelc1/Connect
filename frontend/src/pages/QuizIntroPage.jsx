@@ -68,18 +68,10 @@ export default function QuizIntroPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center px-4 md:px-8 py-6"
-      style={{ background: "rgb(var(--color-bg))" }}
+      className="min-h-screen flex flex-col items-center px-4 md:px-8 py-6 bg-surface"
+    
     >
-      {/* SWITCH LANG */}
-      <div className="self-end mb-4">
-        <button
-          onClick={switchLang}
-          className="px-4 py-2 bg-gray-200 rounded-md shadow-sm hover:bg-gray-300"
-        >
-          {lang === "fr" ? "EN" : "FR"}
-        </button>
-      </div>
+
 
       {/* TITLE */}
       <h1 className="text-2xl md:text-4xl font-bold text-center text-[rgb(var(--color-primary))] mb-6">
@@ -87,7 +79,7 @@ export default function QuizIntroPage() {
       </h1>
 
       {/* MAIN CARD */}
-      <div className="bg-white rounded-2xl shadow-lg bg-grad-6 p-10 w-full max-w-3xl mb-10 min-h-[500px] flex flex-col justify-center">
+      <div className="bg-white rounded-2xl shadow-lg bg-grad-6 p-10 w-full  mb-10 min-h-[500px] flex flex-col justify-center">
 
         {/* ICON */}
         <div className="flex justify-center mb-6">

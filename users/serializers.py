@@ -10,7 +10,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         model = Utilisateur
         fields = [
             'id_utilisateur', 'nom', 'prenom', 'date_naissance',
-            'adresse_email', 'mot_de_passe', 'matricule'
+            'adresse_email', 'mot_de_passe', 'matricule', 'must_change_password'
         ]
    
     def create(self, validated_data):
@@ -62,7 +62,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id_utilisateur', 'nom', 'prenom', 'date_naissance',
             'adresse_email', 'matricule', 'role', 'grade', 'specialite',
-            'annee_etude', 'joined'
+            'annee_etude', 'joined', 'must_change_password'
         ]
 
     def get_role(self, obj):
@@ -82,3 +82,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_annee_etude(self, obj):
         return getattr(getattr(obj, "etudiant", None), "annee_etude", None)
+
+class AdminProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Administrateur
+        fields = ['id_admin', 'email_admin']
