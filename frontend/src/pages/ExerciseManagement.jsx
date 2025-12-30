@@ -2,18 +2,18 @@ import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
-import { Search, Pencil, Trash2, Code } from "lucide-react";
+import { Search, SquarePen, Trash2, Code } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
 // Navigation entre routes (React Router)
 import { useNavigate } from "react-router-dom";
-
+import api from "../services/courseService";
+import { toast } from 'react-hot-toast';
 // Thème global (dark/light mode)
 import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import ContentSearchBar from "../components/common/ContentSearchBar";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
+
 export default function ExercisesManagement() {
   // SEARCH contrôlé
   const [search, setSearch] = useState("");
@@ -25,30 +25,23 @@ export default function ExercisesManagement() {
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const adminData = JSON.parse(localStorage.getItem("admin")) || {};
-  const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
+
 
 
   // LISTE
   const [exercises, setExercises] = useState([]);
-  const [createModal, setCreateModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
 
-  const [newExercise, setNewExercise] = useState({
-    titre_exo: "",
-    categorie: "",
-    enonce: "",
-    niveau_exo: "debutant",
-    cours: 1,
-  });
 
   const [editValues, setEditValues] = useState({
     titre_exo: "",
     categorie: "",
     enonce: "",
     niveau_exo: "debutant",
+    visibilite_exo: false,
     cours: 1,
+    utilisateur: 1
   });
 
 
@@ -58,7 +51,7 @@ export default function ExercisesManagement() {
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data)) {
-          console.error("Les exercices ne sont pas un tableau :", data);
+          console.error(t("errors.invalidData"), data);
           setExercises([]);
           return;
         }
@@ -73,12 +66,13 @@ export default function ExercisesManagement() {
           cours: ex.cours,
           utilisateur: ex.utilisateur,
           utilisateur_name: ex.utilisateur_name,
+          visibilite_exo: ex.visibilite_exo, //est un boolean
         }));
 
         setExercises(formatted);
       })
       .catch((err) => {
-        console.error("Erreur chargement exercices :", err);
+        console.error(t("errors.fetchExercises"), err);
         setExercises([]);
       });
   }, []);
@@ -89,25 +83,6 @@ export default function ExercisesManagement() {
     (e.titre_exo || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  /* ================= CREATE ================= */
-  const submitCreate = (e) => {
-    e.preventDefault();
-
-    fetch("http://localhost:8000/api/exercices/create/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify(newExercise),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setExercises([...exercises, data]);
-        setCreateModal(false);
-        setNewExercise({ titre_exo: "", categorie: "", enonce: "", niveau_exo: "debutant", cours: 1 });
-      });
-  };
 
   /* ================= EDIT ================= */
   const openEdit = (ex) => {
@@ -118,35 +93,64 @@ export default function ExercisesManagement() {
       enonce: ex.enonce,
       niveau_exo: ex.niveau_exo,
       cours: ex.cours,
+      visibilite_exo: ex.visibilite_exo,
+      utilisateur: ex.utilisateur,
     });
     setEditModal(true);
   };
+  const token = localStorage.getItem("admin_token"); // JWT admin
 
-  const submitEdit = (e) => {
-    e.preventDefault();
 
-    fetch(`http://localhost:8000/api/exercices/${selectedExercise.id_exercice}/`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify(editValues),
-    })
-      .then((res) => res.json())
-      .then((updated) => {
-        setExercises(
-          exercises.map((ex) =>
-            ex.id_exercice === updated.id_exercice ? updated : ex
-          )
-        );
-        setEditModal(false);
-      });
+  const submitEdit = async () => {
+    if (!selectedExercise) return;
+
+    const token = localStorage.getItem("admin_token"); // ou "token"
+
+    console.log({ selectedExercise });
+
+    try {
+      const res = await api.put(
+        `exercices/${selectedExercise.id_exercice}/`,
+        {
+          titre_exo: editValues.titre_exo,
+          enonce: editValues.enonce,
+          niveau_exo: editValues.niveau_exo,
+          categorie: editValues.categorie,
+          visibilite_exo: editValues.visibilite_exo,
+          utilisateur: editValues.utilisateur,
+          cours: editValues.cours
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // ✅ Toast ou alert succès
+      toast.success("Exercice mis à jour avec succès !");
+
+      // Mettre à jour la liste localement
+      const updatedExo = res.data;
+      setExercises((prev) =>
+        prev.map((ex) =>
+          ex.id_exercice === updatedExo.id_exercice ? updatedExo : ex
+        )
+      );
+
+      // Fermer modal
+      setEditModal(false);
+      setSelectedExercise(null);
+
+      return updatedExo.id_exercice;
+    } catch (err) {
+      console.error("Erreur mise à jour:", err.response?.data || err.message);
+      alert("Erreur lors de la mise à jour de l'exercice");
+      return null;
+    }
   };
+
 
   /* ================= DELETE ================= */
   const handleDelete = (id) => {
-    fetch(`http://localhost:8000/api/exercices/delete/${id}/`, {
+    if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
+    fetch(`http://localhost:8000/api/exercices/${id}/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -181,23 +185,11 @@ export default function ExercisesManagement() {
     avance: "bg-grad-4",
   };
 
-
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-       {/* Sidebar */}
+      {/* Sidebar */}
       <div>
         <Navbar />
-        <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
       </div>
 
       {/* Main Content */}
@@ -212,15 +204,7 @@ export default function ExercisesManagement() {
             <p className="text-gray">{t("description")}</p>
           </div>
 
-          <div className="flex gap-4 items-center">
-            <Button
-              text={t("addExerciseButton")}
-              variant="primary"
-              className="!w-auto px-6 py-2 rounded-xl"
-              onClick={() => setCreateModal(true)}
-            />
 
-          </div>
         </div>
 
         {/* Search */}
@@ -238,7 +222,7 @@ export default function ExercisesManagement() {
           {filtered.map((item) => (
             <div
               key={item.id_exercice}
-              className={`${ difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
+              className={`${difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
             >
               <div className="flex justify-between items-center mb-4">
                 <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
@@ -246,10 +230,10 @@ export default function ExercisesManagement() {
                 </div>
                 <span
                   className={`px-3 py-1 text-xs font-medium rounded-full ${item.niveau_exo === "debutant"
-                      ? "bg-muted/20 text-muted"
-                      : item.niveau_exo === "intermediaire"
-                        ? "bg-pink/20 text-pink"
-                        : "bg-purple/20 text-purple"
+                    ? "bg-muted/20 text-muted"
+                    : item.niveau_exo === "intermediaire"
+                      ? "bg-pink/20 text-pink"
+                      : "bg-purple/20 text-purple"
                     }`}
                 >
                   {item.niveau_exercice_label}
@@ -266,18 +250,12 @@ export default function ExercisesManagement() {
 
               <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
                 <span>{t("submissions", { count: item.submissions })}</span>
-                <div className="flex gap-3">
-                  <button
-                    className="text-muted hover:opacity-80"
-                    onClick={() => openEdit(item)}
-                  >
-                    <Pencil size={18} />
+                <div className="flex gap-3" >
+                  <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
+                    <SquarePen size={20} />
                   </button>
-                  <button
-                    className="text-red hover:opacity-80"
-                    onClick={() => handleDelete(item.id_exercice)}
-                  >
-                    <Trash2 size={18} />
+                  <button className="text-red hover:opacity-80" onClick={() => handleDelete(item.id_exercice)}>
+                    <Trash2 size={20} />
                   </button>
                 </div>
               </div>
@@ -288,43 +266,7 @@ export default function ExercisesManagement() {
       </main>
 
       {/* Modals */}
-      <AddModal
-        open={createModal}
-        onClose={() => setCreateModal(false)}
-        title={t("modal.create.title")}
-        subtitle={t("modal.create.subtitle")}
-        submitLabel={t("modal.create.submit")}
-        cancelLabel={t("modal.create.cancel")}
-        onSubmit={submitCreate}
-        fields={[
-          {
-            label: t("field.title"),
-            placeholder: t("field.titlePlaceholder"),
-            value: newExercise.title,
-            onChange: (e) => setNewExercise({ ...newExercise, title: e.target.value }),
-          },
-          {
-            label: t("field.category"),
-            placeholder: t("field.categoryPlaceholder"),
-            value: newExercise.category,
-            onChange: (e) => setNewExercise({ ...newExercise, category: e.target.value }),
-          },
-          {
-            label: t("field.difficulty"),
-            element: (
-              <select
-                value={newExercise.difficulty}
-                onChange={(e) => setNewExercise({ ...newExercise, difficulty: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="easy">{t("difficulty.easy")}</option>
-                <option value="medium">{t("difficulty.medium")}</option>
-                <option value="hard">{t("difficulty.hard")}</option>
-              </select>
-            ),
-          },
-        ]}
-      />
+
 
       <AddModal
         open={editModal}
@@ -338,31 +280,59 @@ export default function ExercisesManagement() {
           {
             label: t("field.title"),
             placeholder: t("field.titlePlaceholder"),
-            value: editValues.title,
-            onChange: (e) => setEditValues({ ...editValues, title: e.target.value }),
+            value: editValues.titre_exo,               // ✅ correct
+            onChange: (e) => setEditValues({ ...editValues, titre_exo: e.target.value }),
           },
           {
             label: t("field.category"),
-            placeholder: t("field.categoryPlaceholder"),
-            value: editValues.category,
-            onChange: (e) => setEditValues({ ...editValues, category: e.target.value }),
+            element: (
+              <select
+                value={editValues.categorie}
+                onChange={(e) => setEditValues({ ...editValues, categorie: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="code">{t("categorie.code")}</option>
+                <option value="question_cours">{t("categorie.question_cours")}</option>
+              </select>
+            )
+
           },
           {
             label: t("field.difficulty"),
             element: (
               <select
-                value={editValues.difficulty}
-                onChange={(e) => setEditValues({ ...editValues, difficulty: e.target.value })}
+                value={editValues.niveau_exo}
+                onChange={(e) => setEditValues({ ...editValues, niveau_exo: e.target.value })}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
-                <option value="easy">{t("difficulty.easy")}</option>
-                <option value="medium">{t("difficulty.medium")}</option>
-                <option value="hard">{t("difficulty.hard")}</option>
+                <option value="debutant">{t("difficulty.easy")}</option>
+                <option value="intermediaire">{t("difficulty.medium")}</option>
+                <option value="avance">{t("difficulty.hard")}</option>
               </select>
             ),
           },
+          {
+            label: t("field.visibilite"),
+            element: (
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editValues.visibilite_exo}   // ✅ checked
+                  onChange={(e) =>
+                    setEditValues({
+                      ...editValues,
+                      visibilite_exo: e.target.checked, // ✅ boolean
+                    })
+                  }
+                />
+                <span>{t("field.visibiliteLabel")}</span>
+              </label>
+            ),
+          }
+
         ]}
       />
+
     </div>
   );
 }

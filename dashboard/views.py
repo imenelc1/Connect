@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
+from badges.views import check_course_badges, check_first_steps_badge, check_marathon_coder_badge, check_problem_solver_badge
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
@@ -60,7 +61,7 @@ def complete_lesson(request, lecon_id):
     ).count()
     cours_progress = round((completed_cours / total_cours) * 100) if total_cours > 0 else 0
 
-    # Récupérer ou créer la progression du cours (⚠️ defaults obligatoires)
+    # Récupérer ou créer la progression du cours
     pc, _ = ProgressionCours.objects.get_or_create(
         utilisateur=user,
         cours=cours,
@@ -79,7 +80,8 @@ def complete_lesson(request, lecon_id):
     duration = request.data.get("duration", 0)
     if duration and duration > 0:
         pc.temps_passe = (pc.temps_passe or timedelta(seconds=0)) + timedelta(seconds=duration)
-
+    
+    check_course_badges(user, pc)
     pc.save()
 
     # Historique
@@ -139,6 +141,8 @@ def complete_lessons_bulk(request):
     else:
         cours_progress = 0
 
+
+    check_course_badges(user, pc)
     return Response({
         "course_progress": cours_progress,
         "temps_passe": pc.temps_passe.total_seconds() if cours else 0
@@ -187,6 +191,8 @@ def reset_progress(request, cours_id):
         pc.derniere_lecon = None
         pc.save()
 
+
+        check_course_badges(student, pc)
         return Response({"status": "success", "progress": 0})
     except ProgressionCours.DoesNotExist:
         return Response({"status": "error", "message": "Progression not found"}, status=404)
@@ -228,6 +234,8 @@ def add_session(request):
             utilisateur=request.user,
             duration=duration
         )
+
+        check_marathon_coder_badge(request.user)
         return Response({"saved": True, "cumulative": False})
 
 
@@ -253,7 +261,6 @@ def daily_time(request):
         "total_seconds": total_seconds,
         "readable": f"{hours}h {minutes}min {seconds}s"
     })
-
 
 
 @api_view(['GET'])
@@ -643,28 +650,23 @@ class create_tentative(APIView):
         user = request.user
         exercice_id = request.data.get("exercice_id")
         etat = request.data.get("etat", "brouillon")
-        overwrite = request.data.get("overwrite", False)  # si on veut écraser dernière tentative
+        overwrite = request.data.get("overwrite", False)
 
-        # Vérification du rôle
         if not hasattr(user, "etudiant"):
             return Response(
                 {"error": "Seuls les étudiants peuvent participer aux exercices"},
                 status=403
             )
 
-        # Récupération de l'exercice
         try:
             exercice = Exercice.objects.get(id_exercice=exercice_id)
         except Exercice.DoesNotExist:
             return Response({"error": "Exercice non trouvé"}, status=404)
 
-        # Vérification appartenance à l'espace pour les soumissions
         if etat == "soumis" and not etudiant_appartient_a_lespace(user, exercice):
             raise PermissionDenied("Vous ne pouvez pas soumettre cet exercice")
 
-        # Temps passé
-        temps_passe_sec = request.data.get("temps_passe", 0)
-        temps_passe = timedelta(seconds=int(temps_passe_sec))
+        temps_passe = timedelta(seconds=int(request.data.get("temps_passe", 0)))
 
         defaults = {
             "reponse": request.data.get("reponse", ""),
@@ -673,8 +675,8 @@ class create_tentative(APIView):
             "temps_passe": temps_passe,
         }
 
+        # ================= BROUILLON =================
         if etat == "brouillon":
-            # Toujours un seul brouillon par étudiant et exercice
             tentative, created = TentativeExercice.objects.update_or_create(
                 utilisateur=user,
                 exercice=exercice,
@@ -682,8 +684,11 @@ class create_tentative(APIView):
                 defaults=defaults
             )
 
-        elif etat == "soumis":
-            # Vérifier si un brouillon existe
+            #First Steps OK même en brouillon
+            check_first_steps_badge(user)
+
+        # ================= SOUMIS =================
+        else:
             brouillon = TentativeExercice.objects.filter(
                 utilisateur=user,
                 exercice=exercice,
@@ -691,49 +696,27 @@ class create_tentative(APIView):
             ).first()
 
             if brouillon:
-                # Transformer le brouillon en soumis
                 brouillon.etat = "soumis"
                 brouillon.reponse = defaults["reponse"]
                 brouillon.output = defaults["output"]
-                brouillon.temps_passe = defaults["temps_passe"]
+                brouillon.temps_passe = temps_passe
                 brouillon.submitted_at = now()
-                brouillon.save(update_fields=["etat", "reponse", "output", "temps_passe", "submitted_at"])
+                brouillon.save()
                 tentative = brouillon
             else:
-                # Compter les soumissions existantes
-                nb_soumissions = TentativeExercice.objects.filter(
+                tentative = TentativeExercice.objects.create(
                     utilisateur=user,
                     exercice=exercice,
-                    etat="soumis"
-                ).count()
+                    etat="soumis",
+                    reponse=defaults["reponse"],
+                    output=defaults["output"],
+                    temps_passe=temps_passe,
+                    submitted_at=now()
+                )
 
-                if exercice.max_soumissions != 0 and nb_soumissions >= exercice.max_soumissions:
-                    if not overwrite:
-                        return Response({"error": "Limite de soumissions atteinte"}, status=400)
-                    else:
-                        # Écraser la dernière soumission
-                        last_submission = TentativeExercice.objects.filter(
-                            utilisateur=user,
-                            exercice=exercice,
-                            etat="soumis"
-                        ).order_by("-submitted_at").first()
-                        last_submission.reponse = defaults["reponse"]
-                        last_submission.output = defaults["output"]
-                        last_submission.temps_passe = defaults["temps_passe"]
-                        last_submission.submitted_at = now()
-                        last_submission.save(update_fields=["reponse", "output", "temps_passe", "submitted_at"])
-                        tentative = last_submission
-                else:
-                    # Créer nouvelle tentative soumis
-                    tentative = TentativeExercice.objects.create(
-                        utilisateur=user,
-                        exercice=exercice,
-                        etat="soumis",
-                        reponse=defaults["reponse"],
-                        output=defaults["output"],
-                        temps_passe=defaults["temps_passe"],
-                        submitted_at=now()
-                    )
+            # BADGES après une vraie soumission
+            check_first_steps_badge(user)
+            check_problem_solver_badge(user)
 
         return Response({
             "success": "Tentative enregistrée",
@@ -743,6 +726,7 @@ class create_tentative(APIView):
                 "submitted_at": tentative.submitted_at,
             }
         }, status=status.HTTP_200_OK)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
@@ -922,57 +906,45 @@ def student_active_courses(request, student_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def weekly_submission_chart(request, student_id):
-    prof = request.user
+    today = localtime(now())
+    end_of_today = today.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    today = now().date()
-    start_of_this_week = today - timedelta(days=today.weekday())
-    start_date = start_of_this_week - timedelta(weeks=5)
-
-    spaces = Space.objects.filter(
-        utilisateur=prof,
-        spaceetudiant__etudiant_id=student_id
-    ).distinct()
-
-    exercises = Exercice.objects.filter(
-        utilisateur=prof,
-        spaceexo__space__in=spaces
-    ).distinct()
-
-    total_exercises = exercises.count() or 1  # éviter division par 0
-
-    data = []
+    # 6 périodes glissantes de 7 jours
+    periods = []
     for i in range(6):
-        week_start = start_date + timedelta(weeks=i)
-        week_end = week_start + timedelta(days=6)
-        data.append({
-            "week": f"Week {i+1}",
-            "start_date": week_start.isoformat(),
-            "end_date": week_end.isoformat(),
+        period_end = end_of_today - timedelta(days=i*7)
+        period_start = period_end - timedelta(days=6)
+        periods.append({
+            "label": f"Week {6-i}",
+            "start_datetime": period_start,
+            "end_datetime": period_end,
             "submissions": 0
         })
+    periods = list(reversed(periods))  # du plus ancien au plus récent
 
-    submissions = (
-        TentativeExercice.objects.filter(
-            exercice__in=exercises,
+    # Exercices accessibles à l'étudiant
+    spaces = Space.objects.filter(spaceetudiant__etudiant_id=student_id).distinct()
+    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
+    total_exercises = exercises.count() or 1  # éviter division par zéro
+
+    # Calcul des soumissions uniques par exercice par semaine
+    for p in periods:
+        week_submissions = TentativeExercice.objects.filter(
             utilisateur_id=student_id,
+            exercice__in=exercises,
             etat="soumis",
-            submitted_at__date__gte=start_date
-        )
-        .annotate(week_start=TruncWeek("submitted_at"))
-        .values("week_start")
-        .annotate(
-            exercises_count=Count("exercice", distinct=True)
-        )
-    )
+            submitted_at__date__range=(p["start_datetime"].date(), p["end_datetime"].date())
+        ).values("exercice_id").distinct().count()
 
-    for s in submissions:
-        week_index = (s["week_start"].date() - start_date).days // 7
-        if 0 <= week_index < 6:
-            data[week_index]["submissions"] = round(
-                (s["exercises_count"] / total_exercises) * 100
-            )
+        p["submissions"] = round((week_submissions / total_exercises) * 100)
 
-    return Response(data)
+        # Transformer datetime en ISO pour JSON
+        p["start_date"] = p["start_datetime"].isoformat()
+        p["end_date"] = p["end_datetime"].isoformat()
+        del p["start_datetime"]
+        del p["end_datetime"]
+
+    return Response(periods)
 
 
 @api_view(["GET"])
@@ -980,64 +952,45 @@ def weekly_submission_chart(request, student_id):
 def student_weekly_submission_chart(request):
     user = request.user
 
-    # Lundi de la semaine courante (timezone-safe)
-    today = now()
-    start_of_this_week = today - timedelta(days=today.weekday())
-    start_of_this_week = start_of_this_week.replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
+    today = localtime(now())
+    end_of_today = today.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # On remonte à 6 semaines (incluant la semaine courante)
-    start_date = start_of_this_week - timedelta(weeks=5)
-
-    # Espaces où l'étudiant est inscrit
-    spaces = Space.objects.filter(spaceetudiant__etudiant=user).distinct()
-
-    # Exercices accessibles à l'étudiant
-    exercises = Exercice.objects.filter(
-        spaceexo__space__in=spaces
-    ).distinct()
-
-    total_exercises = exercises.count()
-
-    if total_exercises == 0:
-        return Response([], status=status.HTTP_200_OK)
-
-    # Initialisation des 6 semaines
-    data = []
+    # Définir 6 périodes glissantes de 7 jours
+    periods = []
     for i in range(6):
-        week_start = start_date + timedelta(weeks=i)
-        week_end = week_start + timedelta(days=6)
-        data.append({
-            "week": f"Week {i + 1}",
-            "start_date": week_start.date().isoformat(),
-            "end_date": week_end.date().isoformat(),
+        period_end = end_of_today - timedelta(days=i*7)
+        period_start = period_end - timedelta(days=6)
+        periods.append({
+            "label": f"Week {6-i}",
+            "start_datetime": period_start,
+            "end_datetime": period_end,
             "submissions": 0
         })
+    periods = list(reversed(periods))  # du plus ancien au plus récent
 
-    # Tentatives soumises par semaine (EXERCICES DISTINCTS)
-    submissions = (
-        TentativeExercice.objects.filter(
+    # Exercices accessibles à l'étudiant
+    spaces = Space.objects.filter(spaceetudiant__etudiant=user).distinct()
+    exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
+    total_exercises = exercises.count() or 1  # éviter division par zéro
+
+    # Récupérer les tentatives uniques par exercice et par semaine
+    for p in periods:
+        week_submissions = TentativeExercice.objects.filter(
             utilisateur=user,
             exercice__in=exercises,
             etat="soumis",
-            submitted_at__gte=start_date
-        )
-        .annotate(week_start=TruncWeek("submitted_at"))
-        .values("week_start")
-        .annotate(exos_soumis=Count("exercice", distinct=True))
-        .order_by("week_start")
-    )
+            submitted_at__date__range=(p["start_datetime"].date(), p["end_datetime"].date())
+        ).values("exercice_id").distinct().count()
 
-    # Remplissage des semaines
-    for s in submissions:
-        week_index = int((s["week_start"] - start_date).days / 7)
-        if 0 <= week_index < 6:
-            data[week_index]["submissions"] = round(
-                (s["exos_soumis"] / total_exercises) * 100
-            )
+        p["submissions"] = round((week_submissions / total_exercises) * 100)
 
-    return Response(data, status=status.HTTP_200_OK)
+        # Transformer datetime en ISO
+        p["start_date"] = p["start_datetime"].isoformat()
+        p["end_date"] = p["end_datetime"].isoformat()
+        del p["start_datetime"]
+        del p["end_datetime"]
+
+    return Response(periods)
 
 
 

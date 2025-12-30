@@ -1,15 +1,13 @@
-from badges.models import Badge, GagnerBadge
-from courses import serializers
-
+from rest_framework import serializers
+from .models import Badge, GagnerBadge
 
 class BadgeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Badge
-        fields = ['id', 'nom', 'description', 'icone', 'condition']
+        fields = ['id', 'nom', 'description', 'icone', 'condition', 'categorie', 'numpoints']
 
 class GagnerBadgeSerializer(serializers.ModelSerializer):
-    badge = BadgeSerializer(read_only=True)  # nested serializer pour info du badge
-
+    badge = BadgeSerializer()  # inclure les infos du badge
     class Meta:
         model = GagnerBadge
-        fields = ['badge', 'date_obtention']
+        fields = ['id', 'badge', 'date_obtention']

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'dashboard',
     'feedback.apps.FeedbackConfig',
     'spaces.apps.SpacesConfig',
+    'badges',
     # API et CORS
     'rest_framework',
     'corsheaders',
@@ -149,11 +150,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        
-    ],
+     ]
 }
+
+
 
 
 
