@@ -22,6 +22,8 @@ from dashboard.models import ProgressionCours
 from django.db.models import Avg
 from quiz.models import ReponseQuiz
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404
+from django.utils.crypto import get_random_string
 
 # -----------------------------
 # Constantes JWT manquantes
@@ -101,45 +103,50 @@ class LoginView(APIView):
             if not user.check_password(password):
                 return Response({"error": "Mot de passe incorrect."}, status=401)
 
-            # --- Étudiant ---
+            # Génération token JWT
+            token = _create_token(user.id_utilisateur, role)
+
+            # Préparer données utilisateur
+            user_data = {
+                "user_id": user.id_utilisateur,
+                "nom": user.nom,
+                "prenom": user.prenom,
+                "email": user.adresse_email,
+                "role": role,
+                "must_change_password": user.must_change_password,
+            }
+
             if role == "etudiant":
                 if not hasattr(user, "etudiant"):
                     return Response({"error": "Accès réservé aux étudiants."}, status=403)
-                token = _create_token(user.id_utilisateur, "etudiant")
-                return Response({
-                    "message": "Connexion réussie",
-                    "token": token,
-                    "user": {
-                        "user_id": user.id_utilisateur,
-                        "nom": user.nom,
-                        "prenom": user.prenom,
-                        "email": user.adresse_email,
-                        "role": "etudiant",
-                        "specialite": user.etudiant.specialite,
-                        "annee_etude": user.etudiant.annee_etude
-                    }
-                }, status=200)
+                user_data.update({
+                    "specialite": user.etudiant.specialite,
+                    "annee_etude": user.etudiant.annee_etude
+                })
 
-            # --- Enseignant ---
             elif role == "enseignant":
                 if not hasattr(user, "enseignant"):
                     return Response({"error": "Accès réservé aux enseignants."}, status=403)
-                token = _create_token(user.id_utilisateur, "enseignant")
-                return Response({
-                    "message": "Connexion réussie",
-                    "token": token,
-                    "user": {
-                        "user_id": user.id_utilisateur,
-                        "nom": user.nom,
-                        "prenom": user.prenom,
-                        "email": user.adresse_email,
-                        "role": "enseignant",
-                        "grade": user.enseignant.grade
-                    }
-                }, status=200)
+                user_data.update({
+                    "grade": user.enseignant.grade
+                })
+
+            # Si l’utilisateur doit changer le mot de passe, renvoyer aussi un reset_token
+            response_data = {
+                "message": "Connexion réussie",
+                "token": token,
+                "user": user_data
+            }
+
+            if user.must_change_password:
+                reset_token = _create_token(user.id_utilisateur, role)
+                response_data["reset_token"] = reset_token
+
+            return Response(response_data, status=200)
 
         except Utilisateur.DoesNotExist:
             return Response({"error": "Utilisateur introuvable."}, status=404)
+
 # -----------------------------
 # Admin
 # -----------------------------
@@ -288,6 +295,7 @@ class ResetPasswordView(APIView):
 
         user = token_obj.user
         user.set_password(new_password)
+        user.must_change_password = False
         user.save()
 
         token_obj.delete()  # empêche réutilisation
@@ -409,7 +417,419 @@ def students_with_progress(request):
             "courses_count": nb_cours,
             "progress": avg_progress,
             "joined": u.date_inscription.strftime("%d/%m/%Y") if u.date_inscription else "—",
-            # 🔹 pas besoin des détails des quiz ici
+            "matricule": u.matricule or "—", #Affiicher marticule
+            "specialite": etudiant.specialite or "—", #Ajouter afficher la specialie
+            "annee_etude": etudiant.annee_etude or "—", #annee d'etude
         })
 
     return Response(data)
+
+
+
+#=============ADDED BY CHAHLA======================
+class AdminDeleteUserView(APIView):
+    permission_classes = [IsAdminJWT]
+
+    def delete(self, request, user_id):
+        utilisateur = get_object_or_404(Utilisateur, id_utilisateur=user_id)
+
+        # 🔒 Empêcher suppression d’un admin
+        if hasattr(utilisateur, "administrateur"):
+            return Response(
+                {"error": "Impossible de supprimer un administrateur"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            # ---------- CAS ÉTUDIANT ----------
+            """ if hasattr(utilisateur, "etudiant"):
+                # Supprimer toutes les données liées
+                #ProgressionCours.objects.filter(utilisateur=utilisateur).delete()
+                #ReponseQuiz.objects.filter(utilisateur=utilisateur).delete()
+                # Etudiant supprimé automatiquement avec CASCADE si FK sur Utilisateur
+                # utilisateur.etudiant.delete()  # pas nécessaire si CASCADE
+
+            # ---------- CAS ENSEIGNANT ----------
+            elif hasattr(utilisateur, "enseignant"):
+                #enseignant = utilisateur.enseignant
+
+                # Supprimer tous les espaces liés à l'enseignant
+                #Space.objects.filter(utilisateur=utilisateur).delete()
+
+                # Supprimer tous les cours créés par l'enseignant
+                #Cours.objects.filter(utilisateur=utilisateur).delete()
+
+                # Supprimer tous les exercices créés par l'enseignant
+                #Exercice.objects.filter(utilisateur=utilisateur).delete()
+
+                # Supprimer toutes les réponses aux quiz de cet enseignant
+                #ReponseQuiz.objects.filter(utilisateur=utilisateur).delete()
+
+                # L'enseignant sera supprimé automatiquement avec CASCADE sur Utilisateur
+                # enseignant.delete()  # pas nécessaire si CASCADE
+
+            # ---------- SUPPRIMER L'UTILISATEUR ----------"""
+            utilisateur.delete()  # CASCADE supprimera Etudiant ou Enseignant
+
+            return Response(
+                {"message": "Utilisateur et toutes ses données associées supprimés avec succès"},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": f"Erreur lors de la suppression : {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+            
+            
+            
+
+# -----------------------------
+# Permission custom : admin ou owner
+# -----------------------------
+class IsAdminOrSelf(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # Récupérer le payload JWT
+        auth = request.headers.get("Authorization")
+        if not auth:
+            return False
+        try:
+            token = auth.split(" ")[1]
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            role = payload.get("role")
+            user_id = payload.get("user_id")
+            # Admin peut tout faire
+            if role == "admin":
+                return True
+            # L'utilisateur peut modifier ses propres données
+            return obj.id_utilisateur == user_id
+        except:
+            return False
+
+# -----------------------------
+# View pour modifier un enseignant
+# -----------------------------
+@api_view(["PUT"])
+@permission_classes([IsAdminOrSelf])
+def update_enseignant(request, user_id):
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=user_id)
+
+    # Vérifier que c'est bien un enseignant
+    if not hasattr(utilisateur, "enseignant"):
+        return Response({"error": "Utilisateur n'est pas un enseignant"}, status=400)
+
+    # Permissions : admin ou lui-même
+    permission = IsAdminOrSelf()
+    if not permission.has_object_permission(request, None, utilisateur):
+        return Response({"error": "Accès refusé"}, status=403)
+
+    data = request.data
+
+    # Mise à jour des champs de Utilisateur
+    utilisateur.nom = data.get("nom", utilisateur.nom)
+    utilisateur.prenom = data.get("prenom", utilisateur.prenom)
+    utilisateur.adresse_email = data.get("email", utilisateur.adresse_email)
+    utilisateur.date_naissance = data.get("date_naissance", utilisateur.date_naissance)
+    utilisateur.matricule = data.get("matricule", utilisateur.matricule)
+    utilisateur.save()
+
+    # Mise à jour des champs spécifiques Enseignant
+    enseignant = utilisateur.enseignant
+    enseignant.grade = data.get("grade", enseignant.grade)
+    enseignant.save()
+    notify_user_update(utilisateur)
+
+    # Serializer pour retourner les infos
+    serializer = EnseignantSerializer(enseignant)
+    return Response(serializer.data, status=200)
+
+# -----------------------------
+# View pour modifier un etudiant
+# -----------------------------
+@api_view(["PUT"])
+@permission_classes([IsAdminOrSelf])
+def update_etudiant(request, user_id):
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=user_id)
+
+    # Vérifier que c'est bien un étudiant
+    if not hasattr(utilisateur, "etudiant"):
+        return Response({"error": "Utilisateur n'est pas un étudiant"}, status=400)
+
+    # Vérifier permission
+    permission = IsAdminOrSelf()
+    if not permission.has_object_permission(request, None, utilisateur):
+        return Response({"error": "Accès refusé"}, status=403)
+
+    data = request.data
+
+    # Mise à jour des champs Utilisateur
+    utilisateur.nom = data.get("nom", utilisateur.nom)
+    utilisateur.prenom = data.get("prenom", utilisateur.prenom)
+    utilisateur.adresse_email = data.get("email", utilisateur.adresse_email)
+    utilisateur.date_naissance = data.get("date_naissance", utilisateur.date_naissance)
+    utilisateur.matricule = data.get("matricule", utilisateur.matricule)
+    utilisateur.save()
+
+    # Mise à jour des champs Etudiant
+    etudiant = utilisateur.etudiant
+    etudiant.specialite = data.get("specialite", etudiant.specialite)
+    etudiant.annee_etude = data.get("annee_etude", etudiant.annee_etude)
+    etudiant.save()
+
+    # Envoyer email de notification
+    notify_user_update(utilisateur)
+
+    # Retourner les infos mises à jour
+    serializer = EtudiantSerializer(etudiant)
+    return Response(serializer.data, status=200)
+
+# -----------------------------
+# View pour Informer L'utilisateur (enseignant, etudiant) que ses info sont modifié
+# -----------------------------
+def notify_user_update(user):
+    """
+    Envoie un email à l'utilisateur (enseignant ou étudiant)
+    après modification de ses informations personnelles.
+    """
+    subject = "Vos informations ont été mises à jour"
+
+    # Détecter le type d'utilisateur et récupérer les champs spécifiques
+    if hasattr(user, "enseignant"):
+        role_specific = f"Grade : {user.enseignant.grade}"
+    elif hasattr(user, "etudiant"):
+        role_specific = f"Spécialité : {user.etudiant.specialite}\nAnnée d'étude : {user.etudiant.annee_etude}"
+    else:
+        role_specific = "—"
+
+    message = f"""
+Bonjour {user.prenom},
+
+Un administrateur a modifié vos informations personnelles sur notre plateforme.
+Voici vos nouvelles informations :
+
+Nom : {user.nom}
+Prénom : {user.prenom}
+Email : {user.adresse_email}
+Matricule : {user.matricule}
+{role_specific}
+
+Si vous n'êtes pas à l'origine de ces modifications, merci de contacter le support immédiatement.
+"""
+
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.adresse_email],
+        fail_silently=False,
+    )
+
+
+
+#---------------------------------------
+#View pour l'admin crée un enseignant , et lui envoyer un email pour reset his password
+#------------------------------------------
+class AdminCreateEnseignantView(APIView):
+    permission_classes = [IsAdminJWT]
+
+    def post(self, request):
+        data = request.data
+
+        required_fields = ["nom", "prenom", "email", "matricule", "grade"]
+        for field in required_fields:
+            if not data.get(field):
+                return Response(
+                    {"error": f"{field} est requis"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Vérifier email unique
+        if Utilisateur.objects.filter(adresse_email=data["email"]).exists():
+            return Response(
+                {"error": "Un utilisateur avec cet email existe déjà"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 🔐 Mot de passe temporaire
+        temp_password = get_random_string(length=10)
+        date_naissance = data.get("date_naissance")  # récupère la valeur si fournie
+        # Création utilisateur
+        utilisateur = Utilisateur.objects.create(
+            nom=data["nom"],
+            prenom=data["prenom"],
+            adresse_email=data["email"],
+            matricule=data["matricule"],
+            date_naissance=date_naissance, 
+            must_change_password=True,
+        )
+        utilisateur.set_password(temp_password)
+        utilisateur.save()
+
+        # Création enseignant
+        Enseignant.objects.create(
+            utilisateur=utilisateur,
+            grade=data["grade"]
+        )
+
+        # 📧 Envoi email
+        self.send_welcome_email(utilisateur, temp_password)
+
+        return Response(
+            {
+                "message": "Enseignant créé avec succès et email envoyé",
+                "id_utilisateur": utilisateur.id_utilisateur
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+    def send_welcome_email(self, user, temp_password):
+        subject = "Votre compte enseignant a été créé"
+        message = f"""
+Bonjour {user.prenom},
+
+Un compte enseignant vient d’être créé pour vous sur notre plateforme.
+
+Vos informations :
+Email : {user.adresse_email}
+Mot de passe temporaire : {temp_password}
+
+⚠️ Pour des raisons de sécurité, merci de modifier votre mot de passe dès votre première connexion.
+
+
+
+Si vous n’êtes pas à l’origine de cette création, contactez immédiatement le support.
+
+Cordialement,
+L’équipe pédagogique
+"""
+
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.adresse_email],
+            fail_silently=False,
+        )
+        
+        
+        
+#----------------------
+#Ajouter un etudiant by l'admin
+#---------------------
+
+class AdminCreateEtudiantView(APIView):
+    permission_classes = [IsAdminJWT]
+
+    def post(self, request):
+        data = request.data
+
+        # Champs requis
+        required_fields = ["nom", "prenom", "email", "matricule",  "date_naissance", "specialite", "annee_etude" ]
+        for field in required_fields:
+            if not data.get(field):
+                return Response(
+                    {"error": f"{field} est requis"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Vérifier email unique
+        if Utilisateur.objects.filter(adresse_email=data["email"]).exists():
+            return Response(
+                {"error": "Un utilisateur avec cet email existe déjà"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 🔐 Mot de passe temporaire
+        temp_password = get_random_string(length=10)
+
+        # Création utilisateur
+        utilisateur = Utilisateur.objects.create(
+            nom=data["nom"],
+            prenom=data["prenom"],
+            adresse_email=data["email"],
+            matricule=data["matricule"],
+            date_naissance=data["date_naissance"],
+            must_change_password=True,  # forcer changement à la première connexion
+        )
+        utilisateur.set_password(temp_password)
+        utilisateur.save()
+
+        # Création étudiant
+        Etudiant.objects.create(
+            utilisateur=utilisateur,
+            specialite=data["specialite"],
+            annee_etude=data["annee_etude"]
+        )
+
+        # 📧 Envoi email
+        self.send_welcome_email(utilisateur, temp_password)
+
+        return Response(
+            {
+                "message": "Étudiant créé avec succès et email envoyé",
+                "id_utilisateur": utilisateur.id_utilisateur
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+    def send_welcome_email(self, user, temp_password):
+        subject = "Votre compte étudiant a été créé"
+        message = f"""
+Bonjour {user.prenom},
+
+Un compte étudiant vient d’être créé pour vous sur notre plateforme.
+
+Vos informations :
+Email : {user.adresse_email}
+Mot de passe temporaire : {temp_password}
+Date de naissance : {user.date_naissance}
+
+⚠️ Pour des raisons de sécurité, merci de modifier votre mot de passe dès votre première connexion.
+
+Lien pour changer votre mot de passe : https://monsite.com/change-password
+
+Si vous n’êtes pas à l’origine de cette création, contactez immédiatement le support.
+
+Cordialement,
+L’équipe pédagogique
+"""
+
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.adresse_email],
+            fail_silently=False,
+        )
+
+
+#--------------------
+#Modifer password
+#----------------------
+class ResetPasswordView2(APIView):
+    def post(self, request):
+        token_str = request.data.get("token")
+        new_password = request.data.get("new_password")
+
+        if not token_str or not new_password:
+            return Response({"error": "Token et nouveau mot de passe requis"}, status=400)
+
+        try:
+            payload = jwt.decode(token_str, settings.SECRET_KEY, algorithms=["HS256"])
+            user_id = payload.get("user_id")
+        except jwt.ExpiredSignatureError:
+            return Response({"error": "Token expiré"}, status=400)
+        except jwt.InvalidTokenError:
+            return Response({"error": "Token invalide"}, status=400)
+
+        try:
+            user = Utilisateur.objects.get(id_utilisateur=user_id)
+            user.set_password(new_password)
+            user.must_change_password = False
+            user.save()
+        except Utilisateur.DoesNotExist:
+            return Response({"error": "Utilisateur introuvable."}, status=404)
+
+        return Response({"message": "Mot de passe mis à jour avec succès"})

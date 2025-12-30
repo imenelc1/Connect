@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('courses', '0001_initial'),
         ('exercices', '0001_initial'),
+        ('quiz', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -25,7 +26,8 @@ class Migration(migrations.Migration):
                 ('avancement', models.FloatField()),
                 ('temps_passe', models.DurationField()),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('cours', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='courses.cours')),
+                ('cours', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='courses.cours')),
+                ('quiz', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='quiz.quiz')),
                 ('utilisateur', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -40,6 +42,25 @@ class Migration(migrations.Migration):
                 ('date', models.DateTimeField(auto_now_add=True)),
                 ('utilisateur', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
+        ),
+        migrations.CreateModel(
+            name='TentativeExercice',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('reponse', models.TextField()),
+                ('output', models.TextField(blank=True, null=True)),
+                ('etat', models.CharField(choices=[('brouillon', 'Brouillon'), ('soumis', 'Soumis'), ('corrige', 'Corrigé')], default='brouillon', max_length=20)),
+                ('score', models.FloatField(blank=True, null=True)),
+                ('feedback', models.TextField(blank=True, null=True)),
+                ('temps_passe', models.DurationField(blank=True, null=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('submitted_at', models.DateTimeField(blank=True, null=True)),
+                ('exercice', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='exercices.exercice')),
+                ('utilisateur', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'ordering': ['-created_at'],
+            },
         ),
         migrations.CreateModel(
             name='LeconComplete',
