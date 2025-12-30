@@ -87,8 +87,17 @@ export default function LoginInstructor() {
 
       console.log(t("login.api"), res.data);
 
+<<<<<<< HEAD
       toast.success(t("login.success"));
+=======
+      toast.success(t("success.login"));
+      if (res.data.user.must_change_password) {
+      // 🔑 on utilise le reset_token renvoyé par le backend
+      navigate(`/welcome-reset-password/${res.data.reset_token}`);
+      } else {
+>>>>>>> main
       navigate("/dashboard-ens");
+      }
 
     } catch (error) {
       const backend = error.response?.data;

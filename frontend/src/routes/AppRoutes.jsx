@@ -21,6 +21,7 @@ import CommunityPage from "../pages/CommunityPage";
 import Badges from "../pages/Badges";
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
+import WelcomeResetPassword from "../pages/WelcomeResetPassword.jsx";
 
 /* ================= COURSES ================= */
 import AllCoursesPage from "../pages/AllCoursesPage";
@@ -91,6 +92,8 @@ export default function AppRoutes() {
         <Route path="/badges" element={<Badges/>} />
         <Route path="/my-students" element={<MyStudents />} />
         <Route path="/spaces" element={<Spaces />} />
+        <Route path="/welcome-reset-password/:token" element={<WelcomeResetPassword />} />
+
 
         {/* ========= COURSES ========= */}
         <Route path="/all-courses" element={<AllCoursesPage />} />
