@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar.jsx";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
 import { Trash2, ChevronUp } from "lucide-react";

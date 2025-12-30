@@ -5,6 +5,7 @@ import Navbar from "../components/common/NavBar";
 import InfoCard from "../components/common/InfoCard";
 import { MessageCircle, File } from "lucide-react";
 import { getTentativeById } from "../services/progressionService";
+import axios from "axios"; // ← Ajoutez cette importation
 
 export default function SubmittedExercise() {
   const { t } = useTranslation("SubmittedExercise");
@@ -12,40 +13,67 @@ export default function SubmittedExercise() {
 
   const [loading, setLoading] = useState(true);
   const [exerciseData, setExerciseData] = useState(null);
+  const [feedback, setFeedback] = useState(""); // ← État séparé pour le feedback
 
-useEffect(() => {
-  const fetchTentative = async () => {
-    try {
-      const data = await getTentativeById(tentativeId);
+  useEffect(() => {
+    const fetchTentative = async () => {
+      try {
+        // 1. Récupérer la tentative
+        const data = await getTentativeById(tentativeId);
+        
+        // 2. Récupérer le feedback depuis le nouveau modèle
+        let feedbackContent = data.feedback || ""; // Fallback sur l'ancien champ
+        
+        try {
+          const token = localStorage.getItem("token");
+          const BACKEND_URL = "http://127.0.0.1:8000";
+          
+          const response = await axios.get(
+            `${BACKEND_URL}/api/feedback-exercice/list/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              params: { 
+                tentative_ids: tentativeId // Un seul ID
+              }
+            }
+          );
+          
+          // Si on a des résultats, prendre le premier
+          if (response.data && response.data.length > 0) {
+            feedbackContent = response.data[0].contenu;
+          }
+        } catch (fbErr) {
+          console.warn("Erreur récupération feedback, utilisation ancien champ:", fbErr);
+          // On garde l'ancien feedback en cas d'erreur
+        }
+        
+        setFeedback(feedbackContent);
 
-      setExerciseData({
-        code: data.reponse,
-        expectedOutput: data.exercice.expected_output || "",
-        actualOutput: data.output,
-        feedback: data.feedback,
-        titre: data.exercice.titre_exo,
-        description: data.exercice.enonce,
-        language: "C", 
-        difficulty: data.exercice.niveau_exo,
-        studentName: data.utilisateur.nom + " " + data.utilisateur.prenom,
-        submittedDate: data.submitted_at
-  ? new Date(data.submitted_at).toLocaleDateString()
-  : new Date(data.created_at).toLocaleDateString(),
+        // 3. Préparer les données de l'exercice
+        setExerciseData({
+          code: data.reponse,
+          solution: data.exercice.solution || "",
+          actualOutput: data.output,
+          feedback: feedbackContent, // ← Utilise le nouveau feedback
+          titre: data.exercice.titre_exo,
+          description: data.exercice.enonce,
+          language: "C",
+          difficulty: data.exercice.niveau_exo,
+          studentName: data.utilisateur.nom + " " + data.utilisateur.prenom,
+          submittedDate: data.submitted_at
+            ? new Date(data.submitted_at).toLocaleDateString()
+            : new Date(data.created_at).toLocaleDateString(),
+        });
 
-      });
+        setLoading(false);
+      } catch (err) {
+        console.error("Erreur chargement tentative", err);
+        setLoading(false);
+      }
+    };
 
-      setLoading(false);
-    } catch (err) {
-      console.error("Erreur chargement tentative", err);
-      setLoading(false);
-    }
-  };
-
-  fetchTentative();
-}, [tentativeId]);
-
-
-
+    fetchTentative();
+  }, [tentativeId]);
 
   if (loading) {
     return <div className="p-10 text-center">Loading...</div>;
@@ -60,12 +88,11 @@ useEffect(() => {
       <Navbar />
 
       <main className="flex-1 ml-16 md:ml-56 p-6">
-
         {/* INFO CARD */}
-        <InfoCard exercise={exerciseData} />
+        <h1 className="text-3xl ml-5 mb-5 font-semibold text-primary">{t("Completed Exercise")}</h1>
+        <InfoCard exercise={exerciseData}/>
 
         <div className="grid grid-cols-1 gap-4">
-
           {/* CODE */}
           <div className="bg-card p-4 rounded-2xl shadow-lg border border-primary/35">
             <div className="flex items-center mb-3 gap-2">
@@ -74,21 +101,10 @@ useEffect(() => {
             </div>
 
             <div className="bg-black rounded-xl overflow-auto h-96 text-gray-300 p-4">
-              <pre className="whitespace-pre-wrap">
-                {exerciseData.code}
-              </pre>
+              <pre className="whitespace-pre-wrap">{exerciseData.code}</pre>
             </div>
           </div>
 
-          {/* OUTPUTS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-
-            <div className="bg-card p-4 rounded-xl border border-primary/65">
-              <h3 className="font-semibold mb-2">{t("expectedOutput")}</h3>
-              <pre className="bg-surface p-3 rounded text-sm">
-                {exerciseData.expectedOutput}
-              </pre>
-            </div>
 
             <div className="bg-card p-4 rounded-xl border border-primary/65">
               <h3 className="font-semibold mb-2">{t("actualOutput")}</h3>
@@ -96,8 +112,16 @@ useEffect(() => {
                 {exerciseData.actualOutput}
               </pre>
             </div>
-
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
+            <div className="bg-card p-4 rounded-xl border border-primary/65">
+              <h3 className="font-semibold mb-2">{t("solution")}</h3>
+              <pre className="bg-surface p-3 rounded text-sm">
+                {exerciseData.solution}
+              </pre>
+          </div>
+
 
           {/* FEEDBACK */}
           <div className="bg-primary/10 p-4 rounded-2xl shadow-lg flex gap-2 mt-4">
@@ -107,11 +131,10 @@ useEffect(() => {
                 {t("teacherFeedback")}
               </h2>
               <p className="text-sm text-textc">
-                {exerciseData.feedback}
+                {feedback || exerciseData.feedback || "Aucun feedback pour le moment"}
               </p>
             </div>
           </div>
-
         </div>
       </main>
     </div>

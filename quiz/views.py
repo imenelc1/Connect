@@ -1,9 +1,13 @@
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from dashboard.models import ProgressionHistory
 from users.jwt_auth import jwt_required
 from django.utils import timezone
+from django.db.models import Sum
 
 from exercices.models import Exercice
 from users.models import Utilisateur
@@ -107,6 +111,24 @@ class QuizSubmitView(APIView):
         tentative.terminer = True
         tentative.date_fin = timezone.now() 
         tentative.save()
+
+        score_max = quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        # 🔹 progression en %
+        avancement = round((score_total / score_max) * 100) if score_max > 0 else 0
+
+        # 🔹 historique de progression du quiz
+        ProgressionHistory.objects.create(
+            utilisateur=request.user,
+            cours=quiz.exercice.cours,
+            quiz=quiz,
+            type_contenu="quiz",
+            avancement=avancement,
+            temps_passe=timedelta(seconds=0)
+        )
+        
 
         return Response({
             "score": score_total,
@@ -239,3 +261,75 @@ def toutes_les_tentatives_quiz(request, quiz_id, utilisateur_id):
 
     serializer = ReponseQuizSerializer(reponses_quiz, many=True)
     return Response(serializer.data)
+
+
+
+#Recherche dans quiz par titre, enonce
+class QuizSearchAPIView(APIView):
+    """
+    Retourne uniquement les Quiz (exercices avec Quiz)
+    filtrés par titre, énoncé ou catégorie.
+    """
+
+    def get(self, request):
+        search = request.GET.get("search", "").strip()
+        categorie = request.GET.get("categorie", "").strip()
+
+        quizzes = Quiz.objects.select_related("exercice").all()
+
+        if search:
+            quizzes = quizzes.filter(
+                Q(exercice__titre_exo__icontains=search) |
+                Q(exercice__enonce__icontains=search)
+            )
+
+        if categorie:
+            quizzes = quizzes.filter(exercice__categorie__icontains=categorie)
+
+        serializer = QuizSerializer1(quizzes, many=True)
+        return Response(serializer.data)
+from django.db.models import OuterRef
+
+@api_view(["GET"])
+def quizzes_faits_par_etudiant(request, student_id):
+    utilisateur = get_object_or_404(Utilisateur, id_utilisateur=student_id)
+
+    # Dernière tentative de chaque quiz
+    last_attempts = ReponseQuiz.objects.filter(
+        etudiant=utilisateur,
+        quiz=OuterRef('quiz')
+    ).order_by('-date_fin')
+
+    # Récupérer toutes les tentatives terminées
+    tentatives = ReponseQuiz.objects.filter(
+        etudiant=utilisateur,
+        terminer=True
+    ).order_by('-date_fin')
+
+    quizzes_done = {}
+    for t in tentatives:
+        if t.quiz_id not in quizzes_done:
+            quizzes_done[t.quiz_id] = t  # première occurrence = dernière tentative
+
+    data = []
+
+    for tentative in quizzes_done.values():
+        quiz = tentative.quiz
+
+        # score max du quiz
+        score_max = quiz.exercice.questions.aggregate(total=Sum("score"))["total"] or 0
+
+        progression = round((tentative.score_total / score_max) * 100) if score_max > 0 else 0
+
+        data.append({
+            "quiz_id": quiz.id,
+            "exercice_id": quiz.exercice.id_exercice,
+            "titre_exercice": quiz.exercice.titre_exo,
+            "score_obtenu": tentative.score_total,
+            "score_max": score_max,
+            "progression": progression,
+            "reussi": tentative.score_total >= quiz.scoreMinimum,
+            "date_fin": tentative.date_fin,
+        })
+
+    return Response(data)

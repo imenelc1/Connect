@@ -18,6 +18,10 @@ from django.core.mail import send_mail
 import uuid
 from rest_framework.permissions import BasePermission
 from django.http import JsonResponse
+from dashboard.models import ProgressionCours
+from django.db.models import Avg
+from quiz.models import ReponseQuiz
+from django.db.models import Sum
 
 # -----------------------------
 # Constantes JWT manquantes
@@ -190,20 +194,28 @@ class IsAdminJWT(BasePermission):
 # User Profile
 # -----------------------------
 
+from .serializers import ProfileSerializer, AdminProfileSerializer
+from .models import Administrateur, Utilisateur
+
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
-    serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticatedJWT]
 
     def get_object(self):
-        # Garantit que request.user est bien un objet Utilisateur ou None
-        if not hasattr(self.request, 'user') or self.request.user is None:
-            return None
         return self.request.user
+
+    def get_serializer_class(self):
+        user = self.get_object()
+
+        # 👇 Si c'est un administrateur → serializer admin
+        if isinstance(user, Administrateur):
+            return AdminProfileSerializer
+        
+        # 👇 Sinon → serializer utilisateur normal
+        return ProfileSerializer
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()
-        if not user:
-            return Response({"error": "Utilisateur introuvable"}, status=404)
         serializer = self.get_serializer(user)
         return Response(serializer.data)
 
@@ -364,9 +376,40 @@ def get_etudiants(request):
             "specialite": e.specialite,
             "annee_etude": e.annee_etude,
             "initials": f"{u.nom[0]}{u.prenom[0]}".upper(),
-            "joined": u.date_joined.strftime("%b %Y") if hasattr(u, "date_joined") else "—",
+            "joined": u.date_inscription.strftime("%d/%m/%Y") if hasattr(u, "date_inscription") else "—",
             "courses": 0,      # 🔹 tu pourras le calculer plus tard
             "progress": 0      # 🔹 idem
         })
 
     return Response(data, status=200)
+
+@api_view(["GET"])
+@permission_classes([IsAdminOrTeacherJWT])
+def students_with_progress(request):
+    students = Etudiant.objects.select_related("utilisateur").all()
+    data = []
+
+    for etudiant in students:
+        u = etudiant.utilisateur
+
+        # Nombre de cours suivis
+        cours_suivis = ProgressionCours.objects.filter(utilisateur=u)
+        nb_cours = cours_suivis.count()
+
+        # Progression globale moyenne
+        avg_progress = cours_suivis.aggregate(global_progress=Avg("avancement_cours"))["global_progress"] or 0
+        avg_progress = round(avg_progress)
+
+        data.append({
+            "id": u.id_utilisateur,
+            "nom": u.nom,
+            "prenom": u.prenom,
+            "email": u.adresse_email,
+            "initials": f"{u.nom[0]}{u.prenom[0]}".upper(),
+            "courses_count": nb_cours,
+            "progress": avg_progress,
+            "joined": u.date_inscription.strftime("%d/%m/%Y") if u.date_inscription else "—",
+            # 🔹 pas besoin des détails des quiz ici
+        })
+
+    return Response(data)

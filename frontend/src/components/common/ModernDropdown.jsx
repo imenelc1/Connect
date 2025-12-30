@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
-export default function ModernDropdown({ value, onChange, options, placeholder }) {
+export default function ModernDropdown({ value, onChange, options, placeholder, style = {} }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -17,7 +17,7 @@ export default function ModernDropdown({ value, onChange, options, placeholder }
   return (
     <div className="relative" ref={ref}>
       {/* BOUTON COMPACT */}
-      <button type="button"
+      <button type="button" style={style}
         className="flex items-center justify-between min-w-[115px] px-3 py-1.5
                    rounded-lg bg-white dark:bg-grad-2 border border-primary/20 shadow-sm
                    text-primary text-sm font-medium cursor-pointer

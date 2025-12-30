@@ -1,14 +1,24 @@
 {
   "spacesTitle": "Spaces",
+  "mySpacesTitle": "My Spaces",
   "createSpaceButton": "+ Create Space",
   "modalTitle": "Create New Space",
   "modalSubtitle": "Fill the information to create a space",
   "modalSubmit": "Add Space",
-  "modalCancel": " Cancel",
+  "modalCancel": "Cancel",
   "fieldSpaceName": "Space Name",
   "fieldSpaceNamePlaceholder": "Enter space name",
   "fieldDescription": "Description",
   "fieldDescriptionPlaceholder": "Enter space description",
   "created": "Created on ",
-  "mySpacesTitle":"My Spaces"
+  "noSpacesMessage": "No spaces have been created yet.",
+  "noStudentSpaces": "You are not enrolled in any spaces yet.",
+  "spaceNameRequired": "Space name is required.",
+  "spaceNameExists": "A space with this name already exists.",
+  "spaceCreated": "Space created successfully!",
+  "spaceCreationFailed": "An error occurred while creating the space.",
+  "confirmDeleteSpace": "Are you sure you want to delete this space?",
+  "spaceDeleted": "Space deleted successfully!",
+  "spaceDeleteFailed": "An error occurred while deleting the space.",
+  "deleteSpace": "Delete space"
 }

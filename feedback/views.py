@@ -149,16 +149,121 @@ def mark_notification_read(request, notif_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class FeedbackExerciceListCreateView(generics.ListCreateAPIView):
-    serializer_class = FeedbackExerciceSerializer
-    permission_classes = [IsAuthenticatedJWT]
+from rest_framework import generics, status
+from rest_framework.response import Response
+from users.jwt_helpers import IsAuthenticatedJWT
+from .models import FeedbackExercice, Exercice, TentativeExercice
+from .serializers import FeedbackExerciceSerializer
+from django.shortcuts import get_object_or_404
 
-    def get_queryset(self):
-        tentative_ids = self.request.query_params.getlist('tentative_ids')
-        return FeedbackExercice.objects.filter(tentative_id__in=tentative_ids)
+from rest_framework import generics, status
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
-    def perform_create(self, serializer):
-        serializer.save(auteur=self.request.user)
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedJWT])
+def create_or_update_feedback(request):
+    user = request.user
+
+    # TEMPORAIRE: Pour test, permettez à tous les utilisateurs
+    # TODO: Décommentez pour la production
+    # if not hasattr(user, 'enseignant'):
+    #     return Response(
+    #         {"error": "Seuls les enseignants peuvent donner un feedback"},
+    #         status=status.HTTP_403_FORBIDDEN
+    #     )
+
+    tentative_id = request.data.get("tentative")
+    contenu = request.data.get("contenu", "").strip()
+
+    if not tentative_id or not contenu:
+        return Response(
+            {"error": "Tentative et contenu requis"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Convertir en entier si c'est une chaîne
+    try:
+        tentative_id = int(tentative_id)
+    except (ValueError, TypeError):
+        return Response(
+            {"error": "ID de tentative invalide"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        tentative = TentativeExercice.objects.get(id=tentative_id)
+    except TentativeExercice.DoesNotExist:
+        return Response(
+            {"error": f"Tentative avec ID {tentative_id} non trouvée"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Créer ou mettre à jour le feedback
+    feedback, created = FeedbackExercice.objects.update_or_create(
+        tentative=tentative,
+        defaults={
+            "contenu": contenu,
+            "auteur": user,
+            "exercice": tentative.exercice
+        }
+    )
+
+    # Retourner une réponse simple et claire
+    return Response({
+        "success": True,
+        "created": created,
+        "feedback": {
+            "id": feedback.id,
+            "contenu": feedback.contenu,
+            "tentative_id": feedback.tentative_id,
+            "date_creation": feedback.date_creation
+        }
+    }, status=status.HTTP_200_OK)
+    
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from users.jwt_helpers import IsAuthenticatedJWT
+from .models import FeedbackExercice
+from .serializers import FeedbackExerciceSerializer
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def feedbacks_by_tentative(request):
+    """
+    Récupère les feedbacks pour une ou plusieurs tentatives.
+    Format: /api/feedback-exercice/list/?tentative_ids=1,2,3
+    """
+    # Récupérer la chaîne de paramètre
+    tentative_ids_str = request.GET.get('tentative_ids', '')
+    
+    if not tentative_ids_str:
+        return Response([])
+    
+    # Convertir en liste d'entiers
+    try:
+        tentative_ids = [int(tid.strip()) for tid in tentative_ids_str.split(',') if tid.strip()]
+    except ValueError:
+        return Response({"error": "IDs invalides"}, status=400)
+    
+    # Récupérer les feedbacks
+    feedbacks = FeedbackExercice.objects.filter(tentative_id__in=tentative_ids)
+    
+    # Retourner les données avec tentative_id explicite
+    data = []
+    for fb in feedbacks:
+        data.append({
+            'id': fb.id,
+            'contenu': fb.contenu,
+            'tentative_id': fb.tentative_id,  # ← ID explicite
+            'exercice_id': fb.exercice_id,
+            'auteur_nom': fb.auteur.nom,
+            'auteur_prenom': fb.auteur.prenom,
+            'date_creation': fb.date_creation
+        })
+    
+    return Response(data)
 
 
 def get_utilisateur_from_request(request):
@@ -179,4 +284,3 @@ def get_utilisateur_from_request(request):
             return admin, "admin"
         except Administrateur.DoesNotExist:
             return None, None
-
