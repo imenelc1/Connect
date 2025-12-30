@@ -166,27 +166,51 @@ int main() {
   }, [userCode]);
 
   // -------- Run / Debug / Stop --------
-  const runCode = async () => {
-    setIsRunning(true);
-    setOutput("Exécution en cours...");
+ const runCode = async () => {
+  setIsRunning(true);
+  setOutput("Exécution en cours...");
 
-    try {
-      const res = await axios.post(
-        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-        {
-          source_code: userCode,
-          language_id: 49,
-          stdin: userInput,
-        }
+  try {
+    const res = await axios.post(
+      "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+      {
+        source_code: userCode,
+        language_id: 49,
+        stdin: userInput,
+      }
+    );
+
+    const {
+      stdout,
+      stderr,
+      compile_output,
+      status,
+    } = res.data;
+
+    const result =
+      stdout ||
+      stderr ||
+      compile_output ||
+      "Aucune sortie pour le moment...";
+
+    setOutput(result);
+
+    // 🚨 NOTIFICATION IMMÉDIATE
+    if (stderr || compile_output) {
+      sendNotification(
+        "⚠️ Erreur détectée lors de l'exécution. Besoin d’un coup de main ?",
+        "hint"
       );
-      const result = res.data.stdout ?? res.data.stderr ?? "Aucune sortie pour le moment...";
-      setOutput(result);
-    } catch {
-      setOutput("Erreur pendant l'exécution");
-    } finally {
-      setIsRunning(false);
     }
-  };
+
+  } catch {
+    setOutput("Erreur pendant l'exécution");
+    sendNotification("Erreur pendant l'exécution", "error");
+  } finally {
+    setIsRunning(false);
+  }
+};
+
 
   const debugCode = async () => {
     setIsRunning(true);
