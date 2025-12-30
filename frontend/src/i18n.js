@@ -157,20 +157,11 @@ const resources = {
     CoursesManagement: translationFRCourseManagement,
     ValidationCourses: translationFRValidationCourses,
     DashboardAdmin: translationFRDashboardAdmin,
-<<<<<<< HEAD
-     ForumManagement:translationnFRforumManagement,
-     BadgesManagement:translationnFRbadgesManagement,
-    StudentsManagement:translationnFRStudentsManagement,
+     ForumManagement:translationFRForumManagement,
+     BadgesManagement:translationFRBadgesManagement,
+    StudentsManagement:translationFRStudentsManagement,
     notifications:translationFRNotification
     },
-=======
-    ForumManagement: translationFRForumManagement,
-    BadgesManagement: translationFRBadgesManagement,
-    StudentsManagement: translationFRStudentsManagement,
-    space: translationFRSpacesPage,
-    instructors: translationFRInstructors,
-  },
->>>>>>> origin/main
 
   en: {
     translation: translationEN,
@@ -207,22 +198,14 @@ const resources = {
     CoursesManagement: translationENCourseManagement,
     ValidationCourses: translationENValidationCourses,
     DashboardAdmin: translationENDashboardAdmin,
-<<<<<<< HEAD
-     ForumManagement:translationnENforumManagement,
-       BadgesManagement:translationnENbadgesManagement,
-      StudentsManagement:translationnENStudentsManagement,
+     ForumManagement:translationENForumManagement,
+       BadgesManagement:translationENBadgesManagement,
+      StudentsManagement:translationENStudentsManagement,
        space: translationENSpacesPage,
       instructors: translationENInstructors,
       notifications:translationENNotification
 
 
-=======
-    ForumManagement: translationENForumManagement,
-    BadgesManagement: translationENBadgesManagement,
-    StudentsManagement: translationENStudentsManagement,
-    space: translationENSpacesPage,
-    instructors: translationENInstructors,
->>>>>>> origin/main
   },
 };
 

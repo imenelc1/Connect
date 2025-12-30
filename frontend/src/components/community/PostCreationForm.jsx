@@ -256,8 +256,4 @@ export default function PostCreationForm({
       </div>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/main

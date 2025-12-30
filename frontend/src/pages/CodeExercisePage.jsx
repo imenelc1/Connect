@@ -24,7 +24,8 @@ export default function StartExercise() {
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
-  const [output, setOutput] = useState("Aucune sortie pour le moment...");
+  const [output, setOutput] = useState(t("output.noOutput"));
+
   const [isRunning, setIsRunning] = useState(false);
   const [userCode, setUserCode] = useState(`#include <stdio.h>
 #include <stdlib.h>
@@ -76,9 +77,11 @@ int main() {
         const data = await res.json();
         setExercise(data);
         setStartTime(Date.now());
-        sendNotification("Exercice chargé !");
+        // "Exercice chargé !"
+        sendNotification(t("errors.exerciseLoad"));
       } catch {
-        sendNotification("Impossible de charger l'exercice", "error");
+        "Impossible de charger l'exercice"
+        sendNotification(t("errors.exerciseNOTLoad"), "error");
       } finally {
         setLoadingExercise(false);
       }
@@ -106,7 +109,7 @@ int main() {
   // -------- Inactivity hint --------
   useEffect(() => {
     const t = setTimeout(
-      () => sendNotification("Tu as besoin d'un indice ?", "hint"),
+      () => sendNotification(t("assistant.tipHelper"), "hint"),
       60000
     );
     return () => clearTimeout(t);
@@ -121,7 +124,7 @@ int main() {
           { source_code: userCode, language_id: 49 }
         );
         if (res.data.stderr)
-          sendNotification("Erreur détectée — vérifie la syntaxe", "hint");
+          sendNotification(t("error.syntaxError"), "hint");
       } catch { }
     }, 10000);
     return () => clearTimeout(t);
@@ -137,10 +140,10 @@ int main() {
         etat: "brouillon",
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
-      toast.success("Code sauvegardé");
-      sendNotification("Brouillon sauvegardé !");
+      toast.success(t("messages.codeSave"));
+      sendNotification(t("messages.draftSave"));
     } catch {
-      toast.error("Erreur lors de la sauvegarde");
+      toast.error(t("errors.errorSave"));
     }
   };
 
@@ -154,7 +157,7 @@ int main() {
         overwrite,
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
-      toast.success("Exercice soumis");
+      toast.success(t("messages.exoSubmitted"));
 
       // Vérifier à nouveau si l'on peut soumettre
       const res = await fetch(
@@ -169,12 +172,12 @@ int main() {
       setCanSubmit(data.can_submit);
 
       if (!data.can_submit) {
-        toast.error("Toutes les tentatives ont été utilisées !");
+        toast.error(t("messages.usedAttempts"));
       }
 
     } catch (err) {
       console.error(err);
-      toast.error("Erreur lors de la soumission");
+      toast.error(t("errors.errorSubmit"));
     }
   };
 
@@ -194,7 +197,7 @@ int main() {
   // -------- Run / Debug / Stop --------
   const runCode = async () => {
     setIsRunning(true);
-    setOutput("Exécution en cours...");
+    setOutput(t("messages.runningEXE"));
     controllerRef.current = new AbortController();
 
     try {
@@ -204,12 +207,12 @@ int main() {
         { signal: controllerRef.current.signal }
       );
       const result =
-        res.data.stdout ?? res.data.stderr ?? "Aucune sortie pour le moment...";
+        res.data.stdout ?? res.data.stderr ?? "Aucune sorte pour le moment...";
       setOutput(result);
-      sendNotification("Exécution terminée !");
+      sendNotification(t("messages.finishEXE"));
     } catch (e) {
       setOutput(
-        axios.isCancel(e) ? "Exécution stoppée" : "Erreur pendant l'exécution"
+        axios.isCancel(e) ? t("messages.exeStop") : t("errors.exeError")
       );
     }
     setIsRunning(false);
@@ -223,10 +226,10 @@ int main() {
         { source_code: userCode, language_id: 49 }
       );
       if (res.data.stderr) {
-        setOutput("Erreur détectée :\n\n" + res.data.stderr);
-        sendNotification("Bug détecté", "hint");
+        setOutput(`${t("errors.errorDetected")}\n\n${res.data.stderr}`);
+        sendNotification(t("errors.bugDetected"), "hint");
       } else {
-        setOutput("Aucun bug détecté");
+        setOutput(t("messages.noBug"));
       }
     } finally {
       setIsRunning(false);
@@ -314,7 +317,7 @@ int main() {
             {exercise ? (
               <>
                 <p className="font-semibold text-muted text-[20px]">
-                  Exercice: {exercise.titre_exo}
+                  {t("header.title")} {exercise.titre_exo}
                 </p>
                 <p className="mt-3 text-muted text-sm md:text-base">
                   {exercise.enonce}
@@ -322,7 +325,8 @@ int main() {
               </>
             ) : (
               <p className="text-red-500 text-sm">
-                Impossible de charger l'exercice.
+                {/* Impossible de charger l'exercice. */}
+                {t("errors.exerciseNOTLoad")}
               </p>
             )}
           </div>
@@ -402,7 +406,7 @@ int main() {
       `}
                 style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
               >
-                {t("send_solution")}
+                {t("buttons.sendSolution")}
               </button>
             </div>
           )}
@@ -432,7 +436,8 @@ int main() {
                 />
               </div>
               <div className="text-[rgb(var(--color-primary))] font-medium">
-                Besoin d'aide ? Discutez avec l'Assistant IA
+                {/* Besoin d'aide ? Discutez avec l'Assistant IA */}
+                {t("assistant.help")}
               </div>
             </button>
           </div>

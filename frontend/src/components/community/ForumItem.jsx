@@ -144,17 +144,10 @@ export default function ForumItem({
         }));
       } else {
         const errorData = await response.json().catch(() => ({}));
-<<<<<<< HEAD
         console.error(t("errors.delError"), errorData.error || `Erreur ${response.status}`);
       }
     } catch (error) {
       console.error(t("errors.delNetworkerror"), error);
-=======
-        console.error("Erreur lors de la suppression:", errorData.error || `Erreur ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Erreur réseau lors de la suppression:", error);
->>>>>>> origin/main
     } finally {
       setDeletingCommentId(null);
       setShowDeleteCommentConfirm(null);
@@ -219,11 +212,7 @@ export default function ForumItem({
           return { ...prev, [forumId]: updatedMessages };
         });
         
-<<<<<<< HEAD
         console.error(t("errors.likeError"), errorData.error || `Erreur ${response.status}`);
-=======
-        console.error("Erreur lors du like:", errorData.error || `Erreur ${response.status}`);
->>>>>>> origin/main
       } else {
         const data = await response.json();
         setMessages(prev => {
@@ -257,11 +246,7 @@ export default function ForumItem({
         return { ...prev, [forumId]: updatedMessages };
       });
       
-<<<<<<< HEAD
       console.error(t("errors.likeNetworkerrors"), error);
-=======
-      console.error("Erreur réseau lors du like:", error);
->>>>>>> origin/main
     } finally {
       setLikingMessageId(null);
     }
@@ -285,12 +270,8 @@ export default function ForumItem({
               </span>
               {post.type === "student-teacher" && (
                 <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded border border-yellow-200 dark:border-yellow-800">
-<<<<<<< HEAD
                   {/* Question d'étudiant */}
                   {t("actions.studentQuestion")}
-=======
-                  Question d'étudiant
->>>>>>> origin/main
                 </span>
               )}
             </div>
@@ -298,12 +279,8 @@ export default function ForumItem({
         </div>
         {post.isMine && (
           <span className="px-3 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full">
-<<<<<<< HEAD
             {/* Votre forum */}
               {t("actions.yourForum")}
-=======
-            Votre forum
->>>>>>> origin/main
           </span>
         )}
       </div>
@@ -613,8 +590,4 @@ export default function ForumItem({
       )}
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/main

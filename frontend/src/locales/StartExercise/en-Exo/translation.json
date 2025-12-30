@@ -1,52 +1,66 @@
 {
   "header": {
     "title": "Exercises",
-    "subtitle": "Commençons l'exercice !"
+    "subtitle": "Let's start the exercise!"
   },
-
-  "exerciseCard": {
-    "title": "Exercice 1",
-    "subtitle": "Somme de deux nombres",
-    "description": "Lire un entier et afficher s'il est pair ou impair."
-  },
-
+ 
   "editor": {
-    "yourCode": "Votre code :",
-    "fileName": "main.c"
-  },
+    "yourCode": "Your code:"
 
+  },
   "buttons": {
-    "run": "Exécuter",
-    "stop": "Arrêter",
-    "debug": "Déboguer",
-    "reset": "Réinitialiser",
-    "sendSolution": "Envoyer la solution"
+    "run": "Run",
+    "stop": "Stop",
+    "debug": "Debug",
+    "reset": "Reset",
+    "sendSolution": "Send the solution",
+    "saveDraft":"Save draft"
   },
-
   "tipCard": {
-    "title": "Astuce",
-    "message": "Testez votre code progressivement et utilisez printf pour déboguer."
+    "title": "Tip",
+    "message": "Test your code gradually and use printf to debug."
   },
-
   "output": {
-    "title": "Sortie :",
-    "default": "Hello world!\nLe programme s'est terminé avec le code de sortie 0\nAppuyez sur ENTRÉE pour quitter la console."
+    "title": "Output:",
+    "default": "Hello world!\nProgram finished with exit code 0\nPress ENTER to exit console.",
+    "noOutput":"No output yet"
   },
-
   "feedback": {
-    "title": "Comment trouvez-vous cet exercice ?",
-    "subtitle": "Votre avis nous aide à améliorer l’expérience d’apprentissage",
-
+    "title": "How did you find this exercise?",
+    "subtitle": "Your feedback helps us improve the learning experience",
     "labels": {
-      "veryEasy": "Très facile",
-      "moderate": "Modéré",
-      "veryDifficult": "Très difficile"
+      "veryEasy": "Very easy",
+      "moderate": "Moderate",
+      "veryDifficult": "Very difficult"
     },
-
-    "tip": "💡 Pas de souci ! L’Assistant IA est là pour vous aider."
+    "tip": "💡 No worries! The AI Assistant is here to help you."
+   
   },
-
   "assistant": {
-    "button":"Assistant IA"
-  }
+    "button": "AI Assistant",
+    "help":"Need help? Chat with the AI Assistant",
+     "tipHelper":"Do you need a hint?"
+  },
+"errors":{
+  "exerciseLoad":"Exercise loaded!",
+  "exerciseNOTLoad":"Unable to load the exercise",
+  "syntaxError":"Error detected — check the syntax",
+    "errorSave":"Error while saving",
+    "errorSubmit":"Error while submitting",
+    "exeError":"Error during execution",
+    "errorDetected": "Error detected :",
+    "bugDetected": "Bug detected"
+},
+"messages":{
+  "codeSave":"Code saved",
+  "draftSave":"Draft saved!",
+  "exoSubmitted":"Exercise submitted",
+  "usedAttempts":"All attempts have been used!",
+  "runningEXE":"Execution running...",
+  "finishEXE":"Run completed!",
+  "exeStop":"Execution stopped",
+  "noBugs":"No bug detected"
+
+}
+
 }

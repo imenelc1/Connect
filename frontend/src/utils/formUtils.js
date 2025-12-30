@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
 // Fonction utilitaire pour déterminer la cible
 export const getCibleFromForumType = (forumType) => {
   const mapping = {
@@ -10,11 +6,7 @@ export const getCibleFromForumType = (forumType) => {
     "student-student": "etudiants", 
     "student-teacher": "enseignants"
   };
-<<<<<<< HEAD
- return i18n.t(`community.targets.${mapping[forumType] || "students"}`);
-=======
   return mapping[forumType] || "etudiants";
->>>>>>> origin/main
 };
 
 // Fonction utilitaire pour la validation
@@ -22,17 +14,6 @@ export const validateForumData = (title, content) => {
   const errors = [];
   
   if (!title.trim()) {
-<<<<<<< HEAD
-      errors.push(t("community.validation.titleRequired"));
-  } else if (title.length > 200) {
-    errors.push(t("community.validation.titleTooLong"));
-  }
-  
-   if (!content.trim()) {
-    errors.push(t("community.validation.contentRequired"));
-  } else if (content.length > 2000) {
-    errors.push(t("community.validation.contentTooLong"));
-=======
     errors.push("Le titre est requis");
   } else if (title.length > 200) {
     errors.push("Le titre ne doit pas dépasser 200 caractères");
@@ -42,7 +23,6 @@ export const validateForumData = (title, content) => {
     errors.push("Le message est requis");
   } else if (content.length > 2000) {
     errors.push("Le message ne doit pas dépasser 2000 caractères");
->>>>>>> origin/main
   }
   
   return errors;
@@ -113,8 +93,4 @@ export const formatTimeAgo = (dateString) => {
   } catch (e) {
     return "récemment";
   }
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> origin/main
