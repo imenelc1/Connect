@@ -57,13 +57,6 @@ def check_course_badges(user, progression):
         badge = Badge.objects.get(nom="Dedicated Learner")
         GagnerBadge.objects.get_or_create(utilisateur=user, badge=badge)
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticatedJWT])
-def user_badges(request):
-    user = request.user
-    gained_ids = GagnerBadge.objects.filter(utilisateur=user).values_list('badge_id', flat=True)
-    badges = Badge.objects.all()
-    data = []
 
 def check_first_steps_badge(user):
     # Vérifier si le badge existe déjà
