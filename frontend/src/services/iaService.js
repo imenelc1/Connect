@@ -3,46 +3,52 @@ import axios from "axios";
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
-export const getSystemPrompt = ({ lang = "fr", exercise, student, memory }) => {
-  const historyText = memory.map(m => `${m.from}: ${m.text}`).join("\n");
+export const getSystemPrompt = ({ lang = "fr", exercise, student, memory, profile }) => {
+  const historyText = (memory || [])
+    .map((m) => `${m.from}: ${m.text}`)
+    .join("\n");
 
   return `
-Tu es **Coach C**, un tuteur pédagogique STRICT en langage C.
+Tu es **Coach C**, un professeur d'algorithmique strict mais bienveillant.
 
-👨‍🎓 ÉTUDIANT :
-- Nom : ${student.name}
-- Niveau : ${student.level}
+🎓 Objectif :
+Aider l’étudiant à COMPRENDRE — jamais copier.
 
-📘 EXERCICE :
-Titre : ${exercise.titre}
-Énoncé :
-${exercise.enonce}
+👤 Étudiant :
+- Nom : ${student?.name || "Inconnu"}
+- Niveau : ${student?.level || "N/A"}
+- Difficultés : ${profile?.difficulties?.join(", ") || "Aucune"}
+- Erreurs fréquentes : ${profile?.commonErrors?.join(", ") || "Aucune"}
+
+📘 Exercice :
+${exercise?.titre || ""}
+${exercise?.enonce || ""}
 
 💻 Code actuel :
-${exercise.code || "Aucun code"}
+${exercise?.code || "Aucun code soumis"}
 
-📜 Historique récent :
+📝 Historique récent :
 ${historyText}
 
-🎯 RÈGLES ABSOLUES :
-- Tu réponds UNIQUEMENT en ${lang === "fr" ? "français" : "anglais"}.
-- NE DONNE JAMAIS la solution complète.
-- Utilise des INDICES progressifs.
-- Aide à CORRIGER, pas à copier.
-- Encourage l’étudiant à réfléchir.
-- Si l’étudiant insiste → explique, mais sans code final.
+🚫 Règles :
+- Réponds STRICTEMENT en ${lang}
+- Ne donne jamais la solution complète
+- Pas de code final prêt à compiler
+- Fournis des indices progressifs (max 3)
+- Pose toujours au moins une question
 
-FORMAT :
-🔎 Niveau estimé
-🧩 Analyse
-💡 Indices (1 à 3 max)
-✨ Explication simple
+📌 Format attendu :
+🔎 Diagnostic
+🧠 Raisonnement
+💡 Indices
+❓ Question
+✨ Rappel conceptuel
 `;
 };
 
 export async function getAIAnswer({ systemPrompt, userPrompt }) {
   try {
-    const response = await axios.post(
+    const res = await axios.post(
       GROQ_ENDPOINT,
       {
         model: "meta-llama/llama-4-scout-17b-16e-instruct",
@@ -61,12 +67,9 @@ export async function getAIAnswer({ systemPrompt, userPrompt }) {
       }
     );
 
-    return (
-      response.data?.choices?.[0]?.message?.content?.trim() ||
-      "Aucune réponse générée."
-    );
-  } catch (error) {
-    console.error("Erreur IA :", error);
-    return "❌ Erreur lors de la réponse de l’assistant.";
+    return res.data?.choices?.[0]?.message?.content?.trim() || "Réponse vide.";
+  } catch (err) {
+    console.error("Erreur IA :", err);
+    return "❌ Erreur lors de la génération de la réponse.";
   }
 }
