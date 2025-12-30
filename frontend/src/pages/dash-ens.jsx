@@ -139,9 +139,9 @@ export default function Dashboardens() {
 
 
   useEffect(() => {
-  if (!user) return;
+    if (!user) return;
 
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
   const fetchDailyTime = async () => {
     try {
@@ -158,8 +158,8 @@ export default function Dashboardens() {
   fetchDailyTime();
   const interval = setInterval(fetchDailyTime, 60000);
 
-  return () => clearInterval(interval);
-}, [user]);
+    return () => clearInterval(interval);
+  }, [user]);
 
 
 

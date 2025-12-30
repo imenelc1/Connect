@@ -43,24 +43,34 @@ export default function AllCoursesPage() {
       try {
         const data = await progressionService.getCoursesProgress();
 
-        const formatted = data.map((c) => ({
-          id: c.id_cours,
-          title: c.titre_cour,
-          description: c.description,
-          level: c.niveau_cour_label,
-          duration: c.duration_readable,
-          author: c.utilisateur_name,
-          initials: c.utilisateur_name
-            ?.split(" ")
+        const formatted = data.map((c) => {
+          const nom = c.utilisateur_name || "Nom Inconnu";
+
+          // ✅ Initiales Nom + Prénom
+          const initials = nom
+            .split(" ")
+            .filter(Boolean)
             .map((n) => n[0])
             .join("")
-            .toUpperCase(),
-          isMine: c.utilisateur === currentUserId,
-          progress: c.progress ?? 0,
-          action: c.action,
-          lastLessonId: c.last_lesson_id,
-          visible: c.visibilite_cour === true || c.utilisateur === currentUserId,
-        }));
+            .toUpperCase();
+
+          return {
+            id: c.id_cours,
+            title: c.titre_cour,
+            description: c.description,
+            level: c.niveau_cour_label,
+            duration: c.duration_readable,
+            author: nom,
+            initials: initials, // ✅ BA, MA, etc
+            isMine: c.utilisateur === currentUserId,
+            progress: c.progress ?? 0,
+            action: c.action,
+            lastLessonId: c.last_lesson_id,
+            visible: c.visibilite_cour === true || c.utilisateur === currentUserId,
+          };
+        });
+
+
 
         setCourses(formatted);
       } catch (err) {
