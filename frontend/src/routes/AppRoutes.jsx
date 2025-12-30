@@ -43,6 +43,7 @@ import ExercisePreview from "../pages/ExercisePreview";
 import UpdateExercice from "../pages/UpdateExercice.jsx";
 import ProgressExercice from "../pages/ProgressionExo";
 import ProgressStudent from "../pages/ProgressionStudent";
+import SubmittedExoTheory from "../pages/SubmittedExoTheory.jsx";
 
 /* ================= QUIZZES ================= */
 import AllQuizzesPage from "../pages/AllQuizzesPage";
@@ -113,6 +114,9 @@ export default function AppRoutes() {
         <Route path="/start-exerciseCode/:exerciceId" element={<CodeExercisePage />} />
         <Route path="/submitted-exercise/:tentativeId" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
+        <Route path="/submitted-exercise-theory/:tentativeId" element={<SubmittedExoTheory />} />
+        <Route path="/submitted-exercise-theory/" element={<SubmittedExoTheory />} />
+
         <Route path="/progress-exercice" element={<ProgressExercice />} />
        
         <Route path="/progress-student/" element={<ProgressStudent />} />

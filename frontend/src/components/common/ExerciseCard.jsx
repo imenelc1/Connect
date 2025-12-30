@@ -63,37 +63,54 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
       </div>
 
       {/* FOOTER */}
-      <div className="flex justify-between items-center mt-4 gap-3">
-        <Button
-          variant="start"
-          className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
-          onClick={() => {
-            exercise.categorie === "code"
-              ? navigate(`/start-exerciseCode/${exercise.id}`)
-              : navigate(`/start-exercise/${exercise.id}`);
-          }}
-        >
-          Commencer
-        </Button>
+<div className="flex justify-between items-center mt-4 gap-3">
+  {!isOwner ? (
+    /* ÉTUDIANT */
+    <Button
+      variant="start"
+      className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
+      onClick={() => {
+        exercise.categorie === "code"
+          ? navigate(`/start-exerciseCode/${exercise.id}`)
+          : navigate(`/start-exercise/${exercise.id}`);
+      }}
+    >
+      Commencer
+    </Button>
+  ) : (
+    /* PROF */
+    <Button
+      variant="start"
+      className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
+        onClick={() => {
+        exercise.categorie === "code"
+          ? navigate(`/start-exerciseCode/${exercise.id}`)
+          : navigate(`/start-exercise/${exercise.id}`);
+      }}
+    >
+      Check quiz
+    </Button>
+  )}
 
-        {isOwner && (
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate(`/edit-exercise/${exercise.id}`)}
-              className="text-gray-600 hover:text-blue-600 transition"
-            >
-              <Pencil size={18} />
-            </button>
+  {isOwner && (
+    <div className="flex gap-3">
+      <button
+        onClick={() => navigate(`/exercices/edit/${exercise.id}`)}
+        className="text-gray-600 hover:text-blue-600 transition"
+      >
+        <Pencil size={18} />
+      </button>
 
-            <button
-              onClick={handleDelete}
-              className="text-gray-600 hover:text-red-600 transition"
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
-        )}
-      </div>
+      <button
+        onClick={handleDelete}
+        className="text-gray-600 hover:text-red-600 transition"
+      >
+        <Trash2 size={18} />
+      </button>
+    </div>
+  )}
+</div>
+
     </div>
   );
 }

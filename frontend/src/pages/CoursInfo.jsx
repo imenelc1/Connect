@@ -69,7 +69,8 @@ export default function CoursePage() {
   }, []);
 
   // user data
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
+    }`.toUpperCase();
   const currentUserId = userData?.id_utilisateur;
   const userRole = userData?.role;
 
