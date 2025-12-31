@@ -60,7 +60,15 @@ export default function LoginStudent() {
       loginUser(res.data.token, userWithRole); // ⚡ AuthContext
 
       toast.success(t("success.login"));
+      const a=res.data.user.must_change_password;
+      console.log({a});
+     if (res.data.user.must_change_password) {
+      // 🔑 on utilise le reset_token renvoyé par le backend
+      navigate(`/welcome-reset-password/${res.data.reset_token}`);
+      } else {
       navigate("/dashboard-etu");
+      }
+
 
     } catch (error) {
       const backend = error.response?.data;

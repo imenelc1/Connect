@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
-from badges.views import check_course_badges, check_first_steps_badge, check_marathon_coder_badge, check_problem_solver_badge
+from badges.views import check_7day_streak_badge, check_course_badges, check_first_steps_badge, check_marathon_coder_badge, check_problem_solver_badge, check_speed_demon_badge
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
@@ -727,6 +727,113 @@ class create_tentative(APIView):
             }
         }, status=status.HTTP_200_OK)
 
+    def post(self, request):
+        user = request.user
+        exercice_id = request.data.get("exercice_id")
+        etat = request.data.get("etat", "brouillon")
+        overwrite = request.data.get("overwrite", False)  # si on veut écraser dernière tentative
+
+        # Vérification du rôle
+        if not hasattr(user, "etudiant"):
+            return Response(
+                {"error": "Seuls les étudiants peuvent participer aux exercices"},
+                status=403
+            )
+
+        # Récupération de l'exercice
+        try:
+            exercice = Exercice.objects.get(id_exercice=exercice_id)
+        except Exercice.DoesNotExist:
+            return Response({"error": "Exercice non trouvé"}, status=404)
+
+        # Vérification appartenance à l'espace pour les soumissions
+        if etat == "soumis" and not etudiant_appartient_a_lespace(user, exercice):
+            raise PermissionDenied("Vous ne pouvez pas soumettre cet exercice")
+
+        # Temps passé
+        temps_passe_sec = request.data.get("temps_passe", 0)
+        temps_passe = timedelta(seconds=int(temps_passe_sec))
+
+        defaults = {
+            "reponse": request.data.get("reponse", ""),
+            "output": request.data.get("output", ""),
+            "etat": etat,
+            "temps_passe": temps_passe,
+        }
+
+        if etat == "brouillon":
+            # Toujours un seul brouillon par étudiant et exercice
+            tentative, created = TentativeExercice.objects.update_or_create(
+                utilisateur=user,
+                exercice=exercice,
+                etat="brouillon",
+                defaults=defaults
+            )
+
+        elif etat == "soumis":
+            # Vérifier si un brouillon existe
+            brouillon = TentativeExercice.objects.filter(
+                utilisateur=user,
+                exercice=exercice,
+                etat="brouillon"
+            ).first()
+
+            if brouillon:
+                # Transformer le brouillon en soumis
+                brouillon.etat = "soumis"
+                brouillon.reponse = defaults["reponse"]
+                brouillon.output = defaults["output"]
+                brouillon.temps_passe = defaults["temps_passe"]
+                brouillon.submitted_at = now()
+                brouillon.save(update_fields=["etat", "reponse", "output", "temps_passe", "submitted_at"])
+                tentative = brouillon
+            else:
+                # Compter les soumissions existantes
+                nb_soumissions = TentativeExercice.objects.filter(
+                    utilisateur=user,
+                    exercice=exercice,
+                    etat="soumis"
+                ).count()
+
+                if exercice.max_soumissions != 0 and nb_soumissions >= exercice.max_soumissions:
+                    if not overwrite:
+                        return Response({"error": "Limite de soumissions atteinte"}, status=400)
+                    else:
+                        # Écraser la dernière soumission
+                        last_submission = TentativeExercice.objects.filter(
+                            utilisateur=user,
+                            exercice=exercice,
+                            etat="soumis"
+                        ).order_by("-submitted_at").first()
+                        last_submission.reponse = defaults["reponse"]
+                        last_submission.output = defaults["output"]
+                        last_submission.temps_passe = defaults["temps_passe"]
+                        last_submission.submitted_at = now()
+                        last_submission.save(update_fields=["reponse", "output", "temps_passe", "submitted_at"])
+                        tentative = last_submission
+                else:
+                    # Créer nouvelle tentative soumis
+                    tentative = TentativeExercice.objects.create(
+                        utilisateur=user,
+                        exercice=exercice,
+                        etat="soumis",
+                        reponse=defaults["reponse"],
+                        output=defaults["output"],
+                        temps_passe=defaults["temps_passe"],
+                        submitted_at=now()
+                    )
+        check_first_steps_badge(user)
+        check_problem_solver_badge(user)
+        check_speed_demon_badge(user)
+        check_7day_streak_badge(user)
+        return Response({
+            "success": "Tentative enregistrée",
+            "tentative": {
+                "id": tentative.id,
+                "etat": tentative.etat,
+                "submitted_at": tentative.submitted_at,
+            }
+        }, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])

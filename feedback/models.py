@@ -109,16 +109,31 @@ class Notification(models.Model):
 
 
 class FeedbackExercice(models.Model):
-    id = models.AutoField(primary_key=True)
     contenu = models.TextField()
-    exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE, related_name='feedbacks')
-    tentative = models.ForeignKey(TentativeExercice, on_delete=models.CASCADE, related_name='feedbacks')
-    auteur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+
+    exercice = models.ForeignKey(
+        Exercice,
+        on_delete=models.CASCADE,
+        related_name='feedbacks'
+    )
+
+    tentative = models.OneToOneField(
+        TentativeExercice,
+        on_delete=models.CASCADE,
+        related_name='feedback_exercice'  # ✅ nom UNIQUE
+    )
+
+    auteur = models.ForeignKey(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name='feedbacks_exercices'
+    )
+
     date_creation = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "feedback_exercice"
         ordering = ['-date_creation']
 
     def __str__(self):
-        return f"Feedback {self.id} par {self.auteur.get_full_name()} sur {self.exercice.titre_exo}"
+        return f"Feedback de {self.auteur} sur {self.exercice.titre}"
+

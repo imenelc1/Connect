@@ -12,6 +12,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import progressionService from "../services/progressionService";
+import Input from "../components/common/Input";
 
 import Editor from "@monaco-editor/react";
 import ExerciseContext from "../context/ExerciseContext";
@@ -46,6 +47,7 @@ int main() {
   const storedUser = localStorage.getItem("user");
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
@@ -68,25 +70,36 @@ int main() {
 
   // -------- Fetch Exercise --------
   useEffect(() => {
-    if (!exerciceId) return;
-    const fetchExercise = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:8000/api/exercices/${exerciceId}/`
-        );
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setExercise(data);
-        setStartTime(Date.now());
-        sendNotification("Exercice chargé !");
-      } catch {
-        sendNotification("Impossible de charger l'exercice", "error");
-      } finally {
-        setLoadingExercise(false);
-      }
-    };
-    fetchExercise();
-  }, [exerciceId]);
+  if (!exerciceId) return;
+
+  const fetchExercise = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setExercise(data);
+
+      // Après avoir chargé l'exercice, on check canSubmit
+      const canSubmitRes = await fetch(
+        `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      const canSubmitData = await canSubmitRes.json();
+      setCanSubmit(canSubmitData.can_submit);
+    } catch (err) {
+      sendNotification("Impossible de charger l'exercice", "error");
+      setCanSubmit(false);
+    } finally {
+      setLoadingExercise(false);
+    }
+  };
+
+  fetchExercise();
+}, [exerciceId]);
+
+
 
   // -------- Load last code (localStorage first, then server draft) --------
   useEffect(() => {
@@ -166,27 +179,51 @@ int main() {
   }, [userCode]);
 
   // -------- Run / Debug / Stop --------
-  const runCode = async () => {
-    setIsRunning(true);
-    setOutput("Exécution en cours...");
+ const runCode = async () => {
+  setIsRunning(true);
+  setOutput("Exécution en cours...");
 
-    try {
-      const res = await axios.post(
-        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-        {
-          source_code: userCode,
-          language_id: 49,
-          stdin: userInput,
-        }
+  try {
+    const res = await axios.post(
+      "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+      {
+        source_code: userCode,
+        language_id: 49,
+        stdin: userInput,
+      }
+    );
+
+    const {
+      stdout,
+      stderr,
+      compile_output,
+      status,
+    } = res.data;
+
+    const result =
+      stdout ||
+      stderr ||
+      compile_output ||
+      "Aucune sortie pour le moment...";
+
+    setOutput(result);
+
+    // 🚨 NOTIFICATION IMMÉDIATE
+    if (stderr || compile_output) {
+      sendNotification(
+        "⚠️ Erreur détectée lors de l'exécution. Besoin d’un coup de main ?",
+        "hint"
       );
-      const result = res.data.stdout ?? res.data.stderr ?? "Aucune sortie pour le moment...";
-      setOutput(result);
-    } catch {
-      setOutput("Erreur pendant l'exécution");
-    } finally {
-      setIsRunning(false);
     }
-  };
+
+  } catch {
+    setOutput("Erreur pendant l'exécution");
+    sendNotification("Erreur pendant l'exécution", "error");
+  } finally {
+    setIsRunning(false);
+  }
+};
+
 
   const debugCode = async () => {
     setIsRunning(true);
@@ -253,6 +290,7 @@ int main() {
     output,
     onHintRequest: () => setOpenAssistant(true),
   };
+
 
   // ------------------- JSX -------------------
   return (

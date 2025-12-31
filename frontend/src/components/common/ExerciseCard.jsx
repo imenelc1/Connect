@@ -60,7 +60,7 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
 
   return (
     <div
-      className={`shadow-md p-6 rounded-3xl flex flex-col justify-between h-56 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${levelCardBg[exercise.level]}`}
+      className={`shadow-md p-6 rounded-3xl flex flex-col justify-between h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${levelCardBg[exercise.level]}`}
     >
       {/* ================= HEADER ================= */}
       <div>
