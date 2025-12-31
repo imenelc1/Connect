@@ -174,17 +174,6 @@ export default function BadgesManagement() {
                 <div className="w-14 h-14 rounded-full flex items-center justify-center bg-primary text-white text-2xl">
                   {getBadgeIcon(badge.title)}
                 </div>
-<<<<<<< HEAD
-
-                <span
-                  className={`h-6 px-3 py-1 text-xs font-medium rounded-full ${getTypeColor(
-                    b.type
-                  )}`}
-                >
-                  {t(b.type)}
-                </span>
-
-=======
                 <span
                   className={`h-6 px-3 py-1 text-xs font-medium rounded-full ${
                     categoryColors[badge.category] || "bg-gray-200 text-gray-600"
@@ -192,7 +181,6 @@ export default function BadgesManagement() {
                 >
                   {badge.category}
                 </span>
->>>>>>> main
               </div>
 
               {/* Content */}
