@@ -191,7 +191,7 @@ export function QuizTakePage() {
 
         <ContentProgress value={progressValue} className="mb-6" />
 
-        <div className="bg-white rounded-xl p-4 mb-6">
+        <div className="bg-grad-2 rounded-xl p-4 mb-6">
           <h3 className="font-semibold mb-3">{q.texte}</h3>
 
           <div className="flex flex-col gap-2">

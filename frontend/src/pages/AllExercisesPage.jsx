@@ -35,6 +35,7 @@ export default function AllExercisesPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
@@ -157,19 +158,36 @@ export default function AllExercisesPage() {
 
 
   return (
-    <div className="flex bg-surface min-h-screen">
-      <Navbar />
-      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
-        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
-          <Bell size={18} />
-        </div>
-        <UserCircle initials={initials} onToggleTheme={toggleDarkMode} onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-      </div>
+     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+               {/* Sidebar */}
+               <div>
+                 <Navbar />
+               </div>
+      
 
-      <main className="flex-1 p-4 md:p-8 transition-all duration-300" style={{ marginLeft: sidebarWidth }}>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl font-bold text-muted">{t("exercisesTitle")}</h1>
-        </div>
+     <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+         <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+  {/* Titre */}
+  <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
+    {t("exercisesTitle")}
+  </h1>
+
+  {/* Notifications + User */}
+  <div className="flex items-center gap-3">
+    <NotificationBell />
+    <UserCircle
+      initials={initials}
+      onToggleTheme={toggleDarkMode}
+      onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
+    />
+  </div>
+</header>
+
+     
+     
 
        <ContentSearchBar
          value={searchTerm}
