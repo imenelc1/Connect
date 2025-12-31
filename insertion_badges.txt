@@ -37,8 +37,12 @@ Badge.objects.create(
     condition="Passer 10 heures dans la plateforme en une seule journée",
     categorie="progress",
     numpoints=150,
+<<<<<<< HEAD
     icone="badges/marathon_coder.png"
 )
+=======
+    icone="badges/marathon_coder.png")
+>>>>>>> origin/meriem
 
 # Badge 5 : First Steps
 Badge.objects.create(
@@ -59,3 +63,56 @@ Badge.objects.create(
     numpoints=150,
     icone="badges/problem_solver.png"
 )
+<<<<<<< HEAD
+=======
+
+
+# Badge : Speed Demon
+Badge.objects.create(
+    nom="Speed Demon",
+    description="Solve 5 different exercises in under an hour",
+    condition="Résoudre 5 exercices différents en moins d'une heure",
+    categorie="success",
+    numpoints=200,
+    icone="badges/speed_demon.png"
+)
+
+Badge.objects.get_or_create(
+    nom="7 Day Streak",
+    description="Solve exercises for 7 consecutive days",
+    condition="Résoudre au moins un exercice chaque jour pendant 7 jours consécutifs",
+    categorie="success",
+    numpoints=150,
+    icone="badges/7_day_streak.png"
+)
+
+# Création du badge Quiz Novice
+badge, created = Badge.objects.get_or_create(
+    nom="Quiz Novice",
+    defaults={
+        "description": "Complete your first quiz",
+        "condition": "Réussir au moins un quiz",
+        "categorie": "success",
+        "numpoints": 50,
+        "icone": "badges/quiz_novice.png"
+    }
+)
+
+# Création du badge Quiz Novice
+badge, created = Badge.objects.get_or_create(
+    nom="Quiz Novice",
+    defaults={
+        "description": "Complete your first quiz",
+        "condition": "Réussir au moins un quiz",
+        "categorie": "success",
+        "numpoints": 50,
+        "icone": "badges/quiz_novice.png"
+    }
+)
+
+
+
+
+
+
+>>>>>>> origin/meriem

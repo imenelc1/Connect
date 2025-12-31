@@ -82,6 +82,7 @@ export default function ExercisesManagement() {
   const filtered = exercises.filter((e) =>
     (e.titre_exo || "").toLowerCase().includes(search.toLowerCase())
   );
+  console.log({filteredStudents});
 
 
   /* ================= EDIT ================= */
