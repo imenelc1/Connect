@@ -44,13 +44,14 @@ INSTALLED_APPS = [
     # Apps du projet
     'users',
     'courses.apps.CoursesConfig',
-    'exercices',
-    'quiz',
+    'exercices.app.ExercicesConfig',
+    'quiz.app.QuizConfig',
     'forum.apps.ForumConfig',
     'ia',
     'dashboard',
     'feedback',
     'spaces.apps.SpacesConfig',
+    'badges',
     # API et CORS
     'rest_framework',
     'corsheaders',
@@ -149,11 +150,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        
-    ],
+     ]
 }
+
+
 
 
 

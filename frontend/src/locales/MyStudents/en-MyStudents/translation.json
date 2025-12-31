@@ -12,6 +12,26 @@
   "studentID": "Student ID",
   "studentIDPlaceholder": "ST_00129",
   "space": "Space",
+  "selectSpace": "Select a space",
   "active": "Active",
-  "lastActive": "{{time}} ago"
+  "lastActive": "{{time}} ago",
+  "noStudentsMessage": "No students found.",
+  "Messages": {
+    "StudentAdded": "Student added successfully!",
+    "StudentRemoved": "Student removed successfully!"
+  },
+
+  "Errors": {
+    "FetchProgress": "Failed to get students progress:",
+    "FetchStudents": "Failed to load students",
+    "FetchSpaces": "Failed to load spaces",
+    "AddStudent": "An error occurred while adding the student",
+    "RemoveStudent": "An error occurred while removing the student",
+    "unknownSpace":"Unknown space",
+    "DeleteError":"An error occurred while deleting"
+   
+  },
+    "Confirmations": {
+    "RemoveStudent": "Are you sure you want to remove this student from this space?"
+  }
 }

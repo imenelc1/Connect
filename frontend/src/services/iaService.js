@@ -1,61 +1,75 @@
 import axios from "axios";
 
-// Clé API Groq
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
-// Cache simple pour éviter les requêtes répétées
-const cache = new Map();
+export const getSystemPrompt = ({ lang = "fr", exercise, student, memory, profile }) => {
+  const historyText = (memory || [])
+    .map((m) => `${m.from}: ${m.text}`)
+    .join("\n");
 
-/**
- * Envoie le code ou la question à Llama-4 Scout 17B
- * @param {string} codeOrQuestion - code C ou question sur algorithme
- * @returns {Promise<string>} - réponse du modèle
- */
-export async function getAIAnswer(codeOrQuestion) {
-  // Vérifie si la réponse est déjà dans le cache
-  if (cache.has(codeOrQuestion)) {
-    return cache.get(codeOrQuestion);
-  }
+  return `
+Tu es **Coach C**, un professeur d'algorithmique strict mais bienveillant.
 
-  // Limite la taille du code pour éviter trop de tokens (ex: max 2000 caractères)
-  const limitedQuestion = codeOrQuestion.length > 2000
-    ? codeOrQuestion.slice(0, 2000) + "\n// [Le code a été tronqué pour respecter la limite]"
-    : codeOrQuestion;
+🎓 Objectif :
+Aider l’étudiant à COMPRENDRE — jamais copier.
 
+👤 Étudiant :
+- Nom : ${student?.name || "Inconnu"}
+- Niveau : ${student?.level || "N/A"}
+- Difficultés : ${profile?.difficulties?.join(", ") || "Aucune"}
+- Erreurs fréquentes : ${profile?.commonErrors?.join(", ") || "Aucune"}
+
+📘 Exercice :
+${exercise?.titre || ""}
+${exercise?.enonce || ""}
+
+💻 Code actuel :
+${exercise?.code || "Aucun code soumis"}
+
+📝 Historique récent :
+${historyText}
+
+🚫 Règles :
+- Réponds STRICTEMENT en ${lang}
+- Ne donne jamais la solution complète
+- Pas de code final prêt à compiler
+- Fournis des indices progressifs (max 3)
+- Pose toujours au moins une question
+
+📌 Format attendu :
+🔎 Diagnostic
+🧠 Raisonnement
+💡 Indices
+❓ Question
+✨ Rappel conceptuel
+`;
+};
+
+export async function getAIAnswer({ systemPrompt, userPrompt }) {
   try {
-    const response = await axios.post(
-      "https://api.groq.com/openai/v1/chat/completions",
+    const res = await axios.post(
+      GROQ_ENDPOINT,
       {
-        model: "meta-llama/llama-4-scout-17b-16e-instruct", // modèle recommandé
-        messages: [
-          { role: "system", content: "Tu es un professeur de programmation en C. Tu expliques le code clairement en français." },
-          { role: "user", content: limitedQuestion }
-        ],
-        max_tokens: 512,
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
         temperature: 0.2,
+        max_tokens: 700,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
       },
       {
         headers: {
+          Authorization: `Bearer ${GROQ_API_KEY}`,
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${GROQ_API_KEY}`,
         },
       }
     );
 
-    const answer = response.data?.choices?.[0]?.message?.content || "Aucune réponse générée.";
-
-    // Sauvegarde dans le cache
-    cache.set(codeOrQuestion, answer);
-
-    return answer;
-  } catch (error) {
-    console.error("Erreur IA:", error.message, error.response?.data);
-
-    // Gestion simple des erreurs de quota ou dépassement
-    if (error.response?.status === 429) {
-      return "Trop de requêtes en même temps, veuillez réessayer plus tard.";
-    }
-
-    return error.response?.data?.error?.message || "Erreur lors de la génération de la réponse.";
+    return res.data?.choices?.[0]?.message?.content?.trim() || "Réponse vide.";
+  } catch (err) {
+    console.error("Erreur IA :", err);
+    return "❌ Erreur lors de la génération de la réponse.";
   }
 }

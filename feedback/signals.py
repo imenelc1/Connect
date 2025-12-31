@@ -1,9 +1,10 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.contenttypes.models import ContentType
-from feedback.models import Feedback, Notification
+from feedback.models import Feedback
+from users.models import Administrateur
+from .utils import create_notification
 from courses.models import Cours
-from exercices.models import Exercice
 
 @receiver(post_save, sender=Feedback)
 def create_notification_on_feedback(sender, instance, created, **kwargs):
@@ -11,48 +12,42 @@ def create_notification_on_feedback(sender, instance, created, **kwargs):
         return
 
     cible = instance.content_object
+    if not isinstance(cible, Cours):
+        return
+
     utilisateur_source = instance.utilisateur
+    proprietaire_cours = cible.utilisateur
 
-    destinataire = None
-    module_source = ""
-    message = ""
-
-    # ====== FEEDBACK SUR UN COURS ======
-    if isinstance(cible, Cours):
-        destinataire = cible.utilisateur  # <- champ correct
-        module_source = "cours"
-        message = f"Un nouveau feedback ({instance.etoile}★) a été ajouté à votre cours '{cible.titre_cour}'."
-
-    # ====== FEEDBACK SUR UN EXERCICE ======
-    elif isinstance(cible, Exercice):
-        destinataire = cible.createur  # ou adapte selon ton modèle Exercice
-        module_source = "exercice"
-        message = f"Un nouveau feedback ({instance.etoile}★) a été ajouté à votre exercice."
-
-    # Vérifications supplémentaires
-    if destinataire is None or destinataire == utilisateur_source:
-        return
-    
-    if not hasattr(utilisateur_source, 'id_utilisateur'):
-        return
-
-    try:
-        Notification.objects.create(
-            message_notif=message,
-            utilisateur_destinataire=destinataire,
-            utilisateur_envoyeur=None,
-            content_type=ContentType.objects.get_for_model(Feedback),
-            object_id=instance.id_feedback,
+    # Notification pour le propriétaire du cours
+    if proprietaire_cours != utilisateur_source:
+        create_notification(
+            destinataire=proprietaire_cours,
+            envoyeur=utilisateur_source if getattr(instance, "afficher_nom", False) else None,
+            content_object=instance,
             action_type="feedback_created",
-            module_source=module_source,
+            module_source="cours",
+            message=f"Nouveau feedback ({instance.etoile}★) sur votre cours '{cible.titre_cour}'.",
             extra_data={
-                "etoile": instance.etoile,
-                "object_id": instance.object_id,
                 "feedback_id": instance.id_feedback,
-                "contenu_preview": instance.contenu[:100] if instance.contenu else "",
+                "etoile": instance.etoile,
+                "cours_id": cible.id_cours,
+                "afficher_nom": getattr(instance, "afficher_nom", False)
             }
         )
-    except Exception as e:
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.error(f"Erreur création notification: {e}")
+
+    # Notification pour tous les admins
+    for admin in Administrateur.objects.all():
+        create_notification(
+            admin_destinataire=admin,
+            envoyeur=utilisateur_source if getattr(instance, "afficher_nom", False) else None,
+            content_object=instance,
+            action_type="feedback_created",
+            module_source="cours",
+            message=f"Nouveau feedback ({instance.etoile}★) sur le cours '{cible.titre_cour}'.",
+            extra_data={
+                "feedback_id": instance.id_feedback,
+                "etoile": instance.etoile,
+                "cours_id": cible.id_cours,
+                "afficher_nom": getattr(instance, "afficher_nom", False)
+            }
+        )

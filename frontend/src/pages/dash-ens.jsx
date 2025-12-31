@@ -12,7 +12,8 @@ import UserCircle from "../components/common/UserCircle";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api"; 
+import api from "../services/api";
+import axios from "axios";
 import { PieChart, Pie, Cell } from "recharts";
 import progressionService from "../services/progressionService";
 import NotificationBell from "../components/common/NotificationBell";
@@ -25,13 +26,13 @@ export default function Dashboardens() {
   // États pour la responsivité
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  
+
   const storedUser = localStorage.getItem("user");
   const userData = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
 
   const [user, setUser] = useState(null);
-  const [avgTime, setAvgTime] = useState("");
   const [activeCourses, setActiveCourses] = useState("");
+  const [dailyTime, setDailyTime] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const initials = user
@@ -43,17 +44,75 @@ export default function Dashboardens() {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
     };
   }, []);
+
+  const [avgSubmission, setAvgSubmission] = useState(0);
+
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          "http://127.0.0.1:8000/api/dashboard/all-students-submissions/",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const { total_exercises, students } = res.data;
+        const studentCount = students.length;
+
+        // total soumis par tous les étudiants
+        const totalSubmitted = students.reduce((sum, s) => sum + s.submitted_count, 0);
+
+        const avg = total_exercises && studentCount
+          ? ((totalSubmitted / (total_exercises * studentCount)) * 100).toFixed(2)
+          : 0;
+
+        setAvgSubmission(avg);
+
+
+      } catch (err) {
+        console.error("Erreur fetching submissions:", err);
+      }
+    };
+
+    fetchSubmissions();
+  }, []);
+
+  const [successRate, setSuccessRate] = useState(0);
+  useEffect(() => {
+    const fetchSuccessRate = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          "http://127.0.0.1:8000/api/dashboard/quiz_success_rate_prof/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        setSuccessRate(res.data.success_rate);
+      } catch (err) {
+        console.error("Erreur success rate:", err);
+      }
+    };
+
+    fetchSuccessRate();
+  }, []);
+
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,9 +126,6 @@ export default function Dashboardens() {
         const coursesCount = await progressionService.getActiveCoursesCountProf();
         setActiveCourses(coursesCount);
 
-        // Récupérer le temps moyen passé
-        const avgTimeData = await progressionService.getAverageTimeProf();
-        setAvgTime(avgTimeData.toFixed(2) + "h");
       } catch (err) {
         console.error("Erreur lors du chargement des données:", err.response?.data || err);
       } finally {
@@ -79,6 +135,80 @@ export default function Dashboardens() {
 
     fetchData();
   }, []);
+
+
+
+  useEffect(() => {
+    if (!user) return;
+
+    const token = localStorage.getItem("token");
+
+  const fetchDailyTime = async () => {
+    try {
+      const res = await axios.get(
+        "http://127.0.0.1:8000/api/dashboard/daily-time/",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setDailyTime(res.data.total_seconds || 0);
+    } catch (err) {
+      console.error("Erreur daily time:", err);
+    }
+  };
+
+  fetchDailyTime();
+  const interval = setInterval(fetchDailyTime, 60000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+
+
+
+  const [contentCounts, setContentCounts] = useState({
+    courses_count: 0,
+    exercises_count: 0,
+    quizzes_count: 0
+  });
+
+  useEffect(() => {
+    const fetchContentCounts = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          "http://127.0.0.1:8000/api/dashboard/professor_content_counts_global",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setContentCounts(res.data);
+        console.log("chart", res.data);
+      } catch (err) {
+        console.error("Erreur fetching content counts:", err);
+      }
+    };
+
+    fetchContentCounts();
+  }, []);
+
+
+
+
+  // Formatage du temps lisible
+  const formatTimeStyled = (secs) => {
+    if (!secs || secs < 60) return <span className="text-green-500 font-bold">1 min</span>;
+
+    const mins = Math.floor(secs / 60);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    const s = secs % 60;
+
+    return (
+      <span>
+        {h > 0 && <span style={{ fontSize: 26 }} className="text-blue">{h}h </span>}
+        {m > 0 && <span style={{ fontSize: 26 }} className="text-blue">{m}min </span>}
+        {s > 0 && <span style={{ fontSize: 26 }} className="text-blue">{s}s</span>}
+      </span>
+    );
+  };
+
 
   const dat = [
     {
@@ -108,11 +238,12 @@ export default function Dashboardens() {
   ];
 
   // Chart data
-  const data = [
-    { name: "Published", value: 46 },
-    { name: "Draft", value: 10 },
-    { name: "Quizzes", value: 82 },
+  const chartData = [
+    { name: "Courses", value: contentCounts.courses_count },
+    { name: "Exercises", value: contentCounts.exercises_count },
+    { name: "Quizzes", value: contentCounts.quizzes_count }
   ];
+
 
   if (loading) {
     return (
@@ -123,14 +254,14 @@ export default function Dashboardens() {
   }
 
   return (
-        <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* Sidebar */}
       <div>
         <Navbar />
       </div>
 
       {/* Main content */}
-       <main className={`
+      <main className={`
         flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
@@ -158,7 +289,7 @@ export default function Dashboardens() {
           </form>
         </header>
 
-    
+
 
         {/* Welcome banner */}
         <div className="relative bg-grad-1 text-white p-4 rounded-2xl shadow-md flex flex-col lg:flex-row justify-between items-center gap-3 sm:gap-4">
@@ -175,32 +306,32 @@ export default function Dashboardens() {
 
         {/* Quick stats */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 text-textc">
-          <Cards 
-            text="Average Student Progress" 
-            value="68%" 
-            icon={<TrendingDown size={isMobile ? 16 : 18}/>} 
+          <Cards
+            text="Avg. Submission Rate"
+            value={`${avgSubmission}%`}
+            icon={<TrendingDown size={isMobile ? 16 : 18} />}
             bg="bg-grad-2"
             isMobile={isMobile}
           />
-          <Cards 
-            text="Success Rate" 
-            value="68%" 
-            icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
-            bg="bg-grad-3" 
+          <Cards
+            text="Quizzes Success Rate"
+            value={`${successRate}%`}
+            icon={<CircleCheckBig size={isMobile ? 16 : 18} />}
+            bg="bg-grad-3"
             isMobile={isMobile}
           />
-          <Cards 
-            text="Average time spent" 
-            value={avgTime} 
-            icon={<Book size={isMobile ? 16 : 18} />} 
-            bg="bg-grad-4" 
+          <Cards
+            text="Time Spent Today"
+            value={formatTimeStyled(dailyTime)}
+            icon={<Book size={isMobile ? 16 : 18} />}
+            bg="bg-grad-4"
             isMobile={isMobile}
           />
-          <Cards 
-            text="Active Courses" 
-            value={activeCourses} 
-            icon={<Clock3 size={isMobile ? 16 : 18} />} 
-            bg="bg-grad-2" 
+          <Cards
+            text="Active Courses"
+            value={activeCourses}
+            icon={<Clock3 size={isMobile ? 16 : 18} />}
+            bg="bg-grad-2"
             isMobile={isMobile}
           />
         </div>
@@ -212,7 +343,7 @@ export default function Dashboardens() {
 
         {/* Quick actions + Pie chart */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
+
           {/* Quick actions */}
           <div>
             <h2 className="text-lg sm:text-xl text-muted font-bold mb-4 sm:mb-6">Quick Actions</h2>
@@ -254,13 +385,13 @@ export default function Dashboardens() {
           </div>
 
           {/* Pie chart */}
-          <div className="rounded-2xl shadow-md p-4 flex flex-col items-center bg-card">
-            <PieChart width={isMobile ? 180 : 220} height={isMobile ? 180 : 220}>
+          <div className="rounded-2xl shadow-md  flex flex-col items-center bg-card">
+            <PieChart width={isMobile ? 180 : 240} height={isMobile ? 180 : 220} className="mt-8">
               <Pie
                 dataKey="value"
-                data={data}
-                outerRadius={isMobile ? 70 : 90}
-                paddingAngle={2}
+                data={chartData}
+                outerRadius={isMobile ? 70 : 85}
+                paddingAngle={0}
                 label={({ value }) => value}
                 labelStyle={{ fontSize: isMobile ? 10 : 12 }}
               >
@@ -270,17 +401,19 @@ export default function Dashboardens() {
               </Pie>
             </PieChart>
 
+
             <div className="flex flex-wrap gap-3 sm:gap-4 text-xs mt-2 justify-center">
               <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-purple-500 rounded-full"></span> Published
+                <span className="w-6 h-1 bg-purple rounded-full"></span> Courses
               </div>
               <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-blue-500 rounded-full"></span> Draft
+                <span className="w-6 h-1 bg-blue rounded-full"></span> Exercises
               </div>
               <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-pink-500 rounded-full"></span> Quizzes
+                <span className="w-6 h-1 bg-pink rounded-full"></span> Quizzes
               </div>
             </div>
+
           </div>
         </div>
 

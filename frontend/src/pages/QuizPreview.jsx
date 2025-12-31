@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaClock, FaMedal, FaStar, FaHome } from "react-icons/fa";
-import { useTranslation } from "react-i18next";
+import { Globe } from "lucide-react";
 import Button from "../components/common/Button";
+import { useTranslation } from "react-i18next";
 
 export default function QuizPreview() {
   const [quiz, setQuiz] = useState(null);
@@ -50,51 +51,57 @@ export default function QuizPreview() {
       .catch(() => setLoading(false));
   }, [exerciceId]);
 
-  if (loading) return <div className="p-8 text-center">{t("loading")}</div>;
+  const toggleLanguage = () => {
+    i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
+  };
+
+  if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (!quiz) return <div className="p-8 text-center">{t("noData")}</div>;
 
   const totalPoints = quiz.questions.reduce((sum, q) => sum + q.score, 0);
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 md:px-8 py-6 bg-[rgb(var(--color-bg))]">
+    <div className="min-h-screen px-2 sm:px-6 md:px-8 py-6 bg-[rgb(var(--color-bg))]">
+
+   
 
       {/* TITRE */}
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mt-10 text-muted">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mt-10 text-muted px-2">
         {quiz.exercice.titre}
       </h1>
 
       {/* ENONCÉ */}
-      <p className="text-grayc mt-4 max-w-3xl mx-auto text-sm sm:text-base">
+      <p className="text-grayc mt-4 max-w-3xl mx-auto text-sm sm:text-base md:text-lg px-2 sm:px-0">
         {quiz.exercice.enonce}
       </p>
 
-      {/* INFOS DU QUIZ */}
-      <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 mt-8 text-sm">
-        <div className="flex items-center gap-2 bg-blue text-white px-4 sm:px-6 py-2 rounded-md w-full sm:w-auto justify-center">
+      {/* INFOS */}
+      <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 mt-8 text-sm sm:text-base">
+        <div className="flex items-center gap-2 bg-blue text-white px-3 sm:px-6 py-1.5 sm:py-2 rounded-md text-sm sm:text-base">
           <FaClock />
           {quiz.activerDuration
             ? `${quiz.durationMinutes} ${t("minutes")}`
             : t("nonLimited")}
         </div>
 
-        <div className="flex items-center gap-2 bg-purple text-white px-4 sm:px-6 py-2 rounded-md w-full sm:w-auto justify-center">
+        <div className="flex items-center gap-2 bg-purple text-white px-3 sm:px-6 py-1.5 sm:py-2 rounded-md text-sm sm:text-base">
           <FaMedal /> {totalPoints} {t("points")}
         </div>
 
-        <div className="flex items-center gap-2 bg-pink text-white px-4 sm:px-6 py-2 rounded-md w-full sm:w-auto justify-center">
+        <div className="flex items-center gap-2 bg-pink text-white px-3 sm:px-6 py-1.5 sm:py-2 rounded-md text-sm sm:text-base">
           <FaStar /> {quiz.exercice.niveau}
         </div>
       </div>
 
       {/* QUESTIONS */}
-      <div className="mt-10 max-w-4xl mx-auto flex flex-col gap-4">
+      <div className="mt-10 max-w-4xl w-full px-2 sm:px-4 mx-auto flex flex-col gap-4">
         {quiz.questions.map((q, index) => (
-          <div key={q.id} className="bg-white rounded-xl shadow p-4 sm:p-6 flex flex-col gap-3">
-            <h3 className="font-semibold text-sm sm:text-base">
+          <div key={q.id} className="bg-card rounded-xl shadow p-3 sm:p-4 md:p-6 flex flex-col gap-2">
+            <h3 className="font-semibold text-sm sm:text-base md:text-lg mb-1">
               {index + 1}. {q.texte}
             </h3>
 
-            <p className="text-xs sm:text-sm text-grayc">
+            <p className="text-xs sm:text-sm text-grayc mb-2">
               {q.score} {t("points")}
             </p>
 
@@ -102,7 +109,7 @@ export default function QuizPreview() {
               {q.options.map((opt) => (
                 <li
                   key={opt.id}
-                  className="border rounded-md px-3 py-2 bg-gray-50 w-full text-sm sm:text-base"
+                  className=" rounded-md px-2 sm:px-3 py-1.5 sm:py-2 bg-grad-2 w-full text-sm sm:text-base text-black dark:text-grayc"
                 >
                   {opt.texte}
                 </li>
@@ -111,11 +118,14 @@ export default function QuizPreview() {
           </div>
         ))}
 
-        {/* BOUTON RETOUR */}
         <Button
-          className="w-full sm:w-auto mt-6 self-center"
-          text={<span className="flex items-center gap-2"><FaHome /> {t("backMenu")}</span>}
+          text={
+            <span className="flex items-center gap-2">
+              <FaHome /> {t("backMenu")}
+            </span>
+          }
           variant="quizBack"
+          className="mt-4 w-full sm:w-auto bg-grad-2"
           onClick={() => navigate("/all-quizzes")}
         />
       </div>

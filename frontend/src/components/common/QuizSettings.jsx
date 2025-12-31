@@ -49,17 +49,19 @@ const handleChange = (field, value) => {
         {/* COURS */}
         <div className="flex flex-col gap-2">
           <label>{t("selectCourse")}</label>
-          <select
-            value={quizData.courseId || ""}
-            onChange={(e) => handleChange("courseId", e.target.value)}
-          >
-            <option value="">{t("chooseCourse")}</option>
-            {myCourses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
+        
+         <ModernDropdown
+  value={quizData.courseId || ""}
+  onChange={(val) => handleChange("courseId", val)}
+  options={[
+    { value: "", label: t("chooseCourse") },
+    ...myCourses.map((course) => ({
+      value: course.id,
+      label: course.title,
+    })),
+  ]}
+/>
+
         </div>
 
         {/* VISIBILITÉ */}
@@ -78,17 +80,20 @@ const handleChange = (field, value) => {
         {/* NIVEAU */}
         <div className="flex flex-col gap-2">
           <label>{t("quizLevel")}</label>
-          <select
-            value={quizData.level || ""}
-            onChange={(e) => handleChange("level", e.target.value)}
-          >
-            <option value="">{t("selectLevel")}</option>
-            {levels.map((lvl) => (
-              <option key={lvl.key} value={lvl.key}>
-                {lvl.label}
-              </option>
-            ))}
-          </select>
+          <ModernDropdown
+  value={quizData.level || ""}
+  onChange={(val) => handleChange("level", val)}
+  options={[
+    { value: "", label: t("selectLevel") },
+    ...levels.map((lvl) => ({
+      value: lvl.key,
+      label: lvl.label,
+    })),
+  ]}
+/>
+
+
+          
         </div>
 {/*score minimum*/}
 {/* SCORE MINIMUM */}

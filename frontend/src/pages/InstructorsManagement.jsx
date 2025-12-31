@@ -6,6 +6,7 @@ import { Users, Trash2, Edit, Calendar, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ThemeContext from "../context/ThemeContext";
+import { toast } from "react-hot-toast";
 
 // ================= DETAILS MODAL =================
 function DetailsModal({ open, onClose, instructor }) {
@@ -74,6 +75,7 @@ export default function InstructorsPage() {
       console.log("Raw instructors data:", data); // <-- place ton console.log ici
 
       const formatted = data.map((e) => ({
+        id_utilisateur: e.id_utilisateur, // 🔹 ajoute l'ID pour la suppression
         firstName: e.prenom,
         lastName: e.nom,
         email: e.email || "—",
@@ -153,19 +155,70 @@ export default function InstructorsPage() {
     },
   ];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  // e.preventDefault(); // si tu l'utilises dans un form
 
-    if (editIndex !== null) {
-      const updated = [...instructors];
-      updated[editIndex] = newInstructor;
-      setInstructors(updated);
-      setEditIndex(null);
-    } else {
-      setInstructors([...instructors, newInstructor]);
+  const token = localStorage.getItem("admin_token");
+  if (!token) {
+    toast.error("Token JWT manquant");
+    return;
+  }
+
+  // ================= UPDATE =================
+  if (editIndex !== null) {
+    const instructorToUpdate = instructors[editIndex];
+    await handleUpdateInstructor(instructorToUpdate.id_utilisateur, newInstructor);
+    return;
+  }
+
+  // ================= CREATE =================
+  try {
+    const res = await fetch(
+      "http://localhost:8000/api/users/admin/enseignants/create/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          nom: newInstructor.lastName,
+          prenom: newInstructor.firstName,
+          email: newInstructor.email,
+          matricule: newInstructor.matricule,
+          grade: newInstructor.rank,
+          date_naissance: newInstructor.birthdate,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Erreur lors de la création");
     }
 
+    const responseData = await res.json();
+
+    // Ajouter l’enseignant dans le state local
+    setInstructors((prev) => [
+      ...prev,
+      {
+        id_utilisateur: responseData.id_utilisateur,
+        firstName: newInstructor.firstName,
+        lastName: newInstructor.lastName,
+        email: newInstructor.email,
+        birthdate: newInstructor.birthdate || "—",
+        rank: newInstructor.rank,
+        matricule: newInstructor.matricule,
+      },
+    ]);
+
+    toast.success("Enseignant créé avec succès 📧 Un email a été envoyé");
+
     setOpenModal(false);
+    setEditIndex(null);
+
+    // 🔹 RESET FORMULAIRE APRES CREATION
     setNewInstructor({
       firstName: "",
       lastName: "",
@@ -174,7 +227,12 @@ export default function InstructorsPage() {
       rank: "",
       matricule: "",
     });
-  };
+
+  } catch (err) {
+    console.error("Erreur création enseignant:", err);
+    toast.error(err.message);
+  }
+};
 
   const handleEdit = (index) => {
     setNewInstructor(instructors[index]);
@@ -182,9 +240,111 @@ export default function InstructorsPage() {
     setOpenModal(true);
   };
 
-  const handleDelete = (index) => {
-    setInstructors(instructors.filter((_, i) => i !== index));
-  };
+  //SUPPRIMER UN ENSEIGNANT (FUNCTION ADDED BY CHAHLA) 
+const handleDelete = async (instructorId) => {
+  const token = localStorage.getItem("admin_token");
+   if (!token) {
+    setError("Token JWT manquant.");
+    return;
+  }
+  console.log({instructorId});
+  if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet enseignant?")) return;
+
+  try {
+    
+
+    const res = await fetch(`http://localhost:8000/api/users/admin/users/${instructorId}/`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Erreur lors de la suppression");
+    }
+    setInstructors((prev) => prev.filter((s) => s.id_utilisateur !== instructorId));
+
+    toast.success("Enseignant supprimé avec succès !");
+
+  } catch (err) {
+    console.error("Erreur suppression:", err);
+    alert(t("deleteError"));
+  }
+};
+
+
+//Modifer les information d'un enseignant (FUNCTION ADDED BY CHAHLA)
+const handleUpdateInstructor = async (instructorId, updatedData) => {
+  const token = localStorage.getItem("admin_token");
+  if (!token) {
+    toast.error("Token JWT manquant");
+    return;
+  }
+
+  try {
+    const res = await fetch(
+      `http://localhost:8000/api/users/enseignants/${instructorId}/update/`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          nom: updatedData.lastName,
+          prenom: updatedData.firstName,
+          email: updatedData.email,
+          date_naissance: updatedData.birthdate,
+          matricule: updatedData.matricule,
+          grade: updatedData.rank,
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || "Erreur lors de la mise à jour");
+    }
+
+    const updatedInstructor = await res.json();
+
+    // Mettre à jour le state local
+    setInstructors((prev) =>
+      prev.map((inst) =>
+        inst.id_utilisateur === instructorId
+          ? {
+              ...inst,
+              firstName: updatedData.firstName,
+              lastName: updatedData.lastName,
+              email: updatedData.email,
+              birthdate: updatedData.birthdate,
+              rank: updatedData.rank,
+              matricule: updatedData.matricule,
+            }
+          : inst
+      )
+    );
+
+    toast.success("Enseignant mis à jour avec succès !");
+    setOpenModal(false);
+    setEditIndex(null);
+
+    // 🔹 RESET FORMULAIRE APRES MODIFICATION
+    setNewInstructor({
+      firstName: "",
+      lastName: "",
+      email: "",
+      birthdate: "",
+      rank: "",
+      matricule: "",
+    });
+
+  } catch (err) {
+    console.error("Erreur mise à jour:", err);
+    toast.error(err.message);
+  }
+};
 
   const handleRowClick = (instructor) => {
     setSelectedInstructor(instructor);
@@ -284,7 +444,7 @@ export default function InstructorsPage() {
                       className="inline text-red"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(index);
+                        handleDelete(i.id_utilisateur);
                       }}
                     />
                   </td>
@@ -297,7 +457,18 @@ export default function InstructorsPage() {
 
       <AddModel
         open={openModal}
-        onClose={() => setOpenModal(false)}
+       onClose={() => {
+    setOpenModal(false);       // fermer le modal
+    setEditIndex(null);        // réinitialiser l’édition
+    setNewInstructor({         // vider le formulaire
+      firstName: "",
+      lastName: "",
+      email: "",
+      birthdate: "",
+      rank: "",
+      matricule: "",
+    });
+  }}
         fields={fields}
         onSubmit={handleSubmit}
         submitLabel={editIndex !== null ? t("update") : t("create")}
@@ -312,3 +483,4 @@ export default function InstructorsPage() {
     </div>
   );
 }
+

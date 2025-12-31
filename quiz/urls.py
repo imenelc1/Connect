@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Quiz_api ,Quiz_list_api, QuizSearchAPIView, exercice_detail_with_quiz, toutes_les_tentatives_quiz, QuizRecapAPIView, QuizSubmitView, QuestionListCreateView, QuizListCreateView, OptionListCreateView, QuizDetailView, QuestionDetailView, OptionDetailView
+from .views import Quiz_api ,Quiz_list_api, QuizSearchAPIView, exercice_detail_with_quiz,quizzes_faits_par_etudiant, toutes_les_tentatives_quiz, QuizRecapAPIView, QuizSubmitView, QuestionListCreateView, QuizListCreateView, OptionListCreateView, QuizDetailView, QuestionDetailView, OptionDetailView
 
 urlpatterns = [
     
@@ -25,6 +25,7 @@ urlpatterns = [
     ),
     path("api/quiz", QuizSearchAPIView.as_view(), name="quiz-list"),
 
+   path("student/quizzes-faits/", quizzes_faits_par_etudiant, name="quizzes-faits"),
 
 
 

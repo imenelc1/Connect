@@ -1,197 +1,258 @@
-import React, { useState, useRef, useEffect } from "react";
-import { X, Send } from "lucide-react";
+import React, { useState, useRef, useEffect, useContext } from "react";
+import { X, Send, Maximize2, Minimize2 } from "lucide-react";
 import Mascotte from "../assets/head_mascotte.svg";
-import { getAIAnswer } from "../services/iaService";
+import { getAIAnswer, getSystemPrompt } from "../services/iaService";
+import ExerciseContext from "../context/ExerciseContext";
+import { loadChat, saveChat } from "../utils/memory";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { loadStudentProfile, saveStudentProfile } from "../utils/studentProfile";
 
-export default function AssistantIA({ onClose: parentOnClose }) {
-  const [visible, setVisible] = useState(true);
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      from: "bot",
-      text:
-        "Bonjour ! Je suis votre assistant IA. Je peux vous aider avec votre exercice en C. Posez-moi vos questions !",
-      time: "Maintenant",
-    },
-  ]);
+/* ---------- Utils ---------- */
+const detectLanguage = (t = "") =>
+  /[àâçéèêëîïôûùüÿñæœ]/i.test(t) ? "fr" : "en";
 
+const isExerciseMisunderstood = (msg = "") =>
+  /je comprends pas|j'ai pas compris|pas compris|rien compris|c'est flou/i.test(
+    msg.toLowerCase()
+  );
+
+export default function AssistantIA({ onClose }) {
+  const exercise = useContext(ExerciseContext);
+
+  const [student, setStudent] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const scrollRef = useRef();
+  const [expanded, setExpanded] = useState(false);
+  const [hintLevel, setHintLevel] = useState(1);
+  const [profile, setProfile] = useState(null);
 
-  // --- DRAGGABLE ---
-  const windowRef = useRef();
-  const pos = useRef({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
+  const scrollRef = useRef(null);
 
-  const startDrag = (e) => {
-    pos.current.offsetX = e.clientX - pos.current.x;
-    pos.current.offsetY = e.clientY - pos.current.y;
-    document.addEventListener("mousemove", drag);
-    document.addEventListener("mouseup", stopDrag);
-  };
-
-  const drag = (e) => {
-    pos.current.x = e.clientX - pos.current.offsetX;
-    pos.current.y = e.clientY - pos.current.offsetY;
-    windowRef.current.style.transform = `translate(${pos.current.x}px, ${pos.current.y}px)`;
-  };
-
-  const stopDrag = () => {
-    document.removeEventListener("mousemove", drag);
-    document.removeEventListener("mouseup", stopDrag);
-  };
-  // --- END DRAGGABLE ---
-
+  /* ---------- Load profile ---------- */
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (!exercise?.id) return;
+    setProfile(loadStudentProfile(exercise.id) || {});
+  }, [exercise?.id]);
+
+  /* ---------- Load student ---------- */
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (!stored) return;
+
+    const u = JSON.parse(stored)?.user || JSON.parse(stored);
+    setStudent({
+      name: `${u?.prenom || ""} ${u?.nom || ""}`.trim() || "Étudiant",
+      level: "Débutant",
+    });
+  }, []);
+
+  /* ---------- Load chat ---------- */
+  useEffect(() => {
+    if (!student || !exercise?.id) return;
+
+    const storedChat = loadChat(exercise.id);
+
+    if (storedChat?.messages?.length) {
+      setMessages(storedChat.messages);
+    } else {
+      setMessages([
+        {
+          id: 1,
+          from: "bot",
+          text: `Bonjour ${student.name} 👋  
+Je suis ton **Coach C**.  
+Explique-moi ce qui te bloque.`,
+        },
+      ]);
     }
-  }, [messages, loading]);
+  }, [student, exercise?.id]);
 
-  if (!visible) return null;
+  /* ---------- Save + Auto-scroll ---------- */
+  useEffect(() => {
+    if (!student || !exercise?.id) return;
+    saveChat(exercise.id, messages, student);
 
-  const close = () => {
-    setVisible(false);
-    if (typeof parentOnClose === "function") parentOnClose();
-  };
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, student, exercise?.id]);
 
-  const sendUserMessage = (text) => {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-
-    const userMsg = {
-      id: Date.now(),
-      from: "user",
-      text: trimmed,
-      time: "Maintenant",
-    };
-
-    setMessages((m) => [...m, userMsg]);
-  };
-
-  // --- HANDLE SEND (LocalAI) ---
+  /* ---------- Send Message ---------- */
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
 
-    sendUserMessage(input);
+    const userText = input.trim();
+    const lang = detectLanguage(userText);
+
+    const userMsg = { id: Date.now(), from: "user", text: userText };
+    setMessages((m) => [...m, userMsg]);
     setInput("");
+
+    /* --- Case: misunderstanding (no AI call) --- */
+    if (isExerciseMisunderstood(userText)) {
+      setMessages((m) => [
+        ...m,
+        {
+          id: Date.now() + 1,
+          from: "bot",
+          text: `
+### 🔍 Explication simple (sans code)
+
+L’exercice te demande **une seule chose** :
+
+👉 prendre **un nombre**  
+👉 dire s’il est **pair** ou **impair**
+
+#### Exemple
+- 4 → pair  
+- 7 → impair  
+
+🎯 Pour l’instant, on ne code pas — on clarifie le but.
+
+❓ Est-ce que c’est plus clair maintenant ?
+          `,
+        },
+      ]);
+      return;
+    }
+
+    /* --- Normal AI answer --- */
     setLoading(true);
+    setHintLevel((h) => Math.min(h + 1, 3));
 
-    const aiResponse = await getAIAnswer(input);
+    try {
+      const systemPrompt = getSystemPrompt({
+        lang,
+        exercise,
+        student,
+        memory: messages.slice(-6),
+        profile,
+      });
 
-    setMessages((m) => [
-      ...m,
-      {
-        id: Date.now() + 1,
-        from: "bot",
-        text: aiResponse,
-        time: "Maintenant",
-      },
-    ]);
+      const answer = await getAIAnswer({
+        systemPrompt,
+        userPrompt: `
+NIVEAU D’INDICE AUTORISÉ : ${hintLevel}/3
 
-    setLoading(false);
-  };
+CODE ÉTUDIANT :
+${exercise?.code || "aucun code soumis"}
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+QUESTION :
+${userText}
+`,
+      });
+
+      setMessages((m) => [
+        ...m,
+        { id: Date.now() + 2, from: "bot", text: answer },
+      ]);
+
+      const updatedProfile = {
+        ...profile,
+        hintsUsed: (profile?.hintsUsed || 0) + 1,
+        lastInteraction: Date.now(),
+      };
+
+      saveStudentProfile(exercise.id, updatedProfile);
+      setProfile(updatedProfile);
+    } catch (err) {
+      console.error(err);
+      setMessages((m) => [
+        ...m,
+        {
+          id: Date.now() + 3,
+          from: "bot",
+          text: "❌ Une erreur est survenue. Réessaie dans un instant.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50">
-      {/* background click → close */}
-      <div className="absolute inset-0 bg-black/20" onClick={close} />
+  if (!student) return null;
 
-      {/* DRAGGABLE WINDOW */}
+  /* ---------- UI ---------- */
+  return (
+    <div className="fixed inset-0 z-50 pointer-events-none">
       <div
-        ref={windowRef}
-        className="absolute left-1/2 top-20 -translate-x-1/2 bg-white rounded-xl shadow-2xl border border-[#dbe8ff] w-[420px]"
-        style={{ userSelect: "none" }}
+        className={`pointer-events-auto absolute bottom-6 right-6 bg-surface rounded-xl shadow-2xl border flex flex-col
+        ${expanded ? "w-[720px] h-[560px]" : "w-[360px] h-[420px]"}`}
       >
-        {/* HEADER — DRAG HANDLE */}
-        <div
-          className="bg-[#4a8bff] text-white px-4 py-3 flex items-center justify-between cursor-grab active:cursor-grabbing"
-          onMouseDown={startDrag}
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <img src={Mascotte} className="w-8 h-8 rounded-full" />
+        {/* Header */}
+        <div className="flex justify-between items-center px-4 py-3 bg-grad-1 text-white rounded-t-xl">
+          <div className="flex items-center gap-2">
+            <img src={Mascotte} className="w-8 h-8" />
             <div>
-              <h3 className="text-base font-semibold leading-tight">Assistant IA</h3>
-              <p className="text-[12px] opacity-90 leading-tight">
-                Posez-moi vos questions en C !
-              </p>
+              <p className="font-semibold">Assistant IA</p>
+              <span className="text-xs opacity-80">
+                Coach C • {student.name}
+              </span>
             </div>
           </div>
 
-          <button
-            aria-label="Fermer"
-            onClick={close}
-            className="rounded hover:bg-white/10 p-1"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setExpanded(!expanded)}>
+              {expanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            </button>
+            <button onClick={onClose}>
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* MESSAGES */}
-        <div
-          ref={scrollRef}
-          className="h-[320px] p-4 overflow-y-auto bg-[#f6f9ff] space-y-3"
-        >
-          {messages.map((msg) => (
+        {/* Messages */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+          {messages.map((m) => (
             <div
-              key={msg.id}
-              className={`flex ${
-                msg.from === "bot" ? "items-start" : "justify-end items-end"
-              }`}
+              key={m.id}
+              className={`flex ${m.from === "user" ? "justify-end" : ""}`}
             >
-              {msg.from === "bot" && (
-                <img src={Mascotte} className="w-8 h-8 rounded-full mr-3" />
+              {m.from === "bot" && (
+                <img src={Mascotte} className="w-7 h-7 mr-2" />
               )}
-
               <div
-                className={`max-w-[75%] p-3 rounded-2xl shadow-sm text-sm break-words ${
-                  msg.from === "bot"
-                    ? "bg-[#eef2f6] text-[#1f324f]"
-                    : "bg-[#2e6de6] text-white"
+                className={`p-4 rounded-2xl text-sm max-w-[75%]
+                ${
+                  m.from === "user"
+                    ? "bg-grad-1 text-white"
+                    : "bg-card text-text"
                 }`}
               >
-                <div>{msg.text}</div>
-                <div className="text-[9px] opacity-60 mt-1 text-right">
-                  {msg.time}
-                </div>
+                {m.from === "bot" ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {m.text}
+                  </ReactMarkdown>
+                ) : (
+                  <p>{m.text}</p>
+                )}
               </div>
             </div>
           ))}
 
           {loading && (
-            <div className="flex items-start">
-              <img src={Mascotte} className="w-8 h-8 rounded-full mr-3" />
-              <div className="bg-white p-2.5 rounded-2xl shadow-sm text-sm text-[#4b5563]">
-                L’assistant écrit…
-              </div>
-            </div>
+            <p className="text-xs text-gray-400">L’assistant écrit…</p>
           )}
         </div>
 
-        {/* INPUT */}
-        <div className="px-4 py-3 bg-white border-t border-[#e6efff]">
+        {/* Input */}
+        <div className="p-3 border-t">
           <div className="relative">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Votre question…"
-              className="w-full pr-12 py-2.5 pl-4 rounded-full border border-[#e6eefc] text-sm focus:outline-none focus:ring-2 focus:ring-[#bfd7ff]"
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Explique ton problème…"
+              className="w-full rounded-full border px-4 py-2 pr-12"
             />
-
             <button
               onClick={handleSend}
-              aria-label="Envoyer"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-gradient-to-br from-[#5aa0ff] to-[#2e6de6] flex items-center justify-center shadow text-white"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white w-8 h-8 rounded-full"
             >
-              <Send size={15} />
+              <Send size={14} />
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
+import axios from "axios";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import Cards from "../components/common/Cards-Dash";
@@ -34,10 +35,17 @@ export default function Dashboardetu() {
   const initials = user ? `${user.nom?.[0] || ""}${user.prenom?.[0] || ""}`.toUpperCase() : "";
 
   const [activeCoursesCount, setActiveCoursesCount] = useState(0);
-  const [averageTime, setAverageTime] = useState(0); // en secondes
+
   const [globalProgress, setGlobalProgress] = useState(0);
 
-  const sessionStartRef = useRef(Date.now());
+  const [submittedExercises, setSubmittedExercises] = useState(0);
+  const [totalExercises, setTotalExercises] = useState(0);
+
+
+
+
+
+
 
   const dat = [
     { title: "Emma Wilson completed Python Basics Quiz", date: "2nd Feb", day: "Tuesday", time: "11:30 - 12:30" },
@@ -63,6 +71,8 @@ export default function Dashboardetu() {
     };
   }, []);
 
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -73,11 +83,7 @@ export default function Dashboardetu() {
         // Nombre de cours actifs
         const coursesCount = await progressionService.getActiveCoursesCount();
         setActiveCoursesCount(coursesCount);
-
-        // Average time
-        const avgTime = await progressionService.getAverageTime();
-        setAverageTime(avgTime);
-
+        
         // Global progress
         const progress = await progressionService.getGlobalProgress();
         console.log("Global progress:", progress);
@@ -91,31 +97,96 @@ export default function Dashboardetu() {
     };
 
     fetchData();
-
-    // Fonction pour envoyer la session à la fermeture
-    const sendSession = (duration) => {
-      if (duration > 0) {
-        progressionService.addSession(duration).catch(err => console.error(err));
-      }
-    };
-
-    const handleBeforeUnload = () => {
-      const duration = Math.floor((Date.now() - sessionStartRef.current) / 1000); // secondes
-      sendSession(duration);
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  const formatTime = (secs) => {
-    if (!secs || secs === 0) return "0min";
-    const mins = Math.ceil(secs / 60);
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return h > 0 ? `${h}h ${m}min` : `${m}min`;
+const [dailyTime, setDailyTime] = useState(0); // en secondes
+
+useEffect(() => {
+  if (!user) return;
+
+  const fetchDailyTime = async () => {
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      "http://127.0.0.1:8000/api/dashboard/daily-time/",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setDailyTime(res.data.total_seconds || 0);
   };
+
+  fetchDailyTime();
+  const interval = setInterval(fetchDailyTime, 60000); // chaque minute
+  
+  return () => clearInterval(interval);
+}, [user]);
+
+
+
+
+
+// Formatage du temps lisible
+const formatTimeStyled = (secs) => {
+   if (!secs || secs < 60)
+  return <span className="text-blue font-bold">{secs}s</span>;
+
+
+  const mins = Math.floor(secs / 60);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const s = secs % 60;
+
+  return (
+    <span>
+      {h > 0 && <span style={{ fontSize: 26 }} className="text-blue">{h}h </span>}
+      {m > 0 && <span style={{ fontSize: 26 }} className="text-blue">{m}min </span>}
+      {s > 0 && <span style={{ fontSize: 26 }} className="text-blue">{s}s</span>}
+    </span>
+  );
+};
+
+
+
+const [successRate, setSuccessRate] = useState(0);
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const rate = await progressionService.getSuccessRate();
+      setSuccessRate(rate);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  fetchData();
+}, []);
+
+
+// fetch après que user soit défini
+useEffect(() => {
+
+
+  const fetchExercisesData = async () => {
+    try {
+     const token = localStorage.getItem("token");
+        const res = await axios.get(
+  `http://127.0.0.1:8000/api/dashboard/student-total-tentatives/${user.id_utilisateur}/`,
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+
+console.log("Data submitted exercises:", res.data);
+
+setSubmittedExercises(res.data.total_submitted_attempts || 0);
+setTotalExercises(res.data.total_exercises || 0);
+
+    } catch (err) {
+      console.error("Erreur fetching exercises:", err);
+    }
+  };
+
+  fetchExercisesData();
+}, [user]);
+
+
+
 
   if (loading) {
     return (
@@ -124,6 +195,9 @@ export default function Dashboardetu() {
       </div>
     );
   }
+
+
+  
 
   return (
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -179,22 +253,23 @@ export default function Dashboardetu() {
           
           <Cards 
             text={t("Dashboard.AverageS")} 
-            value="2.5" 
+           value={`${submittedExercises}/${totalExercises}`} 
             icon={<TrendingDown size={isMobile ? 16 : 18} />} 
             bg="bg-grad-2"
             isMobile={isMobile}
             
           />
           <Cards 
-            text={t("Dashboard.Success")} 
-            value="80%" 
-            icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
-            bg="bg-grad-3"
-            isMobile={isMobile}
-          />
+          text={t("Dashboard.Success")} 
+          value={`${successRate}%`} 
+          icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
+          bg="bg-grad-3"
+          isMobile={isMobile}
+        />
+
           <Cards 
             text={t("Dashboard.AverageT")} 
-            value={formatTime(averageTime)} 
+            value={formatTimeStyled(dailyTime)} 
             icon={<Book size={isMobile ? 16 : 18} />} 
             bg="bg-grad-4"
             isMobile={isMobile}

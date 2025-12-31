@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
-from .models import Notification, Feedback
+from .models import Notification, Feedback, FeedbackExercice
 from users.models import Utilisateur
 
 class FeedbackSerializer(serializers.ModelSerializer):
@@ -144,3 +144,19 @@ class NotificationSerializer(serializers.ModelSerializer):
             if hasattr(obj.content_object, 'id_message'):
                 return obj.content_object.id_message
         return None
+
+class FeedbackExerciceSerializer(serializers.ModelSerializer):
+    auteur_nom = serializers.CharField(source='auteur.nom', read_only=True)
+    auteur_prenom = serializers.CharField(source='auteur.prenom', read_only=True)
+
+    class Meta:
+        model = FeedbackExercice
+        fields = [
+            'id',
+            'contenu',
+            'exercice', 
+            'tentative',
+            'auteur_nom',
+            'auteur_prenom',
+            'date_creation'
+        ]

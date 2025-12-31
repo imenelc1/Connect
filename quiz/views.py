@@ -4,16 +4,25 @@ from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from dashboard.models import ProgressionHistory
 from users.jwt_auth import jwt_required
 from django.utils import timezone
+from django.db.models import Sum
 
 from exercices.models import Exercice
 from users.models import Utilisateur
 from datetime import timedelta
 # Create your views here.
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from quiz.models import Quiz, Question, Option, ReponseQuiz, ReponseQuestion
 from .serializers import QuestionSerializer,ReponseQuizSerializer, QuizSerializer, QuizSerializer1,  OptionSerializer, ExerciceSerializer1
+
+
+
+from rest_framework.decorators import api_view, permission_classes
+from users.jwt_auth import IsAuthenticatedJWT  
+from rest_framework.response import Response
 
 class QuizListCreateView(generics.ListCreateAPIView):
     queryset = Quiz.objects.all()
@@ -109,6 +118,24 @@ class QuizSubmitView(APIView):
         tentative.terminer = True
         tentative.date_fin = timezone.now() 
         tentative.save()
+
+        score_max = quiz.exercice.questions.aggregate(
+            total=Sum("score")
+        )["total"] or 0
+
+        # 🔹 progression en %
+        avancement = round((score_total / score_max) * 100) if score_max > 0 else 0
+
+        # 🔹 historique de progression du quiz
+        ProgressionHistory.objects.create(
+            utilisateur=request.user,
+            cours=quiz.exercice.cours,
+            quiz=quiz,
+            type_contenu="quiz",
+            avancement=avancement,
+            temps_passe=timedelta(seconds=0)
+        )
+        
 
         return Response({
             "score": score_total,
@@ -268,3 +295,48 @@ class QuizSearchAPIView(APIView):
 
         serializer = QuizSerializer1(quizzes, many=True)
         return Response(serializer.data)
+from django.db.models import OuterRef
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def quizzes_faits_par_etudiant(request):
+    """
+    Récupère les quizzes terminés par l'utilisateur connecté.
+    Retourne pour chaque quiz la dernière tentative et les infos utiles.
+    """
+    utilisateur = request.user  # User authentifié
+    if utilisateur.is_anonymous:
+        return Response({"detail": "Authentication credentials were not provided."}, status=401)
+
+    # Récupérer toutes les tentatives terminées de l’utilisateur
+    tentatives = ReponseQuiz.objects.filter(
+        etudiant=utilisateur,
+        terminer=True
+    ).order_by('-date_fin')
+
+    # Garder uniquement la dernière tentative par quiz
+    quizzes_done = {}
+    for t in tentatives:
+        if t.quiz_id not in quizzes_done:
+            quizzes_done[t.quiz_id] = t  # première occurrence = dernière tentative
+
+    # Préparer les données à renvoyer
+    data = []
+    for tentative in quizzes_done.values():
+        quiz = tentative.quiz
+
+        score_max = quiz.exercice.questions.aggregate(total=Sum("score"))["total"] or 0
+        progression = round((tentative.score_total / score_max) * 100) if score_max > 0 else 0
+
+        data.append({
+            "quiz_id": quiz.id,
+            "exercice_id": quiz.exercice.id_exercice,
+            "titre_exercice": quiz.exercice.titre_exo,
+            "score_obtenu": tentative.score_total,
+            "score_max": score_max,
+            "progression": progression,
+            "reussi": tentative.score_total >= quiz.scoreMinimum,
+            "date_fin": tentative.date_fin,
+        })
+
+    return Response(data)

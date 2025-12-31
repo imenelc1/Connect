@@ -26,3 +26,9 @@ class Exercice(models.Model):
 
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
+
+    max_soumissions = models.PositiveIntegerField(
+    default=0,  # 0 = illimité
+    help_text="0 = illimité. Sinon, nombre maximum de soumissions par étudiant."
+)
+

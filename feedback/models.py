@@ -3,7 +3,9 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from users.models import Utilisateur
-
+from users.models import Utilisateur
+from exercices.models import Exercice
+from dashboard.models import TentativeExercice
 
 class Feedback(models.Model):
     id_feedback = models.AutoField(primary_key=True)
@@ -46,15 +48,26 @@ class Notification(models.Model):
     message_notif = models.TextField()
     date_envoie = models.DateTimeField(auto_now_add=True)
     
-    # Qui reçoit la notification
+    # Destinataire utilisateur
     utilisateur_destinataire = models.ForeignKey(
         Utilisateur,
         on_delete=models.CASCADE,
         related_name='notifications_recues',
+        null=True,
+        blank=True,
         db_column='utilisateur_destinataire_id'
     )
+
+    # Destinataire admin
+    admin_destinataire = models.ForeignKey(
+        'users.Administrateur',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notifications_recues'
+    )
     
-    # Qui envoie (peut être nul pour notifications système)
+    # Expéditeur (peut être nul)
     utilisateur_envoyeur = models.ForeignKey(
         Utilisateur,
         on_delete=models.SET_NULL,
@@ -64,34 +77,19 @@ class Notification(models.Model):
         db_column='utilisateur_envoyeur_id'
     )
     
-    # ====== CHAMPS GÉNÉRIQUES POUR TOUS LES TYPES ======
-    
-    # 1. Type de contenu (forum, cours, exercice, etc.)
+    # ====== CHAMPS GÉNÉRIQUES ======
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
         null=True,
         blank=True
     )
-    
-    # 2. ID de l'objet (forum_id, cours_id, etc.)
     object_id = models.PositiveIntegerField(null=True, blank=True)
-    
-    # 3. L'objet lui-même (forum, cours, etc.)
     content_object = GenericForeignKey('content_type', 'object_id')
     
-    # ====== AUTRES INFOS ======
-    
-    # Type d'action (like, comment, completed, ranked, etc.)
-    action_type = models.CharField(max_length=50)  # 'forum_like', 'course_completed', etc.
-    
-    # Module source (forum, cours, exercice, classement, etc.)
-    module_source = models.CharField(max_length=50)  # 'forum', 'cours', 'exercice', 'classement'
-    
-    # Lu ou non
+    action_type = models.CharField(max_length=50)
+    module_source = models.CharField(max_length=50)
     is_read = models.BooleanField(default=False)
-    
-    # Données supplémentaires (JSON)
     extra_data = models.JSONField(null=True, blank=True, default=dict)
     
     class Meta:
@@ -100,7 +98,42 @@ class Notification(models.Model):
         indexes = [
             models.Index(fields=['content_type', 'object_id']),
             models.Index(fields=['utilisateur_destinataire', 'is_read']),
+            models.Index(fields=['admin_destinataire', 'is_read']),
         ]
     
     def __str__(self):
-        return f"Notification {self.id_notif} - {self.module_source}.{self.action_type}"
+        target = self.admin_destinataire.email_admin if self.admin_destinataire else self.utilisateur_destinataire.adresse_email
+        return f"Notification {self.id_notif} - {self.module_source}.{self.action_type} -> {target}"
+
+
+
+
+class FeedbackExercice(models.Model):
+    contenu = models.TextField()
+
+    exercice = models.ForeignKey(
+        Exercice,
+        on_delete=models.CASCADE,
+        related_name='feedbacks'
+    )
+
+    tentative = models.OneToOneField(
+        TentativeExercice,
+        on_delete=models.CASCADE,
+        related_name='feedback_exercice'  # ✅ nom UNIQUE
+    )
+
+    auteur = models.ForeignKey(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name='feedbacks_exercices'
+    )
+
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date_creation']
+
+    def __str__(self):
+        return f"Feedback de {self.auteur} sur {self.exercice.titre}"
+
