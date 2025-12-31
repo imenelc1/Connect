@@ -101,6 +101,8 @@ int main() {
     fetchExercise();
   }, [exerciceId]);
 
+
+
   // -------- Load last code (localStorage first, then server draft) --------
   useEffect(() => {
     if (!exerciceId) return;
@@ -149,7 +151,7 @@ int main() {
           etat: "brouillon",
           temps_passe: Math.floor((Date.now() - startTime) / 1000),
         });
-      } catch {}
+      } catch { }
     }, 1000);
     return () => clearTimeout(timer);
   }, [userCode, output, exerciceId, startTime]);
@@ -172,57 +174,59 @@ int main() {
           { source_code: userCode, language_id: 49 }
         );
         if (res.data.stderr)
-          sendNotification("Erreur détectée — vérifie la syntaxe", "hint");
-      } catch {}
+          sendNotification(t("errors.syntaxError"), "hint");
+
+      } catch { }
     }, 10000);
     return () => clearTimeout(t);
   }, [userCode]);
 
   // -------- Run / Debug / Stop --------
- const runCode = async () => {
-  setIsRunning(true);
-  setOutput("Exécution en cours...");
+  const runCode = async () => {
+    setIsRunning(true);
+    setOutput(t("messages.runningEXE"));
 
-  try {
-    const res = await axios.post(
-      "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-      {
-        source_code: userCode,
-        language_id: 49,
-        stdin: userInput,
-      }
-    );
 
-    const {
-      stdout,
-      stderr,
-      compile_output,
-      status,
-    } = res.data;
-
-    const result =
-      stdout ||
-      stderr ||
-      compile_output ||
-      "Aucune sortie pour le moment...";
-
-    setOutput(result);
-
-    // 🚨 NOTIFICATION IMMÉDIATE
-    if (stderr || compile_output) {
-      sendNotification(
-        "⚠️ Erreur détectée lors de l'exécution. Besoin d’un coup de main ?",
-        "hint"
+    try {
+      const res = await axios.post(
+        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+        {
+          source_code: userCode,
+          language_id: 49,
+          stdin: userInput,
+        }
       );
-    }
 
-  } catch {
-    setOutput("Erreur pendant l'exécution");
-    sendNotification("Erreur pendant l'exécution", "error");
-  } finally {
-    setIsRunning(false);
-  }
-};
+      const {
+        stdout,
+        stderr,
+        compile_output,
+        status,
+      } = res.data;
+
+      const result =
+        stdout ||
+        stderr ||
+        compile_output ||
+        "Aucune sortie pour le moment...";
+
+      setOutput(result);
+
+      // 🚨 NOTIFICATION IMMÉDIATE
+      if (stderr || compile_output) {
+        sendNotification(
+          t("assistant.executionErrorHelp"), "hint"
+        );
+      }
+
+    } catch {
+      setOutput(t("errors.exeError"));
+      sendNotification(t("errors.exeError"), "error");
+
+    } finally {
+      setIsRunning(false);
+    }
+  };
 
 
   const debugCode = async () => {
@@ -233,10 +237,12 @@ int main() {
         { source_code: userCode, language_id: 49 }
       );
       if (res.data.stderr) {
-        setOutput("Erreur détectée :\n\n" + res.data.stderr);
-        sendNotification("Bug détecté", "hint");
+        setOutput(`${t("errors.errorDetected")}\n\n${res.data.stderr}`);
+        sendNotification(t("errors.bugDetected"), "hint");
+
       } else {
-        setOutput("Aucun bug détecté");
+        setOutput(t("messages.noBugs"));
+
       }
     } finally {
       setIsRunning(false);
@@ -277,9 +283,11 @@ int main() {
         overwrite,
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
-      toast.success("Exercice soumis");
+      toast.success(t("messages.exoSubmitted"));
+
     } catch {
-      toast.error("Erreur lors de la soumission");
+      toast.error(t("errors.errorSubmit"));
+
     }
   };
 
@@ -401,11 +409,11 @@ int main() {
           </div>
           {/* Input pour scanf */}
           <div className="mb-4">
-            <label className="text-sm text-gray-300 mb-1 block">Entrées (stdin)</label>
+            <label className="text-sm text-gray-300 mb-1 block">{t("input.stdinLabel")}</label>
             <textarea
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              placeholder="Tapez ici vos entrées, séparées par Enter"
+              placeholder={t("input.stdinPlaceholder")}
               className="w-full p-2 rounded bg-gray-900 text-white font-mono resize-none"
               rows={4}
             />
