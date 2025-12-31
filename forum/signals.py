@@ -1,20 +1,30 @@
 # forum/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.contenttypes.models import ContentType
 from .models import Like, Commentaire, MessageLike, Message, Forum
 from feedback.utils import create_notification
-from users.models import Utilisateur
+from users.models import Utilisateur, Administrateur
 
 
-def get_user_role(user):
-    """Retourne le rôle d'un utilisateur : 'etudiant', 'enseignant' ou None."""
-    if hasattr(user, 'etudiant'):
-        return 'etudiant'
-    elif hasattr(user, 'enseignant'):
-        return 'enseignant'
-    else:
-        return None
+# =========================
+# 🔧 UTILITAIRE ADMIN
+# =========================
+def notify_admins(message, content_object, action_type, module_source, envoyeur=None):
+    for admin in Administrateur.objects.all():
+        create_notification(
+            admin_destinataire=admin,
+            envoyeur=envoyeur,
+            content_object=content_object,
+            action_type=action_type,
+            module_source=module_source,
+            message=message
+        )
+
+
+# =========================
 # 🔔 LIKE FORUM
+# =========================
 @receiver(post_save, sender=Like)
 def notify_forum_like(sender, instance, created, **kwargs):
     if not created:
@@ -26,20 +36,29 @@ def notify_forum_like(sender, instance, created, **kwargs):
     if not forum.utilisateur or forum.utilisateur == user:
         return
 
-    try:
-        create_notification(
-            destinataire=forum.utilisateur,
-            envoyeur=user,
-            content_object=forum,
-            action_type='like',
-            module_source='forum',
-            message=f"{user.prenom} a aimé votre forum '{forum.titre_forum[:50]}...'"
-        )
-    except Exception as e:
-        print(f"Erreur notification like forum: {e}")
+    # Auteur du forum
+    create_notification(
+        destinataire=forum.utilisateur,
+        envoyeur=user,
+        content_object=forum,
+        action_type="like",
+        module_source="forum",
+        message=f"{user.prenom} a aimé votre forum « {forum.titre_forum[:50]} »."
+    )
+
+    # Admin
+    notify_admins(
+        message=f"{user.prenom} a aimé le forum « {forum.titre_forum[:50]} ».",
+        content_object=forum,
+        action_type="forum_like",
+        module_source="forum",
+        envoyeur=user
+    )
 
 
+# =========================
 # 🔔 COMMENTAIRE SUR MESSAGE
+# =========================
 @receiver(post_save, sender=Commentaire)
 def notify_comment(sender, instance, created, **kwargs):
     if not created:
@@ -51,21 +70,35 @@ def notify_comment(sender, instance, created, **kwargs):
     if not message.utilisateur or message.utilisateur == user:
         return
 
-    try:
-        create_notification(
-            destinataire=message.utilisateur,
-            envoyeur=user,
-            content_object=message,
-            action_type='comment',
-            module_source='forum',
-            message=f"{user.prenom} a commenté votre message dans le forum "
-                    f"'{message.forum.titre_forum[:30]}...'"
+    # Auteur du message
+    create_notification(
+        destinataire=message.utilisateur,
+        envoyeur=user,
+        content_object=message,
+        action_type="comment",
+        module_source="forum",
+        message=(
+            f"{user.prenom} a commenté votre message dans le forum "
+            f"« {message.forum.titre_forum[:30]} »."
         )
-    except Exception as e:
-        print(f"Erreur notification commentaire: {e}")
+    )
+
+    # Admin
+    notify_admins(
+        message=(
+            f"{user.prenom} a commenté un message dans le forum "
+            f"« {message.forum.titre_forum[:30]} »."
+        ),
+        content_object=message,
+        action_type="comment_added",
+        module_source="forum",
+        envoyeur=user
+    )
 
 
+# =========================
 # 🔔 LIKE MESSAGE
+# =========================
 @receiver(post_save, sender=MessageLike)
 def notify_message_like(sender, instance, created, **kwargs):
     if not created:
@@ -77,20 +110,35 @@ def notify_message_like(sender, instance, created, **kwargs):
     if not message.utilisateur or message.utilisateur == user:
         return
 
-    try:
-        create_notification(
-            destinataire=message.utilisateur,
-            envoyeur=user,
-            content_object=message,
-            action_type='message_like',
-            module_source='forum',
-            message=f"{user.prenom} a aimé votre message dans le forum "
-                    f"'{message.forum.titre_forum[:30]}...'"
+    # Auteur du message
+    create_notification(
+        destinataire=message.utilisateur,
+        envoyeur=user,
+        content_object=message,
+        action_type="message_like",
+        module_source="forum",
+        message=(
+            f"{user.prenom} a aimé votre message dans le forum "
+            f"« {message.forum.titre_forum[:30]} »."
         )
-    except Exception as e:
-        print(f"Erreur notification like message: {e}")
+    )
+
+    # Admin
+    notify_admins(
+        message=(
+            f"{user.prenom} a aimé un message dans le forum "
+            f"« {message.forum.titre_forum[:30]} »."
+        ),
+        content_object=message,
+        action_type="message_like",
+        module_source="forum",
+        envoyeur=user
+    )
 
 
+# =========================
+# 🔔 NOUVEAU MESSAGE
+# =========================
 @receiver(post_save, sender=Message)
 def notify_new_message(sender, instance, created, **kwargs):
     if not created:
@@ -103,36 +151,47 @@ def notify_new_message(sender, instance, created, **kwargs):
     if not forum or not sender_user:
         return
 
-    forum_cible = getattr(forum, 'cible', None)
+    forum_cible = getattr(forum, "cible", None)
 
-    if forum_cible == 'etudiants':
-        participants = Utilisateur.objects.filter(etudiant__isnull=False).exclude(id_utilisateur=sender_user.id_utilisateur)
-    elif forum_cible == 'enseignants':
-        participants = Utilisateur.objects.filter(enseignant__isnull=False).exclude(id_utilisateur=sender_user.id_utilisateur)
+    if forum_cible == "etudiants":
+        participants = Utilisateur.objects.filter(etudiant__isnull=False)
+    elif forum_cible == "enseignants":
+        participants = Utilisateur.objects.filter(enseignant__isnull=False)
     else:
-        participants = Utilisateur.objects.exclude(id_utilisateur=sender_user.id_utilisateur)
+        participants = Utilisateur.objects.all()
 
-    # Inclure les personnes ayant déjà posté
-    previous_posters = set(
-        Message.objects.filter(forum=forum)
-        .exclude(utilisateur=sender_user)
-        .values_list('utilisateur_id', flat=True)
-    )
+    participants = participants.exclude(id_utilisateur=sender_user.id_utilisateur)
+
+    # inclure les anciens participants
+    previous_posters = Message.objects.filter(forum=forum)\
+        .exclude(utilisateur=sender_user)\
+        .values_list("utilisateur_id", flat=True)
+
     participants = participants | Utilisateur.objects.filter(id_utilisateur__in=previous_posters)
 
-    for user in participants:
-        try:
-            create_notification(
-                destinataire=user,
-                envoyeur=sender_user,
-                content_object=forum,
-                action_type='new_message',
-                module_source='forum',
-                message=f"{sender_user.prenom} a posté un message dans '{forum.titre_forum[:50]}...'"
-            )
-        except Exception as e:
-            print(f"Erreur notification pour {user.adresse_email}: {e}")
+    for user in participants.distinct():
+        create_notification(
+            destinataire=user,
+            envoyeur=sender_user,
+            content_object=forum,
+            action_type="new_message",
+            module_source="forum",
+            message=f"{sender_user.prenom} a posté un message dans « {forum.titre_forum[:50]} »."
+        )
 
+    # Admin
+    notify_admins(
+        message=f"Nouveau message posté par {sender_user.prenom} dans le forum « {forum.titre_forum[:50]} ».",
+        content_object=forum,
+        action_type="new_message",
+        module_source="forum",
+        envoyeur=sender_user
+    )
+
+
+# =========================
+# 🔔 NOUVEAU FORUM
+# =========================
 @receiver(post_save, sender=Forum)
 def notify_new_forum(sender, instance, created, **kwargs):
     if not created:
@@ -143,26 +202,32 @@ def notify_new_forum(sender, instance, created, **kwargs):
     if not creator:
         return
 
-    # ❌ Avant : forum_type = forum.type
-    # ✅ Maintenant on utilise le champ cible
-    forum_cible = getattr(forum, 'cible', None)  # 'etudiants' ou 'enseignants'
+    forum_cible = getattr(forum, "cible", None)
 
-    if forum_cible == 'etudiants':
-        destinataires = Utilisateur.objects.filter(etudiant__isnull=False).exclude(id_utilisateur=creator.id_utilisateur)
-    elif forum_cible == 'enseignants':
-        destinataires = Utilisateur.objects.filter(enseignant__isnull=False).exclude(id_utilisateur=creator.id_utilisateur)
+    if forum_cible == "etudiants":
+        destinataires = Utilisateur.objects.filter(etudiant__isnull=False)
+    elif forum_cible == "enseignants":
+        destinataires = Utilisateur.objects.filter(enseignant__isnull=False)
     else:
-        destinataires = Utilisateur.objects.exclude(id_utilisateur=creator.id_utilisateur)
+        destinataires = Utilisateur.objects.all()
+
+    destinataires = destinataires.exclude(id_utilisateur=creator.id_utilisateur)
 
     for user in destinataires:
-        try:
-            create_notification(
-                destinataire=user,
-                envoyeur=creator,
-                content_object=forum,
-                action_type='new_forum',
-                module_source='forum',
-                message=f"{creator.prenom} a créé un nouveau forum : '{forum.titre_forum[:50]}...'"
-            )
-        except Exception as e:
-            print(f"Erreur notification pour {user.adresse_email}: {e}")
+        create_notification(
+            destinataire=user,
+            envoyeur=creator,
+            content_object=forum,
+            action_type="new_forum",
+            module_source="forum",
+            message=f"{creator.prenom} a créé un nouveau forum « {forum.titre_forum[:50]} »."
+        )
+
+    # Admin
+    notify_admins(
+        message=f"Nouveau forum créé par {creator.prenom} : « {forum.titre_forum[:50]} ».",
+        content_object=forum,
+        action_type="forum_created",
+        module_source="forum",
+        envoyeur=creator
+    )

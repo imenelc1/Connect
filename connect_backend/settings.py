@@ -42,14 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Apps du projet
-    'users',
+    'users.apps.UsersConfig',
     'courses.apps.CoursesConfig',
     'exercices.app.ExercicesConfig',
     'quiz.app.QuizConfig',
     'forum.apps.ForumConfig',
     'ia',
     'dashboard',
-    'feedback',
+    'feedback.apps.FeedbackConfig',
     'spaces.apps.SpacesConfig',
     'badges',
     # API et CORS

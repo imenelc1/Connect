@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import axios from "axios";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import Cards from "../components/common/Cards-Dash";
 import { TrendingDown, CircleCheckBig, Clock3, Book, Bell, Search } from "lucide-react";

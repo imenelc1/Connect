@@ -5,6 +5,7 @@ import Navbar from "../components/common/NavBar";
 import InfoCard from "../components/common/InfoCard";
 import { MessageCircle, File } from "lucide-react";
 import { getTentativeById } from "../services/progressionService";
+import axios from "axios"; // ← Ajoutez cette importation
 
 export default function SubmittedExercise() {
   const { t } = useTranslation("SubmittedExercise");
@@ -12,17 +13,48 @@ export default function SubmittedExercise() {
 
   const [loading, setLoading] = useState(true);
   const [exerciseData, setExerciseData] = useState(null);
+  const [feedback, setFeedback] = useState(""); // ← État séparé pour le feedback
 
   useEffect(() => {
     const fetchTentative = async () => {
       try {
+        // 1. Récupérer la tentative
         const data = await getTentativeById(tentativeId);
+        
+        // 2. Récupérer le feedback depuis le nouveau modèle
+        let feedbackContent = data.feedback || ""; // Fallback sur l'ancien champ
+        
+        try {
+          const token = localStorage.getItem("token");
+          const BACKEND_URL = "http://127.0.0.1:8000";
+          
+          const response = await axios.get(
+            `${BACKEND_URL}/api/feedback-exercice/list/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              params: { 
+                tentative_ids: tentativeId // Un seul ID
+              }
+            }
+          );
+          
+          // Si on a des résultats, prendre le premier
+          if (response.data && response.data.length > 0) {
+            feedbackContent = response.data[0].contenu;
+          }
+        } catch (fbErr) {
+          console.warn("Erreur récupération feedback, utilisation ancien champ:", fbErr);
+          // On garde l'ancien feedback en cas d'erreur
+        }
+        
+        setFeedback(feedbackContent);
 
+        // 3. Préparer les données de l'exercice
         setExerciseData({
           code: data.reponse,
-          solution: data.exercice.solution || "", // <- la solution ici
+          solution: data.exercice.solution || "",
           actualOutput: data.output,
-          feedback: data.feedback,
+          feedback: feedbackContent, // ← Utilise le nouveau feedback
           titre: data.exercice.titre_exo,
           description: data.exercice.enonce,
           language: "C",
@@ -98,7 +130,9 @@ export default function SubmittedExercise() {
               <h2 className="text-lg font-semibold mb-1">
                 {t("teacherFeedback")}
               </h2>
-              <p className="text-sm text-textc">{exerciseData.feedback}</p>
+              <p className="text-sm text-textc">
+                {feedback || exerciseData.feedback || "Aucun feedback pour le moment"}
+              </p>
             </div>
           </div>
         </div>

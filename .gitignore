@@ -11,3 +11,9 @@ package-lock.json
 
 # OS
 .DS_Store
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

@@ -1,47 +1,72 @@
-# signals.py
+# quiz/signals.py
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.contenttypes.models import ContentType
 from .models import Quiz
-from users.models import Etudiant
-from feedback.utils import create_notification
-from spaces.models import SpaceCour  # pour récupérer les espaces où le cours est ajouté
+from feedback.models import Notification
+from users.models import Utilisateur, Administrateur
 
 @receiver(post_save, sender=Quiz)
-def notify_students_on_quiz(sender, instance, created, **kwargs):
+def notify_on_public_quiz_create(sender, instance, created, **kwargs):
     if not created:
         return
 
     quiz = instance
-    exercice = quiz.exercice
-    professeur = exercice.utilisateur
-    cours = exercice.cours
 
-    if exercice.visibilite_exo:
-        # Quiz public → tous les étudiants du cours
-        etudiants = Etudiant.objects.filter(cours=cours)
-        message_info = f"nouveau quiz public : {exercice.titre_exo} (du cours '{cours.titre_cour}')"
-    else:
-        # Quiz privé → uniquement les étudiants des espaces où le cours est ajouté
-        espaces = SpaceCour.objects.filter(cours=cours).select_related('space')
-        etudiants_ids = []
-        espaces_noms = []
-        for espace in espaces:
-            students_in_space = espace.space.spaceetudiant_set.all()
-            etudiants_ids.extend([se.etudiant.id_utilisateur for se in students_in_space])
-            espaces_noms.append(espace.space.nom_space)
-        etudiants = Etudiant.objects.filter(utilisateur__id_utilisateur__in=etudiants_ids).distinct()
-        message_info = f"de l'espace {', '.join(espaces_noms)}"
+    # 🔒 Quiz privé → aucune notification
+    if not quiz.visibilite_quiz:
+        return
 
-    # Créer les notifications
+    content_type = ContentType.objects.get_for_model(Quiz)
+    notifications = []
+
+    prof = quiz.utilisateur
+    prof_name = f"{prof.nom} {prof.prenom}" if prof else "un professeur"
+
+    # ======================
+    # 🎓 Étudiants
+    # ======================
+    etudiants = Utilisateur.objects.filter(etudiant__isnull=False)
     for etudiant in etudiants:
-        try:
-            create_notification(
-                destinataire=etudiant.utilisateur,
-                envoyeur=professeur,
-                content_object=quiz,
-                action_type='new_quiz',
-                module_source='quiz',
-                message=f"Nouveau quiz disponible : {exercice.titre_exo} ({message_info})"
+        notifications.append(
+            Notification(
+                utilisateur_destinataire=etudiant,
+                utilisateur_envoyeur=prof,
+                message_notif=f"Nouveau quiz public : {quiz.titre_quiz}",
+                content_type=content_type,
+                object_id=quiz.pk,
+                action_type="quiz_created",
+                module_source="quiz",
+                extra_data={
+                    "titre_quiz": quiz.titre_quiz,
+                    "public": True
+                }
             )
-        except Exception as e:
-            print(f"Erreur notification quiz pour {etudiant}: {e}")
+        )
+
+    # ======================
+    # 🛠️ Administrateurs
+    # ======================
+    admins = Administrateur.objects.all()
+    for admin in admins:
+        notifications.append(
+            Notification(
+                admin_destinataire=admin,
+                utilisateur_envoyeur=prof,
+                message_notif=(
+                    f"Nouveau quiz créé par {prof_name} : "
+                    f"{quiz.titre_quiz}"
+                ),
+                content_type=content_type,
+                object_id=quiz.pk,
+                action_type="quiz_created",
+                module_source="quiz",
+                extra_data={
+                    "titre_quiz": quiz.titre_quiz,
+                    "auteur": prof_name,
+                    "public": True
+                }
+            )
+        )
+
+    Notification.objects.bulk_create(notifications)

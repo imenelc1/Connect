@@ -29,7 +29,7 @@ export default function AllExercisesPage() {
   const navigate = useNavigate();
   const { t } = useTranslation("allExercises");
   const { toggleDarkMode } = useContext(ThemeContext);
-  const [searchTerm, setSearchTerm] = useState("");
+
   const [exercises, setExercises] = useState([]);
   const [filterLevel, setFilterLevel] = useState("ALL");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -54,17 +54,13 @@ export default function AllExercisesPage() {
           categorie: c.categorie,
           description: c.enonce,
           author: c.utilisateur_name,
-          author_id:c.utilisateur,
-          visibilite_exo:c.visibilite_exo,
           coursId: c.cours, // pour navigation vers le cours si besoin
           initials: c.utilisateur_name
             .split(" ")
             .map(n => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId,
-          visible: c.visibilite_exo === true || c.utilisateur === currentUserId, // <-- Nouveau champ
-
+          isMine: c.utilisateur === currentUserId
         }));
         setExercises(formatted);
       })
@@ -73,46 +69,6 @@ export default function AllExercisesPage() {
         setExercises([]);
       });
   }, [currentUserId]);
-
-
-  //Recherche exercice
-  
-  useEffect(() => {
-  const controller = new AbortController();
-
-  fetch(`http://localhost:8000/api/exercices/exo?search=${searchTerm}`, {
-    signal: controller.signal
-  })
-    .then(res => res.json())
-    .then(data => {
-      const formatted = data.map(c => ({
-        id: c.id_exercice,
-        title: c.titre_exo,
-        level: c.niveau_exercice_label,
-        categorie: c.categorie,
-        description: c.enonce,
-        author: c.utilisateur_name,
-        author_id:c.utilisateur,
-        coursId: c.cours,
-        visibilite_exo:c.visibilite_exo,
-        initials: c.utilisateur_name
-          .split(" ")
-          .map(n => n[0])
-          .join("")
-          .toUpperCase(),
-        isMine: c.utilisateur === currentUserId,
-        visible: c.visibilite_exo === true || c.utilisateur === currentUserId, // <-- Nouveau champ
-
-      }));
-      setExercises(formatted);
-    })
-    .catch(err => {
-      if (err.name !== "AbortError") console.error(err);
-    });
-
-  return () => controller.abort();
-}, [searchTerm]);
-
 
   const handleDeleteExo = async (exoId) => {
     if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
@@ -154,8 +110,6 @@ export default function AllExercisesPage() {
   if (userRole === "enseignant" && categoryFilter === "mine") {
     filteredExercises = filteredExercises.filter(ex => ex.isMine);
   }
-  filteredExercises = filteredExercises.filter((ex) => ex.visible);
-
 
   return (
      <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -189,10 +143,7 @@ export default function AllExercisesPage() {
      
      
 
-       <ContentSearchBar
-         value={searchTerm}
-         onChange={(e) => setSearchTerm(e.target.value)}
-       />
+        <ContentSearchBar />
 
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
@@ -218,7 +169,7 @@ export default function AllExercisesPage() {
 
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredExercises.map((exercise) => (
-            <ExerciseCard key={exercise.id} exercise={exercise} isOwner={exercise.isMine} onDelete={handleDeleteExo} />
+            <ExerciseCard key={exercise.id} exercise={exercise} />
 
           ))}
         </div>
