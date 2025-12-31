@@ -21,24 +21,28 @@ export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
   const { exerciceId } = useParams();
+
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
   const [output, setOutput] = useState("Aucune sortie pour le moment...");
   const [isRunning, setIsRunning] = useState(false);
-  const [userCode, setUserCode] = useState(`#include <stdio.h>
+  const [userInput, setUserInput] = useState("");
+
+  const defaultCode = `#include <stdio.h>
 #include <stdlib.h>
 
 int main() {
   printf("Hello world!\\n");
   return 0;
-}`);
+}`;
+
+  const [userCode, setUserCode] = useState(null);
   const [startTime, setStartTime] = useState(Date.now());
   const controllerRef = useRef(null);
-
   const [notifications, setNotifications] = useState([]);
-  const defaultCode = userCode;
-  const resetCode = () => setUserCode(defaultCode);
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [overwrite, setOverwrite] = useState(false);
 
   const storedUser = localStorage.getItem("user");
   const userData =
@@ -47,11 +51,11 @@ int main() {
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
-
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const sidebarWidth = sidebarCollapsed ? -200 : -50;
   const isStudent = userData?.role === "etudiant";
-  const [overwrite, setOverwrite] = useState(false);
+
+  const sidebarWidth = false ? -200 : -50;
+
+  const resetCode = () => setUserCode(defaultCode);
 
   // -------- Notifications --------
   const sendNotification = (message, type = "info") => {
@@ -86,7 +90,43 @@ int main() {
     fetchExercise();
   }, [exerciceId]);
 
-  // -------- Auto-save draft --------
+  // -------- Load last code (localStorage first, then server draft) --------
+  useEffect(() => {
+    if (!exerciceId) return;
+
+    const fetchLastCode = async () => {
+      // 1️⃣ Vérifie localStorage
+      const local = localStorage.getItem(`exercise-${exerciceId}-code`);
+      if (local) {
+        setUserCode(local);
+        return;
+      }
+
+      // 2️⃣ Sinon récupère le dernier brouillon serveur
+      try {
+        const lastDraft = await progressionService.getLastTentative(exerciceId);
+        if (lastDraft?.reponse) {
+          setUserCode(lastDraft.reponse);
+          setOutput(lastDraft.output || "Aucune sortie pour le moment...");
+        } else {
+          setUserCode(defaultCode);
+        }
+      } catch {
+        setUserCode(defaultCode);
+      }
+    };
+
+    fetchLastCode();
+  }, [exerciceId]);
+
+  // -------- Auto-save localStorage --------
+  useEffect(() => {
+    if (userCode !== null && exerciceId) {
+      localStorage.setItem(`exercise-${exerciceId}-code`, userCode);
+    }
+  }, [userCode, exerciceId]);
+
+  // -------- Auto-save draft server --------
   useEffect(() => {
     if (!exerciceId || !userCode) return;
     const timer = setTimeout(async () => {
@@ -98,7 +138,7 @@ int main() {
           etat: "brouillon",
           temps_passe: Math.floor((Date.now() - startTime) / 1000),
         });
-      } catch { }
+      } catch {}
     }, 1000);
     return () => clearTimeout(timer);
   }, [userCode, output, exerciceId, startTime]);
@@ -122,10 +162,80 @@ int main() {
         );
         if (res.data.stderr)
           sendNotification("Erreur détectée — vérifie la syntaxe", "hint");
-      } catch { }
+      } catch {}
     }, 10000);
     return () => clearTimeout(t);
   }, [userCode]);
+
+  // -------- Run / Debug / Stop --------
+ const runCode = async () => {
+  setIsRunning(true);
+  setOutput("Exécution en cours...");
+
+  try {
+    const res = await axios.post(
+      "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+      {
+        source_code: userCode,
+        language_id: 49,
+        stdin: userInput,
+      }
+    );
+
+    const {
+      stdout,
+      stderr,
+      compile_output,
+      status,
+    } = res.data;
+
+    const result =
+      stdout ||
+      stderr ||
+      compile_output ||
+      "Aucune sortie pour le moment...";
+
+    setOutput(result);
+
+    // 🚨 NOTIFICATION IMMÉDIATE
+    if (stderr || compile_output) {
+      sendNotification(
+        "⚠️ Erreur détectée lors de l'exécution. Besoin d’un coup de main ?",
+        "hint"
+      );
+    }
+
+  } catch {
+    setOutput("Erreur pendant l'exécution");
+    sendNotification("Erreur pendant l'exécution", "error");
+  } finally {
+    setIsRunning(false);
+  }
+};
+
+
+  const debugCode = async () => {
+    setIsRunning(true);
+    try {
+      const res = await axios.post(
+        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+        { source_code: userCode, language_id: 49 }
+      );
+      if (res.data.stderr) {
+        setOutput("Erreur détectée :\n\n" + res.data.stderr);
+        sendNotification("Bug détecté", "hint");
+      } else {
+        setOutput("Aucun bug détecté");
+      }
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const stopCode = () => {
+    controllerRef.current?.abort();
+    setIsRunning(false);
+  };
 
   // -------- Save & Submit --------
   const handleSaveDraft = async () => {
@@ -155,90 +265,12 @@ int main() {
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
       toast.success("Exercice soumis");
-
-      // Vérifier à nouveau si l'on peut soumettre
-      const res = await fetch(
-        `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      setCanSubmit(data.can_submit);
-
-      if (!data.can_submit) {
-        toast.error("Toutes les tentatives ont été utilisées !");
-      }
-
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Erreur lors de la soumission");
     }
   };
 
-
-  const [canSubmit, setCanSubmit] = useState(false);
-  useEffect(() => {
-    if (!exerciceId) return;
-    fetch(
-      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-    )
-      .then((r) => r.json())
-      .then((d) => setCanSubmit(d.can_submit))
-      .catch(() => setCanSubmit(false));
-  }, [exerciceId]);
-
-  // -------- Run / Debug / Stop --------
-  const runCode = async () => {
-    setIsRunning(true);
-    setOutput("Exécution en cours...");
-    controllerRef.current = new AbortController();
-
-    try {
-      const res = await axios.post(
-        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-        { source_code: userCode, language_id: 49 },
-        { signal: controllerRef.current.signal }
-      );
-      const result =
-        res.data.stdout ?? res.data.stderr ?? "Aucune sortie pour le moment...";
-      setOutput(result);
-      sendNotification("Exécution terminée !");
-    } catch (e) {
-      setOutput(
-        axios.isCancel(e) ? "Exécution stoppée" : "Erreur pendant l'exécution"
-      );
-    }
-    setIsRunning(false);
-  };
-
-  const debugCode = async () => {
-    setIsRunning(true);
-    try {
-      const res = await axios.post(
-        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-        { source_code: userCode, language_id: 49 }
-      );
-      if (res.data.stderr) {
-        setOutput("Erreur détectée :\n\n" + res.data.stderr);
-        sendNotification("Bug détecté", "hint");
-      } else {
-        setOutput("Aucun bug détecté");
-      }
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
-  const stopCode = () => {
-    controllerRef.current?.abort();
-    setIsRunning(false);
-  };
-
-  // ---------- Contexte partagé ----------
+  // -------- JSX et context --------
   const exerciseContextValue = {
     id: exerciceId,
     titre: exercise?.titre_exo,
@@ -337,20 +369,35 @@ int main() {
               </span>
               <span className="font-medium text-sm text-gray-300">main.c</span>
             </div>
-            <Editor
-              height="400px"
-              language="c"
-              theme="vs-dark"
-              value={userCode}
-              onChange={setUserCode}
-              options={{
-                fontSize: 15,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-              }}
+            {userCode !== null && (
+              <Editor
+                height="400px"
+                language="c"
+                theme="vs-dark"
+                value={userCode}
+                onChange={setUserCode}
+                options={{
+                  fontSize: 15,
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                }}
+              />
+            )}
+
+          </div>
+          {/* Input pour scanf */}
+          <div className="mb-4">
+            <label className="text-sm text-gray-300 mb-1 block">Entrées (stdin)</label>
+            <textarea
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="Tapez ici vos entrées, séparées par Enter"
+              className="w-full p-2 rounded bg-gray-900 text-white font-mono resize-none"
+              rows={4}
             />
           </div>
+
 
           {/* Buttons */}
           <div className="flex flex-wrap justify-center gap-4 mb-10">

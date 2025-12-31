@@ -44,6 +44,7 @@ import ExercisePreview from "../pages/ExercisePreview";
 import UpdateExercice from "../pages/UpdateExercice.jsx";
 import ProgressExercice from "../pages/ProgressionExo";
 import ProgressStudent from "../pages/ProgressionStudent";
+import SubmittedExoTheory from "../pages/SubmittedExoTheory.jsx";
 
 /* ================= QUIZZES ================= */
 import AllQuizzesPage from "../pages/AllQuizzesPage";
@@ -65,6 +66,8 @@ import SpacesManagement from "../pages/SpacesManagement.jsx";
 import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 import StudentsManagement from "../pages/studentsManagement.jsx";
 import UpdateQuiz from "../pages/UpdateQuiz.jsx";
+import VoirCoursAdmin from "../pages/VoirCoursAdmin.jsx";
+import VoirQuizAdmin from "../pages/VoirQuizAdmin.jsx"
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -116,6 +119,9 @@ export default function AppRoutes() {
         <Route path="/start-exerciseCode/:exerciceId" element={<CodeExercisePage />} />
         <Route path="/submitted-exercise/:tentativeId" element={<SubmittedExercise />} />
         <Route path="/SubmittedExos" element={<SubmittedExercises />} />
+        <Route path="/submitted-exercise-theory/:tentativeId" element={<SubmittedExoTheory />} />
+        <Route path="/submitted-exercise-theory/" element={<SubmittedExoTheory />} />
+
         <Route path="/progress-exercice" element={<ProgressExercice />} />
        
         <Route path="/progress-student/" element={<ProgressStudent />} />
@@ -141,8 +147,10 @@ export default function AppRoutes() {
         <Route path="/StudentsManagement" element={<StudentsManagement />} />
         <Route path="/validation-courses" element={<ValidationCourses />} />
         <Route path="/ForumManagement" element={<ForumManagement />} />
-         <Route path="/SpacesManagement" element={<SpacesManagement />} />
-         <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
+        <Route path="/SpacesManagement" element={<SpacesManagement />} />
+        <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
+        <Route path="/cours/:id_cours" element={<VoirCoursAdmin />} />
+        <Route path="/Voir-quiz/:exerciceId" element={<VoirQuizAdmin />} />
 
    
       </Routes>

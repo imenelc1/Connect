@@ -22,7 +22,7 @@ export default function SubmittedExercises() {
           exerciceId: t.exercice.id_exercice, 
           title: t.exercice.titre_exo,
           description: t.exercice.enonce,
-          type: t.exercice.type || "non-code", // ⚡ type pour savoir si on affiche </>
+          categorie: t.exercice.categorie || "non-code",
           status: t.etat === "soumis" ? "Soumis" : t.etat === "brouillon" ? "Brouillon" : "Corrigé",
           submittedDate: t.submitted_at || t.created_at,
           language: t.exercice.language || "C",
@@ -112,13 +112,16 @@ export default function SubmittedExercises() {
 
                 {/* ArrowRight clickable */}
                 <div className="flex justify-end mt-2">
-                  <ChevronRight
-                    size={20}
-                    className="text-primary cursor-pointer"
-                    onClick={() => window.location.href = `/submitted-exercise/${ex.id}`}
+                 <ChevronRight
+  size={20}
+  className="text-primary cursor-pointer"
+  onClick={() => {
+    ex.categorie === "code"
+      ? window.location.href = `/submitted-exercise/${ex.id}`
+      : window.location.href = `/submitted-exercise-theory/${ex.id}`;
+  }}
+/>
 
-
-                  />
                 </div>
 
                 {/* Details */}
@@ -128,7 +131,7 @@ export default function SubmittedExercises() {
                       <Calendar size={14} className="text-primary" /> {new Date(ex.submittedDate).toLocaleDateString()}
                     </div>
                     {/* Type code badge */}
-                    {ex.type === "code" && (
+                  {ex.categorie === "code" && (
                       <div className="flex items-center gap-1">
                         <span className="text-primary font-bold">{`</>`}</span> {ex.language}
                       </div>

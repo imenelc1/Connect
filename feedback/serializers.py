@@ -151,4 +151,12 @@ class FeedbackExerciceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FeedbackExercice
-        fields = ['id', 'contenu', 'exercice', 'tentative', 'auteur_nom', 'auteur_prenom', 'date_creation']
+        fields = [
+            'id',
+            'contenu',
+            'exercice', 
+            'tentative',
+            'auteur_nom',
+            'auteur_prenom',
+            'date_creation'
+        ]

@@ -143,39 +143,20 @@ export default function Dashboardens() {
 
     const token = localStorage.getItem("token");
 
-    const addSession = async () => {
-      try {
-        await axios.post(
-          "http://127.0.0.1:8000/api/dashboard/add-session/",
-          { duration: 60 },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } catch (err) {
-        console.error("Erreur ajout session:", err);
-      }
-    };
+  const fetchDailyTime = async () => {
+    try {
+      const res = await axios.get(
+        "http://127.0.0.1:8000/api/dashboard/daily-time/",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setDailyTime(res.data.total_seconds || 0);
+    } catch (err) {
+      console.error("Erreur daily time:", err);
+    }
+  };
 
-    const fetchDailyTime = async () => {
-      try {
-        const res = await axios.get(
-          "http://127.0.0.1:8000/api/dashboard/daily-time/",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setDailyTime(res.data.total_seconds || 0);
-      } catch (err) {
-        console.error("Erreur fetching daily time:", err);
-      }
-    };
-
-    // 1️⃣ On récupère le temps **une première fois immédiatement**
-    fetchDailyTime();
-
-    // 2️⃣ On ajoute la session et relance le fetch toutes les 60 sec
-    addSession();
-    const interval = setInterval(async () => {
-      await addSession();
-      await fetchDailyTime();
-    }, 60000);
+  fetchDailyTime();
+  const interval = setInterval(fetchDailyTime, 60000);
 
     return () => clearInterval(interval);
   }, [user]);

@@ -15,8 +15,7 @@ def create_notification(
     """
     Crée une notification pour un Utilisateur ou un Admin.
     """
-
-    # Empêche de s'envoyer une notification à soi-même (pour utilisateur)
+    # Empêche de s'envoyer une notification à soi-même
     if destinataire and envoyeur and destinataire.id_utilisateur == envoyeur.id_utilisateur:
         return None
 
@@ -30,16 +29,10 @@ def create_notification(
         extra_data=extra_data or {}
     )
 
-    # Lier l'objet (forum, cours, exercice…)
+    # Lier l'objet (cours, feedback, etc.)
     if content_object:
         notif.content_type = ContentType.objects.get_for_model(content_object)
         notif.object_id = content_object.pk
 
     notif.save()
-
-    # Log simple pour dev
-    target = "Admin" if admin_destinataire else "Utilisateur"
-    email = admin_destinataire.email_admin if admin_destinataire else destinataire.adresse_email
-    print(f"✅ Notification créée ({target}): {email} - {module_source}.{action_type}")
-
     return notif

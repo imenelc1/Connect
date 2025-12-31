@@ -105,26 +105,29 @@ useEffect(() => {
   if (!user) return;
 
   const fetchDailyTime = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        "http://127.0.0.1:8000/api/dashboard/daily-time/",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      console.log("Daily time:", res.data);
-      setDailyTime(res.data.total_seconds || 0);
-    } catch (err) {
-      console.error("Erreur fetching daily time:", err);
-    }
+    const token = localStorage.getItem("token");
+    const res = await axios.get(
+      "http://127.0.0.1:8000/api/dashboard/daily-time/",
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setDailyTime(res.data.total_seconds || 0);
   };
 
   fetchDailyTime();
+  const interval = setInterval(fetchDailyTime, 60000); // chaque minute
+  
+  return () => clearInterval(interval);
 }, [user]);
+
+
+
+
 
 // Formatage du temps lisible
 const formatTimeStyled = (secs) => {
-  if (!secs || secs < 60) return <span className="text-green-500 font-bold">1 min</span>;
+   if (!secs || secs < 60)
+  return <span className="text-blue font-bold">{secs}s</span>;
+
 
   const mins = Math.floor(secs / 60);
   const h = Math.floor(mins / 60);

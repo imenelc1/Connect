@@ -13,6 +13,17 @@ import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
 import { toast } from 'react-hot-toast';
+const levelStyles = {
+  Débutant: "bg-blue text-white",
+  Intermédiaire: "bg-purple text-white",
+  Avancé: "bg-pink text-white",
+};
+
+const buttonStyles = {
+  Débutant: "bg-blue text-white",
+  Intermédiaire: "bg-purple text-white",
+  Avancé: "bg-pink text-white",
+};
 
 export default function CoursesManagement() {
   const navigate = useNavigate();
@@ -125,27 +136,7 @@ export default function CoursesManagement() {
     (c.titre_cour || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  // CREATE
-  const submitCreate = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("http://localhost:8000/api/create_cours/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(newCourse),
-      });
-      if (!res.ok) throw new Error(t("errors.createCourse"));
-      const data = await res.json();
-      setCourses([...courses, data]);
-      setNewCourse({ titre_cour: "", niveau_cour: "debutant", description: "", duration: "00:30:00", utilisateur: "" });
-      setCreateModal(false);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
 
   // EDIT
   const openEdit = (course) => {
@@ -292,18 +283,35 @@ export default function CoursesManagement() {
               </div>
 
               <h3 className="font-semibold text-lg mb-2 truncate">{item.titre_cour}</h3>
+               <p className="text-grayc text-sm mb-2">
+                  {item.duration_readable}
+                </p>
+              {teachers.length > 0 && (
+                <p className="text-grayc text-sm mb-2">
+                  Auteur: {teachers.find(t => t.id_utilisateur === item.utilisateur)?.nom}{" "}
+                  {teachers.find(t => t.id_utilisateur === item.utilisateur)?.prenom}
+                </p>
+              )}
               {item.description && (
                 <p className="text-grayc  text-sm mb-4 line-clamp-2">{item.description}</p>
               )}
 
               <div className="flex justify-end mt-auto pt-4">
                 <div className="flex gap-3">
+                   <Button
+                    variant="courseStart"
+                    className={`px-4 py-2 whitespace-nowrap ${buttonStyles[item.niveau_cour_label]}`}
+                    onClick={() => navigate(`/Cours/${item.id_cours}`)}
+                  >
+                    Voir Cours
+                  </Button>
                   <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
                     <SquarePen size={20} />
                   </button>
                   <button className="text-red hover:opacity-80" onClick={()=>handleDeleteCourse(item.id_cours)}>
                     <Trash2 size={20}  />
                   </button>
+                 
                 </div>
               </div>
             </div>
