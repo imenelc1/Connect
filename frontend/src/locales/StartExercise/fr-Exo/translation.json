@@ -1,7 +1,8 @@
 {
   "header": {
     "title": "Exercices",
-    "subtitle": "Commençons l'exercice !"
+    "subtitle": "Commençons l'exercice !",
+    "label":"Exercice :"
   },
   "editor": {
     "yourCode": "Votre code :"
@@ -23,6 +24,10 @@
     "default": "Hello world!\nLe programme s'est terminé avec le code de sortie 0\nAppuyez sur ENTRÉE pour quitter la console.",
      "noOutput":"Aucune sortie pour le moment..."
   },
+  "input": {
+  "stdinLabel": "Entrées (stdin)",
+  "stdinPlaceholder": "Tapez ici vos entrées, séparées par Entrée"
+},
   "feedback": {
     "title": "Comment trouvez-vous cet exercice ?",
     "subtitle": "Votre avis nous aide à améliorer l’expérience d’apprentissage",
@@ -36,7 +41,9 @@
   "assistant": {
     "button": "Assistant IA",
     "help":"Besoin d'aide ? Discutez avec l'Assistant IA",
-      "tipHelper":"Tu as besoin d'un indice ?"
+      "tipHelper":"Tu as besoin d'un indice ?",
+      "executionErrorHelp": "⚠️Erreur détectée lors de l'exécution. Besoin d’un coup de main ?"
+      
   },
   "errors":{
   "exerciseLoad":"Exercice chargé !",

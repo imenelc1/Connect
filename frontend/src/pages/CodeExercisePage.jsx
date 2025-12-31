@@ -21,25 +21,29 @@ export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
   const { toggleDarkMode } = useContext(ThemeContext);
   const { exerciceId } = useParams();
+
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
-  const [output, setOutput] = useState(t("output.noOutput"));
+  const [output, setOutput] = useState("");
 
   const [isRunning, setIsRunning] = useState(false);
-  const [userCode, setUserCode] = useState(`#include <stdio.h>
+  const [userInput, setUserInput] = useState("");
+
+  const defaultCode = `#include <stdio.h>
 #include <stdlib.h>
 
 int main() {
   printf("Hello world!\\n");
   return 0;
-}`);
+}`;
+
+  const [userCode, setUserCode] = useState(null);
   const [startTime, setStartTime] = useState(Date.now());
   const controllerRef = useRef(null);
-
   const [notifications, setNotifications] = useState([]);
-  const defaultCode = userCode;
-  const resetCode = () => setUserCode(defaultCode);
+  const [canSubmit, setCanSubmit] = useState(false);
+  const [overwrite, setOverwrite] = useState(false);
 
   const storedUser = localStorage.getItem("user");
   const userData =
@@ -48,11 +52,11 @@ int main() {
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
-
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const sidebarWidth = sidebarCollapsed ? -200 : -50;
   const isStudent = userData?.role === "etudiant";
-  const [overwrite, setOverwrite] = useState(false);
+
+  const sidebarWidth = false ? -200 : -50;
+
+  const resetCode = () => setUserCode(defaultCode);
 
   // -------- Notifications --------
   const sendNotification = (message, type = "info") => {
@@ -68,28 +72,74 @@ int main() {
   // -------- Fetch Exercise --------
   useEffect(() => {
     if (!exerciceId) return;
+
     const fetchExercise = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:8000/api/exercices/${exerciceId}/`
-        );
+        const res = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         setExercise(data);
-        setStartTime(Date.now());
-        // "Exercice chargé !"
-        sendNotification(t("errors.exerciseLoad"));
-      } catch {
-        "Impossible de charger l'exercice"
+
+        // Après avoir chargé l'exercice, on check canSubmit
+        const canSubmitRes = await fetch(
+          `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          }
+        );
+        const canSubmitData = await canSubmitRes.json();
+        setCanSubmit(canSubmitData.can_submit);
+      } catch (err) {
         sendNotification(t("errors.exerciseNOTLoad"), "error");
+
+        setCanSubmit(false);
       } finally {
         setLoadingExercise(false);
       }
     };
+
     fetchExercise();
   }, [exerciceId]);
 
-  // -------- Auto-save draft --------
+
+
+  // -------- Load last code (localStorage first, then server draft) --------
+  useEffect(() => {
+    if (!exerciceId) return;
+
+    const fetchLastCode = async () => {
+      // 1️⃣ Vérifie localStorage
+      const local = localStorage.getItem(`exercise-${exerciceId}-code`);
+      if (local) {
+        setUserCode(local);
+        return;
+      }
+
+      // 2️⃣ Sinon récupère le dernier brouillon serveur
+      try {
+        const lastDraft = await progressionService.getLastTentative(exerciceId);
+        if (lastDraft?.reponse) {
+          setUserCode(lastDraft.reponse);
+          setOutput(lastDraft.output || "Aucune sortie pour le moment...");
+        } else {
+          setUserCode(defaultCode);
+        }
+      } catch {
+        setUserCode(defaultCode);
+      }
+    };
+
+    fetchLastCode();
+  }, [exerciceId]);
+
+  // -------- Auto-save localStorage --------
+  useEffect(() => {
+    if (userCode !== null && exerciceId) {
+      localStorage.setItem(`exercise-${exerciceId}-code`, userCode);
+    }
+  }, [userCode, exerciceId]);
+
+  // -------- Auto-save draft server --------
   useEffect(() => {
     if (!exerciceId || !userCode) return;
     const timer = setTimeout(async () => {
@@ -124,11 +174,85 @@ int main() {
           { source_code: userCode, language_id: 49 }
         );
         if (res.data.stderr)
-          sendNotification(t("error.syntaxError"), "hint");
+          sendNotification(t("errors.syntaxError"), "hint");
+
       } catch { }
     }, 10000);
     return () => clearTimeout(t);
   }, [userCode]);
+
+  // -------- Run / Debug / Stop --------
+  const runCode = async () => {
+    setIsRunning(true);
+    setOutput(t("messages.runningEXE"));
+
+
+    try {
+      const res = await axios.post(
+        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+        {
+          source_code: userCode,
+          language_id: 49,
+          stdin: userInput,
+        }
+      );
+
+      const {
+        stdout,
+        stderr,
+        compile_output,
+        status,
+      } = res.data;
+
+      const result =
+        stdout ||
+        stderr ||
+        compile_output ||
+        "Aucune sortie pour le moment...";
+
+      setOutput(result);
+
+      // 🚨 NOTIFICATION IMMÉDIATE
+      if (stderr || compile_output) {
+        sendNotification(
+          t("assistant.executionErrorHelp"), "hint"
+        );
+      }
+
+    } catch {
+      setOutput(t("errors.exeError"));
+      sendNotification(t("errors.exeError"), "error");
+
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+
+  const debugCode = async () => {
+    setIsRunning(true);
+    try {
+      const res = await axios.post(
+        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+        { source_code: userCode, language_id: 49 }
+      );
+      if (res.data.stderr) {
+        setOutput(`${t("errors.errorDetected")}\n\n${res.data.stderr}`);
+        sendNotification(t("errors.bugDetected"), "hint");
+
+      } else {
+        setOutput(t("messages.noBugs"));
+
+      }
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const stopCode = () => {
+    controllerRef.current?.abort();
+    setIsRunning(false);
+  };
 
   // -------- Save & Submit --------
   const handleSaveDraft = async () => {
@@ -142,8 +266,10 @@ int main() {
       });
       toast.success(t("messages.codeSave"));
       sendNotification(t("messages.draftSave"));
+
     } catch {
       toast.error(t("errors.errorSave"));
+
     }
   };
 
@@ -159,89 +285,13 @@ int main() {
       });
       toast.success(t("messages.exoSubmitted"));
 
-      // Vérifier à nouveau si l'on peut soumettre
-      const res = await fetch(
-        `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      setCanSubmit(data.can_submit);
-
-      if (!data.can_submit) {
-        toast.error(t("messages.usedAttempts"));
-      }
-
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error(t("errors.errorSubmit"));
+
     }
   };
 
-
-  const [canSubmit, setCanSubmit] = useState(false);
-  useEffect(() => {
-    if (!exerciceId) return;
-    fetch(
-      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-    )
-      .then((r) => r.json())
-      .then((d) => setCanSubmit(d.can_submit))
-      .catch(() => setCanSubmit(false));
-  }, [exerciceId]);
-
-  // -------- Run / Debug / Stop --------
-  const runCode = async () => {
-    setIsRunning(true);
-    setOutput(t("messages.runningEXE"));
-    controllerRef.current = new AbortController();
-
-    try {
-      const res = await axios.post(
-        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-        { source_code: userCode, language_id: 49 },
-        { signal: controllerRef.current.signal }
-      );
-      const result =
-        res.data.stdout ?? res.data.stderr ?? "Aucune sorte pour le moment...";
-      setOutput(result);
-      sendNotification(t("messages.finishEXE"));
-    } catch (e) {
-      setOutput(
-        axios.isCancel(e) ? t("messages.exeStop") : t("errors.exeError")
-      );
-    }
-    setIsRunning(false);
-  };
-
-  const debugCode = async () => {
-    setIsRunning(true);
-    try {
-      const res = await axios.post(
-        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-        { source_code: userCode, language_id: 49 }
-      );
-      if (res.data.stderr) {
-        setOutput(`${t("errors.errorDetected")}\n\n${res.data.stderr}`);
-        sendNotification(t("errors.bugDetected"), "hint");
-      } else {
-        setOutput(t("messages.noBug"));
-      }
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
-  const stopCode = () => {
-    controllerRef.current?.abort();
-    setIsRunning(false);
-  };
-
-  // ---------- Contexte partagé ----------
+  // -------- JSX et context --------
   const exerciseContextValue = {
     id: exerciceId,
     titre: exercise?.titre_exo,
@@ -317,7 +367,7 @@ int main() {
             {exercise ? (
               <>
                 <p className="font-semibold text-muted text-[20px]">
-                  {t("header.title")} {exercise.titre_exo}
+                  {t("header.label")}  {exercise.titre_exo}
                 </p>
                 <p className="mt-3 text-muted text-sm md:text-base">
                   {exercise.enonce}
@@ -325,7 +375,6 @@ int main() {
               </>
             ) : (
               <p className="text-red-500 text-sm">
-                {/* Impossible de charger l'exercice. */}
                 {t("errors.exerciseNOTLoad")}
               </p>
             )}
@@ -341,26 +390,42 @@ int main() {
               </span>
               <span className="font-medium text-sm text-gray-300">main.c</span>
             </div>
-            <Editor
-              height="400px"
-              language="c"
-              theme="vs-dark"
-              value={userCode}
-              onChange={setUserCode}
-              options={{
-                fontSize: 15,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-              }}
+            {userCode !== null && (
+              <Editor
+                height="400px"
+                language="c"
+                theme="vs-dark"
+                value={userCode}
+                onChange={setUserCode}
+                options={{
+                  fontSize: 15,
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                }}
+              />
+            )}
+
+          </div>
+          {/* Input pour scanf */}
+          <div className="mb-4">
+            <label className="text-sm text-gray-300 mb-1 block">{t("input.stdinLabel")}</label>
+            <textarea
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder={t("input.stdinPlaceholder")}
+              className="w-full p-2 rounded bg-gray-900 text-white font-mono resize-none"
+              rows={4}
             />
           </div>
+
 
           {/* Buttons */}
           <div className="flex flex-wrap justify-center gap-4 mb-10">
             <ActionButton
               icon={<Play size={18} />}
-              label={isRunning ? "Exécution..." : t("buttons.run")}
+              label={isRunning ? t("messages.runningEXE") : t("buttons.run")}
+
               bg="var(--grad-button)"
               onClick={runCode}
             />
@@ -407,6 +472,7 @@ int main() {
                 style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
               >
                 {t("buttons.sendSolution")}
+
               </button>
             </div>
           )}
@@ -417,7 +483,9 @@ int main() {
             {t("output.title")}
           </p>
           <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
-            {output.split("\n").map((line, i) => (
+            {/* {output.split("\n").map((line, i) => ( */}
+            {(output || t("output.noOutput")).split("\n").map((line, i) => (
+
               <div key={i}>{line}</div>
             ))}
           </div>
@@ -436,8 +504,8 @@ int main() {
                 />
               </div>
               <div className="text-[rgb(var(--color-primary))] font-medium">
-                {/* Besoin d'aide ? Discutez avec l'Assistant IA */}
                 {t("assistant.help")}
+
               </div>
             </button>
           </div>
