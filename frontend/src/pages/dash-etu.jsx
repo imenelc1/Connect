@@ -1,9 +1,9 @@
+// src/pages/Dashboardetu.jsx
 import React, { useEffect, useState, useRef, useContext } from "react";
 import axios from "axios";
 import Navbar from "../components/common/Navbar";
-import Button from "../components/common/Button";
 import Cards from "../components/common/Cards-Dash";
-import { TrendingDown, CircleCheckBig, Clock3, Book, Bell, Search } from "lucide-react";
+import { TrendingDown, CircleCheckBig, Clock3, Book, Search } from "lucide-react";
 import Mascotte from "../components/common/Mascotte";
 import LearningCurve from "../components/common/LearningCurveEtu";
 import NotificationItem from "../components/common/AcivityFeed";
@@ -13,10 +13,11 @@ import Input from "../components/common/Input";
 import ThemeContext from "../context/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import ContentSearchBar from "../components/common/ContentSearchBar";
 import api from "../services/api";
 import progressionService from "../services/progressionService";
 import NotificationBell from "../components/common/NotificationBell";
+import { useNotifications } from "../context/NotificationContext"; // AJOUT
+import dayjs from "dayjs";
 
 export default function Dashboardetu() {
   const navigate = useNavigate();
@@ -35,17 +36,14 @@ export default function Dashboardetu() {
   const initials = user ? `${user.nom?.[0] || ""}${user.prenom?.[0] || ""}`.toUpperCase() : "";
 
   const [activeCoursesCount, setActiveCoursesCount] = useState(0);
-
   const [globalProgress, setGlobalProgress] = useState(0);
-
   const [submittedExercises, setSubmittedExercises] = useState(0);
   const [totalExercises, setTotalExercises] = useState(0);
+  const [dailyTime, setDailyTime] = useState(0);
+  const [successRate, setSuccessRate] = useState(0);
 
-
-
-
-
-
+  // UTILISEZ LE CONTEXTE AU LIEU DU STATE LOCAL
+  const { notifications, loading: loadingNotifications } = useNotifications();
 
   const dat = [
     { title: "Emma Wilson completed Python Basics Quiz", date: "2nd Feb", day: "Tuesday", time: "11:30 - 12:30" },
@@ -71,8 +69,7 @@ export default function Dashboardetu() {
     };
   }, []);
 
-  
-
+  // Charger les données utilisateur
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -89,6 +86,10 @@ export default function Dashboardetu() {
         console.log("Global progress:", progress);
         setGlobalProgress(progress);
 
+        // Success rate
+        const rate = await progressionService.getSuccessRate();
+        setSuccessRate(rate);
+
       } catch (err) {
         console.error("Erreur lors du chargement des données:", err);
       } finally {
@@ -99,94 +100,87 @@ export default function Dashboardetu() {
     fetchData();
   }, []);
 
-const [dailyTime, setDailyTime] = useState(0); // en secondes
+  // Charger le temps journalier
+  useEffect(() => {
+    if (!user) return;
 
-useEffect(() => {
-  if (!user) return;
-
-  const fetchDailyTime = async () => {
-    const token = localStorage.getItem("token");
-    const res = await axios.get(
-      "http://127.0.0.1:8000/api/dashboard/daily-time/",
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setDailyTime(res.data.total_seconds || 0);
-  };
-
-  fetchDailyTime();
-  const interval = setInterval(fetchDailyTime, 60000); // chaque minute
-  
-  return () => clearInterval(interval);
-}, [user]);
-
-
-
-
-
-// Formatage du temps lisible
-const formatTimeStyled = (secs) => {
-   if (!secs || secs < 60)
-  return <span className="text-blue font-bold">{secs}s</span>;
-
-
-  const mins = Math.floor(secs / 60);
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  const s = secs % 60;
-
-  return (
-    <span>
-      {h > 0 && <span style={{ fontSize: 26 }} className="text-blue">{h}h </span>}
-      {m > 0 && <span style={{ fontSize: 26 }} className="text-blue">{m}min </span>}
-      {s > 0 && <span style={{ fontSize: 26 }} className="text-blue">{s}s</span>}
-    </span>
-  );
-};
-
-
-
-const [successRate, setSuccessRate] = useState(0);
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const rate = await progressionService.getSuccessRate();
-      setSuccessRate(rate);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  fetchData();
-}, []);
-
-
-// fetch après que user soit défini
-useEffect(() => {
-
-
-  const fetchExercisesData = async () => {
-    try {
-     const token = localStorage.getItem("token");
+    const fetchDailyTime = async () => {
+      try {
+        const token = localStorage.getItem("token");
         const res = await axios.get(
-  `http://127.0.0.1:8000/api/dashboard/student-total-tentatives/${user.id_utilisateur}/`,
-  { headers: { Authorization: `Bearer ${token}` } }
-);
+          "http://127.0.0.1:8000/api/dashboard/daily-time/",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setDailyTime(res.data.total_seconds || 0);
+      } catch (err) {
+        console.error("Erreur fetching daily time:", err);
+      }
+    };
 
-console.log("Data submitted exercises:", res.data);
+    fetchDailyTime();
+    const interval = setInterval(fetchDailyTime, 60000);
+    
+    return () => clearInterval(interval);
+  }, [user]);
 
-setSubmittedExercises(res.data.total_submitted_attempts || 0);
-setTotalExercises(res.data.total_exercises || 0);
+  // Charger les exercices
+  useEffect(() => {
+    if (!user) return;
 
-    } catch (err) {
-      console.error("Erreur fetching exercises:", err);
+    const fetchExercisesData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          `http://127.0.0.1:8000/api/dashboard/student-total-tentatives/${user.id_utilisateur}/`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        console.log("Data submitted exercises:", res.data);
+        setSubmittedExercises(res.data.total_submitted_attempts || 0);
+        setTotalExercises(res.data.total_exercises || 0);
+      } catch (err) {
+        console.error("Erreur fetching exercises:", err);
+      }
+    };
+
+    fetchExercisesData();
+  }, [user]);
+
+  // Formatage du temps lisible
+  const formatTimeStyled = (secs) => {
+    if (!secs || secs < 60) {
+      return <span className="text-blue font-bold">{secs}s</span>;
     }
+
+    const mins = Math.floor(secs / 60);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    const s = secs % 60;
+
+    return (
+      <span>
+        {h > 0 && <span style={{ fontSize: 26 }} className="text-blue">{h}h </span>}
+        {m > 0 && <span style={{ fontSize: 26 }} className="text-blue">{m}min </span>}
+        {s > 0 && <span style={{ fontSize: 26 }} className="text-blue">{s}s</span>}
+      </span>
+    );
   };
 
-  fetchExercisesData();
-}, [user]);
-
-
-
+  // Formater les notifications pour ActivityFeed
+  const formatNotificationsForFeed = () => {
+    if (!notifications || notifications.length === 0) return [];
+    
+    return notifications.slice(0, 4).map(notif => {
+      const dateObj = notif.date_envoie ? dayjs(notif.date_envoie) : dayjs();
+      
+      return {
+        title: notif.message_notif || "Notification",
+        date: dateObj.format("DD/MM/YYYY"),
+        day: dateObj.format("dddd"),
+        time: dateObj.format("HH:mm")
+      };
+    });
+  };
 
   if (loading) {
     return (
@@ -196,8 +190,7 @@ setTotalExercises(res.data.total_exercises || 0);
     );
   }
 
-
-  
+  const formattedNotifications = formatNotificationsForFeed();
 
   return (
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -222,7 +215,6 @@ setTotalExercises(res.data.total_exercises || 0);
               onChangeLang={(lang) => i18n.changeLanguage(lang)}
               size={isMobile ? "sm" : "md"}
             />
-
           </div>
 
           {/* Search input */}
@@ -250,23 +242,20 @@ setTotalExercises(res.data.total_exercises || 0);
 
         {/* Quick stats */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 text-textc">
-          
           <Cards 
             text={t("Dashboard.AverageS")} 
-           value={`${submittedExercises}/${totalExercises}`} 
+            value={`${submittedExercises}/${totalExercises}`} 
             icon={<TrendingDown size={isMobile ? 16 : 18} />} 
             bg="bg-grad-2"
             isMobile={isMobile}
-            
           />
           <Cards 
-          text={t("Dashboard.Success")} 
-          value={`${successRate}%`} 
-          icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
-          bg="bg-grad-3"
-          isMobile={isMobile}
-        />
-
+            text={t("Dashboard.Success")} 
+            value={`${successRate}%`} 
+            icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
+            bg="bg-grad-3"
+            isMobile={isMobile}
+          />
           <Cards 
             text={t("Dashboard.AverageT")} 
             value={formatTimeStyled(dailyTime)} 
@@ -280,7 +269,6 @@ setTotalExercises(res.data.total_exercises || 0);
             icon={<Clock3 size={isMobile ? 16 : 18} />} 
             bg="bg-grad-2"
             isMobile={isMobile}
-            
           />
         </div>
 
@@ -294,17 +282,18 @@ setTotalExercises(res.data.total_exercises || 0);
         </div>
 
         {/* Learning curve */}
-<div className="p-3 w-full" style={{ height: "360px" }}>
+        <div className="p-3 w-full" style={{ height: "360px" }}>
           <LearningCurve title={t("Dashboard.Progress")} />
         </div>
 
         {/* Activity feed */}
-        <div className="bg-card p-4 rounded-2xl w-full">
-          <h2 className="text-lg sm:text-xl font-bold text-gray mb-2">{t("Dashboard.ActivityF")}</h2>
-          <p className="text-grisclair text-xs mb-4">1st Feb Monday - 7th Feb Sunday</p>
-          
-          <div className="space-y-3">
-            {dat.map((item, index) => (
+        <div className="space-y-3">
+          {loadingNotifications ? (
+            <p className="text-xs text-gray-500">Chargement des notifications...</p>
+          ) : formattedNotifications.length === 0 ? (
+            <p className="text-xs text-gray-500">Aucune notification disponible.</p>
+          ) : (
+            formattedNotifications.map((item, index) => (
               <NotificationItem
                 key={index}
                 title={item.title}
@@ -313,8 +302,8 @@ setTotalExercises(res.data.total_exercises || 0);
                 time={item.time}
                 isMobile={isMobile}
               />
-            ))}
-          </div> 
+            ))
+          )}
         </div>
       </main>
     </div>

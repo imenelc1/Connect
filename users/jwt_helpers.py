@@ -5,12 +5,6 @@ from rest_framework.response import Response
 from functools import wraps
 from .models import Utilisateur
 
-class AdminUserWrapper:
-    """Objet factice pour représenter un admin côté DRF."""
-    @property
-    def is_authenticated(self):
-        return True
-    role = "admin"
 
 def jwt_authenticate(request):
     """
