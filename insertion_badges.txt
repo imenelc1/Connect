@@ -101,6 +101,29 @@ badge, created = Badge.objects.get_or_create(
     }
 )
 
+badge, created = Badge.objects.get_or_create(
+    nom="Quiz Whiz",
+    defaults={
+        "description": "Get a perfect score in a quiz",
+        "condition": "Obtenir 100% dans un quiz",
+        "categorie": "success",
+        "numpoints": 100,
+        "icone": "badges/quiz_whiz.png"
+    }
+)
+
+
+
+badge, created = Badge.objects.get_or_create(
+    nom="Quiz Master",
+    defaults={
+        "description": "Finish 10 quizzes",
+        "condition": "Terminer 10 quiz",
+        "categorie": "success",
+        "numpoints": 150,
+        "icone": "badges/quiz_master.png"
+    }
+)
 
 
 

@@ -2,9 +2,12 @@ from itertools import combinations
 from django.utils.timezone import localtime, now
 from datetime import datetime, timedelta
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status
+from courses.models import Cours
 from dashboard import models
-from dashboard.models import SessionDuration, TentativeExercice
-from quiz.models import ReponseQuiz
+from dashboard.models import ProgressionCours, SessionDuration, TentativeExercice
+from exercices.models import Exercice
+from quiz.models import Quiz, ReponseQuestion, ReponseQuiz
 from users.jwt_auth import IsAuthenticatedJWT  
 from rest_framework.response import Response
 from .models import Badge, GagnerBadge
@@ -273,3 +276,219 @@ def check_quiz_whiz_badge(user, quiz):
 
     return False
 
+
+
+def check_quiz_master_badge(user):
+    """
+    Vérifie si l'utilisateur a terminé au moins 10 quiz.
+    Attribue le badge 'Quiz Master' si ce n'est pas déjà fait.
+    """
+    if not is_student(user):
+        return
+
+    # Nombre de quiz terminés par l'étudiant
+    completed_quizzes_count = ReponseQuiz.objects.filter(
+        etudiant=user,
+        terminer=True
+    ).count()
+
+    if completed_quizzes_count >= 10:
+        badge, _ = Badge.objects.get_or_create(
+            nom="Quiz Master",
+            defaults={
+                "description": "Finish 10 quizzes",
+                "condition": "Terminer 10 quiz",
+                "categorie": "success",
+                "numpoints": 150,
+                "icone": "badges/quiz_master.png"
+            }
+        )
+
+        # Vérifier si l'utilisateur n'a pas déjà le badge
+        if not GagnerBadge.objects.filter(utilisateur=user, badge=badge).exists():
+            GagnerBadge.objects.create(utilisateur=user, badge=badge)
+            return True
+
+    return False
+
+
+
+def check_curious_mind_badge(user):
+    """
+    Vérifie si l'utilisateur a répondu à au moins 50 questions de quiz.
+    Attribue le badge 'Curious Mind' si ce n'est pas déjà fait.
+    """
+    if not is_student(user):
+        return
+ 
+    # Compter toutes les réponses associées aux tentatives terminées
+    total_questions_answered = ReponseQuestion.objects.filter(
+        reponse_quiz__etudiant=user,
+        reponse_quiz__terminer=True
+    ).count()
+
+    if total_questions_answered >= 50:
+        badge, _ = Badge.objects.get_or_create(
+            nom="Curious Mind",
+            defaults={
+                "description": "Answer 50 total quiz questions",
+                "condition": "Répondre à 50 questions de quiz au total",
+                "categorie": "success",
+                "numpoints": 100,
+                "icone": "badges/curious_mind.png"
+            }
+        )
+
+        if not GagnerBadge.objects.filter(utilisateur=user, badge=badge).exists():
+            GagnerBadge.objects.create(utilisateur=user, badge=badge)
+            return True
+
+    return False
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticatedJWT])
+def use_ai_explanation(request):
+
+    user = request.user
+
+    if not is_student(user):
+        return Response(
+            {"error": "Only students can receive this badge"},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    badge, _ = Badge.objects.get_or_create(
+        nom="AI Learner",
+        defaults={
+            "description": "Use the AI explanation feature for the first time",
+            "condition": "Utiliser la fonction d'explication IA pour la première fois",
+            "categorie": "success",
+            "numpoints": 50,
+            "icone": "badges/ai_learner.png"
+        }
+    )
+
+    gagner, created = GagnerBadge.objects.get_or_create(
+        utilisateur=user,
+        badge=badge
+    )
+
+    if created:
+        return Response(
+            {"message": "Badge AI Learner attribué"},
+            status=status.HTTP_201_CREATED
+        )
+
+    return Response(
+        {"message": "Badge déjà attribué"},
+        status=status.HTTP_200_OK
+    )
+
+
+
+def check_all_rounder_badge(user):
+    """
+    Attribue le badge 'All-Rounder' si l'utilisateur a :
+    - complété au moins 1 cours
+    - soumis au moins 1 exercice
+    - terminé au moins 1 quiz
+    """
+    if not is_student(user):
+        return False
+
+    from dashboard.models import ProgressionCours
+
+    # Cours terminé
+    has_completed_course = ProgressionCours.objects.filter(
+        utilisateur=user,
+        avancement_cours=100
+    ).exists()
+
+    # Exercice soumis
+    has_submitted_exercise = TentativeExercice.objects.filter(
+        utilisateur=user,
+        etat="soumis"
+    ).exists()
+
+    # Quiz terminé
+    has_completed_quiz = ReponseQuiz.objects.filter(
+        etudiant=user,
+        terminer=True
+    ).exists()
+
+    if has_completed_course and has_submitted_exercise and has_completed_quiz:
+        badge, _ = Badge.objects.get_or_create(
+            nom="All-Rounder",
+            defaults={
+                "description": "Complete one course, one exercise, and one quiz",
+                "condition": "Compléter au moins un cours, un exercice et un quiz",
+                "categorie": "success",
+                "numpoints": 200,
+                "icone": "badges/all_rounder.png"
+            }
+        )
+
+        if not GagnerBadge.objects.filter(utilisateur=user, badge=badge).exists():
+            GagnerBadge.objects.create(utilisateur=user, badge=badge)
+            return True
+
+    return False
+
+
+def check_legendary_coder_badge(user):
+    """
+    Badge spécial : tout compléter sur la plateforme
+    """
+    if not is_student(user):
+        return False
+
+    # ---------- COURS ----------
+    total_courses = Cours.objects.count()
+
+    completed_courses = ProgressionCours.objects.filter(
+        utilisateur=user,
+        avancement_cours=100
+    ).values("cours").distinct().count()
+
+    if total_courses == 0 or completed_courses < total_courses:
+        return False
+
+    # ---------- EXERCICES ----------
+    total_exercises = Exercice.objects.count()
+
+    completed_exercises = TentativeExercice.objects.filter(
+        utilisateur=user
+    ).values("exercice").distinct().count()
+
+    if total_exercises == 0 or completed_exercises < total_exercises:
+        return False
+
+    # ---------- QUIZ ----------
+    total_quizzes = Quiz.objects.count()
+
+    completed_quizzes = ReponseQuiz.objects.filter(
+        etudiant=user,
+        terminer=True
+    ).values("quiz").distinct().count()
+
+    if total_quizzes == 0 or completed_quizzes < total_quizzes:
+        return False
+
+    # ---------- ATTRIBUTION ----------
+    badge, _ = Badge.objects.get_or_create(
+        nom="Legendary Coder",
+        defaults={
+            "description": "Complete all courses, exercises, and quizzes on the platform",
+            "condition": "Compléter tous les cours, exercices et quiz de la plateforme",
+            "categorie": "special",
+            "numpoints": 1000,
+            "icone": "badges/legendary_coder.png"
+        }
+    )
+
+    if not GagnerBadge.objects.filter(utilisateur=user, badge=badge).exists():
+        GagnerBadge.objects.create(utilisateur=user, badge=badge)
+        return True
+
+    return False

@@ -8,6 +8,7 @@ import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import UserCircle from "../components/common/UserCircle";
 import { Bell, ChevronRight, X } from "lucide-react";
+import NotificationBell from "../components/common/NotificationBell";
 
 import {
   getSpacesStudents,
@@ -30,6 +31,10 @@ export default function MyStudents() {
   const [space, setSpace] = useState("");
 
   const [studentsProgress, setStudentsProgress] = useState({});
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userRole = userData?.user?.role ?? userData?.role;
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+
 
 
 
@@ -185,11 +190,12 @@ export default function MyStudents() {
           {t("myStudentsTitle")}
         </h1>
         <div className="flex items-center gap-4 mr-8">
-          <Bell
-            className="w-5 h-5 text-gray-600 cursor-pointer"
-            fill="currentColor"
+          <NotificationBell />
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
           />
-          <UserCircle initials="MH" onToggleTheme={toggleDarkMode} />
         </div>
       </div>
 
@@ -235,9 +241,9 @@ export default function MyStudents() {
 
                         {/* RIGHT ARROW */}
                         <Button className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10"
-                        onClick={() => navigate(`/student-exercises/${st.id}`)}>
+                          onClick={() => navigate(`/student-exercises/${st.id}`)}>
                           <ChevronRight size={16} className="w-6 h-6" />
-                          
+
                         </Button>
                       </div>
                     </div>

@@ -1,52 +1,70 @@
 {
   "header": {
-    "title": "Exercises",
-    "subtitle": "Let's start the exercise!"
+    "title": "Exercices",
+    "subtitle": "Commençons l'exercice !",
+    "label":"Exercice :"
   },
-
-  "exerciseCard": {
-    "title": "Exercise 1",
-    "subtitle": "Sum of two numbers",
-    "description": "Read an integer and display whether it is even or odd."
-  },
-
   "editor": {
-    "yourCode": "Your code:",
-    "fileName": "main.c"
+    "yourCode": "Votre code :"
   },
-
   "buttons": {
-    "run": "Run",
-    "stop": "Stop",
-    "debug": "Debug",
-    "reset": "Reset",
-    "sendSolution": "Send the solution"
+    "run": "Exécuter",
+    "stop": "Arrêter",
+    "debug": "Déboguer",
+    "reset": "Réinitialiser",
+    "sendSolution": "Envoyer la solution",
+    "saveDraft":"Enregistrer le brouillon"
   },
-
   "tipCard": {
-    "title": "Tip",
-    "message": "Test your code gradually and use printf to debug."
+    "title": "Astuce",
+    "message": "Testez votre code progressivement et utilisez printf pour déboguer."
   },
-
   "output": {
-    "title": "Output:",
-    "default": "Hello world!\nProgram finished with exit code 0\nPress ENTER to exit console."
+    "title": "Sortie :",
+    "default": "Hello world!\nLe programme s'est terminé avec le code de sortie 0\nAppuyez sur ENTRÉE pour quitter la console.",
+     "noOutput":"Aucune sortie pour le moment..."
   },
-
+  "input": {
+  "stdinLabel": "Entrées (stdin)",
+  "stdinPlaceholder": "Tapez ici vos entrées, séparées par Entrée"
+},
   "feedback": {
-    "title": "How did you find this exercise?",
-    "subtitle": "Your feedback helps us improve the learning experience",
-
+    "title": "Comment trouvez-vous cet exercice ?",
+    "subtitle": "Votre avis nous aide à améliorer l’expérience d’apprentissage",
     "labels": {
-      "veryEasy": "Very easy",
-      "moderate": "Moderate",
-      "veryDifficult": "Very difficult"
+      "veryEasy": "Très facile",
+      "moderate": "Modéré",
+      "veryDifficult": "Très difficile"
     },
-
-    "tip": "💡 No worries! The AI Assistant is here to help you."
+    "tip": "💡 Pas de souci ! L’Assistant IA est là pour vous aider."
   },
-
   "assistant": {
-    "button": "AI Assistant"
-  }
+    "button": "Assistant IA",
+    "help":"Besoin d'aide ? Discutez avec l'Assistant IA",
+      "tipHelper":"Tu as besoin d'un indice ?",
+      "executionErrorHelp": "⚠️Erreur détectée lors de l'exécution. Besoin d’un coup de main ?"
+      
+  },
+  "errors":{
+  "exerciseLoad":"Exercice chargé !",
+  "exerciseNOTLoad":"Impossible de charger l'exercice",
+  "syntaxError":"Erreur détectée — vérifie la syntaxe",
+   "errorSave":"Erreur lors de la sauvegarde",
+   "errorSubmit":"Erreur lors de la soumission",
+   "exeError":"Erreur pendant l'exécution",
+   "errorDetected": "Erreur détectée :",
+    "bugDetected": "Bug détecté"
+},
+"messages":{
+  "codeSave":"Code sauvegardé",
+  "draftSave":"Brouillon sauvegardé !",
+   "usedAttempts":"Toutes les tentatives ont été utilisées !",
+    "exoSubmitted":"Exercice soumis",
+      "runningEXE":"Exécution en cours...",
+      "finishEXE":"Exécution terminée !",
+       "exeStop":"Exécution stoppée",
+       "noBugs":"Aucun bug détecté"
+ 
+}
+
 }
