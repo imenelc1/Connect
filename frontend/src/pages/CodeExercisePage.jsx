@@ -56,7 +56,31 @@ int main() {
 
   const sidebarWidth = false ? -200 : -50;
 
-  const resetCode = () => setUserCode(defaultCode);
+  const resetExercise = () => {
+    // 1️⃣ Code de l'éditeur
+    setUserCode(defaultCode);
+
+    // 2️⃣ Output
+    setOutput("");
+
+    // 3️⃣ Input utilisateur
+    setUserInput("");
+
+    // 4️⃣ Notifications
+    setNotifications([]);
+
+    // 5️⃣ Reboot chrono
+    setStartTime(Date.now());
+
+    // 6️⃣ Optionnel : effacer le localStorage du brouillon
+    if (exerciceId) {
+      localStorage.removeItem(`exercise-${exerciceId}-code`);
+    }
+
+    // 🔹 Notification pour indiquer que l'exercice a été réinitialisé
+    toast.success(t("messages.exerciseReset") || "Exercice réinitialisé !");
+  };
+
 
   // -------- Notifications --------
   const sendNotification = (message, type = "info") => {
@@ -446,8 +470,9 @@ int main() {
               label={t("buttons.reset")}
               bg="linear-gradient(#FFFFFF,#A3AAED,#A3AAED)"
               text="rgb(var(--color-text))"
-              onClick={resetCode}
+              onClick={resetExercise}
             />
+
           </div>
 
 

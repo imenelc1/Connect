@@ -66,7 +66,8 @@
   "runningEXE":"Execution running...",
   "finishEXE":"Run completed!",
   "exeStop":"Execution stopped",
-  "noBugs":"No bug detected"
+  "noBugs":"No bug detected",
+  "exerciseReset": "Exercise has been reset!"
 
 }
 
