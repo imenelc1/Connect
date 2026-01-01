@@ -85,25 +85,47 @@ class NotificationMarkReadView(generics.UpdateAPIView):
         return Response(serializer.data)
 
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from users.jwt_helpers import IsAuthenticatedJWT
+from .models import Notification
+from .serializers import NotificationSerializer
+from users.models import Utilisateur, Administrateur
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
 def user_notifications(request):
     try:
-        obj, role = get_utilisateur_from_request(request)
-        if not obj:
-            return Response({"error": "Utilisateur introuvable"}, status=status.HTTP_401_UNAUTHORIZED)
+        user_obj, role = get_utilisateur_from_request(request)
 
+        if not user_obj:
+            return Response(
+                {"error": "Utilisateur introuvable"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # Filtrage selon le rôle
         if role == "user":
-            notifications = Notification.objects.filter(utilisateur_destinataire=obj).order_by('-date_envoie')
-        else:
-            notifications = Notification.objects.filter(admin_destinataire=obj).order_by('-date_envoie')
+            notifications = Notification.objects.filter(
+                utilisateur_destinataire=user_obj
+            ).order_by('-date_envoie')
+        else:  # admin
+            notifications = Notification.objects.filter(
+                admin_destinataire=user_obj
+            ).order_by('-date_envoie')
 
-        serializer = NotificationSerializer(notifications, many=True)
+        # Sérialisation sécurisée
+        serializer = NotificationSerializer(notifications, many=True, context={"request": request})
         return Response(serializer.data)
 
     except Exception as e:
+        # Affichage détaillé pour debug
         print(f"Erreur récupération notifications: {e}")
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {"error": "Erreur serveur lors de la récupération des notifications"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 
@@ -284,3 +306,4 @@ def get_utilisateur_from_request(request):
             return admin, "admin"
         except Administrateur.DoesNotExist:
             return None, None
+

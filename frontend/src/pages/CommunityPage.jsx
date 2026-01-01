@@ -13,7 +13,7 @@ import Tabs from "../components/common/Tabs";
 import Button from "../components/common/Button";
 import ModernDropdown from "../components/common/ModernDropdown";
 import NotificationBell from "../components/common/NotificationBell";
-
+import i18n from "../i18n";
 import {
   getCibleFromForumType,
   validateForumData,
@@ -33,53 +33,56 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState([]);
   const [forumType, setForumType] = useState("all");
   const [forumTypeToCreate, setForumTypeToCreate] = useState("");
-  
+
   const navigate = useNavigate();
   const { t } = useTranslation("community");
   const { fetchUnreadCount } = useNotifications();
-  
+
   const userData = JSON.parse(localStorage.getItem("user")) || {};
   const token = localStorage.getItem("access") || localStorage.getItem("token");
   const role = userData?.role;
   const userId = userData?.user_id;
-  
-  const API_URL = window.location.hostname === "localhost" 
-    ? "http://localhost:8000/api" 
+
+  const API_URL = window.location.hostname === "localhost"
+    ? "http://localhost:8000/api"
     : "/api";
 
   const { toggleDarkMode } = useContext(ThemeContext);
-  
-  const initials = useMemo(() => 
+
+  const initials = useMemo(() =>
     `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase(),
     [userData?.nom, userData?.prenom]
   );
 
   const forumOptions = useMemo(() => {
     // OPTIONS EXACTES COMME DEMANDÉ :
-    
+
     if (role === "enseignant") {
       return [
-        { value: "all", label: "Tous les forums" },
-        { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
-        { value: "teacher-student", label: "Enseignants ↔ Étudiants" }  // Regroupe teacher-student + student-teacher
+        { value: "all", label: i18n.t("forums.all") },
+        { value: "teacher-teacher", label: i18n.t("forums.teacher-teacher") },
+        { value: "teacher-student", label: i18n.t("forums.teacher-student") } // Regroupe teacher-student + student-teacher
       ];
-    } 
+
+    }
     else if (role === "etudiant") {
       return [
-        { value: "all", label: "Tous les forums" },
-        { value: "student-student", label: "Étudiants ↔ Étudiants" },
-        { value: "student-teacher", label: "Étudiants ↔ Enseignants" }  // Regroupe teacher-student + student-teacher
+        { value: "all", label: t("forums.all") },
+        { value: "student-student", label: t("forums.student-student") },
+        { value: "student-teacher", label: t("forums.student-teacher") } // Regroupe teacher-student + student-teacher
       ];
+
     }
-    
+
     // Pour admin ou autres rôles (au cas où)
     return [
-      { value: "all", label: "Tous les forums" },
-      { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
-      { value: "teacher-student", label: "Enseignant → Étudiants" },
-      { value: "student-student", label: "Étudiants ↔ Étudiants" },
-      { value: "student-teacher", label: "Étudiant → Enseignants" }
+      { value: "all", label: t("forums.all") },
+      { value: "teacher-teacher", label: t("forums.teacher-teacher") },
+      { value: "teacher-student", label: t("forums.teacher-student") }, // Enseignant → Étudiants
+      { value: "student-student", label: t("forums.student-student") },
+      { value: "student-teacher", label: t("forums.student-teacher") }  // Étudiant → Enseignants
     ];
+
   }, [role]);
 
   useEffect(() => {
@@ -105,7 +108,7 @@ export default function CommunityPage() {
 
   const checkAllForumLikes = useCallback(async (forums) => {
     if (!token) return forums;
-    
+
     const forumsWithLikes = await Promise.all(
       forums.map(async (forum) => {
         try {
@@ -115,7 +118,7 @@ export default function CommunityPage() {
               'Content-Type': 'application/json'
             }
           });
-          
+
           if (response.ok) {
             const data = await response.json();
             return {
@@ -125,22 +128,24 @@ export default function CommunityPage() {
             };
           }
         } catch (error) {
-          console.error(`Erreur vérification like forum ${forum.id}:`, error);
+          // Erreur vérification like forum 
+          console.error(`${t("errors.likeError")} forum ${forum.id}:`, error);
         }
         return forum;
       })
     );
-    
+
     return forumsWithLikes;
   }, [token, API_URL]);
 
   const fetchForums = useCallback(async () => {
     if (!token) {
-      setError("Token manquant - Veuillez vous reconnecter");
+      setError(t("errors.missingToken"));
+
       setIsLoading(false);
       return;
     }
-    
+
     try {
       const response = await fetch(`${API_URL}/forums/`, {
         headers: {
@@ -148,18 +153,18 @@ export default function CommunityPage() {
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
-      
+
       const forums = await response.json();
-      
+
       // Filtrer selon les règles de visibilité
       const visibleForums = forums.filter(forum => {
         const forumType = forum.type;
         const creatorRole = forum.utilisateur_role || (forum.utilisateur === userId ? role : null);
-        
+
         if (role === "etudiant") {
           // Étudiant voit :
           // 1. Forums envoyés aux étudiants (teacher-student, student-student)
@@ -171,7 +176,7 @@ export default function CommunityPage() {
             return creatorRole === "etudiant";
           }
           return false; // teacher-teacher invisible
-        } 
+        }
         else if (role === "enseignant") {
           // Enseignant voit :
           // 1. Forums envoyés aux enseignants (teacher-teacher, student-teacher)
@@ -184,10 +189,10 @@ export default function CommunityPage() {
           }
           return false; // student-student invisible
         }
-        
+
         return true; // admin voit tout
       });
-      
+
       const transformedForums = visibleForums.map(forum => ({
         id: forum.id_forum,
         authorInitials: `${forum.utilisateur_nom?.[0] || ""}${forum.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
@@ -205,14 +210,14 @@ export default function CommunityPage() {
         contenu_forum: forum.contenu_forum || "",
         creatorRole: forum.utilisateur_role || (forum.utilisateur === userId ? role : null)
       }));
-      
+
       const forumsWithLikes = await checkAllForumLikes(transformedForums);
-      
+
       setPosts(forumsWithLikes);
       setError("");
     } catch (error) {
-      console.error("Erreur chargement forums:", error);
-      setError("Impossible de charger les forums. Vérifiez votre connexion.");
+      console.error(i18n.t("logs.loadForumsError"), error);
+      setError(i18n.t("errors.loadForums"));
       setPosts([]);
     } finally {
       setIsLoading(false);
@@ -232,13 +237,13 @@ export default function CommunityPage() {
       // Gérer les options spéciales du dropdown
       if (role === "enseignant" && forumType === "teacher-student") {
         // Pour enseignant : "Enseignants ↔ Étudiants" = teacher-student + student-teacher
-        filtered = filtered.filter(post => 
+        filtered = filtered.filter(post =>
           post.type === "teacher-student" || post.type === "student-teacher"
         );
-      } 
+      }
       else if (role === "etudiant" && forumType === "student-teacher") {
         // Pour étudiant : "Étudiants ↔ Enseignants" = teacher-student + student-teacher
-        filtered = filtered.filter(post => 
+        filtered = filtered.filter(post =>
           post.type === "teacher-student" || post.type === "student-teacher"
         );
       }
@@ -253,7 +258,7 @@ export default function CommunityPage() {
         return [...filtered].sort((a, b) => b.likes - a.likes);
       case "myforums":
         return [...filtered].filter(post => post.isMine)
-                           .sort((a, b) => new Date(b.time) - new Date(a.time));
+          .sort((a, b) => new Date(b.time) - new Date(a.time));
       default:
         return [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
     }
@@ -265,11 +270,11 @@ export default function CommunityPage() {
   const getDisplayForumTypeLabel = useCallback((type) => {
     if (role === "enseignant") {
       if (type === "teacher-student" || type === "student-teacher") {
-        return "Enseignants ↔ Étudiants";
+        return t("forums.teacher-student"); 
       }
     } else if (role === "etudiant") {
       if (type === "teacher-student" || type === "student-teacher") {
-        return "Étudiants ↔ Enseignants";
+        return  t("forums.student-teacher");
       }
     }
     return getForumTypeLabel(type);
@@ -279,13 +284,14 @@ export default function CommunityPage() {
     return (
       <div className="flex min-h-screen bg-background dark:bg-gray-900 items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4 dark:text-white">Non connecté</h1>
-          <p className="mb-6 dark:text-gray-300">Veuillez vous connecter</p>
-          <button 
+          <h1 className="text-2xl font-bold mb-4 dark:text-white">   {t("community.notConnected")}</h1>
+          <p className="mb-6 dark:text-gray-300">   {t("community.pleaseLogin")}</p>
+          <button
             onClick={() => navigate("/login")}
             className="bg-blue text-white px-6 py-2 rounded-full hover:bg-blue-dark transition"
           >
-            Se connecter
+            {/* se connecter */}
+            {t("community.login")}
           </button>
         </div>
       </div>
@@ -295,7 +301,7 @@ export default function CommunityPage() {
   return (
     <div className="flex min-h-screen bg-background dark:bg-gray-900">
       <Navbar />
-      
+
       <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
         <NotificationBell />
         <UserCircle
@@ -337,7 +343,8 @@ export default function CommunityPage() {
             value={forumType}
             onChange={setForumType}
             options={forumOptions}
-            placeholder="Sélectionner un type"
+           placeholder={t("placeholders.selectPlaceholder")}
+
             disabled={isLoading}
           />
         </div>

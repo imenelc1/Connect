@@ -29,12 +29,13 @@ export default function AllExercisesPage() {
   const navigate = useNavigate();
   const { t } = useTranslation("allExercises");
   const { toggleDarkMode } = useContext(ThemeContext);
-  const [searchTerm, setSearchTerm] = useState("");
+
   const [exercises, setExercises] = useState([]);
   const [filterLevel, setFilterLevel] = useState("ALL");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
@@ -53,17 +54,13 @@ export default function AllExercisesPage() {
           categorie: c.categorie,
           description: c.enonce,
           author: c.utilisateur_name,
-          author_id:c.utilisateur,
-          visibilite_exo:c.visibilite_exo,
           coursId: c.cours, // pour navigation vers le cours si besoin
           initials: c.utilisateur_name
             .split(" ")
             .map(n => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId,
-          visible: c.visibilite_exo === true || c.utilisateur === currentUserId, // <-- Nouveau champ
-
+          isMine: c.utilisateur === currentUserId
         }));
         setExercises(formatted);
       })
@@ -72,46 +69,6 @@ export default function AllExercisesPage() {
         setExercises([]);
       });
   }, [currentUserId]);
-
-
-  //Recherche exercice
-  
-  useEffect(() => {
-  const controller = new AbortController();
-
-  fetch(`http://localhost:8000/api/exercices/exo?search=${searchTerm}`, {
-    signal: controller.signal
-  })
-    .then(res => res.json())
-    .then(data => {
-      const formatted = data.map(c => ({
-        id: c.id_exercice,
-        title: c.titre_exo,
-        level: c.niveau_exercice_label,
-        categorie: c.categorie,
-        description: c.enonce,
-        author: c.utilisateur_name,
-        author_id:c.utilisateur,
-        coursId: c.cours,
-        visibilite_exo:c.visibilite_exo,
-        initials: c.utilisateur_name
-          .split(" ")
-          .map(n => n[0])
-          .join("")
-          .toUpperCase(),
-        isMine: c.utilisateur === currentUserId,
-        visible: c.visibilite_exo === true || c.utilisateur === currentUserId, // <-- Nouveau champ
-
-      }));
-      setExercises(formatted);
-    })
-    .catch(err => {
-      if (err.name !== "AbortError") console.error(err);
-    });
-
-  return () => controller.abort();
-}, [searchTerm]);
-
 
   const handleDeleteExo = async (exoId) => {
     if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
@@ -153,28 +110,40 @@ export default function AllExercisesPage() {
   if (userRole === "enseignant" && categoryFilter === "mine") {
     filteredExercises = filteredExercises.filter(ex => ex.isMine);
   }
-  filteredExercises = filteredExercises.filter((ex) => ex.visible);
-
 
   return (
-    <div className="flex bg-surface min-h-screen">
-      <Navbar />
-      <div className="absolute top-6 right-6 flex items-center gap-4 z-50">
-        <div className="bg-bg w-9 h-9 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
-          <Bell size={18} />
-        </div>
-        <UserCircle initials={initials} onToggleTheme={toggleDarkMode} onChangeLang={(lang) => i18n.changeLanguage(lang)} />
-      </div>
+     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+               {/* Sidebar */}
+               <div>
+                 <Navbar />
+               </div>
+      
 
-      <main className="flex-1 p-4 md:p-8 transition-all duration-300" style={{ marginLeft: sidebarWidth }}>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl font-bold text-muted">{t("exercisesTitle")}</h1>
-        </div>
+     <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+         <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+  {/* Titre */}
+  <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
+    {t("exercisesTitle")}
+  </h1>
 
-       <ContentSearchBar
-         value={searchTerm}
-         onChange={(e) => setSearchTerm(e.target.value)}
-       />
+  {/* Notifications + User */}
+  <div className="flex items-center gap-3">
+    <NotificationBell />
+    <UserCircle
+      initials={initials}
+      onToggleTheme={toggleDarkMode}
+      onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
+    />
+  </div>
+</header>
+
+     
+     
+
+        <ContentSearchBar />
 
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
@@ -200,7 +169,7 @@ export default function AllExercisesPage() {
 
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredExercises.map((exercise) => (
-            <ExerciseCard key={exercise.id} exercise={exercise} isOwner={exercise.isMine} onDelete={handleDeleteExo} />
+            <ExerciseCard key={exercise.id} exercise={exercise} />
 
           ))}
         </div>

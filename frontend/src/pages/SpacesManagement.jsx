@@ -147,7 +147,8 @@ const [quizzes, setQuizzes] = useState([]);
   };
 
   // ================= OPEN MODAL POUR GÉRER LES ÉTUDIANTS =================
-  const handleOpenSpaceStudents = async (space) => {
+  // ================= OPEN MODAL POUR GÉRER LES ÉTUDIANTS =================
+const handleOpenSpaceStudents = async (space) => {
   setSelectedSpace(space);
   setAddStudentsModalOpen(true);
 
@@ -155,41 +156,41 @@ const [quizzes, setQuizzes] = useState([]);
   if (!token) return toast.error("Token manquant");
 
   try {
+    // Récupérer les détails de l'espace
     const res = await fetch(
       `http://localhost:8000/api/spaces/space/${space.id}/details/`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
-
     if (!res.ok) throw new Error("Erreur chargement espace");
-
     const data = await res.json();
 
-    // =====================
-    // Étudiants
-    // =====================
-    setStudentsInSpace(data.students || []);
+    // Étudiants déjà dans l'espace
+    const inSpace = data.students.map((s) => ({
+      ...s,
+      id_utilisateur: s.id_utilisateur || s.id, // assure cohérence des IDs
+    }));
+    setStudentsInSpace(inSpace);
 
+    // Récupérer tous les étudiants
     const resAll = await fetch(
       "http://localhost:8000/api/users/students-with-progress/",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     const allStudentsData = await resAll.json();
 
-    const inSpaceIds = data.students.map((s) => s.id_utilisateur);
-    const otherStudents = allStudentsData.filter(
-      (s) => !inSpaceIds.includes(s.id)
-    );
+    // Étudiants disponibles à ajouter (ceux qui ne sont pas déjà dans l'espace)
+    const inSpaceIds = inSpace.map((s) => s.id_utilisateur);
+    const otherStudents = allStudentsData
+      .filter((s) => !inSpaceIds.includes(s.id))
+      .map((s) => ({
+        ...s,
+        id_utilisateur: s.id, // standardiser l'ID pour le checkbox
+      }));
 
     setStudents(otherStudents);
-    setSelectedStudents([]);
+    setSelectedStudents([]); // aucune sélection par défaut
 
-    // =====================
     // Contenus
-    // =====================
     setCourses(data.courses || []);
     setExercices(data.exercices || []);
     setQuizzes(data.quizzes || []);
@@ -423,22 +424,26 @@ const handleRemoveStudentFromSpace = async (student) => {
             </p>
           ) : (
             <form onSubmit={handleAddStudentsToSpace} className="space-y-3 max-h-96 overflow-y-auto pr-3">
-              {students.map((student) => (
-                <div
-                  key={student.id_utilisateur}
-                  className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
-                >
-                  <input
-                    type="checkbox"
-                    id={`student-${student.id_utilisateur}`}
-                    checked={selectedStudents.includes(student.id_utilisateur)}
-                    onChange={() => toggleStudent(student.id_utilisateur)}
-                  />
-                  <label htmlFor={`student-${student.id_utilisateur}`} className="truncate font-medium text-base">
-                    {student.nom} {student.prenom} ({student.adresse_email || student.email})
-                  </label>
-                </div>
-              ))}
+             {students.map((student) => (
+  <div
+    key={student.id_utilisateur}
+    className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
+  >
+    <input
+      type="checkbox"
+      id={`student-${student.id_utilisateur}`}
+      checked={selectedStudents.includes(student.id_utilisateur)}
+      onChange={() => toggleStudent(student.id_utilisateur)}
+    />
+    <label
+      htmlFor={`student-${student.id_utilisateur}`}
+      className="truncate font-medium text-base"
+    >
+      {student.nom} {student.prenom} ({student.adresse_email || student.email})
+    </label>
+  </div>
+))}
+
               <div className="flex justify-end gap-4 mt-5">
                 <Button
                   type="button"

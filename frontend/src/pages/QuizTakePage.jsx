@@ -26,14 +26,11 @@ export function QuizTakePage() {
     if (!exerciceId) return;
 
     fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId}/`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Quiz non trouvé");
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
         const q = Array.isArray(data) ? data[0] : data;
 
-        setQuiz({
+        const formattedQuiz = {
           quizId: q.id,
           scoreMinimum: q.scoreMinimum,
           durationMinutes: q.duration_minutes,
@@ -53,12 +50,18 @@ export function QuizTakePage() {
               texte: opt.texte_option,
             })),
           })),
-        });
+        };
 
         setQuiz(formattedQuiz);
 
         if (formattedQuiz.activerDuration) {
-          setSecondsLeft(formattedQuiz.durationMinutes * 60);
+          // récupérer la valeur stockée si elle existe
+          const storedSeconds = localStorage.getItem(`quiz_timer_${exerciceId}`);
+          setSecondsLeft(
+            storedSeconds !== null
+              ? parseInt(storedSeconds, 10)
+              : formattedQuiz.durationMinutes * 60
+          );
         }
 
         setLoading(false);
@@ -71,6 +74,7 @@ export function QuizTakePage() {
     if (secondsLeft === null || !quiz?.activerDuration) return;
 
     if (secondsLeft <= 0) {
+      localStorage.removeItem(`quiz_timer_${exerciceId}`);
       submitQuiz(); // soumission automatique
       return;
     }
@@ -81,6 +85,13 @@ export function QuizTakePage() {
 
     return () => clearInterval(interval);
   }, [secondsLeft, quiz]);
+
+  // Stocker le timer dans localStorage pour persistance
+  useEffect(() => {
+    if (secondsLeft !== null) {
+      localStorage.setItem(`quiz_timer_${exerciceId}`, secondsLeft);
+    }
+  }, [secondsLeft, exerciceId]);
 
   const formatTime = (totalSeconds) => {
     const m = Math.floor(totalSeconds / 60)
@@ -119,6 +130,8 @@ export function QuizTakePage() {
 
       const data = await response.json();
 
+      localStorage.removeItem(`quiz_timer_${exerciceId}`); // nettoyer timer
+
       navigate(`/QuizRecape/${exerciceId}`, {
         state: data,
       });
@@ -145,13 +158,13 @@ export function QuizTakePage() {
   /* ================= USER ================= */
   const storedUser = localStorage.getItem("user");
   const userData =
-    storedUser && storedUser !== "undefined"
-      ? JSON.parse(storedUser)
-      : null;
+    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
 
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
+
+  const progressColor = "bg-blue border-blue";
 
   if (loading || !quiz) return <p>Chargement...</p>;
 
@@ -189,9 +202,9 @@ export function QuizTakePage() {
           {t("question")} {currentQuestion + 1} / {quiz.questions.length}
         </p>
 
-        <ContentProgress value={progressValue} className="mb-6" />
+        <ContentProgress value={Math.round(progressValue)} className="mb-6" color={progressColor} />
 
-        <div className="bg-white rounded-xl p-4 mb-6">
+        <div className="bg-grad-2 rounded-xl p-4 mb-6">
           <h3 className="font-semibold mb-3">{q.texte}</h3>
 
           <div className="flex flex-col gap-2">
@@ -211,11 +224,11 @@ export function QuizTakePage() {
             ))}
           </div>
         </div>
+      </div>
 
-        <div className="flex justify-between">
-          <Button text={`< ${t("prev")}`} onClick={prevQuestion} disabled={currentQuestion === 0} />
-          <Button text={`${t("next")} >`} onClick={nextQuestion} disabled={!answers[q.id]} />
-        </div>
+      <div className="flex gap-4 justify-between mt-4">
+        <Button text={`< ${t("prev")}`} onClick={prevQuestion} disabled={currentQuestion === 0} />
+        <Button text={`${t("next")} >`} onClick={nextQuestion} disabled={!answers[q.id]} />
       </div>
     </div>
   );

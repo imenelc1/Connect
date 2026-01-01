@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useMemo } from "react";
 import Navbar from "../components/common/NavBar";
-import { Plus, Bell } from "lucide-react";
+import { Plus } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button";
 import ContentFilters from "../components/common/ContentFilters";
@@ -33,18 +33,18 @@ export default function AllQuizzesPage() {
   const [tentativesByQuiz, setTentativesByQuiz] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("ALL");
-  const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const sidebarWidth = sidebarCollapsed ? 60 : 240;
   const getGridCols = () => {
     if (windowWidth < 640) return 1;
     if (windowWidth < 1024) return 2;
     return 3;
   };
 
-  // 🔹 Fetch quiz depuis le backend (initial + recherche)
+  // 🔹 Fetch quizzes depuis le backend
   useEffect(() => {
     const controller = new AbortController();
 
@@ -63,7 +63,7 @@ export default function AllQuizzesPage() {
           categorie: c.exercice?.categorie,
           author: c.exercice?.utilisateur_name,
           author_id: c.exercice?.utilisateur,
-          visibilite_exo:c.exercice?.visibilite_exo,
+          visibilite_exo: c.exercice?.visibilite_exo,
           initials: c.exercice?.utilisateur_name
             .split(" ")
             .map(n => n[0])
@@ -74,9 +74,8 @@ export default function AllQuizzesPage() {
           delai_entre_tentatives: c.delai_entre_tentatives,
           activer: c.activerDuration,
           duration: c.duration_minutes,
-          visible: c.exercice?.visibilite_exo === true || c.exercice?.utilisateur === currentUserId, // <-- Nouveau champ
-
-        }))
+          visible: c.exercice?.visibilite_exo === true || c.exercice?.utilisateur === currentUserId,
+        }));
 
         setQuizzes(formatted);
       } catch (err) {
@@ -88,7 +87,7 @@ export default function AllQuizzesPage() {
     return () => controller.abort();
   }, [searchTerm, currentUserId]);
 
-  // 🔹 Fetch tentatives pour chaque quiz affiché
+  // 🔹 Fetch tentatives pour chaque quiz
   useEffect(() => {
     if (!currentUserId || quizzes.length === 0) return;
 
@@ -146,7 +145,7 @@ export default function AllQuizzesPage() {
     });
   }, [quizzes, tentativesByQuiz]);
 
-  // 🔹 Filtres et recherche finale (niveau + catégorie)
+  // 🔹 Filtres et recherche finale
   const filteredList = useMemo(() => {
     let list =
       filterLevel === "ALL"
@@ -156,8 +155,7 @@ export default function AllQuizzesPage() {
     if (userRole === "enseignant" && categoryFilter === "mine") {
       list = list.filter(q => q.isMine);
     }
-    list = list.filter((q) => q.visible);
-    console.log({list});
+    list = list.filter(q => q.visible);
     return list;
   }, [quizzesWithAttempts, filterLevel, categoryFilter, userRole]);
 
@@ -176,35 +174,27 @@ export default function AllQuizzesPage() {
     }
   };
 
-  // 🔹 Sidebar & resize
-  useEffect(() => {
-    const handler = (e) => setSidebarCollapsed(e.detail);
-    window.addEventListener("sidebarChanged", handler);
-    return () => window.removeEventListener("sidebarChanged", handler);
-  }, []);
-
-  useEffect(() => {
-    const resizeHandler = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", resizeHandler);
-    return () => window.removeEventListener("resize", resizeHandler);
-  }, []);
-
   return (
-    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
       <Navbar />
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
-        />
-      </div>
-
-      <main className="flex-1 p-4 md:p-8 transition-all duration-300" style={{ marginLeft: sidebarWidth }}>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-muted">{t("quizzesTitle")}</h1>
-        </div>
+      <main
+        className={`flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden ${
+          !isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""
+        }`}
+      >
+        <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+          <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
+            {t("quizzesTitle")}
+          </h1>
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
+            />
+          </div>
+        </header>
 
         <ContentSearchBar
           value={searchTerm}
@@ -237,9 +227,9 @@ export default function AllQuizzesPage() {
           className="grid gap-6"
           style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}
         >
-          {filteredList.map((quiz, idx) => (
+          {filteredList.map((quiz) => (
             <ContentCard
-              key={idx}
+              key={quiz.quizId}
               className={gradientMap[quiz.level]}
               course={quiz}
               role={userRole}

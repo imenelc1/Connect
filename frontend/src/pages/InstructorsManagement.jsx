@@ -10,12 +10,16 @@ import { toast } from "react-hot-toast";
 
 // ================= DETAILS MODAL =================
 function DetailsModal({ open, onClose, instructor }) {
+   const { t } = useTranslation("instructors");
   if (!open || !instructor) return null;
-  const { t, i18n } = useTranslation("instructors");
+
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
       <div className="bg-card rounded-xl shadow-lg p-6 w-[400px]">
-        <h2 className="text-xl text-muted font-bold mb-4">{t("instructorResume")}</h2>
+        <h2 className="text-xl text-muted font-bold mb-4">
+          Résumé de l'enseignant
+        </h2>
+
         <ul className="text-sm text-gray space-y-2">
           <li><strong>{t("firstName")} :</strong> {instructor.firstName}</li>
           <li><strong>{t("lastName")} :</strong> {instructor.lastName}</li>
@@ -26,7 +30,9 @@ function DetailsModal({ open, onClose, instructor }) {
         </ul>
 
         <div className="mt-4 flex justify-end">
-          <Button variant="secondary" onClick={onClose}>{t("close")}</Button>
+          <Button variant="secondary" onClick={onClose}>
+            Fermer
+          </Button>
         </div>
       </div>
     </div>
@@ -482,4 +488,3 @@ const handleUpdateInstructor = async (instructorId, updatedData) => {
     </div>
   );
 }
-

@@ -52,11 +52,12 @@ class QuizSerializer1(serializers.ModelSerializer):
         questions = obj.exercice.questions.all()  # FK de Question vers Exercice
         return QuestionSerializer(questions, many=True).data
     def get_duration_minutes(self, obj):
-        if obj.duration:
-            total_seconds = obj.duration.total_seconds()  # convertir duration en secondes
-            minutes = int(total_seconds // 60)  # convertir en minutes
-            return minutes
-        return None
+     if obj.duration:
+        total_seconds = int(obj.duration.total_seconds())  # convertir duration en secondes
+        minutes = max(1, total_seconds // 60)  # minimum 1 minute
+        return minutes
+     return 1  # au moins 1 minute si duration None
+
     
     
 

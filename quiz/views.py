@@ -4,6 +4,7 @@ from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from badges.views import check_all_rounder_badge, check_curious_mind_badge, check_legendary_coder_badge, check_quiz_novice_badge, check_quiz_whiz_badge, check_quiz_master_badge
 from dashboard.models import ProgressionHistory
 from users.jwt_auth import jwt_required
 from django.utils import timezone
@@ -136,7 +137,12 @@ class QuizSubmitView(APIView):
             temps_passe=timedelta(seconds=0)
         )
         
-
+        check_quiz_novice_badge(request.user)
+        check_quiz_whiz_badge(request.user, quiz)
+        check_quiz_master_badge(request.user)
+        check_curious_mind_badge(request.user)
+        check_all_rounder_badge(request.user)
+        check_legendary_coder_badge(request.user)
         return Response({
             "score": score_total,
             "scoreMinimum": quiz.scoreMinimum,
@@ -295,6 +301,9 @@ class QuizSearchAPIView(APIView):
 
         serializer = QuizSerializer1(quizzes, many=True)
         return Response(serializer.data)
+    
+
+
 from django.db.models import OuterRef
 
 @api_view(["GET"])

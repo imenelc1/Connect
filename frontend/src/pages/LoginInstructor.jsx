@@ -53,7 +53,7 @@ export default function LoginInstructor() {
     }
 
     if (!password) {
-      setErrorPassword(t("errors.passwordRequired"));
+      setErrorPassword("errors.passwordRequired");
       return;
     }
     if (password.length < 8) {

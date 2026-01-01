@@ -2,6 +2,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
+
+from badges.views import check_top_commentateur_badge, check_top_forum_badge
 from .models import Forum, Message, Commentaire, Like, MessageLike
 from .serializers import ForumSerializer, MessageSerializer, CommentaireSerializer
 from users.jwt_helpers import IsAuthenticatedJWT
@@ -15,27 +17,34 @@ from django.db.models import Q
 def list_forums(request):
     role = getattr(request, "user_role", None)
     user = request.user
-    filtre = request.GET.get("filtre", "tous")
+    filtre = request.GET.get("filtre", "tous")  # valeur par défaut : tous
+
+    forums = Forum.objects.none()
 
     if role == "admin":
         forums = Forum.objects.all()
     elif role == "etudiant":
         forums = Forum.objects.filter(
-            Q(cible="etudiants") | Q(cible="enseignants", utilisateur=user)
+            Q(cible="etudiants") | 
+            Q(cible="enseignants", utilisateur=user)
         )
     elif role == "enseignant":
         forums = Forum.objects.filter(
-            Q(cible="enseignants") | Q(cible="etudiants", utilisateur=user)
+            Q(cible="enseignants") | 
+            Q(cible="etudiants", utilisateur=user)
         )
     else:
         return Response([], status=200)
 
+    # Optionnel : appliquer des filtres supplémentaires comme "mes_forums"
     if filtre == "mes_forums":
         forums = forums.filter(utilisateur=user)
 
     forums = forums.order_by("-date_creation")
     serializer = ForumSerializer(forums, many=True, context={'request': request})
     return Response(serializer.data)
+
+
 
 # forum/views.py
 @api_view(['POST'])
@@ -115,6 +124,10 @@ def like_forum(request, forum_id):
         action = "liked"
     
     likes_count = Like.objects.filter(forum=forum).count()
+
+
+
+    check_top_forum_badge(request.user)
     
     return Response({
         'message': f'Forum {action} avec succès',
@@ -292,7 +305,11 @@ def create_comment(request, message_id):
     serializer = CommentaireSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         serializer.save(message=message, utilisateur=request.user)
+
+        check_top_commentateur_badge(request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

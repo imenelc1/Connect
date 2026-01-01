@@ -64,6 +64,8 @@ const getBadgeIcon = (title) => {
       return <FaFire />;
     case "Night Owl":
       return <FaStar />;
+    case "Top Commentator":
+      return <FaLightbulb />;
     default:
       return <FaRocket />;
   }
@@ -96,12 +98,15 @@ export default function Badges() {
 
 
   const [userBadges, setUserBadges] = useState([]);
+  const [badgeStats, setBadgeStats] = useState([]);
   
   useEffect(() => {
     const fetchBadges = async () => {
       try {
         const res = await api.get("/badges/user-badges/");
         setUserBadges(res.data);
+        console.log("Badges récupérés :", res.data);
+
       } catch (err) {
         console.error("Erreur récupération badges :", err);
       }
@@ -141,6 +146,39 @@ export default function Badges() {
     i18n.changeLanguage(newLang);
     localStorage.setItem("lang", newLang);
   };
+
+  // Filtrage des badges selon la catégorie
+const filteredBadges = userBadges.filter((badge) => {
+  if (activeTab === "all") return true;
+  return badge.category === activeTab; // correspond exactement aux valeurs de l'API
+});
+
+
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const res = await api.get("/badges/user_stats/");
+
+      const data = res.data;
+
+      // Arrondir les pourcentages pour les barres
+      const streakPct = Math.round(data.streak_pct);
+      const xpPct = Math.round((data.total_xp / (data.max_xp || 1)) * 100); // éviter division par 0
+
+      setBadgeStats({
+        ...data,
+        streak_pct: streakPct,
+        xp_pct: xpPct,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchStats();
+}, []);
+
+
 
   
 
@@ -182,18 +220,22 @@ export default function Badges() {
           </span>
         </div>
 
-        {/* Stats */}
         <BadgeStats
-          
-          streakPct={streakPct}
-          xpPct={xpPct}
-        />
+        unlockedCount={badgeStats.unlocked_count}
+        totalBadges={badgeStats.total_badges}
+        streakDays={badgeStats.streak_days}
+        totalXp={badgeStats.total_xp}
+        progressPct={(badgeStats.unlocked_count / badgeStats.total_badges) * 100}
+        streakPct={badgeStats.streak_pct}
+        xpPct={badgeStats.xp_pct}
+      />
+
 
         {/* Tabs */}
         <BadgeTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {/* Badge grid */}
-        <BadgeGrid badges={userBadges} getBadgeIcon={getBadgeIcon} />
+        <BadgeGrid badges={filteredBadges} getBadgeIcon={getBadgeIcon} />
 
         {/* Footer */}
         <BadgeFooter />

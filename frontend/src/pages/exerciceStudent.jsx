@@ -14,46 +14,88 @@ export default function StudentExercice() {
   const [exercises, setExercises] = useState([]);
   const [totalExercises, setTotalExercises] = useState(0);
   const [submittedCount, setSubmittedCount] = useState(0);
+  const [feedbacksMap, setFeedbacksMap] = useState({});
+  const [evaluatedCount, setEvaluatedCount] = useState(0);
 
   const token = localStorage.getItem("token");
   const BACKEND_URL = "http://127.0.0.1:8000";
   const navigate = useNavigate();
-  const [feedbacks, setFeedbacks] = useState({}); // ← bien défini ici
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Info étudiant
+        // =========================
+        //  Infos étudiant
+        // =========================
         const studentRes = await axios.get(
           `${BACKEND_URL}/api/dashboard/student/${studentId}/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setStudent(studentRes.data || {});
 
-        // Exercices + tentatives
+        // =========================
+        //  Exercices + tentatives
+        // =========================
         const exRes = await axios.get(
           `${BACKEND_URL}/api/dashboard/student-exercises/${studentId}/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        // exRes.data.exercises contient maintenant toutes les tentatives
         const exercisesData = exRes.data.exercises || [];
         setExercises(exercisesData);
         setTotalExercises(exRes.data.total_exercises || 0);
 
-        // Calcul du nombre soumis
-        let submitted = 0;
-        exercisesData.forEach((ex) => {
-          if (ex.tentatives?.some((t) => t.etat === "soumis")) submitted += 1;
-        });
+        // =========================
+        //  Stats (PAR EXERCICE)
+        // =========================
+        const submitted = exercisesData.filter(
+          (ex) => ex.nb_soumissions > 0
+        ).length;
+
         setSubmittedCount(submitted);
 
+        // =========================
+        //  IDs de TOUTES les tentatives
+        // =========================
+        const tentativeIds = exercisesData.flatMap(
+          (ex) => ex.tentatives?.map((t) => t.id) || []
+        );
+
+        // =========================
+        // Feedbacks
+        // =========================
+        if (tentativeIds.length > 0) {
+          try {
+            const feedbacksRes = await axios.get(
+              `${BACKEND_URL}/api/feedback-exercice/list/`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+                params: {
+                  tentative_ids: tentativeIds.join(","),
+                },
+              }
+            );
+
+            const feedbacksMap = {};
+            feedbacksRes.data.forEach((fb) => {
+              if (fb.tentative_id) {
+                feedbacksMap[fb.tentative_id] = fb.contenu;
+              }
+            });
+
+            setFeedbacksMap(feedbacksMap);
+            setEvaluatedCount(Object.keys(feedbacksMap).length);
+          } catch (fbErr) {
+            console.warn("Erreur récupération feedbacks:", fbErr.message);
+          }
+        }
       } catch (err) {
         console.error("Erreur fetch StudentExercice:", err);
         setStudent({});
         setExercises([]);
         setTotalExercises(0);
         setSubmittedCount(0);
+        setFeedbacksMap({});
       }
     };
 
@@ -62,14 +104,24 @@ export default function StudentExercice() {
 
   if (!student) return <p>Loading...</p>;
 
-  const { nom = "—", prenom = "—", adresse_email = "—", date_joined = null } = student;
-  const initials = ((prenom || "").charAt(0) + (nom || "").charAt(0)).toUpperCase();
-  const joinedDate = date_joined ? new Date(date_joined).toLocaleDateString() : "";
+  const {
+    nom = "—",
+    prenom = "—",
+    adresse_email = "—",
+    date_joined = null,
+  } = student;
+  const initials = (
+    (prenom || "").charAt(0) + (nom || "").charAt(0)
+  ).toUpperCase();
+  const joinedDate = date_joined
+    ? new Date(date_joined).toLocaleDateString()
+    : "";
 
   // Stats
-  const submissionRate = totalExercises > 0
-    ? Math.round((submittedCount / totalExercises) * 100)
-    : 0;
+  const submissionRate =
+    totalExercises > 0
+      ? Math.round((submittedCount / totalExercises) * 100)
+      : 0;
   const completedRatio = `${submittedCount}/${totalExercises}`;
 
   return (
@@ -86,7 +138,9 @@ export default function StudentExercice() {
               </h2>
               <p className="text-gray text-sm sm:text-base">{adresse_email}</p>
               {joinedDate && (
-                <p className="text-gray text-xs sm:text-sm">Joined on {joinedDate}</p>
+                <p className="text-gray text-xs sm:text-sm">
+                  Joined on {joinedDate}
+                </p>
               )}
             </div>
           </div>
@@ -94,18 +148,24 @@ export default function StudentExercice() {
           {/* Stats */}
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-16 mt-4 sm:mt-6 text-center justify-center">
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-purple">{submissionRate}%</p>
+              <p className="text-xl sm:text-2xl font-bold text-purple">
+                {submissionRate}%
+              </p>
               <p className="text-gray">{t("exerciceStudent.Submission")}</p>
             </div>
 
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-pink">{completedRatio}</p>
+              <p className="text-xl sm:text-2xl font-bold text-pink">
+                {completedRatio}
+              </p>
               <p className="text-gray">{t("exerciceStudent.Completed")}</p>
             </div>
 
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-primary">00</p>
-              <p className="text-gray">évalués</p>
+              <p className="text-xl sm:text-2xl font-bold text-primary">
+                {evaluatedCount}
+              </p>
+              <p className="text-gray">évaluées</p>
             </div>
           </div>
         </div>
@@ -127,27 +187,49 @@ export default function StudentExercice() {
 
         {/* Exercices + toutes les tentatives */}
         <div className="flex flex-col gap-6 sm:gap-8 max-w-full sm:max-w-5xl mx-auto">
-          {exercises.length === 0 && <p className="text-gray-500">{t("noExercises")}</p>}
+          {exercises.length === 0 && (
+            <p className="text-gray-500">
+              {t("noExercises") || "Aucun exercice"}
+            </p>
+          )}
 
           {exercises.map((ex) => {
-            const tentative = ex.tentatives?.[0] || {};
-            const feedback = feedbacks[tentative.id] || "";
+            const tentatives = ex.tentatives || [];
+
+            if (tentatives.length === 0) {
+              return (
+                <div
+                  key={ex.id_exercice}
+                  className="bg-white rounded-3xl shadow-md p-6 border-2 border-gray"
+                >
+                  <h3 className="text-lg font-bold">{ex.nom_exercice}</h3>
+                  <p className="text-gray-500 mt-2">Aucune tentative soumise</p>
+                </div>
+              );
+            }
 
             return (
               <TaskCard
                 key={ex.id_exercice}
                 title={ex.nom_exercice}
-                date={tentative.submitted_at ? new Date(tentative.submitted_at).toLocaleString() : ""}
-                etat={tentative.etat || ""}
-                code={tentative.reponse || ""}
-                feedback={feedback}
+                date={
+                  tentatives[0].submitted_at
+                    ? new Date(tentatives[0].submitted_at).toLocaleString()
+                    : ""
+                }
+                etat={tentatives[0].etat || ""}
+                code={tentatives[0].reponse || ""}
+                feedback={tentatives[0].feedback || ""}
                 exerciceId={ex.id_exercice}
-                tentativeId={tentative.id}
+                tentativeId={tentatives[0].id}
+                nbSoumissions={ex.nb_soumissions}
+                maxSoumissions={ex.max_soumissions}
+                numeroTentative={1}
+                allTentatives={tentatives} // ← Passer TOUTES les tentatives
+                currentTentativeIndex={0} // ← Commencer par la première
               />
             );
           })}
-
-
         </div>
       </div>
     </div>
