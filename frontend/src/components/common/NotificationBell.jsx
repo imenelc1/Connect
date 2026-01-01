@@ -14,7 +14,7 @@ const NotificationBell = () => {
   }, [fetchUnreadCount]);
 
   const getIconByModule = (moduleSource) => {
-    switch(moduleSource?.toLowerCase()) {
+    switch (moduleSource?.toLowerCase()) {
       case 'forum': return <MessageSquare size={16} className="text-blue-500" />;
       case 'cours': return <BookOpen size={16} className="text-green-500" />;
       case 'exercice': return <Award size={16} className="text-purple-500" />;
@@ -22,6 +22,9 @@ const NotificationBell = () => {
       default: return <Bell size={16} className="text-gray-500" />;
     }
   };
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount]);
 
   const handleNotificationNavigation = (notif) => {
     const objectId = notif.object_data?.id || notif.object_data?.cours_id || notif.object_data?.exercice_id || notif.object_data?.forum_id;
@@ -47,11 +50,11 @@ const NotificationBell = () => {
         >
           <Bell size={22} className="text-gray-700 dark:text-gray-300" />
           {unreadCount > 0 && (
-             <span
-  className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-[#ff0000] text-white text-xs rounded-full flex items-center justify-center font-bold animate-pulse px-1"
->
-  {unreadCount > 9 ? '9+' : unreadCount}
-</span>
+            <span
+              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-[#ff0000] text-white text-xs rounded-full flex items-center justify-center font-bold animate-pulse px-1"
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
           )}
         </button>
 
@@ -61,7 +64,7 @@ const NotificationBell = () => {
               <h3 className="font-bold text-lg text-gray-800 dark:text-white">Notifications</h3>
               {unreadCount > 0 && (
                 <button onClick={markAllAsRead} className="text-sm text-blue-500 hover:text-blue-700 flex items-center gap-1">
-                  <Check size={14}/> Tout lire
+                  <Check size={14} /> Tout lire
                 </button>
               )}
             </div>
