@@ -9,38 +9,83 @@ import ThemeContext from "../context/ThemeContext";
 import { toast } from "react-hot-toast";
 
 // ================= MODAL DÉTAIL =================
-function StudentDetailModal({ student, onClose }) {
-  if (!student) return null;
+// ================= MODAL DÉTAIL =================
+function StudentDetailModal({ studentId, onClose }) {
+  const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!studentId) return;
+
+    const fetchStudent = async () => {
+      const token = localStorage.getItem("admin_token");
+      if (!token) return setError("Token JWT manquant");
+
+      setLoading(true);
+      try {
+        const res = await fetch(`http://localhost:8000/api/users/utilisateurs/${studentId}/progression/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        const data = await res.json();
+        setStudent(data);
+      } catch (err) {
+        console.error(err);
+        setError("Impossible de charger les informations de l'étudiant.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudent();
+  }, [studentId]);
+
+  if (!studentId) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg relative">
-        <button
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
-          onClick={onClose}
-        >
-          ✕
-        </button>
-        <h2 className="text-2xl font-bold mb-4">{student.nom} {student.prenom}</h2>
-        <p className="text-sm text-gray-500 mb-2">{student.email}</p>
-        <p className="text-sm text-gray-500 mb-4">{`Cours suivis: ${student.courses_count || 0}`}</p>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg relative overflow-y-auto max-h-[80vh]">
+        <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800" onClick={onClose}>✕</button>
+        
+        {loading ? (
+          <p>Chargement...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : student ? (
+          <>
+            <h2 className="text-2xl font-bold mb-2">{student.nom} {student.prenom}</h2>
+            <p className="text-sm text-gray-500 mb-4">{student.email}</p>
 
-        {student.courses_count > 0 ? (
-          <div>
-            {student.courses.map((course, idx) => (
-              <div key={idx} className="mb-3 border-b pb-2">
-                <p className="font-semibold">{course.title}</p>
-                <p className="text-sm text-gray-500">Progression: {course.progress}%</p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p>Aucun cours suivi</p>
-        )}
+            <h3 className="font-semibold text-lg mb-2">Cours lus</h3>
+            {student.cours_lus?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.cours_lus.map((c, idx) => <li key={idx}>{c.titre_cour}</li>)}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun cours lu</p>}
+
+            <h3 className="font-semibold text-lg mb-2">Exercices faits</h3>
+            {student.exercices_faits?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.exercices_faits.map((e, idx) => <li key={idx}>{e.titre_exo}</li>)}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun exercice fait</p>}
+
+            <h3 className="font-semibold text-lg mb-2">Quiz faits</h3>
+            {student.quiz_faits?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.quiz_faits.map((q, idx) => (
+                  <li key={idx}>{q.titre_quiz} – Score: {q.score_obtenu} </li>
+                ))}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun quiz fait</p>}
+          </>
+        ) : null}
       </div>
     </div>
   );
 }
+
 
 // ================= MODAL ÉDITION =================
 function StudentEditModal({ studentForm, setStudentForm, onClose, onSubmit }) {
@@ -167,6 +212,8 @@ export default function StudentsManagement() {
     };
     fetchStudents();
   }, []);
+
+ 
 
   // ================= RESIZE =================
   useEffect(() => {
@@ -323,7 +370,7 @@ const handleCreateStudent = async (e) => {
         {/* Grid */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredStudents.map((s, index) => (
-            <div key={index} className="bg-grad-2 rounded-2xl p-6 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-lg transition" onClick={() => setSelectedStudent(s)}>
+            <div key={index} className="bg-grad-2 rounded-2xl p-6 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-lg transition" onClick={() => setSelectedStudent(s.id)} >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-12 h-12 rounded-full bg-grad-1 text-white flex items-center justify-center text-lg font-semibold">{s.initials}</div>
@@ -361,7 +408,10 @@ const handleCreateStudent = async (e) => {
       </main>
 
       {/* Modals */}
-      <StudentDetailModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
+      <StudentDetailModal
+  studentId={selectedStudent}   // ici selectedStudent est l'ID
+  onClose={() => setSelectedStudent(null)}
+/>
       <StudentEditModal studentForm={studentForm} setStudentForm={setStudentForm} onClose={() => { setEditStudent(null); setStudentForm(null); }} onSubmit={handleUpdate} />
         {addStudentModalOpen && (
   <StudentAddModal

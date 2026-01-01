@@ -23,7 +23,6 @@ function DetailsModal({ open, onClose, instructor }) {
           <li><strong>{t("birthdate")} :</strong> {instructor.birthdate}</li>
           <li><strong>{t("rank")} :</strong> {instructor.rank}</li>
           <li><strong>{t("matricule")} :</strong> {instructor.matricule}</li>
-          <li><strong>{t("password")} :</strong> {instructor.password}</li>
         </ul>
 
         <div className="mt-4 flex justify-end">

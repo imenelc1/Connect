@@ -345,9 +345,178 @@ class SpaceUpdateView(APIView):
     def put(self, request, id_space):
         space = get_object_or_404(Space, id_space=id_space)
 
-        serializer = SpaceSerializer(space, data=request.data, partial=True)
+        serializer = SpaceSerializer1(space, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#Admin add students to un espace
+@permission_classes([IsAuthenticatedJWT])
+class AdminAddStudentToSpaceView(APIView):
+    """
+    Permet à un administrateur d'ajouter un étudiant à n'importe quel espace.
+    """
+    #permission_classes = [IsAuthenticatedJWT]  # Assurez-vous que l'admin a un JWT valide
+
+    def post(self, request):
+        # Vérifier que l'utilisateur est admin
+       
+
+        email = request.data.get("email")
+        space_id = request.data.get("space_id")
+
+        if not email or not space_id:
+            return Response({"error": "Email et space_id requis"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Chercher l'étudiant
+        try:
+            user = Utilisateur.objects.get(adresse_email=email)
+        except Utilisateur.DoesNotExist:
+            return Response({"error": "Utilisateur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Chercher l'espace sans restriction sur l'utilisateur
+        try:
+            space = Space.objects.get(id_space=space_id)
+        except Space.DoesNotExist:
+            return Response({"error": "Espace non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Créer la relation étudiant-espace
+        serializer = SpaceEtudiantCreateSerializer(data={
+            "etudiant": user.id_utilisateur,
+            "space": space.id_space
+        })
+
+        if serializer.is_valid():
+            space_etudiant = serializer.save()
+            display_serializer = SpaceEtudiantDisplaySerializer(space_etudiant)
+            return Response(display_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+     
+     
+class SpaceStudentsDetailView(APIView):
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, space_id):
+        try:
+            space = Space.objects.get(id_space=space_id)
+        except Space.DoesNotExist:
+            return Response(
+                {"error": "Espace non trouvé"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # =======================
+        # Étudiants
+        # =======================
+        students_qs = SpaceEtudiant.objects.select_related("etudiant").filter(space=space)
+        students_data = [
+            {
+                "id_utilisateur": se.etudiant.id_utilisateur,
+                "nom": se.etudiant.nom,
+                "prenom": se.etudiant.prenom,
+                "email": se.etudiant.adresse_email,
+                "date_ajout": se.date_ajout,
+            }
+            for se in students_qs
+        ]
+
+        # =======================
+        # Cours
+        # =======================
+        courses_qs = SpaceCour.objects.select_related("cours").filter(space=space)
+        courses_data = [
+            {
+                "id_cours": sc.cours.id_cours,
+                "titre": sc.cours.titre_cour,
+                "date_ajout": sc.date_ajout,
+            }
+            for sc in courses_qs
+        ]
+
+        # =======================
+        # Exercices
+        # =======================
+        exercices_qs = SpaceExo.objects.select_related("exercice").filter(space=space)
+        exercices_data = [
+            {
+                "id_exercice": se.exercice.id_exercice,
+                "titre": se.exercice.titre_exo,
+                "date_ajout": se.date_ajout,
+            }
+            for se in exercices_qs
+        ]
+
+        # =======================
+        # Quiz
+        # =======================
+        quizzes_qs = SpaceQuiz.objects.select_related("quiz").filter(space=space)
+        quizzes_data = [
+            {
+                "id_quiz": sq.quiz.id,
+                "titre": sq.quiz.exercice.titre_exo,
+                "date_ajout": sq.date_ajout,
+            }
+            for sq in quizzes_qs
+        ]
+
+        # =======================
+        # Réponse finale
+        # =======================
+        return Response(
+            {
+                "space": {
+                    "id": space.id_space,
+                    "nom": space.nom_space,
+                    "description": space.description,
+                    "date_creation": space.date_creation,
+                },
+                "students": students_data,
+                "courses": courses_data,
+                "exercices": exercices_data,
+                "quizzes": quizzes_data,
+            },
+            status=status.HTTP_200_OK
+        )
+    
+    
+    
+#----------
+#admin remove etudiant from un espace
+#---------------
+@api_view(['POST'])
+def Admin_remove_student_from_space(request):
+    """
+    Supprime un étudiant d'un espace.
+    Attendu dans le body JSON:
+    {
+        "student_id": 1,
+        "space_id": 1
+    }
+    """
+    student_id = request.data.get("student_id")
+    space_id = request.data.get("space_id")
+
+    if not student_id or not space_id:
+        return Response({"error": "student_id et space_id sont requis"}, status=400)
+
+    try:
+        student = Utilisateur.objects.get(id_utilisateur=student_id)
+    except Utilisateur.DoesNotExist:
+        return Response({"error": "Étudiant introuvable"}, status=404)
+
+    try:
+        space = Space.objects.get(id_space=space_id)
+    except Space.DoesNotExist:
+        return Response({"error": "Espace introuvable"}, status=404)
+
+    try:
+        space_etudiant = SpaceEtudiant.objects.get(etudiant=student, space=space)
+        space_etudiant.delete()
+        return Response({"success": f"{student} retiré de l'espace {space}"}, status=200)
+    except SpaceEtudiant.DoesNotExist:
+        return Response({"error": "L'étudiant n'est pas dans cet espace"}, status=400)
