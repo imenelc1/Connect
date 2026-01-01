@@ -1,40 +1,50 @@
-// src/pages/Dashboardetu.jsx
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { 
+  TrendingDown, 
+  CircleCheckBig, 
+  Clock3, 
+  Book, 
+  Search 
+} from "lucide-react";
+import dayjs from "dayjs";
+
+// Composants
 import Navbar from "../components/common/Navbar";
 import Cards from "../components/common/Cards-Dash";
-import { TrendingDown, CircleCheckBig, Clock3, Book, Search } from "lucide-react";
 import Mascotte from "../components/common/Mascotte";
 import LearningCurve from "../components/common/LearningCurveEtu";
 import NotificationItem from "../components/common/AcivityFeed";
 import ProgressBar from "../components/ui/ProgressBar";
 import UserCircle from "../components/common/UserCircle";
 import Input from "../components/common/Input";
+import NotificationBell from "../components/common/NotificationBell";
+
+// Contextes & Services
 import ThemeContext from "../context/ThemeContext";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useNotifications } from "../context/NotificationContext";
 import api from "../services/api";
 import progressionService from "../services/progressionService";
-import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext"; // AJOUT
-import dayjs from "dayjs";
 
 export default function Dashboardetu() {
+  // Hooks
   const navigate = useNavigate();
-  const { toggleDarkMode } = useContext(ThemeContext);
   const { t, i18n } = useTranslation("Dashboard");
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const { notifications, loading: loadingNotifications } = useNotifications();
 
-  // États pour la responsivité
+  // États de l'interface
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [loading, setLoading] = useState(true);
 
-  const storedUser = localStorage.getItem("user");
-  const userData = storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-
+  // États utilisateur
   const [user, setUser] = useState(null);
   const initials = user ? `${user.nom?.[0] || ""}${user.prenom?.[0] || ""}`.toUpperCase() : "";
 
+  // États des statistiques
   const [activeCoursesCount, setActiveCoursesCount] = useState(0);
   const [globalProgress, setGlobalProgress] = useState(0);
   const [submittedExercises, setSubmittedExercises] = useState(0);
@@ -42,51 +52,37 @@ export default function Dashboardetu() {
   const [dailyTime, setDailyTime] = useState(0);
   const [successRate, setSuccessRate] = useState(0);
 
-  // UTILISEZ LE CONTEXTE AU LIEU DU STATE LOCAL
-  const { notifications, loading: loadingNotifications } = useNotifications();
-
-  const dat = [
-    { title: "Emma Wilson completed Python Basics Quiz", date: "2nd Feb", day: "Tuesday", time: "11:30 - 12:30" },
-    { title: "James Lee submitted Loop Assignment", date: "3rd Feb", day: "Wednesday", time: "11:30 - 12:30" },
-    { title: "Sophia Chen asked question in Arrays & Strings", date: "5th Feb", day: "Tuesday", time: "11:30 - 12:30" },
-    { title: "Michael Brown completed Data Structures Course", date: "8th Feb", day: "Monday", time: "11:30 - 12:30" },
-  ];
-
-  // Effet pour la responsivité
+  // Gestion de la responsivité
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
     };
   }, []);
 
-  // Charger les données utilisateur
+  // Chargement des données utilisateur
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUserData = async () => {
       try {
-        // Charger profil
+        // Profil utilisateur
         const profileRes = await api.get("profile/");
         setUser(profileRes.data);
 
-        // Nombre de cours actifs
+        // Cours actifs
         const coursesCount = await progressionService.getActiveCoursesCount();
         setActiveCoursesCount(coursesCount);
         
-        // Global progress
+        // Progression globale
         const progress = await progressionService.getGlobalProgress();
-        console.log("Global progress:", progress);
         setGlobalProgress(progress);
 
-        // Success rate
+        // Taux de réussite
         const rate = await progressionService.getSuccessRate();
         setSuccessRate(rate);
 
@@ -97,10 +93,10 @@ export default function Dashboardetu() {
       }
     };
 
-    fetchData();
+    fetchUserData();
   }, []);
 
-  // Charger le temps journalier
+  // Temps journalier
   useEffect(() => {
     if (!user) return;
 
@@ -123,7 +119,7 @@ export default function Dashboardetu() {
     return () => clearInterval(interval);
   }, [user]);
 
-  // Charger les exercices
+  // Données des exercices
   useEffect(() => {
     if (!user) return;
 
@@ -135,7 +131,6 @@ export default function Dashboardetu() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        console.log("Data submitted exercises:", res.data);
         setSubmittedExercises(res.data.total_submitted_attempts || 0);
         setTotalExercises(res.data.total_exercises || 0);
       } catch (err) {
@@ -146,7 +141,7 @@ export default function Dashboardetu() {
     fetchExercisesData();
   }, [user]);
 
-  // Formatage du temps lisible
+  // Formater le temps en format lisible
   const formatTimeStyled = (secs) => {
     if (!secs || secs < 60) {
       return <span className="text-blue font-bold">{secs}s</span>;
@@ -166,7 +161,7 @@ export default function Dashboardetu() {
     );
   };
 
-  // Formater les notifications pour ActivityFeed
+  // Formater les notifications pour l'affichage
   const formatNotificationsForFeed = () => {
     if (!notifications || notifications.length === 0) return [];
     
@@ -182,32 +177,42 @@ export default function Dashboardetu() {
     });
   };
 
+  const formattedNotifications = formatNotificationsForFeed();
+
+  // Écran de chargement
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-primary/10">
-        <div className="text-muted">{t("Global.Loading") || "Chargement..."}</div>
+        <div className="text-muted">{t("Dashboard.Loading") || "Chargement..."}</div>
       </div>
     );
   }
 
-  const formattedNotifications = formatNotificationsForFeed();
-
   return (
-    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+    <div className="flex min-h-screen bg-surface">
       {/* Sidebar */}
-      <div>
-        <Navbar />
-      </div>
+      <Navbar />
 
-      {/* Main content */}
+      {/* Contenu principal */}
       <main className={`
-        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 
+        min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
-        {/* Header */}
+        
+        {/* En-tête */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          {/* User + Bell */}
-          <div className="flex items-center gap-3 order-1 sm:order-2 mt-0 sm:mt-0 self-end sm:self-auto">
+          {/* Barre de recherche */}
+          <form className="w-full sm:flex-1 max-w-full lg:max-w-sm order-2 sm:order-1">
+            <Input
+              placeholder={t("Dashboard.Search")}
+              icon={<Search size={isMobile ? 14 : 16} />}
+              className="w-full"
+            />
+          </form>
+
+          {/* Notifications et profil */}
+          <div className="flex items-center gap-3 order-1 sm:order-2 self-end sm:self-auto">
             <NotificationBell />
             <UserCircle
               initials={initials}
@@ -216,31 +221,26 @@ export default function Dashboardetu() {
               size={isMobile ? "sm" : "md"}
             />
           </div>
-
-          {/* Search input */}
-          <form className="w-full sm:flex-1 max-w-full lg:max-w-sm ml-0 sm:ml-5 order-2 sm:order-1">
-            <Input
-              placeholder={t("Dashboard.Search")}
-              icon={<Search size={isMobile ? 14 : 16} />}
-              className="w-full"
-            />
-          </form>
         </header>
 
-        {/* Welcome banner */}
-        <div className="relative bg-grad-1 text-white p-4 rounded-2xl shadow-md flex flex-col lg:flex-row justify-between items-center gap-3 sm:gap-4">
+        {/* Bannière de bienvenue */}
+        <div className="relative bg-grad-1 text-white p-4 rounded-2xl shadow-md 
+                       flex flex-col lg:flex-row justify-between items-center gap-3 sm:gap-4">
           <div className="flex flex-col w-full lg:w-auto">
-            <span className="absolute top-2 left-3 text-xs opacity-90">October 18, 2025</span>
+            <span className="absolute top-2 left-3 text-xs opacity-90">
+              {dayjs().format("MMMM DD, YYYY")}
+            </span>
             <h1 className="text-lg sm:text-xl font-bold mt-4 sm:mt-0">
               {t("Dashboard.Welcome")} {user ? `${user.nom} ${user.prenom}` : "..."}
             </h1>
-            <p className="text-xs sm:text-sm opacity-90 mt-1">{t("Dashboard.Alwaysp")}</p>
+            <p className="text-xs sm:text-sm opacity-90 mt-1">
+              {t("Dashboard.Alwaysp")}
+            </p>
           </div>
-          
           <Mascotte className="w-28 sm:w-36 lg:w-44 mt-4 lg:mt-0" />
         </div>
 
-        {/* Quick stats */}
+        {/* Statistiques rapides */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 text-textc">
           <Cards 
             text={t("Dashboard.AverageS")} 
@@ -272,7 +272,7 @@ export default function Dashboardetu() {
           />
         </div>
 
-        {/* Progress bar */}
+        {/* Barre de progression globale */}
         <div className="bg-card text-primary p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl w-full shadow-lg">
           <ProgressBar 
             value={globalProgress} 
@@ -281,29 +281,40 @@ export default function Dashboardetu() {
           />
         </div>
 
-        {/* Learning curve */}
+        {/* Courbe d'apprentissage */}
         <div className="p-3 w-full" style={{ height: "360px" }}>
           <LearningCurve title={t("Dashboard.Progress")} />
         </div>
 
-        {/* Activity feed */}
-        <div className="space-y-3">
-          {loadingNotifications ? (
-            <p className="text-xs text-gray-500">Chargement des notifications...</p>
-          ) : formattedNotifications.length === 0 ? (
-            <p className="text-xs text-gray-500">Aucune notification disponible.</p>
-          ) : (
-            formattedNotifications.map((item, index) => (
-              <NotificationItem
-                key={index}
-                title={item.title}
-                date={item.date}
-                day={item.day}
-                time={item.time}
-                isMobile={isMobile}
-              />
-            ))
-          )}
+        {/* Fil d'activité */}
+        <div className="bg-card p-4 rounded-2xl mb-4">
+          <h2 className="text-lg font-bold mb-1">{t("Dashboard.ActivityF")}</h2>
+          <p className="text-gray-500 text-xs mb-4">
+            {dayjs().startOf('week').format("DD MMM")} - {dayjs().endOf('week').format("DD MMM")}
+          </p>
+
+          <div className="space-y-3">
+            {loadingNotifications ? (
+              <div className="flex items-center justify-center py-4">
+                <p className="text-sm text-gray-500">Chargement des notifications...</p>
+              </div>
+            ) : formattedNotifications.length === 0 ? (
+              <div className="flex items-center justify-center py-4">
+                <p className="text-sm text-gray-500">Aucune notification disponible.</p>
+              </div>
+            ) : (
+              formattedNotifications.map((item, index) => (
+                <NotificationItem
+                  key={index}
+                  title={item.title}
+                  date={item.date}
+                  day={item.day}
+                  time={item.time}
+                  isMobile={isMobile}
+                />
+              ))
+            )}
+          </div>
         </div>
       </main>
     </div>
