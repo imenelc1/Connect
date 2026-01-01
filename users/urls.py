@@ -25,7 +25,7 @@ urlpatterns = [
     path('admin/etudiants/create/', AdminCreateEtudiantView.as_view(), name='create-etudiant'),
     #Modifier mot de passe 
     path("users/reset-password/", ResetPasswordView2.as_view()),
-
+    
 
 ]
   # GET/PATCH profil utilisateur
