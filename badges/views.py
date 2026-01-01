@@ -1,18 +1,20 @@
 from itertools import combinations
 from django.utils.timezone import localtime, now
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from courses.models import Cours
 from dashboard import models
 from dashboard.models import ProgressionCours, SessionDuration, TentativeExercice
 from exercices.models import Exercice
+from forum.models import Commentaire, Like
 from quiz.models import Quiz, ReponseQuestion, ReponseQuiz
 from users.jwt_auth import IsAuthenticatedJWT  
 from rest_framework.response import Response
 from .models import Badge, GagnerBadge
 from django.db import models
 from django.db.models import Sum
+from datetime import time
 
 
 def is_student(user):
@@ -437,45 +439,66 @@ def check_all_rounder_badge(user):
 
 
 def check_legendary_coder_badge(user):
-    """
-    Badge spécial : tout compléter sur la plateforme
-    """
     if not is_student(user):
         return False
 
     # ---------- COURS ----------
     total_courses = Cours.objects.count()
-
     completed_courses = ProgressionCours.objects.filter(
         utilisateur=user,
         avancement_cours=100
     ).values("cours").distinct().count()
-
-    if total_courses == 0 or completed_courses < total_courses:
+    print(f"COURSES : {completed_courses} / {total_courses}")
+    if completed_courses < total_courses:
+        print("Il reste des cours à terminer !")
         return False
 
-    # ---------- EXERCICES ----------
-    total_exercises = Exercice.objects.count()
+    # ---------- EXERCICES (hors quiz) ----------
+    # IDs des exercices qui sont liés à des quiz
+    quiz_exercise_ids = list(Quiz.objects.values_list("exercice_id", flat=True))
 
+    # Total de tous les exercices non-quiz
+    total_exercises = Exercice.objects.exclude(
+        id_exercice__in=quiz_exercise_ids
+    ).count()
+
+    # Exercices soumis par l'utilisateur (hors quiz)
     completed_exercises = TentativeExercice.objects.filter(
-        utilisateur=user
+        utilisateur=user,
+        etat="soumis"
+    ).exclude(
+        exercice__id_exercice__in=quiz_exercise_ids
     ).values("exercice").distinct().count()
 
-    if total_exercises == 0 or completed_exercises < total_exercises:
+    print(f"EXERCICES soumis : {completed_exercises} / {total_exercises}")
+
+    if completed_exercises < total_exercises:
+        missing_exercises = set(
+            Exercice.objects.exclude(id_exercice__in=quiz_exercise_ids)
+            .values_list("id_exercice", flat=True)
+        ) - set(
+            TentativeExercice.objects.filter(
+                utilisateur=user,
+                etat="soumis"
+            ).exclude(
+                exercice__id_exercice__in=quiz_exercise_ids
+            ).values_list("exercice__id_exercice", flat=True)
+        )
+        print("Exercices manquants :", missing_exercises)
         return False
 
     # ---------- QUIZ ----------
     total_quizzes = Quiz.objects.count()
-
     completed_quizzes = ReponseQuiz.objects.filter(
         etudiant=user,
         terminer=True
     ).values("quiz").distinct().count()
-
-    if total_quizzes == 0 or completed_quizzes < total_quizzes:
+    print(f"QUIZ : {completed_quizzes} / {total_quizzes}")
+    if completed_quizzes < total_quizzes:
+        print("Il reste des quiz à terminer !")
         return False
 
-    # ---------- ATTRIBUTION ----------
+    # ---------- ATTRIBUTION DU BADGE ----------
     badge, _ = Badge.objects.get_or_create(
         nom="Legendary Coder",
         defaults={
@@ -487,8 +510,151 @@ def check_legendary_coder_badge(user):
         }
     )
 
-    if not GagnerBadge.objects.filter(utilisateur=user, badge=badge).exists():
-        GagnerBadge.objects.create(utilisateur=user, badge=badge)
-        return True
+    gagner, created = GagnerBadge.objects.get_or_create(utilisateur=user, badge=badge)
+    if created:
+        print("Badge Legendary Coder attribué ! 🎉")
+    else:
+        print("Badge Legendary Coder déjà attribué.")
 
+    return True
+
+
+
+
+
+def check_night_owl_badge(user):
+    if not is_student(user):
+        return False
+
+    # Récupérer les tentatives soumises entre minuit et 6h
+    night_submissions = TentativeExercice.objects.filter(
+        utilisateur=user,
+        etat="soumis",
+        submitted_at__time__gte=time(0, 0),
+        submitted_at__time__lt=time(6, 0)
+    )
+
+    if not night_submissions.exists():
+        return False
+
+    # Créer ou récupérer le badge
+    badge, _ = Badge.objects.get_or_create(
+        nom="Night Owl",
+        defaults={
+            "description": "Submit an exercise between midnight and 6 AM",
+            "condition": "Soumettre un exercice entre 00h00 et 06h00",
+            "categorie": "special",
+            "numpoints": 200,
+            "icone": "badges/night_owl.png"
+        }
+    )
+
+    # Attribuer le badge si l'utilisateur ne l'a pas déjà
+    GagnerBadge.objects.get_or_create(utilisateur=user, badge=badge)
+    return True
+
+
+
+def check_top_commentateur_badge(user):
+    comment_count = Commentaire.objects.filter(utilisateur=user).count()
+    threshold = 20  
+
+    if comment_count >= threshold:
+        badge = Badge.objects.get(nom="Top Commentateur")
+        GagnerBadge.objects.get_or_create(utilisateur=user, badge=badge)
+        return True
     return False
+
+
+
+def check_top_forum_badge(user):
+    """
+    Badge spécial : avoir un forum qui reçoit beaucoup de likes
+    Exemple : au moins 10 likes cumulés sur ses forums
+    """
+    # Vérifie que l'utilisateur a un profil
+    if not hasattr(user, "etudiant") and not hasattr(user, "enseignant"):
+        return False
+
+    # Total likes cumulés sur tous les forums de l'utilisateur
+    total_likes = Like.objects.filter(forum__utilisateur=user).count()
+    print(f"Total likes reçus sur les forums de {user}: {total_likes}")
+
+    seuil = 20
+    if total_likes < seuil:
+        return False
+
+    # Création du badge si nécessaire
+    badge, _ = Badge.objects.get_or_create(
+        nom="Top Forum Likeur",
+        defaults={
+            "description": f"Avoir au moins {seuil} likes cumulés sur vos forums",
+            "condition": f"Recevoir {seuil} likes cumulés sur vos forums",
+            "categorie": "special",
+            "numpoints": 500,
+            "icone": "badges/top_forum_likeur.png"
+        }
+    )
+
+    # Attribution du badge
+    GagnerBadge.objects.get_or_create(utilisateur=user, badge=badge)
+    return True
+
+
+def get_badge_streak(user):
+    """
+    Retourne le nombre de jours consécutifs où l'utilisateur a débloqué au moins un badge.
+    """
+    # Récupérer toutes les dates où l'utilisateur a gagné un badge
+    badge_dates = GagnerBadge.objects.filter(utilisateur=user).order_by('date_obtention').values_list('date_obtention', flat=True)
+    
+    # Transformer en set de jours uniques
+    # Ici on s'assure que c'est bien des datetime.date
+    days = sorted({dt if isinstance(dt, date) else dt.date() for dt in badge_dates})
+    
+    if not days:
+        return 0
+
+    streak = 1
+    max_streak = 1
+
+    for i in range(1, len(days)):
+        if (days[i] - days[i-1]) == timedelta(days=1):
+            streak += 1
+            if streak > max_streak:
+                max_streak = streak
+        elif days[i] != days[i-1]:
+            streak = 1  # reset si séquence cassée
+
+    return max_streak
+
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def user_stats(request):
+    user = request.user
+
+    # Badges
+    gained_ids = GagnerBadge.objects.filter(utilisateur=user).values_list('badge_id', flat=True)
+    total_badges = Badge.objects.count()
+    unlocked_count = len(gained_ids)
+
+    # XP
+    total_xp = GagnerBadge.objects.filter(utilisateur=user).aggregate(sum=models.Sum('badge__numpoints'))['sum'] or 0
+    max_xp = Badge.objects.aggregate(sum=models.Sum('numpoints'))['sum'] or 0
+    xp_pct = int((total_xp / max_xp) * 100) if max_xp else 0
+
+    # Streak basé sur les badges
+    streak_days = get_badge_streak(user)          
+    streak_pct = min((streak_days / 7) * 100, 100)  # % par rapport au streak idéal de 7 jours
+
+    return Response({
+    "total_badges": total_badges,
+    "unlocked_count": unlocked_count,
+    "total_xp": total_xp,        # <-- pour l'affichage total
+    "max_xp": max_xp,            # <-- pour la barre de progression
+    "streak_days": streak_days,
+    "streak_pct": streak_pct
+})

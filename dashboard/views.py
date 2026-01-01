@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
-from badges.views import check_7day_streak_badge, check_all_rounder_badge, check_course_badges, check_first_steps_badge, check_legendary_coder_badge, check_marathon_coder_badge, check_problem_solver_badge, check_speed_demon_badge
+from badges.views import check_7day_streak_badge, check_all_rounder_badge, check_course_badges, check_first_steps_badge, check_legendary_coder_badge, check_marathon_coder_badge, check_night_owl_badge, check_problem_solver_badge, check_speed_demon_badge
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
@@ -832,6 +832,7 @@ class create_tentative(APIView):
         check_7day_streak_badge(user)
         check_all_rounder_badge(user)
         check_legendary_coder_badge(user)
+        check_night_owl_badge(user)
         return Response({
             "success": "Tentative enregistrée",
             "tentative": {

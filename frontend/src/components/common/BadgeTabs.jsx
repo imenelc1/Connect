@@ -13,6 +13,9 @@ export default function BadgeTabs({ activeTab, setActiveTab }) {
     { key: "special", label: t("tabs.special"), icon: <MdAutoAwesome /> },
   ];
 
+
+  
+
   return (
     <section className="mb-6">
       <div className="grid grid-cols-2 sm:flex justify-around gap-2 text-sm font-medium">
