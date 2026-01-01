@@ -109,7 +109,7 @@ export default function SubmittedExercises() {
 
       <main className="flex-1 ml-16 sm:ml-56 p-6">
         <h1 className="text-3xl font-semibold text-primary">{t("submittedExercises") || "Exercices Soumis"}</h1>
-        <div className="text-primary font-medium text-sm border border-primary px-3 py-1 rounded-md shadow-sm bg-bg inline-block mt-2">
+        <div className="text-primary font-medium text-sm border border-primary px-3 py-1 rounded-md shadow-sm bg-surface inline-block mt-2">
           {t("total") || "Total"}: {filtered.length} {t("exercises") || "exercices"}
         </div>
 

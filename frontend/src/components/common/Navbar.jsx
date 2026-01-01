@@ -126,6 +126,11 @@ export default function Navbar() {
     "/badges"
 
   ];
+  const spacesRoutes = [
+    "/spaces",
+    "/CourseDetails"
+
+  ];
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
@@ -200,6 +205,10 @@ export default function Navbar() {
             forceActive = true;
           }
            if (item.href === "/badges" && classementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          
+          if (item.href === "/spaces" && spacesRoutes.some(r => location.pathname.startsWith(r))) {
             forceActive = true;
           }
 
