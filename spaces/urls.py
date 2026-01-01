@@ -14,7 +14,10 @@ from .views import (
     space_exercises,
     space_quizzes,
     SpaceCreateView,
-    SpaceUpdateView
+    SpaceUpdateView,
+    AdminAddStudentToSpaceView,
+    SpaceStudentsDetailView,
+    Admin_remove_student_from_space
 )
 
 from spaces import views
@@ -43,6 +46,11 @@ urlpatterns = [
     path("<int:id_space>/", SpaceDetailView.as_view(), name="space-detail"),
     
     #---Creation modification from admin---
-     path('admin/create/', SpaceCreateView.as_view(), name='create'),
+    path('admin/create/', SpaceCreateView.as_view(), name='create'),
     path('admin/<int:id_space>/update/', SpaceUpdateView.as_view(), name='update'),
+    path('admin/add-students/', AdminAddStudentToSpaceView.as_view(), name='update'),
+    
+    path("space/<int:space_id>/details/", SpaceStudentsDetailView.as_view(), name="space-students"),
+     path('admin/remove-student/', Admin_remove_student_from_space, name='remove-student-from-space'),
+
 ]

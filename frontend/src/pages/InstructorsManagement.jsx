@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 
 // ================= DETAILS MODAL =================
 function DetailsModal({ open, onClose, instructor }) {
+   const { t } = useTranslation("instructors");
   if (!open || !instructor) return null;
 
   return (
@@ -20,12 +21,12 @@ function DetailsModal({ open, onClose, instructor }) {
         </h2>
 
         <ul className="text-sm text-gray space-y-2">
-          <li><strong>Prénom :</strong> {instructor.firstName}</li>
-          <li><strong>Nom :</strong> {instructor.lastName}</li>
-          <li><strong>Email :</strong> {instructor.email}</li>
-          <li><strong>Date de naissance :</strong> {instructor.birthdate}</li>
-          <li><strong>Rang :</strong> {instructor.rank}</li>
-          <li><strong>Matricule :</strong> {instructor.matricule}</li>
+          <li><strong>{t("firstName")} :</strong> {instructor.firstName}</li>
+          <li><strong>{t("lastName")} :</strong> {instructor.lastName}</li>
+          <li><strong>{t("email")} :</strong> {instructor.email}</li>
+          <li><strong>{t("birthdate")} :</strong> {instructor.birthdate}</li>
+          <li><strong>{t("rank")} :</strong> {instructor.rank}</li>
+          <li><strong>{t("matricule")} :</strong> {instructor.matricule}</li>
         </ul>
 
         <div className="mt-4 flex justify-end">

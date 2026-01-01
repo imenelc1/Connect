@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, AdminLoginView,UserProfileView,ChangePasswordView,ForgotPasswordView,ResetPasswordView,admin_stats, get_enseignants,get_etudiants,students_with_progress,AdminDeleteUserView, update_enseignant, update_etudiant, AdminCreateEnseignantView, AdminCreateEtudiantView, ResetPasswordView2
+from .views import RegisterView, LoginView, AdminLoginView,UserProfileView,ChangePasswordView,ForgotPasswordView,ResetPasswordView,admin_stats, get_enseignants,get_etudiants,students_with_progress,AdminDeleteUserView, update_enseignant, update_etudiant, AdminCreateEnseignantView, AdminCreateEtudiantView, ResetPasswordView2, ProgressionUtilisateurAPIView
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
@@ -26,6 +26,12 @@ urlpatterns = [
     #Modifier mot de passe 
     path("users/reset-password/", ResetPasswordView2.as_view()),
     
+    path(
+        "utilisateurs/<int:user_id>/progression/",
+        ProgressionUtilisateurAPIView.as_view(),
+        name="progression-utilisateur"
+    ),
+
 
 ]
   # GET/PATCH profil utilisateur
