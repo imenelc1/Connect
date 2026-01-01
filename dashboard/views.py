@@ -1345,3 +1345,16 @@ def all_students_submissions(request):
         "students": result
     })
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def get_user_draft(request, exercice_id):
+    tentative = TentativeExercice.objects.filter(
+        utilisateur=request.user,
+        exercice_id=exercice_id,
+        etat="brouillon"
+    ).order_by('-created_at').first()
+
+    if not tentative:
+        return Response({"draft": None})
+
+    return Response(TentativeExerciceReadSerializer(tentative).data)

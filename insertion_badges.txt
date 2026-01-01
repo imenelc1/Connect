@@ -37,12 +37,8 @@ Badge.objects.create(
     condition="Passer 10 heures dans la plateforme en une seule journée",
     categorie="progress",
     numpoints=150,
-<<<<<<< HEAD
     icone="badges/marathon_coder.png"
 )
-=======
-    icone="badges/marathon_coder.png")
->>>>>>> origin/meriem
 
 # Badge 5 : First Steps
 Badge.objects.create(
@@ -63,8 +59,6 @@ Badge.objects.create(
     numpoints=150,
     icone="badges/problem_solver.png"
 )
-<<<<<<< HEAD
-=======
 
 
 # Badge : Speed Demon
@@ -115,4 +109,3 @@ badge, created = Badge.objects.get_or_create(
 
 
 
->>>>>>> origin/meriem
