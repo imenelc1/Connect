@@ -151,7 +151,7 @@ int main() {
           etat: "brouillon",
           temps_passe: Math.floor((Date.now() - startTime) / 1000),
         });
-      } catch { }
+      } catch {}
     }, 1000);
     return () => clearTimeout(timer);
   }, [userCode, output, exerciceId, startTime]);

@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Folder, Edit, Trash2, Plus } from "lucide-react";
 import Button from "../components/common/Button";
 import AddModel from "../components/common/AddModel";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import ContentSearchBar from "../components/common/ContentSearchBar";
+import { getSpaces, createSpace, deleteSpace } from "../services/spacesService";
+
+import toast from "react-hot-toast";
 
 export default function SpacesPage() {
   const { t } = useTranslation("space");
@@ -17,8 +20,10 @@ export default function SpacesPage() {
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const [newSpace, setNewSpace] = useState({ nom_space: "", description: "" });
+  const [newSpace, setNewSpace] = useState({ nom_space: "", description: "", utilisateur: "" });
   const [spaces, setSpaces] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+
 
   // ================= FETCH BACKEND =================
   useEffect(() => {
@@ -40,6 +45,7 @@ export default function SpacesPage() {
           id: s.id_space,
           title: s.nom_space,
           description: s.description || "—",
+          utilisateur:s.utilisateur
         }));
 
         setSpaces(formatted);
@@ -51,6 +57,26 @@ export default function SpacesPage() {
     fetchSpaces();
   }, []);
 
+
+  //==================== ENSEIGNANT================
+useEffect(() => {
+  const fetchTeachers = async () => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      const res = await fetch("http://localhost:8000/api/users/enseignants/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(t("errors.fetchTeachers"));
+      const data = await res.json();
+      setTeachers(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  fetchTeachers();
+}, []);
+
+  //console.log({teachers});
   // ================= RESPONSIVE =================
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -65,54 +91,183 @@ export default function SpacesPage() {
     };
   }, []);
 
-  // Effet pour la responsivité
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Gestion de la sidebar
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("sidebarChanged", handleSidebarChange);
-    
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("sidebarChanged", handleSidebarChange);
-    };
-  }, []);
+
+  
 
   const filteredSpaces = spaces.filter((s) =>
     s.title.toLowerCase().includes(search.toLowerCase())
   );
 
+ const handleDeleteSpace = async (id_space) => {
+  const confirmDelete = window.confirm(t("confirmDeleteSpace"));
+  if (!confirmDelete) return;
+
+  try {
+    await deleteSpace(id_space);
+
+    // 🔥 suppression immédiate du state
+    setSpaces((prev) => prev.filter((s) => s.id !== id_space));
+
+    toast.success(t("spaceDeleted"));
+  } catch (err) {
+    console.error("Erreur deleteSpace:", err);
+    toast.error(t("spaceDeleteFailed"));
+  }
+};
+
   const fields = [
-    { label: t("title"), value: newSpace.title, onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }) },
-    { label: t("description"), value: newSpace.description, onChange: (e) => setNewSpace({ ...newSpace, description: e.target.value }) },
-  ];
+  {
+  label: t("editModalTitle"),
+  placeholder: "Ex: Algorithm Masters",
+  value: newSpace.title,
+  onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }),
+},
+  {
+    label: t("editModalSubtitle"),
+    placeholder: t("subtitlePlaceholder"),
+    value: newSpace.description,
+    onChange: (e) =>
+      setNewSpace({ ...newSpace, description: e.target.value }),
+  },
+  {
+    label: t("spaceOwner"),
+    element: (
+      <select
+        value={newSpace.utilisateur}
+        onChange={(e) =>
+          setNewSpace({ ...newSpace, utilisateur: e.target.value })
+        }
+        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+      >
+        <option value="">-- Sélectionner un enseignant --</option>
+        {teachers.map((teacher) => (
+          <option key={teacher.id_utilisateur} value={teacher.id_utilisateur}>
+            {teacher.prenom} {teacher.nom}
+          </option>
+        ))}
+      </select>
+    ),
+  },
+];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editIndex !== null) {
-      const updated = [...spaces];
-      updated[editIndex] = { ...updated[editIndex], ...newSpace };
-      setSpaces(updated);
-      setEditIndex(null);
-    } else {
-      const newId = spaces.length + 1;
-      setSpaces([...spaces, { id: newId, ...newSpace }]);
-    }
+
+const addSpace = async (spaceData, setSpaces, t, setOpenModal, setNewSpace) => {
+  try {
+    // Mapping frontend → backend
+    const payload = {
+      nom_space: spaceData.title,
+      description: spaceData.description,
+      utilisateur: spaceData.utilisateur,
+    };
+
+    const res = await fetch("http://localhost:8000/api/spaces/admin/create/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) throw new Error("Erreur création space");
+
+    const data = await res.json();
+
+    // Mise à jour immédiate du state
+    setSpaces((prev) => [
+      ...prev,
+      {
+        id: data.id_space,
+        title: data.nom_space,
+        description: data.description,
+        utilisateur: data.utilisateur,
+      },
+    ]);
+
+    toast.success(t("spaceCreated"));
+
+    // Reset formulaire
     setOpenModal(false);
-    setNewSpace({ title: "", description: "" });
-  };
+    setNewSpace({ title: "", description: "", utilisateur: "" });
+  } catch (err) {
+    console.error(err);
+    toast.error(t("operationFailed"));
+  }
+};
 
-  const handleDelete = (index) => setSpaces(spaces.filter((_, i) => i !== index));
+
+const updateSpace = async (spaceId, spaceData, setSpaces, t, setOpenModal, setNewSpace) => {
+  try {
+    const payload = {
+      nom_space: spaceData.title,
+      description: spaceData.description,
+      utilisateur: spaceData.utilisateur,
+    };
+
+    const res = await fetch(`http://localhost:8000/api/spaces/admin/${spaceId}/update/`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) throw new Error("Erreur modification space");
+
+    const data = await res.json();
+
+    // Mise à jour immédiate du state
+    setSpaces((prev) =>
+      prev.map((s) =>
+        s.id === spaceId
+          ? {
+              id: data.id_space,
+              title: data.nom_space,
+              description: data.description,
+              utilisateur: data.utilisateur,
+            }
+          : s
+      )
+    );
+
+    toast.success(t("spaceUpdated"));
+
+    // Reset formulaire
+    setOpenModal(false);
+    setNewSpace({ title: "", description: "", utilisateur: "" });
+  } catch (err) {
+    console.error(err);
+    toast.error(t("operationFailed"));
+  }
+};
+
+
+const handleSubmit = (e) => {
+  //e.preventDefault();
+
+  if (editIndex) {
+    updateSpace(editIndex, newSpace, setSpaces, t, setOpenModal, setNewSpace);
+  } else {
+    addSpace(newSpace, setSpaces, t, setOpenModal, setNewSpace);
+  }
+};
+
+
+ 
   const handleEdit = (index) => {
-    setNewSpace(spaces[index]);
-    setEditIndex(index);
-    setOpenModal(true);
-  };
+  const space = spaces[index];
+
+  setNewSpace({
+    title: space.title,
+    description: space.description,
+    utilisateur: space.utilisateur,
+  });
+
+  setEditIndex(space.id); // ID BACKEND
+  setOpenModal(true);
+};
+
 
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -129,7 +284,7 @@ export default function SpacesPage() {
             text={<span className="flex items-center gap-2"><Plus size={18}/> {t("addSpace")}</span>}
             variant="primary"
             className="!w-auto px-6 py-2 rounded-xl"
-            onClick={() => { setEditIndex(null); setNewSpace({ title: "", description: "" }); setOpenModal(true); }}
+            onClick={() => { setEditIndex(null); setNewSpace({ title: "", description: "", utilisateur: "" }); setOpenModal(true); }}
           />
         </div>
 
@@ -153,7 +308,7 @@ export default function SpacesPage() {
               </div>
               <div className="flex items-center justify-end gap-3 pt-4">
                 <button className="text-muted hover:text-primary" onClick={() => handleEdit(index)} title={t("edit")}><Edit size={18} /></button>
-                <button className="text-red hover:text-red" onClick={() => handleDelete(index)} title={t("delete")}><Trash2 size={18} /></button>
+                <button className="text-red hover:text-red" onClick={() => handleDeleteSpace(space.id)} title={t("delete")}><Trash2 size={18} /></button>
               </div>
             </div>
           ))}

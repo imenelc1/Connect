@@ -7,10 +7,10 @@ from courses.models import Cours
 from courses.serializers import CoursSerializer
 from exercices.models import Exercice
 from rest_framework import exceptions
-
+from rest_framework.permissions import IsAuthenticated
 from exercices.serializers import ExerciceSerializer
 from quiz.models import Quiz
-
+from django.shortcuts import get_object_or_404
 from quiz.serializers import QuizSerializer, QuizSerializer1
 from users.models import Utilisateur
 from .models import Space, SpaceCour, SpaceEtudiant, SpaceExo, SpaceQuiz
@@ -22,7 +22,8 @@ from .serializers import (
     SpaceQuizSerializer,
     SpaceSerializer,
     SpaceEtudiantCreateSerializer,
-    SpaceEtudiantDisplaySerializer
+    SpaceEtudiantDisplaySerializer,
+    SpaceSerializer1
 )
 from users.jwt_auth import IsAuthenticatedJWT, jwt_required
 from django.db.models import Q
@@ -321,3 +322,32 @@ def my_space_exercises(request, space_id):
     serializer = ExerciceSerializer(exercises, many=True)
     return Response(serializer.data)
 
+#Creation d'un espace from admin
+@permission_classes([IsAuthenticatedJWT])
+class SpaceCreateView(APIView):
+   # permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = SpaceSerializer1(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    
+#Modification d'un espace
+@permission_classes([IsAuthenticatedJWT])
+class SpaceUpdateView(APIView):
+    #permission_classes = [IsAuthenticated]
+
+    def put(self, request, id_space):
+        space = get_object_or_404(Space, id_space=id_space)
+
+        serializer = SpaceSerializer(space, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

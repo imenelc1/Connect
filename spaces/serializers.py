@@ -86,3 +86,11 @@ class MyExerciseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exercice
         fields = ['id_exercice', 'titre_exo']
+
+
+#Un serializer pour admin
+class SpaceSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Space
+        fields = ['id_space', 'nom_space', 'description', 'utilisateur', 'date_creation']
+        read_only_fields = ['id_space', 'date_creation']

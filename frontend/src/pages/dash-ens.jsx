@@ -58,6 +58,14 @@ export default function Dashboardens() {
     quizzes_count: 0
   });
 
+  // Données mockées pour les notifications (fallback)
+  const mockNotifications = [
+    { title: "Emma Wilson completed Python Basics Quiz", date: "2nd Feb", day: "Tuesday", time: "11:30 - 12:30" },
+    { title: "James Lee submitted Loop Assignment", date: "3rd Feb", day: "Wednesday", time: "11:30 - 12:30" },
+    { title: "Sophia Chen asked question in Arrays & Strings", date: "5th Feb", day: "Tuesday", time: "11:30 - 12:30" },
+    { title: "Michael Brown completed Data Structures Course", date: "8th Feb", day: "Monday", time: "11:30 - 12:30" },
+  ];
+
   // Gestion de la responsivité
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -181,9 +189,36 @@ export default function Dashboardens() {
     fetchContentCounts();
   }, []);
 
+  // Formater les notifications pour l'affichage
+  const formatNotificationsForFeed = () => {
+    // Vérifier si nous avons des notifications réelles
+    const hasRealNotifications = notifications && 
+                                 Array.isArray(notifications) && 
+                                 notifications.length > 0;
+
+    if (hasRealNotifications) {
+      // Utiliser les notifications réelles
+      return notifications.slice(0, 4).map(notif => {
+        const dateObj = notif.date_envoie ? dayjs(notif.date_envoie) : dayjs();
+        
+        return {
+          title: notif.message_notif || "Notification",
+          date: dateObj.format("DD/MM/YYYY"),
+          day: dateObj.format("dddd"),
+          time: dateObj.format("HH:mm")
+        };
+      });
+    }
+    
+    // Fallback sur les données mockées
+    return mockNotifications;
+  };
+
   // Formater le temps en format lisible
   const formatTimeStyled = (secs) => {
-    if (!secs || secs < 60) return <span className="text-blue font-bold">1 min</span>;
+    if (!secs || secs < 60) {
+      return <span className="text-blue font-bold">1 min</span>;
+    }
 
     const mins = Math.floor(secs / 60);
     const h = Math.floor(mins / 60);
@@ -197,30 +232,6 @@ export default function Dashboardens() {
         {s > 0 && <span style={{ fontSize: 26 }} className="text-blue">{s}s</span>}
       </span>
     );
-  };
-
-  // Formater les notifications pour l'affichage
-  const formatNotificationsForFeed = () => {
-    if (!notifications || notifications.length === 0) {
-      // Données mockées par défaut
-      return [
-        { title: "Emma Wilson completed Python Basics Quiz", date: "2nd Feb", day: "Tuesday", time: "11:30 - 12:30" },
-        { title: "James Lee submitted Loop Assignment", date: "3rd Feb", day: "Wednesday", time: "11:30 - 12:30" },
-        { title: "Sophia Chen asked question in Arrays & Strings", date: "5th Feb", day: "Tuesday", time: "11:30 - 12:30" },
-        { title: "Michael Brown completed Data Structures Course", date: "8th Feb", day: "Monday", time: "11:30 - 12:30" },
-      ];
-    }
-    
-    return notifications.slice(0, 4).map(notif => {
-      const dateObj = notif.date_envoie ? dayjs(notif.date_envoie) : dayjs();
-      
-      return {
-        title: notif.message_notif || "Notification",
-        date: dateObj.format("DD/MM/YYYY"),
-        day: dateObj.format("dddd"),
-        time: dateObj.format("HH:mm")
-      };
-    });
   };
 
   // Données pour le graphique circulaire

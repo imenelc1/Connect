@@ -44,5 +44,5 @@ export default function SessionTracker() {
     };
   }, []);
 
-  return null; // ce composant n'affiche rien
+  return null;
 }
