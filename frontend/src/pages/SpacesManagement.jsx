@@ -65,13 +65,31 @@ export default function SpacesPage() {
     };
   }, []);
 
+  // Effet pour la responsivité
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Gestion de la sidebar
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+    
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
+
   const filteredSpaces = spaces.filter((s) =>
     s.title.toLowerCase().includes(search.toLowerCase())
   );
 
   const fields = [
-    { label: t("editModalTitle"), placeholder: "Ex: Algorithm Masters", value: newSpace.title, onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }) },
-    { label: t("editModalSubtitle"), placeholder: t("subtitlePlaceholder"), value: newSpace.description, onChange: (e) => setNewSpace({ ...newSpace, description: e.target.value }) },
+    { label: t("title"), value: newSpace.title, onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }) },
+    { label: t("description"), value: newSpace.description, onChange: (e) => setNewSpace({ ...newSpace, description: e.target.value }) },
   ];
 
   const handleSubmit = (e) => {

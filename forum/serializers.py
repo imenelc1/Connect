@@ -1,8 +1,6 @@
 # forum/serializers.py
 from rest_framework import serializers
 from .models import Forum, Message, Commentaire, Like, MessageLike
-from users.models import Utilisateur
-
 
 class CommentaireSerializer(serializers.ModelSerializer):
     utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
@@ -27,7 +25,6 @@ class ForumSerializer(serializers.ModelSerializer):
     nombre_messages = serializers.SerializerMethodField()
     nombre_likes = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()
-
     class Meta:
         model = Forum
         fields = [
@@ -45,21 +42,18 @@ class ForumSerializer(serializers.ModelSerializer):
             'user_has_liked'
         ]
         read_only_fields = ('utilisateur', 'date_creation')
-
     def get_nombre_messages(self, obj):
         return obj.messages.count()
-
+   
     def get_nombre_likes(self, obj):
         return obj.likes.count()
-
+   
     def get_user_has_liked(self, obj):
         request = self.context.get('request')
-        user = getattr(request, "user", None)
-        # Vérifie que user est bien un Utilisateur avant le filter
-        if isinstance(user, Utilisateur):
-            return obj.likes.filter(utilisateur=user).exists()
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(utilisateur=request.user).exists()
         return False
-    
+
 class MessageSerializer(serializers.ModelSerializer):
     utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
     utilisateur_prenom = serializers.CharField(source='utilisateur.prenom', read_only=True)

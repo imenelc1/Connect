@@ -263,9 +263,6 @@ useEffect(() => {
           <p className="text-green-700 font-semibold text-sm sm:text-base">
              Cours terminé !
           </p>
-          <p className="text-muted text-xs sm:text-sm mt-1">
-            Vous progressez, continuez ainsi
-          </p>
         </div>
       )}
 

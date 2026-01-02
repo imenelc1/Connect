@@ -88,3 +88,4 @@ def notify_students_on_course_publish(sender, instance, created, **kwargs):
 
     if notifications:
         Notification.objects.bulk_create(notifications)
+

@@ -1,3 +1,4 @@
+// src/contexts/NotificationContext.jsx
 import React, { createContext, useState, useContext, useEffect, useCallback, useRef } from 'react';
 
 const NotificationContext = createContext();
@@ -20,22 +21,15 @@ export const NotificationProvider = ({ children }) => {
   const isFetching = useRef(false);
   
   // Récupère le token depuis localStorage
-  const getToken = useCallback(() => {
-    const token = localStorage.getItem("admin_token") || 
-                  localStorage.getItem("access") || 
-                  localStorage.getItem("token");
-    if (!token) {
-      console.warn("⚠️ Pas de token JWT trouvé dans le localStorage !");
-      return null;
-    }
-    return token;
-  }, []);
-
+  const getToken = () => {
+    return localStorage.getItem('access') || localStorage.getItem('token');
+  };
+  
   const API_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:8000/api' 
     : '/api';
 
-  // Fonction pour fetch les notifications complètes
+  // Fonction pour fetch les notifications
   const fetchNotifications = useCallback(async () => {
     const token = getToken();
     if (!token || isFetching.current) {
@@ -79,7 +73,7 @@ export const NotificationProvider = ({ children }) => {
       }
       isFetching.current = false;
     }
-  }, [API_URL, getToken]);
+  }, [API_URL]);
 
   // Fonction pour fetch uniquement le compteur non lu
   const fetchUnreadCount = useCallback(async () => {
@@ -103,7 +97,7 @@ export const NotificationProvider = ({ children }) => {
     } catch (err) {
       console.error('❌ Erreur comptage non lus:', err);
     }
-  }, [API_URL, getToken]);
+  }, [API_URL]);
 
   // Marquer une notification comme lue
   const markAsRead = useCallback(async (notifId) => {
@@ -132,13 +126,10 @@ export const NotificationProvider = ({ children }) => {
     } catch (err) {
       console.error('❌ Erreur marquage lu:', err);
     }
-  }, [API_URL, getToken]);
+  }, [API_URL]);
 
   // Marquer toutes comme lues
   const markAllAsRead = useCallback(async () => {
-    const token = getToken();
-    if (!token) return;
-
     const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id_notif);
     if (unreadIds.length === 0) return;
 
@@ -148,38 +139,31 @@ export const NotificationProvider = ({ children }) => {
     );
     setUnreadCount(0);
 
-    try {
-      // Utilisez une requête batch si votre API le supporte
-      // Sinon, envoyez les requêtes en parallèle
-      const promises = unreadIds.map(id =>
-        fetch(`${API_URL}/notifications/${id}/mark-read/`, {
+    // Envoie les requêtes au backend
+    const token = getToken();
+    if (!token) return;
+
+    unreadIds.forEach(async (id) => {
+      try {
+        await fetch(`${API_URL}/notifications/${id}/mark-read/`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
-        })
-      );
-      
-      await Promise.all(promises);
-      console.log(`✅ ${unreadIds.length} notifications marquées comme lues`);
-    } catch (error) {
-      console.error('❌ Erreur marquage multiple:', error);
-    }
-  }, [notifications, API_URL, getToken]);
-
-  // Rafraîchir les notifications après marquage comme lu
-  const refreshAfterMarkRead = useCallback(() => {
-    if (isMounted.current && !isFetching.current) {
-      fetchUnreadCount();
-    }
-  }, [fetchUnreadCount]);
+        });
+      } catch (error) {
+        console.error(`❌ Erreur marquage ${id}:`, error);
+      }
+    });
+  }, [notifications, API_URL]);
 
   // Écouteur d'événements personnalisé pour les nouvelles notifications
   const setupEventListeners = useCallback(() => {
+    // Écouter l'événement personnalisé 'new-notification'
     const handleNewNotification = () => {
-      console.log('📢 Événement new-notification reçu');
-      refreshAfterMarkRead();
+      console.log('📢 Événement new-notification reçu, rafraîchissement...');
+      fetchUnreadCount();
     };
 
     window.addEventListener('new-notification', handleNewNotification);
@@ -187,7 +171,7 @@ export const NotificationProvider = ({ children }) => {
     return () => {
       window.removeEventListener('new-notification', handleNewNotification);
     };
-  }, [refreshAfterMarkRead]);
+  }, [fetchUnreadCount]);
 
   // Chargement initial
   useEffect(() => {
@@ -201,9 +185,8 @@ export const NotificationProvider = ({ children }) => {
 
     return () => {
       isMounted.current = false;
-      window.removeEventListener('new-notification', setupEventListeners);
     };
-  }, [fetchNotifications, setupEventListeners, getToken]);
+  }, [fetchNotifications, setupEventListeners]);
 
   // Rafraîchissement automatique toutes les 30 secondes
   useEffect(() => {
@@ -211,29 +194,12 @@ export const NotificationProvider = ({ children }) => {
 
     const interval = setInterval(() => {
       if (isMounted.current && !isFetching.current) {
-        fetchUnreadCount();
+        fetchUnreadCount(); // Juste le compteur, plus léger
       }
     }, 30000); // 30 secondes
 
     return () => clearInterval(interval);
-  }, [fetchUnreadCount, getToken]);
-
-  // Nettoyer à la déconnexion
-  useEffect(() => {
-    const handleStorageChange = () => {
-      if (!getToken()) {
-        // Utilisateur déconnecté, nettoyer les notifications
-        setNotifications([]);
-        setUnreadCount(0);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [getToken]);
+  }, [fetchUnreadCount]);
 
   return (
     <NotificationContext.Provider
@@ -246,7 +212,6 @@ export const NotificationProvider = ({ children }) => {
         fetchUnreadCount,
         markAsRead,
         markAllAsRead,
-        refreshAfterMarkRead,
       }}
     >
       {children}

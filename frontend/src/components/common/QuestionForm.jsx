@@ -103,18 +103,33 @@ const removeQuestion = (qIndex) => {
             value={q.text}
             onChange={(e) => updateQuestionText(qIndex, e.target.value)}
             placeholder={t("questionText")}
-            className="w-full text-sm border rounded-xl px-3 py-2 text-black"
+            className="w-full shadow-md text-sm border rounded-xl px-3 py-2 text-black"
           />
 
-          {/* Score input */}
-          <input
-            type="number"
-            min={1}
-            value={q.points || 1}
-            onChange={(e) => handleQuestionChange(qIndex, "points", parseFloat(e.target.value) || 1)}
-            placeholder="Points"
-            className="w-24 mb-2 mt-2"
-          />
+{/* Score input */}
+<div className="flex items-center gap-2 mt-2 mb-2">
+  
+
+  <input
+    type="number"
+    min={1}
+    value={q.points || 1}
+    onChange={(e) =>
+      handleQuestionChange(
+        qIndex,
+        "points",
+        parseFloat(e.target.value) || 1
+      )
+    }
+    className="w-20 text-center border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+  />
+
+  <span className="text-sm text-gray-600 font-medium">
+    points
+  </span>
+</div>
+
+
 
           {/* Answers */}
           <div className="mt-3">
@@ -127,7 +142,7 @@ const removeQuestion = (qIndex) => {
                   name={`correct-answer-${qIndex}`}
                   checked={a.isCorrect}
                   onChange={() => markCorrectAnswer(qIndex, aIndex)}
-                  className="w-4 h-4"
+                  className="w-4 h-4 shadow-md"
                 />
                 <span className="font-semibold">{String.fromCharCode(65 + aIndex)}.</span>
                 <input
@@ -141,7 +156,7 @@ const removeQuestion = (qIndex) => {
                       ? t("answerOptionB")
                       : t("answerOption")
                   }
-                  className="flex-1 text-sm border rounded-xl px-3 py-2 text-black"
+                  className="flex-1 text-sm border rounded-xl px-3 py-2 text-black shadow-md"
                   style={{ borderColor: "#e5e7eb", background: "white" }}
                 />
                 {/* Bouton trash option */}

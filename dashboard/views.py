@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
-from badges.views import check_course_badges, check_first_steps_badge, check_marathon_coder_badge, check_problem_solver_badge
+from badges.views import check_7day_streak_badge, check_course_badges, check_first_steps_badge, check_marathon_coder_badge, check_problem_solver_badge, check_speed_demon_badge
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
@@ -21,7 +21,7 @@ from users.models import Etudiant, Utilisateur
 from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration, TentativeExercice
 from django.views.decorators.csrf import csrf_exempt
 from datetime import timedelta
-
+from feedback.views import FeedbackExercice
 from rest_framework.exceptions import PermissionDenied
 from django.db.models.functions import TruncWeek
 from django.db.models import Count
@@ -822,7 +822,6 @@ class create_tentative(APIView):
                         temps_passe=defaults["temps_passe"],
                         submitted_at=now()
                     )
-
         return Response({
             "success": "Tentative enregistrée",
             "tentative": {
@@ -898,13 +897,13 @@ def student_exercises(request, student_id):
     except Utilisateur.DoesNotExist:
         return Response({"error": "Étudiant non trouvé"}, status=404)
 
-    # tous les espaces du prof où l’étudiant est inscrit
+    # Tous les espaces du prof où l'étudiant est inscrit
     spaces = Space.objects.filter(
         utilisateur=prof,
         spaceetudiant__etudiant=student
     ).distinct()
 
-    # tous les exercices du prof dans ces espaces
+    # Tous les exercices du prof dans ces espaces
     exercises = Exercice.objects.filter(
         utilisateur=prof,
         spaceexo__space__in=spaces
@@ -916,27 +915,57 @@ def student_exercises(request, student_id):
     results = []
 
     for ex in exercises:
-        # toutes les tentatives de l’étudiant pour cet exercice, triées par date décroissante
+        # Récupérer TOUTES les tentatives
         tentatives = TentativeExercice.objects.filter(
             exercice=ex,
             utilisateur=student
         ).order_by("-submitted_at")
-
-        # compter combien ont été soumises
-        submitted_count += tentatives.filter(etat="soumis").count()
+        
+        # Calculer les stats
+        nb_soumissions = tentatives.filter(etat="soumis").count()
+        max_soumissions = ex.max_soumissions
+        
+        # Pour CHAQUE tentative, récupérer son feedback
+        tentative_data = []
+        for t in tentatives:
+            # Chercher le feedback dans FeedbackExercice
+            feedback_contenu = ""
+            feedback_id = None
+            try:
+                feedback_obj = FeedbackExercice.objects.get(tentative=t)
+                feedback_contenu = feedback_obj.contenu
+                feedback_id = feedback_obj.id
+            except FeedbackExercice.DoesNotExist:
+                # Fallback sur l'ancien champ
+                feedback_contenu = t.feedback if t.feedback else ""
+            
+            tentative_data.append({
+                "id": t.id,
+                "etat": t.etat,
+                "reponse": t.reponse,
+                "output": t.output,
+                "submitted_at": t.submitted_at,
+                "score": t.score,
+                "feedback": feedback_contenu,  # Feedback pour CETTE tentative
+                "feedback_id": feedback_id,     # ID du feedback si existe
+                "numero_tentative": None,  # On va calculer ça après
+            })
+        
+        # Calculer le numéro de chaque tentative (basé sur l'ordre de soumission)
+        tentatives_soumises = [t for t in tentative_data if t["etat"] == "soumis"]
+        tentatives_soumises.sort(key=lambda x: x["submitted_at"] or "1970-01-01")
+        
+        for i, t in enumerate(tentatives_soumises, 1):
+            t["numero_tentative"] = i
+        
+        submitted_count += nb_soumissions
 
         results.append({
             "id_exercice": ex.id_exercice,
             "nom_exercice": ex.titre_exo,
-            "tentatives": [
-                {
-                    "etat": t.etat,
-                    "reponse": t.reponse,
-                    "output": t.output,
-                    "submitted_at": t.submitted_at,
-                    "score": t.score,
-                } for t in tentatives
-            ]
+            "max_soumissions": max_soumissions,
+            "nb_soumissions": nb_soumissions,
+            "tentatives": tentative_data  # TOUTES les tentatives avec leurs feedbacks
         })
 
     return Response({
@@ -1315,3 +1344,4 @@ def all_students_submissions(request):
         "total_exercises": total_exercises,
         "students": result
     })
+

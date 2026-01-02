@@ -1,9 +1,12 @@
 {
   "community": {
     "title": "Communauté",
-    "subtitle": "Échangez avec d'autres enseignants et partagez votre expérience",
+    "subtitle": "Échangez avec les autres et partagez votre expérience",
     "placeholder": "Partagez avec la communauté...",
-    "send": "Envoyer"
+    "send": "Envoyer",
+    "notConnected": "Non connecté",
+    "pleaseLogin": "Veuillez vous connecter",
+    "login": "Se connecter"
   },
   "tabs": {
     "recent": "Récent",
@@ -11,10 +14,82 @@
     "myforums": "Mes forums"
   },
   "forums": {
-    "select": "Choisir un type de forum",
+    "select": "Sélectionnez le type de forum",
     "all": "Tous les forums",
     "teacher-teacher": "Enseignant ↔ Enseignant",
     "teacher-student": "Enseignant ↔ Étudiant",
-    "student-student": "Étudiant ↔ Étudiant"
+    "student-student": "Étudiant ↔ Étudiant",
+    "student-teacher": "Étudiant ↔ Enseignant",
+    "studentReserved": "réservé aux étudiants",
+    "instructorReserved": "réservé aux enseignants",
+    "teacher-teacher-short": "enseignants",
+  "teacher-student-short": "étudiants",
+  "student-student-short": "étudiants",
+  "student-teacher-short": "enseignants",
+   "defaultTarget": "étudiants"
+  },
+  "actions": {
+    "like": "Aimer",
+    "likes": "Likes",
+    "comment": "Commenter",
+    "comments": "Commentaires",
+    "deleteForum": "Supprimer le forum",
+    "deleteComment": "Supprimer le commentaire",
+    "cancel": "Annuler",
+    "sendMessage": "Envoyer la réponse",
+    "sendComment": "Envoyer le commentaire",
+    "yourForum": "Votre forum",
+    "studentQuestion": "Question d'étudiant",
+    "hideMessages": "Masquer les messages",
+    "showMessages": "Afficher les messages"
+  },
+  "placeholders": {
+    "writeResponse": "Écrivez votre réponse... (max 2000 caractères)",
+    "writeComment": "Écrivez un commentaire... (max 1000 caractères)"
+  },
+  "messages": {
+    "deleteForumConfirm": "Supprimer ce forum ? Cette action est irréversible. Tous les messages et commentaires seront supprimés.",
+    "deleteCommentConfirm": "Supprimer ce commentaire ?",
+    "noForums": "Aucun forum",
+    "firstForum": "Soyez le premier à créer un forum !",
+    "noForumType": "Aucun forum de type \"{{type}}\"",
+    "likeError": "Erreur lors de l'ajout du like",
+    "deleteError": "Erreur lors de la suppression du forum",
+    "noPermission": "Ce forum est {{type}}. Vous n'avez pas la permission de répondre.",
+    "forumNOTfound": "Forum introuvable",
+    "loginDel": "Vous devez vous connecter pour supprimer un forum"
+  
+
+  },
+  "notifications": {
+    "posting": "Publication en cours...",
+    "deleting": "Suppression en cours...",
+    "likesCount": "{{count}} like",
+    "likesCount_plural": "{{count}} likes",
+    "commentsCount": "{{count}} commentaire",
+    "commentsCount_plural": "{{count}} commentaires",
+    "characters": "{{count}}/2000 caractères",
+    "commentCharacters": "{{count}}/1000 caractères"
+  },
+  "errors": {
+    "loadMessages": "Erreur lors du chargement des messages",
+    "forumNotFound": "Forum introuvable",
+    "emptyMessage": "Veuillez écrire un message",
+    "loginRequired": "Vous devez être connecté",
+    "maxCharacters": "Le message dépasse la limite de caractères (2000)",
+    "sendMessage": "Erreur lors de l'envoi du message",
+    "likeError": "Erreur lors de l'ajout du like",
+    "deleteError": "Erreur lors de la suppression du forum",
+    "noPermission": "Ce forum est {{type}}. Vous n'avez pas la permission de répondre.",
+    "unknownError": "Erreur inconnue",
+    "networkLike": "Erreur réseau lors du like",
+    "networkDelete": "Erreur réseau lors de la suppression du forum",
+    "loginLike": "Vous devez être connecté pour liker",
+    "missingToken": "Token manquant - Veuillez vous reconnecter",
+      "loadForums": "Impossible de charger les forums. Vérifiez votre connexion.",
+      "loadForumsError": "Erreur chargement forums:",
+"selectPlaceholder": "Sélectionner un type"
+
+
   }
 }

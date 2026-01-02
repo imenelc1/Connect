@@ -25,7 +25,8 @@ export default function StartExercise() {
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
-  const [output, setOutput] = useState("Aucune sortie pour le moment...");
+  const [output, setOutput] = useState("");
+
   const [isRunning, setIsRunning] = useState(false);
   const [userInput, setUserInput] = useState("");
 
@@ -71,24 +72,36 @@ int main() {
   // -------- Fetch Exercise --------
   useEffect(() => {
     if (!exerciceId) return;
+
     const fetchExercise = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:8000/api/exercices/${exerciceId}/`
-        );
+        const res = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         setExercise(data);
-        setStartTime(Date.now());
-        sendNotification("Exercice chargé !");
-      } catch {
-        sendNotification("Impossible de charger l'exercice", "error");
+
+        // Après avoir chargé l'exercice, on check canSubmit
+        const canSubmitRes = await fetch(
+          `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          }
+        );
+        const canSubmitData = await canSubmitRes.json();
+        setCanSubmit(canSubmitData.can_submit);
+      } catch (err) {
+        sendNotification(t("errors.exerciseNOTLoad"), "error");
+
+        setCanSubmit(false);
       } finally {
         setLoadingExercise(false);
       }
     };
+
     fetchExercise();
   }, [exerciceId]);
+
+
 
   // -------- Load last code (localStorage first, then server draft) --------
   useEffect(() => {
@@ -138,7 +151,7 @@ int main() {
           etat: "brouillon",
           temps_passe: Math.floor((Date.now() - startTime) / 1000),
         });
-      } catch {}
+      } catch { }
     }, 1000);
     return () => clearTimeout(timer);
   }, [userCode, output, exerciceId, startTime]);
@@ -146,7 +159,7 @@ int main() {
   // -------- Inactivity hint --------
   useEffect(() => {
     const t = setTimeout(
-      () => sendNotification("Tu as besoin d'un indice ?", "hint"),
+      () => sendNotification(t("assistant.tipHelper"), "hint"),
       60000
     );
     return () => clearTimeout(t);
@@ -161,57 +174,59 @@ int main() {
           { source_code: userCode, language_id: 49 }
         );
         if (res.data.stderr)
-          sendNotification("Erreur détectée — vérifie la syntaxe", "hint");
-      } catch {}
+          sendNotification(t("errors.syntaxError"), "hint");
+
+      } catch { }
     }, 10000);
     return () => clearTimeout(t);
   }, [userCode]);
 
   // -------- Run / Debug / Stop --------
- const runCode = async () => {
-  setIsRunning(true);
-  setOutput("Exécution en cours...");
+  const runCode = async () => {
+    setIsRunning(true);
+    setOutput(t("messages.runningEXE"));
 
-  try {
-    const res = await axios.post(
-      "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-      {
-        source_code: userCode,
-        language_id: 49,
-        stdin: userInput,
-      }
-    );
 
-    const {
-      stdout,
-      stderr,
-      compile_output,
-      status,
-    } = res.data;
-
-    const result =
-      stdout ||
-      stderr ||
-      compile_output ||
-      "Aucune sortie pour le moment...";
-
-    setOutput(result);
-
-    // 🚨 NOTIFICATION IMMÉDIATE
-    if (stderr || compile_output) {
-      sendNotification(
-        "⚠️ Erreur détectée lors de l'exécution. Besoin d’un coup de main ?",
-        "hint"
+    try {
+      const res = await axios.post(
+        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+        {
+          source_code: userCode,
+          language_id: 49,
+          stdin: userInput,
+        }
       );
-    }
 
-  } catch {
-    setOutput("Erreur pendant l'exécution");
-    sendNotification("Erreur pendant l'exécution", "error");
-  } finally {
-    setIsRunning(false);
-  }
-};
+      const {
+        stdout,
+        stderr,
+        compile_output,
+        status,
+      } = res.data;
+
+      const result =
+        stdout ||
+        stderr ||
+        compile_output ||
+        "Aucune sortie pour le moment...";
+
+      setOutput(result);
+
+      // 🚨 NOTIFICATION IMMÉDIATE
+      if (stderr || compile_output) {
+        sendNotification(
+          t("assistant.executionErrorHelp"), "hint"
+        );
+      }
+
+    } catch {
+      setOutput(t("errors.exeError"));
+      sendNotification(t("errors.exeError"), "error");
+
+    } finally {
+      setIsRunning(false);
+    }
+  };
 
 
   const debugCode = async () => {
@@ -222,10 +237,12 @@ int main() {
         { source_code: userCode, language_id: 49 }
       );
       if (res.data.stderr) {
-        setOutput("Erreur détectée :\n\n" + res.data.stderr);
-        sendNotification("Bug détecté", "hint");
+        setOutput(`${t("errors.errorDetected")}\n\n${res.data.stderr}`);
+        sendNotification(t("errors.bugDetected"), "hint");
+
       } else {
-        setOutput("Aucun bug détecté");
+        setOutput(t("messages.noBugs"));
+
       }
     } finally {
       setIsRunning(false);
@@ -247,10 +264,12 @@ int main() {
         etat: "brouillon",
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
-      toast.success("Code sauvegardé");
-      sendNotification("Brouillon sauvegardé !");
+      toast.success(t("messages.codeSave"));
+      sendNotification(t("messages.draftSave"));
+
     } catch {
-      toast.error("Erreur lors de la sauvegarde");
+      toast.error(t("errors.errorSave"));
+
     }
   };
 
@@ -264,9 +283,11 @@ int main() {
         overwrite,
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
-      toast.success("Exercice soumis");
+      toast.success(t("messages.exoSubmitted"));
+
     } catch {
-      toast.error("Erreur lors de la soumission");
+      toast.error(t("errors.errorSubmit"));
+
     }
   };
 
@@ -346,7 +367,7 @@ int main() {
             {exercise ? (
               <>
                 <p className="font-semibold text-muted text-[20px]">
-                  Exercice: {exercise.titre_exo}
+                  {t("header.label")}  {exercise.titre_exo}
                 </p>
                 <p className="mt-3 text-muted text-sm md:text-base">
                   {exercise.enonce}
@@ -354,7 +375,7 @@ int main() {
               </>
             ) : (
               <p className="text-red-500 text-sm">
-                Impossible de charger l'exercice.
+                {t("errors.exerciseNOTLoad")}
               </p>
             )}
           </div>
@@ -388,11 +409,11 @@ int main() {
           </div>
           {/* Input pour scanf */}
           <div className="mb-4">
-            <label className="text-sm text-gray-300 mb-1 block">Entrées (stdin)</label>
+            <label className="text-sm text-gray-300 mb-1 block">{t("input.stdinLabel")}</label>
             <textarea
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              placeholder="Tapez ici vos entrées, séparées par Enter"
+              placeholder={t("input.stdinPlaceholder")}
               className="w-full p-2 rounded bg-gray-900 text-white font-mono resize-none"
               rows={4}
             />
@@ -403,7 +424,8 @@ int main() {
           <div className="flex flex-wrap justify-center gap-4 mb-10">
             <ActionButton
               icon={<Play size={18} />}
-              label={isRunning ? "Exécution..." : t("buttons.run")}
+              label={isRunning ? t("messages.runningEXE") : t("buttons.run")}
+
               bg="var(--grad-button)"
               onClick={runCode}
             />
@@ -449,7 +471,8 @@ int main() {
       `}
                 style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
               >
-                {t("send_solution")}
+                {t("buttons.sendSolution")}
+
               </button>
             </div>
           )}
@@ -460,7 +483,9 @@ int main() {
             {t("output.title")}
           </p>
           <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
-            {output.split("\n").map((line, i) => (
+            {/* {output.split("\n").map((line, i) => ( */}
+            {(output || t("output.noOutput")).split("\n").map((line, i) => (
+
               <div key={i}>{line}</div>
             ))}
           </div>
@@ -479,7 +504,8 @@ int main() {
                 />
               </div>
               <div className="text-[rgb(var(--color-primary))] font-medium">
-                Besoin d'aide ? Discutez avec l'Assistant IA
+                {t("assistant.help")}
+
               </div>
             </button>
           </div>

@@ -4,6 +4,7 @@ from django.db.models import Q
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from badges.views import check_quiz_novice_badge, check_quiz_whiz_badge
 from dashboard.models import ProgressionHistory
 from users.jwt_auth import jwt_required
 from django.utils import timezone
@@ -136,7 +137,8 @@ class QuizSubmitView(APIView):
             temps_passe=timedelta(seconds=0)
         )
         
-
+        check_quiz_novice_badge(request.user)
+        check_quiz_whiz_badge(request.user, quiz)
         return Response({
             "score": score_total,
             "scoreMinimum": quiz.scoreMinimum,
