@@ -33,6 +33,7 @@ const handleChange = (field, value) => {
           <input
             value={quizData.title || ""}
             onChange={(e) => handleChange("title", e.target.value)}
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -43,6 +44,7 @@ const handleChange = (field, value) => {
             value={quizData.description || ""}
             onChange={(e) => handleChange("description", e.target.value)}
             rows={3}
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -107,7 +109,8 @@ const handleChange = (field, value) => {
     onChange={(e) =>
       onQuizChange("passingScore", parseInt(e.target.value) || 0)
     }
-    className="w-full text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
+    className="w-full  shadow-md text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
+    
   />
 </div>
 
@@ -121,6 +124,7 @@ const handleChange = (field, value) => {
             onChange={(e) =>
               handleChange("maxAttempts", parseInt(e.target.value) || 0)
             }
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -133,7 +137,9 @@ const handleChange = (field, value) => {
             value={quizData.delais_entre_tentative || 0}
             onChange={(e) =>
               handleChange("delais_entre_tentative", parseInt(e.target.value) || 0)
+
             }
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -146,6 +152,7 @@ const handleChange = (field, value) => {
             onChange={(e) =>
               handleChange("durationEnabled", e.target.checked)
             }
+            
           />
           <label>{t("enableDuration")}</label>
         </div>
@@ -158,6 +165,7 @@ const handleChange = (field, value) => {
             onChange={(e) =>
               handleChange("duration", parseInt(e.target.value) || 0)
             }
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         )}
       </div>

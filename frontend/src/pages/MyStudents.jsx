@@ -34,6 +34,19 @@ export default function MyStudents() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth < 768);
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+useEffect(() => {
+  const handler = (e) => setSidebarCollapsed(e.detail);
+  window.addEventListener("sidebarChanged", handler);
+  return () => window.removeEventListener("sidebarChanged", handler);
+}, []);
+
 
 
 
@@ -183,13 +196,27 @@ export default function MyStudents() {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-surface">
+  <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+    {/* Sidebar */}
+    <div>
+      <Navbar />
+    </div>
+
+    {/* Main */}
+    <main
+      className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300
+        min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}
+    >
       {/* Header */}
-      <div className="flex justify-between items-center w-full m-5 pl-4 lg:pl-60">
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-muted">
+      <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+        <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
           {t("myStudentsTitle")}
         </h1>
-        <div className="flex items-center gap-4 mr-8">
+
+        <div className="flex items-center gap-3">
           <NotificationBell />
           <UserCircle
             initials={initials}
@@ -197,130 +224,122 @@ export default function MyStudents() {
             onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
           />
         </div>
+      </header>
+
+      {/* Action */}
+      <div className="flex justify-end mb-6">
+        <Button
+          variant="primary"
+          className="w-full sm:w-auto p-6"
+          onClick={() => setModal(true)}
+        >
+          {t("addStudent")}
+        </Button>
       </div>
 
-      <div className="flex w-full">
-        <Navbar />
+      {/* Students grid */}
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+        {studentsList.length > 0 ? (
+          studentsList.map((st, index) => {
+            const gradients = ["bg-grad-2", "bg-grad-3", "bg-grad-4"];
+            const randomGrad = gradients[index % gradients.length];
 
-        <div className="flex-1 p-4 sm:p-6 ml-0 mt-5 lg:ml-60 transition-all duration-300">
-          {/* Boutons */}
-          <div className="flex flex-col sm:flex-row justify-end sm:items-center gap-4 mb-6">
-            <Button
-              variant="primary"
-              className="!px-4 !py-2 !w-auto"
-              onClick={() => setModal(true)}
-            >
-              {t("addStudent")}
-            </Button>
-          </div>
-
-          {/* Liste des étudiants */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {studentsList.length > 0 ? (
-              studentsList.map((st, index) => {
-                const gradients = ["bg-grad-2", "bg-grad-3", "bg-grad-4"];
-                const randomGrad = gradients[index % gradients.length];
-
-                return (
-                  <div
-                    key={st.id}
-                    className={`p-6 rounded-2xl shadow-lg border border-white/10 ${randomGrad}
-                      transition-transform duration-300 hover:scale-[1.03] hover:shadow-2xl`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-[180px]">
-                        <div className="flex gap-5">
-                          <UserCircle
-                            initials={(st.prenom[0] || "") + (st.nom[0] || "")}
-                            className="w-14 h-14"
-                          />
-                          <h2 className="font-semibold text-lg text-textc whitespace-nowrap">
-                            {st.prenom} {st.nom}
-                          </h2>
-                        </div>
-
-                        {/* RIGHT ARROW */}
-                        <Button className="!w-9 !h-9 !p-0 !min-w-0 flex mt-10"
-                          onClick={() => navigate(`/student-exercises/${st.id}`)}>
-                          <ChevronRight size={16} className="w-6 h-6" />
-
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Badges espaces */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {st.spaces.map((spName, i) => (
-                        <span
-                          key={i}
-                          className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2"
-                        >
-                          {spName}
-                          <button
-                            onClick={() => handleRemove(st.id, st.spacesIds[i])}
-                            className="text-red-500 font-bold"
-                          >
-                            <X size={12} />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Progress bar */}
-                    <div className="w-full h-3 bg-grayc/20 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-grad-1 rounded-full"
-                        style={{
-                          width: `${studentsProgress[st.id]
-                            }%`,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <p className="text-grayc">{t("noStudentsMessage")}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Modal */}
-      <AddModal
-        open={modal}
-        onClose={() => setModal(false)}
-        title={t("addStudentTitle")}
-        subtitle={t("addStudentSubtitle")}
-        submitLabel={t("addStudentSubmit")}
-        cancelLabel={t("addStudentCancel")}
-        onSubmit={handleSubmit}
-        fields={[
-          {
-            label: t("email"),
-            placeholder: t("emailPlaceholder"),
-            value: email,
-            onChange: (e) => setEmail(e.target.value),
-          },
-          {
-            label: t("space"),
-            element: (
-              <select
-                value={space}
-                onChange={(e) => setSpace(e.target.value)}
-                className="w-full border rounded px-3 py-2 text-black/80"
+            return (
+              <div
+                key={st.id}
+                className={`p-6 rounded-2xl shadow-lg border border-white/10 ${randomGrad}
+                transition-transform duration-300 hover:scale-[1.03]`}
               >
-                <option value="">{t("selectSpace")}</option>
-                {spacesList.map((s) => (
-                  <option key={s.id_space} value={s.id_space}>
-                    {s.nom_space}
-                  </option>
-                ))}
-              </select>
-            ),
-          },
-        ]}
-      />
-    </div>
-  );
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <UserCircle
+                      initials={(st.prenom[0] || "") + (st.nom[0] || "")}
+                      className="w-12 h-12"
+                    />
+                    <h2 className="font-semibold text-base sm:text-lg text-textc">
+                      {st.prenom} {st.nom}
+                    </h2>
+                  </div>
+
+                  <Button
+                    className="!w-9 !h-9 !p-0 !min-w-0"
+                    onClick={() => navigate(`/student-exercises/${st.id}`)}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* Spaces */}
+                <div className="flex flex-wrap gap-2 my-4">
+                  {st.spaces.map((spName, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2"
+                    >
+                      {spName}
+                      <button
+                        onClick={() => handleRemove(st.id, st.spacesIds[i])}
+                        className="text-red-500"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+
+                {/* Progress */}
+                <div className="w-full h-3 bg-grayc/20 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-grad-1 rounded-full"
+                    style={{ width: `${studentsProgress[st.id] ?? 0}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })
+        ) : (
+          <p className="text-grayc">{t("noStudentsMessage")}</p>
+        )}
+      </div>
+    </main>
+
+    {/* Modal */}
+    <AddModal
+      open={modal}
+      onClose={() => setModal(false)}
+      title={t("addStudentTitle")}
+      subtitle={t("addStudentSubtitle")}
+      submitLabel={t("addStudentSubmit")}
+      cancelLabel={t("addStudentCancel")}
+      onSubmit={handleSubmit}
+      fields={[
+        {
+          label: t("email"),
+          placeholder: t("emailPlaceholder"),
+          value: email,
+          onChange: (e) => setEmail(e.target.value),
+        },
+        {
+          label: t("space"),
+          element: (
+            <select
+              value={space}
+              onChange={(e) => setSpace(e.target.value)}
+              className="w-full border rounded px-3 py-2 text-black/80"
+            >
+              <option value="">{t("selectSpace")}</option>
+              {spacesList.map((s) => (
+                <option key={s.id_space} value={s.id_space}>
+                  {s.nom_space}
+                </option>
+              ))}
+            </select>
+          ),
+        },
+      ]}
+    />
+  </div>
+);
+
 }
