@@ -1,17 +1,17 @@
-export function loadChat(exerciseId) {
-  if (!exerciseId) return null;
-  const data = localStorage.getItem(`chat_${exerciseId}`);
-  return data ? JSON.parse(data) : null;
-}
+export const chatKey = (studentId, type, targetId = "global") =>
+  `chat:${studentId}:${type}:${targetId}`;
 
-export function saveChat(exerciseId, messages, student) {
-  if (!exerciseId) return;
+export const loadChat = (studentId, type, targetId = "global") => {
+  try {
+    return JSON.parse(localStorage.getItem(chatKey(studentId, type, targetId)));
+  } catch {
+    return null;
+  }
+};
+
+export const saveChat = (studentId, type, targetId = "global", messages) => {
   localStorage.setItem(
-    `chat_${exerciseId}`,
-    JSON.stringify({
-      messages,
-      student,
-      updatedAt: Date.now()
-    })
+    chatKey(studentId, type, targetId),
+    JSON.stringify({ studentId, type, targetId, messages, updatedAt: Date.now() })
   );
-}
+};

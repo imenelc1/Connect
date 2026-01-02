@@ -3,46 +3,41 @@ import axios from "axios";
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
-export const getSystemPrompt = ({ lang = "fr", exercise, student, memory, profile }) => {
-  const historyText = (memory || [])
-    .map((m) => `${m.from}: ${m.text}`)
-    .join("\n");
+export const getSystemPrompt = ({ lang = "fr", mode = "generic", exercise, student, memory, courseContext = "" }) => {
+  const historyText = (memory || []).map(m => `${m.from}: ${m.text}`).join("\n");
 
-  return `
-Tu es **Coach C**, un professeur d'algorithmique strict mais bienveillant.
+  if (mode === "course" && courseContext) {
+    return `
+Tu es Coach Cours. Connais le contenu suivant et y réfère-toi :
 
-🎓 Objectif :
-Aider l’étudiant à COMPRENDRE — jamais copier.
+CONTENU DU COURS :
+${courseContext.slice(0, 3000)}
 
-👤 Étudiant :
-- Nom : ${student?.name || "Inconnu"}
-- Niveau : ${student?.level || "N/A"}
-- Difficultés : ${profile?.difficulties?.join(", ") || "Aucune"}
-- Erreurs fréquentes : ${profile?.commonErrors?.join(", ") || "Aucune"}
-
-📘 Exercice :
-${exercise?.titre || ""}
-${exercise?.enonce || ""}
-
-💻 Code actuel :
-${exercise?.code || "Aucun code soumis"}
-
-📝 Historique récent :
+Historique :
 ${historyText}
 
-🚫 Règles :
-- Réponds STRICTEMENT en ${lang}
-- Ne donne jamais la solution complète
-- Pas de code final prêt à compiler
-- Fournis des indices progressifs (max 3)
-- Pose toujours au moins une question
+Réponds STRICTEMENT en ${lang}, de façon pédagogique et structurée, avec exemple concret et question finale.
+`;
+  }
 
-📌 Format attendu :
-🔎 Diagnostic
-🧠 Raisonnement
-💡 Indices
+  if (mode === "exercise" && exercise) {
+    return `
+Tu es Coach Exercice.
+Tu connais l'exercice :
+Titre : ${exercise?.titre || ""}
+Énoncé : ${exercise?.enonce || ""}
+Réponds STRICTEMENT dans la langue de l'utilisateur (${lang}).
+Explique étape par étape, donne des exemples, et termine par une question pour vérifier la compréhension.
+Historique :
+${historyText}
+`;
+  }
+
+  return `
+Tu es Coach IA.
+🧠 Explication
+💡 Exemple
 ❓ Question
-✨ Rappel conceptuel
 `;
 };
 
@@ -69,7 +64,7 @@ export async function getAIAnswer({ systemPrompt, userPrompt }) {
 
     return res.data?.choices?.[0]?.message?.content?.trim() || "Réponse vide.";
   } catch (err) {
-    console.error("Erreur IA :", err);
+    console.error("❌ Erreur IA :", err);
     return "❌ Erreur lors de la génération de la réponse.";
   }
 }

@@ -536,8 +536,13 @@ int main() {
           </div>
 
           {openAssistant && (
-            <AssistantIA onClose={() => setOpenAssistant(false)} />
+            <AssistantIA
+              onClose={() => setOpenAssistant(false)}
+              mode="exercise"      // très important pour que l'IA sache que c'est un exo
+              course={null}        // pas de cours ici
+            />
           )}
+
 
         </div>
       </div>
