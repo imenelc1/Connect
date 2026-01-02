@@ -1,20 +1,28 @@
 from itertools import combinations
 from django.utils.timezone import localtime, now
 from datetime import date, datetime, timedelta
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated 
 from courses.models import Cours
 from dashboard import models
 from dashboard.models import ProgressionCours, SessionDuration, TentativeExercice
 from exercices.models import Exercice
 from forum.models import Commentaire, Like
 from quiz.models import Quiz, ReponseQuestion, ReponseQuiz
-from users.jwt_auth import IsAuthenticatedJWT  
+from users.jwt_auth import IsAuthenticatedJWT 
+from users.models import Utilisateur, Etudiant 
 from rest_framework.response import Response
 from .models import Badge, GagnerBadge
 from django.db import models
 from django.db.models import Sum
+from django.db.models import F
 from datetime import time
+from django.http import JsonResponse
+from .serializers import BadgeSerializer
+import os                       # pour os.path.join et os.makedirs
+from django.conf import settings
 
 
 def is_student(user):
@@ -22,9 +30,114 @@ def is_student(user):
     from users.models import Etudiant
     return Etudiant.objects.filter(utilisateur=user).exists()
 
+@api_view(['GET'])
+def liste_badges(request):
+    badges = Badge.objects.all()
+    serializer = BadgeSerializer(badges, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['PUT', 'PATCH'])
+@parser_classes([MultiPartParser, FormParser])
+def modifier_badge(request, pk):
+    try:
+        badge = Badge.objects.get(pk=pk)
+    except Badge.DoesNotExist:
+        return Response({"detail": "Badge non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+
+    data = request.data.copy()
+
+    # Gestion icône
+    if  'icone' in request.FILES:
+        file = request.FILES['icone']
+        # chemin relatif stocké en DB : badges/nom_image
+        save_path = os.path.join("badges", file.name)
+        # chemin complet sur le disque
+        full_path = os.path.join(settings.MEDIA_ROOT, save_path)
+        # crée le dossier si besoin
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        # écrit le fichier
+        with open(full_path, "wb+") as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+        # enregistre le chemin relatif dans le modèle
+        badge.icone = save_path
+
+    # Mise à jour des autres champs
+    badge.nom = data.get("nom", badge.nom)
+    badge.description = data.get("description", badge.description)
+    badge.categorie = data.get("categorie", badge.categorie)
+    badge.condition = data.get("condition", badge.condition)
+    badge.numpoints = data.get("numpoints", badge.numpoints)
+
+    badge.save()
+    serializer = BadgeSerializer(badge)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def create_badge(request):
+    """
+    Crée un nouveau badge et upload l'icône dans media/badges/.
+    """
+    data = request.data.copy()
+
+    # Créer un nouvel objet Badge
+    badge = Badge(
+        nom=data.get('nom', ''),
+        description=data.get('description', ''),
+        categorie=data.get('categorie', 'common'),
+        condition=data.get('condition', ''),
+        numpoints=data.get('numpoints', 0)
+    )
+
+    # Gérer l'upload d'une icône
+    if 'icone' in request.FILES:
+        image = request.FILES['icone']
+        # Enregistre dans media/badges/ et badge.icone.name devient 'badges/nom_image.jpg'
+        badge.icone.save(image.name, image, save=False)
+
+    # Sauvegarde le badge en base
+    badge.save()
+
+    serializer = BadgeSerializer(badge)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(['DELETE'])
+def delete_badge(request, pk):
+    """
+    Supprime un badge par son ID (pk)
+    """
+    try:
+        badge = Badge.objects.get(pk=pk)
+    except Badge.DoesNotExist:
+        return Response({"error": "Badge non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+    
+    badge.delete()
+    return Response({"success": "Badge supprimé"}, status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def utilisateurs_par_badge(request, badge_id):
+    try:
+        badge = Badge.objects.get(id=badge_id)
+    except Badge.DoesNotExist:
+        return Response({"error": "Badge non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Récupérer les étudiants liés aux utilisateurs qui ont gagné ce badge
+    utilisateurs = (
+        Etudiant.objects
+        .filter(utilisateur__gagnerbadge__badge=badge)  # join sur GagnerBadge
+        .annotate(
+            nom=F('utilisateur__nom'),
+            prenom=F('utilisateur__prenom')
+        )
+        .values('nom', 'prenom', 'specialite', 'annee_etude')
+    )
+    
+    return Response(list(utilisateurs), status=status.HTTP_200_OK)
+
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticatedJWT])
 def user_badges(request):
     user = request.user
     gained_ids = GagnerBadge.objects.filter(utilisateur=user).values_list('badge_id', flat=True)
@@ -37,7 +150,9 @@ def user_badges(request):
             "title": badge.nom,
             "desc": badge.description,
             "category": badge.categorie,
+            "condition": badge.condition,
             "xp": f"+{badge.numpoints} XP",
+            "xpPoint": badge.numpoints,
             "locked": badge.id not in gained_ids,
             "icon": badge.icone.url if badge.icone else None
         })

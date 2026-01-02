@@ -31,6 +31,7 @@ urlpatterns = [
         ProgressionUtilisateurAPIView.as_view(),
         name="progression-utilisateur"
     ),
+    
 
 
 ]
