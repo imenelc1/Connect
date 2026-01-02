@@ -2,7 +2,7 @@
   "header": {
     "title": "Exercices",
     "subtitle": "Commençons l'exercice !",
-    "label":"Exercice :"
+    "label": "Exercice :"
   },
   "editor": {
     "yourCode": "Votre code :"
@@ -13,7 +13,7 @@
     "debug": "Déboguer",
     "reset": "Réinitialiser",
     "sendSolution": "Envoyer la solution",
-    "saveDraft":"Enregistrer le brouillon"
+    "saveDraft": "Enregistrer le brouillon"
   },
   "tipCard": {
     "title": "Astuce",
@@ -22,12 +22,12 @@
   "output": {
     "title": "Sortie :",
     "default": "Hello world!\nLe programme s'est terminé avec le code de sortie 0\nAppuyez sur ENTRÉE pour quitter la console.",
-     "noOutput":"Aucune sortie pour le moment..."
+    "noOutput": "Aucune sortie pour le moment..."
   },
   "input": {
-  "stdinLabel": "Entrées (stdin)",
-  "stdinPlaceholder": "Tapez ici vos entrées, séparées par Entrée"
-},
+    "stdinLabel": "Entrées (stdin)",
+    "stdinPlaceholder": "Tapez ici vos entrées, séparées par Entrée"
+  },
   "feedback": {
     "title": "Comment trouvez-vous cet exercice ?",
     "subtitle": "Votre avis nous aide à améliorer l’expérience d’apprentissage",
@@ -40,31 +40,29 @@
   },
   "assistant": {
     "button": "Assistant IA",
-    "help":"Besoin d'aide ? Discutez avec l'Assistant IA",
-      "tipHelper":"Tu as besoin d'un indice ?",
-      "executionErrorHelp": "⚠️Erreur détectée lors de l'exécution. Besoin d’un coup de main ?"
-      
+    "help": "Besoin d'aide ? Discutez avec l'Assistant IA",
+    "tipHelper": "Tu as besoin d'un indice ?",
+    "executionErrorHelp": "⚠️Erreur détectée lors de l'exécution. Besoin d’un coup de main ?"
   },
-  "errors":{
-  "exerciseLoad":"Exercice chargé !",
-  "exerciseNOTLoad":"Impossible de charger l'exercice",
-  "syntaxError":"Erreur détectée — vérifie la syntaxe",
-   "errorSave":"Erreur lors de la sauvegarde",
-   "errorSubmit":"Erreur lors de la soumission",
-   "exeError":"Erreur pendant l'exécution",
-   "errorDetected": "Erreur détectée :",
+  "errors": {
+    "exerciseLoad": "Exercice chargé !",
+    "exerciseNOTLoad": "Impossible de charger l'exercice",
+    "syntaxError": "Erreur détectée — vérifie la syntaxe",
+    "errorSave": "Erreur lors de la sauvegarde",
+    "errorSubmit": "Erreur lors de la soumission",
+    "exeError": "Erreur pendant l'exécution",
+    "errorDetected": "Erreur détectée :",
     "bugDetected": "Bug détecté"
-},
-"messages":{
-  "codeSave":"Code sauvegardé",
-  "draftSave":"Brouillon sauvegardé !",
-   "usedAttempts":"Toutes les tentatives ont été utilisées !",
-    "exoSubmitted":"Exercice soumis",
-      "runningEXE":"Exécution en cours...",
-      "finishEXE":"Exécution terminée !",
-       "exeStop":"Exécution stoppée",
-       "noBugs":"Aucun bug détecté"
- 
-}
-
+  },
+  "messages": {
+    "codeSave": "Code sauvegardé",
+    "draftSave": "Brouillon sauvegardé !",
+    "usedAttempts": "Toutes les tentatives ont été utilisées !",
+    "exoSubmitted": "Exercice soumis",
+    "runningEXE": "Exécution en cours...",
+    "finishEXE": "Exécution terminée !",
+    "exeStop": "Exécution stoppée",
+    "noBugs": "Aucun bug détecté",
+    "exerciseReset": "Exercice réinitialisé !"
+  }
 }

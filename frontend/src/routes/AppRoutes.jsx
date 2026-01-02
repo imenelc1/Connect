@@ -66,6 +66,8 @@ import SpacesManagement from "../pages/SpacesManagement.jsx";
 import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 import StudentsManagement from "../pages/studentsManagement.jsx";
 import UpdateQuiz from "../pages/UpdateQuiz.jsx";
+import VoirCoursAdmin from "../pages/VoirCoursAdmin.jsx";
+import VoirQuizAdmin from "../pages/VoirQuizAdmin.jsx"
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -145,8 +147,10 @@ export default function AppRoutes() {
         <Route path="/StudentsManagement" element={<StudentsManagement />} />
         <Route path="/validation-courses" element={<ValidationCourses />} />
         <Route path="/ForumManagement" element={<ForumManagement />} />
-         <Route path="/SpacesManagement" element={<SpacesManagement />} />
-         <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
+        <Route path="/SpacesManagement" element={<SpacesManagement />} />
+        <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
+        <Route path="/cours/:id_cours" element={<VoirCoursAdmin />} />
+        <Route path="/Voir-quiz/:exerciceId" element={<VoirQuizAdmin />} />
 
    
       </Routes>

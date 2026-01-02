@@ -77,8 +77,6 @@ quizStart: `${base.replace("w-full", "w-auto")}
       .replace("py-2", "py-2.5")
       .replace("rounded-full", "rounded-md")}
                text-sm px-4 py-2 transition`,
-               
-               
     manage: `
   px-5 py-2 
   bg-grad-4

@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Sum, Avg, F
 from django.db.models.functions import TruncDate
-from badges.views import check_7day_streak_badge, check_course_badges, check_first_steps_badge, check_marathon_coder_badge, check_problem_solver_badge, check_speed_demon_badge
+from badges.views import check_7day_streak_badge, check_all_rounder_badge, check_course_badges, check_first_steps_badge, check_legendary_coder_badge, check_marathon_coder_badge, check_night_owl_badge, check_problem_solver_badge, check_speed_demon_badge
 from courses.models import Cours, Lecon
 from dashboard.serializers import TentativeExerciceReadSerializer, TentativeExerciceWriteSerializer
 from exercices.models import Exercice
@@ -82,6 +82,8 @@ def complete_lesson(request, lecon_id):
         pc.temps_passe = (pc.temps_passe or timedelta(seconds=0)) + timedelta(seconds=duration)
     
     check_course_badges(user, pc)
+    check_all_rounder_badge(user)
+    check_legendary_coder_badge(user)
     pc.save()
 
     # Historique
@@ -143,6 +145,8 @@ def complete_lessons_bulk(request):
 
 
     check_course_badges(user, pc)
+    check_all_rounder_badge(user)
+    check_legendary_coder_badge(user)
     return Response({
         "course_progress": cours_progress,
         "temps_passe": pc.temps_passe.total_seconds() if cours else 0
@@ -822,6 +826,13 @@ class create_tentative(APIView):
                         temps_passe=defaults["temps_passe"],
                         submitted_at=now()
                     )
+        check_first_steps_badge(user)
+        check_problem_solver_badge(user)
+        check_speed_demon_badge(user)
+        check_7day_streak_badge(user)
+        check_all_rounder_badge(user)
+        check_legendary_coder_badge(user)
+        check_night_owl_badge(user)
         return Response({
             "success": "Tentative enregistrée",
             "tentative": {
@@ -918,7 +929,8 @@ def student_exercises(request, student_id):
         # Récupérer TOUTES les tentatives
         tentatives = TentativeExercice.objects.filter(
             exercice=ex,
-            utilisateur=student
+            utilisateur=student,
+            etat="soumis"
         ).order_by("-submitted_at")
         
         # Calculer les stats
@@ -1345,3 +1357,16 @@ def all_students_submissions(request):
         "students": result
     })
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def get_user_draft(request, exercice_id):
+    tentative = TentativeExercice.objects.filter(
+        utilisateur=request.user,
+        exercice_id=exercice_id,
+        etat="brouillon"
+    ).order_by('-created_at').first()
+
+    if not tentative:
+        return Response({"draft": None})
+
+    return Response(TentativeExerciceReadSerializer(tentative).data)

@@ -47,7 +47,7 @@ export default function AllCoursesPage() {
         const formatted = data.map((c) => {
           const nom = c.utilisateur_name || "Nom Inconnu";
 
-          //  Initiales Nom + Prénom
+          // ✅ Initiales Nom + Prénom
           const initials = nom
             .split(" ")
             .filter(Boolean)
@@ -195,8 +195,6 @@ export default function AllCoursesPage() {
                 
                   variant="courseStart"
                   className="mt-2 w-full"
-                  
-
                   
                   onClick={() => {
                     if (course.action === "start") {
