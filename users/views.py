@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from .models import Utilisateur, Etudiant, Enseignant, Administrateur, PasswordResetToken
 from courses.models import Cours
 from exercices.models import Exercice
+from quiz.models import Quiz, ReponseQuiz
 from spaces.models import Space
 from .serializers import UtilisateurSerializer, EtudiantSerializer, EnseignantSerializer, AdministrateurSerializer
 import jwt
@@ -833,3 +834,105 @@ class ResetPasswordView2(APIView):
             return Response({"error": "Utilisateur introuvable."}, status=404)
 
         return Response({"message": "Mot de passe mis à jour avec succès"})
+    
+    
+    
+    
+ 
+#--------------------
+#MUtilisateur +cours lu + exo et quiz fait
+#----------------------    
+
+class ProgressionUtilisateurAPIView(APIView):
+    """
+    Progression complète d'un utilisateur :
+    - infos utilisateur
+    - cours lus
+    - exercices faits
+    - quiz faits (via ReponseQuiz)
+    """
+
+    def get(self, request, user_id):
+
+        # 1️⃣ Utilisateur
+        utilisateur = get_object_or_404(Utilisateur, id_utilisateur=user_id)
+
+        # 2️⃣ Cours lus
+        cours_lus = (
+            Cours.objects
+            .filter(
+                progressioncours__utilisateur=utilisateur,
+                progressioncours__avancement_cours__gt=0
+            )
+            .distinct()
+        )
+
+        # 3️⃣ Exercices faits
+        exercices_faits = (
+            Exercice.objects
+            .filter(
+                tentativeexercice__utilisateur=utilisateur,
+                tentativeexercice__etat__in=["soumis", "corrige"]
+            )
+            .distinct()
+        )
+
+        # 4️⃣ Quiz faits (via ReponseQuiz)
+        quiz_faits_qs = (
+            ReponseQuiz.objects
+            .filter(
+                etudiant=utilisateur,
+                terminer=True
+            )
+            .select_related("quiz")
+        )
+
+        # Préparer la liste des quiz
+        quiz_faits = [
+            {
+                "quiz_id": rq.quiz.id,
+                "titre_quiz": rq.quiz.exercice.titre_exo,  # si tu veux titre de l'exo associé
+                "score_minimum": rq.quiz.scoreMinimum,
+                "score_obtenu": rq.score_total,
+                "date_debut": rq.date_debut,
+                "date_fin": rq.date_fin,
+                "duration": rq.quiz.duration,
+                "nbMax_tentative": rq.quiz.nbMax_tentative,
+                "activerDuration": rq.quiz.activerDuration,
+            }
+            for rq in quiz_faits_qs
+        ]
+
+        # 5️⃣ Construction réponse finale
+        data = {
+            "utilisateur": {
+                "id": utilisateur.id_utilisateur,
+                "nom": utilisateur.nom,
+                "prenom": utilisateur.prenom,
+                "email": utilisateur.adresse_email,
+                "points": utilisateur.points,
+                "date_inscription": utilisateur.date_inscription,
+            },
+
+            "cours_lus": list(
+                cours_lus.values(
+                    "id_cours",
+                    "titre_cour",
+                    "niveau_cour",
+                    "duration"
+                )
+            ),
+
+            "exercices_faits": list(
+                exercices_faits.values(
+                    "id_exercice",
+                    "titre_exo",
+                    "niveau_exo",
+                    "categorie"
+                )
+            ),
+
+            "quiz_faits": quiz_faits  # ✅ injecte directement la liste
+        }
+
+        return Response(data, status=status.HTTP_200_OK)

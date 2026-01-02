@@ -121,6 +121,11 @@ export default function Navbar() {
     "/all-quizzes",
 
   ];
+  const classementRoutes = [
+    "/progress-student",
+    "/badges"
+
+  ];
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
@@ -194,6 +199,10 @@ export default function Navbar() {
           if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
             forceActive = true;
           }
+           if (item.href === "/badges" && classementRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+
 
           return (
             <NavLink
