@@ -13,8 +13,8 @@ import toast from "react-hot-toast";
 
 export default function TheoryExercisePage() {
   const [openAssistant, setOpenAssistant] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [hover, setHover] = useState(0);
+  // const [rating, setRating] = useState(0);
+  // const [hover, setHover] = useState(0);
   const [answer, setAnswer] = useState("");
   const [exercise, setExercise] = useState(null);
   const { exerciceId } = useParams();
@@ -46,62 +46,62 @@ export default function TheoryExercisePage() {
         temps_passe: getTempsPasse(),
       });
 
-      setFeedback(res.data?.feedback || "Brouillon sauvegardé !");
-      toast.success("Solution sauvegardée !");
+      setFeedback(res.data?.feedback || t("draft_saved"));
+      toast.success(t("solution_saved"));
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde :", error.response || error);
-      toast.error("Erreur lors de la sauvegarde");
+      console.error(t("save_error"), error.response || error);
+      toast.error(t("save_error"));
     } finally {
       setLoading(false);
     }
   };
 
   // ------------------- SEND SOLUTION -------------------
- const handleSendSolution = async () => {
-  if (!exercise) return;
+  const handleSendSolution = async () => {
+    if (!exercise) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await progressionService.submitTentative({
-      exercice_id: exercise.id_exercice,
-      reponse: answer,
-      output: "",
-      etat: "soumis",
-      temps_passe: getTempsPasse(),
-    });
+      const res = await progressionService.submitTentative({
+        exercice_id: exercise.id_exercice,
+        reponse: answer,
+        output: "",
+        etat: "soumis",
+        temps_passe: getTempsPasse(),
+      });
 
-    setFeedback(res.data?.feedback || "Solution envoyée !");
-    toast.success("Solution envoyée !");
+      setFeedback(res.data?.feedback || t("solution_sent"));
+      toast.success(t("solution_sent"));
 
-    //Vérifier si on peut encore soumettre
-    const canSubmitRes = await fetch(
-      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      //Vérifier si on peut encore soumettre
+      const canSubmitRes = await fetch(
+        `http://localhost:8000/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const canSubmitData = await canSubmitRes.json();
+      setCanSubmit(canSubmitData.can_submit);
+
+      if (!canSubmitData.can_submit) {
+        toast.error(t("all_attempts_used"));
       }
-    );
-    const canSubmitData = await canSubmitRes.json();
-    setCanSubmit(canSubmitData.can_submit);
 
-    if (!canSubmitData.can_submit) {
-      toast.error("Toutes les tentatives ont été utilisées !");
+    } catch (error) {
+      console.error(t("send_error"), error.response || error);
+
+      if (error.response && error.response.status === 403) {
+        toast.error(t("not_authorized"));
+      } else {
+        toast.error(t("send_error"));
+      }
+    } finally {
+      setLoading(false);
     }
-
-  } catch (error) {
-    console.error("Erreur lors de l'envoi :", error.response || error);
-
-    if (error.response && error.response.status === 403) {
-      toast.error("Vous n'êtes pas autorisé à soumettre cet exercice !");
-    } else {
-      toast.error("Erreur lors de l'envoi");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   // ------------------- FETCH EXERCISE -------------------
@@ -111,7 +111,8 @@ export default function TheoryExercisePage() {
     const fetchExercise = async () => {
       try {
         const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
-        if (!response.ok) throw new Error("Erreur lors de la récupération de l'exercice");
+        if (!response.ok) throw new Error(t("fetch_exercise_error"));
+
         const data = await response.json();
         setExercise(data);
       } catch (error) {
@@ -127,11 +128,11 @@ export default function TheoryExercisePage() {
   const { t, i18n } = useTranslation("exercisePage");
   const switchLang = () => i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
 
-  const getStarGradient = (i) => {
-    if (i <= 2) return "star-very-easy";
-    if (i <= 4) return "star-moderate";
-    return "star-difficult";
-  };
+  // const getStarGradient = (i) => {
+  //   if (i <= 2) return "star-very-easy";
+  //   if (i <= 4) return "star-moderate";
+  //   return "star-difficult";
+  // };
 
   const [canSubmit, setCanSubmit] = useState(false);
 
@@ -143,7 +144,7 @@ export default function TheoryExercisePage() {
     : "";
   const isStudent = userData.role === "etudiant";
 
-  
+
 
   useEffect(() => {
     if (!exerciceId) return;
@@ -208,7 +209,7 @@ export default function TheoryExercisePage() {
           {exercise ? (
             <>
               <p className="font-semibold text-[rgb(var(--color-primary))] text-lg sm:text-xl md:text-xl">
-                Exercice
+               {t("exercise_label")}
                 <span className="font-normal text-[rgb(var(--color-text))] ml-2 text-base sm:text-lg">
                   {exercise.titre_exo}
                 </span>
@@ -218,7 +219,8 @@ export default function TheoryExercisePage() {
               </p>
             </>
           ) : (
-            <p className="text-red-500 text-sm">Impossible de charger l'exercice.</p>
+           <p className="text-red-500 text-sm">{t("exercise_load_error")}</p>
+
           )}
         </div>
 
@@ -250,7 +252,7 @@ export default function TheoryExercisePage() {
             </div>
             <div>
               <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg">
-                Tip
+                 {t("tip_title")}
               </p>
               <p className="text-xs sm:text-sm text-[rgb(var(--color-gray))] mt-1">
                 {t("advice_text")}
@@ -268,7 +270,7 @@ export default function TheoryExercisePage() {
             bg-white border border-[rgb(var(--color-primary))]
             text-[rgb(var(--color-primary))]"
           >
-            Sauvegarder
+             {t("save")}
           </button>
 
           <button
@@ -294,7 +296,7 @@ export default function TheoryExercisePage() {
         </div>)}
 
         {/* FEEDBACK */}
-        <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24" style={{ backgroundImage: "var(--grad-8)" }}>
+        {/* <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24" style={{ backgroundImage: "var(--grad-8)" }}>
           <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg mb-1">
             {t("feedback_title")}
           </p>
@@ -302,8 +304,8 @@ export default function TheoryExercisePage() {
             {t("feedback_subtitle")}
           </p>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
-            <div className="flex gap-3 text-2xl sm:text-3xl">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6"> */}
+            {/* <div className="flex gap-3 text-2xl sm:text-3xl">
               {[1, 2, 3, 4, 5].map((i) => (
                 <span
                   key={i}
@@ -318,19 +320,19 @@ export default function TheoryExercisePage() {
                   ★
                 </span>
               ))}
-            </div>
+            </div> */}
 
-            <div className="flex justify-between w-full text-xs sm:text-sm font-medium mt-2">
+            {/* <div className="flex justify-between w-full text-xs sm:text-sm font-medium mt-2">
               <span className="w-24 text-left label-very-easy">{t("labels.veryEasy")}</span>
               <span className="w-24 text-center label-moderate">{t("labels.moderate")}</span>
               <span className="w-24 text-right label-very-difficult">{t("labels.veryDifficult")}</span>
             </div>
-          </div>
+          </div> */}
 
-          <p className="text-[rgb(var(--color-primary))] text-xs sm:text-sm flex items-center gap-2">
+          {/* <p className="text-[rgb(var(--color-primary))] text-xs sm:text-sm flex items-center gap-2">
             {t("need_help")}
           </p>
-        </div>
+        </div> */}
 
         {/* HELP BUTTON */}
         <div className="flex justify-center my-10 md:my-12">
