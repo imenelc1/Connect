@@ -4,9 +4,12 @@ import Mascotte from "../assets/head_mascotte.svg";
 import { getAIAnswer, getSystemPrompt } from "../services/iaService";
 import ExerciseContext from "../context/ExerciseContext";
 import { loadChat, saveChat } from "../utils/memory";
+import { useTranslation } from "react-i18next";
+
 
 export default function AssistantIA({ onClose }) {
   const exercise = useContext(ExerciseContext);
+  const { t, i18n } = useTranslation("assistant");
 
   // 🔥 récupérer dynamiquement le nom de l'étudiant
   const [student, setStudent] = useState({ name: "", level: "Débutant" });
@@ -20,7 +23,8 @@ export default function AssistantIA({ onClose }) {
         setStudent({ name: `${userObj.prenom || ""} ${userObj.nom || ""}`, level: "Débutant" });
       }
     } catch (err) {
-      console.error("Erreur récupération étudiant:", err);
+      console.error(t("student_fetch_error"), err);
+
     }
   }, []);
 
@@ -31,9 +35,7 @@ export default function AssistantIA({ onClose }) {
       {
         id: 1,
         from: "bot",
-        text: `Bonjour ${student.name || "étudiant"} 👋  
-Je suis ton Coach C.  
-Explique-moi ce qui te bloque.`,
+        text: t("bot_greeting", { name: student.name || t("student") }),
       },
     ]
   );
@@ -109,10 +111,7 @@ Explique-moi ce qui te bloque.`,
         {
           id: Date.now() + 2,
           from: "bot",
-          text:
-            lang === "en"
-              ? "❌ An error occurred. Please try again."
-              : "❌ Une erreur est survenue. Réessaie.",
+          text: t("error_message"),
         },
       ]);
     } finally {
@@ -139,7 +138,7 @@ Explique-moi ce qui te bloque.`,
           <div className="flex items-center gap-2">
             <img src={Mascotte} className="w-8 h-8 rounded-full" />
             <div>
-              <p className="font-semibold leading-none">Assistant IA</p>
+              <p className="font-semibold leading-none">{t("assistant_title")}</p>
               <span className="text-xs opacity-80">Coach C</span>
             </div>
           </div>
@@ -162,11 +161,10 @@ Explique-moi ce qui te bloque.`,
               )}
               <div
                 className={`max-w-[75%] text-sm p-3 rounded-2xl whitespace-pre-wrap
-                ${
-                  m.from === "user"
+                ${m.from === "user"
                     ? "bg-grad-1 text-white rounded-br-sm"
                     : "bg-[rgb(var(--color-card))] text-[rgb(var(--color-text))] rounded-bl-sm"
-                }`}
+                  }`}
               >
                 {m.text}
               </div>
@@ -176,9 +174,8 @@ Explique-moi ce qui te bloque.`,
           {loading && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <img src={Mascotte} className="w-7 h-7 rounded-full" />
-              {detectLanguage(input) === "en"
-                ? "Assistant is typing…"
-                : "L’assistant écrit…"}
+              {t("assistant_typing")}
+
             </div>
           )}
         </div>
@@ -190,11 +187,8 @@ Explique-moi ce qui te bloque.`,
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder={
-                detectLanguage(input) === "en"
-                  ? "Type your question…"
-                  : "Écris ta question…"
-              }
+              placeholder={t("input_placeholder")}
+
               className="w-full rounded-full border px-4 py-2 pr-12 text-sm"
             />
             <button

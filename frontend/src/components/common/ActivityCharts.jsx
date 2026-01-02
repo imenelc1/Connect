@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend
 } from "chart.js";
+import { useTranslation } from "react-i18next";
 
 ChartJS.register(
   CategoryScale,
@@ -21,7 +22,9 @@ ChartJS.register(
   Legend
 );
 
+
 const ActivityCharts = () => {
+  const { t, i18n } = useTranslation("DashboardAdmin");
   const [stats, setStats] = useState({
     registrations: [],
     logins: [],
@@ -45,7 +48,8 @@ const ActivityCharts = () => {
         coursesFollowed: data.coursesFollowed
       });
     } catch (err) {
-      console.error("Erreur chargement stats :", err);
+     console.error(`${t('errors.loadingStats')} `, err);
+
     }
   };
 
@@ -53,12 +57,12 @@ const ActivityCharts = () => {
     labels: stats.labels,
     datasets: [
       {
-        label: "Inscriptions",
+       label: t("charts.registrations"),
         data: stats.registrations,
         backgroundColor: "rgba(54, 162, 235, 0.6)"
       },
       {
-        label: "Connexions",
+        label: t("charts.logins"),
         data: stats.logins,
         backgroundColor: "rgba(255, 206, 86, 0.6)"
       }
@@ -69,26 +73,27 @@ const ActivityCharts = () => {
     labels: stats.labels,
     datasets: [
       {
-        label: "Cours suivis",
+        label: t("charts.coursesFollowed"),
         data: stats.coursesFollowed,
         borderColor: "rgba(75, 192, 192, 1)",
         tension: 0.3
       }
     ]
   };
+  
 
   return (
     <div className="charts-container">
 
-      <h2>📊 Activité de la plateforme</h2>
+    <h2>📊 {t("charts.activityTitle")}</h2>
 
       <div className="chart-card">
-        <h3>📥 Inscriptions & 🔐 Connexions</h3>
+        <h3>{t("charts.registrationsAndLogins")}</h3>
         <Bar data={barData} />
       </div>
 
       <div className="chart-card">
-        <h3>📚 Cours suivis</h3>
+        <h3>📚 {t("charts.coursesFollowed")}</h3>
         <Line data={coursesLineData} />
       </div>
     </div>

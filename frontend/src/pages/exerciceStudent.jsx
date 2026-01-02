@@ -14,11 +14,11 @@ export default function StudentExercice() {
   const [exercises, setExercises] = useState([]);
   const [totalExercises, setTotalExercises] = useState(0);
   const [submittedCount, setSubmittedCount] = useState(0);
+  const [feedbacksMap, setFeedbacksMap] = useState({}); // Map pour stocker les feedbacks
 
   const token = localStorage.getItem("token");
   const BACKEND_URL = "http://127.0.0.1:8000";
   const navigate = useNavigate();
-  const [feedbacks, setFeedbacks] = useState({}); // ← bien défini ici
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,17 +36,60 @@ export default function StudentExercice() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        // exRes.data.exercises contient maintenant toutes les tentatives
         const exercisesData = exRes.data.exercises || [];
         setExercises(exercisesData);
         setTotalExercises(exRes.data.total_exercises || 0);
 
         // Calcul du nombre soumis
         let submitted = 0;
+        const tentativeIds = [];
+        
         exercisesData.forEach((ex) => {
-          if (ex.tentatives?.some((t) => t.etat === "soumis")) submitted += 1;
+          if (ex.tentatives?.length > 0) {
+            ex.tentatives.forEach(tentative => {
+              tentativeIds.push(tentative.id);
+              if (tentative.etat === "soumis") submitted += 1;
+            });
+          }
         });
+        
         setSubmittedCount(submitted);
+
+        // Récupérer les feedbacks existants
+        // Récupérer les feedbacks existants
+if (tentativeIds.length > 0) {
+  try {
+    // Convertir le tableau en chaîne séparée par des virgules
+    const tentativeIdsString = tentativeIds.join(',');
+    
+    const feedbacksRes = await axios.get(
+      `${BACKEND_URL}/api/feedback-exercice/list/`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { 
+          tentative_ids: tentativeIdsString  // Format: "1,2,3"
+        }
+      }
+    );
+    
+    console.log("Feedbacks reçus de l'API:", feedbacksRes.data);
+    
+    // Créer une map tentative_id -> feedback
+    const feedbacksMap = {};
+    feedbacksRes.data.forEach(fb => {
+      // Utiliser tentative_id qui est explicite
+      if (fb.tentative_id) {
+        feedbacksMap[fb.tentative_id] = fb.contenu;
+      }
+    });
+    
+    console.log("Map des feedbacks créée:", feedbacksMap);
+    setFeedbacksMap(feedbacksMap);
+  } catch (fbErr) {
+    console.warn("Erreur récupération feedbacks:", fbErr.message);
+    // Ne pas bloquer l'application si les feedbacks échouent
+  }
+}
 
       } catch (err) {
         console.error("Erreur fetch StudentExercice:", err);
@@ -127,27 +170,38 @@ export default function StudentExercice() {
 
         {/* Exercices + toutes les tentatives */}
         <div className="flex flex-col gap-6 sm:gap-8 max-w-full sm:max-w-5xl mx-auto">
-          {exercises.length === 0 && <p className="text-gray-500">{t("noExercises")}</p>}
+          {exercises.length === 0 && <p className="text-gray-500">{t("noExercises") || "Aucun exercice"}</p>}
 
-          {exercises.map((ex) => {
-            const tentative = ex.tentatives?.[0] || {};
-            const feedback = feedbacks[tentative.id] || "";
+         {exercises.map((ex) => {
+  const tentatives = ex.tentatives || [];
+  
+  if (tentatives.length === 0) {
+    return (
+      <div key={ex.id_exercice} className="bg-white rounded-3xl shadow-md p-6 border-2 border-gray">
+        <h3 className="text-lg font-bold">{ex.nom_exercice}</h3>
+        <p className="text-gray-500 mt-2">Aucune tentative soumise</p>
+      </div>
+    );
+  }
 
-            return (
-              <TaskCard
-                key={ex.id_exercice}
-                title={ex.nom_exercice}
-                date={tentative.submitted_at ? new Date(tentative.submitted_at).toLocaleString() : ""}
-                etat={tentative.etat || ""}
-                code={tentative.reponse || ""}
-                feedback={feedback}
-                exerciceId={ex.id_exercice}
-                tentativeId={tentative.id}
-              />
-            );
-          })}
-
-
+  return (
+    <TaskCard
+      key={ex.id_exercice}
+      title={ex.nom_exercice}
+      date={tentatives[0].submitted_at ? new Date(tentatives[0].submitted_at).toLocaleString() : ""}
+      etat={tentatives[0].etat || ""}
+      code={tentatives[0].reponse || ""}
+      feedback={tentatives[0].feedback || ""}
+      exerciceId={ex.id_exercice}
+      tentativeId={tentatives[0].id}
+      nbSoumissions={ex.nb_soumissions}
+      maxSoumissions={ex.max_soumissions}
+      numeroTentative={1}
+      allTentatives={tentatives}  // ← Passer TOUTES les tentatives
+      currentTentativeIndex={0}   // ← Commencer par la première
+    />
+  );
+})}
         </div>
       </div>
     </div>

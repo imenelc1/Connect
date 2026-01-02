@@ -19,5 +19,18 @@
     "activeCourses": "Total cours",
     "totalExercises": "Total exercices",
     "totalSpaces": "Total espaces"
-  }
+  },
+  "errors": {
+  "loadingStats": "Erreur chargement stats :"
+},
+"charts": {
+  "registrations": "Inscriptions",
+  "logins": "Connexions",
+  "coursesFollowed": "Cours suivis",
+  "activityTitle": "Activité de la plateforme",
+  "registrationsAndLogins": "📥 Inscriptions & 🔐 Connexions"
 }
+}
+
+
+

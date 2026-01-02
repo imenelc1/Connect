@@ -10,16 +10,17 @@ import {
   Legend
 } from "recharts";
 import progressionService from "../../services/progressionService";
+import { useTranslation } from "react-i18next";
 
-export default function LearningCurveProf({ title = "Moyenne progression des étudiants" }) {
+export default function LearningCurveProf({ title }) {
   const [data, setData] = useState([]);
-
+  const { t, i18n } = useTranslation("Dashboard");
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         // Appel à l'API prof pour récupérer l'historique global des étudiants
         const history = await progressionService.getGlobalProgressStudents();
-        console.log("Historique brut prof :", history);
+        console.log(t("Dashboard.RawHistory"), history);
 
         // Formater les dates en jours courts et progression en nombres
         const formatted = history.map(item => {
@@ -34,7 +35,7 @@ export default function LearningCurveProf({ title = "Moyenne progression des ét
 
         setData(formatted);
       } catch (err) {
-        console.error("Erreur récupération historique prof :", err);
+        console.error(t("Dashboard.FetchHistoryError"), err);
       }
     };
 
@@ -43,7 +44,7 @@ export default function LearningCurveProf({ title = "Moyenne progression des ét
 
   return (
     <div className="bg-card p-4 rounded-2xl shadow-md w-full h-full">
-      <h2 className="text-lg font-semibold mb-4">{title}</h2>
+      <h2 className="text-lg font-semibold mb-4">{title || t("Dashboard.AverageS")}</h2>
       <div className="w-full h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
@@ -65,7 +66,7 @@ export default function LearningCurveProf({ title = "Moyenne progression des ét
               stroke="rgb(var(--color-blue))"
               strokeWidth={3}
               dot={{ r: 3 }}
-              name="Cours"
+              name={t("Dashboard.Course")}
             />
             <Line
               type="monotone"
@@ -73,7 +74,7 @@ export default function LearningCurveProf({ title = "Moyenne progression des ét
               stroke="rgb(var(--color-purple))"
               strokeWidth={3}
               dot={{ r: 3 }}
-              name="Quiz"
+              name={t("Dashboard.Quiz")}
             />
           </LineChart>
         </ResponsiveContainer>

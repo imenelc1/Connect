@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import CourseCard from "../components/common/CourseCard";
 import { Users, BookOpen, ClipboardList, LayoutGrid } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
@@ -82,7 +82,7 @@ export default function DashboardAdmin() {
       icon: <Users className="text-blue" size={40} />,
     },
     {
-      title: t("stats.activeCourses"),
+      title: t("stats.totalCourses"),
       value: statsData.total_courses,
       icon: <BookOpen className="text-purple" size={40} />,
     },
