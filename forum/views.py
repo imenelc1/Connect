@@ -5,74 +5,105 @@ from rest_framework import status
 from .models import Forum, Message, Commentaire, Like, MessageLike
 from .serializers import ForumSerializer, MessageSerializer, CommentaireSerializer
 from users.jwt_helpers import IsAuthenticatedJWT
+from users.models import Administrateur
+
 
 # ========== FORUMS ==========
 from django.db.models import Q
 
+
+# forum/views.py - Update the list_forums function
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
 def list_forums(request):
     role = getattr(request, "user_role", None)
     user = request.user
-    filtre = request.GET.get("filtre", "tous")  # valeur par défaut : tous
+    filtre = request.GET.get("filtre", "tous")
 
-    forums = Forum.objects.none()
-
+    # Start with all forums
+    forums = Forum.objects.all()
+    
+    # Apply role-based filtering
     if role == "admin":
-        forums = Forum.objects.all()
+        # Admin sees everything
+        pass
     elif role == "etudiant":
-        forums = Forum.objects.filter(
-            Q(cible="etudiants") | 
-            Q(cible="enseignants", utilisateur=user)
+        # Student sees:
+        # 1. Student forums (student-student, teacher-student)
+        # 2. Admin forums for students
+        forums = forums.filter(
+            Q(type__in=['student-student', 'teacher-student']) |
+            Q(type='admin-student-forum', cible='etudiants')
         )
     elif role == "enseignant":
-        forums = Forum.objects.filter(
-            Q(cible="enseignants") | 
-            Q(cible="etudiants", utilisateur=user)
+        # Teacher sees:
+        # 1. Teacher forums (teacher-teacher, student-teacher)
+        # 2. Admin forums for teachers
+        forums = forums.filter(
+            Q(type__in=['teacher-teacher', 'student-teacher']) |
+            Q(type='admin-teacher-forum', cible='enseignants')
         )
     else:
         return Response([], status=200)
 
-    # Optionnel : appliquer des filtres supplémentaires comme "mes_forums"
+    # Optional: apply "my forums" filter
     if filtre == "mes_forums":
-        forums = forums.filter(utilisateur=user)
+        if role == "admin":
+            # For admin, show forums they created
+            admin_user = Administrateur.objects.filter(email_admin=user.adresse_email).first()
+            forums = forums.filter(administrateur=admin_user)
+        else:
+            # For regular users
+            forums = forums.filter(utilisateur=user)
 
     forums = forums.order_by("-date_creation")
     serializer = ForumSerializer(forums, many=True, context={'request': request})
     return Response(serializer.data)
 
 
+from users.models import Utilisateur
 
-# forum/views.py
+# forum/views.py - Update the create_forum function for admin
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def create_forum(request):
-    serializer = ForumSerializer(data=request.data, context={'request': request})
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=400)
+    role = getattr(request, "user_role", None)
+    data = request.data.copy()
+    titre_forum = data.get('titre_forum')
+    contenu_forum = data.get('contenu_forum')
+    forum_type = data.get('type')
+    cible = data.get('cible')
 
-    user = request.user
+    if not all([titre_forum, contenu_forum]):
+        return Response({'error': 'Titre et contenu sont obligatoires'}, status=400)
 
-    # 🔐 visibilité (sécurité)
-    if hasattr(user, 'etudiant'):
-        cible = 'enseignants'
-    elif hasattr(user, 'enseignant'):
-        cible = request.data.get('cible')
-    else:
-        return Response({'error': 'Rôle invalide'}, status=403)
+    # ADMIN CREATION
+    if role == "admin":
+        admin_user = Administrateur.objects.first()
+        if not admin_user:
+            return Response({'error': 'Aucun administrateur existant'}, status=404)
 
-    forum = serializer.save(
-        utilisateur=user,
-        cible=cible,
-        type=request.data.get('type')  # 🏷️ sens du message
-    )
+        if forum_type not in ['admin-student-forum', 'admin-teacher-forum']:
+            if cible == 'etudiants':
+                forum_type = 'admin-student-forum'
+            elif cible == 'enseignants':
+                forum_type = 'admin-teacher-forum'
+            else:
+                return Response({'error': 'Cible invalide pour admin'}, status=400)
 
-    return Response(ForumSerializer(forum).data, status=201)
+        forum = Forum.objects.create(
+            administrateur=admin_user,
+            type=forum_type,
+            titre_forum=titre_forum,
+            contenu_forum=contenu_forum,
+            cible=cible
+        )
 
-
-
-
+        serializer = ForumSerializer(forum, context={'request': request})
+        return Response(serializer.data, status=201)
+   
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticatedJWT])
 def delete_forum(request, forum_id):
@@ -93,12 +124,61 @@ def delete_forum(request, forum_id):
         )
     
     forum.delete()
-    return Response(
-        {"message": "Forum supprimé avec succès"}, 
-        status=status.HTTP_200_OK
-    )
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# Dans forum/views.py
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticatedJWT])
+def admin_delete_forum(request, forum_id):
+    """Supprime un forum (pour admin seulement)"""
+    # Vérifier que c'est bien un admin
+    role = getattr(request, "user_role", None)
+    if role != "admin":
+        return Response(
+            {"error": "Accès réservé aux administrateurs"}, 
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        forum = Forum.objects.get(pk=forum_id)
+    except Forum.DoesNotExist:
+        return Response(
+            {"error": "Forum introuvable"}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    forum.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticatedJWT])
+def admin_update_forum(request, forum_id):
+    """Modifie un forum (admin seulement)"""
+    # Vérifier que c'est bien un admin
+    role = getattr(request, "user_role", None)
+    if role != "admin":
+        return Response(
+            {"error": "Accès réservé aux administrateurs"}, 
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        forum = Forum.objects.get(id_forum=forum_id)
+    except Forum.DoesNotExist:
+        return Response(
+            {"error": "Forum introuvable"}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    # Valider les données
+    serializer = ForumSerializer(forum, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 # ========== LIKES FORUM ==========
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])

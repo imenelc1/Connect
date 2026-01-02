@@ -156,37 +156,54 @@ export default function CommunityPage() {
       const forums = await response.json();
       
       // Filtrer selon les règles de visibilité
-      const visibleForums = forums.filter(forum => {
-        const forumType = forum.type;
-        const creatorRole = forum.utilisateur_role || (forum.utilisateur === userId ? role : null);
-        
-        if (role === "etudiant") {
-          // Étudiant voit :
-          // 1. Forums envoyés aux étudiants (teacher-student, student-student)
-          // 2. Forums envoyés aux enseignants SEULEMENT si créé par étudiant (student-teacher)
-          if (forumType === "teacher-student" || forumType === "student-student") {
+      // Dans la fonction qui filtre les forums
+// In the fetchForums function, update the filtering section:
+
+// Filtrer selon les règles de visibilité
+const visibleForums = forums.filter(forum => {
+    const forumType = forum.type;
+    const cible = forum.cible;
+    const creatorRole = forum.utilisateur_role; // Get creator role from backend
+    
+    if (role === "etudiant") {
+        // Étudiant voit :
+        // 1. Forums étudiants (student-student, teacher-student)
+        // 2. Forums admin pour étudiants
+        if (forumType === "student-student" || forumType === "teacher-student") {
             return true;
-          }
-          if (forumType === "student-teacher") {
-            return creatorRole === "etudiant";
-          }
-          return false; // teacher-teacher invisible
-        } 
-        else if (role === "enseignant") {
-          // Enseignant voit :
-          // 1. Forums envoyés aux enseignants (teacher-teacher, student-teacher)
-          // 2. Forums envoyés aux étudiants SEULEMENT si créé par enseignant (teacher-student)
-          if (forumType === "teacher-teacher" || forumType === "student-teacher") {
-            return true;
-          }
-          if (forumType === "teacher-student") {
-            return creatorRole === "enseignant";
-          }
-          return false; // student-student invisible
         }
-        
-        return true; // admin voit tout
-      });
+        if (forumType === "admin-student-forum" && cible === "etudiants") {
+            return true;
+        }
+        // Also show admin-created forums for students
+        if (creatorRole === "admin" && cible === "etudiants") {
+            return true;
+        }
+        return false;
+    } 
+    else if (role === "enseignant") {
+        // Enseignant voit :
+        // 1. Forums enseignants (teacher-teacher, student-teacher)
+        // 2. Forums admin pour enseignants
+        if (forumType === "teacher-teacher" || forumType === "student-teacher") {
+            return true;
+        }
+        if (forumType === "admin-teacher-forum" && cible === "enseignants") {
+            return true;
+        }
+        // Also show admin-created forums for teachers
+        if (creatorRole === "admin" && cible === "enseignants") {
+            return true;
+        }
+        return false;
+    }
+    else if (role === "admin") {
+        // Admin voit tout
+        return true;
+    }
+    
+    return false;
+});
       
       const transformedForums = visibleForums.map(forum => ({
         id: forum.id_forum,

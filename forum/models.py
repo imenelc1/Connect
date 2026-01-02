@@ -1,18 +1,21 @@
 # forum/models.py
 from django.db import models
 from users.models import Utilisateur
+from users.models import Administrateur
 
 
-# forum/models.py
 class Forum(models.Model):
     id_forum = models.AutoField(primary_key=True)
+    
+    # Créateur : soit utilisateur, soit admin
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, null=True, blank=True)
+    administrateur = models.ForeignKey('users.Administrateur', on_delete=models.CASCADE, null=True, blank=True)
+    
     type = models.CharField(max_length=50)
     titre_forum = models.CharField(max_length=255)
-    contenu_forum = models.TextField()  # NOUVEAU CHAMP
+    contenu_forum = models.TextField()
     date_creation = models.DateTimeField(auto_now_add=True)
 
-    # NOUVEAU : définir la cible du forum
     CIBLE_CHOICES = (
         ('etudiants', 'Étudiants'),
         ('enseignants', 'Enseignants'),
@@ -23,7 +26,12 @@ class Forum(models.Model):
         ordering = ['-date_creation']
 
     def __str__(self):
-        return f"{self.titre_forum} ({self.type})"
+        if self.administrateur:
+            return f"{self.titre_forum} (Admin: {self.administrateur.email_admin})"
+        elif self.utilisateur:
+            return f"{self.titre_forum} ({self.utilisateur.nom} {self.utilisateur.prenom})"
+        return self.titre_forum
+
 
 
 
