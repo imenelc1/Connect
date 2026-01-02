@@ -51,6 +51,8 @@ urlpatterns = [
     path('admin/add-students/', AdminAddStudentToSpaceView.as_view(), name='update'),
     
     path("space/<int:space_id>/details/", SpaceStudentsDetailView.as_view(), name="space-students"),
-     path('admin/remove-student/', Admin_remove_student_from_space, name='remove-student-from-space'),
+    path('admin/remove-student/', Admin_remove_student_from_space, name='remove-student-from-space'),
+    path('space/<int:space_id>/delete/', views.delete_space, name='delete_space'),
+
 
 ]

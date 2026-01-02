@@ -520,3 +520,24 @@ def Admin_remove_student_from_space(request):
         return Response({"success": f"{student} retiré de l'espace {space}"}, status=200)
     except SpaceEtudiant.DoesNotExist:
         return Response({"error": "L'étudiant n'est pas dans cet espace"}, status=400)
+
+
+
+@api_view(['DELETE'])
+def delete_space(request, space_id):
+    """
+    Supprimer un espace par son ID
+    """
+    try:
+        space = Space.objects.get(id_space=space_id)
+    except Space.DoesNotExist:
+        return Response(
+            {"error": "Espace non trouvé"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    space.delete()
+    return Response(
+        {"message": "Espace supprimé avec succès"},
+        status=status.HTTP_204_NO_CONTENT
+    )

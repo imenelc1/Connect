@@ -133,7 +133,7 @@ const [quizzes, setQuizzes] = useState([]);
     if (!window.confirm("Voulez-vous vraiment supprimer cet espace ?")) return;
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/spaces/admin/${id_space}/delete/`, {
+      const res = await fetch(`http://localhost:8000/api/spaces/space/${id_space}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -303,12 +303,12 @@ const handleRemoveStudentFromSpace = async (student) => {
       <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
-            <p className="text-gray">{t("subtitle")}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-muted">Gestion des espaces</h1>
+            <p className="text-gray">Gere les espaces des enseignants</p>
           </div>
 
           <Button
-            text={<span className="flex items-center gap-2"><Plus size={18}/> {t("addSpace")}</span>}
+            text={<span className="flex items-center gap-2"><Plus size={18}/> Ajouter Espace</span>}
             variant="primary"
             className="!w-auto px-6 py-2 rounded-xl"
             onClick={() => { setEditIndex(null); setNewSpace({ title: "", description: "", utilisateur: "" }); setOpenModal(true); }}
