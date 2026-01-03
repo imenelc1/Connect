@@ -11,9 +11,11 @@ import {
   Legend
 } from "recharts";
 import progressionService from "../../services/progressionService";
+import { useTranslation } from "react-i18next";
 
 export default function LearningCurve({ title }) {
   const [data, setData] = useState([]);
+   const { t, i18n } = useTranslation("Dashboard");
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -27,7 +29,7 @@ export default function LearningCurve({ title }) {
         const formatted = last7.map(item => {
           const d = new Date(item.date);
           return {
-            day: d.toLocaleDateString("fr-FR", { weekday: "short" }),
+            day: d.toLocaleDateString(i18n.language, { weekday: "short" }),
             progression_cours: Number(item.progression_cours || 0),
             progression_quiz: Number(item.progression_quiz || 0)
           };
@@ -65,7 +67,7 @@ export default function LearningCurve({ title }) {
             stroke="rgb(var(--color-muted))"
             strokeWidth={3}
             dot={{ r: 3 }}
-            name="Cours"
+            name={t("Dashboard.Course")}
           />
           <Line
             type="monotone"
@@ -73,7 +75,7 @@ export default function LearningCurve({ title }) {
             stroke="rgb(var(--color-purple))"
             strokeWidth={3}
             dot={{ r: 3 }}
-            name="Quizs"
+             name={t("Dashboard.Quiz")}
           />
         </LineChart>
       </ResponsiveContainer>
