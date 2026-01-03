@@ -196,6 +196,26 @@ export const getTentativeById = async (tentativeId) => {
   return res.data;
 };
 
+// 🔹 Récupérer la dernière tentative de l'utilisateur connecté
+export const getMyLastTentative = async (studentId, exerciceId) => {
+  if (!studentId || !exerciceId) {
+    console.warn("studentId ou exerciceId manquant");
+    return null;
+  }
+
+  try {
+    const response = await axios.get(
+      `http://127.0.0.1:8000/api/dashboard/tentatives/my-last/${exerciceId}/`,
+      { params: { studentId } }
+    );
+    return response.data;
+  } catch (err) {
+    console.error("Erreur récupération tentative", err);
+    return null; // fallback sur null si erreur serveur
+  }
+};
+
+
 
 
  export default {
@@ -221,5 +241,7 @@ export const getTentativeById = async (tentativeId) => {
   getAverageTimeProf,
   getGlobalProgressStudents,
   getCurrentProgressStudents,
+    getMyLastTentative,
+
 
 };

@@ -78,7 +78,7 @@ export default function CourseContentSimple({
                 <p className="mt-2 text-sm sm:text-base text-textc leading-relaxed">{lesson.content}</p>
               )}
               {lesson.type === "example" && lesson.content && (
-                <pre className="mt-2 p-4 bg-blue rounded-xl overflow-x-auto">{lesson.content}</pre>
+                <pre className="mt-2 p-4 bg-grad-dark-3 rounded-xl overflow-x-auto">{lesson.content}</pre>
               )}
             </div>
           ))

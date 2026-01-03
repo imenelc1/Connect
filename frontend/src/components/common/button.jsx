@@ -47,9 +47,9 @@ export default function Button({
     heroPrimary: `${base} bg-[var(--color-primary)] text-white rounded-xl font-medium
                   shadow hover:opacity-90 flex items-center gap-2 px-12 py-2`,
 
-    heroOutline: `${base} border border-[var(--color-primary)]
-                  text-[var(--color-primary)] bg-white rounded-xl font-medium
-                  hover:bg-[var(--color-bg)] px-12 py-2 transition`,
+    heroOutline: `${base} bg-transparent border border-black text-black
+                   rounded-xl font-medium 
+                  shadow hover:opacity-90 flex items-center gap-2 px-12 py-2 dark:bg-grad-2 dark:text-white dark:border-white`,
     courseStart: `${base}
       rounded-full px-2 py-2  hover:bg-grad-1 hover:text-surface transition-all shadow-sm`,
     createCourse: `${base} flex items-center gap-2

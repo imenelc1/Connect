@@ -188,6 +188,52 @@ export const NotificationProvider = ({ children }) => {
     };
   }, [fetchNotifications, setupEventListeners]);
 
+
+// Supprimer une notification
+const deleteNotification = useCallback(async (notifId) => {
+  const token = getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_URL}/notifications/${notifId}/`, {
+  method: 'DELETE',
+  headers: { Authorization: `Bearer ${token}` }
+});
+
+
+    if (res.ok) {
+      setNotifications(prev => prev.filter(n => n.id_notif !== notifId));
+      console.log(`❌ Notification ${notifId} supprimée`);
+    }
+  } catch (err) {
+    console.error('Erreur suppression notification:', err);
+  }
+}, [API_URL]);
+
+
+// Supprimer toutes les notifications
+const deleteAllNotifications = useCallback(async () => {
+  const token = getToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_URL}/notifications/delete-all/`, { // <-- ici
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+      setNotifications([]);
+      setUnreadCount(0);
+      console.log('Toutes les notifications ont été supprimées');
+    }
+  } catch (err) {
+    console.error('Erreur suppression toutes notifications:', err);
+  }
+}, [API_URL]);
+
+
+
   // Rafraîchissement automatique toutes les 30 secondes
   useEffect(() => {
     if (!getToken()) return;
@@ -212,6 +258,8 @@ export const NotificationProvider = ({ children }) => {
         fetchUnreadCount,
         markAsRead,
         markAllAsRead,
+        deleteNotification,
+        deleteAllNotifications
       }}
     >
       {children}

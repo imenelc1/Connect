@@ -30,13 +30,15 @@ export default function CoursesSidebarItem2({
 
         return (
           <div
-            key={section.id || i}
+            key={`${section.id}-${i}`}
             onClick={() => selectSection(i)}
             className={`p-4 rounded-2xl shadow-md border transition cursor-pointer ${
               isActive ? "bg-grad-2 border-blue text-muted" : "bg-grad-3 border-blue/10 text-muted"
             }`}
           >
-            <h2 className="text-[15px] font-semibold">{section.title || "Titre manquant"}</h2>
+            <h2 className="text-[15px] font-semibold">
+              {section.title || "Titre manquant"}
+            </h2>
           </div>
         );
       })}

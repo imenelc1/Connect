@@ -72,6 +72,7 @@
   --grad-output: linear-gradient(135deg, #7bb5e6, #3a6ea5);
   --grad-button: linear-gradient(135deg, #4F9DDE, #2F4F70);
   --grad-rating: linear-gradient(90deg,#b8c0ff,#bde0fe,#cdb4db);
+  --grad-dark-3: linear-gradient(135deg, #4F9DDE, #FFFFFF);
 
   --shadow-card: 0 8px 20px rgba(0,0,0,0.08);
   --shadow-strong: 0 10px 30px rgba(0,0,0,0.15);

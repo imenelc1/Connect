@@ -12,10 +12,19 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import progressionService from "../services/progressionService";
-import Input from "../components/common/Input";
 
 import Editor from "@monaco-editor/react";
 import ExerciseContext from "../context/ExerciseContext";
+import { loadEditorCode } from "../utils/editorStorage";
+
+// ⚡ Ajout de saveEditorCode ici
+export const saveEditorCode = (userId, exerciseId, code) => {
+  if (!userId || !exerciseId) return;
+  localStorage.setItem(`editor_${userId}_${exerciseId}`, code);
+};
+
+// ⚡ Clé pour le localStorage
+const editorKey = (userId, exerciseId) => `editor_${userId}_${exerciseId}`;
 
 export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
@@ -26,24 +35,15 @@ export default function StartExercise() {
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
   const [output, setOutput] = useState("");
-
   const [isRunning, setIsRunning] = useState(false);
   const [userInput, setUserInput] = useState("");
-
-  const defaultCode = `#include <stdio.h>
-#include <stdlib.h>
-
-int main() {
-  printf("Hello world!\\n");
-  return 0;
-}`;
-
   const [userCode, setUserCode] = useState(null);
   const [startTime, setStartTime] = useState(Date.now());
-  const controllerRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
   const [canSubmit, setCanSubmit] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
+
+  const controllerRef = useRef(null);
 
   const storedUser = localStorage.getItem("user");
   const userData =
@@ -56,9 +56,28 @@ int main() {
 
   const sidebarWidth = false ? -200 : -50;
 
-  const resetCode = () => setUserCode(defaultCode);
+  const defaultCode = `#include <stdio.h>
+#include <stdlib.h>
 
-  // -------- Notifications --------
+int main() {
+  printf("Hello world!\\n");
+  return 0;
+}`;
+
+  // ---------------- Reset Exercise ----------------
+  const resetExercise = () => {
+    setUserCode(defaultCode);
+    setOutput("");
+    setUserInput("");
+    setNotifications([]);
+    setStartTime(Date.now());
+    if (exerciceId) {
+      localStorage.removeItem(editorKey(userData.user_id, exerciceId));
+    }
+    toast.success(t("messages.exerciseReset") || "Exercice réinitialisé !");
+  };
+
+  // ---------------- Notifications ----------------
   const sendNotification = (message, type = "info") => {
     const id = Date.now();
     setNotifications((prev) => [...prev, { id, message, type }]);
@@ -69,7 +88,7 @@ int main() {
     if (type === "hint") setOpenAssistant(true);
   };
 
-  // -------- Fetch Exercise --------
+  // ---------------- Fetch Exercise ----------------
   useEffect(() => {
     if (!exerciceId) return;
 
@@ -80,18 +99,14 @@ int main() {
         const data = await res.json();
         setExercise(data);
 
-        // Après avoir chargé l'exercice, on check canSubmit
         const canSubmitRes = await fetch(
           `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
-          {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         const canSubmitData = await canSubmitRes.json();
         setCanSubmit(canSubmitData.can_submit);
       } catch (err) {
         sendNotification(t("errors.exerciseNOTLoad"), "error");
-
         setCanSubmit(false);
       } finally {
         setLoadingExercise(false);
@@ -101,45 +116,36 @@ int main() {
     fetchExercise();
   }, [exerciceId]);
 
+  // ---------------- Load last code ----------------
+ // Extraire juste l'id de l'utilisateur
+const userId = userData?.user_id;
+
+// ---------------- Load last code ----------------
+useEffect(() => {
+  if (!exerciceId || !userId) return;
+
+  const local = loadEditorCode(userId, exerciceId);
+  if (local) {
+    setUserCode(local);
+    return;
+  }
+
+  progressionService.getMyLastTentative(userId, exerciceId)
+    .then(lastDraft => {
+      setUserCode(lastDraft?.reponse || defaultCode);
+      setOutput(lastDraft?.output || "");
+    })
+    .catch(() => setUserCode(defaultCode));
+}, [exerciceId, userId]);
+
+// ---------------- Auto-save localStorage ----------------
+useEffect(() => {
+  if (!userCode || !exerciceId || !userId) return;
+  saveEditorCode(userId, exerciceId, userCode);
+}, [userCode, exerciceId, userId]);
 
 
-  // -------- Load last code (localStorage first, then server draft) --------
-  useEffect(() => {
-    if (!exerciceId) return;
-
-    const fetchLastCode = async () => {
-      // 1️⃣ Vérifie localStorage
-      const local = localStorage.getItem(`exercise-${exerciceId}-code`);
-      if (local) {
-        setUserCode(local);
-        return;
-      }
-
-      // 2️⃣ Sinon récupère le dernier brouillon serveur
-      try {
-        const lastDraft = await progressionService.getLastTentative(exerciceId);
-        if (lastDraft?.reponse) {
-          setUserCode(lastDraft.reponse);
-          setOutput(lastDraft.output || "Aucune sortie pour le moment...");
-        } else {
-          setUserCode(defaultCode);
-        }
-      } catch {
-        setUserCode(defaultCode);
-      }
-    };
-
-    fetchLastCode();
-  }, [exerciceId]);
-
-  // -------- Auto-save localStorage --------
-  useEffect(() => {
-    if (userCode !== null && exerciceId) {
-      localStorage.setItem(`exercise-${exerciceId}-code`, userCode);
-    }
-  }, [userCode, exerciceId]);
-
-  // -------- Auto-save draft server --------
+  // ---------------- Auto-save draft server ----------------
   useEffect(() => {
     if (!exerciceId || !userCode) return;
     const timer = setTimeout(async () => {
@@ -156,7 +162,7 @@ int main() {
     return () => clearTimeout(timer);
   }, [userCode, output, exerciceId, startTime]);
 
-  // -------- Inactivity hint --------
+  // ---------------- Inactivity hint ----------------
   useEffect(() => {
     const t = setTimeout(
       () => sendNotification(t("assistant.tipHelper"), "hint"),
@@ -165,7 +171,7 @@ int main() {
     return () => clearTimeout(t);
   }, [userCode]);
 
-  // -------- Realtime syntax hint --------
+  // ---------------- Realtime syntax hint ----------------
   useEffect(() => {
     const t = setTimeout(async () => {
       try {
@@ -175,59 +181,31 @@ int main() {
         );
         if (res.data.stderr)
           sendNotification(t("errors.syntaxError"), "hint");
-
       } catch { }
     }, 10000);
     return () => clearTimeout(t);
   }, [userCode]);
 
-  // -------- Run / Debug / Stop --------
+  // ---------------- Run / Debug / Stop ----------------
   const runCode = async () => {
     setIsRunning(true);
     setOutput(t("messages.runningEXE"));
-
-
     try {
       const res = await axios.post(
         "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-        {
-          source_code: userCode,
-          language_id: 49,
-          stdin: userInput,
-        }
+        { source_code: userCode, language_id: 49, stdin: userInput }
       );
-
-      const {
-        stdout,
-        stderr,
-        compile_output,
-        status,
-      } = res.data;
-
-      const result =
-        stdout ||
-        stderr ||
-        compile_output ||
-        "Aucune sortie pour le moment...";
-
+      const { stdout, stderr, compile_output } = res.data;
+      const result = stdout || stderr || compile_output || "Aucune sortie pour le moment...";
       setOutput(result);
-
-      // 🚨 NOTIFICATION IMMÉDIATE
-      if (stderr || compile_output) {
-        sendNotification(
-          t("assistant.executionErrorHelp"), "hint"
-        );
-      }
-
+      if (stderr || compile_output) sendNotification(t("assistant.executionErrorHelp"), "hint");
     } catch {
       setOutput(t("errors.exeError"));
       sendNotification(t("errors.exeError"), "error");
-
     } finally {
       setIsRunning(false);
     }
   };
-
 
   const debugCode = async () => {
     setIsRunning(true);
@@ -239,10 +217,8 @@ int main() {
       if (res.data.stderr) {
         setOutput(`${t("errors.errorDetected")}\n\n${res.data.stderr}`);
         sendNotification(t("errors.bugDetected"), "hint");
-
       } else {
         setOutput(t("messages.noBugs"));
-
       }
     } finally {
       setIsRunning(false);
@@ -254,7 +230,7 @@ int main() {
     setIsRunning(false);
   };
 
-  // -------- Save & Submit --------
+  // ---------------- Save & Submit ----------------
   const handleSaveDraft = async () => {
     try {
       await progressionService.createTentative({
@@ -266,10 +242,8 @@ int main() {
       });
       toast.success(t("messages.codeSave"));
       sendNotification(t("messages.draftSave"));
-
     } catch {
       toast.error(t("errors.errorSave"));
-
     }
   };
 
@@ -284,19 +258,18 @@ int main() {
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
       toast.success(t("messages.exoSubmitted"));
-
     } catch {
       toast.error(t("errors.errorSubmit"));
-
     }
   };
 
-  // -------- JSX et context --------
+  // ---------------- Context ----------------
   const exerciseContextValue = {
     id: exerciceId,
     titre: exercise?.titre_exo,
     enonce: exercise?.enonce,
     code: userCode,
+    defaultCode,
     output,
     onHintRequest: () => setOpenAssistant(true),
   };
@@ -446,8 +419,9 @@ int main() {
               label={t("buttons.reset")}
               bg="linear-gradient(#FFFFFF,#A3AAED,#A3AAED)"
               text="rgb(var(--color-text))"
-              onClick={resetCode}
+              onClick={resetExercise}
             />
+
           </div>
 
 
@@ -511,8 +485,13 @@ int main() {
           </div>
 
           {openAssistant && (
-            <AssistantIA onClose={() => setOpenAssistant(false)} />
+            <AssistantIA
+              onClose={() => setOpenAssistant(false)}
+              mode="exercise"      // très important pour que l'IA sache que c'est un exo
+              course={null}        // pas de cours ici
+            />
           )}
+
 
         </div>
       </div>
@@ -533,3 +512,4 @@ function ActionButton({ icon, label, bg, text = "white", onClick }) {
     </button>
   );
 }
+

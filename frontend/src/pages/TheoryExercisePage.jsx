@@ -13,25 +13,43 @@ import toast from "react-hot-toast";
 
 export default function TheoryExercisePage() {
   const [openAssistant, setOpenAssistant] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [hover, setHover] = useState(0);
   const [answer, setAnswer] = useState("");
   const [exercise, setExercise] = useState(null);
   const { exerciceId } = useParams();
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [canSubmit, setCanSubmit] = useState(false);
 
   const [startTime, setStartTime] = useState(Date.now());
 
+  const { t, i18n } = useTranslation("exercisePage");
+
+  /* ================= USER ================= */
+  const storedUser = localStorage.getItem("user");
+  const userData =
+    storedUser && storedUser !== "undefined"
+      ? JSON.parse(storedUser)
+      : null;
+
+  // ✅ NORMALISATION ICI (CLÉ UNIQUE)
+  const userId =
+    userData?.id_utilisateur ??
+    userData?.user_id ??
+    userData?.id ??
+    null;
+
+  const isStudent = userData?.role === "etudiant";
+
+  /* ================= TIMER ================= */
   useEffect(() => {
     if (exercise) setStartTime(Date.now());
   }, [exercise]);
 
-  // Fonction utilitaire pour calculer le temps passé en secondes
-  const getTempsPasse = () => Math.floor((Date.now() - startTime) / 1000);
+  const getTempsPasse = () =>
+    Math.floor((Date.now() - startTime) / 1000);
 
-  // ------------------- SAVE DRAFT -------------------
+  /* ================= SAVE DRAFT ================= */
   const handleSaveDraft = async () => {
     if (!exercise) return;
 
@@ -46,72 +64,64 @@ export default function TheoryExercisePage() {
         temps_passe: getTempsPasse(),
       });
 
-      setFeedback(res.data?.feedback || "Brouillon sauvegardé !");
-      toast.success("Solution sauvegardée !");
+      setFeedback(res.data?.feedback || t("draft_saved"));
+      toast.success(t("solution_saved"));
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde :", error.response || error);
-      toast.error("Erreur lors de la sauvegarde");
+      toast.error(t("save_error"));
     } finally {
       setLoading(false);
     }
   };
 
-  // ------------------- SEND SOLUTION -------------------
- const handleSendSolution = async () => {
-  if (!exercise) return;
+  /* ================= SEND SOLUTION ================= */
+  const handleSendSolution = async () => {
+    if (!exercise) return;
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await progressionService.submitTentative({
-      exercice_id: exercise.id_exercice,
-      reponse: answer,
-      output: "",
-      etat: "soumis",
-      temps_passe: getTempsPasse(),
-    });
+      await progressionService.submitTentative({
+        exercice_id: exercise.id_exercice,
+        reponse: answer,
+        output: "",
+        etat: "soumis",
+        temps_passe: getTempsPasse(),
+      });
 
-    setFeedback(res.data?.feedback || "Solution envoyée !");
-    toast.success("Solution envoyée !");
+      toast.success(t("solution_sent"));
 
-    //Vérifier si on peut encore soumettre
-    const canSubmitRes = await fetch(
-      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+      const canSubmitRes = await fetch(
+        `http://localhost:8000/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const canSubmitData = await canSubmitRes.json();
+      setCanSubmit(canSubmitData.can_submit);
+
+      if (!canSubmitData.can_submit) {
+        toast.error(t("all_attempts_used"));
       }
-    );
-    const canSubmitData = await canSubmitRes.json();
-    setCanSubmit(canSubmitData.can_submit);
-
-    if (!canSubmitData.can_submit) {
-      toast.error("Toutes les tentatives ont été utilisées !");
+    } catch (error) {
+      toast.error(t("send_error"));
+    } finally {
+      setLoading(false);
     }
+  };
 
-  } catch (error) {
-    console.error("Erreur lors de l'envoi :", error.response || error);
-
-    if (error.response && error.response.status === 403) {
-      toast.error("Vous n'êtes pas autorisé à soumettre cet exercice !");
-    } else {
-      toast.error("Erreur lors de l'envoi");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-  // ------------------- FETCH EXERCISE -------------------
+  /* ================= FETCH EXERCISE ================= */
   useEffect(() => {
     if (!exerciceId) return;
 
     const fetchExercise = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
-        if (!response.ok) throw new Error("Erreur lors de la récupération de l'exercice");
+        const response = await fetch(
+          `http://localhost:8000/api/exercices/${exerciceId}/`
+        );
+        if (!response.ok) throw new Error();
         const data = await response.json();
         setExercise(data);
       } catch (error) {
@@ -124,41 +134,54 @@ export default function TheoryExercisePage() {
     fetchExercise();
   }, [exerciceId]);
 
-  const { t, i18n } = useTranslation("exercisePage");
-  const switchLang = () => i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
-
-  const getStarGradient = (i) => {
-    if (i <= 2) return "star-very-easy";
-    if (i <= 4) return "star-moderate";
-    return "star-difficult";
-  };
-
-  const [canSubmit, setCanSubmit] = useState(false);
-
-  const storedUser = localStorage.getItem("user");
-  const userData =
-    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-  const initials = userData
-    ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
-    : "";
-  const isStudent = userData.role === "etudiant";
-
-  
-
+  /* ================= CAN SUBMIT ================= */
   useEffect(() => {
-    if (!exerciceId) return;
+    if (!exerciceId || !isStudent) return;
 
-    fetch(`http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => setCanSubmit(data.can_submit))
+    fetch(
+      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => setCanSubmit(data.can_submit))
       .catch(() => setCanSubmit(false));
-  }, [exerciceId]);
+  }, [exerciceId, isStudent]);
 
+  /* ================= LAST TENTATIVE ================= */
+  useEffect(() => {
+    if (!exercise || !isStudent || !userId) return;
 
+    const fetchLastTentative = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/dashboard/${exercise.id_exercice}/utilisateur/${userId}/tentativerep/`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (!res.ok) return;
+
+        const last = await res.json();
+        if (last?.reponse) setAnswer(last.reponse);
+      } catch (err) {
+        console.error("Erreur chargement tentative:", err);
+      }
+    };
+
+    fetchLastTentative();
+  }, [exercise, isStudent, userId]);
+
+  const switchLang = () =>
+    i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
+
+  /* ================= RENDER ================= */
   return (
     <div className="flex bg-[rgb(var(--color-surface))] min-h-screen">
       <div className="hidden lg:block">
@@ -167,6 +190,7 @@ export default function TheoryExercisePage() {
       <div className="lg:hidden w-full">
         <NavBar />
       </div>
+
 
       <div className="flex-1 lg:ml-72 px-4 sm:px-6 md:px-10 lg:px-12 py-6 sm:py-8 md:py-10 w-full">
         {/* HEADER */}
@@ -208,7 +232,7 @@ export default function TheoryExercisePage() {
           {exercise ? (
             <>
               <p className="font-semibold text-[rgb(var(--color-primary))] text-lg sm:text-xl md:text-xl">
-                Exercice
+               {t("exercise_label")}
                 <span className="font-normal text-[rgb(var(--color-text))] ml-2 text-base sm:text-lg">
                   {exercise.titre_exo}
                 </span>
@@ -218,7 +242,8 @@ export default function TheoryExercisePage() {
               </p>
             </>
           ) : (
-            <p className="text-red-500 text-sm">Impossible de charger l'exercice.</p>
+           <p className="text-red-500 text-sm">{t("exercise_load_error")}</p>
+
           )}
         </div>
 
@@ -250,7 +275,7 @@ export default function TheoryExercisePage() {
             </div>
             <div>
               <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg">
-                Tip
+                 {t("tip_title")}
               </p>
               <p className="text-xs sm:text-sm text-[rgb(var(--color-gray))] mt-1">
                 {t("advice_text")}
@@ -268,7 +293,7 @@ export default function TheoryExercisePage() {
             bg-white border border-[rgb(var(--color-primary))]
             text-[rgb(var(--color-primary))]"
           >
-            Sauvegarder
+             {t("save")}
           </button>
 
           <button
@@ -294,7 +319,7 @@ export default function TheoryExercisePage() {
         </div>)}
 
         {/* FEEDBACK */}
-        <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24" style={{ backgroundImage: "var(--grad-8)" }}>
+        {/* <div className="p-6 sm:p-7 md:p-8 rounded-2xl shadow-card border mb-24" style={{ backgroundImage: "var(--grad-8)" }}>
           <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg mb-1">
             {t("feedback_title")}
           </p>
@@ -302,8 +327,8 @@ export default function TheoryExercisePage() {
             {t("feedback_subtitle")}
           </p>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6">
-            <div className="flex gap-3 text-2xl sm:text-3xl">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-6"> */}
+            {/* <div className="flex gap-3 text-2xl sm:text-3xl">
               {[1, 2, 3, 4, 5].map((i) => (
                 <span
                   key={i}
@@ -318,19 +343,19 @@ export default function TheoryExercisePage() {
                   ★
                 </span>
               ))}
-            </div>
+            </div> */}
 
-            <div className="flex justify-between w-full text-xs sm:text-sm font-medium mt-2">
+            {/* <div className="flex justify-between w-full text-xs sm:text-sm font-medium mt-2">
               <span className="w-24 text-left label-very-easy">{t("labels.veryEasy")}</span>
               <span className="w-24 text-center label-moderate">{t("labels.moderate")}</span>
               <span className="w-24 text-right label-very-difficult">{t("labels.veryDifficult")}</span>
             </div>
-          </div>
+          </div> */}
 
-          <p className="text-[rgb(var(--color-primary))] text-xs sm:text-sm flex items-center gap-2">
+          {/* <p className="text-[rgb(var(--color-primary))] text-xs sm:text-sm flex items-center gap-2">
             {t("need_help")}
           </p>
-        </div>
+        </div> */}
 
         {/* HELP BUTTON */}
         <div className="flex justify-center my-10 md:my-12">
