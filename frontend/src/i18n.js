@@ -117,8 +117,10 @@ import translationENSpacesPage from "./locales/addSpace/en.json";
 
 import translationFRInstructors from "./locales/addinstructors/fr.json";
 import translationENInstructors from "./locales/addinstructors/en.json";
-import translationFRNotification from "./locales/notifications/fr-notif/translation.json"
-import translationENNotification from "./locales/notifications/en-notif/translation.json"
+import translationFRNotification from "./locales/notifications/fr-notif/translation.json";
+import translationENNotification from "./locales/notifications/en-notif/translation.json";
+import translationENAssistant from "./locales/AssistantIA/en-assistant/translation.json"
+import translationFRAssistant from "./locales/AssistantIA/fr-assistant/translation.json"
 
 
 const resources = {
@@ -160,7 +162,8 @@ const resources = {
      ForumManagement:translationFRForumManagement,
      BadgesManagement:translationFRBadgesManagement,
     StudentsManagement:translationFRStudentsManagement,
-    notifications:translationFRNotification
+    notifications:translationFRNotification,
+   assistant:translationFRAssistant
     },
 
   en: {
@@ -203,7 +206,9 @@ const resources = {
       StudentsManagement:translationENStudentsManagement,
        space: translationENSpacesPage,
       instructors: translationENInstructors,
-      notifications:translationENNotification
+      notifications:translationENNotification,
+      assistant:translationENAssistant
+
 
 
   },

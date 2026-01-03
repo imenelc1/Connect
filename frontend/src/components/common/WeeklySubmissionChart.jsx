@@ -28,9 +28,9 @@ export default function WeeklySubmissionChart({ studentId = null }) {
         });
 
         setWeeklyData(res.data || []);
-        console.log("Weekly data:", res.data); // 🔹 Vérification
+        console.log(t("weeklyDataLog"), res.data); // 🔹 Vérification
       } catch (err) {
-        console.error("Erreur fetching weekly submissions:", err);
+        console.error(t("errors.weeklySubmissionsError"), err);
         setWeeklyData([]);
       }
     };
@@ -65,7 +65,7 @@ export default function WeeklySubmissionChart({ studentId = null }) {
           <p className="font-semibold">
             {start.toLocaleDateString()} - {end.toLocaleDateString()}
           </p>
-          <p>Submissions: {week.submissions}%</p>
+          <p>{t("ProgressStudent.submissionsLabel")} {week.submissions}%</p>
         </div>
       );
     }

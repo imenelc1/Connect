@@ -88,7 +88,7 @@ export default function Dashboardetu() {
         setSuccessRate(rate);
 
       } catch (err) {
-        console.error("Erreur lors du chargement des données:", err);
+        console.error(t("Dashboard.LoadDataError"), err);
       } finally {
         setLoading(false);
       }
@@ -110,7 +110,7 @@ export default function Dashboardetu() {
         );
         setDailyTime(res.data.total_seconds || 0);
       } catch (err) {
-        console.error("Erreur fetching daily time:", err);
+        console.error(t("Dashboard.FetchDailyTimeError"), err);
       }
     };
 

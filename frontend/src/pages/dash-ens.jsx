@@ -86,7 +86,7 @@ export default function Dashboardens() {
         setActiveCourses(coursesCount);
 
       } catch (err) {
-        console.error("Erreur lors du chargement des données:", err.response?.data || err);
+        console.error(t("Dashboard.LoadDataError"), err.response?.data || err);
       } finally {
         setLoading(false);
       }
@@ -115,7 +115,7 @@ export default function Dashboardens() {
 
         setAvgSubmission(avg);
       } catch (err) {
-        console.error("Erreur fetching submissions:", err);
+        console.error( t("Dashboard.FetchSubmissionsError"), err);
       }
     };
 
@@ -134,7 +134,7 @@ export default function Dashboardens() {
 
         setSuccessRate(res.data.success_rate);
       } catch (err) {
-        console.error("Erreur success rate:", err);
+        console.error(t("Dashboard.FetchSuccessRateError"), err);
       }
     };
 
@@ -154,7 +154,7 @@ export default function Dashboardens() {
         );
         setDailyTime(res.data.total_seconds || 0);
       } catch (err) {
-        console.error("Erreur daily time:", err);
+        console.error(t("Dashboard.FetchDailyTimeError"), err);
       }
     };
 
@@ -175,7 +175,7 @@ export default function Dashboardens() {
         );
         setContentCounts(res.data);
       } catch (err) {
-        console.error("Erreur fetching content counts:", err);
+        console.error(t("Dashboard.FetchContentCountsError"), err);
       }
     };
 
@@ -223,11 +223,12 @@ export default function Dashboardens() {
   };
 
   // Données pour le graphique circulaire
-  const chartData = [
-    { name: "Courses", value: contentCounts.courses_count },
-    { name: "Exercises", value: contentCounts.exercises_count },
-    { name: "Quizzes", value: contentCounts.quizzes_count }
-  ];
+ const chartData = [
+  { name:"Courses", value: contentCounts.courses_count },
+  { name:"Exercises", value: contentCounts.exercises_count },
+  { name:"Quizzes", value: contentCounts.quizzes_count }
+];
+
 
   const formattedNotifications = formatNotificationsForFeed();
 
@@ -235,7 +236,7 @@ export default function Dashboardens() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-primary/10">
-        <div className="text-muted">Chargement...</div>
+        <div className="text-muted">{t("Dashboard.Loading")}</div>
       </div>
     );
   }
@@ -295,28 +296,28 @@ export default function Dashboardens() {
         {/* Statistiques rapides */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 text-textc">
           <Cards
-            text="Avg. Submission Rate"
-            value={`${avgSubmission}%`}
+            text={t("Dashboard.AverageS")}
+            value={`${Math.round(avgSubmission)}%`}
             icon={<TrendingDown size={isMobile ? 16 : 18} />}
             bg="bg-grad-2"
             isMobile={isMobile}
           />
           <Cards
-            text="Quizzes Success Rate"
-            value={`${successRate}%`}
+            text={t("Dashboard.Success")}
+           value={`${Math.round(successRate)}%`}
             icon={<CircleCheckBig size={isMobile ? 16 : 18} />}
             bg="bg-grad-3"
             isMobile={isMobile}
           />
           <Cards
-            text="Time Spent Today"
+            text={t("Dashboard.AverageT")}
             value={formatTimeStyled(dailyTime)}
             icon={<Book size={isMobile ? 16 : 18} />}
             bg="bg-grad-4"
             isMobile={isMobile}
           />
           <Cards
-            text="Active Courses"
+            text={t("Dashboard.ActiveC")}
             value={activeCourses}
             icon={<Clock3 size={isMobile ? 16 : 18} />}
             bg="bg-grad-2"
@@ -334,7 +335,7 @@ export default function Dashboardens() {
           {/* Actions rapides */}
           <div>
             <h2 className="text-lg sm:text-xl text-muted font-bold mb-4 sm:mb-6">
-              Quick Actions
+            {t("Dashboard.Quick")}
             </h2>
             <div className="bg-grad-1 text-white rounded-2xl sm:rounded-3xl shadow-lg">
               <div className="flex flex-col">
@@ -346,7 +347,7 @@ export default function Dashboardens() {
                 >
                   <CirclePlus size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                    Create Course
+                  {t("Dashboard.CreateC")}
                   </span>
                 </button>
 
@@ -357,7 +358,7 @@ export default function Dashboardens() {
                 >
                   <Activity size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                    My Spaces
+                  {t("Dashboard.Space")}
                   </span>
                 </button>
 
@@ -368,7 +369,7 @@ export default function Dashboardens() {
                 >
                   <FolderPlus size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                    Publish Exercise
+                 {t("Dashboard.publish")}
                   </span>
                 </button>
 
@@ -380,7 +381,7 @@ export default function Dashboardens() {
                 >
                   <TrendingDown size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                    Stats
+                  {t("Dashboard.Stats")}
                   </span>
                 </button>
               </div>
@@ -407,15 +408,15 @@ export default function Dashboardens() {
             <div className="flex flex-wrap gap-3 sm:gap-4 text-xs mt-4 justify-center">
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-purple rounded-full"></span>
-                <span>Courses</span>
+                <span>{t("Dashboard.Courses")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-blue rounded-full"></span>
-                <span>Exercises</span>
+                <span>{t("Dashboard.Exercises")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 bg-pink rounded-full"></span>
-                <span>Quizzes</span>
+                <span>{t("Dashboard.quizzes")}</span>
               </div>
             </div>
           </div>
@@ -431,11 +432,11 @@ export default function Dashboardens() {
           <div className="space-y-3">
             {loadingNotifications ? (
               <div className="flex items-center justify-center py-4">
-                <p className="text-sm text-gray-500">Chargement des notifications...</p>
+                <p className="text-sm text-gray-500">{t("Dashboard.LoadingNotifications")}</p>
               </div>
             ) : formattedNotifications.length === 0 ? (
               <div className="flex items-center justify-center py-4">
-                <p className="text-sm text-gray-500">Aucune notification disponible.</p>
+                <p className="text-sm text-gray-500">{t("Dashboard.NoNotifications")}</p>
               </div>
             ) : (
               formattedNotifications.map((item, index) => (
