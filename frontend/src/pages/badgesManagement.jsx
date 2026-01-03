@@ -23,7 +23,9 @@ const buttonStyles = {
 // Fonction pour générer l'URL de l'image
 const getBadgeImageUrl = (iconPath) => {
   if (!iconPath) return null;
-  return `http://127.0.0.1:8000/${iconPath.replace(/\\/g, "/")}`;
+  // Retire le slash de début s’il existe
+  const path = iconPath.startsWith("/") ? iconPath.slice(1) : iconPath;
+  return `http://127.0.0.1:8000/${path.replace(/\\/g, "/")}`;
 };
 
 export default function BadgesManagement() {
