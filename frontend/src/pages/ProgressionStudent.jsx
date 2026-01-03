@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import UserCircle from "../components/common/UserCircle";
 import WeeklySubmissionChart from "../components/common/WeeklySubmissionChart";
 import GradeProgressionChart from "../components/common/GradeProgressionChart";
