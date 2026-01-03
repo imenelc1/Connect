@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/NavBar.jsx";
+import Navbar from "../components/common/Navbar.jsx";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
 import { Trash2, ChevronUp } from "lucide-react";
@@ -20,7 +20,7 @@ export default function CoursePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("courseInfo");
   const { toggleDarkMode } = useContext(ThemeContext);
-  
+
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -30,8 +30,7 @@ export default function CoursePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
   const [token, setToken] = useState(null);
-const [sectionPages, setSectionPages] = useState({});
-const [currentCoursId, setCurrentCoursId] = useState(null);
+  const [sectionPages, setSectionPages] = useState({});
 
 
   // Effet pour la responsivité
@@ -39,12 +38,12 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -87,12 +86,12 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
     { label: t("course.curriculum"), icon: BookOpenCheck },
     { label: t("course.publish_title"), icon: CheckCircle },
   ];
-  
+
   const [hours, setHours] = useState("00");
   const [minutes, setMinutes] = useState("00");
   const [seconds, setSeconds] = useState("00");
   const [duration, setDuration] = useState("");
-
+const [currentCoursId, setCurrentCoursId] = useState(null);
   useEffect(() => {
     setDuration(`${hours}:${minutes}:${seconds}`);
   }, [hours, minutes, seconds]);
@@ -112,7 +111,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState("");
   const [courseVisibility, setCourseVisibility] = useState("public");
-const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
+  const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
 
 
   // --- Sections & lessons ---
@@ -339,26 +338,31 @@ const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
             <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-muted">
               {t("course.basic_info")}
             </h2>
-            
-            <div className="flex flex-col mb-4 sm:mb-6">
+
+            <div className="flex flex-col mb-4 sm:mb-6 ">
               <label className="font-medium mb-2 text-muted">{t("course.title")}</label>
               <Input
                 placeholder={t("course.course_title_placeholder")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                className="
+  !bg-card !text-black dark:!text-white
+  
+"
+                
               />
             </div>
-            
+
             <div className="flex flex-col mb-4 sm:mb-6">
               <label className="font-medium mb-2 text-muted">{t("course.course_topic")}</label>
               <textarea
-                className="w-full min-h-[120px] sm:min-h-[180px] border border-gray-300 rounded-xl p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full bg-card  text-black  dark:text-white  min-h-[120px] sm:min-h-[180px] border border-gray-300 rounded-xl p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder={t("course.course_topic_placeholder")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="flex flex-col">
                 <label className="font-medium mb-2 text-muted">{t("course.duration")}</label>
@@ -400,7 +404,7 @@ const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
                   ]}
                 />
               </div>
-              
+
               <div className="flex flex-col md:col-span-2">
                 <label className="font-medium mb-2 text-muted">{t("course.visibility")}</label>
                 <ModernDropdown
@@ -414,9 +418,9 @@ const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-between mt-6 sm:mt-10">
-              <button className="px-4 sm:px-6 py-2 rounded-xl border border-gray-300 font-medium bg-white shadow-sm transition hover:bg-gray-50" onClick={() => navigate("/all-courses")}>
+              <button  className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition" onClick={() => navigate("/all-courses")}>
                 {t("course.cancel")}
               </button>
               <button
@@ -429,82 +433,100 @@ const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
           </div>
         )}
 
+
         {/* STEP 2 */}
         {activeStep === 2 && (
-          <div className="w-full">
-            <div className="bg-grad-2 rounded-2xl p-4 sm:p-6 lg:p-8">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-muted">
-                  {t("course.curriculum")}
-                </h1>
-                <button
-                  className="px-4 sm:px-6 py-2 rounded-xl bg-primary text-white shadow-sm hover:shadow-md transition self-start"
-                  onClick={addSection}
-                >
-                  + {t("course.add_section")}
-                </button>
-              </div>
+          <div className="w-full bg-grad-2 rounded-2xl shadow-md p-4 sm:p-6 lg:p-8">
 
-              {sections.map((section, index) => (
-                <div
-                  key={section.id}
-                  className="bg-grad-2 rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-200 hover:border-primary/30 transition mb-6"
-                >
-                  <div className="flex flex-col gap-4 mb-4">
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-primary text-white font-semibold flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      
-                      <div className="flex-1">
-                        <Input
-                          value={section.title}
-                          onChange={(e) => updateSectionTitle(section.id, e.target.value)}
-                          placeholder={t("course.section_title_placeholder")}
-                          className="!border-none !bg-transparent px-0 font-medium text-lg"
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-muted">
+                {t("course.curriculum")}
+              </h1>
+              <button
+                className="px-4 sm:px-6 py-2 rounded-xl bg-primary text-white shadow-sm hover:shadow-md transition self-start"
+                onClick={addSection}
+              >
+                + {t("course.add_section")}
+              </button>
+            </div>
+
+            {sections.length === 0 && addSection()}
+
+            {sections.map((section, index) => (
+              <div
+                key={section.id}
+                className="bg-grad-2 rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-200 hover:border-primary/30 transition mb-6"
+              >
+                <div className="flex flex-col gap-4 mb-4">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+
+                    {/* Numéro */}
+                    <div className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-primary text-white font-semibold">
+                      {index + 1}
+                    </div>
+
+                    {/* Contenu */}
+                    <div className="flex-1 flex flex-col gap-2 w-full">
+                      <Input
+                        value={section.title}
+                        onChange={(e) => updateSectionTitle(section.id, e.target.value)}
+                        placeholder={t("course.section_title_placeholder")}
+                        className="!border-none !bg-transparent px-0 font-medium text-lg w-full"
+                      />
+
+                      <textarea
+                        className="w-full min-h-[80px] border  bg-card border-gray-300 rounded-xl p-3 text-sm sm:text-base"
+                        placeholder={t("course.section_description_placeholder")}
+                        value={section.description}
+                        onChange={(e) => updateSectionDescription(section.id, e.target.value)}
+                      />
+                    </div>
+
+                    {/* Boutons */}
+                    <div className="flex gap-2 self-end sm:self-start">
+                      <button
+                        className="hover:text-primary transition"
+                        onClick={() => toggleSection(section.id)}
+                      >
+                        <ChevronUp
+                          size={20}
+                          className={`transition-transform duration-300 ${section.open ? "" : "rotate-180"
+                            }`}
                         />
-                        <textarea
-                          className="w-full mt-2 min-h-[60px] sm:min-h-[80px] border border-gray-300 rounded-xl p-3 text-sm sm:text-base "
-                          placeholder={t("course.section_description_placeholder")}
-                          value={section.description}
-                          onChange={(e) => updateSectionDescription(section.id, e.target.value)}
-                        />
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <button
-                          className="hover:text-primary transition"
-                          onClick={() => toggleSection(section.id)}
-                        >
-                          <ChevronUp
-                            size={20}
-                            className={`transition-transform duration-300 ${section.open ? "" : "rotate-180"}`}
-                          />
-                        </button>
-                        <button
-                          className="hover:text-red-500 transition"
-                          onClick={() => removeSection(section.id)}
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
+                      </button>
+
+                      <button
+                        className="hover:text-red-500 transition"
+                        onClick={() => removeSection(section.id)}
+                      >
+                        <Trash2 size={20} />
+                      </button>
                     </div>
                   </div>
 
-                  {section.open && section.lessons.map((lesson, idx) => (
+
+
+
+                </div>
+
+                {/* LESSONS */}
+                {section.open &&
+                  section.lessons.map((lesson, idx) => (
                     <div
                       key={lesson.id}
-                      className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4"
+                      className="bg-grad-3 rounded-xl p-4 border border-gray-200 mb-4"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3 w-full">
                         <div className="text-sm font-medium text-gray-600 w-6">{idx + 1}.</div>
+
                         <Input
                           placeholder={t("course.lesson_title")}
                           value={lesson.title}
                           onChange={(e) => updateLessonTitle(section.id, lesson.id, e.target.value)}
-                          className="flex-1 !bg-white"
+                          className="flex-1 text-black dark:text-white !bg-card w-full"
                         />
-                        <div className="flex gap-3 md:ml-[350px] ">
+
+                        <div className="flex ml-[270px] gap-4">
                           <ModernDropdown
                             value={lesson.type || "text"}
                             onChange={(value) =>
@@ -526,7 +548,7 @@ const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
                               { value: "image", label: t("course.image") },
                               { value: "example", label: t("course.example") },
                             ]}
-                            className="w-32"
+                            className="w-full sm:w-32"
                           />
                           <button
                             onClick={() => removeLesson(section.id, lesson.id)}
@@ -537,18 +559,10 @@ const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
                         </div>
                       </div>
 
-                      {lesson.type === "text" && (
+                      {/* CONTENT */}
+                      {(lesson.type === "text" || lesson.type === "example" || !lesson.type) && (
                         <textarea
-                          className="w-full min-h-[100px] border border-gray-300 rounded-xl p-3 text-sm sm:text-base"
-                          placeholder={t("course.lesson_content")}
-                          value={lesson.content}
-                          onChange={(e) => updateLessonContent(section.id, lesson.id, e.target.value)}
-                        />
-                      )}
-
-                      {lesson.type === "example" && (
-                        <textarea
-                          className="w-full min-h-[100px] border border-gray-300 rounded-xl p-3 text-sm sm:text-base"
+                          className="w-full bg-card min-h-[100px] border border-gray-300 rounded-xl p-3 text-sm sm:text-base"
                           placeholder={t("course.lesson_content")}
                           value={lesson.content}
                           onChange={(e) => updateLessonContent(section.id, lesson.id, e.target.value)}
@@ -556,7 +570,7 @@ const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
                       )}
 
                       {lesson.type === "image" && (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 mt-2">
                           <label
                             htmlFor={`file-${section.id}-${lesson.id}`}
                             className="cursor-pointer w-32 h-32 sm:w-40 sm:h-40 bg-gray-100 rounded-xl flex items-center justify-center border border-dashed hover:bg-gray-200 transition"
@@ -585,99 +599,96 @@ const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
                     </div>
                   ))}
 
-                  <div className="flex justify-center mt-4">
-                    <button
-                      onClick={() => addLessonToSection(section.id)}
-                      className="w-full sm:w-1/2 rounded-xl py-2 bg-primary text-white font-medium hover:bg-primary/90 transition"
-                    >
-                      + {t("course.add_lesson")}
-                    </button>
-                  </div>
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={() => addLessonToSection(section.id)}
+                    className="w-full sm:w-1/2 rounded-xl py-2 bg-primary text-white font-medium hover:bg-primary/90 transition"
+                  >
+                    + {t("course.add_lesson")}
+                  </button>
                 </div>
-              ))}
-
-              <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
-                <button
-                  className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition"
-                  onClick={() => setActiveStep(1)}
-                >
-                  {t("course.back")}
-                </button>
-                <button
-                  className="px-6 py-2 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition"
-                  onClick={() => setActiveStep(3)}
-                >
-                  {t("course.save_next")}
-                </button>
               </div>
+            ))}
+
+            <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
+              <button
+                className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition"
+                onClick={() => setActiveStep(1)}
+              >
+                {t("course.back")}
+              </button>
+              <button
+                className="px-6 py-2 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition"
+                onClick={() => setActiveStep(3)}
+              >
+                {t("course.save_next")}
+              </button>
             </div>
           </div>
         )}
 
-       {/* STEP 3 – PREVIEW DU COURS */}
-{/* STEP 3 – PREVIEW DU COURS */}
-{/* ===================== */}
-{/* STEP 3 – PREVIEW COURS */}
-{/* ===================== */}
-{activeStep === 3 && (
-  <div className="w-full max-w-7xl mx-auto px-4 pb-10 flex flex-col gap-8">
+        {/* ===================== */}
+        {/* STEP 3 – PREVIEW COURS */}
+        {/* ===================== */}
+        {activeStep === 3 && (
+          <div className="w-full max-w-7xl mx-auto px-4 pb-10 flex flex-col gap-8">
 
-    {/* ZONE PREVIEW (SIDEBAR + CONTENT) */}
-    <div className="flex flex-col lg:flex-row gap-6">
+            {/* ZONE PREVIEW (SIDEBAR + CONTENT) */}
+            <div className="flex flex-col lg:flex-row gap-6">
 
-      {/* SIDEBAR – réutilisation exacte */}
-      <CoursesSidebarItem2
-        sections={sections}
-        currentSectionIndex={previewSectionIndex}
-        setCurrentSectionIndex={(index) => {
-          setPreviewSectionIndex(index);
-          setPreviewLessonPage(0);
-          setSectionPages((prev) => ({ ...prev, [index]: 0 }));
-        }}
-      />
+              {/* SIDEBAR – réutilisation exacte */}
+              <CoursesSidebarItem2
+                sections={sections}
+                currentSectionIndex={previewSectionIndex}
+                setCurrentSectionIndex={(index) => {
+                  setPreviewSectionIndex(index);
+                  setPreviewLessonPage(0);
+                  setSectionPages((prev) => ({ ...prev, [index]: 0 }));
+                }}
+              />
 
-      {/* CONTENU DU COURS – réutilisation exacte */}
-     <CourseContentSimple
-  course={{
-    id: "preview",
-    title,
-    description,
-    level,
-    duration,
-    sections,
-  }}
-  currentSectionIndex={previewSectionIndex}
-  setCurrentSectionIndex={setPreviewSectionIndex}
-  /* pagination des leçons */
-  sectionPages={sectionPages}
-  setSectionPages={setSectionPages}
-/>
+              {/* CONTENU DU COURS – réutilisation exacte */}
+              <CourseContentSimple
+                course={{
+                  id: "preview",
+                  title,
+                  description,
+                  level,
+                  duration,
+                  sections,
+                }}
+                currentSectionIndex={previewSectionIndex}
+                setCurrentSectionIndex={setPreviewSectionIndex}
+                /* pagination des leçons */
+                sectionPages={sectionPages}
+                setSectionPages={setSectionPages}
+              />
 
- </div>
-    {/* ACTIONS GLOBALES (SÉPARÉES DU CONTENU) */}
-    <div className="flex justify-between items-center pt-6 border-t">
+            </div>
+            {/* ACTIONS GLOBALES (SÉPARÉES DU CONTENU) */}
+            <div className="flex justify-between items-center pt-6 border-t">
 
-      {/* RETOUR */}
-      <button
-        onClick={() => setActiveStep(2)}
-        className="px-6 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition font-medium"
-      >
-        ← {t("course.back")}
-      </button>
+              {/* RETOUR */}
+              <button
+                onClick={() => setActiveStep(2)}
+                className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition"
+              >
+                ← {t("course.back")}
+              </button>
 
-      {/* PUBLIER */}
-      <button
-        onClick={handleSaveAll}
-        className="px-8 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition"
-      >
-        {t("course.save_publier")}
-      </button>
+              {/* PUBLIER */}
+              <button
+                onClick={handleSaveAll}
+                className="px-8 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition"
+              >
+                {t("course.save_publier")}
+              </button>
 
-    </div>
-  </div>
- 
+            </div>
+          </div>
 
-)}
+
+        )}
 
 
 
