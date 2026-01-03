@@ -252,7 +252,7 @@ export default function Dashboardetu() {
           />
           <Cards 
             text={t("Dashboard.Success")} 
-            value={`${successRate}%`} 
+            value={`${Math.round(successRate)}%`} 
             icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
             bg="bg-grad-3"
             isMobile={isMobile}

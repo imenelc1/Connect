@@ -38,8 +38,6 @@ export default function WeeklySubmissionChart({ studentId = null }) {
     fetchWeeklyData();
   }, [studentId, token]);
 
-
-
   return (
     <div className="bg-white rounded-2xl shadow p-6 w-full">
       <h2 className="font-semibold text-lg mb-4">
@@ -49,30 +47,29 @@ export default function WeeklySubmissionChart({ studentId = null }) {
       <div className="w-full h-64">
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={weeklyData}>
-          
-
             <YAxis />
-           <XAxis dataKey="label" />  {/* label = "Week 1", "Week 2", ... */}
-<Tooltip
-  content={({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const week = payload[0].payload;
-      // Affichage des dates dans le tooltip seulement
-      const start = new Date(week.start_date);
-      const end = new Date(week.end_date);
-      return (
-        <div className="bg-white p-2 rounded shadow border">
-          <p className="font-semibold">
-            {start.toLocaleDateString()} - {end.toLocaleDateString()}
-          </p>
-          <p>{t("ProgressStudent.submissionsLabel")} {week.submissions}%</p>
-        </div>
-      );
-    }
-    return null;
-  }}
-/>
+            <XAxis dataKey="label" /> {/* label = "Week 1", "Week 2", ... */}
+            <Tooltip
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  const day = payload[0].payload;
+                  const date = new Date(day.date);
 
+                  return (
+                    <div className="bg-white p-2 rounded shadow border">
+                      <p className="font-semibold">
+                        {date.toLocaleDateString()}
+                      </p>
+                      <p>
+                        {t("ProgressStudent.submissionsLabel")}{" "}
+                        {day.submissions}%
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              }}
+            />
             <Bar
               dataKey="submissions"
               fill="rgb(var(--color-purple))"

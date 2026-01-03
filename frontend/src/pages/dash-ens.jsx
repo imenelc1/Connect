@@ -223,14 +223,14 @@ export default function Dashboardens() {
   };
 
   // Données pour le graphique circulaire
- const chartData = [
-  { name:"Courses", value: contentCounts.courses_count },
-  { name:"Exercises", value: contentCounts.exercises_count },
-  { name:"Quizzes", value: contentCounts.quizzes_count }
-];
-
+  const chartData = [
+    { name: "Courses", value: contentCounts.courses_count },
+    { name: "Exercises", value: contentCounts.exercises_count },
+    { name: "Quizzes", value: contentCounts.quizzes_count }
+  ];
 
   const formattedNotifications = formatNotificationsForFeed();
+
 
   // Écran de chargement
   if (loading) {

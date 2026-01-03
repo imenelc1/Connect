@@ -8,7 +8,15 @@ import ContentSearchBar from "../components/common/ContentSearchBar";
 import ContentCard from "../components/common/ContentCard";
 import ContentFilters from "../components/common/ContentFilters";
 import UserCircle from "../components/common/UserCircle";
-import { ArrowLeft, Users, Bell, BookOpen, NotebookPen, FileCheck, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  Users,
+  Bell,
+  BookOpen,
+  NotebookPen,
+  FileCheck,
+  Plus,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import toast from "react-hot-toast";
@@ -33,12 +41,13 @@ export default function SpaceDetails() {
   const { t, i18n } = useTranslation("CourseDetails");
 
   const userData = JSON.parse(localStorage.getItem("user")) || {};
- 
+
   const userId = userData?.user_id;
 
-
   const userRole = userData?.role || "";
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
   const [spaceName, setSpaceName] = useState("");
   const [studentsCount, setStudentsCount] = useState(0);
@@ -53,9 +62,12 @@ export default function SpaceDetails() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("ALL");
+  const [activeProgressFilter, setActiveProgressFilter] = useState("ALL");
   const [activeStep, setActiveStep] = useState(1);
   const [openModal, setOpenModal] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState("");
+  const [activeExerciseFilter, setActiveExerciseFilter] = useState("ALL");
+
 
   const steps = [
     { label: t("topbar.course"), icon: BookOpen },
@@ -69,12 +81,12 @@ export default function SpaceDetails() {
     fetch(`http://127.0.0.1:8000/api/spaces/${id}/`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setSpaceName(data.nom_space || "My space");
         setStudentsCount(data.students_count || 0);
       })
-      .catch(err => console.error("Failed to load space details:", err));
+      .catch((err) => console.error("Failed to load space details:", err));
   }, [id]);
 
   // --- Fetch space items according to active step ---
@@ -86,15 +98,20 @@ export default function SpaceDetails() {
         if (activeStep === 1) {
           // Courses
           const allCourses = await getCoursesProgress();
-          const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/courses/`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          });
+          const res = await fetch(
+            `http://127.0.0.1:8000/api/spaces/${id}/courses/`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
           const data = await res.json();
-          const spaceCoursesIds = data.map(sc => sc.cours.id_cours);
+          const spaceCoursesIds = data.map((sc) => sc.cours.id_cours);
           setSpaceCourses(
             allCourses
-              .filter(c => spaceCoursesIds.includes(c.id_cours))
-              .map(c => ({
+              .filter((c) => spaceCoursesIds.includes(c.id_cours))
+              .map((c) => ({
                 id: c.id_cours,
                 title: c.titre_cour,
                 description: c.description,
@@ -106,110 +123,128 @@ export default function SpaceDetails() {
               }))
           );
         } else if (activeStep === 2) {
-  const res = await fetch(
-    `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`,
-    {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    }
-  );
-
-  const data = await res.json();
-
-  const formatted = (data || []).map(q => ({
-    id: q.quiz.exercice?.id_exercice,      // EXACT comme AllQuizzesPage
-    quizId: q.quiz.id,                     // IMPORTANT
-    title: q.quiz.exercice?.titre_exo,
-    description: q.quiz.exercice?.enonce,
-    level: q.quiz.exercice?.niveau_exercice_label,
-    author: q.quiz.exercice?.utilisateur_name,
-    nbMax_tentative: q.quiz.nbMax_tentative,
-    delai_entre_tentatives: q.quiz.delai_entre_tentatives,
-    duration: q.quiz.duration_minutes,
-    activer: q.quiz.activerDuration,
-    isMine: q.quiz.exercice?.utilisateur === userData?.id,
-    initials: q.quiz.exercice?.utilisateur_name
-      ?.split(" ")
-      .map(n => n[0])
-      .join("")
-      .toUpperCase(),
-  }));
-
-   const results = {};
-
-      await Promise.all(
-        formatted.map(async quiz => {
           const res = await fetch(
-            `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${userId}/`,
+            `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
             }
           );
-          results[quiz.quizId] = await res.json();
-        })
-      );
+
+          const data = await res.json();
+          const formatted = (data || []).map((q) => ({
+            
+            id: q.quiz.exercice?.id_exercice, // EXACT comme AllQuizzesPage
+            quizId: q.quiz.id, // IMPORTANT
+            title: q.quiz.exercice?.titre_exo,
+            description: q.quiz.exercice?.enonce,
+            level: q.quiz.exercice?.niveau_exercice_label,
+            author: q.quiz.exercice?.utilisateur_name,
+            nbMax_tentative: q.quiz.nbMax_tentative,
+            delai_entre_tentatives: q.quiz.delai_entre_tentatives,
+            duration: q.quiz.duration_minutes,
+            activer: q.quiz.activerDuration,
+            isMine: q.quiz.exercice?.utilisateur === userData?.id,
+            initials: q.quiz.exercice?.utilisateur_name
+              ?.split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase(),
+          }));
+
+          const results = {};
+
+          await Promise.all(
+            formatted.map(async (quiz) => {
+              const res = await fetch(
+                `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${userId}/`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                }
+              );
+              results[quiz.quizId] = await res.json();
+            })
+          );
+
+          //  même logique que AllQuizzesPage
+
+          const quizzesWithAttempts = formatted.map((quiz) => {
+            const tentatives = results[quiz.quizId] || [];
+
+            let isBlocked = false;
+            let minutesRestantes = 0;
+            let tentativesRestantes = null;
+
+            if (quiz.nbMax_tentative > 0) {
+              tentativesRestantes = quiz.nbMax_tentative - tentatives.length;
+              if (tentativesRestantes <= 0) isBlocked = true;
+            }
+
+            if (
+              !isBlocked &&
+              tentatives.length > 0 &&
+              quiz.delai_entre_tentatives
+            ) {
+              const last = tentatives[0];
+              if (last.date_fin) {
+                const diff =
+                  new Date(last.date_fin).getTime() +
+                  quiz.delai_entre_tentatives * 60000 -
+                  Date.now();
+
+                if (diff > 0) {
+                  isBlocked = true;
+                  minutesRestantes = Math.ceil(diff / 60000);
+                }
+              }
+            }
+
+        const isFinished = tentatives.length > 0 && tentatives.some(t => t.terminer === true);
 
 
-  //  même logique que AllQuizzesPage
 
+  
 
-  const quizzesWithAttempts = formatted.map(quiz => {
-    const tentatives = results[quiz.quizId] || [];
+return {
+  ...quiz,
+  tentatives,
+  isBlocked,
+  tentativesRestantes,
+  minutesRestantes,
+  isFinished, 
+};
 
-    let isBlocked = false;
-    let minutesRestantes = 0;
-    let tentativesRestantes = null;
-
-    if (quiz.nbMax_tentative > 0) {
-      tentativesRestantes = quiz.nbMax_tentative - tentatives.length;
-      if (tentativesRestantes <= 0) isBlocked = true;
-    }
-
-    if (!isBlocked && tentatives.length > 0 && quiz.delai_entre_tentatives) {
-      const last = tentatives[0];
-      if (last.date_fin) {
-        const diff =
-          new Date(last.date_fin).getTime() +
-          quiz.delai_entre_tentatives * 60000 -
-          Date.now();
-
-        if (diff > 0) {
-          isBlocked = true;
-          minutesRestantes = Math.ceil(diff / 60000);
-        }
-      }
-    }
-
-    return {
-      ...quiz,
-      tentatives,
-      isBlocked,
-      tentativesRestantes,
-      minutesRestantes,
-    };
-  });
-
-  setSpaceQuizzes(quizzesWithAttempts);
-}
- else if (activeStep === 3) {
-          // Exercises
-          const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
+
+          setSpaceQuizzes(quizzesWithAttempts);
+        } else if (activeStep === 3) {
+          // Exercises
+          const res = await fetch(
+            `http://127.0.0.1:8000/api/spaces/${id}/exercises/`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
           const data = await res.json();
           setSpaceExercises(
-            (data || []).filter(e => e.exercice).map(e => ({
-              id: e.exercice.id_exercice,
-              title: e.exercice.titre_exo,
-              description: e.exercice.enonce,
-              level: e.exercice.niveau_exercice_label,
-              author: e.exercice.utilisateur_name || "Inconnu",
-              date: e.exercice.date_creation || "",
-              categorie: e.exercice.categorie,
-              progress: e.progress ?? 0,
-              isMine: e.exercice.utilisateur === userData?.id,
-            }))
+            (data || [])
+              .filter((e) => e.exercice)
+              .map((e) => ({
+                id: e.exercice.id_exercice,
+                title: e.exercice.titre_exo,
+                description: e.exercice.enonce,
+                level: e.exercice.niveau_exercice_label,
+                author: e.exercice.utilisateur_name || "Inconnu",
+                date: e.exercice.date_creation || "",
+                categorie: e.exercice.categorie,
+                progress: e.progress ?? 0,
+                isMine: e.exercice.utilisateur === userData?.id,
+              }))
           );
         }
       } catch (err) {
@@ -220,61 +255,72 @@ export default function SpaceDetails() {
     fetchItems();
   }, [id, activeStep, userId]);
 
-
   // --- Fetch my items for modal ---
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    const fetchMyCourses = fetch(`http://127.0.0.1:8000/api/spaces/my-courses/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then(res => res.json());
+    const fetchMyCourses = fetch(
+      `http://127.0.0.1:8000/api/spaces/my-courses/`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json());
 
-    const fetchMyQuizzes = fetch(`http://127.0.0.1:8000/api/spaces/my-quizzes/?space_id=${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then(res => res.json());
+    const fetchMyQuizzes = fetch(
+      `http://127.0.0.1:8000/api/spaces/my-quizzes/?space_id=${id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json());
 
-    const fetchMyExercises = fetch(`http://127.0.0.1:8000/api/spaces/my-exercises/`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then(res => res.json());
+    const fetchMyExercises = fetch(
+      `http://127.0.0.1:8000/api/spaces/my-exercises/`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json());
 
     Promise.all([fetchMyCourses, fetchMyQuizzes, fetchMyExercises])
       .then(([coursesData, quizzesData, exercisesData]) => {
-        setMyCourses((coursesData || []).map(c => ({
-          id: c.id_cours,
-          title: c.titre_cour,
-          description: c.description,
-          level: c.niveau_cour_label,
-          author: c.utilisateur_name,
-        })));
+        setMyCourses(
+          (coursesData || []).map((c) => ({
+            id: c.id_cours,
+            title: c.titre_cour,
+            description: c.description,
+            level: c.niveau_cour_label,
+            author: c.utilisateur_name,
+          }))
+        );
 
-setMyQuizzes(
-  (quizzesData || [])
-    .filter(q => q.id && q.exercice)   // <-- ajouter q.exercice
-    .map(q => ({
-      id: q.id,
-      title: q.exercice.titre_exo?.trim() || "Sans titre",
-      description: q.exercice.enonce || "",
-      level: q.exercice.niveau_exercice_label || "",
-      author: q.exercice.utilisateur_name || "",
-    }))
-);
+        setMyQuizzes(
+          (quizzesData || [])
+            .filter((q) => q.id && q.exercice) // <-- ajouter q.exercice
+            .map((q) => ({
+              id: q.id,
+              title: q.exercice.titre_exo?.trim() || "Sans titre",
+              description: q.exercice.enonce || "",
+              level: q.exercice.niveau_exercice_label || "",
+              author: q.exercice.utilisateur_name || "",
+            }))
+        );
 
-
-
-
-
-        setMyExercises((exercisesData || []).filter(e => e.id_exercice).map(e => ({
-          id: e.id_exercice,
-          title: e.titre_exo?.trim() || "Sans titre",
-          description: e.enonce || "",
-          level: e.niveau_exercice_label || "",
-          author: e.utilisateur_name || "",
-        })));
+        setMyExercises(
+          (exercisesData || [])
+            .filter((e) => e.id_exercice)
+            .map((e) => ({
+              id: e.id_exercice,
+              title: e.titre_exo?.trim() || "Sans titre",
+              description: e.enonce || "",
+              level: e.niveau_exercice_label || "",
+              author: e.utilisateur_name || "",
+            }))
+        );
       })
-      .catch(err => console.error("Failed to fetch my items:", err));
+      .catch((err) => console.error("Failed to fetch my items:", err));
   }, []);
 
   // --- Unified handle add item ---
+ // --- Unified handle add item ---
 const handleAddItem = (selectedItemId) => {
   const idToSend = Number(selectedItemId);
   if (!idToSend) {
@@ -374,12 +420,127 @@ const handleAddItem = (selectedItemId) => {
 
 
 
-  const itemsToDisplay = activeStep === 1 ? spaceCourses : activeStep === 2 ? spaceQuizzes : spaceExercises;
-  const filteredItems = itemsToDisplay
-    .filter(c => filterLevel === "ALL" || c.level === filterLevel)
-    .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const modalItems = activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
+  useEffect(() => {
+  if (!id || activeStep !== 3) return;
+
+  const fetchExercises = async () => {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+
+      const exercises = (data || []).filter((e) => e.exercice);
+
+      const exercisesWithState = await Promise.all(
+        exercises.map(async (ex) => {
+          try {
+            const resTent = await fetch(
+              `http://127.0.0.1:8000/api/dashboard/${ex.exercice.id_exercice}/utilisateur/${userId}/tentatives/`,
+              { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+            );
+            const tentatives = resTent.ok ? await resTent.json() : [];
+            console.log("tentatives", tentatives);
+
+            const lastTentative = tentatives.sort((a,b)=>new Date(b.submitted_at)-new Date(a.submitted_at))[0] || null;
+            const etat = lastTentative?.etat || "brouillon";
+            const progress = etat === "soumis" ? 100 : lastTentative ? 50 : 0;
+
+            return {
+              id: ex.exercice.id_exercice,
+              title: ex.exercice.titre_exo,
+              description: ex.exercice.enonce,
+              level: ex.exercice.niveau_exercice_label,
+              author: ex.exercice.utilisateur_name || "Inconnu",
+              date: ex.exercice.date_creation,
+              categorie: ex.exercice.categorie,
+              etat,
+              progress,
+              isMine: ex.exercice.utilisateur === userData?.id,
+              tentatives,
+            };
+          } catch (err) {
+            console.error(err);
+            return { ...ex.exercice, progress: 0, etat: "brouillon", tentatives: [] };
+          }
+        })
+      );
+
+      setSpaceExercises(exercisesWithState);
+
+    } catch (err) {
+      console.error("Erreur fetch exercises:", err);
+    }
+  };
+
+  fetchExercises();
+}, [id, activeStep, userId]);
+
+
+  const itemsToDisplay =
+    activeStep === 1
+      ? spaceCourses
+      : activeStep === 2
+      ? spaceQuizzes
+      : spaceExercises;
+const filteredItems = itemsToDisplay
+  // 🔹 Filtre par niveau
+  .filter(item => {
+    if (activeStep === 3) {
+      // Pour les exercices, utiliser le niveau sélectionné
+      return filterLevel === "ALL" || item.level === filterLevel;
+    } else {
+      return filterLevel === "ALL" || item.level === filterLevel;
+    }
+  })
+  // 🔹 Filtre par état/progress
+  .filter(item => {
+    if (userRole !== "etudiant") return true;
+
+    if (activeStep === 1) {
+      if (activeProgressFilter === "completed") return item.progress === 100;
+      if (activeProgressFilter === "not_completed") return item.progress < 100;
+    }
+
+    if (activeStep === 2) {
+      if (activeProgressFilter === "completed") return item.isFinished === true;
+      if (activeProgressFilter === "not_completed") return !item.isFinished;
+    }
+
+    if (activeStep === 3) {
+      switch (activeExerciseFilter) {
+        case "soumis":
+          return item.etat === "soumis";
+        case "brouillon":
+          return item.etat === "brouillon";
+        case "ALL":
+        default:
+          return true;
+      }
+    }
+
+    return true;
+  })
+  // 🔹 Recherche texte
+  .filter(item => {
+  if (!searchTerm.trim()) return true;
+
+  const search = searchTerm.toLowerCase();
+
+  return (
+    item.title?.toLowerCase().includes(search) ||
+    item.description?.toLowerCase().includes(search) ||
+    item.author?.toLowerCase().includes(search)
+  );
+});
+
+
+
+
+  const modalItems =
+    activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
 
   return (
     <div className="flex w-full bg-surface min-h-screen">
@@ -393,30 +554,30 @@ const handleAddItem = (selectedItemId) => {
           >
             <ArrowLeft size={16} /> {t("backToSpaces")}
           </button>
-          
-    
-      
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
+
+          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+            <NotificationBell />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => {
+                const i18n = window.i18n;
+                if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+              }}
+            />
+          </div>
         </div>
 
         {/* Space Info + Search */}
         <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
           <h2 className="text-4xl font-semibold text-muted">{spaceName}</h2>
           <div className="w-full md:w-[400px]">
-            <ContentSearchBar
-              placeholder={t("searchItems")}
-              onChange={setSearchTerm}
-            />
+           <ContentSearchBar
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+/>
+
+
           </div>
           <div className="flex items-center gap-2 bg-card text-muted font-semibold px-4 py-2 rounded-md">
             <Users size={16} /> {studentsCount} {t("students")}
@@ -432,14 +593,26 @@ const handleAddItem = (selectedItemId) => {
 
         {/* Filters + Add Button */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <ContentFilters
-            type={activeStep === 1 ? "courses" : activeStep === 2 ? "quizzes" : "exercises"}
-            userRole={userRole}
-            activeFilter={filterLevel}
-            onFilterChange={setFilterLevel}
-            showCompletedFilter={userRole === "etudiant" && activeStep === 1}
-            hideCategoryFilter={true}
-          />
+       <ContentFilters
+  type={
+    activeStep === 1
+      ? "courses"
+      : activeStep === 2
+      ? "quizzes"
+      : "exercises"
+  }
+  userRole={userRole}
+  activeFilter={filterLevel}          // ← filtre NIVEAU
+  onFilterChange={setFilterLevel}     // ← met à jour filterLevel
+  showCompletedFilter={userRole === "etudiant" && (activeStep === 1 || activeStep === 2)}
+  onCompletedChange={
+    activeStep === 3
+      ? setActiveExerciseFilter       // ← filtre ÉTAT pour exos
+      : setActiveProgressFilter       // ← filtre ÉTAT pour cours/quizzes
+  }
+  hideCategoryFilter={true}
+/>
+
           {userRole === "enseignant" && (
             <Button
               variant="courseStart"
@@ -452,121 +625,120 @@ const handleAddItem = (selectedItemId) => {
         </div>
 
         {/* Items Grid */}
-       <div
-  className="grid gap-6"
-  style={{
-    gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3}, minmax(0, 1fr))`,
-  }}
->
-  {/* COURSES & QUIZZES */}
-  {activeStep !== 3 &&
-    filteredItems.map(item => (
-      <ContentCard
-        key={`${activeStep}-${item.id}`}
-        course={{
-          ...item,
-          initials: item.author
-            ? item.author
-                .split(" ")
-                .map(n => n[0])
-                .join("")
-                .toUpperCase()
-            : "",
-          duration: item.date ? `Créé le ${item.date}` : "",
-        }}
-        role={userRole}
-        showProgress={userRole === "etudiant" && activeStep === 1}
-        type={activeStep === 1 ? "course" : "quiz"}
-        className={gradientMap[item.level] ?? "bg-grad-1"}
-        onDelete={id => {
-          if (activeStep === 1)
-            setSpaceCourses(spaceCourses.filter(c => c.id !== id));
-          else if (activeStep === 2)
-            setSpaceQuizzes(spaceQuizzes.filter(c => c.id !== id));
-        }}
-        onClick={() => {
-          if (userRole === "etudiant") {
-            if (activeStep === 1) navigate(`/courses/${item.id}/start`);
-            else navigate(`/quizzes/${item.id}/start`);
-          } else {
-            if (activeStep === 1) navigate(`/courses/${item.id}`);
-            else navigate(`/quizzes/${item.id}`);
-          }
-        }}
-      />
-    ))}
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${
+              window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
+            }, minmax(0, 1fr))`,
+          }}
+        >
+          {/* COURSES & QUIZZES */}
+          {activeStep !== 3 &&
+            filteredItems.map((item) => (
+              <ContentCard
+                key={`${activeStep}-${item.id}`}
+                course={{
+                  ...item,
+                  initials: item.author
+                    ? item.author
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                    : "",
+                  duration: item.date ? `Créé le ${item.date}` : "",
+                }}
+                role={userRole}
+                showProgress={userRole === "etudiant" && activeStep === 1}
+                type={activeStep === 1 ? "course" : "quiz"}
+                className={gradientMap[item.level] ?? "bg-grad-1"}
+                onDelete={(id) => {
+                  if (activeStep === 1)
+                    setSpaceCourses(spaceCourses.filter((c) => c.id !== id));
+                  else if (activeStep === 2)
+                    setSpaceQuizzes(spaceQuizzes.filter((c) => c.id !== id));
+                }}
+                onClick={() => {
+                  if (userRole === "etudiant") {
+                    if (activeStep === 1) navigate(`/courses/${item.id}/start`);
+                    else navigate(`/quizzes/${item.id}/start`);
+                  } else {
+                    if (activeStep === 1) navigate(`/courses/${item.id}`);
+                    else navigate(`/quizzes/${item.id}`);
+                  }
+                }}
+              />
+            ))}
 
-  {/* EXERCISES */}
-  {activeStep === 3 &&
-    filteredItems.map(exercise => (
-      <ExerciseCard
-        key={exercise.id}
-        exercise={exercise}
-        onDelete={() =>
-          setSpaceExercises(prev =>
-            prev.filter(e => e.id !== exercise.id)
-          )
-        }
-        onClick={() => navigate(`/exercises/${exercise.id}`)}
-      />
-    ))}
-</div>
+          {/* EXERCISES */}
+          {activeStep === 3 &&
+            filteredItems.map((exercise) => (
+              <ExerciseCard
+                key={exercise.id}
+                exercise={exercise}
+                onDelete={() =>
+                  setSpaceExercises((prev) =>
+                    prev.filter((e) => e.id !== exercise.id)
+                  )
+                }
+                onClick={() => navigate(`/exercises/${exercise.id}`)}
+              />
+            ))}
+        </div>
 
-
-{/* Add Modal */}
-{openModal && (
-  <AddModal
-    open={openModal}
-    onClose={() => {
-      setOpenModal(false);
-      setSelectedItemId("");
-    }}
-    title={t("addItem")}
-    subtitle={t("selectItemToAdd")}
-    submitLabel={t("addButton")}
-    onSubmit={() => handleAddItem(selectedItemId)}
-    fields={[
-      {
-        label: t("selectItemLabel"),
-        element: (() => {
-          switch (activeStep) {
-            case 1:
-              return (
-                <MyCoursesSelect
-                  items={myCourses}              // LES COURS DE L'UTILISATEUR
-                  selectedItemId={selectedItemId}
-                  onChange={setSelectedItemId}
-                  existingItems={spaceCourses}   // COURS déjà dans l'espace
-                />
-              );
-            case 2:
-              return (
-                      <MyQuizzesSelect
-        items={myQuizzes}              // SEULEMENT LES QUIZZES DE L'UTILISATEUR non ajoutés
-        selectedItemId={selectedItemId}
-        onChange={setSelectedItemId}
-        existingItems={spaceQuizzes}   // QUIZZES déjà dans l'espace
-      />
-
-              );
-            case 3:
-              return (
-                <MyExercisesSelect
-                  items={myExercises}             // SEULEMENT LES EXERCICES DE L'UTILISATEUR
-                  selectedItemId={selectedItemId}
-                  onChange={setSelectedItemId}
-                  existingItems={spaceExercises}  // EXERCICES déjà dans l'espace
-                />
-              );
-            default:
-              return null;
-          }
-        })(),
-      },
-    ]}
-  />
-)}
-
+        {/* Add Modal */}
+        {openModal && (
+          <AddModal
+            open={openModal}
+            onClose={() => {
+              setOpenModal(false);
+              setSelectedItemId("");
+            }}
+            title={t("addItem")}
+            subtitle={t("selectItemToAdd")}
+            submitLabel={t("addButton")}
+            onSubmit={() => handleAddItem(selectedItemId)}
+            fields={[
+              {
+                label: t("selectItemLabel"),
+                element: (() => {
+                  switch (activeStep) {
+                    case 1:
+                      return (
+                        <MyCoursesSelect
+                          items={myCourses} // LES COURS DE L'UTILISATEUR
+                          selectedItemId={selectedItemId}
+                          onChange={setSelectedItemId}
+                          existingItems={spaceCourses} // COURS déjà dans l'espace
+                        />
+                      );
+                    case 2:
+                      return (
+                        <MyQuizzesSelect
+                          items={myQuizzes} // SEULEMENT LES QUIZZES DE L'UTILISATEUR non ajoutés
+                          selectedItemId={selectedItemId}
+                          onChange={setSelectedItemId}
+                          existingItems={spaceQuizzes} // QUIZZES déjà dans l'espace
+                        />
+                      );
+                    case 3:
+                      return (
+                        <MyExercisesSelect
+                          items={myExercises} // SEULEMENT LES EXERCICES DE L'UTILISATEUR
+                          selectedItemId={selectedItemId}
+                          onChange={setSelectedItemId}
+                          existingItems={spaceExercises} // EXERCICES déjà dans l'espace
+                        />
+                      );
+                    default:
+                      return null;
+                  }
+                })(),
+              },
+            ]}
+          />
+        )}
       </main>
     </div>
   );

@@ -10,13 +10,16 @@ export default function ContentFilters({
   type = "courses",
   categoryFilter,
   setCategoryFilter,
-  hideCategoryFilter = false // <-- Nouvelle prop pour cacher le filtre catégorie
+  hideCategoryFilter = false, 
+  onCompletedChange 
 }) {
   const { t } = useTranslation("filters");
   const levels = ["ALL", "Débutant", "Intermédiaire", "Avancé"];
 
   const [completedStatus, setCompletedStatus] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
+  const [exerciseStatus, setExerciseStatus] = useState("");
+
 
   // TEXTES DYNAMIQUES SELON LE TYPE
   const labels = {
@@ -67,17 +70,38 @@ export default function ContentFilters({
     {/* ÉTAT DE COMPLÉTION */}
     {showCompletedFilter && (
       <ModernDropdown
-        value={completedStatus}
-        onChange={setCompletedStatus}
-        placeholder={t("status.all")}
-        options={[
-          { value: "", label: t("status.all") },
-          { value: "completed", label: t("status.completed") },
-          { value: "not_completed", label: t("status.notCompleted") },
-        ]}
-        className="w-full sm:w-40"
-      />
+  value={completedStatus}
+  onChange={(value) => {
+    setCompletedStatus(value);
+    onCompletedChange?.(value); 
+  }}
+  placeholder={t("status.all")}
+  options={[
+    { value: "", label: t("status.all") },
+    { value: "completed", label: t("status.completed") },
+    { value: "not_completed", label: t("status.notCompleted") },
+  ]}
+  className="w-full sm:w-40"
+/>
     )}
+
+    {/* ÉTAT DES EXERCICES */}
+{type === "exercises" && userRole === "etudiant" && (
+ <ModernDropdown
+  value={activeFilter} // ← utiliser la valeur active depuis le parent
+  onChange={(value) => {
+    onCompletedChange?.(value);
+  }}
+  placeholder={t("status.all")}
+  options={[
+    { value: "ALL", label: t("status.all") },
+    { value: "soumis", label: t("status.submitted") },
+    { value: "brouillon", label: t("status.draft") },
+  ]}
+  className="w-full sm:w-40"
+/>
+)}
+
 
     {/* CATÉGORIE */}
     {!hideCategoryFilter && (userRole === "enseignant" || userRole === "etudiant") && (

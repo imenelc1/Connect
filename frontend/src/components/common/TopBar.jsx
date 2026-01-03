@@ -40,4 +40,3 @@ export default function Topbar({ steps = [], activeStep, setActiveStep, onStepCh
     </div>
   );
 }
-
