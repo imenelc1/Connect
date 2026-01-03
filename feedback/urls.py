@@ -18,4 +18,9 @@ urlpatterns = [
         views.mark_notification_read,
         name='notification-mark-read'
     ),
+    path('notifications/<int:notif_id>/', views.delete_notification, name='notification-delete'),
+    path('notifications/delete-all/', views.delete_all_notifications, name='notifications-delete-all'),
+
+    
 ]
+

@@ -1,0 +1,12 @@
+{
+  "assistant_title": "AI Assistant",
+  "assistant_typing": "Assistant is typing...",
+  "placeholder_question": "Type your question...",
+  "error_message": "❌ An error occurred. Please try again.",
+  "student_fetch_error": "Error fetching student:",
+  "bot_greeting": "Hello {{name}} 👋\nI'm your Coach C.\nTell me what's blocking you.",
+  "student": "student",
+  "input_placeholder": "Type your question.."
+  
+
+}

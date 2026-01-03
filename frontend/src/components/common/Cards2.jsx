@@ -37,7 +37,7 @@ export default function Cards2({
       {/* LEFT AREA */}
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 w-full">
         {/* ICON */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-start justify-start">
           {typeof icon === "string" ? (
             <div className="w-10 h-10 flex items-center justify-center text-white font-semibold bg-grad-1 rounded-md">
               {icon}

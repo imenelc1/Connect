@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/NavBar.jsx";
+import Navbar from "../components/common/Navbar.jsx";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
 import { Trash2, ChevronUp } from "lucide-react";
@@ -14,11 +14,13 @@ import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
+import CoursesSidebarItem2 from "../components/ui/CoursesSidebarItem2.jsx";
+import CourseContentSimple from "../components/ui/CourseContentSimple.jsx";
 export default function CoursePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("courseInfo");
   const { toggleDarkMode } = useContext(ThemeContext);
-  
+
   // États pour la responsivité
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -28,18 +30,20 @@ export default function CoursePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
   const [token, setToken] = useState(null);
+  const [sectionPages, setSectionPages] = useState({});
+
 
   // Effet pour la responsivité
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -82,12 +86,12 @@ export default function CoursePage() {
     { label: t("course.curriculum"), icon: BookOpenCheck },
     { label: t("course.publish_title"), icon: CheckCircle },
   ];
-  
+
   const [hours, setHours] = useState("00");
   const [minutes, setMinutes] = useState("00");
   const [seconds, setSeconds] = useState("00");
   const [duration, setDuration] = useState("");
-
+const [currentCoursId, setCurrentCoursId] = useState(null);
   useEffect(() => {
     setDuration(`${hours}:${minutes}:${seconds}`);
   }, [hours, minutes, seconds]);
@@ -107,8 +111,8 @@ export default function CoursePage() {
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState("");
   const [courseVisibility, setCourseVisibility] = useState("public");
+  const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
 
-  const [currentCoursId, setCurrentCoursId] = useState(null);
 
   // --- Sections & lessons ---
   const [sections, setSections] = useState([
@@ -293,6 +297,11 @@ export default function CoursePage() {
     return <div style={{ padding: 20 }}>Not authenticated...</div>;
   }
 
+
+
+
+
+
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* Sidebar */}
@@ -329,26 +338,31 @@ export default function CoursePage() {
             <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-muted">
               {t("course.basic_info")}
             </h2>
-            
-            <div className="flex flex-col mb-4 sm:mb-6">
+
+            <div className="flex flex-col mb-4 sm:mb-6 ">
               <label className="font-medium mb-2 text-muted">{t("course.title")}</label>
               <Input
                 placeholder={t("course.course_title_placeholder")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                className="
+  !bg-card !text-black dark:!text-white
+  
+"
+                
               />
             </div>
-            
+
             <div className="flex flex-col mb-4 sm:mb-6">
               <label className="font-medium mb-2 text-muted">{t("course.course_topic")}</label>
               <textarea
-                className="w-full min-h-[120px] sm:min-h-[180px] border border-gray-300 rounded-xl p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full bg-card  text-black  dark:text-white  min-h-[120px] sm:min-h-[180px] border border-gray-300 rounded-xl p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder={t("course.course_topic_placeholder")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="flex flex-col">
                 <label className="font-medium mb-2 text-muted">{t("course.duration")}</label>
@@ -390,7 +404,7 @@ export default function CoursePage() {
                   ]}
                 />
               </div>
-              
+
               <div className="flex flex-col md:col-span-2">
                 <label className="font-medium mb-2 text-muted">{t("course.visibility")}</label>
                 <ModernDropdown
@@ -404,9 +418,9 @@ export default function CoursePage() {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-between mt-6 sm:mt-10">
-              <button className="px-4 sm:px-6 py-2 rounded-xl border border-gray-300 font-medium bg-white shadow-sm transition hover:bg-gray-50">
+              <button  className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition" onClick={() => navigate("/all-courses")}>
                 {t("course.cancel")}
               </button>
               <button
@@ -419,82 +433,100 @@ export default function CoursePage() {
           </div>
         )}
 
+
         {/* STEP 2 */}
         {activeStep === 2 && (
-          <div className="w-full">
-            <div className="bg-grad-2 rounded-2xl p-4 sm:p-6 lg:p-8">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-muted">
-                  {t("course.curriculum")}
-                </h1>
-                <button
-                  className="px-4 sm:px-6 py-2 rounded-xl bg-primary text-white shadow-sm hover:shadow-md transition self-start"
-                  onClick={addSection}
-                >
-                  + {t("course.add_section")}
-                </button>
-              </div>
+          <div className="w-full bg-grad-2 rounded-2xl shadow-md p-4 sm:p-6 lg:p-8">
 
-              {sections.map((section, index) => (
-                <div
-                  key={section.id}
-                  className="bg-grad-2 rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-200 hover:border-primary/30 transition mb-6"
-                >
-                  <div className="flex flex-col gap-4 mb-4">
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-primary text-white font-semibold flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      
-                      <div className="flex-1">
-                        <Input
-                          value={section.title}
-                          onChange={(e) => updateSectionTitle(section.id, e.target.value)}
-                          placeholder={t("course.section_title_placeholder")}
-                          className="!border-none !bg-transparent px-0 font-medium text-lg"
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-muted">
+                {t("course.curriculum")}
+              </h1>
+              <button
+                className="px-4 sm:px-6 py-2 rounded-xl bg-primary text-white shadow-sm hover:shadow-md transition self-start"
+                onClick={addSection}
+              >
+                + {t("course.add_section")}
+              </button>
+            </div>
+
+            {sections.length === 0 && addSection()}
+
+            {sections.map((section, index) => (
+              <div
+                key={section.id}
+                className="bg-grad-2 rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-200 hover:border-primary/30 transition mb-6"
+              >
+                <div className="flex flex-col gap-4 mb-4">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+
+                    {/* Numéro */}
+                    <div className="flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-primary text-white font-semibold">
+                      {index + 1}
+                    </div>
+
+                    {/* Contenu */}
+                    <div className="flex-1 flex flex-col gap-2 w-full">
+                      <Input
+                        value={section.title}
+                        onChange={(e) => updateSectionTitle(section.id, e.target.value)}
+                        placeholder={t("course.section_title_placeholder")}
+                        className="!border-none !bg-transparent px-0 font-medium text-lg w-full"
+                      />
+
+                      <textarea
+                        className="w-full min-h-[80px] border  bg-card border-gray-300 rounded-xl p-3 text-sm sm:text-base"
+                        placeholder={t("course.section_description_placeholder")}
+                        value={section.description}
+                        onChange={(e) => updateSectionDescription(section.id, e.target.value)}
+                      />
+                    </div>
+
+                    {/* Boutons */}
+                    <div className="flex gap-2 self-end sm:self-start">
+                      <button
+                        className="hover:text-primary transition"
+                        onClick={() => toggleSection(section.id)}
+                      >
+                        <ChevronUp
+                          size={20}
+                          className={`transition-transform duration-300 ${section.open ? "" : "rotate-180"
+                            }`}
                         />
-                        <textarea
-                          className="w-full mt-2 min-h-[60px] sm:min-h-[80px] border border-gray-300 rounded-xl p-3 text-sm sm:text-base "
-                          placeholder={t("course.section_description_placeholder")}
-                          value={section.description}
-                          onChange={(e) => updateSectionDescription(section.id, e.target.value)}
-                        />
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <button
-                          className="hover:text-primary transition"
-                          onClick={() => toggleSection(section.id)}
-                        >
-                          <ChevronUp
-                            size={20}
-                            className={`transition-transform duration-300 ${section.open ? "" : "rotate-180"}`}
-                          />
-                        </button>
-                        <button
-                          className="hover:text-red-500 transition"
-                          onClick={() => removeSection(section.id)}
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
+                      </button>
+
+                      <button
+                        className="hover:text-red-500 transition"
+                        onClick={() => removeSection(section.id)}
+                      >
+                        <Trash2 size={20} />
+                      </button>
                     </div>
                   </div>
 
-                  {section.open && section.lessons.map((lesson, idx) => (
+
+
+
+                </div>
+
+                {/* LESSONS */}
+                {section.open &&
+                  section.lessons.map((lesson, idx) => (
                     <div
                       key={lesson.id}
-                      className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4"
+                      className="bg-grad-3 rounded-xl p-4 border border-gray-200 mb-4"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3 w-full">
                         <div className="text-sm font-medium text-gray-600 w-6">{idx + 1}.</div>
+
                         <Input
                           placeholder={t("course.lesson_title")}
                           value={lesson.title}
                           onChange={(e) => updateLessonTitle(section.id, lesson.id, e.target.value)}
-                          className="flex-1 !bg-white"
+                          className="flex-1 text-black dark:text-white !bg-card w-full"
                         />
-                        <div className="flex gap-3 md:ml-[350px] ">
+
+                        <div className="flex ml-[270px] gap-4">
                           <ModernDropdown
                             value={lesson.type || "text"}
                             onChange={(value) =>
@@ -516,7 +548,7 @@ export default function CoursePage() {
                               { value: "image", label: t("course.image") },
                               { value: "example", label: t("course.example") },
                             ]}
-                            className="w-32"
+                            className="w-full sm:w-32"
                           />
                           <button
                             onClick={() => removeLesson(section.id, lesson.id)}
@@ -527,18 +559,10 @@ export default function CoursePage() {
                         </div>
                       </div>
 
-                      {lesson.type === "text" && (
+                      {/* CONTENT */}
+                      {(lesson.type === "text" || lesson.type === "example" || !lesson.type) && (
                         <textarea
-                          className="w-full min-h-[100px] border border-gray-300 rounded-xl p-3 text-sm sm:text-base"
-                          placeholder={t("course.lesson_content")}
-                          value={lesson.content}
-                          onChange={(e) => updateLessonContent(section.id, lesson.id, e.target.value)}
-                        />
-                      )}
-
-                      {lesson.type === "example" && (
-                        <textarea
-                          className="w-full min-h-[100px] border border-gray-300 rounded-xl p-3 text-sm sm:text-base"
+                          className="w-full bg-card min-h-[100px] border border-gray-300 rounded-xl p-3 text-sm sm:text-base"
                           placeholder={t("course.lesson_content")}
                           value={lesson.content}
                           onChange={(e) => updateLessonContent(section.id, lesson.id, e.target.value)}
@@ -546,7 +570,7 @@ export default function CoursePage() {
                       )}
 
                       {lesson.type === "image" && (
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 mt-2">
                           <label
                             htmlFor={`file-${section.id}-${lesson.id}`}
                             className="cursor-pointer w-32 h-32 sm:w-40 sm:h-40 bg-gray-100 rounded-xl flex items-center justify-center border border-dashed hover:bg-gray-200 transition"
@@ -575,110 +599,100 @@ export default function CoursePage() {
                     </div>
                   ))}
 
-                  <div className="flex justify-center mt-4">
-                    <button
-                      onClick={() => addLessonToSection(section.id)}
-                      className="w-full sm:w-1/2 rounded-xl py-2 bg-primary text-white font-medium hover:bg-primary/90 transition"
-                    >
-                      + {t("course.add_lesson")}
-                    </button>
-                  </div>
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={() => addLessonToSection(section.id)}
+                    className="w-full sm:w-1/2 rounded-xl py-2 bg-primary text-white font-medium hover:bg-primary/90 transition"
+                  >
+                    + {t("course.add_lesson")}
+                  </button>
                 </div>
-              ))}
-
-              <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
-                <button
-                  className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition"
-                  onClick={() => setActiveStep(1)}
-                >
-                  {t("course.back")}
-                </button>
-                <button
-                  className="px-6 py-2 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition"
-                  onClick={() => setActiveStep(3)}
-                >
-                  {t("course.save_next")}
-                </button>
               </div>
-            </div>
-          </div>
-        )}
+            ))}
 
-        {/* STEP 3 */}
-        {activeStep === 3 && (
-          <div className="space-y-6">
-            {/* RÉSUMÉ INFOS GÉNÉRALES */}
-            <div className="bg-card rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-muted">
-                {t("course.summary")}
-              </h2>
-              <div className="space-y-3 text-grayc">
-                <p><strong>{t("course.title")} :</strong> {title}</p>
-                <p><strong>{t("course.course_topic")} :</strong> {description}</p>
-                <p><strong>{t("course.duration")} :</strong> {duration}</p>
-                <p><strong>{t("course.level")} :</strong> {level}</p>
-                <p><strong>{t("course.courseVisibility")} :</strong> {courseVisibility}</p>
-              </div>
-            </div>
-
-            {/* RÉSUMÉ SECTIONS */}
-            <div className="bg-card rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8">
-              <h3 className="text-lg sm:text-xl font-semibold mb-6 text-primary">
-                {t("course.curriculum")}
-              </h3>
-              {sections.map((section, sectionIndex) => (
-                <div key={section.id} className="mb-6 pb-4 border-b border-gray-200 ">
-                  <h4 className="text-base sm:text-lg font-semibold text-gray-800">
-                    {sectionIndex + 1}. {section.title || t("course.untitled_section")}
-                  </h4>
-                  {section.description && (
-                    <p className="text-sm text-gray-500 mt-1">{section.description}</p>
-                  )}
-                  <div className="mt-4 pl-4 space-y-3 ">
-                    {section.lessons.map((lesson, lessonIndex) => (
-                      <div key={lesson.id} className="bg-gray-50 p-3 rounded-lg border">
-                        <p className="font-medium text-gray-800">
-                          {lessonIndex + 1}. {lesson.title || t("course.untitled_lesson")}
-                        </p>
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                          {lesson.type || "text"}
-                        </span>
-                        {(lesson.type === "text" || lesson.type === "example") && (
-                          <p className="text-sm text-gray-600 mt-2 whitespace-pre-line">
-                            {lesson.content || t("course.no_content")}
-                          </p>
-                        )}
-                        {lesson.type === "image" && lesson.preview && (
-                          <img
-                            src={lesson.preview}
-                            alt="Lesson visual"
-                            className="w-full sm:w-48 mt-2 rounded-xl border object-cover"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* BOUTONS */}
-            <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <div className="mt-8 flex flex-col sm:flex-row justify-between gap-4">
               <button
-                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition"
-                onClick={() => setActiveStep(2)}
+                className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition"
+                onClick={() => setActiveStep(1)}
               >
                 {t("course.back")}
               </button>
               <button
-                className="px-6 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition"
-                onClick={handleSaveAll}
+                className="px-6 py-2 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition"
+                onClick={() => setActiveStep(3)}
               >
-                {t("course.save_publier")}
+                {t("course.save_next")}
               </button>
             </div>
           </div>
         )}
+
+        {/* ===================== */}
+        {/* STEP 3 – PREVIEW COURS */}
+        {/* ===================== */}
+        {activeStep === 3 && (
+          <div className="w-full max-w-7xl mx-auto px-4 pb-10 flex flex-col gap-8">
+
+            {/* ZONE PREVIEW (SIDEBAR + CONTENT) */}
+            <div className="flex flex-col lg:flex-row gap-6">
+
+              {/* SIDEBAR – réutilisation exacte */}
+              <CoursesSidebarItem2
+                sections={sections}
+                currentSectionIndex={previewSectionIndex}
+                setCurrentSectionIndex={(index) => {
+                  setPreviewSectionIndex(index);
+                  setPreviewLessonPage(0);
+                  setSectionPages((prev) => ({ ...prev, [index]: 0 }));
+                }}
+              />
+
+              {/* CONTENU DU COURS – réutilisation exacte */}
+              <CourseContentSimple
+                course={{
+                  id: "preview",
+                  title,
+                  description,
+                  level,
+                  duration,
+                  sections,
+                }}
+                currentSectionIndex={previewSectionIndex}
+                setCurrentSectionIndex={setPreviewSectionIndex}
+                /* pagination des leçons */
+                sectionPages={sectionPages}
+                setSectionPages={setSectionPages}
+              />
+
+            </div>
+            {/* ACTIONS GLOBALES (SÉPARÉES DU CONTENU) */}
+            <div className="flex justify-between items-center pt-6 border-t">
+
+              {/* RETOUR */}
+              <button
+                onClick={() => setActiveStep(2)}
+                className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition"
+              >
+                ← {t("course.back")}
+              </button>
+
+              {/* PUBLIER */}
+              <button
+                onClick={handleSaveAll}
+                className="px-8 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition"
+              >
+                {t("course.save_publier")}
+              </button>
+
+            </div>
+          </div>
+
+
+        )}
+
+
+
+
       </main>
     </div>
   );

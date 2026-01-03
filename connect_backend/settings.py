@@ -42,14 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Apps du projet
-    'users.apps.UsersConfig',
+    'users',
     'courses.apps.CoursesConfig',
     'exercices.app.ExercicesConfig',
     'quiz.app.QuizConfig',
     'forum.apps.ForumConfig',
     'ia',
     'dashboard',
-    'feedback.apps.FeedbackConfig',
+    'feedback',
     'spaces.apps.SpacesConfig',
     'badges',
     # API et CORS
@@ -182,7 +182,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.Utilisateur'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # settings.py
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -1,0 +1,11 @@
+{
+  "assistant_title": "Assistant IA",
+  "assistant_typing": "L’assistant écrit...",
+  "placeholder_question": "Écris ta question...",
+  "error_message": "❌ Une erreur est survenue. Réessaie.",
+  "student_fetch_error": "Erreur récupération étudiant :",
+   "bot_greeting": "Bonjour {{name}} 👋\nJe suis ton Coach C.\nExplique-moi ce qui te bloque.",
+  "student": "étudiant",
+   "input_placeholder": "Écris ta question..."
+
+}

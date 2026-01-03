@@ -6,14 +6,14 @@ import { useNotifications } from "../context/NotificationContext";
 import { FiSend } from "react-icons/fi";
 import { Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import UserCircle from "../components/common/UserCircle";
 import Input from "../components/common/Input";
 import Tabs from "../components/common/Tabs";
 import Button from "../components/common/Button";
 import ModernDropdown from "../components/common/ModernDropdown";
 import NotificationBell from "../components/common/NotificationBell";
-import i18n from "../i18n";
+
 import {
   getCibleFromForumType,
   validateForumData,
@@ -33,56 +33,55 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState([]);
   const [forumType, setForumType] = useState("all");
   const [forumTypeToCreate, setForumTypeToCreate] = useState("");
-
+  
   const navigate = useNavigate();
   const { t } = useTranslation("community");
   const { fetchUnreadCount } = useNotifications();
-
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
   const userData = JSON.parse(localStorage.getItem("user")) || {};
   const token = localStorage.getItem("access") || localStorage.getItem("token");
   const role = userData?.role;
   const userId = userData?.user_id;
-
-  const API_URL = window.location.hostname === "localhost"
-    ? "http://localhost:8000/api"
+  
+  const API_URL = window.location.hostname === "localhost" 
+    ? "http://localhost:8000/api" 
     : "/api";
 
-  const { toggleDarkMode } = useContext(ThemeContext);
-
-  const initials = useMemo(() =>
+  
+  const initials = useMemo(() => 
     `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase(),
     [userData?.nom, userData?.prenom]
   );
 
   const forumOptions = useMemo(() => {
     // OPTIONS EXACTES COMME DEMANDÉ :
-
+    
     if (role === "enseignant") {
       return [
-        { value: "all", label: i18n.t("forums.all") },
-        { value: "teacher-teacher", label: i18n.t("forums.teacher-teacher") },
-        { value: "teacher-student", label: i18n.t("forums.teacher-student") } // Regroupe teacher-student + student-teacher
+        { value: "all", label: "Tous les forums" },
+        { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
+        { value: "teacher-student", label: "Enseignants ↔ Étudiants" }  // Regroupe teacher-student + student-teacher
       ];
-
-    }
+    } 
     else if (role === "etudiant") {
       return [
-        { value: "all", label: t("forums.all") },
-        { value: "student-student", label: t("forums.student-student") },
-        { value: "student-teacher", label: t("forums.student-teacher") } // Regroupe teacher-student + student-teacher
+        { value: "all", label: "Tous les forums" },
+        { value: "student-student", label: "Étudiants ↔ Étudiants" },
+        { value: "student-teacher", label: "Étudiants ↔ Enseignants" }  // Regroupe teacher-student + student-teacher
       ];
-
     }
-
+    
     // Pour admin ou autres rôles (au cas où)
     return [
-      { value: "all", label: t("forums.all") },
-      { value: "teacher-teacher", label: t("forums.teacher-teacher") },
-      { value: "teacher-student", label: t("forums.teacher-student") }, // Enseignant → Étudiants
-      { value: "student-student", label: t("forums.student-student") },
-      { value: "student-teacher", label: t("forums.student-teacher") }  // Étudiant → Enseignants
+      { value: "all", label: "Tous les forums" },
+      { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
+      { value: "teacher-student", label: "Enseignant → Étudiants" },
+      { value: "student-student", label: "Étudiants ↔ Étudiants" },
+      { value: "student-teacher", label: "Étudiant → Enseignants" }
     ];
-
   }, [role]);
 
   useEffect(() => {
@@ -108,7 +107,7 @@ export default function CommunityPage() {
 
   const checkAllForumLikes = useCallback(async (forums) => {
     if (!token) return forums;
-
+    
     const forumsWithLikes = await Promise.all(
       forums.map(async (forum) => {
         try {
@@ -118,7 +117,7 @@ export default function CommunityPage() {
               'Content-Type': 'application/json'
             }
           });
-
+          
           if (response.ok) {
             const data = await response.json();
             return {
@@ -128,24 +127,22 @@ export default function CommunityPage() {
             };
           }
         } catch (error) {
-          // Erreur vérification like forum 
-          console.error(`${t("errors.likeError")} forum ${forum.id}:`, error);
+          console.error(`Erreur vérification like forum ${forum.id}:`, error);
         }
         return forum;
       })
     );
-
+    
     return forumsWithLikes;
   }, [token, API_URL]);
 
   const fetchForums = useCallback(async () => {
     if (!token) {
-      setError(t("errors.missingToken"));
-
+      setError("Token manquant - Veuillez vous reconnecter");
       setIsLoading(false);
       return;
     }
-
+    
     try {
       const response = await fetch(`${API_URL}/forums/`, {
         headers: {
@@ -153,46 +150,63 @@ export default function CommunityPage() {
           'Content-Type': 'application/json'
         }
       });
-
+      
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
-
+      
       const forums = await response.json();
-
+      
       // Filtrer selon les règles de visibilité
-      const visibleForums = forums.filter(forum => {
-        const forumType = forum.type;
-        const creatorRole = forum.utilisateur_role || (forum.utilisateur === userId ? role : null);
+      // Dans la fonction qui filtre les forums
+// In the fetchForums function, update the filtering section:
 
-        if (role === "etudiant") {
-          // Étudiant voit :
-          // 1. Forums envoyés aux étudiants (teacher-student, student-student)
-          // 2. Forums envoyés aux enseignants SEULEMENT si créé par étudiant (student-teacher)
-          if (forumType === "teacher-student" || forumType === "student-student") {
+// Filtrer selon les règles de visibilité
+const visibleForums = forums.filter(forum => {
+    const forumType = forum.type;
+    const cible = forum.cible;
+    const creatorRole = forum.utilisateur_role; // Get creator role from backend
+    
+    if (role === "etudiant") {
+        // Étudiant voit :
+        // 1. Forums étudiants (student-student, teacher-student)
+        // 2. Forums admin pour étudiants
+        if (forumType === "student-student" || forumType === "teacher-student") {
             return true;
-          }
-          if (forumType === "student-teacher") {
-            return creatorRole === "etudiant";
-          }
-          return false; // teacher-teacher invisible
         }
-        else if (role === "enseignant") {
-          // Enseignant voit :
-          // 1. Forums envoyés aux enseignants (teacher-teacher, student-teacher)
-          // 2. Forums envoyés aux étudiants SEULEMENT si créé par enseignant (teacher-student)
-          if (forumType === "teacher-teacher" || forumType === "student-teacher") {
+        if (forumType === "admin-student-forum" && cible === "etudiants") {
             return true;
-          }
-          if (forumType === "teacher-student") {
-            return creatorRole === "enseignant";
-          }
-          return false; // student-student invisible
         }
-
-        return true; // admin voit tout
-      });
-
+        // Also show admin-created forums for students
+        if (creatorRole === "admin" && cible === "etudiants") {
+            return true;
+        }
+        return false;
+    } 
+    else if (role === "enseignant") {
+        // Enseignant voit :
+        // 1. Forums enseignants (teacher-teacher, student-teacher)
+        // 2. Forums admin pour enseignants
+        if (forumType === "teacher-teacher" || forumType === "student-teacher") {
+            return true;
+        }
+        if (forumType === "admin-teacher-forum" && cible === "enseignants") {
+            return true;
+        }
+        // Also show admin-created forums for teachers
+        if (creatorRole === "admin" && cible === "enseignants") {
+            return true;
+        }
+        return false;
+    }
+    else if (role === "admin") {
+        // Admin voit tout
+        return true;
+    }
+    
+    return false;
+});
+      
       const transformedForums = visibleForums.map(forum => ({
         id: forum.id_forum,
         authorInitials: `${forum.utilisateur_nom?.[0] || ""}${forum.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
@@ -210,14 +224,14 @@ export default function CommunityPage() {
         contenu_forum: forum.contenu_forum || "",
         creatorRole: forum.utilisateur_role || (forum.utilisateur === userId ? role : null)
       }));
-
+      
       const forumsWithLikes = await checkAllForumLikes(transformedForums);
-
+      
       setPosts(forumsWithLikes);
       setError("");
     } catch (error) {
-      console.error(i18n.t("logs.loadForumsError"), error);
-      setError(i18n.t("errors.loadForums"));
+      console.error("Erreur chargement forums:", error);
+      setError("Impossible de charger les forums. Vérifiez votre connexion.");
       setPosts([]);
     } finally {
       setIsLoading(false);
@@ -237,13 +251,13 @@ export default function CommunityPage() {
       // Gérer les options spéciales du dropdown
       if (role === "enseignant" && forumType === "teacher-student") {
         // Pour enseignant : "Enseignants ↔ Étudiants" = teacher-student + student-teacher
-        filtered = filtered.filter(post =>
+        filtered = filtered.filter(post => 
           post.type === "teacher-student" || post.type === "student-teacher"
         );
-      }
+      } 
       else if (role === "etudiant" && forumType === "student-teacher") {
         // Pour étudiant : "Étudiants ↔ Enseignants" = teacher-student + student-teacher
-        filtered = filtered.filter(post =>
+        filtered = filtered.filter(post => 
           post.type === "teacher-student" || post.type === "student-teacher"
         );
       }
@@ -258,7 +272,7 @@ export default function CommunityPage() {
         return [...filtered].sort((a, b) => b.likes - a.likes);
       case "myforums":
         return [...filtered].filter(post => post.isMine)
-          .sort((a, b) => new Date(b.time) - new Date(a.time));
+                           .sort((a, b) => new Date(b.time) - new Date(a.time));
       default:
         return [...filtered].sort((a, b) => new Date(b.time) - new Date(a.time));
     }
@@ -270,11 +284,11 @@ export default function CommunityPage() {
   const getDisplayForumTypeLabel = useCallback((type) => {
     if (role === "enseignant") {
       if (type === "teacher-student" || type === "student-teacher") {
-        return t("forums.teacher-student"); 
+        return "Enseignants ↔ Étudiants";
       }
     } else if (role === "etudiant") {
       if (type === "teacher-student" || type === "student-teacher") {
-        return  t("forums.student-teacher");
+        return "Étudiants ↔ Enseignants";
       }
     }
     return getForumTypeLabel(type);
@@ -284,44 +298,58 @@ export default function CommunityPage() {
     return (
       <div className="flex min-h-screen bg-background dark:bg-gray-900 items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4 dark:text-white">   {t("community.notConnected")}</h1>
-          <p className="mb-6 dark:text-gray-300">   {t("community.pleaseLogin")}</p>
-          <button
+          <h1 className="text-2xl font-bold mb-4 dark:text-white">Non connecté</h1>
+          <p className="mb-6 dark:text-gray-300">Veuillez vous connecter</p>
+          <button 
             onClick={() => navigate("/login")}
             className="bg-blue text-white px-6 py-2 rounded-full hover:bg-blue-dark transition"
           >
-            {/* se connecter */}
-            {t("community.login")}
+            Se connecter
           </button>
         </div>
       </div>
     );
   }
+   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
 
   return (
-    <div className="flex min-h-screen bg-background dark:bg-gray-900">
-      <Navbar />
-
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
+    <div className="flex min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
       </div>
 
-      <div className="flex-1 ml-56 p-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-blue dark:text-blue-400">{t("community.title")}</h1>
-          <p className="mb-6 text-grayc dark:text-gray-400">
-            {t("community.subtitle")}
-          </p>
-        </header>
+      {/* Main Content */} 
+     <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+       
+ 
 
+       {/* User controls */}
+<div className="flex justify-end items-center gap-4 w-full px-0">
+  <NotificationBell />
+  <UserCircle
+    initials={initials}
+    onToggleTheme={toggleDarkMode}
+    onChangeLang={(lang) => i18n.changeLanguage(lang)}
+  />
+</div>
+
+
+        {/* Post Creation */}
         <PostCreationForm
           forumTypeToCreate={forumTypeToCreate}
           setForumTypeToCreate={setForumTypeToCreate}
@@ -331,8 +359,7 @@ export default function CommunityPage() {
           userData={userData}
           setPosts={setPosts}
           setError={setError}
-          triggerNotificationEvent={triggerNotificationEvent}
-          API_URL={API_URL}
+          API_URL={window.location.hostname === "localhost" ? "http://localhost:8000/api" : "/api"}
           t={t}
         />
 
@@ -343,8 +370,7 @@ export default function CommunityPage() {
             value={forumType}
             onChange={setForumType}
             options={forumOptions}
-           placeholder={t("placeholders.selectPlaceholder")}
-
+            placeholder={t("placeholders.selectPlaceholder")}
             disabled={isLoading}
           />
         </div>
@@ -357,17 +383,15 @@ export default function CommunityPage() {
           posts={posts}
           setPosts={setPosts}
           token={token}
-          API_URL={API_URL}
           role={role}
           userId={userId}
           setError={setError}
-          triggerNotificationEvent={triggerNotificationEvent}
-          getForumTypeLabel={getDisplayForumTypeLabel}  // Utiliser la fonction adaptée
+          getForumTypeLabel={getForumTypeLabel}
           getForumTypeClasses={getForumTypeClasses}
           formatTimeAgo={formatTimeAgo}
           t={t}
         />
-      </div>
+      </main>
     </div>
   );
 }

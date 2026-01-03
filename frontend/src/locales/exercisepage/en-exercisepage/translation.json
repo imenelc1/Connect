@@ -14,5 +14,18 @@
   "need_help": "Need help? The AI assistant is here for you.",
   "ask_help": "Ask for help",
   "your_solution": "Your solution",
-  "lines": "lines"
+  "lines": "lines",
+  "draft_saved": "Draft saved!",
+  "solution_saved": "Solution saved!",
+  "save_error": "Error while saving",
+  "solution_sent": "Solution sent!",
+   "all_attempts_used": "All attempts have been used!",
+  "not_authorized": "You are not authorized to submit this exercise!",
+  "send_error": "Error while sending",
+  "fetch_exercise_error": "Error fetching the exercise",
+    "exercise_label": "Exercise",
+     "exercise_load_error": "Unable to load the exercise.",
+      "tip_title": "Tip",
+      "save": "Save",
+     "ai_assistant": "AI Assistant"
 }

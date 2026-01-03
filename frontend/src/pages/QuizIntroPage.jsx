@@ -71,11 +71,17 @@ export default function QuizIntroPage() {
     : 0;
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 md:px-8 py-6 bg-[rgb(var(--color-bg))]">
+    <div className="min-h-screen flex flex-col items-center px-4 md:px-8 py-6 bg-primary/30">
       {/* TITLE */}
-      <h1 className="text-2xl md:text-4xl font-bold text-center text-[rgb(var(--color-primary))] mb-6">
-        {quiz.title}
-      </h1>
+   <h1
+  className="w-full max-w-3xl mx-auto px-3
+             text-2xl md:text-4xl font-bold text-center
+             break-all overflow-hidden
+             text-[rgb(var(--color-primary))]
+             mb-6"
+>
+  {quiz.title}
+</h1>
 
       {/* ICON */}
       <div className="flex justify-center mb-6">
@@ -90,9 +96,15 @@ export default function QuizIntroPage() {
       </h2>
 
       {/* DESCRIPTION */}
-      <p className="text-sm md:text-base text-center text-grayc max-w-2xl mx-auto mb-8 md:mb-10 leading-relaxed">
-        {quiz.description}
-      </p>
+    <p
+  className="w-full max-w-2xl mx-auto px-3
+             text-sm md:text-base text-center text-grayc
+             break-all overflow-hidden
+             leading-relaxed mb-8 md:mb-10"
+>
+  {quiz.description}
+</p>
+
 
       {/* STATS */}
       <div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-10 text-sm md:text-base mb-8 md:mb-16">
