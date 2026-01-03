@@ -11,6 +11,7 @@ import {
   Legend
 } from "chart.js";
 import { useTranslation } from "react-i18next";
+import { FaChartBar, FaBook } from "react-icons/fa";
 
 ChartJS.register(
   CategoryScale,
@@ -22,79 +23,113 @@ ChartJS.register(
   Legend
 );
 
-
 const ActivityCharts = () => {
-  const { t, i18n } = useTranslation("DashboardAdmin");
+  const { t } = useTranslation("DashboardAdmin");
+
   const [stats, setStats] = useState({
+    labels: [],
     registrations: [],
     logins: [],
-    coursesFollowed: [],
-    labels: []
+    coursesFollowed: []
   });
+
+  const fetchActivityStats = async () => {
+    try {
+      const token = localStorage.getItem("admin_token");
+
+      const res = await fetch("http://localhost:8000/api/dashboard/activity/stats/", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!res.ok) throw new Error(`Erreur API : ${res.status}`);
+
+      const data = await res.json();
+      setStats(data);
+    } catch (error) {
+      console.error("Erreur chargement stats :", error);
+    }
+  };
 
   useEffect(() => {
     fetchActivityStats();
   }, []);
 
-  const fetchActivityStats = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/api/activity/stats");
-      const data = await res.json();
-
-      setStats({
-        labels: data.labels, // ex: ["Jan","Feb","Mar"]
-        registrations: data.registrations,
-        logins: data.logins,
-        coursesFollowed: data.coursesFollowed
-      });
-    } catch (err) {
-     console.error(`${t('errors.loadingStats')} `, err);
-
-    }
-  };
-
   const barData = {
     labels: stats.labels,
     datasets: [
       {
-       label: t("charts.registrations"),
+        label: t("charts.registrations"),
         data: stats.registrations,
-        backgroundColor: "rgba(54, 162, 235, 0.6)"
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
+        borderRadius: 6
       },
       {
         label: t("charts.logins"),
         data: stats.logins,
-        backgroundColor: "rgba(255, 206, 86, 0.6)"
+        backgroundColor: "rgba(255, 159, 64, 0.6)",
+        borderRadius: 6
       }
     ]
   };
 
-  const coursesLineData = {
+  const lineData = {
     labels: stats.labels,
     datasets: [
       {
         label: t("charts.coursesFollowed"),
         data: stats.coursesFollowed,
-        borderColor: "rgba(75, 192, 192, 1)",
-        tension: 0.3
+        borderColor: "rgba(54, 162, 235, 1)",
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        tension: 0.3,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6
       }
     ]
   };
-  
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top"
+      },
+      tooltip: {
+        mode: "index",
+        intersect: false
+      }
+    },
+    maintainAspectRatio: false
+  };
 
   return (
-    <div className="charts-container">
+    <div className="charts-container space-y-6 p-4">
+      {/* Titre général */}
+      <h2 className="flex items-center gap-2 text-xl font-semibold mb-4">
+        <FaChartBar className="text-blue-600" /> {t("charts.activityTitle")}
+      </h2>
 
-    <h2>📊 {t("charts.activityTitle")}</h2>
-
-      <div className="chart-card">
-        <h3>{t("charts.registrationsAndLogins")}</h3>
-        <Bar data={barData} />
+      {/* Bar Chart: registrations & logins */}
+      <div className="chart-card p-4 bg-white shadow-md rounded-lg">
+        <h3 className="flex items-center gap-2 text-lg font-medium mb-2">
+          <FaChartBar className="text-teal-600" /> {t("charts.registrationsAndLogins")}
+        </h3>
+        <div className="h-64">
+          <Bar data={barData} options={chartOptions} />
+        </div>
       </div>
 
-      <div className="chart-card">
-        <h3>📚 {t("charts.coursesFollowed")}</h3>
-        <Line data={coursesLineData} />
+      {/* Line Chart: courses followed */}
+      <div className="chart-card p-4 bg-white shadow-md rounded-lg">
+        <h3 className="flex items-center gap-2 text-lg font-medium mb-2">
+          <FaBook className="text-blue-500" /> {t("charts.coursesFollowed")}
+        </h3>
+        <div className="h-64">
+          <Line data={lineData} options={chartOptions} />
+        </div>
       </div>
     </div>
   );
