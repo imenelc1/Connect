@@ -45,6 +45,8 @@ export default function NewExercise() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const token = localStorage.getItem("token");
+   // États pour la responsivité
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const currentUserId = getCurrentUserId();
 
@@ -123,19 +125,17 @@ export default function NewExercise() {
   };
 
   return (
-    <div className="w-full min-h-screen  bg-surface">
+    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* SIDEBAR */}
-      <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
+      <div >
         <Navbar />
       </div>
 
-      {/* MAIN CONTENT */}
-      <div
-        className={`
-        p-6 pt-10 min-h-screen text-textc transition-all duration-300 space-y-5
-        ${sidebarCollapsed ? "ml-20" : "ml-64"}
-      `}
-      >
+      {/* Main Content */}
+      <div className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
         <div className="flex justify-end">
           <UserCircle
             initials={initials}
@@ -164,7 +164,7 @@ export default function NewExercise() {
               placeholder={t("form.title_placeholder")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-full border border-grayc px-5 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 bg-secondary/10"
+              className="w-full rounded-full border border-grayc px-5 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 !bg-card dark:text-white"
             />
 
             {/* STATEMENT */}
@@ -177,7 +177,7 @@ export default function NewExercise() {
               value={statement}
               onChange={(e) => setStatement(e.target.value)}
               rows={6}
-              className="w-full rounded-3xl border border-grayc px-5 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-10 resize-none text-black bg-secondary/10"
+              className="w-full rounded-3xl border border-grayc px-5 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-10 resize-none text-black bg-card dark:text-white"
             />
             <label className="block text-textc font-semibold mb-2">
               {t("form.solution_label")}
@@ -194,7 +194,7 @@ export default function NewExercise() {
               rows={5}
               className="w-full rounded-3xl border border-grayc px-5 py-3 shadow-sm
              focus:outline-none focus:ring-2 focus:ring-primary mb-4
-             resize-none text-black bg-secondary/10"
+             resize-none text-black bg-card dark:text-white"
             />
 
             <p
@@ -289,7 +289,7 @@ export default function NewExercise() {
                 value={maxSoumissions}
                 onChange={(e) => setMaxSoumissions(Number(e.target.value))}
                 placeholder="0"
-                className="w-36 border border-grayc shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 bg-secondary/10"
+                className="w-36 border border-grayc shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 !bg-card dark:text-white"
               />
 
               </div>
