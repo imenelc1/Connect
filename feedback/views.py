@@ -307,3 +307,45 @@ def get_utilisateur_from_request(request):
         except Administrateur.DoesNotExist:
             return None, None
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
+from users.jwt_helpers import IsAuthenticatedJWT
+from .models import Notification
+from .views import get_utilisateur_from_request  
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticatedJWT])
+def delete_notification(request, notif_id):
+    # Récupérer l'objet user/admin correct
+    obj, role = get_utilisateur_from_request(request)
+    if not obj:
+        return Response({"error": "Utilisateur introuvable"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+        if role == "user":
+            notif = Notification.objects.get(id_notif=notif_id, utilisateur_destinataire=obj)
+        else:
+            notif = Notification.objects.get(id_notif=notif_id, admin_destinataire=obj)
+
+        notif.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    except Notification.DoesNotExist:
+        return Response({"error": "Notification non trouvée ou accès non autorisé"}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticatedJWT])
+def delete_all_notifications(request):
+    obj, role = get_utilisateur_from_request(request)
+    if not obj:
+        return Response({"error": "Utilisateur introuvable"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    if role == "user":
+        Notification.objects.filter(utilisateur_destinataire=obj).delete()
+    else:
+        Notification.objects.filter(admin_destinataire=obj).delete()
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
+

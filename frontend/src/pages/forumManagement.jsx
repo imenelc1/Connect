@@ -851,60 +851,208 @@ const handleCreateForum = async (formData) => {
   // HANDLERS VIEW MODAL
   // =========================
   const handleViewForum = async (forum) => {
-    try {
-      setSelectedForum(forum);
+  console.log("👁️ handleViewForum appelé pour le forum:", forum);
+  
+  try {
+    setSelectedForum(forum);
+    
+    const token = localStorage.getItem("admin_token");
+    console.log("🔑 Token:", token ? "Présent" : "Absent");
+    
+    // ESSAYEZ CES DEUX URLs (l'une peut être la bonne)
+    const url = `http://localhost:8000/api/forums/${forum.id}/messages/`;
+    console.log("🌐 Tentative avec URL:", url);
+    
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("📡 Statut de la réponse:", res.status);
+    console.log("📡 OK ?:", res.ok);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("❌ Erreur du serveur:", errorText);
       
-      const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/forums/${forum.id}/messages/`, {
+      // ESSAYEZ L'AUTRE URL
+      console.log("🔄 Essai avec une autre URL...");
+      const alternativeUrl = `http://localhost:8000/api/forums/${forum.id}/messages`;
+      console.log("🌐 Essai avec URL:", alternativeUrl);
+      
+      const res2 = await fetch(alternativeUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
-
-      if (res.ok) {
-        const messagesData = await res.json();
+      
+      if (res2.ok) {
+        const messagesData = await res2.json();
+        console.log("✅ Messages chargés (alternative):", messagesData.length, "messages");
         setForumMessages(messagesData);
         setIsViewModalOpen(true);
       } else {
+        const errorText2 = await res2.text();
+        console.error("❌ Deuxième erreur:", errorText2);
         alert("Impossible de charger les messages");
       }
-    } catch (err) {
-      console.error("Erreur:", err);
-      alert("Erreur lors du chargement du forum");
+    } else {
+      const messagesData = await res.json();
+      console.log("✅ Messages chargés:", messagesData.length, "messages");
+      setForumMessages(messagesData);
+      setIsViewModalOpen(true);
     }
-  };
+  } catch (err) {
+    console.error("❌ Erreur:", err);
+    console.error("❌ Stack:", err.stack);
+    alert("Erreur lors du chargement du forum");
+  }
+};
 
   // =========================
   // HANDLERS MESSAGES
   // =========================
   const handlePostMessage = useCallback(async (messageContent) => {
-    if (!selectedForum) return;
+  if (!selectedForum) {
+    console.error("❌ Aucun forum sélectionné");
+    alert("Erreur : Aucun forum sélectionné");
+    return;
+  }
 
+  try {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      console.error("❌ Token manquant");
+      alert("Erreur : Vous devez être connecté");
+      return;
+    }
+
+    // OPTION 1 : URL avec forum_id dans le path
+    const url = `http://localhost:8000/api/forums/${selectedForum.id}/messages/create/`;
+    
+    // OPTION 2 : URL alternative (essaye les deux)
+    // const url = `http://localhost:8000/api/messages/create/`;
+    
+    console.log("📤 Envoi POST vers:", url);
+    console.log("📝 Message:", messageContent);
+    console.log("🔑 Token présent:", !!token);
+    console.log("🎯 Forum ID:", selectedForum.id);
+
+    // Structure des données - essaie différentes options
+    const payload = {
+      contenu_message: messageContent.trim(),
+      forum_id: selectedForum.id,  // Important si backend le demande
+      // forum: selectedForum.id,   // Alternative
+      // message: messageContent.trim(),  // Alternative
+    };
+
+    console.log("📦 Payload:", payload);
+
+    // D'abord, teste avec une requête simple
+    console.log("🧪 Test de connexion à l'API...");
     try {
-      const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/forums/${selectedForum.id}/messages/`, {
-        method: "POST",
+      const testRes = await fetch(`http://localhost:8000/api/forums/`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ contenu_message: messageContent })
       });
-
-      if (res.ok) {
-        const newMessage = await res.json();
-        setForumMessages(prev => [...prev, newMessage]);
-        setForums(prevForums => prevForums.map(f => 
-          f.id === selectedForum.id 
-            ? { ...f, threads: f.threads + 1 }
-            : f
-        ));
-      }
-    } catch (err) {
-      console.error("Erreur:", err);
-      alert("Erreur lors de l'envoi du message");
+      console.log("✅ Test API réussi, statut:", testRes.status);
+    } catch (testErr) {
+      console.error("❌ Test API échoué:", testErr);
     }
-  }, [selectedForum]);
+
+    // Maintenant la vraie requête
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log("📡 Réponse statut:", res.status);
+    console.log("📡 Réponse OK?:", res.ok);
+
+    // Récupère le texte de la réponse d'abord
+    const responseText = await res.text();
+    console.log("📡 Réponse texte:", responseText);
+
+    if (!res.ok) {
+      let errorMessage = `Erreur ${res.status}`;
+      
+      try {
+        // Essaye de parser comme JSON
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.error || errorData.detail || errorData.message || responseText;
+        console.error("❌ Erreur JSON:", errorData);
+      } catch (jsonError) {
+        // Si ce n'est pas du JSON, utilise le texte brut
+        console.error("❌ Réponse non-JSON:", responseText);
+        errorMessage = responseText || "Erreur inconnue";
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    // Parse la réponse JSON
+    let newMessage;
+    try {
+      newMessage = JSON.parse(responseText);
+      console.log("✅ Message créé:", newMessage);
+    } catch (parseError) {
+      console.error("❌ Impossible de parser la réponse:", responseText);
+      throw new Error("Réponse invalide du serveur");
+    }
+
+    // Ajoute des champs manquants si nécessaire
+    const enrichedMessage = {
+      ...newMessage,
+      id_message: newMessage.id_message || newMessage.id,
+      contenu_message: newMessage.contenu_message || messageContent,
+      utilisateur_nom: newMessage.utilisateur_nom || "Administrateur",
+      utilisateur_prenom: newMessage.utilisateur_prenom || "",
+      date_publication: newMessage.date_publication || new Date().toISOString(),
+      nombre_likes: newMessage.nombre_likes || 0,
+      user_has_liked: newMessage.user_has_liked || false,
+      commentaires: newMessage.commentaires || [],
+    };
+
+    // Met à jour l'état
+    setForumMessages(prev => [enrichedMessage, ...prev]);
+
+    // Met à jour le compteur dans la liste des forums
+    setForums(prevForums => prevForums.map(f =>
+      f.id === selectedForum.id
+        ? { ...f, threads: (f.threads || 0) + 1 }
+        : f
+    ));
+
+    console.log("✅ Message ajouté à l'état local");
+    return enrichedMessage;
+
+  } catch (err) {
+    console.error("❌ Erreur complète:", err);
+    console.error("❌ Stack:", err.stack);
+    
+    // Messages d'erreur plus clairs
+    if (err.message.includes("403")) {
+      alert("❌ Accès interdit. Vérifiez vos permissions.");
+    } else if (err.message.includes("404")) {
+      alert("❌ Endpoint non trouvé. Vérifiez l'URL de l'API.");
+    } else if (err.message.includes("500")) {
+      alert("❌ Erreur serveur. Vérifiez les logs Django.");
+    } else {
+      alert(`❌ Erreur: ${err.message}`);
+    }
+    
+    throw err; // Propage l'erreur
+  }
+}, [selectedForum]);
 
   const handlePostComment = useCallback(async (messageId, commentContent) => {
     try {

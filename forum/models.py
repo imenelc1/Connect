@@ -38,15 +38,24 @@ class Forum(models.Model):
 class Message(models.Model):
     id_message = models.AutoField(primary_key=True)
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE, related_name='messages')
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    
+    # Auteur : utilisateur ou admin
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, null=True, blank=True)
+    administrateur = models.ForeignKey(Administrateur, on_delete=models.CASCADE, null=True, blank=True)
+    
     contenu_message = models.TextField()
     date_publication = models.DateTimeField(auto_now_add=True)
-   
+
     class Meta:
         ordering = ['date_publication']
-   
+
     def __str__(self):
-        return f"Message {self.id_message} - {self.utilisateur.nom} {self.utilisateur.prenom}"
+        if self.administrateur:
+            return f"Message {self.id_message} - Admin {self.administrateur.email_admin}"
+        elif self.utilisateur:
+            return f"Message {self.id_message} - {self.utilisateur.nom} {self.utilisateur.prenom}"
+        return f"Message {self.id_message}"
+
 
 
 class MessageLike(models.Model):  # NOUVEAU MODÈLE

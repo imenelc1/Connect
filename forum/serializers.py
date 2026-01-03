@@ -81,8 +81,8 @@ class ForumSerializer(serializers.ModelSerializer):
 
 # ===== Message Serializer =====
 class MessageSerializer(serializers.ModelSerializer):
-    utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
-    utilisateur_prenom = serializers.CharField(source='utilisateur.prenom', read_only=True)
+    auteur_nom = serializers.SerializerMethodField()
+    auteur_type = serializers.SerializerMethodField()  # 'admin' ou 'utilisateur'
     nombre_commentaires = serializers.SerializerMethodField()
     nombre_likes = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()
@@ -94,8 +94,9 @@ class MessageSerializer(serializers.ModelSerializer):
             'id_message',
             'forum',
             'utilisateur',
-            'utilisateur_nom',
-            'utilisateur_prenom',
+            'administrateur',
+            'auteur_nom',
+            'auteur_type',
             'contenu_message',
             'date_publication',
             'nombre_commentaires',
@@ -103,7 +104,21 @@ class MessageSerializer(serializers.ModelSerializer):
             'user_has_liked',
             'commentaires'
         ]
-        read_only_fields = ('forum', 'utilisateur', 'date_publication')
+        read_only_fields = ('forum', 'utilisateur', 'administrateur', 'date_publication')
+
+    def get_auteur_nom(self, obj):
+        if obj.administrateur:
+            return obj.administrateur.email_admin
+        elif obj.utilisateur:
+            return f"{obj.utilisateur.nom} {obj.utilisateur.prenom}"
+        return "Inconnu"
+
+    def get_auteur_type(self, obj):
+        if obj.administrateur:
+            return "admin"
+        elif obj.utilisateur:
+            return "utilisateur"
+        return None
 
     def get_nombre_commentaires(self, obj):
         return obj.commentaires.count() if hasattr(obj, 'commentaires') else 0
