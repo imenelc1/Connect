@@ -25,6 +25,11 @@ path(
     views.TentativeExerciceListView.as_view(),
     name="tentatives_exercice_utilisateur",
 ),
+path(
+    "<int:exercice_id>/utilisateur/<int:user_id>/tentativerep/",
+    views.TentativeReponse.as_view(),
+    name="tentatives_exercice_utilisateur",
+),
 
  path("tentatives/id/<int:tentative_id>/", views.get_tentative, name="get-tentative"),
  path("tentatives/can-submit/<int:exercice_id>/", views.can_submit_exercice, name="can-submit-exercice"),

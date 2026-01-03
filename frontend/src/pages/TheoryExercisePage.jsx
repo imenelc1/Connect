@@ -139,6 +139,8 @@ export default function TheoryExercisePage() {
   const storedUser = localStorage.getItem("user");
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
+  console.log("userData", userData);
+
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
@@ -158,6 +160,38 @@ export default function TheoryExercisePage() {
       .then(data => setCanSubmit(data.can_submit))
       .catch(() => setCanSubmit(false));
   }, [exerciceId]);
+
+
+
+  useEffect(() => {
+  if (!exercise || !isStudent) return;
+
+  const fetchLastTentative = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/dashboard/${exercise.id_exercice}/utilisateur/${userData.user_id}/tentativerep/`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!res.ok) return;
+
+      const last = await res.json();
+
+      if (last.reponse) setAnswer(last.reponse);
+
+    } catch (err) {
+      console.error("Erreur chargement tentative:", err);
+    }
+  };
+
+  fetchLastTentative();
+}, [exercise]);
+
+
 
 
   return (

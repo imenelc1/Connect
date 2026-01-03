@@ -863,6 +863,36 @@ class TentativeExerciceListView(APIView):
             for t in tentatives
         ]
         return Response(data)
+    
+
+class TentativeReponse(APIView):
+    permission_classes = [IsAuthenticatedJWT]
+
+    def get(self, request, exercice_id, user_id):
+        tentatives = TentativeExercice.objects.filter(
+            exercice_id=exercice_id,
+            utilisateur_id=user_id
+        )
+
+        if not tentatives.exists():
+            return Response([])
+
+        # Trier par date la plus récente : submitted_at pour soumis, updated_at pour brouillon
+        def last_modified(t):
+            return t.submitted_at or t.created_at or now()
+
+        last_tentative = max(tentatives, key=last_modified)
+
+        data = {
+            "id": last_tentative.id,
+            "etat": last_tentative.etat,
+            "submitted_at": last_tentative.submitted_at,
+            "reponse": last_tentative.reponse,
+            "terminer": last_tentative.etat == "soumis",
+        }
+
+        return Response(data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])

@@ -13,14 +13,14 @@ def notify_on_public_quiz_create(sender, instance, created, **kwargs):
 
     quiz = instance
 
-    # 🔒 Quiz privé → aucune notification
-    if not quiz.visibilite_quiz:
+    #  Quiz privé → aucune notification
+    if not quiz.exercice.visibilite_exo:
         return
 
     content_type = ContentType.objects.get_for_model(Quiz)
     notifications = []
 
-    prof = quiz.utilisateur
+    prof = quiz.exercice.utilisateur
     prof_name = f"{prof.nom} {prof.prenom}" if prof else "un professeur"
 
     # ======================
@@ -32,13 +32,13 @@ def notify_on_public_quiz_create(sender, instance, created, **kwargs):
             Notification(
                 utilisateur_destinataire=etudiant,
                 utilisateur_envoyeur=prof,
-                message_notif=f"Nouveau quiz public : {quiz.titre_quiz}",
+                message_notif=f"Nouveau quiz public : {quiz.exercice.titre_exo}",
                 content_type=content_type,
                 object_id=quiz.pk,
                 action_type="quiz_created",
                 module_source="quiz",
                 extra_data={
-                    "titre_quiz": quiz.titre_quiz,
+                    "titre_quiz": quiz.exercice.titre_exo,
                     "public": True
                 }
             )
@@ -55,14 +55,14 @@ def notify_on_public_quiz_create(sender, instance, created, **kwargs):
                 utilisateur_envoyeur=prof,
                 message_notif=(
                     f"Nouveau quiz créé par {prof_name} : "
-                    f"{quiz.titre_quiz}"
+                    f"{quiz.exercice.titre_exo}"
                 ),
                 content_type=content_type,
                 object_id=quiz.pk,
                 action_type="quiz_created",
                 module_source="quiz",
                 extra_data={
-                    "titre_quiz": quiz.titre_quiz,
+                    "titre_quiz": quiz.exercice.titre_exo,
                     "auteur": prof_name,
                     "public": True
                 }

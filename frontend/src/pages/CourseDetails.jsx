@@ -524,7 +524,18 @@ const filteredItems = itemsToDisplay
     return true;
   })
   // 🔹 Recherche texte
-  .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()));
+  .filter(item => {
+  if (!searchTerm.trim()) return true;
+
+  const search = searchTerm.toLowerCase();
+
+  return (
+    item.title?.toLowerCase().includes(search) ||
+    item.description?.toLowerCase().includes(search) ||
+    item.author?.toLowerCase().includes(search)
+  );
+});
+
 
 
 
@@ -561,10 +572,12 @@ const filteredItems = itemsToDisplay
         <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
           <h2 className="text-4xl font-semibold text-muted">{spaceName}</h2>
           <div className="w-full md:w-[400px]">
-            <ContentSearchBar
-              placeholder={t("searchItems")}
-              onChange={setSearchTerm}
-            />
+           <ContentSearchBar
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+/>
+
+
           </div>
           <div className="flex items-center gap-2 bg-card text-muted font-semibold px-4 py-2 rounded-md">
             <Users size={16} /> {studentsCount} {t("students")}
