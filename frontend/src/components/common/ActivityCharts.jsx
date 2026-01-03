@@ -23,6 +23,7 @@ ChartJS.register(
   Legend
 );
 
+
 const ActivityCharts = () => {
   const { t } = useTranslation("DashboardAdmin");
 
@@ -90,6 +91,7 @@ const ActivityCharts = () => {
       }
     ]
   };
+  
 
   const chartOptions = {
     responsive: true,
