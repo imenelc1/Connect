@@ -445,7 +445,7 @@ def handle_weekly_progress(sender, instance, created, **kwargs):
         type_contenu='cours'
     ).count()
     
-    if courses_this_week >= 5:
+    if courses_this_week == 5:
         create_notification(
             destinataire=user,
             action_type='weekly_course_master',

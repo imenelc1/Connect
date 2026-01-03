@@ -36,7 +36,8 @@ export default function Dashboardens() {
   const { t, i18n } = useTranslation("Dashboard");
   const navigate = useNavigate();
   const { toggleDarkMode } = useContext(ThemeContext);
-  const { notifications, loading: loadingNotifications } = useNotifications();
+  const { notifications, loading: loadingNotifications, fetchNotifications } = useNotifications();
+
 
   // États de l'interface
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -58,7 +59,9 @@ export default function Dashboardens() {
     quizzes_count: 0
   });
 
-
+  useEffect(() => {
+    fetchNotifications(); // récupère les notifications dès le montage
+  }, [fetchNotifications]);
   // Gestion de la responsivité
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);

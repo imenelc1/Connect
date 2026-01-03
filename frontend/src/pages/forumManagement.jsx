@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo, useCallback } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
+import { createForum, updateForum, deleteForum } from "../services/forumService";
 import { 
   MessageSquare, 
   TrendingUp, 
@@ -9,21 +10,16 @@ import {
   Trash2, 
   Edit2, 
   Eye,
-  Filter,
   Users,
   GraduationCap,
   Search,
   Clock,
-  MoreVertical,
-  ChevronDown,
-  X,
+  AlertCircle,
   Heart,
   Send,
   MessageCircle,
-  BookOpen,
-  LayoutGrid,
-  AlertCircle,
-  ChevronRight
+  X,
+  MoreVertical
 } from "lucide-react";
 import "../styles/index.css";
 import { useTranslation } from "react-i18next";
@@ -34,9 +30,19 @@ import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
 
 // =========================
-// MODAL DE VISUALISATION DU FORUM (gardé tel quel)
+// MODAL DE VISUALISATION DU FORUM
 // =========================
-const ForumViewModal = ({ isOpen, onClose, forum, messages, onPostMessage, onPostComment, onLikeMessage, onDeleteMessage, onDeleteComment }) => {
+const ForumViewModal = ({ 
+  isOpen, 
+  onClose, 
+  forum, 
+  messages, 
+  onPostMessage, 
+  onPostComment, 
+  onLikeMessage, 
+  onDeleteMessage, 
+  onDeleteComment 
+}) => {
   const [newMessage, setNewMessage] = useState("");
   const [newComment, setNewComment] = useState({});
   const [messageDropdown, setMessageDropdown] = useState(null);
@@ -55,7 +61,7 @@ const ForumViewModal = ({ isOpen, onClose, forum, messages, onPostMessage, onPos
     const commentText = newComment[messageId];
     if (commentText?.trim()) {
       await onPostComment(messageId, commentText);
-      setNewComment({ ...newComment, [messageId]: "" });
+      setNewComment(prev => ({ ...prev, [messageId]: "" }));
     }
   };
 
@@ -98,9 +104,6 @@ const ForumViewModal = ({ isOpen, onClose, forum, messages, onPostMessage, onPos
                   Pour enseignants
                 </span>
               )}
-            </span>
-            <span className="text-xs px-3 py-1.5 bg-primary/20 text-primary rounded-full font-medium">
-              {forum.type}
             </span>
           </div>
         </div>
@@ -256,10 +259,10 @@ const ForumViewModal = ({ isOpen, onClose, forum, messages, onPostMessage, onPos
                     </button>
                     
                     <button
-                      onClick={() => setNewComment({
-                        ...newComment,
-                        [message.id_message]: newComment[message.id_message] || ""
-                      })}
+                      onClick={() => setNewComment(prev => ({
+                        ...prev,
+                        [message.id_message]: prev[message.id_message] || ""
+                      }))}
                       className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/10 text-gray transition-all duration-200"
                     >
                       <MessageCircle size={18} />
@@ -279,10 +282,10 @@ const ForumViewModal = ({ isOpen, onClose, forum, messages, onPostMessage, onPos
                         <input
                           type="text"
                           value={newComment[message.id_message] || ""}
-                          onChange={(e) => setNewComment({
-                            ...newComment,
+                          onChange={(e) => setNewComment(prev => ({
+                            ...prev,
                             [message.id_message]: e.target.value
-                          })}
+                          }))}
                           placeholder="Écrivez votre réponse..."
                           className="flex-1 px-4 py-3 border border-gray-800/20 rounded-xl bg-surface text-muted focus:outline-none focus:ring-2 focus:ring-primary"
                           onKeyPress={(e) => e.key === 'Enter' && handleSubmitComment(message.id_message)}
@@ -298,9 +301,11 @@ const ForumViewModal = ({ isOpen, onClose, forum, messages, onPostMessage, onPos
                           </Button>
                           <button
                             onClick={() => {
-                              const updated = { ...newComment };
-                              delete updated[message.id_message];
-                              setNewComment(updated);
+                              setNewComment(prev => {
+                                const updated = { ...prev };
+                                delete updated[message.id_message];
+                                return updated;
+                              });
                             }}
                             className="px-3 py-2 text-sm text-gray hover:text-muted transition-colors"
                           >
@@ -395,13 +400,12 @@ const ForumViewModal = ({ isOpen, onClose, forum, messages, onPostMessage, onPos
 };
 
 // =========================
-// MODAL DE CRÉATION/MODIFICATION (gardé tel quel)
+// MODAL DE CRÉATION/MODIFICATION
 // =========================
 const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
   const { t } = useTranslation("ForumManagement");
   const [formData, setFormData] = useState({
     titre_forum: "",
-    type: "",
     contenu_forum: "",
     cible: "etudiants"
   });
@@ -412,14 +416,12 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
     if (editingForum) {
       setFormData({
         titre_forum: editingForum.title || "",
-        type: editingForum.description || "",
         contenu_forum: editingForum.originalData?.contenu_forum || "",
         cible: editingForum.originalData?.cible || "etudiants"
       });
     } else {
       setFormData({
         titre_forum: "",
-        type: "",
         contenu_forum: "",
         cible: "etudiants"
       });
@@ -473,28 +475,6 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
               className="w-full p-3 border border-gray-800/20 rounded-lg bg-surface text-muted focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Ex: Débats sur l'IA"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray mb-2">
-              Type *
-            </label>
-            <select
-              required
-              value={formData.type}
-              onChange={(e) =>
-                setFormData({ ...formData, type: e.target.value })
-              }
-              className="w-full p-3 border border-gray-800/20 rounded-lg bg-surface text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="">Sélectionner un type</option>
-              <option value="Discussion">Discussion</option>
-              <option value="Question">Question</option>
-              <option value="Débat">Débat</option>
-              <option value="Annonce">Annonce</option>
-              <option value="Projet">Projet</option>
-              <option value="Aide">Aide</option>
-            </select>
           </div>
 
           <div>
@@ -575,7 +555,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
 };
 
 // =========================
-// MODAL DE CONFIRMATION SUPPRESSION (gardé tel quel)
+// MODAL DE CONFIRMATION SUPPRESSION
 // =========================
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, forumTitle }) => {
   if (!isOpen) return null;
@@ -620,7 +600,7 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, forumTitle }) => 
 };
 
 // =========================
-// COMPOSANT PRINCIPAL - ADAPTÉ AU STYLE DASHBOARDADMIN
+// COMPOSANT PRINCIPAL - FORUM MANAGEMENT
 // =========================
 export default function ForumManagement() {
   const navigate = useNavigate();
@@ -647,10 +627,9 @@ export default function ForumManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const [activeFilter, setActiveFilter] = useState("pending");
+  const [activeFilter, setActiveFilter] = useState("all");
 
-  // Données utilisateur (comme DashboardAdmin)
-  const token = localStorage.getItem("access") || localStorage.getItem("admin_token");
+  // Données utilisateur
   const adminData = JSON.parse(localStorage.getItem("admin")) || {};
   const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
 
@@ -685,7 +664,6 @@ export default function ForumManagement() {
       const formattedForums = data.map((forum) => ({
         id: forum.id_forum,
         title: forum.titre_forum,
-        description: forum.type,
         threads: forum.nombre_messages,
         posts: forum.nombre_likes,
         members: forum.nombre_likes,
@@ -710,15 +688,18 @@ export default function ForumManagement() {
   }, []);
 
   // =========================
-  // RESPONSIVE EFFECTS (comme DashboardAdmin)
+  // RESPONSIVE EFFECTS
   // =========================
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setSidebarCollapsed(true);
     };
     
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
    
+    handleResize(); // Appeler au chargement initial
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
     
@@ -731,120 +712,461 @@ export default function ForumManagement() {
   // =========================
   // HANDLERS FORUMS
   // =========================
-  const handleCreateForum = async (formData) => {
-    const token = localStorage.getItem("admin_token");
-    
-    const url = editingForum 
-      ? `http://localhost:8000/api/forums/${editingForum.id}/` 
-      : "http://localhost:8000/api/forums/create/";
-    
-    const method = editingForum ? "PUT" : "POST";
-    
-    const res = await fetch(url, {
-      method: method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+  // Importez le service au début du fichier
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText || "Erreur lors de l'opération");
-    }
 
-    const newForum = await res.json();
+// Ensuite, remplacez la fonction handleCreateForum par :
+const handleCreateForum = async (formData) => {
+  const token = localStorage.getItem("admin_token");
+  const adminData = JSON.parse(localStorage.getItem("admin")) || {};
+  
+  console.log("=== DEBUG CREATE FORUM ===");
+  console.log("Token:", token ? "Token exists" : "No token");
+  console.log("Admin data:", adminData);
+  console.log("Form data:", formData);
+  
+  if (!token) {
+    alert("Token manquant. Veuillez vous reconnecter.");
+    return;
+  }
+
+  try {
+    // CORRECTION: Utilisez les types que Django attend
+    const forumType = formData.cible === "etudiants" 
+      ? "admin-student-forum"  // Django attend ce format
+      : "admin-teacher-forum"; // Django attend ce format
     
+    const forumData = {
+      titre_forum: formData.titre_forum,
+      contenu_forum: formData.contenu_forum,
+      cible: formData.cible,
+      type: forumType  // Envoyer le bon format
+    };
+
+    console.log("Sending forum data to Django:", forumData);
+
     if (editingForum) {
-      setForums(forums.map(f => 
+      // MODIFICATION
+      const updatedForum = await updateForum(token, editingForum.id, forumData);
+      console.log("Update response:", updatedForum);
+
+      // Mettre à jour l'état local
+      setForums(prevForums => prevForums.map(f => 
         f.id === editingForum.id 
           ? {
               ...f,
-              title: newForum.titre_forum,
-              description: newForum.type,
-              cible: newForum.cible,
-              originalData: newForum
+              title: updatedForum.titre_forum,
+              cible: updatedForum.cible,
+              originalData: updatedForum
             }
           : f
       ));
+
+      alert("✅ Forum modifié avec succès !");
     } else {
+      // CRÉATION
+      console.log("Creating new forum...");
+      const newForum = await createForum(token, forumData);
+      console.log("Create response:", newForum);
+
+      // Format the new forum for display
       const formattedForum = {
         id: newForum.id_forum,
         title: newForum.titre_forum,
-        description: newForum.type,
-        threads: 0,
-        posts: 0,
-        members: 0,
-        userHasLiked: false,
+        threads: newForum.nombre_messages || 0,
+        posts: newForum.nombre_likes || 0,
+        members: newForum.nombre_likes || 0,
+        userHasLiked: newForum.user_has_liked || false,
         cible: newForum.cible,
-        utilisateur: newForum.utilisateur_nom + " " + newForum.utilisateur_prenom,
+        utilisateur: newForum.administrateur ? "Administrateur" : 
+                    `${newForum.utilisateur_nom || ''} ${newForum.utilisateur_prenom || ''}`,
         date_creation: new Date(newForum.date_creation).toLocaleDateString("fr-FR"),
         originalData: newForum,
       };
+
+      console.log("Formatted forum:", formattedForum);
       
-      setForums([formattedForum, ...forums]);
+      setForums(prevForums => [formattedForum, ...prevForums]);
+      alert("✅ Forum créé avec succès !");
     }
-    
+
+    // Fermer le modal et réinitialiser
+    setIsModalOpen(false);
     setEditingForum(null);
-  };
+
+  } catch (err) {
+    console.error("Erreur détaillée:", err);
+    console.error("Error stack:", err.stack);
+    alert(`❌ Erreur: ${err.message}`);
+  }
+};
 
   const handleDeleteForum = async () => {
-    if (!forumToDelete) return;
+  if (!forumToDelete) return;
 
-    try {
-      const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/forums/${forumToDelete.id}/delete/`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  const token = localStorage.getItem("admin_token");
+  const userRole = JSON.parse(localStorage.getItem("admin"))?.role || "admin";
 
-      if (!res.ok) {
-        throw new Error("Erreur lors de la suppression");
-      }
+  if (!token) {
+    alert("Token manquant. Veuillez vous reconnecter.");
+    return;
+  }
 
-      setForums(forums.filter(forum => forum.id !== forumToDelete.id));
-      setIsDeleteModalOpen(false);
-      setForumToDelete(null);
-    } catch (err) {
-      alert("Erreur: " + err.message);
-      setIsDeleteModalOpen(false);
+  if (userRole !== "admin") {
+    alert("Seuls les administrateurs peuvent supprimer des forums");
+    return;
+  }
+
+  try {
+    const confirmed = window.confirm(
+      `Êtes-vous sûr de vouloir supprimer le forum "${forumToDelete.title}" ? Cette action est irréversible.`
+    );
+
+    if (!confirmed) return;
+
+    await deleteForum(token, forumToDelete.id);
+
+    // Mettre à jour l'état local
+    setForums(prevForums => prevForums.filter(f => f.id !== forumToDelete.id));
+
+    // Fermer les modals si nécessaire
+    if (selectedForum && selectedForum.id === forumToDelete.id) {
+      setIsViewModalOpen(false);
+      setSelectedForum(null);
+      setForumMessages([]);
     }
-  };
+
+    setIsDeleteModalOpen(false);
+    setForumToDelete(null);
+
+    alert("✅ Forum supprimé avec succès !");
+
+  } catch (err) {
+    console.error("Erreur lors de la suppression:", err);
+    alert(`❌ Erreur: ${err.message}`);
+  }
+};
 
   // =========================
   // HANDLERS VIEW MODAL
   // =========================
   const handleViewForum = async (forum) => {
-    try {
-      setSelectedForum(forum);
+  console.log("👁️ handleViewForum appelé pour le forum:", forum);
+  
+  try {
+    setSelectedForum(forum);
+    
+    const token = localStorage.getItem("admin_token");
+    console.log("🔑 Token:", token ? "Présent" : "Absent");
+    
+    // ESSAYEZ CES DEUX URLs (l'une peut être la bonne)
+    const url = `http://localhost:8000/api/forums/${forum.id}/messages/`;
+    console.log("🌐 Tentative avec URL:", url);
+    
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("📡 Statut de la réponse:", res.status);
+    console.log("📡 OK ?:", res.ok);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("❌ Erreur du serveur:", errorText);
       
+      // ESSAYEZ L'AUTRE URL
+      console.log("🔄 Essai avec une autre URL...");
+      const alternativeUrl = `http://localhost:8000/api/forums/${forum.id}/messages`;
+      console.log("🌐 Essai avec URL:", alternativeUrl);
+      
+      const res2 = await fetch(alternativeUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (res2.ok) {
+        const messagesData = await res2.json();
+        console.log("✅ Messages chargés (alternative):", messagesData.length, "messages");
+        setForumMessages(messagesData);
+        setIsViewModalOpen(true);
+      } else {
+        const errorText2 = await res2.text();
+        console.error("❌ Deuxième erreur:", errorText2);
+        alert("Impossible de charger les messages");
+      }
+    } else {
+      const messagesData = await res.json();
+      console.log("✅ Messages chargés:", messagesData.length, "messages");
+      setForumMessages(messagesData);
+      setIsViewModalOpen(true);
+    }
+  } catch (err) {
+    console.error("❌ Erreur:", err);
+    console.error("❌ Stack:", err.stack);
+    alert("Erreur lors du chargement du forum");
+  }
+};
+
+  // =========================
+  // HANDLERS MESSAGES
+  // =========================
+  const handlePostMessage = useCallback(async (messageContent) => {
+  if (!selectedForum) {
+    console.error("❌ Aucun forum sélectionné");
+    alert("Erreur : Aucun forum sélectionné");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      console.error("❌ Token manquant");
+      alert("Erreur : Vous devez être connecté");
+      return;
+    }
+
+    // OPTION 1 : URL avec forum_id dans le path
+    const url = `http://localhost:8000/api/forums/${selectedForum.id}/messages/create/`;
+    
+    // OPTION 2 : URL alternative (essaye les deux)
+    // const url = `http://localhost:8000/api/messages/create/`;
+    
+    console.log("📤 Envoi POST vers:", url);
+    console.log("📝 Message:", messageContent);
+    console.log("🔑 Token présent:", !!token);
+    console.log("🎯 Forum ID:", selectedForum.id);
+
+    // Structure des données - essaie différentes options
+    const payload = {
+      contenu_message: messageContent.trim(),
+      forum_id: selectedForum.id,  // Important si backend le demande
+      // forum: selectedForum.id,   // Alternative
+      // message: messageContent.trim(),  // Alternative
+    };
+
+    console.log("📦 Payload:", payload);
+
+    // D'abord, teste avec une requête simple
+    console.log("🧪 Test de connexion à l'API...");
+    try {
+      const testRes = await fetch(`http://localhost:8000/api/forums/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("✅ Test API réussi, statut:", testRes.status);
+    } catch (testErr) {
+      console.error("❌ Test API échoué:", testErr);
+    }
+
+    // Maintenant la vraie requête
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log("📡 Réponse statut:", res.status);
+    console.log("📡 Réponse OK?:", res.ok);
+
+    // Récupère le texte de la réponse d'abord
+    const responseText = await res.text();
+    console.log("📡 Réponse texte:", responseText);
+
+    if (!res.ok) {
+      let errorMessage = `Erreur ${res.status}`;
+      
+      try {
+        // Essaye de parser comme JSON
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.error || errorData.detail || errorData.message || responseText;
+        console.error("❌ Erreur JSON:", errorData);
+      } catch (jsonError) {
+        // Si ce n'est pas du JSON, utilise le texte brut
+        console.error("❌ Réponse non-JSON:", responseText);
+        errorMessage = responseText || "Erreur inconnue";
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    // Parse la réponse JSON
+    let newMessage;
+    try {
+      newMessage = JSON.parse(responseText);
+      console.log("✅ Message créé:", newMessage);
+    } catch (parseError) {
+      console.error("❌ Impossible de parser la réponse:", responseText);
+      throw new Error("Réponse invalide du serveur");
+    }
+
+    // Ajoute des champs manquants si nécessaire
+    const enrichedMessage = {
+      ...newMessage,
+      id_message: newMessage.id_message || newMessage.id,
+      contenu_message: newMessage.contenu_message || messageContent,
+      utilisateur_nom: newMessage.utilisateur_nom || "Administrateur",
+      utilisateur_prenom: newMessage.utilisateur_prenom || "",
+      date_publication: newMessage.date_publication || new Date().toISOString(),
+      nombre_likes: newMessage.nombre_likes || 0,
+      user_has_liked: newMessage.user_has_liked || false,
+      commentaires: newMessage.commentaires || [],
+    };
+
+    // Met à jour l'état
+    setForumMessages(prev => [enrichedMessage, ...prev]);
+
+    // Met à jour le compteur dans la liste des forums
+    setForums(prevForums => prevForums.map(f =>
+      f.id === selectedForum.id
+        ? { ...f, threads: (f.threads || 0) + 1 }
+        : f
+    ));
+
+    console.log("✅ Message ajouté à l'état local");
+    return enrichedMessage;
+
+  } catch (err) {
+    console.error("❌ Erreur complète:", err);
+    console.error("❌ Stack:", err.stack);
+    
+    // Messages d'erreur plus clairs
+    if (err.message.includes("403")) {
+      alert("❌ Accès interdit. Vérifiez vos permissions.");
+    } else if (err.message.includes("404")) {
+      alert("❌ Endpoint non trouvé. Vérifiez l'URL de l'API.");
+    } else if (err.message.includes("500")) {
+      alert("❌ Erreur serveur. Vérifiez les logs Django.");
+    } else {
+      alert(`❌ Erreur: ${err.message}`);
+    }
+    
+    throw err; // Propage l'erreur
+  }
+}, [selectedForum]);
+
+  const handlePostComment = useCallback(async (messageId, commentContent) => {
+    try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/forums/${forum.id}/messages/`, {
+      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/commentaires/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contenu_comm: commentContent })
+      });
+
+      if (res.ok) {
+        const newComment = await res.json();
+        setForumMessages(prevMessages => prevMessages.map(msg =>
+          msg.id_message === messageId
+            ? {
+                ...msg,
+                commentaires: [...(msg.commentaires || []), newComment]
+              }
+            : msg
+        ));
+      }
+    } catch (err) {
+      console.error("Erreur:", err);
+      alert("Erreur lors de l'envoi du commentaire");
+    }
+  }, []);
+
+  const handleLikeMessage = useCallback(async (messageId) => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/like/`, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (res.ok) {
-        const messagesData = await res.json();
-        setForumMessages(messagesData);
-        setIsViewModalOpen(true);
-      } else {
-        alert("Impossible de charger les messages");
+        setForumMessages(prevMessages => prevMessages.map(msg =>
+          msg.id_message === messageId
+            ? {
+                ...msg,
+                user_has_liked: !msg.user_has_liked,
+                nombre_likes: msg.user_has_liked 
+                  ? (msg.nombre_likes || 0) - 1 
+                  : (msg.nombre_likes || 0) + 1
+              }
+            : msg
+        ));
       }
     } catch (err) {
       console.error("Erreur:", err);
-      alert("Erreur lors du chargement du forum");
     }
-  };
+  }, []);
+
+  const handleDeleteMessage = useCallback(async (messageId) => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        setForumMessages(prevMessages => prevMessages.filter(msg => msg.id_message !== messageId));
+        if (selectedForum) {
+          setForums(prevForums => prevForums.map(f => 
+            f.id === selectedForum.id 
+              ? { ...f, threads: Math.max(0, f.threads - 1) }
+              : f
+          ));
+        }
+      }
+    } catch (err) {
+      console.error("Erreur:", err);
+    }
+  }, [selectedForum]);
+
+  const handleDeleteComment = useCallback(async (commentId, messageId) => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      const res = await fetch(`http://localhost:8000/api/commentaires/${commentId}/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        setForumMessages(prevMessages => prevMessages.map(msg =>
+          msg.id_message === messageId
+            ? {
+                ...msg,
+                commentaires: msg.commentaires?.filter(comment => 
+                  comment.id_commentaire !== commentId
+                ) || []
+              }
+            : msg
+        ));
+      }
+    } catch (err) {
+      console.error("Erreur:", err);
+    }
+  }, []);
 
   // =========================
-  // STATISTIQUES (comme DashboardAdmin)
+  // CALCULS MÉMORISÉS
   // =========================
-  const stats = [
+  const stats = useMemo(() => [
     { 
       title: "Forums totaux", 
       value: forums.length,
@@ -869,31 +1191,27 @@ export default function ForumManagement() {
       icon: <TrendingUp className="text-blue" size={40} />,
       bg: "bg-grad-3"
     },
-  ];
+  ], [forums]);
 
-  // =========================
-  // FILTRES EN TABS (comme DashboardAdmin)
-  // =========================
-  const filterTabs = [
+  const filterTabs = useMemo(() => [
     { id: "all", label: "Tous les forums" },
     { id: "etudiants", label: "Pour étudiants" },
     { id: "enseignants", label: "Pour enseignants" },
-  ];
+  ], []);
+
+  const filteredForums = useMemo(() => {
+    return forums.filter(forum => {
+      const matchesSearch = forum.title.toLowerCase().includes(search.toLowerCase()) ||
+                         (forum.originalData?.contenu_forum || "").toLowerCase().includes(search.toLowerCase());
+      
+      const matchesFilter = activeFilter === "all" || forum.cible === activeFilter;
+      
+      return matchesSearch && matchesFilter;
+    });
+  }, [forums, search, activeFilter]);
 
   // =========================
-  // FILTRES
-  // =========================
-  const filteredForums = forums.filter(forum => {
-    const matchesSearch = forum.title.toLowerCase().includes(search.toLowerCase()) ||
-                         forum.description.toLowerCase().includes(search.toLowerCase());
-    
-    const matchesFilter = activeFilter === "all" || forum.cible === activeFilter;
-    
-    return matchesSearch && matchesFilter;
-  });
-
-  // =========================
-  // RENDER - ADAPTÉ AU STYLE DASHBOARDADMIN
+  // RENDER
   // =========================
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
@@ -902,12 +1220,12 @@ export default function ForumManagement() {
         <Navbar />
       </div>
 
-      {/* Main Content - Layout comme DashboardAdmin */}
+      {/* Main Content */}
       <main className={`
         flex-1 p-6 pt-10 space-y-5 transition-all duration-300
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
-        {/* Header - Comme DashboardAdmin */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">
@@ -931,7 +1249,7 @@ export default function ForumManagement() {
           </div>
         </div>
 
-        {/* STATISTIQUES - Exactement comme DashboardAdmin */}
+        {/* STATISTIQUES */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, i) => (
             <div 
@@ -949,14 +1267,14 @@ export default function ForumManagement() {
           ))}
         </div>
 
-        {/* GRID: FORUMS + ACTIVITÉ - Comme DashboardAdmin */}
+        {/* GRID: FORUMS + ACTIVITÉ */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* LEFT: Forums List */}
           <div className="bg-card rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-muted mb-4">Forums de discussion</h2>
 
-            {/* TABS COMME DASHBOARDADMIN */}
+            {/* TABS */}
             <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
               {filterTabs.map((tab) => (
                 <button
@@ -1081,9 +1399,6 @@ export default function ForumManagement() {
                               }`}>
                                 {forum.cible === "etudiants" ? "Pour étudiants" : "Pour enseignants"}
                               </span>
-                              <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
-                                {forum.type}
-                              </span>
                             </div>
                             
                             <p className="text-gray text-sm mb-3 line-clamp-2">
@@ -1163,7 +1478,7 @@ export default function ForumManagement() {
             )}
           </div>
 
-          {/* RIGHT: Activités récentes (mock) - Comme DashboardAdmin */}
+          {/* RIGHT: Activités récentes */}
           <div className="bg-card rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-muted mb-4">Activités récentes</h2>
 
@@ -1192,7 +1507,7 @@ export default function ForumManagement() {
       </main>
 
       {/* ========================= */}
-      {/* MODALS - GARDÉS TELS QUELS */}
+      {/* MODALS */}
       {/* ========================= */}
 
       {/* Modal de création/modification */}
@@ -1227,11 +1542,11 @@ export default function ForumManagement() {
         }}
         forum={selectedForum}
         messages={forumMessages}
-        onPostMessage={() => {}}
-        onPostComment={() => {}}
-        onLikeMessage={() => {}}
-        onDeleteMessage={() => {}}
-        onDeleteComment={() => {}}
+        onPostMessage={handlePostMessage}
+        onPostComment={handlePostComment}
+        onLikeMessage={handleLikeMessage}
+        onDeleteMessage={handleDeleteMessage}
+        onDeleteComment={handleDeleteComment}
       />
     </div>
   );
