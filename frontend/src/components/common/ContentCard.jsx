@@ -3,7 +3,7 @@ import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiCheckCircle } from "react-icons/fi";
 import progressionService from "../../services/progressionService";
 
 /* ===================== STYLES ===================== */
@@ -84,12 +84,11 @@ export default function ContentCard({
       } else {
         navigate(`/start-exercise/${course.id}`);
       }
-    } else if ((pageType === "quiz") && (role=== "etudiant")) {
+    } else if (pageType === "quiz" && role === "etudiant") {
       navigate(`/quiz-intro/${course.id}`);
-    } else if ((pageType === "quiz") && (role=== "enseignant")){
+    } else if (pageType === "quiz" && role === "enseignant") {
       navigate(`/quiz-preview/${course.id}`);
-    }
-    else {
+    } else {
       navigate(`/Seecourses/${course.id}`);
     }
   };
@@ -109,7 +108,6 @@ export default function ContentCard({
       navigate(`/Seecourses/${course.id}`);
     }
   };
-
 
   const handleRestart = async () => {
     try {

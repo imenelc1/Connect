@@ -14,6 +14,8 @@ import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
+import CoursesSidebarItem2 from "../components/ui/CoursesSidebarItem2.jsx";
+import CourseContentSimple from "../components/ui/CourseContentSimple.jsx";
 export default function CoursePage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("courseInfo");
@@ -28,6 +30,9 @@ export default function CoursePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
   const [token, setToken] = useState(null);
+const [sectionPages, setSectionPages] = useState({});
+const [currentCoursId, setCurrentCoursId] = useState(null);
+
 
   // Effet pour la responsivité
   useEffect(() => {
@@ -107,8 +112,8 @@ export default function CoursePage() {
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState("");
   const [courseVisibility, setCourseVisibility] = useState("public");
+const [previewSectionIndex, setPreviewSectionIndex] = useState(0);
 
-  const [currentCoursId, setCurrentCoursId] = useState(null);
 
   // --- Sections & lessons ---
   const [sections, setSections] = useState([
@@ -293,6 +298,11 @@ export default function CoursePage() {
     return <div style={{ padding: 20 }}>Not authenticated...</div>;
   }
 
+
+
+
+
+
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* Sidebar */}
@@ -406,7 +416,7 @@ export default function CoursePage() {
             </div>
             
             <div className="flex justify-between mt-6 sm:mt-10">
-              <button className="px-4 sm:px-6 py-2 rounded-xl border border-gray-300 font-medium bg-white shadow-sm transition hover:bg-gray-50">
+              <button className="px-4 sm:px-6 py-2 rounded-xl border border-gray-300 font-medium bg-white shadow-sm transition hover:bg-gray-50" onClick={() => navigate("/all-courses")}>
                 {t("course.cancel")}
               </button>
               <button
@@ -604,81 +614,74 @@ export default function CoursePage() {
           </div>
         )}
 
-        {/* STEP 3 */}
-        {activeStep === 3 && (
-          <div className="space-y-6">
-            {/* RÉSUMÉ INFOS GÉNÉRALES */}
-            <div className="bg-card rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-muted">
-                {t("course.summary")}
-              </h2>
-              <div className="space-y-3 text-grayc">
-                <p><strong>{t("course.title")} :</strong> {title}</p>
-                <p><strong>{t("course.course_topic")} :</strong> {description}</p>
-                <p><strong>{t("course.duration")} :</strong> {duration}</p>
-                <p><strong>{t("course.level")} :</strong> {level}</p>
-                <p><strong>{t("course.courseVisibility")} :</strong> {courseVisibility}</p>
-              </div>
-            </div>
+       {/* STEP 3 – PREVIEW DU COURS */}
+{/* STEP 3 – PREVIEW DU COURS */}
+{/* ===================== */}
+{/* STEP 3 – PREVIEW COURS */}
+{/* ===================== */}
+{activeStep === 3 && (
+  <div className="w-full max-w-7xl mx-auto px-4 pb-10 flex flex-col gap-8">
 
-            {/* RÉSUMÉ SECTIONS */}
-            <div className="bg-card rounded-2xl shadow-sm p-4 sm:p-6 lg:p-8">
-              <h3 className="text-lg sm:text-xl font-semibold mb-6 text-primary">
-                {t("course.curriculum")}
-              </h3>
-              {sections.map((section, sectionIndex) => (
-                <div key={section.id} className="mb-6 pb-4 border-b border-gray-200 ">
-                  <h4 className="text-base sm:text-lg font-semibold text-gray-800">
-                    {sectionIndex + 1}. {section.title || t("course.untitled_section")}
-                  </h4>
-                  {section.description && (
-                    <p className="text-sm text-gray-500 mt-1">{section.description}</p>
-                  )}
-                  <div className="mt-4 pl-4 space-y-3 ">
-                    {section.lessons.map((lesson, lessonIndex) => (
-                      <div key={lesson.id} className="bg-gray-50 p-3 rounded-lg border">
-                        <p className="font-medium text-gray-800">
-                          {lessonIndex + 1}. {lesson.title || t("course.untitled_lesson")}
-                        </p>
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                          {lesson.type || "text"}
-                        </span>
-                        {(lesson.type === "text" || lesson.type === "example") && (
-                          <p className="text-sm text-gray-600 mt-2 whitespace-pre-line">
-                            {lesson.content || t("course.no_content")}
-                          </p>
-                        )}
-                        {lesson.type === "image" && lesson.preview && (
-                          <img
-                            src={lesson.preview}
-                            alt="Lesson visual"
-                            className="w-full sm:w-48 mt-2 rounded-xl border object-cover"
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+    {/* ZONE PREVIEW (SIDEBAR + CONTENT) */}
+    <div className="flex flex-col lg:flex-row gap-6">
 
-            {/* BOUTONS */}
-            <div className="flex flex-col sm:flex-row justify-between gap-4">
-              <button
-                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition"
-                onClick={() => setActiveStep(2)}
-              >
-                {t("course.back")}
-              </button>
-              <button
-                className="px-6 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition"
-                onClick={handleSaveAll}
-              >
-                {t("course.save_publier")}
-              </button>
-            </div>
-          </div>
-        )}
+      {/* SIDEBAR – réutilisation exacte */}
+      <CoursesSidebarItem2
+        sections={sections}
+        currentSectionIndex={previewSectionIndex}
+        setCurrentSectionIndex={(index) => {
+          setPreviewSectionIndex(index);
+          setPreviewLessonPage(0);
+          setSectionPages((prev) => ({ ...prev, [index]: 0 }));
+        }}
+      />
+
+      {/* CONTENU DU COURS – réutilisation exacte */}
+     <CourseContentSimple
+  course={{
+    id: "preview",
+    title,
+    description,
+    level,
+    duration,
+    sections,
+  }}
+  currentSectionIndex={previewSectionIndex}
+  setCurrentSectionIndex={setPreviewSectionIndex}
+  /* pagination des leçons */
+  sectionPages={sectionPages}
+  setSectionPages={setSectionPages}
+/>
+
+ </div>
+    {/* ACTIONS GLOBALES (SÉPARÉES DU CONTENU) */}
+    <div className="flex justify-between items-center pt-6 border-t">
+
+      {/* RETOUR */}
+      <button
+        onClick={() => setActiveStep(2)}
+        className="px-6 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition font-medium"
+      >
+        ← {t("course.back")}
+      </button>
+
+      {/* PUBLIER */}
+      <button
+        onClick={handleSaveAll}
+        className="px-8 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition"
+      >
+        {t("course.save_publier")}
+      </button>
+
+    </div>
+  </div>
+ 
+
+)}
+
+
+
+
       </main>
     </div>
   );

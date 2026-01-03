@@ -856,6 +856,7 @@ class ProgressionUtilisateurAPIView(APIView):
 
         # 1️⃣ Utilisateur
         utilisateur = get_object_or_404(Utilisateur, id_utilisateur=user_id)
+        etudiant=get_object_or_404(Etudiant, utilisateur=user_id)
 
         # 2️⃣ Cours lus
         cours_lus = (
@@ -912,6 +913,12 @@ class ProgressionUtilisateurAPIView(APIView):
                 "email": utilisateur.adresse_email,
                 "points": utilisateur.points,
                 "date_inscription": utilisateur.date_inscription,
+                "matricule" : utilisateur.matricule,
+                "adresse_email" : utilisateur.adresse_email,
+                "date_naissance" : utilisateur.date_naissance,
+                "specialite": etudiant.specialite,
+                "annee_etude": etudiant.annee_etude,
+                
             },
 
             "cours_lus": list(

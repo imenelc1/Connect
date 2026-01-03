@@ -231,7 +231,6 @@ export default function Dashboardens() {
 
   const formattedNotifications = formatNotificationsForFeed();
 
-
   // Écran de chargement
   if (loading) {
     return (
