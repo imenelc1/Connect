@@ -1413,3 +1413,23 @@ def get_user_draft(request, exercice_id):
         return Response({"draft": None})
 
     return Response(TentativeExerciceReadSerializer(tentative).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def my_last_tentative(request, exercice_id):
+    user = request.user  # sera bien l'utilisateur connecté
+    exercice = get_object_or_404(Exercice, id=exercice_id)
+    last_tentative = TentativeExercice.objects.filter(user=user, exercice=exercice).order_by('-id').first()
+    
+    if not last_tentative:
+        return Response({}, status=status.HTTP_200_OK)
+    
+    data = {
+        "reponse": last_tentative.reponse,
+        "output": last_tentative.output,
+        "etat": last_tentative.etat,
+        "temps_passe": last_tentative.temps_passe,
+        "score": last_tentative.score,
+    }
+    return Response(data, status=status.HTTP_200_OK)

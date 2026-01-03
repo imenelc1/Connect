@@ -138,6 +138,7 @@ def utilisateurs_par_badge(request, badge_id):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
 def user_badges(request):
     user = request.user
     gained_ids = GagnerBadge.objects.filter(utilisateur=user).values_list('badge_id', flat=True)

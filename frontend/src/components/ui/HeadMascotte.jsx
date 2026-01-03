@@ -14,31 +14,43 @@ export default function HeadMascotte({ courseData = null }) {
   const [notifications, setNotifications] = useState([]);
   const lastNotifRef = useRef(null);
 
-  // 🔎 Détection automatique du contexte
+  // 🔎 Détection automatique du contexte (fix boucle infinie)
   useEffect(() => {
-    if (exercise?.id) {
+    if (exercise?.id && assistantMode !== "exercise") {
       setAssistantMode("exercise");
       setCurrentCourse(null);
       return;
     }
 
-    if (courseData?.id) {
+    if (courseData?.id && assistantMode !== "course") {
       setAssistantMode("course");
-      const context = courseData.sections?.map(sec => sec.lessons.map(lec => lec.content || "").join("\n")).join("\n\n") || "";
+      const context =
+        courseData.sections
+          ?.map((sec) =>
+            sec.lessons.map((lec) => lec.content || "").join("\n")
+          )
+          .join("\n\n") || "";
       setCurrentCourse({ ...courseData, context });
       return;
     }
 
-    setAssistantMode("generic");
-    setCurrentCourse(null);
-  }, [exercise, courseData]);
+    if (!exercise?.id && !courseData?.id && assistantMode !== "generic") {
+      setAssistantMode("generic");
+      setCurrentCourse(null);
+    }
+  }, [exercise, courseData, assistantMode]);
 
+  // ---------------- Notifications ----------------
   const pushNotification = (text, type = "info") => {
     if (lastNotifRef.current === text) return;
     lastNotifRef.current = text;
     const id = Date.now();
-    setNotifications(prev => [...prev, { id, text, type }]);
-    setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== id)), NOTIF_DURATION);
+    setNotifications((prev) => [...prev, { id, text, type }]);
+    setTimeout(
+      () =>
+        setNotifications((prev) => prev.filter((n) => n.id !== id)),
+      NOTIF_DURATION
+    );
   };
 
   return (
@@ -51,7 +63,7 @@ export default function HeadMascotte({ courseData = null }) {
           onClick={() => setOpenAssistant(true)}
         />
         <div className="absolute -top-2 -right-2 flex flex-col gap-2 z-50">
-          {notifications.map(n => (
+          {notifications.map((n) => (
             <div
               key={n.id}
               onClick={() => setOpenAssistant(true)}
@@ -69,7 +81,7 @@ export default function HeadMascotte({ courseData = null }) {
         <AssistantIA
           onClose={() => setOpenAssistant(false)}
           mode={assistantMode}
-          course={currentCourse} 
+          course={currentCourse}
         />
       )}
     </>
