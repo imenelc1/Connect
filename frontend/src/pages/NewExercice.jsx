@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 
 import { Globe, FileText, Activity } from "lucide-react";
 import { useTranslation } from "react-i18next";

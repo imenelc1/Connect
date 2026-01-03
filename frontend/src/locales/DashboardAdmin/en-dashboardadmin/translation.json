@@ -3,7 +3,7 @@
   "subtitle": "Welcome back! Here's what's happening today.",
   "stats": {
     "totalStudents": "Total Students",
-    "activeCourses": "Active Courses",
+    "totalCourses": "Total Courses",
     "totalExercises": "Total Exercises",
     "totalSpaces": "Total Spaces"
   },
@@ -19,5 +19,17 @@
     "inspect": "Inspect",
     "approve": "Approve",
     "reject": "Reject"
-  }
+  },
+  "errors":{
+    "loadingStats": "Error loading stats:"
+
+  },
+  "charts": {
+  "registrations": "Registrations",
+  "logins": "Logins",
+  "coursesFollowed": "Followed Courses ",
+  "activityTitle": "Platform Activity",
+   "registrationsAndLogins": "📥 Registrations & 🔐 Logins"
+}
+
 }

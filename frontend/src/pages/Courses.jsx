@@ -7,9 +7,10 @@ import ContentSearchBar from "../components/common/ContentSearchBar.jsx";
 import CoursesSidebarItem from "../components/ui/CourseSidebarItem.jsx";
 import CourseContent from "../components/ui/CourseContent.jsx";
 import HeadMascotte from "../components/ui/HeadMascotte.jsx";
-import IaAssistant from "../components/ui/IaAssistant.jsx";
 import api from "../services/courseService";
 import progressionService from "../services/progressionService";
+import CourseContext from "../context/CourseContext";
+
 
 export default function Courses() {
   const { t, i18n } = useTranslation("courses");
@@ -32,36 +33,40 @@ export default function Courses() {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [courseProgress, setCourseProgress] = useState(0);
   const [initialLessonPage, setInitialLessonPage] = useState(0);
+  const currentCourse = sections.length > 0
+    ? { id: coursId, title, description, level, duration, sections }
+    : null;
+
 
   // **NOUVEAU** pour gérer la page par section
   const [sectionPages, setSectionPages] = useState({});
 
   const lastLessonId = location.state?.lastLessonId;
 
-// Marquer une leçon comme visitée
-const markLessonVisited = async (lessonId) => {
-  try {
-    // Appel backend pour marquer la leçon
-    const res = await progressionService.completeLesson(lessonId);
-    
-    // Mettre à jour la progression globale du cours
-    if (res?.course_progress !== undefined) {
-      setCourseProgress(res.course_progress);
-    }
+  // Marquer une leçon comme visitée
+  const markLessonVisited = async (lessonId) => {
+    try {
+      // Appel backend pour marquer la leçon
+      const res = await progressionService.completeLesson(lessonId);
 
-    // Mettre à jour localement la leçon comme visitée
-    setSections(prev =>
-      prev.map((sec) => ({
-        ...sec,
-        lessons: sec.lessons.map((l) =>
-          l.id === lessonId ? { ...l, visited: true } : l
-        ),
-      }))
-    );
-  } catch (err) {
-    console.error("Erreur lors du marquage de la leçon :", err);
-  }
-};
+      // Mettre à jour la progression globale du cours
+      if (res?.course_progress !== undefined) {
+        setCourseProgress(res.course_progress);
+      }
+
+      // Mettre à jour localement la leçon comme visitée
+      setSections(prev =>
+        prev.map((sec) => ({
+          ...sec,
+          lessons: sec.lessons.map((l) =>
+            l.id === lessonId ? { ...l, visited: true } : l
+          ),
+        }))
+      );
+    } catch (err) {
+      console.error("Erreur lors du marquage de la leçon :", err);
+    }
+  };
 
 
   useEffect(() => {
@@ -146,43 +151,67 @@ const markLessonVisited = async (lessonId) => {
   };
 
   return (
-    <div className="w-full bg-surface flex flex-col items-center">
-      <header className="w-full max-w-7xl flex flex-col gap-4 py-6 px-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">{t("title")}</h1>
-        <div className="hidden sm:flex sm:flex-row w-full gap-3 md:gap-4 items-center md:w-auto">
-          <div className="relative w-full sm:w-64 md:w-80">
-            <ContentSearchBar />
+    <CourseContext.Provider
+      value={{
+        id: coursId,
+        title,
+        description,
+        level,
+        duration,
+        sections,
+      }}
+    >
+      <div className="w-full bg-surface flex flex-col items-center">
+        <header className="w-full max-w-7xl flex flex-col gap-4 py-6 px-4 md:flex-row md:items-center md:justify-between">
+          <h1 className="text-2xl md:text-3xl font-bold text-muted md:ml-10">{t("title")}</h1>
+          <div className="hidden sm:flex sm:flex-row w-full gap-3 md:gap-4 items-center md:w-auto">
+            <div className="relative w-full sm:w-64 md:w-80">
+              <ContentSearchBar />
+            </div>
+            <HeadMascotte
+              courseData={
+                sections.length > 0
+                  ? {
+                    id: coursId,
+                    title,
+                    description,
+                    level,
+                    duration,
+                    sections, // HeadMascotte s'occupe de créer course.context
+                  }
+                  : null
+              }
+            />
+
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => i18n.changeLanguage(lang)}
+            />
           </div>
-          <IaAssistant />
-          <HeadMascotte />
-          <UserCircle
-            initials={initials}
-            onToggleTheme={toggleDarkMode}
-            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+        </header>
+
+        <div className="w-full max-w-7xl px-4 pb-10 flex flex-col lg:flex-row gap-6 relative">
+          <CoursesSidebarItem
+            sections={sections}
+            currentSectionIndex={currentSectionIndex}
+            setCurrentSectionIndex={setCurrentSectionIndex}
           />
+          <CourseContent
+            course={{ title, description, level, duration, sections, id: coursId }}
+            currentSectionIndex={currentSectionIndex}
+            setCurrentSectionIndex={setCurrentSectionIndex}
+            setSections={setSections}
+            sectionPages={sectionPages}
+            setSectionPages={setSectionPages}
+            currentLessonPage={initialLessonPage}
+            setCurrentLessonPage={setInitialLessonPage}
+            updateSectionProgress={updateSectionProgress}
+            markLessonVisited={markLessonVisited} // <-- ici
+          />
+
         </div>
-      </header>
-
-      <div className="w-full max-w-7xl px-4 pb-10 flex flex-col lg:flex-row gap-6 relative">
-        <CoursesSidebarItem
-          sections={sections}
-          currentSectionIndex={currentSectionIndex}
-          setCurrentSectionIndex={setCurrentSectionIndex}
-        />
-       <CourseContent
-  course={{ title, description, level, duration, sections, id: coursId }}
-  currentSectionIndex={currentSectionIndex}
-  setCurrentSectionIndex={setCurrentSectionIndex}
-  setSections={setSections}
-  sectionPages={sectionPages}
-  setSectionPages={setSectionPages}
-  currentLessonPage={initialLessonPage}
-  setCurrentLessonPage={setInitialLessonPage}
-  updateSectionProgress={updateSectionProgress}
-  markLessonVisited={markLessonVisited} // <-- ici
-/>
-
       </div>
-    </div>
+    </CourseContext.Provider>
   );
 }

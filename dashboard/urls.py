@@ -19,6 +19,18 @@ urlpatterns = [
  path ("current-progress/students/", views.current_progress_students, name="current-progress-students"),
  path("tentatives/", views.list_tentatives, name="list_tentatives"),
  path("tentatives/create/", views.create_tentative.as_view(), name="create_tentative"),
+  
+path(
+    "<int:exercice_id>/utilisateur/<int:user_id>/tentatives/",
+    views.TentativeExerciceListView.as_view(),
+    name="tentatives_exercice_utilisateur",
+),
+path(
+    "<int:exercice_id>/utilisateur/<int:user_id>/tentativerep/",
+    views.TentativeReponse.as_view(),
+    name="tentatives_exercice_utilisateur",
+),
+
  path("tentatives/id/<int:tentative_id>/", views.get_tentative, name="get-tentative"),
  path("tentatives/can-submit/<int:exercice_id>/", views.can_submit_exercice, name="can-submit-exercice"),
  path("student-exercises/<int:student_id>/", views.student_exercises, name="student-exercises"),
@@ -37,6 +49,8 @@ urlpatterns = [
 path("all-students-submissions/", views.all_students_submissions, name="all-students-submissions"),
 path("quiz_success_rate_prof/", views.quiz_success_rate_prof, name="quiz_success_rate_prof"),
 path("professor_content_counts_global/", views.professor_content_counts_global, name="professor_content_counts_global"),
+path("tentatives/my-last/<int:exercice_id>/", views.my_last_tentative, name="my-last-tentative"),
+
 
 
 

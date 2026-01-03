@@ -1,20 +1,32 @@
 {
   "ProgressStudent": {
-    "AvarageG": "Note moyenne",
+    "AverageG": "Note moyenne",
     "Submission": "Taux de soumission",
-    "Completed": "Complété",
+    "Completed": "Terminé",
     "points": "points du mois dernier",
     "mycourses": "Mes cours",
     "Weekly": "Taux de soumission hebdomadaire",
-    "grade": "Informations sur les performances",
+    "grade": "Évolution des notes dans le temps",
     "positive": "Tendance positive",
-    "positivep1": "Vos performances se sont améliorées de  ",
+    "positivep1": "Vos performances se sont améliorées de ",
     "positivep2": "points au cours des ",
-    "positivep3": "dernières semaines.Continuez à encourager ces progrès!",
-    "joined": "Rejoint le",
+    "positivep3": "dernières semaines. Continuez à encourager ces progrès !",
+    "joined": "Inscrit le",
     "Week": "Semaine",
-     "level": "Note",
-     "submissionsLabel": "Soumissions"
-
+    "level": "Note",
+    "submissionsLabel": "soumissions",
+    "submitted": "Exercices soumis",
+    "empty": "Aucun exercice soumis pour le moment",
+    "completed": "Quiz terminés",
+    "noneCompleted": "Aucun quiz terminé pour l'instant",
+     "QuizAverageScore": "Note moyenne des quiz",
+     "weeklyDataLog": "Données hebdomadaires" ,
+     "weeklySubmissionsError": "Erreur lors de la récupération des soumissions hebdomadaires",
+     "untitledExercise": "Sans titre"
+  },
+  "errors": {
+    "dashboardError": "Erreur lors du chargement du tableau de bord",
+    "averageScore": "Erreur lors de la récupération de la note moyenne",
+    "attempts": "Erreur lors de la récupération des tentatives"
   }
 }

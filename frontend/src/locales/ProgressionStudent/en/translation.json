@@ -1,20 +1,34 @@
 {
   "ProgressStudent": {
-    "AvarageG": "Average Grade",
+    "AverageG": "Average Grade",
     "Submission": "Submission Rate",
     "Completed": "Completed",
-    "points": " points from last month",
+    "points": "points from last month",
     "mycourses": "My Courses",
     "Weekly": "Weekly Submission Rate",
     "grade": "Grade Progression Over Time",
     "positive": "Positive Trend",
-    "positivep1": "Your performance has improved by  ",
+    "positivep1": "Your performance has improved by ",
     "positivep2": "points over the past ",
-    "positivep3": "weeks.Keep encouraging this progress!",
+    "positivep3": "weeks. Keep encouraging this progress!",
     "joined": "Joined on",
     "Week": "Week",
-     "level": "Grade",
-     "submissionsLabel": "Submissions"
-
+    "level": "Grade",
+    "submissionsLabel": "Submissions",
+    "dashboardError": "Error while fetching dashboard",
+    "submitted": "Submitted Exercises",
+    "empty": "No exercises submitted yet",
+    "completed": "Completed Quizzes",
+    "noneCompleted": "No quizzes completed yet",
+    "QuizAverageScore": "Quiz Average Score",
+     "weeklyDataLog": "Weekly data",
+     "untitledExercise": "Untitled"
+  
+  },
+  "errors": {
+    "dashboardError": "Error while fetching dashboard",
+    "averageScore": "Error while fetching average score",
+    "attempts": "Error while fetching attempts",
+     "weeklySubmissionsError": "Error fetching weekly submissions"
   }
 }

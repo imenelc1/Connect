@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import UserCircle from "../components/common/UserCircle";
 import TaskCard from "../components/common/TaskCard";
 import WeeklySubmissionChart from "../components/common/WeeklySubmissionChart";
@@ -24,6 +24,22 @@ export default function ProgressExercice() {
   const [totalExercises, setTotalExercises] = useState(0);
   const [submittedCount, setSubmittedCount] = useState(0);
   const token = localStorage.getItem("token");
+  // / États de l'interface
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Gestion de la responsivité
+    useEffect(() => {
+      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+  
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("sidebarChanged", handleSidebarChange);
+  
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("sidebarChanged", handleSidebarChange);
+      };
+    }, []); 
   const BACKEND_URL = "http://127.0.0.1:8000";
 
   const colorClasses = {
@@ -121,12 +137,17 @@ export default function ProgressExercice() {
 
 
   return (
-    <div className="flex flex-col lg:flex-row bg-primary/10 min-h-screen">
-      <Navbar />
-
-      <div className="flex-1 p-4 sm:p-8 lg:ml-56">
+      <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                                       {/* Sidebar */}
+                                       <div>
+                                         <Navbar />
+                                       </div>
+          <div className={`
+                flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+                ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+              `}>
         {/* Profile Header */}
-        <div className="bg-card rounded-3xl shadow-md p-6 sm:p-8 mb-6 sm:mb-8 w-full max-w-full lg:max-w-5xl mx-auto">
+        <div className="bg-grad-1 rounded-3xl shadow-md p-6 sm:p-8 mb-6 sm:mb-8 w-full max-w-full lg:max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center sm:gap-6">
             <UserCircle initials={initials} className="w-14 h-14" />
             <div className="mt-4 sm:mt-0 text-center sm:text-left">

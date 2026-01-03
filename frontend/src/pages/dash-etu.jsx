@@ -34,7 +34,8 @@ export default function Dashboardetu() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("Dashboard");
   const { toggleDarkMode } = useContext(ThemeContext);
-  const { notifications, loading: loadingNotifications } = useNotifications();
+  const { notifications, loading: loadingNotifications, fetchNotifications } = useNotifications();
+
 
   // États de l'interface
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -52,7 +53,9 @@ export default function Dashboardetu() {
   const [totalExercises, setTotalExercises] = useState(0);
   const [dailyTime, setDailyTime] = useState(0);
   const [successRate, setSuccessRate] = useState(0);
-
+  useEffect(() => {
+  fetchNotifications(); // récupère les notifications dès le montage
+}, [fetchNotifications]);
   // Gestion de la responsivité
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -88,7 +91,7 @@ export default function Dashboardetu() {
         setSuccessRate(rate);
 
       } catch (err) {
-        console.error("Erreur lors du chargement des données:", err);
+        console.error(t("Dashboard.LoadDataError"), err);
       } finally {
         setLoading(false);
       }
@@ -110,7 +113,7 @@ export default function Dashboardetu() {
         );
         setDailyTime(res.data.total_seconds || 0);
       } catch (err) {
-        console.error("Erreur fetching daily time:", err);
+        console.error(t("Dashboard.FetchDailyTimeError"), err);
       }
     };
 
@@ -190,14 +193,15 @@ export default function Dashboardetu() {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface">
-      {/* Sidebar */}
-      <Navbar />
-
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                     {/* Sidebar */}
+                     <div>
+                       <Navbar />
+                     </div>
       {/* Contenu principal */}
+      
       <main className={`
-        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 
-        min-h-screen w-full overflow-x-hidden
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
         
@@ -252,7 +256,7 @@ export default function Dashboardetu() {
           />
           <Cards 
             text={t("Dashboard.Success")} 
-            value={`${successRate}%`} 
+            value={`${Math.round(successRate)}%`} 
             icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
             bg="bg-grad-3"
             isMobile={isMobile}

@@ -40,7 +40,7 @@ function StudentDetailModal({ studentId, onClose }) {
 
     fetchStudent();
   }, [studentId]);
-
+console.log({student});
   if (!studentId) return null;
 
   return (
@@ -54,28 +54,37 @@ function StudentDetailModal({ studentId, onClose }) {
           <p className="text-red-500">{error}</p>
         ) : student ? (
           <>
-            <h2 className="text-2xl font-bold mb-2">{student.nom} {student.prenom}</h2>
-            <p className="text-sm text-gray-500 mb-4">{student.email}</p>
+            {/* Informations générales */}
+            <h2 className="text-2xl font-bold mb-2">{student.utilisateur.nom} {student.utilisateur.prenom}</h2>
+            <p className="text-sm text-gray-500 mb-4">{student.utilisateur.email}</p>
 
-            <h3 className="font-semibold text-lg mb-2">Cours lus</h3>
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p><strong>Date de naissance:</strong> {student.utilisateur.date_naissance || "—"}</p>
+              <p><strong>Matricule:</strong> {student.utilisateur.matricule || "—"}</p>
+              <p><strong>Spécialité:</strong> {student.utilisateur.specialite || "—"}</p>
+              <p><strong>Année d'étude:</strong> {student.utilisateur.annee_etude || "—"}</p>
+            </div>
+
+            {/* Progression */}
+            <h3 className="font-semibold text-lg mb-2">Cours lus: {student.cours_lus?.length}</h3>
             {student.cours_lus?.length > 0 ? (
               <ul className="mb-4 list-disc list-inside">
                 {student.cours_lus.map((c, idx) => <li key={idx}>{c.titre_cour}</li>)}
               </ul>
             ) : <p className="mb-4 text-sm text-gray-500">Aucun cours lu</p>}
 
-            <h3 className="font-semibold text-lg mb-2">Exercices faits</h3>
+            <h3 className="font-semibold text-lg mb-2">Exercices faits: {student.exercices_faits?.length} </h3>
             {student.exercices_faits?.length > 0 ? (
               <ul className="mb-4 list-disc list-inside">
                 {student.exercices_faits.map((e, idx) => <li key={idx}>{e.titre_exo}</li>)}
               </ul>
             ) : <p className="mb-4 text-sm text-gray-500">Aucun exercice fait</p>}
 
-            <h3 className="font-semibold text-lg mb-2">Quiz faits</h3>
+            <h3 className="font-semibold text-lg mb-2">Quiz faits : {student.quiz_faits?.length}</h3>
             {student.quiz_faits?.length > 0 ? (
               <ul className="mb-4 list-disc list-inside">
                 {student.quiz_faits.map((q, idx) => (
-                  <li key={idx}>{q.titre_quiz} – Score: {q.score_obtenu} </li>
+                  <li key={idx}>{q.titre_quiz} – Score: {q.score_obtenu}</li>
                 ))}
               </ul>
             ) : <p className="mb-4 text-sm text-gray-500">Aucun quiz fait</p>}

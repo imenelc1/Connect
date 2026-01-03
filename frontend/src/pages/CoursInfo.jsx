@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/NavBar.jsx";
+import Navbar from "../components/common/Navbar.jsx";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
 import { Trash2, ChevronUp } from "lucide-react";
@@ -31,6 +31,7 @@ export default function CoursePage() {
   const [userData, setUserData] = useState(null);
   const [token, setToken] = useState(null);
   const [sectionPages, setSectionPages] = useState({});
+
 
   // Effet pour la responsivité
   useEffect(() => {
@@ -525,7 +526,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
                           className="flex-1 text-black dark:text-white !bg-card w-full"
                         />
 
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                        <div className="flex ml-[270px] gap-4">
                           <ModernDropdown
                             value={lesson.type || "text"}
                             onChange={(value) =>

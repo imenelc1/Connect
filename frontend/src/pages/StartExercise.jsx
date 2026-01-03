@@ -12,7 +12,7 @@ import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
 import IaAssistant from "../components/ui/IaAssistant";
 
-import NavBar from "../components/common/NavBar";
+import NavBar from "../components/common/Navbar";
 import AssistantIA from "../pages/AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
@@ -97,15 +97,12 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
 >
 
   {/* NAVBAR PC */}
-  <div >
+  <div className="hidden lg:block">
     <NavBar />
   </div>
 
   {/* CONTENT */}
-  <div className={`
-        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
-        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-      `}>
+  <div className="flex-1 p-4 md:p-8 lg:ml-72 transition-all duration-300 ml-10">
     {/* HEADER */}
     <div className="flex flex-col md:flex-row md:items-center mb-10 gap-6 md:gap-0">
       <div className="flex-1">
@@ -129,19 +126,17 @@ const sidebarWidth = sidebarCollapsed ?  -200: -50;
     </div>
 
     {/* EXERCISE CARD */}
-  <div className="w-full p-6 rounded-2xl bg-grad-3 mb-6 md:mb-10 overflow-hidden">
-  <p className="font-semibold text-muted text-[20px] break-all">
-    {t("exerciseCard.title")}
-    <span className="font-normal text-[rgb(var(--color-text))] ml-3 opacity-70 break-all">
-      {t("exerciseCard.subtitle")}
-    </span>
-  </p>
-
-  <p className="mt-3 text-muted text-sm md:text-base break-all">
-    {t("exerciseCard.description")}
-  </p>
-</div>
-
+    <div className="w-full p-6 rounded-2xl bg-grad-3 mb-6 md:mb-10">
+      <p className="font-semibold text-muted text-[20px]">
+        {t("exerciseCard.title")}
+        <span className="font-normal text-[rgb(var(--color-text))] ml-3 opacity-70">
+          {t("exerciseCard.subtitle")}
+        </span>
+      </p>
+      <p className="mt-3 text-muted text-sm md:text-base">
+        {t("exerciseCard.description")}
+      </p>
+    </div>
 
     {/* CODE EDITOR */}
     <p className="text-lg md:text-xl font-semibold mb-4">
