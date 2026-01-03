@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+console.log("clé GROQ :", import.meta.env.VITE_GROQ_API_KEY);
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
 export const getSystemPrompt = ({ lang = "fr", mode = "generic", exercise, student, memory, courseContext = "" }) => {

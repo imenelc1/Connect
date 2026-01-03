@@ -433,6 +433,7 @@ def create_comment(request, message_id):
     if serializer.is_valid():
         serializer.save(message=message, utilisateur=request.user)
         return Response(serializer.data, status=201)
+    check_top_commentateur_badge(request.user)
     return Response(serializer.errors, status=400)
 
 

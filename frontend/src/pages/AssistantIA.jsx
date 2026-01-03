@@ -9,6 +9,26 @@ import { getSystemPrompt, getAIAnswer } from "../services/iaService";
 const detectLanguage = text => /[àâçéèêëîïôûùüÿñæœ]/i.test(text) ? "fr" : "en";
 const isExerciseQuestion = msg => /je comprends pas|j'ai pas compris|pas compris|rien compris|c'est flou/i.test(msg.toLowerCase());
 
+
+import axios from "axios";
+
+const API_URL = "http://localhost:8000/api/badges/ai-explanation-badge/"; // ton endpoint Django
+
+async function awardAIBadge() {
+  try {
+    const res = await axios.post(API_URL, {}, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}` // ou selon ton auth
+      }
+    });
+    console.log(res.data.message);
+    return res.data;
+  } catch (err) {
+    console.error("Erreur badge IA :", err.response?.data || err);
+  }
+}
+
+
 export default function AssistantIA({ onClose, mode = "generic", course = null }) {
   const exercise = useContext(ExerciseContext);  // récupère l'exercice
   const [student, setStudent] = useState(null);
@@ -66,40 +86,53 @@ export default function AssistantIA({ onClose, mode = "generic", course = null }
 
   // ---------- Send message ----------
   const handleSend = async () => {
-    if (!input.trim() || loading || !student?.id) return;
-    const userText = input.trim();
-    const lang = detectLanguage(userText);
+  if (!input.trim() || loading || !student?.id) return;
+  const userText = input.trim();
+  const lang = detectLanguage(userText);
 
-    setMessages(m => [...m, { id: Date.now(), from: "user", text: userText }]);
-    setInput("");
+  setMessages(m => [...m, { id: Date.now(), from: "user", text: userText }]);
+  setInput("");
 
-    // 🟡 Si question sur l'exercice
-    if (actualMode === "exercise" && isExerciseQuestion(userText)) {
-      setMessages(m => [...m,
-        {
-          id: Date.now() + 1,
-          from: "bot",
-          text: `🧠 Je vois que tu bloques sur l'exercice **${exercise?.titre || ""}**.\n\nVoici l'énoncé :\n\n${exercise?.enonce || "Pas d'énoncé chargé"}\n\nExplique-moi ce que tu n’as pas compris exactement et je te guiderai pas à pas.`
-        }
-      ]);
-      return; // stop ici pour ne pas appeler l'IA
+  if (actualMode === "exercise" && isExerciseQuestion(userText)) {
+    setMessages(m => [...m,
+      {
+        id: Date.now() + 1,
+        from: "bot",
+        text: `🧠 Je vois que tu bloques sur l'exercice **${exercise?.titre || ""}**.\n\nVoici l'énoncé :\n\n${exercise?.enonce || "Pas d'énoncé chargé"}\n\nExplique-moi ce que tu n’as pas compris exactement et je te guiderai pas à pas.`
+      }
+    ]);
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const systemPrompt = getSystemPrompt({
+      lang,
+      mode: actualMode,
+      exercise,
+      student,
+      memory: messages.slice(-6),
+      courseContext: course?.context || ""
+    });
+
+    const answer = await getAIAnswer({ systemPrompt, userPrompt: userText });
+    setMessages(m => [...m, { id: Date.now() + 2, from: "bot", text: answer }]);
+
+    // Ici on appelle le badge IA
+    if (actualMode !== "exercise") { // ou condition si tu veux uniquement pour IA générique
+      const badgeRes = await awardAIBadge();
+      if (badgeRes?.message) {
+        alert(badgeRes.message); // ou toast si tu utilises react-toastify
+      }
     }
 
-    setLoading(true);
-    try {
-      const systemPrompt = getSystemPrompt({
-        lang,
-        mode: actualMode,
-        exercise,
-        student,
-        memory: messages.slice(-6),
-        courseContext: course?.context || ""
-      });
+  } finally { setLoading(false); }
+  console.log("Appel badge IA...");
+const badgeRes = await awardAIBadge();
+console.log("Réponse badge :", badgeRes);
 
-      const answer = await getAIAnswer({ systemPrompt, userPrompt: userText });
-      setMessages(m => [...m, { id: Date.now() + 2, from: "bot", text: answer }]);
-    } finally { setLoading(false); }
-  };
+};
+
 
   if (!student?.id) return null;
 

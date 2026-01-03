@@ -13,25 +13,43 @@ import toast from "react-hot-toast";
 
 export default function TheoryExercisePage() {
   const [openAssistant, setOpenAssistant] = useState(false);
-  // const [rating, setRating] = useState(0);
-  // const [hover, setHover] = useState(0);
   const [answer, setAnswer] = useState("");
   const [exercise, setExercise] = useState(null);
   const { exerciceId } = useParams();
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [canSubmit, setCanSubmit] = useState(false);
 
   const [startTime, setStartTime] = useState(Date.now());
 
+  const { t, i18n } = useTranslation("exercisePage");
+
+  /* ================= USER ================= */
+  const storedUser = localStorage.getItem("user");
+  const userData =
+    storedUser && storedUser !== "undefined"
+      ? JSON.parse(storedUser)
+      : null;
+
+  // ✅ NORMALISATION ICI (CLÉ UNIQUE)
+  const userId =
+    userData?.id_utilisateur ??
+    userData?.user_id ??
+    userData?.id ??
+    null;
+
+  const isStudent = userData?.role === "etudiant";
+
+  /* ================= TIMER ================= */
   useEffect(() => {
     if (exercise) setStartTime(Date.now());
   }, [exercise]);
 
-  // Fonction utilitaire pour calculer le temps passé en secondes
-  const getTempsPasse = () => Math.floor((Date.now() - startTime) / 1000);
+  const getTempsPasse = () =>
+    Math.floor((Date.now() - startTime) / 1000);
 
-  // ------------------- SAVE DRAFT -------------------
+  /* ================= SAVE DRAFT ================= */
   const handleSaveDraft = async () => {
     if (!exercise) return;
 
@@ -49,21 +67,20 @@ export default function TheoryExercisePage() {
       setFeedback(res.data?.feedback || t("draft_saved"));
       toast.success(t("solution_saved"));
     } catch (error) {
-      console.error(t("save_error"), error.response || error);
       toast.error(t("save_error"));
     } finally {
       setLoading(false);
     }
   };
 
-  // ------------------- SEND SOLUTION -------------------
+  /* ================= SEND SOLUTION ================= */
   const handleSendSolution = async () => {
     if (!exercise) return;
 
     try {
       setLoading(true);
 
-      const res = await progressionService.submitTentative({
+      await progressionService.submitTentative({
         exercice_id: exercise.id_exercice,
         reponse: answer,
         output: "",
@@ -71,10 +88,8 @@ export default function TheoryExercisePage() {
         temps_passe: getTempsPasse(),
       });
 
-      setFeedback(res.data?.feedback || t("solution_sent"));
       toast.success(t("solution_sent"));
 
-      //Vérifier si on peut encore soumettre
       const canSubmitRes = await fetch(
         `http://localhost:8000/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
         {
@@ -83,36 +98,30 @@ export default function TheoryExercisePage() {
           },
         }
       );
+
       const canSubmitData = await canSubmitRes.json();
       setCanSubmit(canSubmitData.can_submit);
 
       if (!canSubmitData.can_submit) {
         toast.error(t("all_attempts_used"));
       }
-
     } catch (error) {
-      console.error(t("send_error"), error.response || error);
-
-      if (error.response && error.response.status === 403) {
-        toast.error(t("not_authorized"));
-      } else {
-        toast.error(t("send_error"));
-      }
+      toast.error(t("send_error"));
     } finally {
       setLoading(false);
     }
   };
 
-
-  // ------------------- FETCH EXERCISE -------------------
+  /* ================= FETCH EXERCISE ================= */
   useEffect(() => {
     if (!exerciceId) return;
 
     const fetchExercise = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
-        if (!response.ok) throw new Error(t("fetch_exercise_error"));
-
+        const response = await fetch(
+          `http://localhost:8000/api/exercices/${exerciceId}/`
+        );
+        if (!response.ok) throw new Error();
         const data = await response.json();
         setExercise(data);
       } catch (error) {
@@ -125,75 +134,54 @@ export default function TheoryExercisePage() {
     fetchExercise();
   }, [exerciceId]);
 
-  const { t, i18n } = useTranslation("exercisePage");
-  const switchLang = () => i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
-
-  // const getStarGradient = (i) => {
-  //   if (i <= 2) return "star-very-easy";
-  //   if (i <= 4) return "star-moderate";
-  //   return "star-difficult";
-  // };
-
-  const [canSubmit, setCanSubmit] = useState(false);
-
-  const storedUser = localStorage.getItem("user");
-  const userData =
-    storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
-  console.log("userData", userData);
-
-  const initials = userData
-    ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
-    : "";
-  const isStudent = userData.role === "etudiant";
-
-
-
+  /* ================= CAN SUBMIT ================= */
   useEffect(() => {
-    if (!exerciceId) return;
+    if (!exerciceId || !isStudent) return;
 
-    fetch(`http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then(res => res.json())
-      .then(data => setCanSubmit(data.can_submit))
+    fetch(
+      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => setCanSubmit(data.can_submit))
       .catch(() => setCanSubmit(false));
-  }, [exerciceId]);
+  }, [exerciceId, isStudent]);
 
-
-
+  /* ================= LAST TENTATIVE ================= */
   useEffect(() => {
-  if (!exercise || !isStudent) return;
+    if (!exercise || !isStudent || !userId) return;
 
-  const fetchLastTentative = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8000/api/dashboard/${exercise.id_exercice}/utilisateur/${userData.user_id}/tentativerep/`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+    const fetchLastTentative = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/dashboard/${exercise.id_exercice}/utilisateur/${userId}/tentativerep/`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
-      if (!res.ok) return;
+        if (!res.ok) return;
 
-      const last = await res.json();
+        const last = await res.json();
+        if (last?.reponse) setAnswer(last.reponse);
+      } catch (err) {
+        console.error("Erreur chargement tentative:", err);
+      }
+    };
 
-      if (last.reponse) setAnswer(last.reponse);
+    fetchLastTentative();
+  }, [exercise, isStudent, userId]);
 
-    } catch (err) {
-      console.error("Erreur chargement tentative:", err);
-    }
-  };
+  const switchLang = () =>
+    i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
 
-  fetchLastTentative();
-}, [exercise]);
-
-
-
-
+  /* ================= RENDER ================= */
   return (
     <div className="flex bg-[rgb(var(--color-surface))] min-h-screen">
       <div className="hidden lg:block">
@@ -202,6 +190,7 @@ export default function TheoryExercisePage() {
       <div className="lg:hidden w-full">
         <NavBar />
       </div>
+
 
       <div className="flex-1 lg:ml-72 px-4 sm:px-6 md:px-10 lg:px-12 py-6 sm:py-8 md:py-10 w-full">
         {/* HEADER */}

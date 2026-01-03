@@ -467,7 +467,6 @@ def check_curious_mind_badge(user):
 @api_view(["POST"])
 @permission_classes([IsAuthenticatedJWT])
 def use_ai_explanation(request):
-
     user = request.user
 
     if not is_student(user):
