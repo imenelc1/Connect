@@ -32,6 +32,8 @@
     "RawHistory": "Raw history for professor:",
     "FetchHistoryError": "Error while fetching professor history",
     "LoadingNotifications": "Loading notifications...",
-    "NoNotifications": "No notifications available."
+    "NoNotifications": "No notifications available.",
+    "FetchExercisesError": "Error while fetching exercises"
+
   }
 }
