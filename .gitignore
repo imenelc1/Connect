@@ -1,6 +1,9 @@
 # Python
 venv/
 .env/
+frontend/.env
+connect-backend/.env
+**/.env
 
 # Node
 node_modules/

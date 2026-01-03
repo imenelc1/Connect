@@ -269,6 +269,7 @@ useEffect(() => {
     titre: exercise?.titre_exo,
     enonce: exercise?.enonce,
     code: userCode,
+    defaultCode,
     output,
     onHintRequest: () => setOpenAssistant(true),
   };
