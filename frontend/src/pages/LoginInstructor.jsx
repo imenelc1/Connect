@@ -178,7 +178,7 @@ export default function LoginInstructor() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errorEmail}
-              icon={<FaEnvelope size={16} className="text-grayc" />} />
+              icon={<FaEnvelope size={16}/>} />
 
             <Input
               label={t("login.password")}
@@ -188,13 +188,13 @@ export default function LoginInstructor() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errorPassword}
-              icon={<FaLock size={16} className="text-grayc" />}
+              icon={<FaLock size={16}  />}
               rightIcon={
                 showPassword ? (
                   <FiEyeOff
                     size={18}
                     onClick={() => setShowPassword(false)}
-                    className="cursor-pointer text-grayc"
+                    className="cursor-pointer"
                   />
                 ) : (
                   <FiEye

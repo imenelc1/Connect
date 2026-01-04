@@ -44,18 +44,19 @@ class SpaceEtudiantDisplaySerializer(serializers.ModelSerializer):
 # --- Serializer SpaceCour ---
 class SpaceCourSerializer(serializers.ModelSerializer):
     cours = CoursSerializer(read_only=True)
-
+    ai_enabled = serializers.BooleanField(required=False)  # ✅ obligatoire
     class Meta:
         model = SpaceCour
-        fields = ['id', 'space', 'cours', 'date_ajout']
+        fields = ['id', 'space', 'cours', 'date_ajout' , 'ai_enabled']
 
 # --- Serializer SpaceExo ---
 class SpaceExoSerializer(serializers.ModelSerializer):
     exercice = ExerciceSerializer(read_only=True)
+    ai_enabled = serializers.BooleanField(required=False)  # ✅ obligatoire
 
     class Meta:
         model = SpaceExo
-        fields = ['id', 'space', 'exercice', 'date_ajout']
+        fields = ['id', 'space', 'exercice', 'date_ajout' , 'ai_enabled']
 
 class SpaceQuizSerializer(serializers.ModelSerializer):
     quiz = QuizSerializer1(read_only=True)  

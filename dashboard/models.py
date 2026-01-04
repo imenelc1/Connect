@@ -104,3 +104,16 @@ class ProgressionHistory(models.Model):
     class Meta:
         ordering = ["created_at"]
 
+class ActivityEvent(models.Model):
+    EVENT_TYPES = [
+        ("registration", "Registration"),
+        ("login", "Login"),
+        ("course_followed", "Course Followed"),
+    ]
+
+    user = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.event_type} - {self.created_at}"

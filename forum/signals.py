@@ -11,7 +11,11 @@ from users.models import Utilisateur, Administrateur
 # 🔧 UTILITAIRE ADMIN
 # =========================
 def notify_admins(message, content_object, action_type, module_source, envoyeur=None):
-    for admin in Administrateur.objects.all():
+    admins = Administrateur.objects.all()
+    if isinstance(envoyeur, Administrateur):
+        # Exclure l'admin qui a envoyé l'action
+        admins = admins.exclude(id_admin=envoyeur.id_admin)
+    for admin in admins:
         create_notification(
             admin_destinataire=admin,
             envoyeur=envoyeur,
@@ -20,6 +24,8 @@ def notify_admins(message, content_object, action_type, module_source, envoyeur=
             module_source=module_source,
             message=message
         )
+
+
 
 
 # =========================
@@ -31,29 +37,50 @@ def notify_forum_like(sender, instance, created, **kwargs):
         return
 
     forum = instance.forum
-    user = instance.utilisateur
+    user = getattr(instance, 'utilisateur', None)
+    admin = getattr(instance, 'administrateur', None)
 
-    if not forum.utilisateur or forum.utilisateur == user:
-        return
+    if user:
+        # Si c'est un utilisateur normal
+        if forum.utilisateur and forum.utilisateur != user:
+            create_notification(
+                destinataire=forum.utilisateur,
+                envoyeur=user,
+                content_object=forum,
+                action_type="like",
+                module_source="forum",
+                message=f"{user.prenom} a aimé votre forum « {forum.titre_forum[:50]} »."
+            )
 
-    # Auteur du forum
-    create_notification(
-        destinataire=forum.utilisateur,
-        envoyeur=user,
-        content_object=forum,
-        action_type="like",
-        module_source="forum",
-        message=f"{user.prenom} a aimé votre forum « {forum.titre_forum[:50]} »."
-    )
+        # Notification pour tous les admins
+        notify_admins(
+            message=f"{user.prenom} a aimé le forum « {forum.titre_forum[:50]} ».",
+            content_object=forum,
+            action_type="forum_like",
+            module_source="forum",
+            envoyeur=user
+        )
 
-    # Admin
-    notify_admins(
-        message=f"{user.prenom} a aimé le forum « {forum.titre_forum[:50]} ».",
-        content_object=forum,
-        action_type="forum_like",
-        module_source="forum",
-        envoyeur=user
-    )
+    elif admin:
+        # Si c'est un admin qui like, on ne notifie pas l'auteur
+        # Juste une notification générale ou rien selon ton besoin
+        create_notification(
+            destinataire=forum.utilisateur,
+            envoyeur=None,
+            content_object=forum,
+            action_type="forum_like",
+            module_source="forum",
+            message="Un Administrateur a aimé votre forum."
+        )
+
+        # Notification pour tous les admins si tu veux
+        notify_admins(
+            message=f"L'administrateur {admin.email_admin} a aimé le forum « {forum.titre_forum[:50]} ».",
+            content_object=forum,
+            action_type="forum_like",
+            module_source="forum",
+            envoyeur=admin
+        )
 
 
 # =========================

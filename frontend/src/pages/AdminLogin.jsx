@@ -25,7 +25,7 @@ export default function AdminLogin() {
   const [errorPassword, setErrorPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorEmail("");
     setErrorPassword("");
@@ -56,21 +56,22 @@ export default function AdminLogin() {
       // Met à jour le context Auth (si utilisé)
       loginUser(token, user);
 
-      toast.success("Connexion administrateur réussie");
+      toast.success(t("login.successAdmin"));
       navigate("/Dashboard-admin"); // Redirection vers dashboard admin
     } catch (error) {
       const backend = error.response?.data;
-      const msg = backend?.detail || backend?.error || "Accès refusé";
+      const msg = backend?.detail || backend?.error || t("login.accessDenied");
       setErrorPassword(msg);
       toast.error(msg);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-surface px-4 sm:px-0 pb-12">
+    <div className="flex flex-col items-center justify-start min-h-screen pt-2 sm:pt-0 px-4 sm:px-0 pb-12">
+
 
       {/* Header */}
-      <div className="flex w-full mb-4 items-center justify-between px-4 pt-12">
+      <div className="flex w-full mb-4 items-center justify-between px-4 pt-1">
         <div className="hidden md:block"><LogoComponent /></div>
         <div className="block md:hidden"><LogoIconeComponent className="w-8 h-8" /></div>
       </div>
@@ -80,8 +81,8 @@ export default function AdminLogin() {
         {/* FORM */}
         <div className="w-full lg:w-1/2 p-8 bg-card">
           <h2 className="text-2xl font-semibold text-center mb-6">
-            <span className="text-textc">Admin</span>{" "}
-            <span className="text-muted">Login</span>
+            <span className="text-textc">{t("login.admin")}</span>{" "}
+            <span className="text-muted">{t("login.login")}</span>
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -102,22 +103,22 @@ export default function AdminLogin() {
               icon={<FaLock />}
               error={errorPassword}
               rightIcon={
-                showPassword ? 
-                  <FiEyeOff size={18} onClick={() => setShowPassword(false)} className="cursor-pointer" /> : 
-                  <FiEye size={18} onClick={() => setShowPassword(true)} className="cursor-pointer" 
-                />
+                showPassword ?
+                  <FiEyeOff size={18} onClick={() => setShowPassword(false)} className="cursor-pointer" /> :
+                  <FiEye size={18} onClick={() => setShowPassword(true)} className="cursor-pointer"
+                  />
               }
               className={errorPassword ? "border-blue-500" : ""}
             />
-            <Button text="Se connecter" type="submit" />
+            <Button text={t("login.seconnect")} type="submit" />
           </form>
         </div>
 
         {/* MASCOTTE */}
         <div className="w-full lg:w-1/2 relative hidden lg:flex items-center justify-center bg-card">
           <Mascotte width="w-48 sm:w-60 lg:w-58" className="absolute top-20 right-20 h-58 z-10" />
-          <div className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full blur-3xl" 
-               style={{ background: "rgba(52,144,220,0.6)", top: "50%", left: "70%", transform: "translate(-50%, -50%)" }} />
+          <div className="absolute w-48 h-48 sm:w-60 sm:h-60 lg:w-72 lg:h-72 rounded-full blur-3xl"
+            style={{ background: "rgba(52,144,220,0.6)", top: "50%", left: "70%", transform: "translate(-50%, -50%)" }} />
         </div>
 
       </div>

@@ -20,6 +20,7 @@ export default function TheoryExercisePage() {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [canSubmit, setCanSubmit] = useState(false);
+  const [aiAllowed, setAiAllowed] = useState(true); // par défaut IA activée
 
   const [startTime, setStartTime] = useState(Date.now());
 
@@ -178,25 +179,81 @@ export default function TheoryExercisePage() {
     fetchLastTentative();
   }, [exercise, isStudent, userId]);
 
+
+  // Verifier si on active l'IA ou non
+
+  useEffect(() => {
+  if (!exercise || !isStudent || !userId) return;
+
+  const checkAIStatus = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to check AI status");
+
+      const data = await res.json();
+
+      // Désactiver l'IA si un espace commun existe et ai_enabled === false
+      if (data.same_space) {
+        const disabled = data.spaces.some(space => space.ai_enabled === false);
+        setAiAllowed(!disabled); // false = désactivé
+      } else {
+        setAiAllowed(true); // pas d'espace commun = IA activée
+      }
+    } catch (err) {
+      console.error("Erreur vérification IA :", err);
+      setAiAllowed(true); // fallback : IA activée
+    }
+  };
+
+  checkAIStatus();
+}, [exercise, userId, isStudent]);
+
+
+
   const switchLang = () =>
     i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
+  // / États de l'interface
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    // Gestion de la responsivité
+      useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+    
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("sidebarChanged", handleSidebarChange);
+    
+        return () => {
+          window.removeEventListener("resize", handleResize);
+          window.removeEventListener("sidebarChanged", handleSidebarChange);
+        };
+      }, []);
 
   /* ================= RENDER ================= */
   return (
-    <div className="flex bg-[rgb(var(--color-surface))] min-h-screen">
-      <div className="hidden lg:block">
-        <NavBar />
-      </div>
-      <div className="lg:hidden w-full">
-        <NavBar />
-      </div>
+   <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                                  {/* Sidebar */}
+                                  <div>
+                                    <NavBar />
+                                  </div>
 
 
-      <div className="flex-1 lg:ml-72 px-4 sm:px-6 md:px-10 lg:px-12 py-6 sm:py-8 md:py-10 w-full">
+      <div className={`
+            flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+            ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+          `}>
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6 md:gap-0">
           <div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[rgb(var(--color-primary))] mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-muted mb-2">
               {t("exercise_title")}
             </h1>
             <p className="text-[rgb(var(--color-text))] text-base sm:text-lg md:text-xl font-medium">
@@ -205,19 +262,21 @@ export default function TheoryExercisePage() {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
-            <button
-              onClick={switchLang}
-              className="p-2 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-gray-light))] rounded-xl shadow hover:brightness-95 transition flex items-center justify-center"
-            >
-              <Globe size={18} className="text-[rgb(var(--color-primary))]" />
-            </button>
+           
 
             <button
-              onClick={() => setOpenAssistant(true)}
-              className="flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl bg-[rgb(var(--color-primary))] text-white font-medium shadow-md hover:brightness-110 transition text-xs sm:text-sm md:text-base"
-            >
-              <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
-            </button>
+  onClick={() => aiAllowed && setOpenAssistant(true)}
+  disabled={!aiAllowed} // désactive le clic si IA interdite
+  className={`flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl 
+    font-medium shadow-md transition
+    ${aiAllowed 
+       ? "bg-[rgb(var(--color-primary))] text-white hover:brightness-110" 
+       : "bg-gray-300 text-gray-500 cursor-not-allowed"}
+  `}
+>
+  <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
+</button>
+
 
             <img
               src={Mascotte}
@@ -228,10 +287,13 @@ export default function TheoryExercisePage() {
         </div>
 
         {/* EXERCISE CARD */}
-        <div className="border border-[rgb(var(--color-gray-light))] bg-[rgb(var(--grad-6))] shadow-card rounded-2xl px-4 sm:px-5 md:px-6 py-5 mb-12">
+       <div className="border border-[rgb(var(--color-gray-light))] 
+                bg-card shadow-card rounded-2xl 
+                px-4 sm:px-5 md:px-6 py-5 mb-12
+                w-full max-w-full break-words">
           {exercise ? (
             <>
-              <p className="font-semibold text-[rgb(var(--color-primary))] text-lg sm:text-xl md:text-xl">
+              <p className="font-semibold text-muted text-lg sm:text-xl md:text-xl">
                {t("exercise_label")}
                 <span className="font-normal text-[rgb(var(--color-text))] ml-2 text-base sm:text-lg">
                   {exercise.titre_exo}
@@ -257,7 +319,7 @@ export default function TheoryExercisePage() {
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             placeholder={t("write_here")}
-            className="w-full min-h-[150px] sm:min-h-[200px] md:min-h-[250px] p-5 rounded-2xl border border-gray-300 bg-white text-[rgb(var(--color-text))] text-base sm:text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:shadow-md resize-none transition-all duration-200 hover:shadow-md"
+            className="w-full min-h-[150px] sm:min-h-[200px] md:min-h-[250px] p-5 rounded-2xl border border-gray-300 bg-card text-[rgb(var(--color-text))] text-base sm:text-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:shadow-md resize-none transition-all duration-200 hover:shadow-md"
           />
           <div className="absolute top-2 right-4 text-xs text-gray-400">
             {answer.length} / 1000 | {answer.split("\n").length} {t("lines")}
@@ -265,7 +327,7 @@ export default function TheoryExercisePage() {
         </div>
 
         {/* TIP BLOCK */}
-        <div className="border border-[rgb(var(--color-gray-light))] bg-[rgb(var(--grad-7))] shadow-card rounded-xl px-4 sm:px-5 md:px-6 py-4 mt-10 mb-12">
+        <div className="border border-[rgb(var(--color-gray-light))] bg-grad-3 shadow-card rounded-xl px-4 sm:px-5 md:px-6 py-4 mt-10 mb-12">
           <div className="flex items-start gap-3">
             <div
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white shadow"
@@ -274,7 +336,7 @@ export default function TheoryExercisePage() {
               <MdAutoAwesome size={18} />
             </div>
             <div>
-              <p className="font-semibold text-[rgb(var(--color-primary))] text-base sm:text-lg">
+              <p className="font-semibold text-muted text-base sm:text-lg ">
                  {t("tip_title")}
               </p>
               <p className="text-xs sm:text-sm text-[rgb(var(--color-gray))] mt-1">
@@ -361,7 +423,7 @@ export default function TheoryExercisePage() {
         <div className="flex justify-center my-10 md:my-12">
           <button
             onClick={() => setOpenAssistant(true)}
-            className="flex items-center gap-3 px-4 sm:px-5 py-2 rounded-full bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-gray-light))] shadow hover:brightness-95 transition"
+            className="flex items-center gap-3 px-4 sm:px-5 py-2 rounded-full bg-grad-1 border border-[rgb(var(--color-gray-light))] shadow hover:brightness-95 transition"
           >
             <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-[rgb(var(--color-gray-light))] flex items-center justify-center">
               <MessageCircle size={16} strokeWidth={1.7} />

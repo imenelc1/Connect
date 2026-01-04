@@ -11,12 +11,9 @@ package-lock.json
 
 # OS
 .DS_Store
-<<<<<<< HEAD
 
 # Python cache files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-=======
->>>>>>> origin/back_coursExoQuiz_Chahla

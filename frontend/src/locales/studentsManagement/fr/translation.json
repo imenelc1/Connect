@@ -1,12 +1,46 @@
-
 {
   "StudentsManagement": {
-    "StudentsManagement": "Gestion des étudiants" ,
-    "view":"Consulter et gérer les comptes étudiants",
+    "StudentsManagement": "Gestion des étudiants",
+    "view": "Consulter et gérer les comptes étudiants",
     "buttonAdd": "Ajouter un étudiant",
-    "Search": "Rechercher des étudiants ...",
-    "Encolled":"Cours suivis",
-    "Overal":"Progrès global",
-    "joined":"Rejoint"
+    "searchPlaceholder": "Rechercher des étudiants...",
+    "Encolled": "Cours suivis",
+    "Overal": "Progrès global",
+    "joined": "Rejoint",
+    "close": "Fermer",
+    
+    "editStudent": "Modifier l'étudiant",
+    "addStudent": "Ajouter un étudiant",
+    
+    "labels": {
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "dob": "Date de naissance",
+      "regNumber": "Matricule",
+      "speciality": "Spécialité",
+      "year": "Année"
+    },
+    
+    "buttons": {
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "create": "Créer"
+    },
+    
+    "errors": {
+      "required": "Champ requis",
+      "invalidEmail": "Email invalide",
+      "minAge": "L'étudiant doit avoir au moins 16 ans",
+      "invalidRegNumber": "Matricule invalide",
+      "noNumbers": "Pas de chiffres"
+    },
+    
+    "detailLabels": {
+      "coursesRead": "Cours lus",
+      "exercisesDone": "Exercices faits",
+      "quizzesDone": "Quiz faits",
+      "joinedOn": "Rejoint le"
+    }
   }
 }

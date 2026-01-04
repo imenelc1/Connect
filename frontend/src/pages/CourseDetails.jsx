@@ -67,6 +67,10 @@ export default function SpaceDetails() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [activeExerciseFilter, setActiveExerciseFilter] = useState("ALL");
+  //Etas pour activer, desactiver l'ia
+  const [aiEnabledForCourse, setAiEnabledForCourse] = useState(true);
+  const [aiEnabledForExercise, setAiEnabledForExercise] = useState(true);
+
 
 
   const steps = [
@@ -333,11 +337,20 @@ const handleAddItem = (selectedItemId) => {
   let bodyKey = "";
   let mapNewItem = null;
 
+  // 👇 payload envoyé au backend
+  let body = {};
+
   if (activeStep === 1) {
     // --- Courses ---
     alreadyAdded = spaceCourses.some(c => c.id === idToSend);
     url = `http://127.0.0.1:8000/api/spaces/${id}/courses/`;
     bodyKey = "cours";
+
+    body = {
+      cours: idToSend,
+      ai_enabled: aiEnabledForCourse, // ✅ IA cours
+    };
+
     mapNewItem = (newItem) => ({
       id: newItem.cours.id_cours,
       title: newItem.cours.titre_cour,
@@ -348,14 +361,20 @@ const handleAddItem = (selectedItemId) => {
       progress: 0,
       isMine: true,
     });
+
   } else if (activeStep === 2) {
     // --- Quizzes ---
     alreadyAdded = spaceQuizzes.some(c => c.id === idToSend);
     url = `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`;
     bodyKey = "quiz";
+
+    body = {
+      quiz: idToSend, // ❌ pas d’IA ici (pour l’instant)
+    };
+
     mapNewItem = (newItem) => ({
-      id: newItem.quiz.exercice?.id_exercice, // navigation correcte
-      quizId: newItem.quiz.id,                 // gardé pour backend / tentatives
+      id: newItem.quiz.exercice?.id_exercice,
+      quizId: newItem.quiz.id,
       title: newItem.quiz.exercice?.titre_exo || "Sans titre",
       description: newItem.quiz.exercice?.enonce || "",
       level: newItem.quiz.exercice?.niveau_exercice_label || "",
@@ -364,11 +383,18 @@ const handleAddItem = (selectedItemId) => {
       progress: 0,
       isMine: true,
     });
+
   } else if (activeStep === 3) {
     // --- Exercises ---
     alreadyAdded = spaceExercises.some(c => c.id === idToSend);
     url = `http://127.0.0.1:8000/api/spaces/${id}/exercises/`;
     bodyKey = "exercice";
+
+    body = {
+      exercice: idToSend,
+      ai_enabled: aiEnabledForExercise, // ✅ IA exercice
+    };
+
     mapNewItem = (newItem) => ({
       id: newItem.exercice.id_exercice,
       title: newItem.exercice.titre_exo || "Sans titre",
@@ -386,8 +412,6 @@ const handleAddItem = (selectedItemId) => {
     toast.error(t("alreadyAdded"));
     return;
   }
-
-  const body = { [bodyKey]: idToSend };
 
   fetch(url, {
     method: "POST",
@@ -411,13 +435,16 @@ const handleAddItem = (selectedItemId) => {
       toast.success(t("addedSuccessfully"));
       setOpenModal(false);
       setSelectedItemId("");
+
+      // 🔄 reset des checkbox
+      setAiEnabledForCourse(true);
+      setAiEnabledForExercise(true);
     })
     .catch(err => {
       console.error(err);
       toast.error(t("addFailed"));
     });
 };
-
 
 
 
@@ -485,7 +512,7 @@ const handleAddItem = (selectedItemId) => {
       : activeStep === 2
       ? spaceQuizzes
       : spaceExercises;
-const filteredItems = itemsToDisplay
+  const filteredItems = itemsToDisplay
   // 🔹 Filtre par niveau
   .filter(item => {
     if (activeStep === 3) {
@@ -573,9 +600,9 @@ const filteredItems = itemsToDisplay
           <h2 className="text-4xl font-semibold text-muted">{spaceName}</h2>
           <div className="w-full md:w-[400px]">
            <ContentSearchBar
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-/>
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
 
 
           </div>
@@ -594,24 +621,24 @@ const filteredItems = itemsToDisplay
         {/* Filters + Add Button */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
        <ContentFilters
-  type={
-    activeStep === 1
-      ? "courses"
-      : activeStep === 2
-      ? "quizzes"
-      : "exercises"
-  }
-  userRole={userRole}
-  activeFilter={filterLevel}          // ← filtre NIVEAU
-  onFilterChange={setFilterLevel}     // ← met à jour filterLevel
-  showCompletedFilter={userRole === "etudiant" && (activeStep === 1 || activeStep === 2)}
-  onCompletedChange={
-    activeStep === 3
-      ? setActiveExerciseFilter       // ← filtre ÉTAT pour exos
-      : setActiveProgressFilter       // ← filtre ÉTAT pour cours/quizzes
-  }
-  hideCategoryFilter={true}
-/>
+        type={
+          activeStep === 1
+            ? "courses"
+            : activeStep === 2
+            ? "quizzes"
+            : "exercises"
+        }
+        userRole={userRole}
+        activeFilter={filterLevel}          // ← filtre NIVEAU
+        onFilterChange={setFilterLevel}     // ← met à jour filterLevel
+        showCompletedFilter={userRole === "etudiant" && (activeStep === 1 || activeStep === 2)}
+        onCompletedChange={
+          activeStep === 3
+            ? setActiveExerciseFilter       // ← filtre ÉTAT pour exos
+            : setActiveProgressFilter       // ← filtre ÉTAT pour cours/quizzes
+        }
+        hideCategoryFilter={true}
+      />
 
           {userRole === "enseignant" && (
             <Button
@@ -706,12 +733,24 @@ const filteredItems = itemsToDisplay
                   switch (activeStep) {
                     case 1:
                       return (
+                         <>
                         <MyCoursesSelect
                           items={myCourses} // LES COURS DE L'UTILISATEUR
                           selectedItemId={selectedItemId}
                           onChange={setSelectedItemId}
                           existingItems={spaceCourses} // COURS déjà dans l'espace
                         />
+
+                        {/* ✅ Checkbox IA cours */}
+                        <label className="flex items-center gap-2 mt-4 text-sm text-muted">
+                          <input
+                            type="checkbox"
+                            checked={aiEnabledForCourse}
+                            onChange={(e) => setAiEnabledForCourse(e.target.checked)}
+                          />
+                          Activer l’assistant IA pour ce cours
+                        </label>
+                      </>
                       );
                     case 2:
                       return (
@@ -724,12 +763,23 @@ const filteredItems = itemsToDisplay
                       );
                     case 3:
                       return (
+                           <>
                         <MyExercisesSelect
                           items={myExercises} // SEULEMENT LES EXERCICES DE L'UTILISATEUR
                           selectedItemId={selectedItemId}
                           onChange={setSelectedItemId}
                           existingItems={spaceExercises} // EXERCICES déjà dans l'espace
                         />
+                         {/* ✅ Checkbox IA exercices */}
+                        <label className="flex items-center gap-2 mt-4 text-sm text-muted">
+                          <input
+                            type="checkbox"
+                            checked={aiEnabledForExercise}
+                            onChange={(e) => setAiEnabledForExercise(e.target.checked)}
+                          />
+                          Activer l’assistant IA pour cet exercice
+                        </label>
+                      </>
                       );
                     default:
                       return null;

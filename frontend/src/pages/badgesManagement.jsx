@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Plus, Trash, SquarePen } from "lucide-react";
@@ -165,7 +165,8 @@ export default function BadgesManagement() {
         }));
         setBadges(mappedBadges);
       } catch (err) {
-        console.error("Erreur récupération badges :", err);
+        console.error(t("messages.fetchBadgesError"), err);
+
       }
     };
     fetchBadges();
@@ -195,8 +196,9 @@ export default function BadgesManagement() {
       setSelectedBadge(badge);
       setStudentsModalOpen(true);
     } catch (err) {
-      console.error("Erreur récupération étudiants :", err);
-      toast.error("Impossible de récupérer les étudiants");
+      console.error(t("messages.fetchStudentsError"), err);
+      toast.error(t("messages.fetchStudentsToast"));
+
     }
   };
 
@@ -276,7 +278,8 @@ export default function BadgesManagement() {
           )
         );
         setEditModal(false);
-        toast.success("Badge mis à jour !");
+        toast.success(t("messages.updated"));
+
       } else {
         // Create
         const res = await api.post("badges/create_badge/", formData, {
@@ -295,23 +298,23 @@ export default function BadgesManagement() {
           },
         ]);
         setCreateModal(false);
-        toast.success("Badge créé !");
+        toast.success(t("messages.created"));
       }
     } catch (err) {
-      console.error("Erreur badge :", err);
-      toast.error("Erreur lors de l'opération");
+      console.error(t("messages.errorBadge"), err);
+      toast.error(t("messages.operationError"));
     }
   };
 
   const handleDelete = async (badgeId) => {
-    if (!window.confirm("Tu es sûr de supprimer ce badge ?")) return;
+    if (!window.confirm(t("messages.confirmDelete"))) return;
     try {
       await api.delete(`badges/badge/${badgeId}/delete/`);
       setBadges((prev) => prev.filter((b) => b.id !== badgeId));
-      toast.error("Badge supprimé");
+      toast.error(t("messages.deleted"));
     } catch (err) {
       console.error(err);
-      toast.error("Erreur suppression badge");
+      toast.error(t("messages.deleteError"));
     }
   };
 
@@ -326,14 +329,14 @@ export default function BadgesManagement() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">
-              {t("BadgesManagement.BadgesManagement")}
+              {t("BadgesManagement.title")}
             </h1>
             <p className="text-gray">{t("BadgesManagement.badgesp")}</p>
           </div>
           <Button
             text={
               <span className="flex items-center gap-2">
-                <Plus size={18} /> Créer Badge
+                <Plus size={18} /> {t("BadgesManagement.buttonCreate")}
               </span>
             }
             variant="primary"
@@ -345,7 +348,7 @@ export default function BadgesManagement() {
         <ContentSearchBar
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher un badge"
+          placeholder={t("BadgesManagement.search")}
           className="w-full max-w-md mb-6 sm:mb-10"
         />
 
@@ -357,17 +360,15 @@ export default function BadgesManagement() {
         >
           {filteredBadges.map((badge) => (
             <div
-              className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between ${
-                categoryColors[badge.category]?.card ||
+              className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between ${categoryColors[badge.category]?.card ||
                 categoryColors.default.card
-              }`}
+                }`}
             >
               <div className="flex justify-between mb-4">
                 <div
-                  className={`w-14 h-14 rounded-full flex items-center justify-center ${
-                    categoryColors[badge.category]?.icon ||
+                  className={`w-14 h-14 rounded-full flex items-center justify-center ${categoryColors[badge.category]?.icon ||
                     categoryColors.default.icon
-                  }`}
+                    }`}
                 >
                   {getBadgeIcon(badge.title)}
                 </div>
@@ -387,13 +388,12 @@ export default function BadgesManagement() {
                 <div className="flex gap-3 text-gray">
                   <Button
                     variant="courseStart"
-                    className={`px-4 py-2 whitespace-nowrap border rounded ${
-                      buttonStyles[badge.category]?.xp ||
+                    className={`px-4 py-2 whitespace-nowrap border rounded ${buttonStyles[badge.category]?.xp ||
                       buttonStyles.default.xp
-                    }`}
+                      }`}
                     onClick={() => handleViewStudents(badge)}
                   >
-                    Voir étudiants
+                    {t("BadgesManagement.viewStudents")}
                   </Button>
                   <button
                     className="text-muted hover:opacity-80"
@@ -421,13 +421,13 @@ export default function BadgesManagement() {
           setCreateModal(false);
           setEditModal(false);
         }}
-        title={selectedBadge ? "Modifier le badge" : "Créer un badge"}
-        submitLabel={selectedBadge ? "Enregistrer" : "Créer"}
-        cancelLabel="Annuler"
+        title={selectedBadge ? t("editTitle") : t("createBadge")}
+        submitLabel={selectedBadge ? t("common.save") : t("common.create")}
+        cancelLabel={t("common.cancel")}
         onSubmit={submitBadge}
         fields={[
           {
-            label: "Titre",
+            label: t("fields.title"),
             element: (
               <input
                 type="text"
@@ -452,7 +452,7 @@ export default function BadgesManagement() {
             ),
           },
           {
-            label: "Catégorie",
+            label: t("fields.category"),
             element: (
               <select
                 value={formValues.category}
@@ -461,9 +461,9 @@ export default function BadgesManagement() {
                 }
                 className="border p-2 rounded w-full"
               >
-                <option value="success">success</option>
-                <option value="special">special</option>
-                <option value="progress">progress</option>
+                <option value="success">{t("fields.categories.success")}</option>
+    <option value="special">{t("fields.categories.special")}</option>
+    <option value="progress">{t("fields.categories.progress")}</option>
               </select>
             ),
           },
@@ -481,7 +481,7 @@ export default function BadgesManagement() {
             ),
           },
           {
-            label: "Points XP",
+            label: t("fields.xpPoints"),
             element: (
               <input
                 type="number"
@@ -497,13 +497,14 @@ export default function BadgesManagement() {
             ),
           },
           {
-            label: "Icône",
+            label: t("fields.icon"),
+
             element: (
               <div className="flex flex-col gap-2 items-center">
                 {previewIcon ? (
                   <img
                     src={previewIcon}
-                    alt="Aperçu icône"
+                   alt={t("fields.iconPreview")}
                     className="w-24 h-24 object-cover rounded-lg border"
                   />
                 ) : (
@@ -533,8 +534,9 @@ export default function BadgesManagement() {
       <AddModal
         open={studentsModalOpen}
         onClose={() => setStudentsModalOpen(false)}
-        title={`Étudiants ayant gagné "${selectedBadge?.title}"`}
-        submitLabel="Fermer"
+        title={t("modalTitle", { title: selectedBadge?.title })}
+
+        submitLabel={t("BadgesManagement.close")}
         cancelLabel=""
         onSubmit={() => setStudentsModalOpen(false)}
         fields={[
@@ -543,7 +545,7 @@ export default function BadgesManagement() {
             element: (
               <div className="flex flex-col gap-2 max-h-96 overflow-auto">
                 {students.length === 0 ? (
-                  <p>Aucun étudiant n'a gagné ce badge.</p>
+                  <p>{t("BadgesManagement.noStudent")}</p>
                 ) : (
                   students.map((s, index) => (
                     <div
@@ -554,7 +556,10 @@ export default function BadgesManagement() {
                         {s.nom} {s.prenom}
                       </span>
                       <span>
-                        {s.specialite} - {s.annee_etude}e année
+                        {t("BadgesManagement.studentInfo", {
+                          specialite: s.specialite,
+                          annee: s.annee_etude,
+                        })}
                       </span>
                     </div>
                   ))

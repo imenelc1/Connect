@@ -1,4 +1,5 @@
-from datetime import timedelta
+from datetime import timedelta, datetime,date
+from django.utils.timezone import make_aware
 from django.utils import timezone
 from django.utils.timezone import now, localtime
 from django.shortcuts import get_object_or_404
@@ -16,7 +17,7 @@ from exercices.serializers import ExerciceSerializer
 from quiz.models import Question, Quiz, ReponseQuestion, ReponseQuiz
 from spaces.models import Space, SpaceEtudiant, SpaceExo
 from spaces.views import etudiant_appartient_a_lespace
-from users.jwt_auth import IsAuthenticatedJWT, jwt_required
+from users.jwt_auth import IsAuthenticatedJWT, jwt_required,jwt_authenticate
 from users.models import Etudiant, Utilisateur
 from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration, TentativeExercice
 from django.views.decorators.csrf import csrf_exempt
@@ -25,6 +26,8 @@ from feedback.views import FeedbackExercice
 from rest_framework.exceptions import PermissionDenied
 from django.db.models.functions import TruncWeek
 from django.db.models import Count
+from dashboard.models import ActivityEvent
+from collections import defaultdict
 
 
 
@@ -841,6 +844,57 @@ class create_tentative(APIView):
                 "submitted_at": tentative.submitted_at,
             }
         }, status=status.HTTP_200_OK)
+    
+
+
+class TentativeExerciceListView(APIView):
+    permission_classes = [IsAuthenticatedJWT]
+
+    def get(self, request, exercice_id, user_id):
+        tentatives = TentativeExercice.objects.filter(
+            exercice_id=exercice_id,
+            utilisateur_id=user_id
+        ).order_by("-submitted_at")
+        data = [
+            {
+                "id": t.id,
+                "etat": t.etat,
+                "submitted_at": t.submitted_at,
+                "terminer": t.etat == "soumis",  # pour simplifier le front
+            }
+            for t in tentatives
+        ]
+        return Response(data)
+    
+
+class TentativeReponse(APIView):
+    permission_classes = [IsAuthenticatedJWT]
+
+    def get(self, request, exercice_id, user_id):
+        tentatives = TentativeExercice.objects.filter(
+            exercice_id=exercice_id,
+            utilisateur_id=user_id
+        )
+
+        if not tentatives.exists():
+            return Response([])
+
+        # Trier par date la plus récente : submitted_at pour soumis, updated_at pour brouillon
+        def last_modified(t):
+            return t.submitted_at or t.created_at or now()
+
+        last_tentative = max(tentatives, key=last_modified)
+
+        data = {
+            "id": last_tentative.id,
+            "etat": last_tentative.etat,
+            "submitted_at": last_tentative.submitted_at,
+            "reponse": last_tentative.reponse,
+            "terminer": last_tentative.etat == "soumis",
+        }
+
+        return Response(data)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticatedJWT])
@@ -1021,91 +1075,82 @@ def student_active_courses(request, student_id):
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def weekly_submission_chart(request, student_id):
-    today = localtime(now())
-    end_of_today = today.replace(hour=23, minute=59, second=59, microsecond=999999)
+    today = localtime(now()).date()
 
-    # 6 périodes glissantes de 7 jours
-    periods = []
-    for i in range(6):
-        period_end = end_of_today - timedelta(days=i*7)
-        period_start = period_end - timedelta(days=6)
-        periods.append({
-            "label": f"Week {6-i}",
-            "start_datetime": period_start,
-            "end_datetime": period_end,
+    days = []
+    for i in range(6, -1, -1):
+        day = today - timedelta(days=i)
+        days.append({
+            "label": day.strftime("%a"),
+            "date": day,
             "submissions": 0
         })
-    periods = list(reversed(periods))  # du plus ancien au plus récent
 
-    # Exercices accessibles à l'étudiant
     spaces = Space.objects.filter(spaceetudiant__etudiant_id=student_id).distinct()
     exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
-    total_exercises = exercises.count() or 1  # éviter division par zéro
+    total_exercises = exercises.count()
 
-    # Calcul des soumissions uniques par exercice par semaine
-    for p in periods:
-        week_submissions = TentativeExercice.objects.filter(
+    if total_exercises == 0:
+        return Response(days)
+
+    for d in days:
+        start_dt = make_aware(datetime.combine(d["date"], datetime.min.time()))
+        end_dt = make_aware(datetime.combine(d["date"], datetime.max.time()))
+
+        daily_submissions = TentativeExercice.objects.filter(
             utilisateur_id=student_id,
             exercice__in=exercises,
             etat="soumis",
-            submitted_at__date__range=(p["start_datetime"].date(), p["end_datetime"].date())
+            submitted_at__range=(start_dt, end_dt)
         ).values("exercice_id").distinct().count()
 
-        p["submissions"] = round((week_submissions / total_exercises) * 100)
+        d["submissions"] = round((daily_submissions / total_exercises) * 100)
+        d["date"] = d["date"].isoformat()
 
-        # Transformer datetime en ISO pour JSON
-        p["start_date"] = p["start_datetime"].isoformat()
-        p["end_date"] = p["end_datetime"].isoformat()
-        del p["start_datetime"]
-        del p["end_datetime"]
+    return Response(days)
 
-    return Response(periods)
+
+
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
 def student_weekly_submission_chart(request):
     user = request.user
+    today = localtime(now()).date()
 
-    today = localtime(now())
-    end_of_today = today.replace(hour=23, minute=59, second=59, microsecond=999999)
-
-    # Définir 6 périodes glissantes de 7 jours
-    periods = []
-    for i in range(6):
-        period_end = end_of_today - timedelta(days=i*7)
-        period_start = period_end - timedelta(days=6)
-        periods.append({
-            "label": f"Week {6-i}",
-            "start_datetime": period_start,
-            "end_datetime": period_end,
+    days = []
+    for i in range(6, -1, -1):
+        day = today - timedelta(days=i)
+        days.append({
+            "label": day.strftime("%a"),
+            "date": day,
             "submissions": 0
         })
-    periods = list(reversed(periods))  # du plus ancien au plus récent
 
-    # Exercices accessibles à l'étudiant
     spaces = Space.objects.filter(spaceetudiant__etudiant=user).distinct()
     exercises = Exercice.objects.filter(spaceexo__space__in=spaces).distinct()
-    total_exercises = exercises.count() or 1  # éviter division par zéro
+    total_exercises = exercises.count()
 
-    # Récupérer les tentatives uniques par exercice et par semaine
-    for p in periods:
-        week_submissions = TentativeExercice.objects.filter(
+    if total_exercises == 0:
+        return Response(days)
+
+    for d in days:
+        start_dt = make_aware(datetime.combine(d["date"], datetime.min.time()))
+        end_dt = make_aware(datetime.combine(d["date"], datetime.max.time()))
+
+        daily_submissions = TentativeExercice.objects.filter(
             utilisateur=user,
             exercice__in=exercises,
             etat="soumis",
-            submitted_at__date__range=(p["start_datetime"].date(), p["end_datetime"].date())
+            submitted_at__range=(start_dt, end_dt)
         ).values("exercice_id").distinct().count()
 
-        p["submissions"] = round((week_submissions / total_exercises) * 100)
+        d["submissions"] = round((daily_submissions / total_exercises) * 100)
+        d["date"] = d["date"].isoformat()
 
-        # Transformer datetime en ISO
-        p["start_date"] = p["start_datetime"].isoformat()
-        p["end_date"] = p["end_datetime"].isoformat()
-        del p["start_datetime"]
-        del p["end_datetime"]
+    return Response(days)
 
-    return Response(periods)
 
 
 
@@ -1370,3 +1415,61 @@ def get_user_draft(request, exercice_id):
         return Response({"draft": None})
 
     return Response(TentativeExerciceReadSerializer(tentative).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticatedJWT])
+def my_last_tentative(request, exercice_id):
+    user = request.user  # sera bien l'utilisateur connecté
+    exercice = get_object_or_404(Exercice, id=exercice_id)
+    last_tentative = TentativeExercice.objects.filter(user=user, exercice=exercice).order_by('-id').first()
+    
+    if not last_tentative:
+        return Response({}, status=status.HTTP_200_OK)
+    
+    data = {
+        "reponse": last_tentative.reponse,
+        "output": last_tentative.output,
+        "etat": last_tentative.etat,
+        "temps_passe": last_tentative.temps_passe,
+        "score": last_tentative.score,
+    }
+    return Response(data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+def activity_stats(request):
+    try:
+        user, payload = jwt_authenticate(request)
+        role = payload.get("role")
+    except Exception:
+        return Response({"detail": "Non autorisé"}, status=403)
+
+    today = date.today()
+    # ✅ 7 derniers jours
+    last_7_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+
+    # Filtrer selon le rôle
+    if role == "admin":
+        queryset = ActivityEvent.objects.filter(created_at__date__gte=last_7_days[0])
+    else:
+        queryset = ActivityEvent.objects.filter(user=user, created_at__date__gte=last_7_days[0])
+
+    totals = defaultdict(lambda: {"registration": 0, "login": 0, "course_followed": 0})
+
+    for e in queryset.values("created_at__date", "event_type").annotate(total=Count("id")):
+        dt = e["created_at__date"]
+        if isinstance(dt, datetime):
+            dt = dt.date()
+        totals[dt][e["event_type"]] = e["total"]
+
+    labels = [d.strftime("%d %b") for d in last_7_days]
+    registrations = [totals[d]["registration"] for d in last_7_days]
+    logins = [totals[d]["login"] for d in last_7_days]
+    coursesFollowed = [totals[d]["course_followed"] for d in last_7_days]
+
+    return Response({
+        "labels": labels,
+        "registrations": registrations,
+        "logins": logins,
+        "coursesFollowed": coursesFollowed
+    })

@@ -437,13 +437,13 @@ export default function ForumItem({
                   <div key={message.id_message} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                     <div className="flex items-start space-x-3">
                       <div className="w-8 h-8 rounded-full bg-blue/20 dark:bg-blue-900/40 flex items-center justify-center text-sm font-bold">
-                        {`${message.utilisateur_prenom?.[0] || ""}${message.utilisateur_nom?.[0] || ""}`.toUpperCase()}
+                        {`${message.auteur_prenom?.[0] || ""}${message.auteur_nom?.[0] || ""}`.toUpperCase()}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div>
                             <span className="font-medium dark:text-white">
-                              {message.utilisateur_prenom} {message.utilisateur_nom}
+                              {message.auteur_prenom} {message.auteur_nom}
                             </span>
                             <span className="text-xs text-grayc dark:text-gray-400 ml-2">
                               {formatTimeAgo(message.date_publication)}
