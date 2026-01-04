@@ -201,38 +201,41 @@ class CoursDetailView(generics.RetrieveUpdateAPIView):
         context['request'] = self.request
         return context
 
-    def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)  # fait la mise à jour du cours
+    from users.models import Administrateur
 
-        # --- Création de la notif pour l'enseignant ---
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)  # mise à jour du cours
+
         cours = self.get_object()
         enseignant = cours.utilisateur
-        if request.user.is_staff and enseignant:
+
+        # Vérifier si l'utilisateur courant est un admin dans ta table Administrateur
+        if Administrateur.objects.filter(email_admin=request.user.adresse_email).exists() and enseignant:
             Notification.objects.create(
                 utilisateur_destinataire=enseignant,
                 action_type='course_updated_by_admin',
                 module_source='courses',
-                message_notif=f"📢 Les informations de votre cours '{cours.titre_cour}' ont été modifié par un administrateur."
+                message_notif=f"📢 Les informations de votre cours '{cours.titre_cour}' ont été modifiées par un administrateur."
             )
 
         return response
+
+
     def destroy(self, request, *args, **kwargs):
-        # Récupère le cours AVANT de le supprimer
         cours = self.get_object()
         enseignant = cours.utilisateur
-        cours_titre = cours.titre_cour
+        titre = cours.titre_cour
 
-        # Crée la notif uniquement si l'utilisateur est staff et qu'un enseignant est assigné
-        if request.user.is_staff and enseignant:
+        if request.user_role == "admin" and enseignant:
             Notification.objects.create(
                 utilisateur_destinataire=enseignant,
-                action_type='course_deleted_by_admin',
-                module_source='courses',
-                message_notif=f"❌ Votre cours '{cours_titre}' a été supprimé par un administrateur."
+                action_type="course_deleted_by_admin",
+                module_source="courses",
+                message_notif=f"❌ Votre cours '{titre}' a été supprimé par un administrateur."
             )
 
-        # Supprime le cours et retourne la réponse
         return super().destroy(request, *args, **kwargs)
+
 
 
 
