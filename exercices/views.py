@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from users.jwt_auth import jwt_required
 from rest_framework.views import APIView
 from rest_framework import status
-
+from feedback.models import Notification
 
 class CreateExoView(APIView):
 
@@ -54,6 +54,40 @@ class ExerciceListCreateView(generics.ListCreateAPIView):
 class ExerciceDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Exercice.objects.all()
     serializer_class = ExerciceSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    # 🔹 update : notifie seulement l'enseignant
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)
+        exercice = self.get_object()
+        enseignant = exercice.utilisateur
+        if request.user.is_staff and enseignant:  # notification à l'enseignant seulement
+            Notification.objects.create(
+                utilisateur_destinataire=enseignant,
+                action_type='exercise_updated',
+                module_source='exercices',
+                message_notif=f"📢 Votre exercice '{exercice.titre_exo}' a été modifié."
+            )
+        return response
+
+    # 🔹 destroy : notifie seulement l'enseignant
+    def destroy(self, request, *args, **kwargs):
+        exercice = self.get_object()  # récupérer avant suppression
+        enseignant = exercice.utilisateur
+        if request.user.is_staff and enseignant:  # notification à l'enseignant seulement
+            Notification.objects.create(
+                utilisateur_destinataire=enseignant,
+                action_type='exercise_deleted',
+                module_source='exercices',
+                message_notif=f"❌ Votre exercice '{exercice.titre_exo}' a été supprimé."
+            )
+        return super().destroy(request, *args, **kwargs)
+
+
     
 
 @api_view (['DELETE'])

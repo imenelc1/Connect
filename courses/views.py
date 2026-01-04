@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 # Create your views here.
 from rest_framework import generics, viewsets, permissions
-
+from feedback.models import Notification;
 import courses
 from dashboard.models import LeconComplete, ProgressionCours
 from users.models import Utilisateur
@@ -200,6 +200,40 @@ class CoursDetailView(generics.RetrieveUpdateAPIView):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)  # fait la mise à jour du cours
+
+        # --- Création de la notif pour l'enseignant ---
+        cours = self.get_object()
+        enseignant = cours.utilisateur
+        if request.user.is_staff and enseignant:
+            Notification.objects.create(
+                utilisateur_destinataire=enseignant,
+                action_type='course_updated_by_admin',
+                module_source='courses',
+                message_notif=f"📢 Les informations de votre cours '{cours.titre_cour}' ont été modifié par un administrateur."
+            )
+
+        return response
+    def destroy(self, request, *args, **kwargs):
+        # Récupère le cours AVANT de le supprimer
+        cours = self.get_object()
+        enseignant = cours.utilisateur
+        cours_titre = cours.titre_cour
+
+        # Crée la notif uniquement si l'utilisateur est staff et qu'un enseignant est assigné
+        if request.user.is_staff and enseignant:
+            Notification.objects.create(
+                utilisateur_destinataire=enseignant,
+                action_type='course_deleted_by_admin',
+                module_source='courses',
+                message_notif=f"❌ Votre cours '{cours_titre}' a été supprimé par un administrateur."
+            )
+
+        # Supprime le cours et retourne la réponse
+        return super().destroy(request, *args, **kwargs)
+
 
 
 class SectionListCreateView(generics.ListCreateAPIView):
