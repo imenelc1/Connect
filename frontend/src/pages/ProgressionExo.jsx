@@ -177,7 +177,7 @@ export default function ProgressExercice() {
             </div>
             <div>
               <p className="text-xl sm:text-2xl font-bold text-pink">{completedRatio}</p>
-              <p className="text-gray">{t("ProgressExercice.completedexo")}</p>
+              <p className="text-gray">{t("ProgressExercice.completedcours")}</p>
             </div>
           </div>
         </div>

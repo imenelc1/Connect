@@ -121,6 +121,8 @@ import translationFRNotification from "./locales/notifications/fr-notif/translat
 import translationENNotification from "./locales/notifications/en-notif/translation.json";
 import translationENAssistant from "./locales/AssistantIA/en-assistant/translation.json"
 import translationFRAssistant from "./locales/AssistantIA/fr-assistant/translation.json"
+import translationFRWelcomereset from "./locales/welcomeresetpassword/fr/auth.json"
+import translationENWelcomereset from "./locales/welcomeresetpassword/en/auth.json"
 
 
 const resources = {
@@ -159,14 +161,15 @@ const resources = {
     CoursesManagement: translationFRCourseManagement,
     ValidationCourses: translationFRValidationCourses,
     DashboardAdmin: translationFRDashboardAdmin,
-     ForumManagement:translationFRForumManagement,
-     BadgesManagement:translationFRBadgesManagement,
-    StudentsManagement:translationFRStudentsManagement,
-    notifications:translationFRNotification,
-   assistant:translationFRAssistant,
+    ForumManagement: translationFRForumManagement,
+    BadgesManagement: translationFRBadgesManagement,
+    StudentsManagement: translationFRStudentsManagement,
+    notifications: translationFRNotification,
+    assistant: translationFRAssistant,
     space: translationFRSpacesPage,
-    instructors: translationFRInstructors
-    },
+    instructors: translationFRInstructors,
+    auth: translationFRWelcomereset
+  },
 
   en: {
     translation: translationEN,
@@ -203,13 +206,14 @@ const resources = {
     CoursesManagement: translationENCourseManagement,
     ValidationCourses: translationENValidationCourses,
     DashboardAdmin: translationENDashboardAdmin,
-     ForumManagement:translationENForumManagement,
-       BadgesManagement:translationENBadgesManagement,
-      StudentsManagement:translationENStudentsManagement,
-       space: translationENSpacesPage,
-      instructors: translationENInstructors,
-      notifications:translationENNotification,
-      assistant:translationENAssistant
+    ForumManagement: translationENForumManagement,
+    BadgesManagement: translationENBadgesManagement,
+    StudentsManagement: translationENStudentsManagement,
+    space: translationENSpacesPage,
+    instructors: translationENInstructors,
+    notifications: translationENNotification,
+    assistant: translationENAssistant,
+    auth: translationENWelcomereset
 
 
 

@@ -81,7 +81,7 @@ export default function Badges() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  
+
 
   // Récupération des données utilisateur
   const storedUser = localStorage.getItem("user");
@@ -99,7 +99,7 @@ export default function Badges() {
 
   const [userBadges, setUserBadges] = useState([]);
   const [badgeStats, setBadgeStats] = useState([]);
-  
+
   useEffect(() => {
     const fetchBadges = async () => {
       try {
@@ -116,9 +116,9 @@ export default function Badges() {
 
 
 
-  
 
-  
+
+
   const navigate = useNavigate();
   // Gestion de la responsivité
   useEffect(() => {
@@ -148,99 +148,100 @@ export default function Badges() {
   };
 
   // Filtrage des badges selon la catégorie
-const filteredBadges = userBadges.filter((badge) => {
-  if (activeTab === "all") return true;
-  return badge.category === activeTab; // correspond exactement aux valeurs de l'API
-});
+  const filteredBadges = userBadges.filter((badge) => {
+    if (activeTab === "all") return true;
+    return badge.category === activeTab; // correspond exactement aux valeurs de l'API
+  });
 
 
-useEffect(() => {
-  const fetchStats = async () => {
-    try {
-      const res = await api.get("/badges/user_stats/");
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await api.get("/badges/user_stats/");
 
-      const data = res.data;
+        const data = res.data;
 
-      // Arrondir les pourcentages pour les barres
-      const streakPct = Math.round(data.streak_pct);
-      const xpPct = Math.round((data.total_xp / (data.max_xp || 1)) * 100); // éviter division par 0
+        // Arrondir les pourcentages pour les barres
+        const streakPct = Math.round(data.streak_pct);
+        const xpPct = Math.round((data.total_xp / (data.max_xp || 1)) * 100); // éviter division par 0
 
-      setBadgeStats({
-        ...data,
-        streak_pct: streakPct,
-        xp_pct: xpPct,
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+        setBadgeStats({
+          ...data,
+          level: Math.min(data.level, 6),
+          streak_pct: streakPct,
+          xp_pct: xpPct,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  fetchStats();
-}, []);
+    fetchStats();
+  }, []);
 
 
 
-  
+
 
   return (
     <>
       <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
         <Navbar />
 
-       
 
-       
 
-     
+
+
+
         <main
-  className={`
+          className={`
     flex-1 p-4 sm:p-6 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
     ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
     pt-12 ml-16 md:pt-10 /* Ajustement crucial pour mobile */
   `}
->
-      
-        {/* BadgeHeader - maintenant visible sur mobile */}
-        <BadgeHeader />
+        >
 
-        <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-full sm:max-w-5xl py-2 px-4 sm:px-6 bg-gradient-to-r from-primary/30 to-purple rounded-full mb-6 sm:mb-8">
-          <span
-            role="button"
-            className="px-12 py-1 text-gray/10 font-semibold bg-card  rounded-full mb-2 sm:mb-0"
-           
-          >
-            {t("Badges")}
-          </span>
-          <span
-            role="button"
-            className="px-12 py-1 text-gray/10 rounded-full font-semibold mb-2 sm:mb-0"
-             onClick={() => navigate("/progress-student")}
-          >
-            {t("Progression")}
-          </span>
-        </div>
+          {/* BadgeHeader - maintenant visible sur mobile */}
+          <BadgeHeader stats={badgeStats} />
 
-        <BadgeStats
-        unlockedCount={badgeStats.unlocked_count}
-        totalBadges={badgeStats.total_badges}
-        streakDays={badgeStats.streak_days}
-        totalXp={badgeStats.total_xp}
-        progressPct={(badgeStats.unlocked_count / badgeStats.total_badges) * 100}
-        streakPct={badgeStats.streak_pct}
-        xpPct={badgeStats.xp_pct}
-      />
+          <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-full sm:max-w-5xl py-2 px-4 sm:px-6 bg-gradient-to-r from-primary/30 to-purple rounded-full mb-6 sm:mb-8">
+            <span
+              role="button"
+              className="px-12 py-1 text-gray/10 font-semibold bg-card  rounded-full mb-2 sm:mb-0"
+
+            >
+              {t("Badges")}
+            </span>
+            <span
+              role="button"
+              className="px-12 py-1 text-gray/10 rounded-full font-semibold mb-2 sm:mb-0"
+              onClick={() => navigate("/progress-student")}
+            >
+              {t("Progression")}
+            </span>
+          </div>
+
+          <BadgeStats
+            unlockedCount={badgeStats.unlocked_count}
+            totalBadges={badgeStats.total_badges}
+            streakDays={badgeStats.streak_days}
+            totalXp={badgeStats.total_xp}
+            progressPct={(badgeStats.unlocked_count / badgeStats.total_badges) * 100}
+            streakPct={badgeStats.streak_pct}
+            xpPct={badgeStats.xp_pct}
+          />
 
 
-        {/* Tabs */}
-        <BadgeTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          {/* Tabs */}
+          <BadgeTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* Badge grid */}
-        <BadgeGrid badges={filteredBadges} getBadgeIcon={getBadgeIcon} />
+          {/* Badge grid */}
+          <BadgeGrid badges={filteredBadges} getBadgeIcon={getBadgeIcon} />
 
-        {/* Footer */}
-        <BadgeFooter />
-      </main>
-    </div>
-  </>
-);
+          {/* Footer */}
+          <BadgeFooter />
+        </main>
+      </div>
+    </>
+  );
 }
