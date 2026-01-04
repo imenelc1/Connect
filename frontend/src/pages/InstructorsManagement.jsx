@@ -1,39 +1,113 @@
 import React, { useState, useEffect, useContext } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
-import AddModel from "../components/common/AddModel";
-import { Users, Trash2, Edit, Calendar, Plus } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import Input from "../components/common/Input";
+import ModernDropdown from "../components/common/ModernDropdown.jsx";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ThemeContext from "../context/ThemeContext";
-import { toast } from "react-hot-toast";
+import { Users, Trash2, Edit, Calendar, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
+import api from "../services/api";
 
-// ================= DETAILS MODAL =================
-function DetailsModal({ open, onClose, instructor }) {
-   const { t } = useTranslation("instructors");
+// ================= MODAL DETAILS =================
+function InstructorDetailModal({ open, onClose, instructor }) {
   if (!open || !instructor) return null;
-
+  const { t } = useTranslation("instructors");
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
       <div className="bg-card rounded-xl shadow-lg p-6 w-[400px]">
-        <h2 className="text-xl text-muted font-bold mb-4">
-          Résumé de l'enseignant
-        </h2>
-
+        <h2 className="text-xl text-muted font-bold mb-4">{t("instructorResume")}</h2>
         <ul className="text-sm text-gray space-y-2">
-          <li><strong>{t("firstName")} :</strong> {instructor.firstName}</li>
-          <li><strong>{t("lastName")} :</strong> {instructor.lastName}</li>
+          <li><strong>{t("firstName")} :</strong> {instructor.nickname}</li>
+          <li><strong>{t("lastName")} :</strong> {instructor.fullname}</li>
           <li><strong>{t("email")} :</strong> {instructor.email}</li>
-          <li><strong>{t("birthdate")} :</strong> {instructor.birthdate}</li>
+          <li><strong>{t("birthdate")} :</strong> {instructor.dob}</li>
           <li><strong>{t("rank")} :</strong> {instructor.rank}</li>
-          <li><strong>{t("matricule")} :</strong> {instructor.matricule}</li>
+          <li><strong>{t("matricule")} :</strong> {instructor.regnumber}</li>
         </ul>
 
         <div className="mt-4 flex justify-end">
-          <Button variant="secondary" onClick={onClose}>
-            Fermer
-          </Button>
+          <Button variant="secondary" onClick={onClose}>{t("close")}</Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ================= MODAL AJOUT / EDIT =================
+function InstructorAddEditModal({ open, onClose, onSubmit, instructorForm, setInstructorForm, errors, isEdit }) {
+  if (!open) return null;
+  const { t } = useTranslation("instructors");
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+      <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-lg overflow-y-auto max-h-[90vh]">
+        <h2 className="text-xl font-bold mb-4">
+          {isEdit ? t("updateInstructor") : t("addInstructor")}
+        </h2>
+
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label={t("firstName")}
+              name="nickname"
+              value={instructorForm.nickname}
+              onChange={e => setInstructorForm({ ...instructorForm, nickname: e.target.value })}
+              error={errors.nickname}
+            />
+            <Input
+              label={t("lastName")}
+              name="fullname"
+              value={instructorForm.fullname}
+              onChange={e => setInstructorForm({ ...instructorForm, fullname: e.target.value })}
+              error={errors.fullname}
+            />
+          </div>
+
+          <Input
+            label={t("email")}
+            name="email"
+            value={instructorForm.email}
+            onChange={e => setInstructorForm({ ...instructorForm, email: e.target.value })}
+            error={errors.email}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label={t("birthdate")}
+              type="date"
+              name="dob"
+              value={instructorForm.dob}
+              onChange={e => setInstructorForm({ ...instructorForm, dob: e.target.value })}
+              error={errors.dob}
+            />
+            <Input
+              label={t("matricule")}
+              name="regnumber"
+              value={instructorForm.regnumber}
+              onChange={e => setInstructorForm({ ...instructorForm, regnumber: e.target.value })}
+              error={errors.regnumber}
+            />
+          </div>
+
+          <ModernDropdown
+            value={instructorForm.rank}
+            onChange={val => setInstructorForm({ ...instructorForm, rank: val })}
+            options={[
+              { value: "Prof", label: t("prof") },
+              { value: "maitre conf", label: t("MC") },
+              { value: "maitre ass", label: t("MA") }
+            ]}
+            placeholder={t("rank")}
+            error={errors.rank}
+          />
+
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="secondary" onClick={onClose}>{t("cancel")}</Button>
+            <Button type="submit" variant="primary" className="!px-6 !py-2">{isEdit ? t("update") : t("create")}</Button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -47,57 +121,47 @@ export default function InstructorsPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  const [instructors, setInstructors] = useState([]);
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
-
-  const [newInstructor, setNewInstructor] = useState({
-    firstName: "",
-    lastName: "",
+  const [instructorForm, setInstructorForm] = useState({
+    nickname: "",
+    fullname: "",
     email: "",
-    birthdate: "",
-    rank: "",
-    matricule: "",
+    dob: "",
+    regnumber: "",
+    rank: ""
   });
+  const [errors, setErrors] = useState({});
 
-  const [instructors, setInstructors] = useState([]);
-
-  // ================= FETCH BACKEND =================
- useEffect(() => {
-  const fetchInstructors = async () => {
-    try {
-      const token = localStorage.getItem("admin_token");
-
-      const res = await fetch("http://localhost:8000/api/users/enseignants/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();  // <-- ici tu transformes la réponse en JSON
-      console.log("Raw instructors data:", data); // <-- place ton console.log ici
-
-      const formatted = data.map((e) => ({
-        id_utilisateur: e.id_utilisateur, // 🔹 ajoute l'ID pour la suppression
-        firstName: e.prenom,
-        lastName: e.nom,
-        email: e.email || "—",
-        birthdate: e.date_naissance || "—",
-        rank: e.grade || "—",
-        matricule: e.matricule || "—",
-      }));
-
-      setInstructors(formatted);
-    } catch (err) {
-      console.error("Erreur chargement enseignants :", err);
-    }
-  };
-
-  fetchInstructors();
-}, []);
-
+  // ================= FETCH =================
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        const token = localStorage.getItem("admin_token");
+        const res = await fetch("http://localhost:8000/api/users/enseignants/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        const formatted = data.map(e => ({
+          nickname: e.prenom,
+          fullname: e.nom,
+          email: e.email || "",
+          dob: e.date_naissance || "",
+          rank: e.grade || "",
+          regnumber: e.matricule || ""
+        }));
+        setInstructors(formatted);
+      } catch (err) {
+        console.error("Erreur chargement enseignants :", err);
+        toast.error(t("loadError"));
+      }
+    };
+    fetchInstructors();
+  }, []);
 
   // ================= RESPONSIVE =================
   useEffect(() => {
@@ -113,295 +177,139 @@ export default function InstructorsPage() {
     };
   }, []);
 
-  // ================= LOGIC =================
-  const filtered = instructors.filter((i) =>
-    `${i.firstName} ${i.lastName}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  // ================= VALIDATION =================
+  const validateForm = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/;
+    const matriculeRegex = /^\d{12}$/;
+    const newErrors = {};
 
-  const fields = [
-    {
-      label: t("firstName"),
-      value: newInstructor.firstName,
-      onChange: (e) =>
-        setNewInstructor({ ...newInstructor, firstName: e.target.value }),
-    },
-    {
-      label: t("lastName"),
-      value: newInstructor.lastName,
-      onChange: (e) =>
-        setNewInstructor({ ...newInstructor, lastName: e.target.value }),
-    },
-    {
-      label: t("email"),
-      value: newInstructor.email,
-      onChange: (e) =>
-        setNewInstructor({ ...newInstructor, email: e.target.value }),
-    },
-    {
-      label: t("birthdate"),
-      type: "date",
-      value: newInstructor.birthdate,
-      onChange: (e) =>
-        setNewInstructor({ ...newInstructor, birthdate: e.target.value }),
-    },
-    {
-      label: t("rank"),
-      value: newInstructor.rank,
-      onChange: (e) =>
-        setNewInstructor({ ...newInstructor, rank: e.target.value }),
-    },
-    {
-      label: t("matricule"),
-      value: newInstructor.matricule,
-      onChange: (e) =>
-        setNewInstructor({ ...newInstructor, matricule: e.target.value }),
-    },
-  ];
+    if (!instructorForm.nickname.trim()) newErrors.nickname = t("requiredField");
+    else if (!nameRegex.test(instructorForm.nickname)) newErrors.nickname = t("invalidName");
 
-const handleSubmit = async (e) => {
-  // e.preventDefault(); // si tu l'utilises dans un form
+    if (!instructorForm.fullname.trim()) newErrors.fullname = t("requiredField");
+    else if (!nameRegex.test(instructorForm.fullname)) newErrors.fullname = t("invalidName");
 
-  const token = localStorage.getItem("admin_token");
-  if (!token) {
-    toast.error("Token JWT manquant");
-    return;
-  }
+    if (!instructorForm.email.trim()) newErrors.email = t("requiredField");
+    else if (!emailRegex.test(instructorForm.email)) newErrors.email = t("invalidEmail");
 
-  // ================= UPDATE =================
-  if (editIndex !== null) {
-    const instructorToUpdate = instructors[editIndex];
-    await handleUpdateInstructor(instructorToUpdate.id_utilisateur, newInstructor);
-    return;
-  }
+    if (!instructorForm.dob) newErrors.dob = t("requiredField");
 
-  // ================= CREATE =================
-  try {
-    const res = await fetch(
-      "http://localhost:8000/api/users/admin/enseignants/create/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          nom: newInstructor.lastName,
-          prenom: newInstructor.firstName,
-          email: newInstructor.email,
-          matricule: newInstructor.matricule,
-          grade: newInstructor.rank,
-          date_naissance: newInstructor.birthdate,
-        }),
-      }
-    );
+    if (!instructorForm.regnumber) newErrors.regnumber = t("requiredField");
+    else if (!matriculeRegex.test(instructorForm.regnumber)) newErrors.regnumber = t("regnumberInvalid");
 
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Erreur lors de la création");
+    if (!instructorForm.rank) newErrors.rank = t("gradeRequired");
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // ================= SUBMIT =================
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      toast.error(t("fixErrors"));
+      return;
     }
 
-    const responseData = await res.json();
+    const payload = {
+      prenom: instructorForm.nickname,
+      nom: instructorForm.fullname,
+      email: instructorForm.email, // <-- utiliser le nom correct
+      date_naissance: instructorForm.dob,
+      matricule: instructorForm.regnumber,
+      grade: instructorForm.rank,
+      role: "enseignant"
+    };
 
-    // Ajouter l’enseignant dans le state local
-    setInstructors((prev) => [
-      ...prev,
-      {
-        id_utilisateur: responseData.id_utilisateur,
-        firstName: newInstructor.firstName,
-        lastName: newInstructor.lastName,
-        email: newInstructor.email,
-        birthdate: newInstructor.birthdate || "—",
-        rank: newInstructor.rank,
-        matricule: newInstructor.matricule,
-      },
-    ]);
 
-    toast.success("Enseignant créé avec succès 📧 Un email a été envoyé");
+    try {
+      const token = localStorage.getItem("admin_token");
+      const url = editIndex !== null
+        ? `http://localhost:8000/api/users/admin/enseignants/${editIndex}/update/`
+        : "http://localhost:8000/api/users/admin/enseignants/create/";
 
-    setOpenModal(false);
-    setEditIndex(null);
+      const method = editIndex !== null ? "PUT" : "POST";
 
-    // 🔹 RESET FORMULAIRE APRES CREATION
-    setNewInstructor({
-      firstName: "",
-      lastName: "",
-      email: "",
-      birthdate: "",
-      rank: "",
-      matricule: "",
-    });
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
 
-  } catch (err) {
-    console.error("Erreur création enseignant:", err);
-    toast.error(err.message);
-  }
-};
+      const data = await res.json();
 
+      if (!res.ok) throw new Error(data.error || "Erreur serveur");
+
+      if (editIndex !== null) {
+        const updated = [...instructors];
+        updated[editIndex] = instructorForm;
+        setInstructors(updated);
+        setEditIndex(null);
+      } else {
+        setInstructors([...instructors, instructorForm]);
+      }
+
+      toast.success(editIndex !== null ? t("updateSuccess") : t("createSuccess"));
+      setInstructorForm({
+        nickname: "", fullname: "", email: "", dob: "", regnumber: "", rank: ""
+      });
+      setOpenModal(false);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || t("networkError"));
+    }
+  };
+
+  // ================= LOGIC =================
   const handleEdit = (index) => {
-    setNewInstructor(instructors[index]);
+    setInstructorForm(instructors[index]);
     setEditIndex(index);
     setOpenModal(true);
   };
 
-  //SUPPRIMER UN ENSEIGNANT (FUNCTION ADDED BY CHAHLA) 
-const handleDelete = async (instructorId) => {
-  const token = localStorage.getItem("admin_token");
-   if (!token) {
-    setError("Token JWT manquant.");
-    return;
-  }
-  console.log({instructorId});
-  if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet enseignant?")) return;
-
-  try {
-    
-
-    const res = await fetch(`http://localhost:8000/api/users/admin/users/${instructorId}/`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Erreur lors de la suppression");
-    }
-    setInstructors((prev) => prev.filter((s) => s.id_utilisateur !== instructorId));
-
-    toast.success("Enseignant supprimé avec succès !");
-
-  } catch (err) {
-    console.error("Erreur suppression:", err);
-    alert(t("deleteError"));
-  }
-};
-
-
-//Modifer les information d'un enseignant (FUNCTION ADDED BY CHAHLA)
-const handleUpdateInstructor = async (instructorId, updatedData) => {
-  const token = localStorage.getItem("admin_token");
-  if (!token) {
-    toast.error("Token JWT manquant");
-    return;
-  }
-
-  try {
-    const res = await fetch(
-      `http://localhost:8000/api/users/enseignants/${instructorId}/update/`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          nom: updatedData.lastName,
-          prenom: updatedData.firstName,
-          email: updatedData.email,
-          date_naissance: updatedData.birthdate,
-          matricule: updatedData.matricule,
-          grade: updatedData.rank,
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Erreur lors de la mise à jour");
-    }
-
-    const updatedInstructor = await res.json();
-
-    // Mettre à jour le state local
-    setInstructors((prev) =>
-      prev.map((inst) =>
-        inst.id_utilisateur === instructorId
-          ? {
-              ...inst,
-              firstName: updatedData.firstName,
-              lastName: updatedData.lastName,
-              email: updatedData.email,
-              birthdate: updatedData.birthdate,
-              rank: updatedData.rank,
-              matricule: updatedData.matricule,
-            }
-          : inst
-      )
-    );
-
-    toast.success("Enseignant mis à jour avec succès !");
-    setOpenModal(false);
-    setEditIndex(null);
-
-    // 🔹 RESET FORMULAIRE APRES MODIFICATION
-    setNewInstructor({
-      firstName: "",
-      lastName: "",
-      email: "",
-      birthdate: "",
-      rank: "",
-      matricule: "",
-    });
-
-  } catch (err) {
-    console.error("Erreur mise à jour:", err);
-    toast.error(err.message);
-  }
-};
+  const handleDelete = (index) => {
+    setInstructors(instructors.filter((_, i) => i !== index));
+  };
 
   const handleRowClick = (instructor) => {
     setSelectedInstructor(instructor);
     setOpenDetails(true);
   };
 
+  const filtered = instructors.filter(i =>
+    `${i.nickname} ${i.fullname}`.toLowerCase().includes(search.toLowerCase())
+  );
+
   // ================= RENDER =================
   return (
-    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
       <Navbar />
-
       <main
-        className={`
-        flex-1 p-6 pt-10 space-y-5 transition-all duration-300
-        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-      `}
+        className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""
+          }`}
       >
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div className="flex items-center gap-3">
             <Users size={28} className="text-muted" />
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-muted">
-                {t("title")}
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
               <p className="text-gray">{t("subtitle")}</p>
             </div>
           </div>
 
           <Button
-            text={
-              <span className="flex items-center gap-2">
-                <Plus size={18} />
-                {t("addInstructor")}
-              </span>
-            }
+            text={<span className="flex items-center gap-2"><Plus size={18} />{t("addInstructor")}</span>}
             variant="primary"
             className="!w-auto px-6 py-2 rounded-xl"
-            onClick={() => {
-              setEditIndex(null);
-              setOpenModal(true);
-            }}
+            onClick={() => { setEditIndex(null); setOpenModal(true); }}
           />
         </div>
 
         {/* SEARCH */}
         <div className="max-w-md">
-          <ContentSearchBar
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-          />
+          <ContentSearchBar value={search} onChange={e => setSearch(e.target.value)} placeholder={t("searchPlaceholder")} />
         </div>
 
         {/* TABLE */}
@@ -421,37 +329,16 @@ const handleUpdateInstructor = async (instructorId, updatedData) => {
 
             <tbody>
               {filtered.map((i, index) => (
-                <tr
-                  key={index}
-                  onClick={() => handleRowClick(i)}
-                  className="border-t hover:bg-card cursor-pointer"
-                >
-                  <td className="px-6 py-4">{i.firstName}</td>
-                  <td className="px-6 py-4">{i.lastName}</td>
+                <tr key={index} onClick={() => handleRowClick(i)} className="border-t hover:bg-card cursor-pointer">
+                  <td className="px-6 py-4">{i.nickname}</td>
+                  <td className="px-6 py-4">{i.fullname}</td>
                   <td className="px-6 py-4 hidden sm:table-cell">{i.email}</td>
-                  <td className="px-6 py-4 hidden md:table-cell">
-                    <Calendar size={14} className="inline mr-2" />
-                    {i.birthdate}
-                  </td>
+                  <td className="px-6 py-4 hidden md:table-cell"><Calendar size={14} className="inline mr-2" />{i.dob}</td>
                   <td className="px-6 py-4 hidden lg:table-cell">{i.rank}</td>
-                  <td className="px-6 py-4 hidden lg:table-cell">{i.matricule}</td>
+                  <td className="px-6 py-4 hidden lg:table-cell">{i.regnumber}</td>
                   <td className="px-6 py-4">
-                    <Edit
-                      size={18}
-                      className="inline mr-3 text-blue"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(index);
-                      }}
-                    />
-                    <Trash2
-                      size={18}
-                      className="inline text-red"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(i.id_utilisateur);
-                      }}
-                    />
+                    <Edit size={18} className="inline mr-3 text-blue" onClick={e => { e.stopPropagation(); handleEdit(index); }} />
+                    <Trash2 size={18} className="inline text-red" onClick={e => { e.stopPropagation(); handleDelete(index); }} />
                   </td>
                 </tr>
               ))}
@@ -460,27 +347,18 @@ const handleUpdateInstructor = async (instructorId, updatedData) => {
         </div>
       </main>
 
-      <AddModel
+      {/* MODALS */}
+      <InstructorAddEditModal
         open={openModal}
-       onClose={() => {
-    setOpenModal(false);       // fermer le modal
-    setEditIndex(null);        // réinitialiser l’édition
-    setNewInstructor({         // vider le formulaire
-      firstName: "",
-      lastName: "",
-      email: "",
-      birthdate: "",
-      rank: "",
-      matricule: "",
-    });
-  }}
-        fields={fields}
+        onClose={() => setOpenModal(false)}
         onSubmit={handleSubmit}
-        submitLabel={editIndex !== null ? t("update") : t("create")}
-        cancelLabel={t("cancel")}
+        instructorForm={instructorForm}
+        setInstructorForm={setInstructorForm}
+        errors={errors}
+        isEdit={editIndex !== null}
       />
 
-      <DetailsModal
+      <InstructorDetailModal
         open={openDetails}
         onClose={() => setOpenDetails(false)}
         instructor={selectedInstructor}
