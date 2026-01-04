@@ -6,7 +6,22 @@
   "student_fetch_error": "Error fetching student:",
   "bot_greeting": "Hello {{name}} 👋\nI'm your Coach C.\nTell me what's blocking you.",
   "student": "student",
-  "input_placeholder": "Type your question.."
-  
-
+  "input_placeholder": "Type your question..",
+  "aiBadgeError": "Error awarding AI badge",
+  "exerciseGreeting": "Hello {{name}} 👋\nI see that you are working on the exercise: **{{exerciseTitle}}**.\nExplain what you don't understand and I will help you step by step.",
+  "courseGreeting": "Hello {{name}} 👋\nI am your course assistant for this course.",
+  "genericGreeting": "Hello {{name}} 👋\nI am your AI assistant.",
+  "untitledExercise": "in progress",
+  "codeAnalysis": "Analyze the code above.\nExplain exactly what is wrong.\nDo NOT write the complete solution.\nDo not improve the code.\nIndicate logical, syntactic or conceptual errors.",
+  "noCodeYet": "Refuse to give the complete solution.\nExplain that the current code is still the base code.\nInvite the student to try writing a first version related to the exercise.\nGive only hints.\nBe encouraging.",
+  "onlyHints": "Give ONLY hints.\nExplain the principle without writing code.",
+  "stepByStep": "Explain the logic step by step.\nYou can use pseudocode.\nDo NOT give the complete solution.",
+  "fullSolution": "Now give the full solution in C,\nwith a line-by-line explanation.\nDo NOT ask any questions to the student.",
+  "header": {
+    "assistantCourse": "Course Assistant",
+    "assistantExercise": "Exercise Assistant",
+    "assistantIA": "AI Assistant"
+  },
+   "coursePlaceholder": "Ask a question about the course…",
+    "problemPlaceholder": "Explain your problem…"
 }
