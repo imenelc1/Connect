@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Loader } from "lucide-react";
 import ForumItem from "./ForumItem";
 
@@ -26,190 +26,79 @@ export default function ForumList({
   const [newMessages, setNewMessages] = useState({});
   const [postingMessage, setPostingMessage] = useState({});
 
+  // -------------------- Charger les messages d’un forum --------------------
   const loadForumMessages = useCallback(async (forumId) => {
-  if (!token || !forumId) return;
+    if (!token || !forumId) return;
 
-  setLoadingMessages(prev => ({ ...prev, [forumId]: true }));
+    setLoadingMessages(prev => ({ ...prev, [forumId]: true }));
 
-  try {
-    const response = await fetch(`${API_URL}/forums/${forumId}/messages/`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    try {
+      const response = await fetch(`${API_URL}/forums/${forumId}/messages/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-    if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+      if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
 
-    const forumData = await response.json();
+      const forumData = await response.json();
+      const messagesArray = Array.isArray(forumData) ? forumData : [];
 
-    // ⚠️ ici : forumData est déjà un array
-    const messagesArray = Array.isArray(forumData) ? forumData : [];
+      const messagesWithComments = messagesArray.map(msg => ({
+        ...msg,
+        commentaires: msg.commentaires || [],
+        nombre_commentaires: msg.nombre_commentaires ?? (msg.commentaires?.length || 0)
+      }));
 
-    const messagesWithComments = messagesArray.map(msg => ({
-      ...msg,
-      commentaires: msg.commentaires || [],
-      nombre_commentaires: msg.nombre_commentaires ?? (msg.commentaires?.length || 0)
-    }));
+      setMessages(prev => ({
+        ...prev,
+        [forumId]: messagesWithComments
+      }));
 
-    setMessages(prev => ({
-      ...prev,
-      [forumId]: messagesWithComments
-    }));
+      setPosts(prev =>
+        prev.map(post =>
+          post.id === forumId
+            ? { ...post, commentsCount: messagesArray.length }
+            : post
+        )
+      );
 
-    setPosts(prev =>
-      prev.map(post =>
-        post.id === forumId
-          ? { ...post, commentsCount: messagesArray.length }
-          : post
-      )
-    );
+    } catch (error) {
+      console.error(`Erreur chargement messages forum ${forumId}:`, error);
+      setMessages(prev => ({ ...prev, [forumId]: [] }));
+      setError(`Erreur chargement messages: ${error.message}`);
+    } finally {
+      setLoadingMessages(prev => ({ ...prev, [forumId]: false }));
+    }
+  }, [token, API_URL, setPosts, setError]);
 
-  } catch (error) {
-    console.error(`Erreur chargement messages forum ${forumId}:`, error);
-    setMessages(prev => ({ ...prev, [forumId]: [] }));
-    setError(`Erreur chargement messages: ${error.message}`);
-  } finally {
-    setLoadingMessages(prev => ({ ...prev, [forumId]: false }));
-  }
-}, [token, API_URL, setPosts, setError]);
-
-
+  // -------------------- Toggle affichage messages --------------------
   const toggleForumMessages = useCallback(async (forumId) => {
     const isExpanded = expandedForums[forumId];
-    
+
     if (!isExpanded && !messages[forumId]) {
-      await loadForumMessages(forumId);
+      await loadForumMessages(forumId); // charge les messages UNE SEULE FOIS
     }
-    
+
     setExpandedForums(prev => ({
       ...prev,
       [forumId]: !isExpanded
     }));
   }, [expandedForums, messages, loadForumMessages]);
 
-  const handlePostMessage = useCallback(async (forumId) => {
-  const messageContent = newMessages[forumId]?.trim();
-  const post = posts.find(p => p.id === forumId);
-  
-  if (!post) {
-    setError("Forum non trouvé");
-    return;
-  }
-  
-  // Vérification des permissions de réponse
-  const canReply = 
-    // 1. L'utilisateur peut répondre à son propre forum
-    post.isMine || 
-    // 2. Admin peut répondre à tout
-    role === "admin" ||
-    // 3. Étudiant peut répondre aux forums pour étudiants
-    (role === "etudiant" && (post.type === "teacher-student" || post.type === "student-student")) ||
-    // 4. Enseignant peut répondre aux forums pour enseignants
-    (role === "enseignant" && (post.type === "teacher-teacher" || post.type === "student-teacher"));
-
-  if (!canReply) {
-    const forumTypeLabels = {
-      "teacher-teacher": "réservé aux enseignants",
-      "teacher-student": "réservé aux étudiants", 
-      "student-student": "réservé aux étudiants",
-      "student-teacher": "réservé aux enseignants"
-    };
-    setError(`Ce forum est ${forumTypeLabels[post.type]}. Vous n'avez pas la permission d'y répondre.`);
-    return;
-  }
-  
-  if (!messageContent) {
-    setError("Veuillez écrire un message");
-    return;
-  }
-
-  if (!token) {
-    setError("Vous devez être connecté pour répondre");
-    return;
-  }
-
-  if (messageContent.length > 2000) {
-    setError("Le message ne doit pas dépasser 2000 caractères");
-    return;
-  }
-  
-  setPostingMessage(prev => ({ ...prev, [forumId]: true }));
-  setError("");
-  
-  try {
-    const response = await fetch(`${API_URL}/forums/${forumId}/messages/create/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contenu_message: messageContent
-      })
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Erreur ${response.status}`);
-    }
-    
-    const newMessage = await response.json();
-    const messageWithLikeAndComments = {
-      ...newMessage,
-      user_has_liked: false,
-      nombre_likes: 0,
-      commentaires: [],
-      nombre_commentaires: 0
-    };
-    
-    setMessages(prev => ({
-      ...prev,
-      [forumId]: [...(prev[forumId] || []), messageWithLikeAndComments]
-    }));
-    
-    setPosts(prev => prev.map(p => 
-      p.id === forumId 
-        ? { ...p, commentsCount: (p.commentsCount || 0) + 1 }
-        : p
-    ));
-    
-    setNewMessages(prev => ({ ...prev, [forumId]: "" }));
-    
-    if (!expandedForums[forumId]) {
-      setExpandedForums(prev => ({
-        ...prev,
-        [forumId]: true
-      }));
-    }
-    
-    triggerNotificationEvent();
-
-  } catch (error) {
-    console.error("Erreur lors de l'envoi du message:", error);
-    setError(`Erreur lors de l'envoi du message: ${error.message}`);
-  } finally {
-    setPostingMessage(prev => ({ ...prev, [forumId]: false }));
-  }
-}, [token, API_URL, newMessages, posts, role, expandedForums, triggerNotificationEvent, setError, setPosts]);
-
+  // -------------------- Like d’un forum --------------------
   const handleLike = useCallback(async (forumId) => {
-    if (!token) {
-      setError("Vous devez être connecté pour liker");
-      return;
-    }
+    if (!token) { setError("Vous devez être connecté pour liker"); return; }
 
     const post = posts.find(p => p.id === forumId);
-    if (!post) {
-      setError("Forum non trouvé");
-      return;
-    }
+    if (!post) { setError("Forum non trouvé"); return; }
 
     const newLikedState = !post.userHasLiked;
     const newLikesCount = newLikedState ? (post.likes || 0) + 1 : Math.max(0, (post.likes || 0) - 1);
-    
-    setPosts(prev => prev.map(p => 
-      p.id === forumId 
+
+    setPosts(prev => prev.map(p =>
+      p.id === forumId
         ? { ...p, likes: newLikesCount, userHasLiked: newLikedState }
         : p
     ));
@@ -217,107 +106,110 @@ export default function ForumList({
     try {
       const response = await fetch(`${API_URL}/forums/${forumId}/like/`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
 
       if (!response.ok) {
-        setPosts(prev => prev.map(p => 
-          p.id === forumId 
+        setPosts(prev => prev.map(p =>
+          p.id === forumId
             ? { ...p, likes: post.likes || 0, userHasLiked: post.userHasLiked || false }
             : p
         ));
-        
         const errorData = await response.json().catch(() => ({}));
-        console.error("Erreur lors du like:", errorData.error || "Erreur inconnue");
         setError(`Erreur lors du like: ${errorData.error || "Erreur inconnue"}`);
       } else {
         const data = await response.json();
-        setPosts(prev => prev.map(p => 
-          p.id === forumId 
-            ? { 
-                ...p, 
-                likes: data.likes_count || newLikesCount, 
-                userHasLiked: data.user_has_liked || newLikedState 
-              }
+        setPosts(prev => prev.map(p =>
+          p.id === forumId
+            ? { ...p, likes: data.likes_count || newLikesCount, userHasLiked: data.user_has_liked || newLikedState }
             : p
         ));
-        
         triggerNotificationEvent();
       }
     } catch (error) {
-      setPosts(prev => prev.map(p => 
-        p.id === forumId 
+      setPosts(prev => prev.map(p =>
+        p.id === forumId
           ? { ...p, likes: post.likes || 0, userHasLiked: post.userHasLiked || false }
           : p
       ));
-      console.error("Erreur réseau lors du like:", error);
       setError("Erreur réseau lors du like");
     }
   }, [token, API_URL, posts, triggerNotificationEvent, setError, setPosts]);
 
-  const handleDeleteForum = useCallback(async (forumId) => {
-    if (!token) {
-      setError("Vous devez être connecté pour supprimer un forum");
-      return;
-    }
+  // -------------------- Poster un message --------------------
+  const handlePostMessage = useCallback(async (forumId) => {
+    const messageContent = newMessages[forumId]?.trim();
+    const post = posts.find(p => p.id === forumId);
+    if (!post) { setError("Forum non trouvé"); return; }
 
-    const postToDelete = posts.find(p => p.id === forumId);
-    
-    setPosts(prev => prev.filter(post => post.id !== forumId));
-    setMessages(prev => {
-      const newMessages = { ...prev };
-      delete newMessages[forumId];
-      return newMessages;
-    });
+    if (!messageContent) { setError("Veuillez écrire un message"); return; }
+    if (!token) { setError("Vous devez être connecté pour répondre"); return; }
+
+    setPostingMessage(prev => ({ ...prev, [forumId]: true }));
+    setError("");
 
     try {
-      const response = await fetch(`${API_URL}/forums/${forumId}/delete/`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const response = await fetch(`${API_URL}/forums/${forumId}/messages/create/`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenu_message: messageContent })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        
-        if (postToDelete) {
-          setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
-        }
-        
-        console.error("Erreur lors de la suppression:", errorData.error || `Erreur ${response.status}`);
+        throw new Error(errorData.error || `Erreur ${response.status}`);
+      }
+
+      const newMessage = await response.json();
+      const messageWithExtras = { ...newMessage, user_has_liked: false, nombre_likes: 0, commentaires: [], nombre_commentaires: 0 };
+
+      setMessages(prev => ({
+        ...prev,
+        [forumId]: [...(prev[forumId] || []), messageWithExtras]
+      }));
+
+      setPosts(prev => prev.map(p =>
+        p.id === forumId ? { ...p, commentsCount: (p.commentsCount || 0) + 1 } : p
+      ));
+
+      setNewMessages(prev => ({ ...prev, [forumId]: "" }));
+      if (!expandedForums[forumId]) toggleForumMessages(forumId);
+
+      triggerNotificationEvent();
+    } catch (error) {
+      setError(`Erreur lors de l'envoi du message: ${error.message}`);
+    } finally {
+      setPostingMessage(prev => ({ ...prev, [forumId]: false }));
+    }
+  }, [token, API_URL, newMessages, posts, expandedForums, toggleForumMessages, triggerNotificationEvent, setError, setPosts]);
+
+  // -------------------- Supprimer un forum --------------------
+  const handleDeleteForum = useCallback(async (forumId) => {
+    if (!token) { setError("Vous devez être connecté pour supprimer un forum"); return; }
+
+    const postToDelete = posts.find(p => p.id === forumId);
+
+    setPosts(prev => prev.filter(p => p.id !== forumId));
+    setMessages(prev => { const newMessages = { ...prev }; delete newMessages[forumId]; return newMessages; });
+
+    try {
+      const response = await fetch(`${API_URL}/forums/${forumId}/delete/`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (postToDelete) setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
         setError(`Erreur lors de la suppression: ${errorData.error || `Erreur ${response.status}`}`);
       }
     } catch (error) {
-      if (postToDelete) {
-        setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
-      }
-      
-      console.error("Erreur réseau lors de la suppression:", error);
+      if (postToDelete) setPosts(prev => [...prev, postToDelete].sort((a, b) => new Date(b.time) - new Date(a.time)));
       setError("Erreur réseau lors de la suppression");
     }
   }, [token, API_URL, posts, setError, setPosts]);
 
-  useEffect(() => {
-    const loadInitialMessages = async () => {
-      if (!token || posts.length === 0) return;
-      
-      for (const post of posts) {
-        if (!messages[post.id] && post.id) {
-          await loadForumMessages(post.id);
-        }
-      }
-    };
-    
-    if (posts.length > 0) {
-      loadInitialMessages();
-    }
-  }, [posts, token]);
-
+  // -------------------- Rendu --------------------
   return (
     <div className="space-y-6">
       {isLoading ? (
@@ -335,7 +227,7 @@ export default function ForumList({
           </p>
         </div>
       ) : (
-        finalPosts.map((post) => (
+        finalPosts.map(post => (
           <ForumItem
             key={post.id}
             post={post}

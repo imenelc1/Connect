@@ -163,33 +163,8 @@ export default function CommunityPage() {
       const forums = await response.json();
       
       // Filtrage simplifié et corrigé
-      const visibleForums = forums.filter(forum => {
-        const forumType = forum.type;
-        const cible = forum.cible;
-        const creatorRole = forum.utilisateur_role;
-        
-        if (role === "etudiant") {
-          // Étudiants peuvent voir :
-          const isStudentForum = forumType === "student-student" || forumType === "teacher-student";
-          const isAdminForStudents = forumType === "admin-student-forum" || 
-                                    (creatorRole === "admin" && cible === "etudiants");
-          return isStudentForum || isAdminForStudents;
-        }
-        
-        if (role === "enseignant") {
-          // Enseignants peuvent voir :
-          const isTeacherForum = forumType === "teacher-teacher" || forumType === "student-teacher";
-          const isAdminForTeachers = forumType === "admin-teacher-forum" || 
-                                    (creatorRole === "admin" && cible === "enseignants");
-          return isTeacherForum || isAdminForTeachers;
-        }
-        
-        if (role === "admin") {
-          return true;
-        }
-        
-        return false;
-      });
+     const visibleForums = forums;
+
       
       const transformedForums = visibleForums.map(forum => ({
         id: forum.id_forum,
@@ -215,12 +190,12 @@ export default function CommunityPage() {
       setError("");
     } catch (error) {
       console.error("Erreur chargement forums:", error);
-      setError(`Impossible de charger les forums: ${error.message}`);
+      setError("Impossible de charger les forums. Vérifiez votre connexion.");
       setPosts([]);
     } finally {
       setIsLoading(false);
     }
-  }, [token, role, userId, API_URL, checkAllForumLikes, navigate]);
+  }, [token, role, userId, API_URL, checkAllForumLikes]);
 
   useEffect(() => {
     if (token && role) {

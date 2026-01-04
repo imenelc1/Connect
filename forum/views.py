@@ -36,20 +36,21 @@ def list_forums(request):
         # Admin sees everything
         pass
     elif role == "etudiant":
-        # Student sees:
-        # 1. Student forums (student-student, teacher-student)
-        # 2. Admin forums for students
+        # Étudiant voit tous les forums sauf :
+        # 1. Les forums enseignants ↔ enseignants
+        # 2. Les forums admin destinés aux enseignants (type admin-teacher-forum ou cible enseignants)
         forums = forums.filter(
-            Q(type__in=['student-student', 'teacher-student']) |
-            Q(type='admin-student-forum', cible='etudiants')
+            Q(type__in=['student-student', 'student-teacher','teacher-student']) |
+            Q(type='admin_student_forum')  # si certains forums admin ont cible='enseignants'
         )
+
     elif role == "enseignant":
         # Teacher sees:
         # 1. Teacher forums (teacher-teacher, student-teacher)
         # 2. Admin forums for teachers
         forums = forums.filter(
-            Q(type__in=['teacher-teacher', 'student-teacher']) |
-            Q(type='admin-teacher-forum', cible='enseignants')
+            Q(type__in=['teacher-teacher', 'student-teacher','teacher-student']) |
+            Q(type='admin_teacher_forum')
         )
     else:
         return Response([], status=200)
@@ -343,9 +344,10 @@ def create_message(request, forum_id):
 
     message = Message.objects.create(
         forum=forum,
+        contenu_message=contenu_message.strip(),
         administrateur=admin_user,
-        utilisateur=utilisateur_user,
-        contenu_message=contenu_message.strip()
+        utilisateur=utilisateur_user
+        
     )
 
     serializer = MessageSerializer(message, context={'request': request})

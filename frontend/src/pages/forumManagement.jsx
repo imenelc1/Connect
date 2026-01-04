@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo, useCallback } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
+import { toast } from 'react-toastify';
 import { 
   createForum, 
   updateForum, 
@@ -956,56 +957,28 @@ const handleDeleteForum = async () => {
   // =========================
   // HANDLERS MESSAGES
   // =========================
-  const handlePostMessage = useCallback(async (messageContent) => {
+ 
+
+const handlePostMessage = useCallback(async (messageContent) => {
   if (!selectedForum) {
-    console.error("❌ Aucun forum sélectionné");
-    alert("Erreur : Aucun forum sélectionné");
+    toast.error("❌ Aucun forum sélectionné !");
     return;
   }
 
   try {
     const token = localStorage.getItem("admin_token");
     if (!token) {
-      console.error("❌ Token manquant");
-      alert("Erreur : Vous devez être connecté");
+      toast.warning("⚠️ Vous devez être connecté !");
       return;
     }
 
-    // OPTION 1 : URL avec forum_id dans le path
     const url = `http://localhost:8000/api/forums/${selectedForum.id}/messages/create/`;
-    
-    // OPTION 2 : URL alternative (essaye les deux)
-    // const url = `http://localhost:8000/api/messages/create/`;
-    
-    console.log("📤 Envoi POST vers:", url);
-    console.log("📝 Message:", messageContent);
-    console.log("🔑 Token présent:", !!token);
-    console.log("🎯 Forum ID:", selectedForum.id);
 
-    // Structure des données - essaie différentes options
     const payload = {
       contenu_message: messageContent.trim(),
-      forum_id: selectedForum.id,  // Important si backend le demande
-      // forum: selectedForum.id,   // Alternative
-      // message: messageContent.trim(),  // Alternative
+      forum_id: selectedForum.id,
     };
 
-    console.log("📦 Payload:", payload);
-
-    // D'abord, teste avec une requête simple
-    console.log("🧪 Test de connexion à l'API...");
-    try {
-      const testRes = await fetch(`http://localhost:8000/api/forums/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("✅ Test API réussi, statut:", testRes.status);
-    } catch (testErr) {
-      console.error("❌ Test API échoué:", testErr);
-    }
-
-    // Maintenant la vraie requête
     const res = await fetch(url, {
       method: "POST",
       headers: {
@@ -1016,41 +989,29 @@ const handleDeleteForum = async () => {
       body: JSON.stringify(payload),
     });
 
-    console.log("📡 Réponse statut:", res.status);
-    console.log("📡 Réponse OK?:", res.ok);
-
-    // Récupère le texte de la réponse d'abord
     const responseText = await res.text();
-    console.log("📡 Réponse texte:", responseText);
 
     if (!res.ok) {
       let errorMessage = `Erreur ${res.status}`;
-      
       try {
-        // Essaye de parser comme JSON
         const errorData = JSON.parse(responseText);
         errorMessage = errorData.error || errorData.detail || errorData.message || responseText;
-        console.error("❌ Erreur JSON:", errorData);
-      } catch (jsonError) {
-        // Si ce n'est pas du JSON, utilise le texte brut
-        console.error("❌ Réponse non-JSON:", responseText);
+      } catch {
         errorMessage = responseText || "Erreur inconnue";
       }
-      
+
+      toast.error(`❌ ${errorMessage}`);
       throw new Error(errorMessage);
     }
 
-    // Parse la réponse JSON
     let newMessage;
     try {
       newMessage = JSON.parse(responseText);
-      console.log("✅ Message créé:", newMessage);
-    } catch (parseError) {
-      console.error("❌ Impossible de parser la réponse:", responseText);
+    } catch {
+      toast.error("❌ Réponse invalide du serveur");
       throw new Error("Réponse invalide du serveur");
     }
 
-    // Ajoute des champs manquants si nécessaire
     const enrichedMessage = {
       ...newMessage,
       id_message: newMessage.id_message || newMessage.id,
@@ -1063,37 +1024,32 @@ const handleDeleteForum = async () => {
       commentaires: newMessage.commentaires || [],
     };
 
-    // Met à jour l'état
     setForumMessages(prev => [enrichedMessage, ...prev]);
 
-    // Met à jour le compteur dans la liste des forums
     setForums(prevForums => prevForums.map(f =>
       f.id === selectedForum.id
         ? { ...f, threads: (f.threads || 0) + 1 }
         : f
     ));
 
-    console.log("✅ Message ajouté à l'état local");
+    toast.success("✅ Message envoyé avec succès !");
     return enrichedMessage;
 
   } catch (err) {
-    console.error("❌ Erreur complète:", err);
-    console.error("❌ Stack:", err.stack);
-    
-    // Messages d'erreur plus clairs
     if (err.message.includes("403")) {
-      alert("❌ Accès interdit. Vérifiez vos permissions.");
+      toast.error("❌ Accès interdit. Vérifiez vos permissions.");
     } else if (err.message.includes("404")) {
-      alert("❌ Endpoint non trouvé. Vérifiez l'URL de l'API.");
+      toast.error("❌ Endpoint non trouvé. Vérifiez l'URL de l'API.");
     } else if (err.message.includes("500")) {
-      alert("❌ Erreur serveur. Vérifiez les logs Django.");
+      toast.error("❌ Erreur serveur. Vérifiez les logs Django.");
     } else {
-      alert(`❌ Erreur: ${err.message}`);
+      toast.error(`❌ Erreur: ${err.message}`);
     }
-    
-    throw err; // Propage l'erreur
+
+    throw err;
   }
 }, [selectedForum]);
+
 
   const handlePostComment = useCallback(async (messageId, commentContent) => {
     try {

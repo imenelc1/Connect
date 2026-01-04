@@ -109,26 +109,27 @@ class MessageSerializer(serializers.ModelSerializer):
             'commentaires'
         ]
         read_only_fields = ('forum', 'utilisateur', 'administrateur', 'date_publication')
-    
+
+    # -------------------- Auteur --------------------
     def get_auteur_nom(self, obj):
-        if obj.administrateur:
-            return "Administrateur"
-        elif obj.utilisateur:
+        if obj.utilisateur:
             return obj.utilisateur.nom
+        elif obj.administrateur:
+            return "Administrateur"
         return None
 
     def get_auteur_prenom(self, obj):
-        if obj.administrateur:
-            return ""
-        elif obj.utilisateur:
+        if obj.utilisateur:
             return obj.utilisateur.prenom
+        elif obj.administrateur:
+            return ""
         return None
 
     def get_auteur_type(self, obj):
         if obj.administrateur:
             return "admin"
         elif obj.utilisateur:
-            # Adaptez selon votre modèle Utilisateur
+            # Détecte automatiquement le type selon ton modèle Utilisateur
             if hasattr(obj.utilisateur, 'is_etudiant') and obj.utilisateur.is_etudiant:
                 return "etudiant"
             elif hasattr(obj.utilisateur, 'is_enseignant') and obj.utilisateur.is_enseignant:
@@ -136,6 +137,7 @@ class MessageSerializer(serializers.ModelSerializer):
             return "utilisateur"
         return None
 
+    # -------------------- Infos supplémentaires --------------------
     def get_nombre_commentaires(self, obj):
         return obj.commentaires.count() if hasattr(obj, 'commentaires') else 0
 
@@ -147,7 +149,6 @@ class MessageSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.likes.filter(utilisateur=request.user).exists() if hasattr(obj, 'likes') else False
         return False
-
 
 # ===== Like Serializer =====
 class LikeSerializer(serializers.ModelSerializer):
