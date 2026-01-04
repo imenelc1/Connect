@@ -82,7 +82,6 @@ export default function Badges() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
 
-
   // Récupération des données utilisateur
   const storedUser = localStorage.getItem("user");
   const userData =
@@ -99,7 +98,6 @@ export default function Badges() {
 
   const [userBadges, setUserBadges] = useState([]);
   const [badgeStats, setBadgeStats] = useState([]);
-
   useEffect(() => {
     const fetchBadges = async () => {
       try {
