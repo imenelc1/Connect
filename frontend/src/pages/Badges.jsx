@@ -167,6 +167,7 @@ useEffect(() => {
 
       setBadgeStats({
         ...data,
+        level: Math.min(data.level, 6),
         streak_pct: streakPct,
         xp_pct: xpPct,
       });
@@ -201,7 +202,7 @@ useEffect(() => {
 >
       
         {/* BadgeHeader - maintenant visible sur mobile */}
-        <BadgeHeader />
+        <BadgeHeader stats={badgeStats} />
 
         <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-full sm:max-w-5xl py-2 px-4 sm:px-6 bg-gradient-to-r from-primary/30 to-purple rounded-full mb-6 sm:mb-8">
           <span

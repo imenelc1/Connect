@@ -131,6 +131,12 @@ export default function Navbar() {
     "/CourseDetails"
 
   ];
+  const mystudentsRoutes = [
+  "/my-students",
+  "/student-exercises",
+  "/students",
+];
+
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
@@ -209,6 +215,9 @@ export default function Navbar() {
           }
           
           if (item.href === "/spaces" && spacesRoutes.some(r => location.pathname.startsWith(r))) {
+            forceActive = true;
+          }
+          if (item.href === "/my-students" && mystudentsRoutes.some(r => location.pathname.startsWith(r))) {
             forceActive = true;
           }
 

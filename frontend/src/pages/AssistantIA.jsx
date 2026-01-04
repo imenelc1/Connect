@@ -245,10 +245,9 @@ INSTRUCTIONS IMPORTANTES :
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
-      <div
-        className={`pointer-events-auto absolute bottom-6 right-6 bg-surface rounded-xl shadow-2xl border flex flex-col
-        ${expanded ? "w-[720px] h-[560px]" : "w-[360px] h-[420px]"}`}
-      >
+      <div className={`pointer-events-auto absolute bottom-6 right-6 bg-surface rounded-xl shadow-2xl border flex flex-col
+        ${expanded ? "w-[720px] h-[560px]" : "w-[360px] h-[420px]"}`}>
+
         {/* Header */}
         <div className="flex justify-between items-center px-4 py-3 bg-grad-1 text-white rounded-t-xl">
           <div className="flex items-center gap-2">
@@ -268,9 +267,7 @@ INSTRUCTIONS IMPORTANTES :
             <button onClick={() => setExpanded(!expanded)}>
               {expanded ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
             </button>
-            <button onClick={onClose}>
-              <X size={18} />
-            </button>
+            <button onClick={onClose}><X size={18} /></button>
           </div>
         </div>
 

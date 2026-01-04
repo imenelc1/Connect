@@ -25,6 +25,7 @@ from quiz.models import ReponseQuiz
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import get_random_string
+from dashboard.models import ActivityEvent
 
 # -----------------------------
 # Constantes JWT manquantes
@@ -69,7 +70,7 @@ class RegisterView(generics.CreateAPIView):
                 utilisateur=user,
                 grade=request.data.get("grade")
             )
-
+        ActivityEvent.objects.create(user=user, event_type="registration")
         # 🔥 CRÉATION DU TOKEN
         token = _create_token(user.id_utilisateur, role)
 
@@ -138,6 +139,11 @@ class LoginView(APIView):
                 "token": token,
                 "user": user_data
             }
+            ActivityEvent.objects.create(
+               user=user,
+               event_type="login"
+            )
+
 
             if user.must_change_password:
                 reset_token = _create_token(user.id_utilisateur, role)

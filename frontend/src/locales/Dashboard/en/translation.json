@@ -2,6 +2,7 @@
   "Dashboard": {
     "Welcome": "Welcome back",
     "Alwaysp": "Always stay updated in your instructor portal.",
+    "AlwayspStudent": "Stay motivated and keep progressing — check your student portal regularly.",
     "AverageS": "Average student progress",
     "Success": "Quiz success rate",
     "AverageT": "Time spent today",
@@ -32,6 +33,8 @@
     "RawHistory": "Raw history for professor:",
     "FetchHistoryError": "Error while fetching professor history",
     "LoadingNotifications": "Loading notifications...",
-    "NoNotifications": "No notifications available."
+    "NoNotifications": "No notifications available.",
+    "FetchExercisesError": "Error while fetching exercises"
+
   }
 }

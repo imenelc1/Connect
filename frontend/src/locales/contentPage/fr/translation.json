@@ -2,36 +2,31 @@
   "coursesTitle": "Cours",
   "exercisesTitle": "Exercices",
   "quizzesTitle": "Quiz",
-
   "createCourseBtn": "Créer un nouveau cours",
   "createExerciseBtn": "Créer un nouvel exercice",
   "createQuizBtn": "Créer un nouveau quiz",
-
   "searchPlaceholder": "Rechercher...",
   "searchCourses": "Rechercher un cours...",
-
   "levels": {
     "beginner": "Débutant",
     "intermediate": "Intermédiaire",
     "advanced": "Avancé"
   },
-
   "continueCourse": "Continuer",
-"continueExercise": "Continuer",
-"continueQuiz": "Continuer",
-
-"restartCourse": "Recommencer",
-"restartExercise": "Recommencer",
-"restartQuiz": "Recommencer",
-
-"startCourse": "Commencer",
-"startExercise": "Commencer",
-"startQuiz": "Commencer",
-
-"checkCourse": "Consulter le cours",
-"checkExercise": "Consulter l'exercice",
-"checkQuiz": "Consulter le quiz",
-
-"checkExos": "Voir exercices"
-
+  "continueExercise": "Continuer",
+  "continueQuiz": "Continuer",
+  "restartCourse": "Recommencer",
+  "restartExercise": "Recommencer",
+  "restartQuiz": "Recommencer",
+  "startCourse": "Commencer",
+  "startExercise": "Commencer",
+  "startQuiz": "Commencer",
+  "checkCourse": "Consulter le cours",
+  "checkExercise": "Consulter l'exercice",
+  "checkQuiz": "Consulter le quiz",
+  "checkExos": "Voir exercices",
+  "completed": "{{value}}% terminé",
+  "maxAttemptsReached": "Nombre maximum de tentatives atteint",
+  "retryIn": "Réessayez dans {{minutes}} min",
+  "remainingAttempts": "Tentatives restantes : {{count}}"
 }

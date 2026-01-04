@@ -2,15 +2,15 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { 
-  Search, 
-  TrendingDown, 
-  CircleCheckBig, 
-  Clock3, 
-  Book, 
-  CirclePlus, 
-  FolderPlus, 
-  Activity 
+import {
+  Search,
+  TrendingDown,
+  CircleCheckBig,
+  Clock3,
+  Book,
+  CirclePlus,
+  FolderPlus,
+  Activity
 } from "lucide-react";
 import { PieChart, Pie, Cell } from "recharts";
 import dayjs from "dayjs";
@@ -118,7 +118,7 @@ export default function Dashboardens() {
 
         setAvgSubmission(avg);
       } catch (err) {
-        console.error( t("Dashboard.FetchSubmissionsError"), err);
+        console.error(t("Dashboard.FetchSubmissionsError"), err);
       }
     };
 
@@ -185,24 +185,24 @@ export default function Dashboardens() {
     fetchContentCounts();
   }, []);
 
- const formatNotificationsForFeed = () => {
-  if (!Array.isArray(notifications) || notifications.length === 0) {
-    return [];
-  }
+  const formatNotificationsForFeed = () => {
+    if (!Array.isArray(notifications) || notifications.length === 0) {
+      return [];
+    }
 
-  return notifications.slice(0, 4).map(notif => {
-    const dateObj = notif.date_envoie
-      ? dayjs(notif.date_envoie)
-      : dayjs();
+    return notifications.slice(0, 4).map(notif => {
+      const dateObj = notif.date_envoie
+        ? dayjs(notif.date_envoie)
+        : dayjs();
 
-    return {
-      title: notif.message_notif || "Notification",
-      date: dateObj.format("DD/MM/YYYY"),
-      day: dateObj.format("dddd"),
-      time: dateObj.format("HH:mm"),
-    };
-  });
-};
+      return {
+        title: notif.message_notif || "Notification",
+        date: dateObj.format("DD/MM/YYYY"),
+        day: dateObj.format("dddd"),
+        time: dateObj.format("HH:mm"),
+      };
+    });
+  };
 
 
   // Formater le temps en format lisible
@@ -244,30 +244,24 @@ export default function Dashboardens() {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface">
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* Sidebar */}
-      <Navbar />
-
+      <div>
+        <Navbar />
+      </div>
       {/* Contenu principal */}
-      <main className={`
-        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 
-        min-h-screen w-full overflow-x-hidden
-        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-      `}>
-        
-        {/* En-tête */}
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          {/* Barre de recherche */}
-          <form className="w-full sm:flex-1 max-w-full lg:max-w-sm order-2 sm:order-1">
-            <Input
-              placeholder={t("Dashboard.Search")}
-              icon={<Search size={isMobile ? 14 : 16} />}
-              className="w-full"
-            />
-          </form>
 
-          {/* Notifications et profil */}
-          <div className="flex items-center gap-3 order-1 sm:order-2 self-end sm:self-auto">
+      <main className={`
+            flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+            ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+          `}>
+
+        {/* En-tête */}
+        <header className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+
+
+          {/* Notifications et profil — alignés à droite */}
+          <div className="flex items-center gap-3 ml-auto">
             <NotificationBell />
             <UserCircle
               initials={initials}
@@ -276,6 +270,7 @@ export default function Dashboardens() {
               size={isMobile ? "sm" : "md"}
             />
           </div>
+
         </header>
 
         {/* Bannière de bienvenue */}
@@ -306,7 +301,7 @@ export default function Dashboardens() {
           />
           <Cards
             text={t("Dashboard.Success")}
-           value={`${Math.round(successRate)}%`}
+            value={`${Math.round(successRate)}%`}
             icon={<CircleCheckBig size={isMobile ? 16 : 18} />}
             bg="bg-grad-3"
             isMobile={isMobile}
@@ -328,7 +323,7 @@ export default function Dashboardens() {
         </div>
 
         {/* Courbe d'apprentissage */}
-        <div className="p-3 w-full" style={{ height: isMobile ? "280px" : "330px" }}>
+        <div className="p-3 w-full" style={{ height: "360px" }}>
           <LearningCurve />
         </div>
 
@@ -337,7 +332,7 @@ export default function Dashboardens() {
           {/* Actions rapides */}
           <div>
             <h2 className="text-lg sm:text-xl text-muted font-bold mb-4 sm:mb-6">
-            {t("Dashboard.Quick")}
+              {t("Dashboard.Quick")}
             </h2>
             <div className="bg-grad-1 text-white rounded-2xl sm:rounded-3xl shadow-lg">
               <div className="flex flex-col">
@@ -349,7 +344,7 @@ export default function Dashboardens() {
                 >
                   <CirclePlus size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                  {t("Dashboard.CreateC")}
+                    {t("Dashboard.CreateC")}
                   </span>
                 </button>
 
@@ -360,7 +355,7 @@ export default function Dashboardens() {
                 >
                   <Activity size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                  {t("Dashboard.Space")}
+                    {t("Dashboard.Space")}
                   </span>
                 </button>
 
@@ -371,7 +366,7 @@ export default function Dashboardens() {
                 >
                   <FolderPlus size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                 {t("Dashboard.publish")}
+                    {t("Dashboard.publish")}
                   </span>
                 </button>
 
@@ -383,7 +378,7 @@ export default function Dashboardens() {
                 >
                   <TrendingDown size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                  {t("Dashboard.Stats")}
+                    {t("Dashboard.Stats")}
                   </span>
                 </button>
               </div>

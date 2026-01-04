@@ -5,21 +5,29 @@ from users.models import Administrateur
 
 # ===== Commentaire Serializer =====
 class CommentaireSerializer(serializers.ModelSerializer):
-    utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
-    utilisateur_prenom = serializers.CharField(source='utilisateur.prenom', read_only=True)
-   
+    utilisateur_nom = serializers.SerializerMethodField()
+    utilisateur_prenom = serializers.SerializerMethodField()
+
     class Meta:
         model = Commentaire
-        fields = [
-            'id_commentaire',
-            'utilisateur',
-            'utilisateur_nom',
-            'utilisateur_prenom',
-            'message',
-            'date_commpub',
-            'contenu_comm'
-        ]
-        read_only_fields = ('utilisateur', 'message', 'date_commpub')
+        fields = ['id_commentaire', 'utilisateur', 'administrateur',
+                  'utilisateur_nom', 'utilisateur_prenom',
+                  'message', 'date_commpub', 'contenu_comm']
+
+    def get_utilisateur_nom(self, obj):
+        if obj.administrateur:
+            return "Administrateur"
+        elif obj.utilisateur:
+            return obj.utilisateur.nom
+        return None
+
+    def get_utilisateur_prenom(self, obj):
+        if obj.administrateur:
+            return ""
+        elif obj.utilisateur:
+            return obj.utilisateur.prenom
+        return None
+
 
 
 # ===== Forum Serializer =====
@@ -80,9 +88,12 @@ class ForumSerializer(serializers.ModelSerializer):
 
 
 # ===== Message Serializer =====
+# ===== Message Serializer (Version simplifiée) =====
 class MessageSerializer(serializers.ModelSerializer):
     auteur_nom = serializers.SerializerMethodField()
-    auteur_type = serializers.SerializerMethodField()  # 'admin' ou 'utilisateur'
+    auteur_prenom = serializers.SerializerMethodField()
+    auteur_type = serializers.SerializerMethodField()
+    
     nombre_commentaires = serializers.SerializerMethodField()
     nombre_likes = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()
@@ -96,6 +107,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'utilisateur',
             'administrateur',
             'auteur_nom',
+            'auteur_prenom',
             'auteur_type',
             'contenu_message',
             'date_publication',
@@ -106,20 +118,34 @@ class MessageSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ('forum', 'utilisateur', 'administrateur', 'date_publication')
 
+    # -------------------- Auteur --------------------
     def get_auteur_nom(self, obj):
-        if obj.administrateur:
-            return obj.administrateur.email_admin
-        elif obj.utilisateur:
-            return f"{obj.utilisateur.nom} {obj.utilisateur.prenom}"
-        return "Inconnu"
+        if obj.utilisateur:
+            return obj.utilisateur.nom
+        elif obj.administrateur:
+            return "Administrateur"
+        return None
+
+    def get_auteur_prenom(self, obj):
+        if obj.utilisateur:
+            return obj.utilisateur.prenom
+        elif obj.administrateur:
+            return ""
+        return None
 
     def get_auteur_type(self, obj):
         if obj.administrateur:
             return "admin"
         elif obj.utilisateur:
+            # Détecte automatiquement le type selon ton modèle Utilisateur
+            if hasattr(obj.utilisateur, 'is_etudiant') and obj.utilisateur.is_etudiant:
+                return "etudiant"
+            elif hasattr(obj.utilisateur, 'is_enseignant') and obj.utilisateur.is_enseignant:
+                return "enseignant"
             return "utilisateur"
         return None
 
+    # -------------------- Infos supplémentaires --------------------
     def get_nombre_commentaires(self, obj):
         return obj.commentaires.count() if hasattr(obj, 'commentaires') else 0
 
@@ -128,10 +154,21 @@ class MessageSerializer(serializers.ModelSerializer):
 
     def get_user_has_liked(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.likes.filter(utilisateur=request.user).exists() if hasattr(obj, 'likes') else False
-        return False
+        if not request:
+            return False
 
+        role = getattr(request, "user_role", None)
+
+        if role == "utilisateur":
+            return obj.likes.filter(utilisateur=request.user).exists()
+
+        if role == "admin":
+            administrateur = getattr(request, "administrateur", None)
+            if not administrateur:
+                return False
+            return obj.likes.filter(administrateur=administrateur).exists()
+
+        return False
 
 # ===== Like Serializer =====
 class LikeSerializer(serializers.ModelSerializer):

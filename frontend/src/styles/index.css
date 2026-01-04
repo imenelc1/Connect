@@ -72,6 +72,7 @@
   --grad-output: linear-gradient(135deg, #7bb5e6, #3a6ea5);
   --grad-button: linear-gradient(135deg, #4F9DDE, #2F4F70);
   --grad-rating: linear-gradient(90deg,#b8c0ff,#bde0fe,#cdb4db);
+  --grad-dark-3: linear-gradient(135deg, #4F9DDE, #FFFFFF);
 
   --shadow-card: 0 8px 20px rgba(0,0,0,0.08);
   --shadow-strong: 0 10px 30px rgba(0,0,0,0.15);
@@ -171,13 +172,14 @@
   background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
 }
 
-/* Fix autofill bleu */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  box-shadow: 0 0 0 30px white inset !important;
-  -webkit-text-fill-color: rgb(172, 179, 194) !important;
+  -webkit-text-fill-color: #000 !important;
+  transition: background-color 0s ease-in-out 0s;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important; /* garde le fond blanc */
 }
+
 
 @keyframes dropdown {
   from { opacity: 0; transform: translateY(-6px); }

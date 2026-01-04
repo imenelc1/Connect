@@ -1,32 +1,66 @@
-
 {
   "BadgesManagement": {
-    "BadgesManagement": "Gestion des badges" ,
-    "badgesp":"Créer et gérer des badges de réussite",
-    "buttonCreate": "Créer des badges",
+    "title": "Gestion des badges",
+    "badgesp": "Créer et gérer les badges de réussite",
+    "buttonCreate": "Créer un badge",
     "search": "Rechercher des badges ...",
     "rarities": {
       "common": "Commun",
       "rare": "Rare",
       "epic": "Épique"
     },
-    "FirstSteps":"Premiers pas",
-    "Completefist":"Complétez vos exercices de poing",
-    "earned":"Gagné par",
-    "students":"étudiants",
-    "codemaster":"Maître des codes",
-    "complete":"Complet",
-    "exercises":"exercices",
-    "Algorithmexpert":"Expert en algorithmes",
-    "Masteralgo":"Cours de master en algorithme",
-    "QuickLeaner":"Apprentissage rapide",
-    "completecourse":"Suivez un cours en moins d'une semaine",
-    "healpingHAND":"Coup de main",
-    "Help":"Aide",
-    "studentsforum":"étudiants dans les forums",
-    "PerfectScore":"Score parfait",
-    "get":"Obtenir",
-    "on":"sur",
-    "quizzes":"quiz"
+    "FirstSteps": "Premiers pas",
+    "Completefist": "Complétez vos premiers exercices",
+    "earned": "Gagné par",
+    "students": "étudiants",
+    "codemaster": "Maître du code",
+    "complete": "Compléter",
+    "exercises": "exercices",
+    "Algorithmexpert": "Expert en algorithmes",
+    "Masteralgo": "Maîtrisez les cours d'algorithmes",
+    "QuickLeaner": "Apprenant rapide",
+    "completecourse": "Terminez un cours en moins d'une semaine",
+    "healpingHAND": "Main secourable",
+    "Help": "Aider",
+    "studentsforum": "étudiants sur les forums",
+    "PerfectScore": "Score parfait",
+    "get": "Obtenu",
+    "on": "sur",
+    "quizzes": "quiz",
+    "noStudent": "Aucun étudiant n'a encore gagné ce badge.",
+    "studentInfo": "{{specialite}} - {{annee}}e année",
+    "modalTitle": "Étudiants ayant obtenu « {{title}} »",
+    "createBadge": "Créer un badge",
+    "editTitle": "Modifier le badge"
+  },
+  "common": {
+    "close": "Fermer",
+    "create": "Créer",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "fields": {
+    "title": "Titre",
+    "icon": "Icône",
+    "iconPreview": "Aperçu icône",
+    "xpPoints": "Points XP",
+    "category": "Catégorie",
+  "categories": {
+    "success": "Succès",
+    "special": "Spécial",
+    "progress": "Progression"
+  }
+  },
+  "messages": {
+    "confirmDelete": "Es-tu sûr de supprimer ce badge ?",
+    "deleted": "Badge supprimé",
+    "deleteError": "Erreur lors de la suppression du badge",
+    "created": "Badge créé !",
+    "errorBadge": "Erreur badge :",
+    "operationError": "Erreur lors de l'opération",
+    "updated": "Badge mis à jour !",
+    "fetchStudentsError": "Erreur récupération étudiants :",
+    "fetchStudentsToast": "Impossible de récupérer les étudiants",
+    "fetchBadgesError": "Erreur récupération badges :"
   }
 }

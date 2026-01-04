@@ -1,9 +1,8 @@
-
 {
   "BadgesManagement": {
-    "BadgesManagement": "Badges Management " ,
-    "badgesp":"Create and manage achievement badges",
-    "buttonCreate": "Create Badges",
+    "title": "Badges Management",
+    "badgesp": "Create and manage achievement badges",
+    "buttonCreate": "Create badges",
     "search": "Search badges ...",
 
     "rarities": {
@@ -11,23 +10,72 @@
       "rare": "Rare",
       "epic": "Epic"
     },
-    "FirstSteps":"First Steps",
-    "Completefist":"Complete your fist exercises",
-    "earned":"Earned by",
-    "students":"students",
-    "codemaster":"Code Master",
-    "complete":"Complete",
-    "exercises":"exercises",
-    "Algorithmexpert":"Algorithm Expert",
-    "Masteralgo":"Master algorithm courses",
-    "QuickLeaner":"Quick Leaner",
-    "completecourse":"Complete a course in under a week",
-    "healpingHAND":"Healping Hand",
-    "Help":"Help",
-    "studentsforum":"students in forums",
-    "PerfectScore":"Perfect Score",
-    "get":"Get",
-    "on":"on",
-    "quizzes":"quizzes"
+
+    "FirstSteps": "First Steps",
+    "Completefist": "Complete your first exercises",
+    "earned": "Earned by",
+    "students": "students",
+
+    "codemaster": "Code Master",
+    "complete": "Complete",
+    "exercises": "exercises",
+
+    "Algorithmexpert": "Algorithm Expert",
+    "Masteralgo": "Master algorithm courses",
+
+    "QuickLeaner": "Quick Learner",
+    "completecourse": "Complete a course in under a week",
+
+    "healpingHAND": "Helping Hand",
+    "Help": "Help",
+    "studentsforum": "students in forums",
+
+    "PerfectScore": "Perfect Score",
+    "get": "Get",
+    "on": "on",
+    "quizzes": "quizzes",
+
+    "noStudent": "No student has earned this badge.",
+    "studentInfo": "{{specialite}} - {{annee}} year",
+    "modalTitle": "Students who earned \"{{title}}\"",
+
+    "createBadge": "Create a badge",
+    "editTitle": "Edit badge",
+    "viewStudents": "Voir étudiants"
+  },
+
+  "common": {
+    "close": "Close",
+    "create": "Create",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "fields": {
+  "title": "Title",
+  "icon": "Icon",
+  "iconPreview": "Icon preview",
+  "xpPoints": "XP Points",
+   "category": "Category",
+  "categories": {
+    "success": "Success",
+    "special": "Special",
+    "progress": "Progress"
   }
+
+
+},
+"messages": {
+  "confirmDelete": "Are you sure you want to delete this badge?",
+  "deleted": "Badge deleted",
+  "deleteError": "Error deleting badge",
+  "created": "Badge created!",
+  "errorBadge": "Badge error:",
+  "operationError": "Error during the operation",
+  "updated": "Badge updated!",
+   "fetchStudentsError": "Error fetching students:",
+  "fetchStudentsToast": "Unable to fetch students",
+  "fetchBadgesError": "Error fetching badges:"
+}
+
+
 }

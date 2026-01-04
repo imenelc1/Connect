@@ -2,6 +2,7 @@
   "Dashboard": {
     "Welcome": "Content de te revoir",
     "Alwaysp": "Consultez régulièrement votre portail instructeur pour rester informé.",
+     "AlwayspStudent": "Restez motivé et progressez — consultez votre portail étudiant régulièrement.",
     "AverageS": "Progrès moyen des étudiants",
     "Success": "Taux de réussite des quiz",
     "AverageT": "Temps passé aujourd’hui",
@@ -32,7 +33,9 @@
     "RawHistory": "Historique brut prof :",
     "FetchHistoryError": "Erreur lors de la récupération de l'historique des professeurs",
     "LoadingNotifications": "Chargement des notifications...",
-    "NoNotifications": "Aucune notification disponible."
+    "NoNotifications": "Aucune notification disponible.",
+    "FetchExercisesError": "Erreur lors de la récupération des exercices"
+
  
   }
 }

@@ -96,7 +96,7 @@ export default function StudentSignUp() {
     if (!formData.year) newErrors.year =  t("requiredField");
 
     if (formData.regnumber && !/^\d{12}$/.test(formData.regnumber))
-       newErrors.regnumber = t("regnumberInvalid");
+       newErrors.regnumber = t("studentRegnumberInvalid");
 
     const birthDate = new Date(formData.dob);
     const minDate = new Date();
