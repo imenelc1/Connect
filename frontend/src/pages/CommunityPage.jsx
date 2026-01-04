@@ -6,7 +6,7 @@ import { useNotifications } from "../context/NotificationContext";
 import { FiSend } from "react-icons/fi";
 import { Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import UserCircle from "../components/common/UserCircle";
 import Input from "../components/common/Input";
 import Tabs from "../components/common/Tabs";
@@ -37,19 +37,18 @@ export default function CommunityPage() {
   const navigate = useNavigate();
   const { t } = useTranslation("community");
   const { fetchUnreadCount } = useNotifications();
-  const { toggleDarkMode } = useContext(ThemeContext);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   const userData = JSON.parse(localStorage.getItem("user")) || {};
   const token = localStorage.getItem("access") || localStorage.getItem("token");
   const role = userData?.role;
   const userId = userData?.user_id;
   
-  const API_URL = window.location.hostname === "localhost" 
+  const API_URL = window.REACT_APP_API_URL || 
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:8000/api" 
-    : "/api";
+    : "/api");
 
+  const { toggleDarkMode } = useContext(ThemeContext);
   
   const initials = useMemo(() => 
     `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase(),
@@ -57,30 +56,30 @@ export default function CommunityPage() {
   );
 
   const forumOptions = useMemo(() => {
-    // OPTIONS EXACTES COMME DEMANDÉ :
-    
     if (role === "enseignant") {
       return [
         { value: "all", label: "Tous les forums" },
         { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
-        { value: "teacher-student", label: "Enseignants ↔ Étudiants" }  // Regroupe teacher-student + student-teacher
+        { value: "teacher-student", label: "Enseignants ↔ Étudiants" }
       ];
     } 
     else if (role === "etudiant") {
       return [
         { value: "all", label: "Tous les forums" },
         { value: "student-student", label: "Étudiants ↔ Étudiants" },
-        { value: "student-teacher", label: "Étudiants ↔ Enseignants" }  // Regroupe teacher-student + student-teacher
+        { value: "student-teacher", label: "Étudiants ↔ Enseignants" }
       ];
     }
     
-    // Pour admin ou autres rôles (au cas où)
+    // Pour admin ou autres rôles
     return [
       { value: "all", label: "Tous les forums" },
       { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
       { value: "teacher-student", label: "Enseignant → Étudiants" },
       { value: "student-student", label: "Étudiants ↔ Étudiants" },
-      { value: "student-teacher", label: "Étudiant → Enseignants" }
+      { value: "student-teacher", label: "Étudiant → Enseignants" },
+      { value: "admin-student-forum", label: "Admin → Étudiants" },
+      { value: "admin-teacher-forum", label: "Admin → Enseignants" }
     ];
   }, [role]);
 
@@ -140,10 +139,12 @@ export default function CommunityPage() {
     if (!token) {
       setError("Token manquant - Veuillez vous reconnecter");
       setIsLoading(false);
+      navigate("/login");
       return;
     }
     
     try {
+      setIsLoading(true);
       const response = await fetch(`${API_URL}/forums/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -152,60 +153,18 @@ export default function CommunityPage() {
       });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          navigate("/login");
+          return;
+        }
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       
       const forums = await response.json();
       
-      // Filtrer selon les règles de visibilité
-      // Dans la fonction qui filtre les forums
-// In the fetchForums function, update the filtering section:
+      // Filtrage simplifié et corrigé
+     const visibleForums = forums;
 
-// Filtrer selon les règles de visibilité
-const visibleForums = forums.filter(forum => {
-    const forumType = forum.type;
-    const cible = forum.cible;
-    const creatorRole = forum.utilisateur_role; // Get creator role from backend
-    
-    if (role === "etudiant") {
-        // Étudiant voit :
-        // 1. Forums étudiants (student-student, teacher-student)
-        // 2. Forums admin pour étudiants
-        if (forumType === "student-student" || forumType === "teacher-student") {
-            return true;
-        }
-        if (forumType === "admin-student-forum" && cible === "etudiants") {
-            return true;
-        }
-        // Also show admin-created forums for students
-        if (creatorRole === "admin" && cible === "etudiants") {
-            return true;
-        }
-        return false;
-    } 
-    else if (role === "enseignant") {
-        // Enseignant voit :
-        // 1. Forums enseignants (teacher-teacher, student-teacher)
-        // 2. Forums admin pour enseignants
-        if (forumType === "teacher-teacher" || forumType === "student-teacher") {
-            return true;
-        }
-        if (forumType === "admin-teacher-forum" && cible === "enseignants") {
-            return true;
-        }
-        // Also show admin-created forums for teachers
-        if (creatorRole === "admin" && cible === "enseignants") {
-            return true;
-        }
-        return false;
-    }
-    else if (role === "admin") {
-        // Admin voit tout
-        return true;
-    }
-    
-    return false;
-});
       
       const transformedForums = visibleForums.map(forum => ({
         id: forum.id_forum,
@@ -242,7 +201,7 @@ const visibleForums = forums.filter(forum => {
     if (token && role) {
       fetchForums();
     }
-  }, [token, role, userId, API_URL, checkAllForumLikes]);
+  }, [token, role, fetchForums]);
 
   const getFilteredPosts = useCallback(() => {
     let filtered = [...posts];
@@ -250,19 +209,16 @@ const visibleForums = forums.filter(forum => {
     if (forumType !== "all") {
       // Gérer les options spéciales du dropdown
       if (role === "enseignant" && forumType === "teacher-student") {
-        // Pour enseignant : "Enseignants ↔ Étudiants" = teacher-student + student-teacher
         filtered = filtered.filter(post => 
           post.type === "teacher-student" || post.type === "student-teacher"
         );
       } 
       else if (role === "etudiant" && forumType === "student-teacher") {
-        // Pour étudiant : "Étudiants ↔ Enseignants" = teacher-student + student-teacher
         filtered = filtered.filter(post => 
           post.type === "teacher-student" || post.type === "student-teacher"
         );
       }
       else {
-        // Filtre normal par type exact
         filtered = filtered.filter(post => post.type === forumType);
       }
     }
@@ -280,7 +236,7 @@ const visibleForums = forums.filter(forum => {
 
   const finalPosts = useMemo(() => getFilteredPosts(), [getFilteredPosts]);
 
-  // Fonction pour obtenir le label du type de forum dans l'affichage des posts
+  // Fonction pour obtenir le label du type de forum
   const getDisplayForumTypeLabel = useCallback((type) => {
     if (role === "enseignant") {
       if (type === "teacher-student" || type === "student-teacher") {
@@ -310,46 +266,31 @@ const visibleForums = forums.filter(forum => {
       </div>
     );
   }
-   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("sidebarChanged", handleSidebarChange);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("sidebarChanged", handleSidebarChange);
-    };
-  }, []);
 
   return (
-    <div className="flex min-h-screen bg-surface gap-16 md:gap-1">
-      {/* Sidebar */}
-      <div>
-        <Navbar />
+    <div className="flex min-h-screen bg-background dark:bg-gray-900">
+      <Navbar />
+      
+      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+        <NotificationBell />
+        <UserCircle
+          initials={initials}
+          onToggleTheme={toggleDarkMode}
+          onChangeLang={(lang) => {
+            const i18n = window.i18n;
+            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+          }}
+        />
       </div>
 
-      {/* Main Content */} 
-     <main className={`
-        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
-        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-      `}>
-       
- 
+      <div className="flex-1 ml-56 p-8">
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold mb-2 text-blue dark:text-blue-400">{t("community.title")}</h1>
+          <p className="mb-6 text-grayc dark:text-gray-400">
+            {t("community.subtitle")}
+          </p>
+        </header>
 
-       {/* User controls */}
-<div className="flex justify-end items-center gap-4 w-full px-0">
-  <NotificationBell />
-  <UserCircle
-    initials={initials}
-    onToggleTheme={toggleDarkMode}
-    onChangeLang={(lang) => i18n.changeLanguage(lang)}
-  />
-</div>
-
-
-        {/* Post Creation */}
         <PostCreationForm
           forumTypeToCreate={forumTypeToCreate}
           setForumTypeToCreate={setForumTypeToCreate}
@@ -359,7 +300,8 @@ const visibleForums = forums.filter(forum => {
           userData={userData}
           setPosts={setPosts}
           setError={setError}
-          API_URL={window.location.hostname === "localhost" ? "http://localhost:8000/api" : "/api"}
+          triggerNotificationEvent={triggerNotificationEvent}
+          API_URL={API_URL}
           t={t}
         />
 
@@ -370,7 +312,7 @@ const visibleForums = forums.filter(forum => {
             value={forumType}
             onChange={setForumType}
             options={forumOptions}
-            placeholder={t("placeholders.selectPlaceholder")}
+            placeholder="Sélectionner un type"
             disabled={isLoading}
           />
         </div>
@@ -383,15 +325,17 @@ const visibleForums = forums.filter(forum => {
           posts={posts}
           setPosts={setPosts}
           token={token}
+          API_URL={API_URL}
           role={role}
           userId={userId}
           setError={setError}
-          getForumTypeLabel={getForumTypeLabel}
+          triggerNotificationEvent={triggerNotificationEvent}
+          getForumTypeLabel={getDisplayForumTypeLabel}
           getForumTypeClasses={getForumTypeClasses}
           formatTimeAgo={formatTimeAgo}
           t={t}
         />
-      </main>
+      </div>
     </div>
   );
 }
