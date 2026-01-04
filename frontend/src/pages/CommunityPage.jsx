@@ -6,7 +6,7 @@ import { useNotifications } from "../context/NotificationContext";
 import { FiSend } from "react-icons/fi";
 import { Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import UserCircle from "../components/common/UserCircle";
 import Input from "../components/common/Input";
 import Tabs from "../components/common/Tabs";
@@ -33,6 +33,23 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState([]);
   const [forumType, setForumType] = useState("all");
   const [forumTypeToCreate, setForumTypeToCreate] = useState("");
+  // / États de l'interface
+      const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+      const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+      // Gestion de la responsivité
+        useEffect(() => {
+          const handleResize = () => setIsMobile(window.innerWidth < 768);
+          const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+      
+          window.addEventListener("resize", handleResize);
+          window.addEventListener("sidebarChanged", handleSidebarChange);
+      
+          return () => {
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("sidebarChanged", handleSidebarChange);
+          };
+        }, []); 
+  
   
   const navigate = useNavigate();
   const { t } = useTranslation("community");
@@ -268,28 +285,41 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background dark:bg-gray-900">
-      <Navbar />
+   <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                                      {/* Sidebar */}
+                                      <div>
+                                        <Navbar />
+                                      </div>
       
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
-
-      <div className="flex-1 ml-56 p-8">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-blue dark:text-blue-400">{t("community.title")}</h1>
+       <div className={`
+            flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+            ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+          `}>
+         {/* En-tête */}
+            <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+              <div>
+                <h1 className="text-3xl font-bold mb-2 text-blue dark:text-blue-400">{t("community.title")}</h1>
           <p className="mb-6 text-grayc dark:text-gray-400">
             {t("community.subtitle")}
           </p>
+
+              </div>
+          
+        
+          {/* Notifications + User */}
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
+            />
+          </div>
         </header>
+     
+
+      <div className="flex-1 ">
+       
 
         <PostCreationForm
           forumTypeToCreate={forumTypeToCreate}
@@ -337,5 +367,6 @@ export default function CommunityPage() {
         />
       </div>
     </div>
+     </div>
   );
 }
