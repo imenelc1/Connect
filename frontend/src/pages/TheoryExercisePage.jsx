@@ -7,6 +7,8 @@ import { useParams } from "react-router-dom";
 
 import NavBar from "../components/common/NavBar";
 import Mascotte from "../assets/head_mascotte.svg";
+import HeadMascotte from "../components/ui/HeadMascotte";
+
 import AssistantIA from "./AssistantIA";
 import progressionService from "../services/progressionService";
 import toast from "react-hot-toast";
@@ -264,25 +266,13 @@ export default function TheoryExercisePage() {
           <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
            
 
-            <button
-  onClick={() => aiAllowed && setOpenAssistant(true)}
-  disabled={!aiAllowed} // désactive le clic si IA interdite
-  className={`flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl 
-    font-medium shadow-md transition
-    ${aiAllowed 
-       ? "bg-[rgb(var(--color-primary))] text-white hover:brightness-110" 
-       : "bg-gray-300 text-gray-500 cursor-not-allowed"}
-  `}
->
-  <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
-</button>
+           <HeadMascotte
+                             courseData={exercise}
+                             aiEnabled={aiAllowed} // <-- nouveau prop
+                           />
 
 
-            <img
-              src={Mascotte}
-              className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11"
-              alt="Mascotte"
-            />
+
           </div>
         </div>
 
@@ -422,16 +412,28 @@ export default function TheoryExercisePage() {
         {/* HELP BUTTON */}
         <div className="flex justify-center my-10 md:my-12">
           <button
-            onClick={() => setOpenAssistant(true)}
-            className="flex items-center gap-3 px-4 sm:px-5 py-2 rounded-full bg-grad-1 border border-[rgb(var(--color-gray-light))] shadow hover:brightness-95 transition"
-          >
-            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-[rgb(var(--color-gray-light))] flex items-center justify-center">
-              <MessageCircle size={16} strokeWidth={1.7} />
-            </div>
-            <span className="text-xs sm:text-sm text-[rgb(var(--color-primary))] font-medium">
-              {t("need_help")}
-            </span>
-          </button>
+  onClick={() => {
+    if (!aiAllowed) {
+      toast.error(t("assistant_disabled") || "Assistant IA désactivé pour cet exercice");
+      return;
+    }
+    setOpenAssistant(true);
+  }}
+  disabled={!aiAllowed}
+  className={`flex items-center gap-3 px-4 sm:px-5 py-2 rounded-full border shadow transition
+    ${aiAllowed
+      ? "bg-grad-1 hover:brightness-95 cursor-pointer"
+      : "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"}
+  `}
+>
+  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center">
+    <MessageCircle size={16} strokeWidth={1.7} />
+  </div>
+  <span className="text-xs sm:text-sm font-medium">
+    {t("need_help")}
+  </span>
+</button>
+
         </div>
       </div>
 

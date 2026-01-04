@@ -19,7 +19,7 @@ export default function Courses() {
   const location = useLocation();
 
   //Verifer pour l'ia 
-  const [courseAiEnabled, setCourseAiEnabled] = useState(false);
+  const [courseAiEnabled, setCourseAiEnabled] = useState(true);
 
   const storedUser = localStorage.getItem("user");
   const userData =
@@ -28,7 +28,7 @@ export default function Courses() {
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
   const userId = userData?.user_id || userData?.id_utilisateur || userData?.id || null;
-  const isStudent = userData?.role === "etudiant";
+  const userRole = userData?.role || "";
 
   const [sections, setSections] = useState([]);
   const [title, setTitle] = useState("");
@@ -156,8 +156,8 @@ export default function Courses() {
   };
 
 useEffect(() => {
-  if (!coursId || !isStudent || !userId) return;
-
+  if (!coursId  || !userId) return;
+  if(userRole !== "etudiant") return;
   const checkAIStatusForCourse = async () => {
     try {
       const res = await fetch(
@@ -187,7 +187,7 @@ useEffect(() => {
   };
 
   checkAIStatusForCourse();
-}, [coursId, userId, isStudent]);
+}, [coursId, userId]);
 console.log({courseAiEnabled});
 
   return (
