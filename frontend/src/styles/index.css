@@ -172,13 +172,14 @@
   background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
 }
 
-/* Fix autofill bleu */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  box-shadow: 0 0 0 30px white inset !important;
-  -webkit-text-fill-color: rgb(172, 179, 194) !important;
+  -webkit-text-fill-color: #000 !important;
+  transition: background-color 0s ease-in-out 0s;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important; /* garde le fond blanc */
 }
+
 
 @keyframes dropdown {
   from { opacity: 0; transform: translateY(-6px); }
