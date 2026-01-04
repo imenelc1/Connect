@@ -450,7 +450,6 @@ const handleAddItem = (selectedItemId) => {
 
   useEffect(() => {
   if (!id || activeStep !== 3) return;
-
   const fetchExercises = async () => {
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
