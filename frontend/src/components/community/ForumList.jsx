@@ -219,7 +219,7 @@ export default function ForumList({
       ) : finalPosts.length === 0 ? (
         <div className="text-center py-12 dark:text-gray-300">
           <div className="text-4xl mb-4">📭</div>
-          <h3 className="text-xl font-semibold mb-2">{t("messages.noForums")}</h3>
+          <h3 className="text-xl font-semibold mb-2">Aucun forum</h3>
           <p className="text-grayc dark:text-gray-400 mb-6">
             {forumType === "all" 
               ? t("messages.firstForum") 

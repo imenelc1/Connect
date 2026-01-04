@@ -20,6 +20,7 @@ export default function TheoryExercisePage() {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [canSubmit, setCanSubmit] = useState(false);
+  const [aiAllowed, setAiAllowed] = useState(true); // par défaut IA activée
 
   const [startTime, setStartTime] = useState(Date.now());
 
@@ -178,6 +179,45 @@ export default function TheoryExercisePage() {
     fetchLastTentative();
   }, [exercise, isStudent, userId]);
 
+
+  // Verifier si on active l'IA ou non
+
+  useEffect(() => {
+  if (!exercise || !isStudent || !userId) return;
+
+  const checkAIStatus = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to check AI status");
+
+      const data = await res.json();
+
+      // Désactiver l'IA si un espace commun existe et ai_enabled === false
+      if (data.same_space) {
+        const disabled = data.spaces.some(space => space.ai_enabled === false);
+        setAiAllowed(!disabled); // false = désactivé
+      } else {
+        setAiAllowed(true); // pas d'espace commun = IA activée
+      }
+    } catch (err) {
+      console.error("Erreur vérification IA :", err);
+      setAiAllowed(true); // fallback : IA activée
+    }
+  };
+
+  checkAIStatus();
+}, [exercise, userId, isStudent]);
+
+
+
   const switchLang = () =>
     i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
   // / États de l'interface
@@ -225,11 +265,18 @@ export default function TheoryExercisePage() {
            
 
             <button
-              onClick={() => setOpenAssistant(true)}
-              className="flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl bg-[rgb(var(--color-primary))] text-white font-medium shadow-md hover:brightness-110 transition text-xs sm:text-sm md:text-base"
-            >
-              <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
-            </button>
+  onClick={() => aiAllowed && setOpenAssistant(true)}
+  disabled={!aiAllowed} // désactive le clic si IA interdite
+  className={`flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl 
+    font-medium shadow-md transition
+    ${aiAllowed 
+       ? "bg-[rgb(var(--color-primary))] text-white hover:brightness-110" 
+       : "bg-gray-300 text-gray-500 cursor-not-allowed"}
+  `}
+>
+  <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
+</button>
+
 
             <img
               src={Mascotte}

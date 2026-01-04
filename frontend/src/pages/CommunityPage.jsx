@@ -54,7 +54,6 @@ export default function CommunityPage() {
   const navigate = useNavigate();
   const { t } = useTranslation("community");
   const { fetchUnreadCount } = useNotifications();
-
   const userData = JSON.parse(localStorage.getItem("user")) || {};
   const token = localStorage.getItem("access") || localStorage.getItem("token");
   const role = userData?.role;
@@ -87,7 +86,6 @@ export default function CommunityPage() {
         { value: "student-teacher", label: "Étudiants ↔ Enseignants" }
       ];
     }
-
     // Pour admin ou autres rôles
     return [
       { value: "all", label: "Tous les forums" },

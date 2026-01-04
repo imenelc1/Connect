@@ -4,7 +4,9 @@ import { MdAutoAwesome } from "react-icons/md";
 
 import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
-import NavBar from "../components/common/Navbar";
+import Mascotte from "../assets/head_mascotte.svg";
+
+import NavBar from "../components/common/NavBar";
 import AssistantIA from "./AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
@@ -43,6 +45,10 @@ export default function StartExercise() {
   const [notifications, setNotifications] = useState([]);
   const [canSubmit, setCanSubmit] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
+  //verifier si on active l'IA ou pas
+  const [aiAllowed, setAiAllowed] = useState(true); // IA activée par défaut
+
+
   // / États de l'interface
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -132,6 +138,11 @@ int main() {
 
     fetchExercise();
   }, [exerciceId]);
+
+
+
+ 
+
 
   // ---------------- Load last code ----------------
  // Extraire juste l'id de l'utilisateur
@@ -292,6 +303,44 @@ useEffect(() => {
   };
 
 
+
+ //fonction pour activer l'IA ou pas 
+  useEffect(() => {
+  if (!exercise || !isStudent || !userId) return;
+
+  const checkAIStatus = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Erreur vérification IA");
+
+      const data = await res.json();
+
+      // si un espace commun existe et que ai_enabled === false => IA désactivée
+      if (data.same_space) {
+        const disabled = data.spaces.some(space => space.ai_enabled === false);
+        setAiAllowed(!disabled);
+      } else {
+        setAiAllowed(true);
+      }
+    } catch (err) {
+      console.error("Erreur vérification IA :", err);
+      setAiAllowed(true); // fallback : IA activée
+    }
+  };
+
+  checkAIStatus();
+}, [exercise, userId, isStudent]);
+console.log({aiAllowed});
+
+
   // ------------------- JSX -------------------
   return (
     <ExerciseContext.Provider value={exerciseContextValue}>
@@ -318,7 +367,23 @@ useEffect(() => {
 
             <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0 relative">
               <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
-                <HeadMascotte />
+                <button
+                  onClick={() => aiAllowed && setOpenAssistant(true)}
+                  disabled={!aiAllowed} // désactive le clic si IA interdite
+                  className={`flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl 
+                    font-medium shadow-md transition
+                    ${aiAllowed 
+                       ? "bg-[rgb(var(--color-primary))] text-white hover:brightness-110" 
+                       : "bg-gray-300 text-gray-500 cursor-not-allowed"}
+                  `}
+                >
+                  <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
+                </button>
+                <img
+                              src={Mascotte}
+                              className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11"
+                              alt="Mascotte"
+                            />
 
                 {/* Notifications */}
                 <div className="fixed top-20 right-6 flex flex-col gap-3 z-[9999]">
