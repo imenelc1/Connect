@@ -106,11 +106,25 @@ class Commentaire(models.Model):
 
 class Like(models.Model):
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE, related_name='likes')
-    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, null=True, blank=True)
+    administrateur = models.ForeignKey(Administrateur, on_delete=models.CASCADE, null=True, blank=True)
+    
     date_liker = models.DateTimeField(auto_now_add=True)
-   
+
     class Meta:
-        unique_together = ('forum', 'utilisateur')
-   
+        constraints = [
+            models.UniqueConstraint(
+                fields=['forum', 'utilisateur'],
+                name='unique_forum_like_utilisateur'
+            ),
+            models.UniqueConstraint(
+                fields=['forum', 'administrateur'],
+                name='unique_forum_like_admin'
+            )
+        ]
+
     def __str__(self):
-        return f"Like {self.id} - Forum {self.forum.id_forum}"
+        if self.administrateur:
+            return f"Like admin - Forum {self.forum.id_forum}"
+        return f"Like utilisateur - Forum {self.forum.id_forum}"

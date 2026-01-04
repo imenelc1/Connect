@@ -883,6 +883,66 @@ export default function ForumManagement() {
   };
 
   // =========================
+  // HANDLER LIKE FORUM
+  // =========================
+  const handleLikeForum = async (forumId) => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      
+      if (!token) {
+        toast.error("Vous devez être connecté pour aimer un forum");
+        return;
+      }
+
+      const res = await fetch(`http://localhost:8000/api/forums/${forumId}/like/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        
+        // Mettre à jour l'état local
+        setForums(prevForums => prevForums.map(forum => {
+          if (forum.id === forumId) {
+            const newLikeStatus = data.liked !== undefined ? data.liked : !forum.userHasLiked;
+            const newLikeCount = data.nombre_likes !== undefined ? data.nombre_likes : 
+              (newLikeStatus ? (forum.posts || 0) + 1 : Math.max(0, (forum.posts || 0) - 1));
+            
+            return {
+              ...forum,
+              userHasLiked: newLikeStatus,
+              posts: newLikeCount,
+              originalData: {
+                ...forum.originalData,
+                user_has_liked: newLikeStatus,
+                nombre_likes: newLikeCount
+              }
+            };
+          }
+          return forum;
+        }));
+
+        // Message de succès
+        toast.success(data.liked ? "❤️" : "💔", {
+          position: "bottom-right",
+          autoClose: 1000,
+        });
+        
+      } else {
+        const errorText = await res.text();
+        toast.error(`❌ ${errorText}`);
+      }
+    } catch (err) {
+      console.error("Erreur lors du like:", err);
+      toast.error("❌ Erreur réseau");
+    }
+  };
+
+  // =========================
   // HANDLERS VIEW MODAL
   // =========================
   const handleViewForum = async (forum) => {
@@ -1070,14 +1130,14 @@ export default function ForumManagement() {
               }
             : msg
         ));
-        toast.success("✅ Commentaire publié !");
+        toast.success("✅");
       } else {
         const errorText = await res.text();
-        toast.error(`❌ Erreur: ${errorText}`);
+        toast.error(`❌ ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
-      toast.error("Erreur lors de l'envoi du commentaire");
+      toast.error("❌ Erreur");
     }
   }, []);
 
@@ -1104,11 +1164,11 @@ export default function ForumManagement() {
             : msg
         ));
       } else {
-        toast.error("❌ Erreur lors du like");
+        toast.error("❌");
       }
     } catch (err) {
       console.error("Erreur:", err);
-      toast.error("❌ Erreur réseau");
+      toast.error("❌");
     }
   }, []);
 
@@ -1131,14 +1191,14 @@ export default function ForumManagement() {
               : f
           ));
         }
-        toast.success("✅ Message supprimé !");
+        toast.success("✅");
       } else {
         const errorText = await res.text();
-        toast.error(`❌ Erreur: ${errorText}`);
+        toast.error(`❌ ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
-      toast.error("❌ Erreur lors de la suppression");
+      toast.error("❌");
     }
   }, [selectedForum]);
 
@@ -1163,14 +1223,14 @@ export default function ForumManagement() {
               }
             : msg
         ));
-        toast.success("✅ Commentaire supprimé !");
+        toast.success("✅");
       } else {
         const errorText = await res.text();
-        toast.error(`❌ Erreur: ${errorText}`);
+        toast.error(`❌ ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
-      toast.error("❌ Erreur lors de la suppression");
+      toast.error("❌");
     }
   }, []);
 
@@ -1440,7 +1500,7 @@ export default function ForumManagement() {
                         {/* Boutons d'action */}
                         <div className="flex lg:flex-col gap-2 lg:border-l lg:pl-5 border-gray-800/20">
                           <Button
-                            variant="secondary"
+                            variant="manage"
                             onClick={() => handleViewForum(forum)}
                             className="flex items-center gap-2 px-3 py-2"
                           >
@@ -1450,15 +1510,6 @@ export default function ForumManagement() {
                           
                           <Button
                             variant="manage"
-                            onClick={() => navigate(`/forum/${forum.id}/manage`)}
-                            className="flex items-center gap-2 px-3 py-2"
-                          >
-                            <Users size={16} />
-                            Gérer
-                          </Button>
-                          
-                          <Button
-                            variant="secondary"
                             onClick={() => {
                               setEditingForum(forum);
                               setIsModalOpen(true);
@@ -1469,8 +1520,31 @@ export default function ForumManagement() {
                             Modifier
                           </Button>
                           
+                          {/* BOUTON J'AIME SEUL AJOUTÉ */}
                           <Button
-                            variant="secondary"
+                            variant="manage"
+                            onClick={() => handleLikeForum(forum.id)}
+                            className={`flex items-center gap-2 px-3 py-2 transition-all duration-200 ${
+                              forum.userHasLiked 
+                                ? "bg-red-500/10 text-red-500 hover:bg-red-500/20" 
+                                : "hover:bg-primary/10"
+                            }`}
+                          >
+                            <Heart 
+                              size={16} 
+                              fill={forum.userHasLiked ? "currentColor" : "none"}
+                            />
+                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                              forum.userHasLiked 
+                                ? "bg-red-500/20" 
+                                : "bg-primary/20"
+                            }`}>
+                              {forum.posts || 0}
+                            </span>
+                          </Button>
+                          
+                          <Button
+                            variant="manage"
                             onClick={() => {
                               setForumToDelete(forum);
                               setIsDeleteModalOpen(true);

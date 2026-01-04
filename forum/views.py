@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 
-#from badges.views import check_top_commentateur_badge, check_top_forum_badge
+
 from .models import Forum, Message, Commentaire, Like, MessageLike
 from .serializers import ForumSerializer, MessageSerializer, CommentaireSerializer
 from users.jwt_helpers import IsAuthenticatedJWT
@@ -191,36 +191,65 @@ def admin_update_forum(request, forum_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def like_forum(request, forum_id):
-    """Like/Unlike un forum"""
+    """Like / Unlike un forum (supporte utilisateur et admin)"""
     try:
         forum = Forum.objects.get(pk=forum_id)
     except Forum.DoesNotExist:
-        return Response(
-            {'error': 'Forum introuvable'}, 
-            status=status.HTTP_404_NOT_FOUND
-        )
-    
-    like_exists = Like.objects.filter(forum=forum, utilisateur=request.user).exists()
-    
-    if like_exists:
-        Like.objects.filter(forum=forum, utilisateur=request.user).delete()
-        action = "unliked"
+        return Response({'error': 'Forum introuvable'}, status=status.HTTP_404_NOT_FOUND)
+
+    role = getattr(request, "user_role", None)
+
+    # ---------------------------
+    # Utilisateur normal
+    # ---------------------------
+    if role in ["utilisateur", "etudiant", "enseignant"]:
+        utilisateur = request.user
+        like_qs = Like.objects.filter(forum=forum, utilisateur=utilisateur)
+
+        if like_qs.exists():
+            like_qs.delete()
+            action = "unliked"
+            user_has_liked = False
+        else:
+            Like.objects.create(forum=forum, utilisateur=utilisateur)
+            action = "liked"
+            user_has_liked = True
+
+    # ---------------------------
+    # Administrateur
+    # ---------------------------
+    elif role == "admin":
+        admin_id = getattr(request, "user_id", None)
+        try:
+            administrateur = Administrateur.objects.get(pk=admin_id)
+        except Administrateur.DoesNotExist:
+            return Response({'error': 'Administrateur non trouvé'}, status=status.HTTP_403_FORBIDDEN)
+
+        like_qs = Like.objects.filter(forum=forum, administrateur=administrateur)
+
+        if like_qs.exists():
+            like_qs.delete()
+            action = "unliked"
+            user_has_liked = False
+        else:
+            Like.objects.create(forum=forum, administrateur=administrateur)
+            action = "liked"
+            user_has_liked = True
+
     else:
-        Like.objects.create(forum=forum, utilisateur=request.user)
-        action = "liked"
-    
+        return Response({'error': 'Rôle inconnu'}, status=status.HTTP_403_FORBIDDEN)
+
+    # Nombre total de likes (admins + utilisateurs)
     likes_count = Like.objects.filter(forum=forum).count()
 
 
-
-    check_top_forum_badge(request.user)
-    
     return Response({
         'message': f'Forum {action} avec succès',
         'likes_count': likes_count,
-        'user_has_liked': not like_exists,
+        'user_has_liked': user_has_liked,
         'action': action
     }, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET'])
