@@ -82,7 +82,7 @@ const ForumViewModal = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-surface rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-gray-800/20">
         {/* Header du modal */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-800/20">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-gray-800/20">
           <div className="flex items-center gap-4">
             <button
               onClick={onClose}
@@ -524,7 +524,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
             <label className="block text-sm font-medium text-gray mb-2">
               Public cible *
             </label>
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, cible: "etudiants" })}
@@ -1286,10 +1286,10 @@ export default function ForumManagement() {
   // =========================
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      {/* Sidebar */}
-      <div>
-        <Navbar />
-      </div>
+          {/* Sidebar */}
+          <div>
+            <Navbar />
+          </div>
 
       {/* Main Content */}
       <main className={`
@@ -1414,7 +1414,7 @@ export default function ForumManagement() {
 
           {/* Liste des forums */}
           {!loading && !error && (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {filteredForums.length === 0 ? (
                 <div className="text-center py-12">
                   <MessageSquare className="w-16 h-16 text-gray mx-auto mb-4" />
