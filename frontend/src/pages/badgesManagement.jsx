@@ -267,13 +267,13 @@ export default function BadgesManagement() {
           prev.map((b) =>
             b.id === selectedBadge.id
               ? {
-                  ...b,
-                  title: res.data.nom,
-                  desc: res.data.description,
-                  category: res.data.categorie.toLowerCase(),
-                  condition: res.data.condition,
-                  xpPoint: res.data.numpoints,
-                }
+                ...b,
+                title: res.data.nom,
+                desc: res.data.description,
+                category: res.data.categorie.toLowerCase(),
+                condition: res.data.condition,
+                xpPoint: res.data.numpoints,
+              }
               : b
           )
         );
@@ -319,13 +319,17 @@ export default function BadgesManagement() {
   };
 
   return (
-    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+    <div className="flex min-h-screen bg-surface">
+
       <Navbar />
-      <main
-        className={`flex-1 p-6 pt-10 space-y-5 ${
-          !isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""
-        }`}
-      >
+     <main
+  className={`
+    flex-1 p-4 sm:p-6 pt-28 space-y-8 transition-all
+    pl-16 md:pl-64
+  `}
+>
+
+
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">
@@ -359,11 +363,12 @@ export default function BadgesManagement() {
           }}
         >
           {filteredBadges.map((badge) => (
-            <div
-              className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between ${categoryColors[badge.category]?.card ||
-                categoryColors.default.card
-                }`}
-            >
+           <div
+  className={`rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between ${
+    categoryColors[badge.category]?.card || categoryColors.default.card
+  }`}
+>
+
               <div className="flex justify-between mb-4">
                 <div
                   className={`w-14 h-14 rounded-full flex items-center justify-center ${categoryColors[badge.category]?.icon ||
@@ -374,9 +379,8 @@ export default function BadgesManagement() {
                 </div>
 
                 <span
-                  className={`h-6 px-3 py-1 text-xs font-medium rounded-full ${
-                    buttonStyles[badge.category]?.xp || buttonStyles.default.xp
-                  }`}
+                  className={`h-6 px-3 py-1 text-xs font-medium rounded-full ${buttonStyles[badge.category]?.xp || buttonStyles.default.xp
+                    }`}
                 >
                   {badge.category}
                 </span>
@@ -462,8 +466,8 @@ export default function BadgesManagement() {
                 className="border p-2 rounded w-full"
               >
                 <option value="success">{t("fields.categories.success")}</option>
-    <option value="special">{t("fields.categories.special")}</option>
-    <option value="progress">{t("fields.categories.progress")}</option>
+                <option value="special">{t("fields.categories.special")}</option>
+                <option value="progress">{t("fields.categories.progress")}</option>
               </select>
             ),
           },
@@ -504,7 +508,7 @@ export default function BadgesManagement() {
                 {previewIcon ? (
                   <img
                     src={previewIcon}
-                   alt={t("fields.iconPreview")}
+                    alt={t("fields.iconPreview")}
                     className="w-24 h-24 object-cover rounded-lg border"
                   />
                 ) : (

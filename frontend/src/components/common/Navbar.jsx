@@ -32,7 +32,7 @@ export default function Navbar() {
   const [collapsed, setCollapsed] = useState(false);
   const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
   const { logout } = useContext(AuthContext);
-  
+
 
   useEffect(() => {
     let userObj = { nom: "", prenom: "", role: "" };
@@ -145,31 +145,31 @@ export default function Navbar() {
 
   return (
 
-   <aside
-  className={`
-    fixed
-    h-screen bg-card rounded-3xl shadow-2xl p-3 flex flex-col
-    top-0 left-0 z-50 transition-all duration-300
-    w-16
-    md:${collapsed ? "w-16" : "w-56"}
-    overflow-y-auto overflow-x-visible pb-3
-  `}
->
+    <aside
+      className={`fixed h-screen overflow-visible bg-card rounded-3xl shadow-2xl p-3
+  top-0 left-0 z-50 transition-all duration-300
+  w-16
+  md:${collapsed ? "w-16" : "w-56"}
+`}
+    >
 
-  {/* Toggle */}
-  <button
-    onClick={() => setCollapsed(!collapsed)}
-    className={`
-      hidden md:flex
-      absolute top-4
-      ${collapsed ? "right-[-12px]" : "right-[-16px]"}
-      w-9 h-9 rounded-full bg-grad-1 text-white shadow-md
-      flex items-center justify-center
-      z-50 transition-all duration-300
-    `}
-  >
-    {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
-  </button>
+
+
+      {/* Toggle */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className={`
+    flex
+    absolute top-4
+    ${collapsed ? "right-[-12px]" : "right-[-16px]"}
+    w-9 h-9 rounded-full bg-grad-1 text-white shadow-md
+    items-center justify-center
+    z-50 transition-all duration-300
+  `}
+      >
+        {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
+      </button>
+
 
 
 
@@ -231,10 +231,9 @@ export default function Navbar() {
       <div className="mt-auto flex flex-col gap-1 pt-1">
 
         <NavLink
-          to="/settings"
+          to={userData.role === "admin" ? "/admin-settings" : "/settings"}
           className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
-            }`
+            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"}`
           }
         >
           <Settings size={17} strokeWidth={1.5} />

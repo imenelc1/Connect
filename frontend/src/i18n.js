@@ -123,6 +123,8 @@ import translationENAssistant from "./locales/AssistantIA/en-assistant/translati
 import translationFRAssistant from "./locales/AssistantIA/fr-assistant/translation.json"
 import translationFRWelcomereset from "./locales/welcomeresetpassword/fr/auth.json"
 import translationENWelcomereset from "./locales/welcomeresetpassword/en/auth.json"
+import translationFRAdminsetting from "./locales/adminsetting/fr/translation.json";
+import translationENAdminsetting from "./locales/adminsetting/en/translation.json";
 
 
 const resources = {
@@ -168,7 +170,8 @@ const resources = {
     assistant: translationFRAssistant,
     space: translationFRSpacesPage,
     instructors: translationFRInstructors,
-    auth: translationFRWelcomereset
+    auth: translationFRWelcomereset,
+    settingadmin: translationFRAdminsetting
   },
 
   en: {
@@ -213,7 +216,8 @@ const resources = {
     instructors: translationENInstructors,
     notifications: translationENNotification,
     assistant: translationENAssistant,
-    auth: translationENWelcomereset
+    auth: translationENWelcomereset,
+    settingadmin: translationENAdminsetting
 
 
 

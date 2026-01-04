@@ -69,6 +69,7 @@ import StudentsManagement from "../pages/studentsManagement.jsx";
 import UpdateQuiz from "../pages/UpdateQuiz.jsx";
 import VoirCoursAdmin from "../pages/VoirCoursAdmin.jsx";
 import VoirQuizAdmin from "../pages/VoirQuizAdmin.jsx";
+import AdminSetting from "../pages/AdminSetting.jsx";
 
 export default function AppRoutes() {
   return (
@@ -346,6 +347,11 @@ export default function AppRoutes() {
         <Route path="/Voir-quiz/:exerciceId" element={
           <PrivateRoute allowedRoles={["admin"]}>
             <VoirQuizAdmin />
+          </PrivateRoute>
+        }/>
+        <Route path="/admin-settings" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <AdminSetting />
           </PrivateRoute>
         }/>
 

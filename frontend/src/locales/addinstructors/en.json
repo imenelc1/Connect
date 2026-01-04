@@ -40,5 +40,8 @@
   "deleteSuccess": "Instructor deleted successfully",
   "updateSuccess": "Instructor updated successfully",
   "createSuccess": "Instructor created successfully",
-  "joinedAt": "Joined at"
+  "joinedAt": "Joined at",
+  "prof":"Professor",
+  "MC":"Associate Professor ",
+  "MA":"Assistant Professor"
 }

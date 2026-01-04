@@ -30,8 +30,6 @@ export default function QuizzesManagement() {
   const [quizzes, setQuizzes] = useState([]);
 
   const [editValues, setEditValues] = useState({ title: "", description: "", visibilite_exo: false });
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const difficultyBgMap = {
     debutant: "bg-grad-2",
@@ -74,18 +72,7 @@ export default function QuizzesManagement() {
   }, [token]);
 
   // ================= Responsivité =================
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("sidebarChanged", handleSidebarChange);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("sidebarChanged", handleSidebarChange);
-    };
-  }, []);
-
+ 
   // ================= Edit Quiz =================
 
 
@@ -159,9 +146,17 @@ export default function QuizzesManagement() {
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
       <Navbar />
       <main
-        className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""
-          }`}
-      >
+  className="
+    flex-1
+    p-6
+    pt-10
+    space-y-5
+    transition-all
+    pl-16
+    md:pl-64
+  "
+>
+
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">

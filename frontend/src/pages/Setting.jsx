@@ -89,7 +89,7 @@ export default function Setting() {
 
     const handleSave = async () => {
         if (!validateProfile()) {
-            console.error("Erreurs dans le formulaire:", formErrors);
+            console.error(t("Errors.FormErrors"), formErrors);
             return;
         }
 
@@ -239,7 +239,7 @@ export default function Setting() {
                             {user?.adresse_email}
                         </p>
                         <span className="inline-block mt-1 bg-primary/20 text-primary text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
-                            {user?.role === "enseignant" ? t("Profile.Professor") : t("Profile.Student")}
+                            {user?.role === "enseignant" ? t("Profile.Role.Professor") : t("Profile.Role.Student")}
                         </span>
                     </div>
                 </div>
@@ -568,3 +568,4 @@ export default function Setting() {
         </div>
     );
 }
+
