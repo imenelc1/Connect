@@ -247,32 +247,81 @@ def check_user_like(request, forum_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def like_message(request, message_id):
-    """Like/Unlike un message (commentaire)"""
+    """
+    Like / Unlike un message.
+    Supporte les utilisateurs et les administrateurs.
+    """
     try:
         message = Message.objects.get(pk=message_id)
     except Message.DoesNotExist:
-        return Response(
-            {'error': 'Message introuvable'}, 
-            status=status.HTTP_404_NOT_FOUND
+        return Response({'error': 'Message introuvable'}, status=status.HTTP_404_NOT_FOUND)
+
+    role = getattr(request, "user_role", None)
+
+    # ---------------------------
+    # Utilisateur normal
+    # ---------------------------
+    if role == "utilisateur":
+        utilisateur = request.user
+
+        like_qs = MessageLike.objects.filter(
+            message=message,
+            utilisateur=utilisateur
         )
-    
-    like_exists = MessageLike.objects.filter(message=message, utilisateur=request.user).exists()
-    
-    if like_exists:
-        MessageLike.objects.filter(message=message, utilisateur=request.user).delete()
-        action = "unliked"
+
+        if like_qs.exists():
+            like_qs.delete()
+            action = "unliked"
+            user_has_liked = False
+        else:
+            MessageLike.objects.create(
+                message=message,
+                utilisateur=utilisateur
+            )
+            action = "liked"
+            user_has_liked = True
+
+    # ---------------------------
+    # Administrateur
+    # ---------------------------
+    elif role == "admin":
+        # Ici tu dois récupérer l’admin depuis le payload JWT
+        admin_id = getattr(request, "user_id", None)  # ton decorator met user_id pour admin
+        try:
+            administrateur = Administrateur.objects.get(pk=admin_id)
+        except Administrateur.DoesNotExist:
+            return Response({'error': 'Administrateur non trouvé'}, status=status.HTTP_403_FORBIDDEN)
+
+        like_qs = MessageLike.objects.filter(
+            message=message,
+            administrateur=administrateur
+        )
+
+        if like_qs.exists():
+            like_qs.delete()
+            action = "unliked"
+            user_has_liked = False
+        else:
+            MessageLike.objects.create(
+                message=message,
+                administrateur=administrateur
+            )
+            action = "liked"
+            user_has_liked = True
+
     else:
-        MessageLike.objects.create(message=message, utilisateur=request.user)
-        action = "liked"
-    
+        return Response({'error': 'Rôle inconnu'}, status=status.HTTP_403_FORBIDDEN)
+
+    # Nombre total de likes (admins + utilisateurs)
     likes_count = MessageLike.objects.filter(message=message).count()
-    
+
     return Response({
         'message': f'Message {action} avec succès',
         'likes_count': likes_count,
-        'user_has_liked': not like_exists,
+        'user_has_liked': user_has_liked,
         'action': action
     }, status=status.HTTP_200_OK)
+
 
 
 @api_view(['GET'])
@@ -379,16 +428,42 @@ def delete_message(request, message_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def create_comment(request, message_id):
-    try:
-        message = Message.objects.get(pk=message_id)
-    except Message.DoesNotExist:
-        return Response({'error': 'Message introuvable'}, status=404)
+    """
+    Crée un commentaire pour un message (utilisateur ou admin)
+    """
+    role = getattr(request, "user_role", None)
+    user = request.user
+    message = get_object_or_404(Message, pk=message_id)
 
-    serializer = CommentaireSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        serializer.save(message=message, utilisateur=request.user)
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
+    contenu = request.data.get('contenu_comm', '').strip()
+    if not contenu:
+        return Response({'error': 'Le contenu du commentaire est requis'}, status=400)
+
+    if role == 'utilisateur':
+        commentaire = Commentaire.objects.create(
+            message=message,
+            contenu_comm=contenu,
+            utilisateur=user,
+            administrateur=None
+        )
+    elif role == 'admin':
+        admin_id = getattr(request, "user_id", None)
+        try:
+            admin = Administrateur.objects.get(pk=admin_id)
+        except Administrateur.DoesNotExist:
+            return Response({'error': 'Administrateur introuvable'}, status=403)
+        commentaire = Commentaire.objects.create(
+            message=message,
+            contenu_comm=contenu,
+            administrateur=admin,
+            utilisateur=None
+        )
+    else:
+        return Response({'error': 'Rôle inconnu'}, status=403)
+
+    serializer = CommentaireSerializer(commentaire, context={'request': request})
+    return Response(serializer.data, status=201)
+
 
 
 @api_view(['DELETE'])

@@ -5,21 +5,29 @@ from users.models import Administrateur
 
 # ===== Commentaire Serializer =====
 class CommentaireSerializer(serializers.ModelSerializer):
-    utilisateur_nom = serializers.CharField(source='utilisateur.nom', read_only=True)
-    utilisateur_prenom = serializers.CharField(source='utilisateur.prenom', read_only=True)
-   
+    utilisateur_nom = serializers.SerializerMethodField()
+    utilisateur_prenom = serializers.SerializerMethodField()
+
     class Meta:
         model = Commentaire
-        fields = [
-            'id_commentaire',
-            'utilisateur',
-            'utilisateur_nom',
-            'utilisateur_prenom',
-            'message',
-            'date_commpub',
-            'contenu_comm'
-        ]
-        read_only_fields = ('utilisateur', 'message', 'date_commpub')
+        fields = ['id_commentaire', 'utilisateur', 'administrateur',
+                  'utilisateur_nom', 'utilisateur_prenom',
+                  'message', 'date_commpub', 'contenu_comm']
+
+    def get_utilisateur_nom(self, obj):
+        if obj.administrateur:
+            return "Administrateur"
+        elif obj.utilisateur:
+            return obj.utilisateur.nom
+        return None
+
+    def get_utilisateur_prenom(self, obj):
+        if obj.administrateur:
+            return ""
+        elif obj.utilisateur:
+            return obj.utilisateur.prenom
+        return None
+
 
 
 # ===== Forum Serializer =====
@@ -146,8 +154,20 @@ class MessageSerializer(serializers.ModelSerializer):
 
     def get_user_has_liked(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.likes.filter(utilisateur=request.user).exists() if hasattr(obj, 'likes') else False
+        if not request:
+            return False
+
+        role = getattr(request, "user_role", None)
+
+        if role == "utilisateur":
+            return obj.likes.filter(utilisateur=request.user).exists()
+
+        if role == "admin":
+            administrateur = getattr(request, "administrateur", None)
+            if not administrateur:
+                return False
+            return obj.likes.filter(administrateur=administrateur).exists()
+
         return False
 
 # ===== Like Serializer =====

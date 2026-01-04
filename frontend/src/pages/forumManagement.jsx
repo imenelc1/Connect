@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useMemo, useCallback } from "re
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { 
   createForum, 
   updateForum, 
@@ -198,41 +199,40 @@ const ForumViewModal = ({
                 >
                   {/* En-tête du message */}
                   <div className="flex justify-between items-start mb-4">
-                   // Dans ForumViewModal.jsx - partie affichage du message
-<div className="flex items-center gap-3">
-  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${
-    message.administrateur || message.auteur_type === 'admin' 
-      ? 'bg-gradient-to-br from-purple-500 to-pink-500'  // Couleur spéciale admin
-      : 'bg-gradient-to-br from-blue-500 to-teal-400'    // Couleur normale
-  }`}>
-    {message.administrateur || message.auteur_type === 'admin' 
-      ? '👑'  // Emoji couronne pour admin
-      : (message.utilisateur_nom?.[0] || message.utilisateur?.nom?.[0] || 'U').toUpperCase()
-    }
-  </div>
-  <div>
-    <div className="flex items-center gap-2">
-      <h4 className="font-semibold text-muted">
-        {message.auteur_nom || (message.utilisateur_nom ? `${message.utilisateur_nom} ${message.utilisateur_prenom}` : 'Utilisateur')}
-      </h4>
-      {message.administrateur || message.auteur_type === 'admin' ? (
-        <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full font-medium">
-          Admin
-        </span>
-      ) : null}
-    </div>
-    <p className="text-sm text-gray flex items-center gap-1">
-      <Clock size={12} />
-      {new Date(message.date_publication).toLocaleDateString("fr-FR", {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })}
-    </p>
-  </div>
-</div>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${
+                        message.administrateur || message.auteur_type === 'admin' 
+                          ? 'bg-gradient-to-br from-purple-500 to-pink-500'
+                          : 'bg-gradient-to-br from-blue-500 to-teal-400'
+                      }`}>
+                        {message.administrateur || message.auteur_type === 'admin' 
+                          ? '👑'
+                          : (message.utilisateur_nom?.[0] || message.utilisateur?.nom?.[0] || 'U').toUpperCase()
+                        }
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold text-muted">
+                            {message.auteur_nom || (message.utilisateur_nom ? `${message.utilisateur_nom} ${message.utilisateur_prenom}` : 'Utilisateur')}
+                          </h4>
+                          {message.administrateur || message.auteur_type === 'admin' ? (
+                            <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full font-medium">
+                              Admin
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="text-sm text-gray flex items-center gap-1">
+                          <Clock size={12} />
+                          {new Date(message.date_publication).toLocaleDateString("fr-FR", {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      </div>
+                    </div>
                     
                     {/* Menu actions */}
                     <div className="relative">
@@ -465,6 +465,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
       onClose();
     } catch (err) {
       setError(err.message || "Erreur inconnue");
+      toast.error(err.message || "Une erreur est survenue");
     } finally {
       setLoading(false);
     }
@@ -671,6 +672,7 @@ export default function ForumManagement() {
       const token = localStorage.getItem("admin_token");
 
       if (!token) {
+        toast.error("Admin non authentifié");
         throw new Error("Admin non authentifié");
       }
 
@@ -683,6 +685,7 @@ export default function ForumManagement() {
 
       if (!res.ok) {
         const text = await res.text();
+        toast.error(text || "Erreur serveur");
         throw new Error(text || "Erreur serveur");
       }
 
@@ -705,6 +708,7 @@ export default function ForumManagement() {
     } catch (err) {
       console.error("Erreur chargement forums :", err);
       setError("Impossible de charger les forums");
+      toast.error("Impossible de charger les forums");
     } finally {
       setLoading(false);
     }
@@ -739,317 +743,310 @@ export default function ForumManagement() {
   // =========================
   // HANDLERS FORUMS
   // =========================
-  // Importez le service au début du fichier
+  const handleCreateForum = async (formData) => {
+    const token = localStorage.getItem("admin_token");
+    
+    if (!token) {
+      toast.error("Token manquant. Veuillez vous reconnecter.");
+      return;
+    }
 
-
-// Ensuite, remplacez la fonction handleCreateForum par :
-const handleCreateForum = async (formData) => {
-  const token = localStorage.getItem("admin_token");
-  
-  if (!token) {
-    alert("Token manquant. Veuillez vous reconnecter.");
-    return;
-  }
-
-  try {
-    // FORMAT EXACT pour Django
-    const forumData = {
-      titre_forum: formData.titre_forum.trim(),
-      contenu_forum: formData.contenu_forum.trim(),
-      cible: formData.cible,
-      type: formData.cible === "etudiants" 
-        ? "admin_student_forum"  // IMPORTANT: underscores
-        : "admin_teacher_forum"  // IMPORTANT: underscores
-    };
-
-    console.log("📤 Sending forum data to Django:", forumData);
-
-    if (editingForum) {
-      // MODIFICATION - Utilise l'URL admin
-      const updatedForum = await updateForum(token, editingForum.id, forumData);
-      
-      // Mettre à jour l'état local
-      setForums(prevForums => prevForums.map(f => 
-        f.id === editingForum.id 
-          ? {
-              ...f,
-              title: updatedForum.titre_forum,
-              cible: updatedForum.cible,
-              originalData: updatedForum
-            }
-          : f
-      ));
-
-      alert("✅ Forum modifié avec succès !");
-    } else {
-      // CRÉATION - Utilise l'URL standard
-      const newForum = await createForum(token, forumData);
-      
-      console.log("✅ Response from Django:", newForum);
-      
-      // Vérifiez la réponse
-      if (!newForum.id_forum) {
-        console.error("❌ Invalid response from server:", newForum);
-        throw new Error("Réponse invalide du serveur: id_forum manquant");
-      }
-
-      // Formater pour l'affichage
-      const formattedForum = {
-        id: newForum.id_forum,
-        title: newForum.titre_forum,
-        threads: newForum.nombre_messages || 0,
-        posts: newForum.nombre_likes || 0,
-        members: newForum.nombre_likes || 0,
-        userHasLiked: newForum.user_has_liked || false,
-        cible: newForum.cible,
-        utilisateur: newForum.administrateur 
-          ? "Administrateur" 
-          : `${newForum.utilisateur_nom || ''} ${newForum.utilisateur_prenom || ''}`.trim(),
-        date_creation: newForum.date_creation 
-          ? new Date(newForum.date_creation).toLocaleDateString("fr-FR", {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            })
-          : new Date().toLocaleDateString("fr-FR"),
-        originalData: newForum,
+    try {
+      // FORMAT EXACT pour Django
+      const forumData = {
+        titre_forum: formData.titre_forum.trim(),
+        contenu_forum: formData.contenu_forum.trim(),
+        cible: formData.cible,
+        type: formData.cible === "etudiants" 
+          ? "admin_student_forum"
+          : "admin_teacher_forum"
       };
 
-      console.log("✅ Formatted forum for display:", formattedForum);
+      console.log("📤 Sending forum data to Django:", forumData);
+
+      if (editingForum) {
+        // MODIFICATION - Utilise l'URL admin
+        const updatedForum = await updateForum(token, editingForum.id, forumData);
+        
+        // Mettre à jour l'état local
+        setForums(prevForums => prevForums.map(f => 
+          f.id === editingForum.id 
+            ? {
+                ...f,
+                title: updatedForum.titre_forum,
+                cible: updatedForum.cible,
+                originalData: updatedForum
+              }
+            : f
+        ));
+
+        toast.success("✅ Forum modifié avec succès !");
+      } else {
+        // CRÉATION - Utilise l'URL standard
+        const newForum = await createForum(token, forumData);
+        
+        console.log("✅ Response from Django:", newForum);
+        
+        // Vérifiez la réponse
+        if (!newForum.id_forum) {
+          console.error("❌ Invalid response from server:", newForum);
+          toast.error("Réponse invalide du serveur: id_forum manquant");
+          throw new Error("Réponse invalide du serveur: id_forum manquant");
+        }
+
+        // Formater pour l'affichage
+        const formattedForum = {
+          id: newForum.id_forum,
+          title: newForum.titre_forum,
+          threads: newForum.nombre_messages || 0,
+          posts: newForum.nombre_likes || 0,
+          members: newForum.nombre_likes || 0,
+          userHasLiked: newForum.user_has_liked || false,
+          cible: newForum.cible,
+          utilisateur: newForum.administrateur 
+            ? "Administrateur" 
+            : `${newForum.utilisateur_nom || ''} ${newForum.utilisateur_prenom || ''}`.trim(),
+          date_creation: newForum.date_creation 
+            ? new Date(newForum.date_creation).toLocaleDateString("fr-FR", {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })
+            : new Date().toLocaleDateString("fr-FR"),
+          originalData: newForum,
+        };
+
+        console.log("✅ Formatted forum for display:", formattedForum);
+        
+        setForums(prevForums => [formattedForum, ...prevForums]);
+        toast.success("✅ Forum créé avec succès !");
+      }
+
+      // Fermer le modal
+      setIsModalOpen(false);
+      setEditingForum(null);
+
+    } catch (err) {
+      console.error("❌ Detailed error:", err);
       
-      setForums(prevForums => [formattedForum, ...prevForums]);
-      alert("✅ Forum créé avec succès !");
+      // Messages d'erreur plus clairs
+      let userMessage = err.message;
+      
+      if (err.message.includes("400")) {
+        userMessage = "Données invalides. Vérifiez que tous les champs sont correctement remplis.";
+      } else if (err.message.includes("403")) {
+        userMessage = "Accès interdit. Vous n'avez pas les permissions nécessaires.";
+      } else if (err.message.includes("401")) {
+        userMessage = "Session expirée. Veuillez vous reconnecter.";
+      } else if (err.message.includes("500")) {
+        userMessage = "Erreur serveur. Veuillez réessayer plus tard.";
+      } else if (err.message.includes("NetworkError")) {
+        userMessage = "Erreur réseau. Vérifiez votre connexion internet.";
+      }
+      
+      toast.error(`❌ ${userMessage}`);
+    }
+  };
+
+  const handleDeleteForum = async () => {
+    if (!forumToDelete) return;
+
+    const token = localStorage.getItem("admin_token");
+    
+    if (!token) {
+      toast.error("Token manquant. Veuillez vous reconnecter.");
+      return;
     }
 
-    // Fermer le modal
-    setIsModalOpen(false);
-    setEditingForum(null);
+    try {
+      await deleteForum(token, forumToDelete.id);
+      
+      // Mettre à jour l'état local
+      setForums(prevForums => prevForums.filter(f => f.id !== forumToDelete.id));
 
-  } catch (err) {
-    console.error("❌ Detailed error:", err);
-    
-    // Messages d'erreur plus clairs
-    let userMessage = err.message;
-    
-    if (err.message.includes("400")) {
-      userMessage = "Données invalides. Vérifiez que tous les champs sont correctement remplis.";
-    } else if (err.message.includes("403")) {
-      userMessage = "Accès interdit. Vous n'avez pas les permissions nécessaires.";
-    } else if (err.message.includes("401")) {
-      userMessage = "Session expirée. Veuillez vous reconnecter.";
-    } else if (err.message.includes("500")) {
-      userMessage = "Erreur serveur. Veuillez réessayer plus tard.";
-    } else if (err.message.includes("NetworkError")) {
-      userMessage = "Erreur réseau. Vérifiez votre connexion internet.";
+      // Fermer les modals si nécessaire
+      if (selectedForum && selectedForum.id === forumToDelete.id) {
+        setIsViewModalOpen(false);
+        setSelectedForum(null);
+        setForumMessages([]);
+      }
+
+      setIsDeleteModalOpen(false);
+      setForumToDelete(null);
+
+      toast.success("✅ Forum supprimé avec succès !");
+
+    } catch (err) {
+      console.error("❌ Erreur lors de la suppression:", err);
+      toast.error(`❌ Erreur: ${err.message}`);
     }
-    
-    alert(`❌ ${userMessage}`);
-  }
-};
-
-// Mettez à jour handleDeleteForum pour utiliser la bonne URL admin
-const handleDeleteForum = async () => {
-  if (!forumToDelete) return;
-
-  const token = localStorage.getItem("admin_token");
-  
-  if (!token) {
-    alert("Token manquant. Veuillez vous reconnecter.");
-    return;
-  }
-
-  try {
-    await deleteForum(token, forumToDelete.id);
-    
-    // Mettre à jour l'état local
-    setForums(prevForums => prevForums.filter(f => f.id !== forumToDelete.id));
-
-    // Fermer les modals si nécessaire
-    if (selectedForum && selectedForum.id === forumToDelete.id) {
-      setIsViewModalOpen(false);
-      setSelectedForum(null);
-      setForumMessages([]);
-    }
-
-    setIsDeleteModalOpen(false);
-    setForumToDelete(null);
-
-    alert("✅ Forum supprimé avec succès !");
-
-  } catch (err) {
-    console.error("❌ Erreur lors de la suppression:", err);
-    alert(`❌ Erreur: ${err.message}`);
-  }
-};
+  };
 
   // =========================
   // HANDLERS VIEW MODAL
   // =========================
   const handleViewForum = async (forum) => {
-  setSelectedForum(forum);
-
-  // ⛔ empêche le rechargement si déjà chargé
-  if (forumMessages.length > 0 && selectedForum?.id === forum.id) {
-    setIsViewModalOpen(true);
-    return;
-  }
-  console.log("👁️ handleViewForum appelé pour le forum:", forum);
-  
-  try {
     setSelectedForum(forum);
-    
-    const token = localStorage.getItem("admin_token");
-    console.log("🔑 Token:", token ? "Présent" : "Absent");
-    
-    // ESSAYEZ CES DEUX URLs (l'une peut être la bonne)
-    const url = `http://localhost:8000/api/forums/${forum.id}/messages/`;
-    console.log("🌐 Tentative avec URL:", url);
-    
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
 
-    console.log("📡 Statut de la réponse:", res.status);
-    console.log("📡 OK ?:", res.ok);
+    // ⛔ empêche le rechargement si déjà chargé
+    if (forumMessages.length > 0 && selectedForum?.id === forum.id) {
+      setIsViewModalOpen(true);
+      return;
+    }
+    console.log("👁️ handleViewForum appelé pour le forum:", forum);
     
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("❌ Erreur du serveur:", errorText);
+    try {
+      setSelectedForum(forum);
       
-      // ESSAYEZ L'AUTRE URL
-      console.log("🔄 Essai avec une autre URL...");
-      const alternativeUrl = `http://localhost:8000/api/forums/${forum.id}/messages`;
-      console.log("🌐 Essai avec URL:", alternativeUrl);
+      const token = localStorage.getItem("admin_token");
+      console.log("🔑 Token:", token ? "Présent" : "Absent");
       
-      const res2 = await fetch(alternativeUrl, {
+      // ESSAYEZ CES DEUX URLs (l'une peut être la bonne)
+      const url = `http://localhost:8000/api/forums/${forum.id}/messages/`;
+      console.log("🌐 Tentative avec URL:", url);
+      
+      const res = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
+
+      console.log("📡 Statut de la réponse:", res.status);
+      console.log("📡 OK ?:", res.ok);
       
-      if (res2.ok) {
-        const messagesData = await res2.json();
-        console.log("✅ Messages chargés (alternative):", messagesData.length, "messages");
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ Erreur du serveur:", errorText);
+        
+        // ESSAYEZ L'AUTRE URL
+        console.log("🔄 Essai avec une autre URL...");
+        const alternativeUrl = `http://localhost:8000/api/forums/${forum.id}/messages`;
+        console.log("🌐 Essai avec URL:", alternativeUrl);
+        
+        const res2 = await fetch(alternativeUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (res2.ok) {
+          const messagesData = await res2.json();
+          console.log("✅ Messages chargés (alternative):", messagesData.length, "messages");
+          setForumMessages(messagesData);
+          setIsViewModalOpen(true);
+        } else {
+          const errorText2 = await res2.text();
+          console.error("❌ Deuxième erreur:", errorText2);
+          toast.error("Impossible de charger les messages");
+        }
+      } else {
+        const messagesData = await res.json();
+        console.log("✅ Messages chargés:", messagesData.length, "messages");
         setForumMessages(messagesData);
         setIsViewModalOpen(true);
-      } else {
-        const errorText2 = await res2.text();
-        console.error("❌ Deuxième erreur:", errorText2);
-        alert("Impossible de charger les messages");
       }
-    } else {
-      const messagesData = await res.json();
-      console.log("✅ Messages chargés:", messagesData.length, "messages");
-      setForumMessages(messagesData);
-      setIsViewModalOpen(true);
+    } catch (err) {
+      console.error("❌ Erreur:", err);
+      console.error("❌ Stack:", err.stack);
+      toast.error("Erreur lors du chargement du forum");
     }
-  } catch (err) {
-    console.error("❌ Erreur:", err);
-    console.error("❌ Stack:", err.stack);
-    alert("Erreur lors du chargement du forum");
-  }
-};
+  };
 
   // =========================
   // HANDLERS MESSAGES
   // =========================
- 
-
-const handlePostMessage = useCallback(async (messageContent) => {
-  if (!selectedForum) {
-    toast.error("❌ Aucun forum sélectionné !");
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("admin_token");
-    if (!token) {
-      toast.warning("⚠️ Vous devez être connecté !");
+  const handlePostMessage = useCallback(async (messageContent) => {
+    if (!selectedForum) {
+      toast.error("❌ Aucun forum sélectionné !");
       return;
     }
 
-    const url = `http://localhost:8000/api/forums/${selectedForum.id}/messages/create/`;
-
-    const payload = {
-      contenu_message: messageContent.trim(),
-      forum_id: selectedForum.id,
-    };
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    const responseText = await res.text();
-
-    if (!res.ok) {
-      let errorMessage = `Erreur ${res.status}`;
-      try {
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.error || errorData.detail || errorData.message || responseText;
-      } catch {
-        errorMessage = responseText || "Erreur inconnue";
+    try {
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        toast.warning("⚠️ Vous devez être connecté !");
+        return;
       }
 
-      toast.error(`❌ ${errorMessage}`);
-      throw new Error(errorMessage);
+      const url = `http://localhost:8000/api/forums/${selectedForum.id}/messages/create/`;
+
+      const payload = {
+        contenu_message: messageContent.trim(),
+        forum_id: selectedForum.id,
+      };
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await res.text();
+
+      if (!res.ok) {
+        let errorMessage = `Erreur ${res.status}`;
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorData.detail || errorData.message || responseText;
+        } catch {
+          errorMessage = responseText || "Erreur inconnue";
+        }
+
+        toast.error(`❌ ${errorMessage}`);
+        throw new Error(errorMessage);
+      }
+
+      let newMessage;
+      try {
+        newMessage = JSON.parse(responseText);
+      } catch {
+        toast.error("❌ Réponse invalide du serveur");
+        throw new Error("Réponse invalide du serveur");
+      }
+
+      const enrichedMessage = {
+        ...newMessage,
+        id_message: newMessage.id_message || newMessage.id,
+        contenu_message: newMessage.contenu_message || messageContent,
+        utilisateur_nom: newMessage.utilisateur_nom || "Administrateur",
+        utilisateur_prenom: newMessage.utilisateur_prenom || "",
+        date_publication: newMessage.date_publication || new Date().toISOString(),
+        nombre_likes: newMessage.nombre_likes || 0,
+        user_has_liked: newMessage.user_has_liked || false,
+        commentaires: newMessage.commentaires || [],
+      };
+
+      setForumMessages(prev => [enrichedMessage, ...prev]);
+
+      setForums(prevForums => prevForums.map(f =>
+        f.id === selectedForum.id
+          ? { ...f, threads: (f.threads || 0) + 1 }
+          : f
+      ));
+
+      toast.success("✅ Message envoyé avec succès !");
+      return enrichedMessage;
+
+    } catch (err) {
+      if (err.message.includes("403")) {
+        toast.error("❌ Accès interdit. Vérifiez vos permissions.");
+      } else if (err.message.includes("404")) {
+        toast.error("❌ Endpoint non trouvé. Vérifiez l'URL de l'API.");
+      } else if (err.message.includes("500")) {
+        toast.error("❌ Erreur serveur. Vérifiez les logs Django.");
+      } else {
+        toast.error(`❌ Erreur: ${err.message}`);
+      }
+
+      throw err;
     }
-
-    let newMessage;
-    try {
-      newMessage = JSON.parse(responseText);
-    } catch {
-      toast.error("❌ Réponse invalide du serveur");
-      throw new Error("Réponse invalide du serveur");
-    }
-
-    const enrichedMessage = {
-      ...newMessage,
-      id_message: newMessage.id_message || newMessage.id,
-      contenu_message: newMessage.contenu_message || messageContent,
-      utilisateur_nom: newMessage.utilisateur_nom || "Administrateur",
-      utilisateur_prenom: newMessage.utilisateur_prenom || "",
-      date_publication: newMessage.date_publication || new Date().toISOString(),
-      nombre_likes: newMessage.nombre_likes || 0,
-      user_has_liked: newMessage.user_has_liked || false,
-      commentaires: newMessage.commentaires || [],
-    };
-
-    setForumMessages(prev => [enrichedMessage, ...prev]);
-
-    setForums(prevForums => prevForums.map(f =>
-      f.id === selectedForum.id
-        ? { ...f, threads: (f.threads || 0) + 1 }
-        : f
-    ));
-
-    toast.success("✅ Message envoyé avec succès !");
-    return enrichedMessage;
-
-  } catch (err) {
-    if (err.message.includes("403")) {
-      toast.error("❌ Accès interdit. Vérifiez vos permissions.");
-    } else if (err.message.includes("404")) {
-      toast.error("❌ Endpoint non trouvé. Vérifiez l'URL de l'API.");
-    } else if (err.message.includes("500")) {
-      toast.error("❌ Erreur serveur. Vérifiez les logs Django.");
-    } else {
-      toast.error(`❌ Erreur: ${err.message}`);
-    }
-
-    throw err;
-  }
-}, [selectedForum]);
-
+  }, [selectedForum]);
 
   const handlePostComment = useCallback(async (messageId, commentContent) => {
     try {
@@ -1073,10 +1070,14 @@ const handlePostMessage = useCallback(async (messageContent) => {
               }
             : msg
         ));
+        toast.success("✅ Commentaire publié !");
+      } else {
+        const errorText = await res.text();
+        toast.error(`❌ Erreur: ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
-      alert("Erreur lors de l'envoi du commentaire");
+      toast.error("Erreur lors de l'envoi du commentaire");
     }
   }, []);
 
@@ -1102,9 +1103,12 @@ const handlePostMessage = useCallback(async (messageContent) => {
               }
             : msg
         ));
+      } else {
+        toast.error("❌ Erreur lors du like");
       }
     } catch (err) {
       console.error("Erreur:", err);
+      toast.error("❌ Erreur réseau");
     }
   }, []);
 
@@ -1127,9 +1131,14 @@ const handlePostMessage = useCallback(async (messageContent) => {
               : f
           ));
         }
+        toast.success("✅ Message supprimé !");
+      } else {
+        const errorText = await res.text();
+        toast.error(`❌ Erreur: ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
+      toast.error("❌ Erreur lors de la suppression");
     }
   }, [selectedForum]);
 
@@ -1154,9 +1163,14 @@ const handlePostMessage = useCallback(async (messageContent) => {
               }
             : msg
         ));
+        toast.success("✅ Commentaire supprimé !");
+      } else {
+        const errorText = await res.text();
+        toast.error(`❌ Erreur: ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
+      toast.error("❌ Erreur lors de la suppression");
     }
   }, []);
 
