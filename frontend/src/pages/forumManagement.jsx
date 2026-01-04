@@ -1,7 +1,18 @@
 import React, { useState, useEffect, useContext, useMemo, useCallback } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
-import { createForum, updateForum, deleteForum } from "../services/forumService";
+import { 
+  createForum, 
+  updateForum, 
+  deleteForum, 
+  fetchForums,
+  createMessage,
+  fetchForumMessages,
+  deleteMessage,
+  createComment,
+  deleteComment,
+  likeMessage
+} from "../services/forumService";
 import { 
   MessageSquare, 
   TrendingUp, 
@@ -186,26 +197,41 @@ const ForumViewModal = ({
                 >
                   {/* En-tête du message */}
                   <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-grad-2 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
-                        {message.utilisateur_nom?.[0] || message.utilisateur?.nom?.[0] || "U"}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-muted">
-                          {message.utilisateur_nom || message.utilisateur?.nom || "Utilisateur"} {message.utilisateur_prenom || message.utilisateur?.prenom || ""}
-                        </h4>
-                        <p className="text-sm text-gray flex items-center gap-1">
-                          <Clock size={12} />
-                          {new Date(message.date_publication).toLocaleDateString("fr-FR", {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                    </div>
+                   // Dans ForumViewModal.jsx - partie affichage du message
+<div className="flex items-center gap-3">
+  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${
+    message.administrateur || message.auteur_type === 'admin' 
+      ? 'bg-gradient-to-br from-purple-500 to-pink-500'  // Couleur spéciale admin
+      : 'bg-gradient-to-br from-blue-500 to-teal-400'    // Couleur normale
+  }`}>
+    {message.administrateur || message.auteur_type === 'admin' 
+      ? '👑'  // Emoji couronne pour admin
+      : (message.utilisateur_nom?.[0] || message.utilisateur?.nom?.[0] || 'U').toUpperCase()
+    }
+  </div>
+  <div>
+    <div className="flex items-center gap-2">
+      <h4 className="font-semibold text-muted">
+        {message.auteur_nom || (message.utilisateur_nom ? `${message.utilisateur_nom} ${message.utilisateur_prenom}` : 'Utilisateur')}
+      </h4>
+      {message.administrateur || message.auteur_type === 'admin' ? (
+        <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full font-medium">
+          Admin
+        </span>
+      ) : null}
+    </div>
+    <p className="text-sm text-gray flex items-center gap-1">
+      <Clock size={12} />
+      {new Date(message.date_publication).toLocaleDateString("fr-FR", {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}
+    </p>
+  </div>
+</div>
                     
                     {/* Menu actions */}
                     <div className="relative">
@@ -718,12 +744,6 @@ export default function ForumManagement() {
 // Ensuite, remplacez la fonction handleCreateForum par :
 const handleCreateForum = async (formData) => {
   const token = localStorage.getItem("admin_token");
-  const adminData = JSON.parse(localStorage.getItem("admin")) || {};
-  
-  console.log("=== DEBUG CREATE FORUM ===");
-  console.log("Token:", token ? "Token exists" : "No token");
-  console.log("Admin data:", adminData);
-  console.log("Form data:", formData);
   
   if (!token) {
     alert("Token manquant. Veuillez vous reconnecter.");
@@ -731,25 +751,22 @@ const handleCreateForum = async (formData) => {
   }
 
   try {
-    // CORRECTION: Utilisez les types que Django attend
-    const forumType = formData.cible === "etudiants" 
-      ? "admin-student-forum"  // Django attend ce format
-      : "admin-teacher-forum"; // Django attend ce format
-    
+    // FORMAT EXACT pour Django
     const forumData = {
-      titre_forum: formData.titre_forum,
-      contenu_forum: formData.contenu_forum,
+      titre_forum: formData.titre_forum.trim(),
+      contenu_forum: formData.contenu_forum.trim(),
       cible: formData.cible,
-      type: forumType  // Envoyer le bon format
+      type: formData.cible === "etudiants" 
+        ? "admin_student_forum"  // IMPORTANT: underscores
+        : "admin_teacher_forum"  // IMPORTANT: underscores
     };
 
-    console.log("Sending forum data to Django:", forumData);
+    console.log("📤 Sending forum data to Django:", forumData);
 
     if (editingForum) {
-      // MODIFICATION
+      // MODIFICATION - Utilise l'URL admin
       const updatedForum = await updateForum(token, editingForum.id, forumData);
-      console.log("Update response:", updatedForum);
-
+      
       // Mettre à jour l'état local
       setForums(prevForums => prevForums.map(f => 
         f.id === editingForum.id 
@@ -764,12 +781,18 @@ const handleCreateForum = async (formData) => {
 
       alert("✅ Forum modifié avec succès !");
     } else {
-      // CRÉATION
-      console.log("Creating new forum...");
+      // CRÉATION - Utilise l'URL standard
       const newForum = await createForum(token, forumData);
-      console.log("Create response:", newForum);
+      
+      console.log("✅ Response from Django:", newForum);
+      
+      // Vérifiez la réponse
+      if (!newForum.id_forum) {
+        console.error("❌ Invalid response from server:", newForum);
+        throw new Error("Réponse invalide du serveur: id_forum manquant");
+      }
 
-      // Format the new forum for display
+      // Formater pour l'affichage
       const formattedForum = {
         id: newForum.id_forum,
         title: newForum.titre_forum,
@@ -778,54 +801,65 @@ const handleCreateForum = async (formData) => {
         members: newForum.nombre_likes || 0,
         userHasLiked: newForum.user_has_liked || false,
         cible: newForum.cible,
-        utilisateur: newForum.administrateur ? "Administrateur" : 
-                    `${newForum.utilisateur_nom || ''} ${newForum.utilisateur_prenom || ''}`,
-        date_creation: new Date(newForum.date_creation).toLocaleDateString("fr-FR"),
+        utilisateur: newForum.administrateur 
+          ? "Administrateur" 
+          : `${newForum.utilisateur_nom || ''} ${newForum.utilisateur_prenom || ''}`.trim(),
+        date_creation: newForum.date_creation 
+          ? new Date(newForum.date_creation).toLocaleDateString("fr-FR", {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })
+          : new Date().toLocaleDateString("fr-FR"),
         originalData: newForum,
       };
 
-      console.log("Formatted forum:", formattedForum);
+      console.log("✅ Formatted forum for display:", formattedForum);
       
       setForums(prevForums => [formattedForum, ...prevForums]);
       alert("✅ Forum créé avec succès !");
     }
 
-    // Fermer le modal et réinitialiser
+    // Fermer le modal
     setIsModalOpen(false);
     setEditingForum(null);
 
   } catch (err) {
-    console.error("Erreur détaillée:", err);
-    console.error("Error stack:", err.stack);
-    alert(`❌ Erreur: ${err.message}`);
+    console.error("❌ Detailed error:", err);
+    
+    // Messages d'erreur plus clairs
+    let userMessage = err.message;
+    
+    if (err.message.includes("400")) {
+      userMessage = "Données invalides. Vérifiez que tous les champs sont correctement remplis.";
+    } else if (err.message.includes("403")) {
+      userMessage = "Accès interdit. Vous n'avez pas les permissions nécessaires.";
+    } else if (err.message.includes("401")) {
+      userMessage = "Session expirée. Veuillez vous reconnecter.";
+    } else if (err.message.includes("500")) {
+      userMessage = "Erreur serveur. Veuillez réessayer plus tard.";
+    } else if (err.message.includes("NetworkError")) {
+      userMessage = "Erreur réseau. Vérifiez votre connexion internet.";
+    }
+    
+    alert(`❌ ${userMessage}`);
   }
 };
 
-  const handleDeleteForum = async () => {
+// Mettez à jour handleDeleteForum pour utiliser la bonne URL admin
+const handleDeleteForum = async () => {
   if (!forumToDelete) return;
 
   const token = localStorage.getItem("admin_token");
-  const userRole = JSON.parse(localStorage.getItem("admin"))?.role || "admin";
-
+  
   if (!token) {
     alert("Token manquant. Veuillez vous reconnecter.");
     return;
   }
 
-  if (userRole !== "admin") {
-    alert("Seuls les administrateurs peuvent supprimer des forums");
-    return;
-  }
-
   try {
-    const confirmed = window.confirm(
-      `Êtes-vous sûr de vouloir supprimer le forum "${forumToDelete.title}" ? Cette action est irréversible.`
-    );
-
-    if (!confirmed) return;
-
     await deleteForum(token, forumToDelete.id);
-
+    
     // Mettre à jour l'état local
     setForums(prevForums => prevForums.filter(f => f.id !== forumToDelete.id));
 
@@ -842,7 +876,7 @@ const handleCreateForum = async (formData) => {
     alert("✅ Forum supprimé avec succès !");
 
   } catch (err) {
-    console.error("Erreur lors de la suppression:", err);
+    console.error("❌ Erreur lors de la suppression:", err);
     alert(`❌ Erreur: ${err.message}`);
   }
 };
@@ -851,6 +885,13 @@ const handleCreateForum = async (formData) => {
   // HANDLERS VIEW MODAL
   // =========================
   const handleViewForum = async (forum) => {
+  setSelectedForum(forum);
+
+  // ⛔ empêche le rechargement si déjà chargé
+  if (forumMessages.length > 0 && selectedForum?.id === forum.id) {
+    setIsViewModalOpen(true);
+    return;
+  }
   console.log("👁️ handleViewForum appelé pour le forum:", forum);
   
   try {
@@ -1057,7 +1098,7 @@ const handleCreateForum = async (formData) => {
   const handlePostComment = useCallback(async (messageId, commentContent) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/commentaires/`, {
+      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/comments/create/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1114,7 +1155,7 @@ const handleCreateForum = async (formData) => {
   const handleDeleteMessage = useCallback(async (messageId) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/`, {
+      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/delete/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1139,7 +1180,7 @@ const handleCreateForum = async (formData) => {
   const handleDeleteComment = useCallback(async (commentId, messageId) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/commentaires/${commentId}/`, {
+      const res = await fetch(`http://localhost:8000/api/comments/${commentId}/delete/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

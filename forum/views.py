@@ -2,12 +2,19 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
+
+#from badges.views import check_top_commentateur_badge, check_top_forum_badge
 from .models import Forum, Message, Commentaire, Like, MessageLike
 from .serializers import ForumSerializer, MessageSerializer, CommentaireSerializer
 from users.jwt_helpers import IsAuthenticatedJWT
 from users.models import Administrateur
 
 
+
+from django.shortcuts import get_object_or_404  # ← AJOUTE CET IMPORT
+
+# OU utilise cette approche :
+from django.http import Http404
 # ========== FORUMS ==========
 from django.db.models import Q
 
@@ -202,6 +209,10 @@ def like_forum(request, forum_id):
         action = "liked"
     
     likes_count = Like.objects.filter(forum=forum).count()
+
+
+
+    check_top_forum_badge(request.user)
     
     return Response({
         'message': f'Forum {action} avec succès',
@@ -290,107 +301,55 @@ def forum_messages(request, forum_id):
     """
     GET : Liste tous les messages d'un forum.
     """
-    try:
-        forum = Forum.objects.get(pk=forum_id)
-    except Forum.DoesNotExist:
-        return Response({'error': 'Forum introuvable'}, status=404)
+    # Récupère le forum ou renvoie 404
+    forum = get_object_or_404(Forum, id_forum=forum_id)
 
+    # Récupère les messages liés au forum
     messages = Message.objects.filter(forum=forum).order_by('date_publication')
+
+    # Sérialise la liste de messages
     serializer = MessageSerializer(messages, many=True, context={'request': request})
-    return Response(serializer.data, status=200)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
-from django.views.decorators.csrf import csrf_exempt
-# forum/views.py
-from django.shortcuts import get_object_or_404  # ← AJOUTE CET IMPORT
-
-# OU utilise cette approche :
-from django.http import Http404
-
-@csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedJWT])
 def create_message(request, forum_id):
-    """Crée un message dans un forum - VERSION CORRIGÉE"""
-    print("=" * 60)
-    print("🆕 CREATE_MESSAGE appelé")
-    print(f"🎯 Forum ID: {forum_id}")
-    print(f"👤 User: {request.user}")
-    print(f"🔑 Role: {getattr(request, 'user_role', 'inconnu')}")
-    print(f"📦 Data: {request.data}")
-    print("=" * 60)
-    
-    # OPTION 1: Avec get_object_or_404
-    try:
-        forum = get_object_or_404(Forum, id_forum=forum_id)
-        print(f"✅ Forum trouvé: {forum.titre_forum} (ID: {forum.id_forum})")
-    except Http404:
-        print(f"❌ Forum {forum_id} non trouvé")
-        return Response({'error': 'Forum introuvable'}, status=404)
-    
-    # OPTION 2: Plus simple sans get_object_or_404
-    # try:
-    #     forum = Forum.objects.get(id_forum=forum_id)
-    #     print(f"✅ Forum trouvé: {forum.titre_forum}")
-    # except Forum.DoesNotExist:
-    #     print(f"❌ Forum {forum_id} non trouvé")
-    #     return Response({'error': 'Forum introuvable'}, status=404)
-    
-    # Récupère le contenu
-    contenu_message = request.data.get('contenu_message')
-    print(f"📝 Contenu reçu: {contenu_message}")
-    
-    if not contenu_message or not str(contenu_message).strip():
-        print("❌ Contenu vide ou null")
-        return Response({'error': 'Le contenu du message est requis'}, status=400)
-    
-    # Détermine l'auteur
+    """
+    Crée un message dans un forum (admin ou utilisateur).
+    """
     role = getattr(request, "user_role", None)
-    print(f"👥 Rôle détecté: {role}")
-    
+    user = request.user
+
+    forum = get_object_or_404(Forum, id_forum=forum_id)
+    data = request.data.copy()
+
+    contenu_message = data.get('contenu_message')
+
+    if not contenu_message or not contenu_message.strip():
+        return Response(
+            {'error': 'Le contenu du message est requis'},
+            status=400
+        )
+
     admin_user = None
     utilisateur_user = None
-    
+
     if role == "admin":
-        print("👑 Création par admin")
-        try:
-            admin_user = Administrateur.objects.filter(email_admin=request.user.adresse_email).first()
-            print(f"✅ Admin trouvé: {admin_user}")
-        except Exception as e:
-            print(f"⚠️ Erreur recherche admin: {e}")
-            admin_user = None
+        admin_user = Administrateur.objects.first()
+        utilisateur_user = None  # ⚡ important : pas d'utilisateur normal
     else:
-        print("👤 Création par utilisateur")
-        utilisateur_user = request.user
-        print(f"✅ Utilisateur: {utilisateur_user}")
-    
-    # Crée le message
-    try:
-        print("🛠️ Création de l'objet Message...")
-        message = Message.objects.create(
-            forum=forum,
-            administrateur=admin_user,
-            utilisateur=utilisateur_user,
-            contenu_message=str(contenu_message).strip()
-        )
-        
-        print(f"✅ Message créé avec ID: {message.id_message}")
-        print(f"✅ Contenu: {message.contenu_message}")
-        print(f"✅ Date: {message.date_publication}")
-        
-        # Sérialise la réponse
-        print("🔄 Sérialisation...")
-        serializer = MessageSerializer(message, context={'request': request})
-        
-        print("✅ Sérialisation réussie!")
-        print(f"✅ Données renvoyées: {serializer.data}")
-        
-        return Response(serializer.data, status=201)
-        
-    except Exception as e:
-        print(f"❌ Erreur création message: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return Response({'error': f'Erreur serveur: {str(e)}'}, status=500)
+        # étudiant ou enseignant
+        utilisateur_user = user
+
+    message = Message.objects.create(
+        forum=forum,
+        administrateur=admin_user,
+        utilisateur=utilisateur_user,
+        contenu_message=contenu_message.strip()
+    )
+
+    serializer = MessageSerializer(message, context={'request': request})
+    return Response(serializer.data, status=201)
 
 
 @api_view(['DELETE'])
@@ -460,3 +419,30 @@ def get_destinataires(forum):
         return Utilisateur.objects.filter(enseignant__isnull=False)
     else:
         return Utilisateur.objects.none()
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedJWT])
+def admin_create_message(request, forum_id):
+    if request.user_role != "admin":
+        return Response({'error': 'Accès réservé aux administrateurs'}, status=403)
+
+    forum = get_object_or_404(Forum, id_forum=forum_id)
+    contenu_message = request.data.get('contenu_message')
+
+    if not contenu_message or not contenu_message.strip():
+        return Response({'error': 'Le contenu du message est requis'}, status=400)
+
+    admin_user = Administrateur.objects.filter(email_admin=request.user.adresse_email).first()
+    if not admin_user:
+        return Response({'error': 'Admin non trouvé'}, status=404)
+
+    message = Message.objects.create(
+        forum=forum,
+        administrateur=admin_user,
+        utilisateur=None,
+        contenu_message=contenu_message.strip()
+    )
+
+    serializer = MessageSerializer(message, context={'request': request})
+    return Response(serializer.data, status=201)

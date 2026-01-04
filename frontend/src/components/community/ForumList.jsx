@@ -27,57 +27,53 @@ export default function ForumList({
   const [postingMessage, setPostingMessage] = useState({});
 
   const loadForumMessages = useCallback(async (forumId) => {
-    if (!token || !forumId) return;
+  if (!token || !forumId) return;
 
-    setLoadingMessages(prev => ({ ...prev, [forumId]: true }));
+  setLoadingMessages(prev => ({ ...prev, [forumId]: true }));
 
-    try {
-      const response = await fetch(`${API_URL}/forums/${forumId}/messages/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+  try {
+    const response = await fetch(`${API_URL}/forums/${forumId}/messages/`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
+    });
 
-      const forumData = await response.json();
-      const messagesArray = Array.isArray(forumData.messages)
-        ? forumData.messages
-        : [];
+    if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
 
-      const messagesWithComments = messagesArray.map(msg => ({
-        ...msg,
-        commentaires: msg.commentaires || [],
-        nombre_commentaires: msg.nombre_commentaires ?? (msg.commentaires?.length || 0)
-      }));
+    const forumData = await response.json();
 
-      setMessages(prev => ({
-        ...prev,
-        [forumId]: messagesWithComments
-      }));
+    // ⚠️ ici : forumData est déjà un array
+    const messagesArray = Array.isArray(forumData) ? forumData : [];
 
-      setPosts(prev =>
-        prev.map(post =>
-          post.id === forumId
-            ? { ...post, commentsCount: messagesArray.length }
-            : post
-        )
-      );
+    const messagesWithComments = messagesArray.map(msg => ({
+      ...msg,
+      commentaires: msg.commentaires || [],
+      nombre_commentaires: msg.nombre_commentaires ?? (msg.commentaires?.length || 0)
+    }));
 
-    } catch (error) {
-      console.error(`Erreur chargement messages forum ${forumId}:`, error);
-      setMessages(prev => ({
-        ...prev,
-        [forumId]: []
-      }));
-      setError(`Erreur chargement messages: ${error.message}`);
-    } finally {
-      setLoadingMessages(prev => ({ ...prev, [forumId]: false }));
-    }
-  }, [token, API_URL, setPosts, setError]);
+    setMessages(prev => ({
+      ...prev,
+      [forumId]: messagesWithComments
+    }));
+
+    setPosts(prev =>
+      prev.map(post =>
+        post.id === forumId
+          ? { ...post, commentsCount: messagesArray.length }
+          : post
+      )
+    );
+
+  } catch (error) {
+    console.error(`Erreur chargement messages forum ${forumId}:`, error);
+    setMessages(prev => ({ ...prev, [forumId]: [] }));
+    setError(`Erreur chargement messages: ${error.message}`);
+  } finally {
+    setLoadingMessages(prev => ({ ...prev, [forumId]: false }));
+  }
+}, [token, API_URL, setPosts, setError]);
+
 
   const toggleForumMessages = useCallback(async (forumId) => {
     const isExpanded = expandedForums[forumId];
@@ -320,7 +316,7 @@ export default function ForumList({
     if (posts.length > 0) {
       loadInitialMessages();
     }
-  }, [posts, token, messages]);
+  }, [posts, token]);
 
   return (
     <div className="space-y-6">

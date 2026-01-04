@@ -43,9 +43,10 @@ export default function CommunityPage() {
   const role = userData?.role;
   const userId = userData?.user_id;
   
-  const API_URL = window.location.hostname === "localhost" 
+  const API_URL = window.REACT_APP_API_URL || 
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:8000/api" 
-    : "/api";
+    : "/api");
 
   const { toggleDarkMode } = useContext(ThemeContext);
   
@@ -55,30 +56,30 @@ export default function CommunityPage() {
   );
 
   const forumOptions = useMemo(() => {
-    // OPTIONS EXACTES COMME DEMANDÉ :
-    
     if (role === "enseignant") {
       return [
         { value: "all", label: "Tous les forums" },
         { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
-        { value: "teacher-student", label: "Enseignants ↔ Étudiants" }  // Regroupe teacher-student + student-teacher
+        { value: "teacher-student", label: "Enseignants ↔ Étudiants" }
       ];
     } 
     else if (role === "etudiant") {
       return [
         { value: "all", label: "Tous les forums" },
         { value: "student-student", label: "Étudiants ↔ Étudiants" },
-        { value: "student-teacher", label: "Étudiants ↔ Enseignants" }  // Regroupe teacher-student + student-teacher
+        { value: "student-teacher", label: "Étudiants ↔ Enseignants" }
       ];
     }
     
-    // Pour admin ou autres rôles (au cas où)
+    // Pour admin ou autres rôles
     return [
       { value: "all", label: "Tous les forums" },
       { value: "teacher-teacher", label: "Enseignants ↔ Enseignants" },
       { value: "teacher-student", label: "Enseignant → Étudiants" },
       { value: "student-student", label: "Étudiants ↔ Étudiants" },
-      { value: "student-teacher", label: "Étudiant → Enseignants" }
+      { value: "student-teacher", label: "Étudiant → Enseignants" },
+      { value: "admin-student-forum", label: "Admin → Étudiants" },
+      { value: "admin-teacher-forum", label: "Admin → Enseignants" }
     ];
   }, [role]);
 
@@ -138,10 +139,12 @@ export default function CommunityPage() {
     if (!token) {
       setError("Token manquant - Veuillez vous reconnecter");
       setIsLoading(false);
+      navigate("/login");
       return;
     }
     
     try {
+      setIsLoading(true);
       const response = await fetch(`${API_URL}/forums/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,60 +153,43 @@ export default function CommunityPage() {
       });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          navigate("/login");
+          return;
+        }
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
       
       const forums = await response.json();
       
-      // Filtrer selon les règles de visibilité
-      // Dans la fonction qui filtre les forums
-// In the fetchForums function, update the filtering section:
-
-// Filtrer selon les règles de visibilité
-const visibleForums = forums.filter(forum => {
-    const forumType = forum.type;
-    const cible = forum.cible;
-    const creatorRole = forum.utilisateur_role; // Get creator role from backend
-    
-    if (role === "etudiant") {
-        // Étudiant voit :
-        // 1. Forums étudiants (student-student, teacher-student)
-        // 2. Forums admin pour étudiants
-        if (forumType === "student-student" || forumType === "teacher-student") {
-            return true;
+      // Filtrage simplifié et corrigé
+      const visibleForums = forums.filter(forum => {
+        const forumType = forum.type;
+        const cible = forum.cible;
+        const creatorRole = forum.utilisateur_role;
+        
+        if (role === "etudiant") {
+          // Étudiants peuvent voir :
+          const isStudentForum = forumType === "student-student" || forumType === "teacher-student";
+          const isAdminForStudents = forumType === "admin-student-forum" || 
+                                    (creatorRole === "admin" && cible === "etudiants");
+          return isStudentForum || isAdminForStudents;
         }
-        if (forumType === "admin-student-forum" && cible === "etudiants") {
-            return true;
+        
+        if (role === "enseignant") {
+          // Enseignants peuvent voir :
+          const isTeacherForum = forumType === "teacher-teacher" || forumType === "student-teacher";
+          const isAdminForTeachers = forumType === "admin-teacher-forum" || 
+                                    (creatorRole === "admin" && cible === "enseignants");
+          return isTeacherForum || isAdminForTeachers;
         }
-        // Also show admin-created forums for students
-        if (creatorRole === "admin" && cible === "etudiants") {
-            return true;
+        
+        if (role === "admin") {
+          return true;
         }
+        
         return false;
-    } 
-    else if (role === "enseignant") {
-        // Enseignant voit :
-        // 1. Forums enseignants (teacher-teacher, student-teacher)
-        // 2. Forums admin pour enseignants
-        if (forumType === "teacher-teacher" || forumType === "student-teacher") {
-            return true;
-        }
-        if (forumType === "admin-teacher-forum" && cible === "enseignants") {
-            return true;
-        }
-        // Also show admin-created forums for teachers
-        if (creatorRole === "admin" && cible === "enseignants") {
-            return true;
-        }
-        return false;
-    }
-    else if (role === "admin") {
-        // Admin voit tout
-        return true;
-    }
-    
-    return false;
-});
+      });
       
       const transformedForums = visibleForums.map(forum => ({
         id: forum.id_forum,
@@ -229,18 +215,18 @@ const visibleForums = forums.filter(forum => {
       setError("");
     } catch (error) {
       console.error("Erreur chargement forums:", error);
-      setError("Impossible de charger les forums. Vérifiez votre connexion.");
+      setError(`Impossible de charger les forums: ${error.message}`);
       setPosts([]);
     } finally {
       setIsLoading(false);
     }
-  }, [token, role, userId, API_URL, checkAllForumLikes]);
+  }, [token, role, userId, API_URL, checkAllForumLikes, navigate]);
 
   useEffect(() => {
     if (token && role) {
       fetchForums();
     }
-  }, [token, role, userId, API_URL, checkAllForumLikes]);
+  }, [token, role, fetchForums]);
 
   const getFilteredPosts = useCallback(() => {
     let filtered = [...posts];
@@ -248,19 +234,16 @@ const visibleForums = forums.filter(forum => {
     if (forumType !== "all") {
       // Gérer les options spéciales du dropdown
       if (role === "enseignant" && forumType === "teacher-student") {
-        // Pour enseignant : "Enseignants ↔ Étudiants" = teacher-student + student-teacher
         filtered = filtered.filter(post => 
           post.type === "teacher-student" || post.type === "student-teacher"
         );
       } 
       else if (role === "etudiant" && forumType === "student-teacher") {
-        // Pour étudiant : "Étudiants ↔ Enseignants" = teacher-student + student-teacher
         filtered = filtered.filter(post => 
           post.type === "teacher-student" || post.type === "student-teacher"
         );
       }
       else {
-        // Filtre normal par type exact
         filtered = filtered.filter(post => post.type === forumType);
       }
     }
@@ -278,7 +261,7 @@ const visibleForums = forums.filter(forum => {
 
   const finalPosts = useMemo(() => getFilteredPosts(), [getFilteredPosts]);
 
-  // Fonction pour obtenir le label du type de forum dans l'affichage des posts
+  // Fonction pour obtenir le label du type de forum
   const getDisplayForumTypeLabel = useCallback((type) => {
     if (role === "enseignant") {
       if (type === "teacher-student" || type === "student-teacher") {
@@ -372,7 +355,7 @@ const visibleForums = forums.filter(forum => {
           userId={userId}
           setError={setError}
           triggerNotificationEvent={triggerNotificationEvent}
-          getForumTypeLabel={getDisplayForumTypeLabel}  // Utiliser la fonction adaptée
+          getForumTypeLabel={getDisplayForumTypeLabel}
           getForumTypeClasses={getForumTypeClasses}
           formatTimeAgo={formatTimeAgo}
           t={t}
