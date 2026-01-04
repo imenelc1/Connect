@@ -2,60 +2,69 @@ import React, { useState, useRef, useEffect } from "react";
 import { Sun, Moon, Globe } from "lucide-react";
 import i18n from "../../i18n";
 
-export default function UserCircle({ initials, onToggleTheme }) {
+export default function UserCircle({
+  initials,
+  onToggleTheme,
+  clickable = true
+}) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const [currentLang, setCurrentLang] = useState(i18n.language || "fr");
-const [isEditing, setIsEditing] = useState(false);
 
-  // Fermer dropdown si clic extérieur
+  // Changement de langue
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("lang", lang);
+    setCurrentLang(lang);
+  };
+
+  // Fermer si clic extérieur
   useEffect(() => {
+    if (!clickable) return;
+
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Fonction pour changer la langue
-  const changeLanguage = (lang) => {
-    i18n.changeLanguage(lang);
-    localStorage.setItem("lang", lang); // persistance
-    setCurrentLang(lang);
-  };
+  }, [clickable]);
 
   return (
     <div ref={menuRef} className="relative select-none z-50">
-
       {/* Cercle utilisateur */}
       <div
-        onClick={() => setOpen(!open)}
-        className="w-12 h-12 rounded-full bg-grad-1 text-white flex items-center justify-center font-semibold shadow-lg cursor-pointer hover:opacity-90"
+        onClick={clickable ? () => setOpen(!open) : undefined}
+        className={`w-14 h-14 rounded-full bg-grad-1 text-white flex items-center justify-center 
+        font-semibold shadow-lg ${
+          clickable ? "cursor-pointer hover:opacity-90" : ""
+        }`}
       >
         {initials}
       </div>
 
-      {/* Dropdown */}
-      {open && (
+      {/* Dropdown paramètres */}
+      {clickable && open && (
         <div
-          className="absolute top-14 right-0 w-60 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-2xl 
-                     rounded-2xl p-3 border border-white/30 dark:border-gray-700/40 
-                     animate-[fadeIn_0.15s_ease-out]"
+          className="absolute top-16 right-0 w-60 backdrop-blur-md bg-white/80 
+          dark:bg-gray-900/80 shadow-2xl rounded-2xl p-3 
+          border border-white/30 dark:border-gray-700/40 animate-fadeIn"
         >
           <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2 mb-2">
             Paramètres
           </h3>
 
-          {/* Changer thème */}
+          {/* Thème */}
           <button
             onClick={onToggleTheme}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-gray-200/60 dark:hover:bg-gray-700/50 transition"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl 
+            hover:bg-gray-200/60 dark:hover:bg-gray-700/50 transition"
           >
             <span className="flex items-center gap-2">
               <Sun size={16} />
-              <span>Changer le thème</span>
+              Changer le thème
             </span>
             <Moon size={16} />
           </button>
@@ -63,24 +72,22 @@ const [isEditing, setIsEditing] = useState(false);
           {/* Langues */}
           <button
             onClick={() => changeLanguage("fr")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-gray-200/60 dark:hover:bg-gray-700/50 transition ${
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl transition 
+            hover:bg-gray-200/60 dark:hover:bg-gray-700/50 ${
               currentLang === "fr" ? "bg-primary/20" : ""
             }`}
           >
-            <span className="flex items-center gap-2">
-              <Globe size={16} /> Français
-            </span>
+            <Globe size={16} /> Français
           </button>
 
           <button
             onClick={() => changeLanguage("en")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-gray-200/60 dark:hover:bg-gray-700/50 transition ${
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl transition 
+            hover:bg-gray-200/60 dark:hover:bg-gray-700/50 ${
               currentLang === "en" ? "bg-primary/20" : ""
             }`}
           >
-            <span className="flex items-center gap-2">
-              <Globe size={16} /> English
-            </span>
+            <Globe size={16} /> English
           </button>
         </div>
       )}

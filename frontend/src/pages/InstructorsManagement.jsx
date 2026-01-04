@@ -9,39 +9,19 @@ import { Users, Trash2, Edit, Calendar, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import api from "../services/api";
+import UserCircle from "../components/common/UserCircle";
+import InstructorDetailModal from "../components/ui/InstructorDetailModal";
 
-// ================= MODAL DETAILS =================
-function InstructorDetailModal({ open, onClose, instructor }) {
-  if (!open || !instructor) return null;
-  const { t } = useTranslation("instructors");
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-      <div className="bg-card rounded-xl shadow-lg p-6 w-[400px]">
-        <h2 className="text-xl text-muted font-bold mb-4">{t("instructorResume")}</h2>
-        <ul className="text-sm text-gray space-y-2">
-          <li><strong>{t("firstName")} :</strong> {instructor.nickname}</li>
-          <li><strong>{t("lastName")} :</strong> {instructor.fullname}</li>
-          <li><strong>{t("email")} :</strong> {instructor.email}</li>
-          <li><strong>{t("birthdate")} :</strong> {instructor.dob}</li>
-          <li><strong>{t("rank")} :</strong> {instructor.rank}</li>
-          <li><strong>{t("matricule")} :</strong> {instructor.regnumber}</li>
-        </ul>
 
-        <div className="mt-4 flex justify-end">
-          <Button variant="secondary" onClick={onClose}>{t("close")}</Button>
-        </div>
-      </div>
-    </div>
-  );
-}
+
+
 
 // ================= MODAL AJOUT / EDIT =================
 function InstructorAddEditModal({ open, onClose, onSubmit, instructorForm, setInstructorForm, errors, isEdit }) {
-  if (!open) return null;
   const { t } = useTranslation("instructors");
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+    <div className={`fixed inset-0 flex items-center justify-center bg-black/40 z-50 ${open ? "" : "hidden"}`}>
       <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-lg overflow-y-auto max-h-[90vh]">
         <h2 className="text-xl font-bold mb-4">
           {isEdit ? t("updateInstructor") : t("addInstructor")}
@@ -49,19 +29,20 @@ function InstructorAddEditModal({ open, onClose, onSubmit, instructorForm, setIn
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              label={t("firstName")}
-              name="nickname"
-              value={instructorForm.nickname}
-              onChange={e => setInstructorForm({ ...instructorForm, nickname: e.target.value })}
-              error={errors.nickname}
-            />
+
             <Input
               label={t("lastName")}
               name="fullname"
               value={instructorForm.fullname}
               onChange={e => setInstructorForm({ ...instructorForm, fullname: e.target.value })}
               error={errors.fullname}
+            />
+            <Input
+              label={t("firstName")}
+              name="nickname"
+              value={instructorForm.nickname}
+              onChange={e => setInstructorForm({ ...instructorForm, nickname: e.target.value })}
+              error={errors.nickname}
             />
           </div>
 
@@ -146,14 +127,19 @@ export default function InstructorsPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
+
         const formatted = data.map(e => ({
           nickname: e.prenom,
           fullname: e.nom,
           email: e.email || "",
           dob: e.date_naissance || "",
           rank: e.grade || "",
-          regnumber: e.matricule || ""
+          regnumber: e.matricule || "",
+          joined: e.joined || e.date_creation || new Date().toISOString(),
+          id: e.id_utilisateur
         }));
+
+
         setInstructors(formatted);
       } catch (err) {
         console.error("Erreur chargement enseignants :", err);
@@ -179,25 +165,38 @@ export default function InstructorsPage() {
 
   // ================= VALIDATION =================
   const validateForm = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/;
-    const matriculeRegex = /^\d{12}$/;
     const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const matriculeRegex = /^\d{12}$/;
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/;
 
+    // Prénom
     if (!instructorForm.nickname.trim()) newErrors.nickname = t("requiredField");
-    else if (!nameRegex.test(instructorForm.nickname)) newErrors.nickname = t("invalidName");
+    else if (!nameRegex.test(instructorForm.nickname)) newErrors.nickname = t("nicknameNumbers");
 
+    // Nom
     if (!instructorForm.fullname.trim()) newErrors.fullname = t("requiredField");
-    else if (!nameRegex.test(instructorForm.fullname)) newErrors.fullname = t("invalidName");
+    else if (!nameRegex.test(instructorForm.fullname)) newErrors.fullname = t("fullnameNumbers");
 
-    if (!instructorForm.email.trim()) newErrors.email = t("requiredField");
+
+    // Email
+    if (!instructorForm.email.trim()) newErrors.email = t("emailRequired");
     else if (!emailRegex.test(instructorForm.email)) newErrors.email = t("invalidEmail");
 
+    // Date de naissance ≥ 25 ans
     if (!instructorForm.dob) newErrors.dob = t("requiredField");
+    else {
+      const birthDate = new Date(instructorForm.dob);
+      const minDate = new Date();
+      minDate.setFullYear(minDate.getFullYear() - 25);
+      if (birthDate > minDate) newErrors.dob = t("MinAgeInstructor");
+    }
 
+    // Matricule 12 chiffres
     if (!instructorForm.regnumber) newErrors.regnumber = t("requiredField");
     else if (!matriculeRegex.test(instructorForm.regnumber)) newErrors.regnumber = t("regnumberInvalid");
 
+    // Grade obligatoire
     if (!instructorForm.rank) newErrors.rank = t("gradeRequired");
 
     setErrors(newErrors);
@@ -207,15 +206,17 @@ export default function InstructorsPage() {
   // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validateForm()) {
       toast.error(t("fixErrors"));
       return;
     }
 
+    // Payload correct pour le backend
     const payload = {
-      prenom: instructorForm.nickname,
-      nom: instructorForm.fullname,
-      email: instructorForm.email, // <-- utiliser le nom correct
+      nom: instructorForm.fullname,   // nom → fullname
+      prenom: instructorForm.nickname, // prénom → nickname
+      email: instructorForm.email,
       date_naissance: instructorForm.dob,
       matricule: instructorForm.regnumber,
       grade: instructorForm.rank,
@@ -225,9 +226,12 @@ export default function InstructorsPage() {
 
     try {
       const token = localStorage.getItem("admin_token");
+
+      // Si édition, utiliser l'ID réel de l'instructeur
       const url = editIndex !== null
-        ? `http://localhost:8000/api/users/admin/enseignants/${editIndex}/update/`
+        ? `http://localhost:8000/api/users/enseignants/${instructors[editIndex].id}/update/`
         : "http://localhost:8000/api/users/admin/enseignants/create/";
+
 
       const method = editIndex !== null ? "PUT" : "POST";
 
@@ -241,20 +245,42 @@ export default function InstructorsPage() {
 
       if (!res.ok) throw new Error(data.error || "Erreur serveur");
 
+      // Mise à jour du state
       if (editIndex !== null) {
         const updated = [...instructors];
-        updated[editIndex] = instructorForm;
+        updated[editIndex] = {
+          ...instructorForm,
+          id: instructors[editIndex].id, // garder l'ID
+        };
         setInstructors(updated);
         setEditIndex(null);
       } else {
-        setInstructors([...instructors, instructorForm]);
+        // backend doit renvoyer l'ID créé
+        setInstructors([
+          ...instructors,
+          {
+            ...instructorForm,
+            joined: data.joined, // ou new Date().toISOString().slice(0,10)
+            id: data.id_utilisateur
+          }
+        ]);
+
       }
 
       toast.success(editIndex !== null ? t("updateSuccess") : t("createSuccess"));
+
+      // Reset du formulaire
       setInstructorForm({
-        nickname: "", fullname: "", email: "", dob: "", regnumber: "", rank: ""
+        nickname: "",
+        fullname: "",
+        email: "",
+        dob: "",
+        regnumber: "",
+        rank: ""
       });
+
       setOpenModal(false);
+
     } catch (err) {
       console.error(err);
       toast.error(err.message || t("networkError"));
@@ -268,14 +294,38 @@ export default function InstructorsPage() {
     setOpenModal(true);
   };
 
-  const handleDelete = (index) => {
-    setInstructors(instructors.filter((_, i) => i !== index));
+  const handleDelete = async (index) => {
+    const instructor = instructors[index];
+    const token = localStorage.getItem("admin_token");
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/users/admin/users/${instructor.id}/`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+
+      if (!res.ok) throw new Error("Impossible de supprimer cet enseignant");
+
+      // Supprimer du frontend
+      setInstructors(instructors.filter((_, i) => i !== index));
+      toast.success(t("deleteSuccess"));
+
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || t("networkError"));
+    }
   };
 
+
   const handleRowClick = (instructor) => {
-    setSelectedInstructor(instructor);
+    setSelectedInstructor({
+      ...instructor,
+      joined: instructor.joined || instructor.date_creation || "",
+    });
     setOpenDetails(true);
   };
+
 
   const filtered = instructors.filter(i =>
     `${i.nickname} ${i.fullname}`.toLowerCase().includes(search.toLowerCase())
