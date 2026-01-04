@@ -32,6 +32,7 @@ export default function Navbar() {
   const [collapsed, setCollapsed] = useState(false);
   const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
   const { logout } = useContext(AuthContext);
+  
 
   useEffect(() => {
     let userObj = { nom: "", prenom: "", role: "" };

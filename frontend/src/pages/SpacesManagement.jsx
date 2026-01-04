@@ -13,8 +13,8 @@ export default function SpacesPage() {
   const { t } = useTranslation("space");
   const { toggleDarkMode } = useContext(ThemeContext);
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarWidth, setSidebarWidth] = useState(256); // 256 = sidebar ouverte / 64 = réduite
 
   const [search, setSearch] = useState("");
   const [openModal, setOpenModal] = useState(false);
@@ -72,12 +72,18 @@ export default function SpacesPage() {
     fetchTeachers();
   }, []);
 
-  // ================= RESPONSIVE =================
+  // ================= RESPONSIVE + SIDEBAR WIDTH =================
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+
+    // reçoit true/false → collapsed / expanded
+    const handleSidebarChange = (e) => {
+      setSidebarWidth(e.detail ? 64 : 256); // 64px = collapsed | 256px = expanded
+    };
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -104,7 +110,11 @@ export default function SpacesPage() {
         if (!res.ok) throw new Error(t("update") + " " + t("space"));
         const data = await res.json();
         setSpaces((prev) =>
-          prev.map((s) => s.id === editIndex ? { id: data.id_space, title: data.nom_space, description: data.description, utilisateur: data.utilisateur } : s)
+          prev.map((s) =>
+            s.id === editIndex
+              ? { id: data.id_space, title: data.nom_space, description: data.description, utilisateur: data.utilisateur }
+              : s
+          )
         );
         toast.success(t("update") + " !");
       } else {
@@ -115,7 +125,10 @@ export default function SpacesPage() {
         });
         if (!res.ok) throw new Error(t("create") + " " + t("space"));
         const data = await res.json();
-        setSpaces((prev) => [...prev, { id: data.id_space, title: data.nom_space, description: data.description, utilisateur: data.utilisateur }]);
+        setSpaces((prev) => [
+          ...prev,
+          { id: data.id_space, title: data.nom_space, description: data.description, utilisateur: data.utilisateur },
+        ]);
         toast.success(t("create") + " !");
       }
       setOpenModal(false);
@@ -193,7 +206,6 @@ export default function SpacesPage() {
     }
   };
 
-  // ================= ADD STUDENTS TO SPACE =================
   const toggleStudent = (studentId) => {
     setSelectedStudents((prev) =>
       prev.includes(studentId)
@@ -271,7 +283,6 @@ export default function SpacesPage() {
     }
   };
 
-  // ================= FIELDS FOR SPACE MODAL =================
   const fields = [
     {
       label: t("editModalTitle"),
@@ -299,14 +310,22 @@ export default function SpacesPage() {
         />
       )
     }
-
   ];
 
-
   return (
-    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+    <div className="flex min-h-screen bg-surface">
+
       <Navbar />
-      <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
+
+      {/* MARGIN FIX = dynamique selon largeur sidebar */}
+      <main
+  className="flex-1 p-6 pt-10 space-y-5 transition-all duration-300"
+  style={{
+    marginLeft: isMobile ? "0px" : `${sidebarWidth}px`,
+  }}
+>
+
+        {/* ---------- HEADER ---------- */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
@@ -325,7 +344,8 @@ export default function SpacesPage() {
           <ContentSearchBar value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("addSpace")} />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 mt-6">
+
           {filteredSpaces.map((space) => (
             <div key={space.id} className="bg-card p-6 rounded-2xl shadow-sm hover:shadow-md flex flex-col justify-between cursor-pointer" onClick={() => handleOpenSpaceStudents(space)}>
               <div className="flex items-start gap-3 mb-3">
@@ -369,13 +389,13 @@ export default function SpacesPage() {
         </div>
       </main>
 
-      {/* Modal Création/Edition d'espace */}
       <AddModel open={openModal} onClose={() => setOpenModal(false)} fields={fields} onSubmit={handleSubmit} submitLabel={editIndex ? t("update") : t("create")} cancelLabel={t("cancel")} />
 
-      {/* Modal Gérer les étudiants */}
+      {/* ========== MODAL : GÉRER LES ÉTUDIANTS ========== */}
       {addStudentsModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-start pt-10 z-50 overflow-y-auto">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-5xl max-h-[95vh] flex flex-col p-8">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full 
+            max-w-5xl max-h-[95vh] flex flex-col p-8 md:p-8 p-4">
 
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
@@ -406,9 +426,9 @@ export default function SpacesPage() {
               </button>
             </div>
 
-            {/* Contenu Onglet */}
             {selectedTab === "students" && (
-              <div className="grid md:grid-cols-2 gap-6 flex-1 overflow-y-auto max-h-[60vh]">
+              <div className="grid md:grid-cols-2 gap-4 md:gap-6 flex-1 overflow-y-auto max-h-[60vh]">
+
                 {/* Déjà dans l'espace */}
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 shadow-inner overflow-y-auto">
                   <h3 className="font-semibold text-lg mb-3 text-gray-800 dark:text-gray-200">{t("alreadyInSpace")}</h3>
@@ -458,7 +478,6 @@ export default function SpacesPage() {
 
             {selectedTab === "contents" && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Cours */}
                 <div>
                   <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <BookOpen size={20} /> {t("courses")}
@@ -470,7 +489,6 @@ export default function SpacesPage() {
                   }
                 </div>
 
-                {/* Exercices */}
                 <div>
                   <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <FileText size={20} /> {t("exercises")}
@@ -482,7 +500,6 @@ export default function SpacesPage() {
                   }
                 </div>
 
-                {/* Quiz */}
                 <div>
                   <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <HelpCircle size={20} /> {t("quiz")}

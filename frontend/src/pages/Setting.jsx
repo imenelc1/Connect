@@ -225,6 +225,7 @@ export default function Setting() {
                 <div className="flex items-center gap-3 sm:gap-4">
                     <UserCircle
                         initials={initials}
+                         clickable={false}
                         onToggleTheme={toggleDarkMode}
                         onChangeLang={(lang) => i18n.changeLanguage(lang)}
                         size={isMobile ? "sm" : "md"}
