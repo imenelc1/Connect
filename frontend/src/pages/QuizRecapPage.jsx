@@ -55,26 +55,17 @@ export default function QuizRecapPage() {
 
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8 bg-background">
+    <div className="min-h-screen flex flex-col items-center px-4 py-8 ">
 
-      {/* Bouton traduction */}
-      <div className="w-full flex justify-end mb-4">
-        <button
-          onClick={toggleLanguage}
-          className="px-3 py-1 rounded-md text-sm font-semibold shadow-md"
-          style={{ background: "rgb(var(--color-primary))", color: "white" }}
-        >
-          {i18n.language === "fr" ? "EN 🇬🇧" : "FR 🇫🇷"}
-        </button>
-      </div>
+     
 
       {/* Titre */}
       <h1 className="text-3xl md:text-4xl font-bold text-primary mb-6">
         {quiz.titre_exo}
       </h1>
 
-      {/* Carte principale */}
-      <div className="rounded-2xl shadow-lg p-8 w-full max-w-3xl flex flex-col items-center text-center mb-10 bg-blue_primary_light">
+      
+     
         {/* Icône */}
         <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-4xl shadow-md mb-2">
           <FaTrophy size={40} />
@@ -152,6 +143,6 @@ export default function QuizRecapPage() {
         </div>
 
       </div>
-    </div>
+    
   );
 }

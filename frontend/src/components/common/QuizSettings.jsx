@@ -33,6 +33,7 @@ const handleChange = (field, value) => {
           <input
             value={quizData.title || ""}
             onChange={(e) => handleChange("title", e.target.value)}
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -43,23 +44,26 @@ const handleChange = (field, value) => {
             value={quizData.description || ""}
             onChange={(e) => handleChange("description", e.target.value)}
             rows={3}
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
         {/* COURS */}
         <div className="flex flex-col gap-2">
           <label>{t("selectCourse")}</label>
-          <select
-            value={quizData.courseId || ""}
-            onChange={(e) => handleChange("courseId", e.target.value)}
-          >
-            <option value="">{t("chooseCourse")}</option>
-            {myCourses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
+        
+         <ModernDropdown
+  value={quizData.courseId || ""}
+  onChange={(val) => handleChange("courseId", val)}
+  options={[
+    { value: "", label: t("chooseCourse") },
+    ...myCourses.map((course) => ({
+      value: course.id,
+      label: course.title,
+    })),
+  ]}
+/>
+
         </div>
 
         {/* VISIBILITÉ */}
@@ -78,17 +82,20 @@ const handleChange = (field, value) => {
         {/* NIVEAU */}
         <div className="flex flex-col gap-2">
           <label>{t("quizLevel")}</label>
-          <select
-            value={quizData.level || ""}
-            onChange={(e) => handleChange("level", e.target.value)}
-          >
-            <option value="">{t("selectLevel")}</option>
-            {levels.map((lvl) => (
-              <option key={lvl.key} value={lvl.key}>
-                {lvl.label}
-              </option>
-            ))}
-          </select>
+          <ModernDropdown
+  value={quizData.level || ""}
+  onChange={(val) => handleChange("level", val)}
+  options={[
+    { value: "", label: t("selectLevel") },
+    ...levels.map((lvl) => ({
+      value: lvl.key,
+      label: lvl.label,
+    })),
+  ]}
+/>
+
+
+          
         </div>
 {/*score minimum*/}
 {/* SCORE MINIMUM */}
@@ -102,7 +109,8 @@ const handleChange = (field, value) => {
     onChange={(e) =>
       onQuizChange("passingScore", parseInt(e.target.value) || 0)
     }
-    className="w-full text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
+    className="w-full  shadow-md text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
+    
   />
 </div>
 
@@ -116,6 +124,7 @@ const handleChange = (field, value) => {
             onChange={(e) =>
               handleChange("maxAttempts", parseInt(e.target.value) || 0)
             }
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -128,7 +137,9 @@ const handleChange = (field, value) => {
             value={quizData.delais_entre_tentative || 0}
             onChange={(e) =>
               handleChange("delais_entre_tentative", parseInt(e.target.value) || 0)
+
             }
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -141,6 +152,7 @@ const handleChange = (field, value) => {
             onChange={(e) =>
               handleChange("durationEnabled", e.target.checked)
             }
+            
           />
           <label>{t("enableDuration")}</label>
         </div>
@@ -153,6 +165,7 @@ const handleChange = (field, value) => {
             onChange={(e) =>
               handleChange("duration", parseInt(e.target.value) || 0)
             }
+             className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         )}
       </div>

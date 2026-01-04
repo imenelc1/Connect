@@ -81,7 +81,7 @@ def notify_course_badges(sender, instance, created, **kwargs):
         course = instance.cours
 
         # Appelle la fonction qui attribue les badges
-        from dashboard.badges import check_course_badges
+        from badges.views import check_course_badges
         check_course_badges(user, instance)
 
         # Vérifier quels badges ont été gagnés pour cet utilisateur récemment
@@ -92,7 +92,7 @@ def notify_course_badges(sender, instance, created, **kwargs):
                 utilisateur_destinataire=user,
                 action_type='badge_unlocked',
                 module_source='achievements',
-                message_notif=f"Félicitations ! Vous avez débloqué le badge '{last_badge.badge.nom}' pour le cours '{course.nom}' !",
+                message_notif=f"Félicitations ! Vous avez débloqué le badge '{last_badge.badge.nom}' pour le cours '{course.titre_cour}' !",
                 extra_data={
                     "badge_id": last_badge.badge.id,
                     "course_id": course.id_cours

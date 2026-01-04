@@ -14,6 +14,12 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 
+const buttonStyles = {
+  Débutant: "bg-blue text-white",
+  Intermédiaire: "bg-purple text-white",
+  Avancé: "bg-pink text-white",
+};
+
 export default function ExercisesManagement() {
   // SEARCH contrôlé
   const [search, setSearch] = useState("");
@@ -32,6 +38,23 @@ export default function ExercisesManagement() {
   const [exercises, setExercises] = useState([]);
   const [editModal, setEditModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
+  const [courses, setCourses] = useState([]);
+useEffect(() => {
+  const fetchCourses = async () => {
+    try {
+      const res = await api.get("courses/");
+      setCourses(res.data);
+    } catch (err) {
+      console.error("Erreur chargement cours", err);
+    }
+  };
+
+  fetchCourses();
+}, []);
+const getCourseTitle = (courseId) => {
+  const course = courses.find(c => c.id_cours === courseId);
+  return course ? course.titre_cour : "—";
+};
 
 
   const [editValues, setEditValues] = useState({
@@ -67,6 +90,8 @@ export default function ExercisesManagement() {
           utilisateur: ex.utilisateur,
           utilisateur_name: ex.utilisateur_name,
           visibilite_exo: ex.visibilite_exo, //est un boolean
+          visibilite_exo_label:ex.visibilite_exo_label,
+          max_soumissions:ex.max_soumissions
         }));
 
         setExercises(formatted);
@@ -117,6 +142,7 @@ export default function ExercisesManagement() {
           niveau_exo: editValues.niveau_exo,
           categorie: editValues.categorie,
           visibilite_exo: editValues.visibilite_exo,
+          
           utilisateur: editValues.utilisateur,
           cours: editValues.cours
         },
@@ -159,6 +185,15 @@ export default function ExercisesManagement() {
       setExercises(exercises.filter((ex) => ex.id_exercice !== id))
     );
   };
+
+const [viewModal, setViewModal] = useState(false);
+///const [selectedExercise, setSelectedExercise] = useState(null);
+const openView = (exercise) => {
+  setSelectedExercise(exercise);
+  setViewModal(true);
+};
+
+
 
   // Effet pour la responsivité
   useEffect(() => {
@@ -245,12 +280,22 @@ export default function ExercisesManagement() {
                 {item.titre_exo}
               </h3>
               <p className="text-grayc text-sm mb-4">
+                {item.utilisateur_name}
+              </p>
+              <p className="text-grayc text-sm mb-4">
                 {item.categorie}
               </p>
 
               <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
-                <span>{t("submissions", { count: item.submissions })}</span>
+                <Button
+                                      variant="courseStart"
+                                      className={`px-4 py-2 whitespace-nowrap ${buttonStyles[item.niveau_exercice_label]}`}
+                                     onClick={() => openView(item)}
+                                    >
+                                      Voir Exercice
+                                    </Button>
                 <div className="flex gap-3" >
+                 
                   <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
                     <SquarePen size={20} />
                   </button>
@@ -332,6 +377,26 @@ export default function ExercisesManagement() {
 
         ]}
       />
+      <AddModal
+  open={viewModal}
+  onClose={() => setViewModal(false)}
+  title="Voir Exercice"
+  submitLabel="Fermer"
+  cancelLabel=""
+  onSubmit={() => setViewModal(false)}
+  fields={[
+    { label: "Titre", value: selectedExercise?.titre_exo, readonly: true },
+    { label: "Énoncé", value: selectedExercise?.enonce, readonly: true },
+    { label: "Auteur", value: selectedExercise?.utilisateur_name, readonly: true },
+    { label: "Catégorie", value: selectedExercise?.categorie, readonly: true },
+    { label: "Niveau", value: selectedExercise?.niveau_exercice_label, readonly: true },
+    { label: "Visibilité", value: selectedExercise?.visibilite_exo_label, readonly: true },
+    { label: "Cours",  value: getCourseTitle(selectedExercise?.cours), readonly: true },
+    { label: "Maximum de tentatives", value: selectedExercise?.max_soumissions, readonly: true },
+    
+  ]}
+/>
+
 
     </div>
   );

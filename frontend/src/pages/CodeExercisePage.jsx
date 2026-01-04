@@ -4,7 +4,7 @@ import { MdAutoAwesome } from "react-icons/md";
 
 import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
-import NavBar from "../components/common/NavBar";
+import NavBar from "../components/common/Navbar";
 import AssistantIA from "./AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
@@ -12,10 +12,20 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import progressionService from "../services/progressionService";
-import Input from "../components/common/Input";
 
 import Editor from "@monaco-editor/react";
 import ExerciseContext from "../context/ExerciseContext";
+import { loadEditorCode } from "../utils/editorStorage";
+
+
+// ⚡ Ajout de saveEditorCode ici
+export const saveEditorCode = (userId, exerciseId, code) => {
+  if (!userId || !exerciseId) return;
+  localStorage.setItem(`editor_${userId}_${exerciseId}`, code);
+};
+
+// ⚡ Clé pour le localStorage
+const editorKey = (userId, exerciseId) => `editor_${userId}_${exerciseId}`;
 
 export default function StartExercise() {
   const { t, i18n } = useTranslation("startExercise");
@@ -25,24 +35,32 @@ export default function StartExercise() {
   const [exercise, setExercise] = useState(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [openAssistant, setOpenAssistant] = useState(false);
-  const [output, setOutput] = useState("Aucune sortie pour le moment...");
+  const [output, setOutput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [userInput, setUserInput] = useState("");
-
-  const defaultCode = `#include <stdio.h>
-#include <stdlib.h>
-
-int main() {
-  printf("Hello world!\\n");
-  return 0;
-}`;
-
   const [userCode, setUserCode] = useState(null);
   const [startTime, setStartTime] = useState(Date.now());
-  const controllerRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
   const [canSubmit, setCanSubmit] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
+  // / États de l'interface
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Gestion de la responsivité
+    useEffect(() => {
+      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+  
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("sidebarChanged", handleSidebarChange);
+  
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("sidebarChanged", handleSidebarChange);
+      };
+    }, []); 
+
+  const controllerRef = useRef(null);
 
   const storedUser = localStorage.getItem("user");
   const userData =
@@ -55,9 +73,28 @@ int main() {
 
   const sidebarWidth = false ? -200 : -50;
 
-  const resetCode = () => setUserCode(defaultCode);
+  const defaultCode = `#include <stdio.h>
+#include <stdlib.h>
 
-  // -------- Notifications --------
+int main() {
+  printf("Hello world!\\n");
+  return 0;
+}`;
+
+  // ---------------- Reset Exercise ----------------
+  const resetExercise = () => {
+    setUserCode(defaultCode);
+    setOutput("");
+    setUserInput("");
+    setNotifications([]);
+    setStartTime(Date.now());
+    if (exerciceId) {
+      localStorage.removeItem(editorKey(userData.user_id, exerciceId));
+    }
+    toast.success(t("messages.exerciseReset") || "Exercice réinitialisé !");
+  };
+
+  // ---------------- Notifications ----------------
   const sendNotification = (message, type = "info") => {
     const id = Date.now();
     setNotifications((prev) => [...prev, { id, message, type }]);
@@ -68,65 +105,64 @@ int main() {
     if (type === "hint") setOpenAssistant(true);
   };
 
-  // -------- Fetch Exercise --------
+  // ---------------- Fetch Exercise ----------------
   useEffect(() => {
     if (!exerciceId) return;
+
     const fetchExercise = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:8000/api/exercices/${exerciceId}/`
-        );
+        const res = await fetch(`http://localhost:8000/api/exercices/${exerciceId}/`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         setExercise(data);
-        setStartTime(Date.now());
-        sendNotification("Exercice chargé !");
-      } catch {
-        sendNotification("Impossible de charger l'exercice", "error");
+
+        const canSubmitRes = await fetch(
+          `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        );
+        const canSubmitData = await canSubmitRes.json();
+        setCanSubmit(canSubmitData.can_submit);
+      } catch (err) {
+        sendNotification(t("errors.exerciseNOTLoad"), "error");
+        setCanSubmit(false);
       } finally {
         setLoadingExercise(false);
       }
     };
+
     fetchExercise();
   }, [exerciceId]);
 
-  // -------- Load last code (localStorage first, then server draft) --------
-  useEffect(() => {
-    if (!exerciceId) return;
+  // ---------------- Load last code ----------------
+ // Extraire juste l'id de l'utilisateur
+const userId = userData?.user_id;
 
-    const fetchLastCode = async () => {
-      // 1️⃣ Vérifie localStorage
-      const local = localStorage.getItem(`exercise-${exerciceId}-code`);
-      if (local) {
-        setUserCode(local);
-        return;
-      }
+// ---------------- Load last code ----------------
+useEffect(() => {
+  if (!exerciceId || !userId) return;
 
-      // 2️⃣ Sinon récupère le dernier brouillon serveur
-      try {
-        const lastDraft = await progressionService.getLastTentative(exerciceId);
-        if (lastDraft?.reponse) {
-          setUserCode(lastDraft.reponse);
-          setOutput(lastDraft.output || "Aucune sortie pour le moment...");
-        } else {
-          setUserCode(defaultCode);
-        }
-      } catch {
-        setUserCode(defaultCode);
-      }
-    };
+  const local = loadEditorCode(userId, exerciceId);
+  if (local) {
+    setUserCode(local);
+    return;
+  }
 
-    fetchLastCode();
-  }, [exerciceId]);
+  progressionService.getMyLastTentative(userId, exerciceId)
+    .then(lastDraft => {
+      setUserCode(lastDraft?.reponse || defaultCode);
+      setOutput(lastDraft?.output || "");
+    })
+    .catch(() => setUserCode(defaultCode));
+}, [exerciceId, userId]);
 
-  // -------- Auto-save localStorage --------
-  useEffect(() => {
-    if (userCode !== null && exerciceId) {
-      localStorage.setItem(`exercise-${exerciceId}-code`, userCode);
-    }
-  }, [userCode, exerciceId]);
+// ---------------- Auto-save localStorage ----------------
+useEffect(() => {
+  if (!userCode || !exerciceId || !userId) return;
+  saveEditorCode(userId, exerciceId, userCode);
+}, [userCode, exerciceId, userId]);
 
-  // -------- Auto-save draft server --------
+
+  // ---------------- Auto-save draft server ----------------
   useEffect(() => {
     if (!exerciceId || !userCode) return;
     const timer = setTimeout(async () => {
@@ -138,21 +174,21 @@ int main() {
           etat: "brouillon",
           temps_passe: Math.floor((Date.now() - startTime) / 1000),
         });
-      } catch {}
+      } catch { }
     }, 1000);
     return () => clearTimeout(timer);
   }, [userCode, output, exerciceId, startTime]);
 
-  // -------- Inactivity hint --------
+  // ---------------- Inactivity hint ----------------
   useEffect(() => {
     const t = setTimeout(
-      () => sendNotification("Tu as besoin d'un indice ?", "hint"),
+      () => sendNotification(t("assistant.tipHelper"), "hint"),
       60000
     );
     return () => clearTimeout(t);
   }, [userCode]);
 
-  // -------- Realtime syntax hint --------
+  // ---------------- Realtime syntax hint ----------------
   useEffect(() => {
     const t = setTimeout(async () => {
       try {
@@ -161,58 +197,32 @@ int main() {
           { source_code: userCode, language_id: 49 }
         );
         if (res.data.stderr)
-          sendNotification("Erreur détectée — vérifie la syntaxe", "hint");
-      } catch {}
+          sendNotification(t("errors.syntaxError"), "hint");
+      } catch { }
     }, 10000);
     return () => clearTimeout(t);
   }, [userCode]);
 
-  // -------- Run / Debug / Stop --------
- const runCode = async () => {
-  setIsRunning(true);
-  setOutput("Exécution en cours...");
-
-  try {
-    const res = await axios.post(
-      "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
-      {
-        source_code: userCode,
-        language_id: 49,
-        stdin: userInput,
-      }
-    );
-
-    const {
-      stdout,
-      stderr,
-      compile_output,
-      status,
-    } = res.data;
-
-    const result =
-      stdout ||
-      stderr ||
-      compile_output ||
-      "Aucune sortie pour le moment...";
-
-    setOutput(result);
-
-    // 🚨 NOTIFICATION IMMÉDIATE
-    if (stderr || compile_output) {
-      sendNotification(
-        "⚠️ Erreur détectée lors de l'exécution. Besoin d’un coup de main ?",
-        "hint"
+  // ---------------- Run / Debug / Stop ----------------
+  const runCode = async () => {
+    setIsRunning(true);
+    setOutput(t("messages.runningEXE"));
+    try {
+      const res = await axios.post(
+        "https://ce.judge0.com/submissions?base64_encoded=false&wait=true",
+        { source_code: userCode, language_id: 49, stdin: userInput }
       );
+      const { stdout, stderr, compile_output } = res.data;
+      const result = stdout || stderr || compile_output || "Aucune sortie pour le moment...";
+      setOutput(result);
+      if (stderr || compile_output) sendNotification(t("assistant.executionErrorHelp"), "hint");
+    } catch {
+      setOutput(t("errors.exeError"));
+      sendNotification(t("errors.exeError"), "error");
+    } finally {
+      setIsRunning(false);
     }
-
-  } catch {
-    setOutput("Erreur pendant l'exécution");
-    sendNotification("Erreur pendant l'exécution", "error");
-  } finally {
-    setIsRunning(false);
-  }
-};
-
+  };
 
   const debugCode = async () => {
     setIsRunning(true);
@@ -222,10 +232,10 @@ int main() {
         { source_code: userCode, language_id: 49 }
       );
       if (res.data.stderr) {
-        setOutput("Erreur détectée :\n\n" + res.data.stderr);
-        sendNotification("Bug détecté", "hint");
+        setOutput(`${t("errors.errorDetected")}\n\n${res.data.stderr}`);
+        sendNotification(t("errors.bugDetected"), "hint");
       } else {
-        setOutput("Aucun bug détecté");
+        setOutput(t("messages.noBugs"));
       }
     } finally {
       setIsRunning(false);
@@ -237,7 +247,7 @@ int main() {
     setIsRunning(false);
   };
 
-  // -------- Save & Submit --------
+  // ---------------- Save & Submit ----------------
   const handleSaveDraft = async () => {
     try {
       await progressionService.createTentative({
@@ -247,10 +257,10 @@ int main() {
         etat: "brouillon",
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
-      toast.success("Code sauvegardé");
-      sendNotification("Brouillon sauvegardé !");
+      toast.success(t("messages.codeSave"));
+      sendNotification(t("messages.draftSave"));
     } catch {
-      toast.error("Erreur lors de la sauvegarde");
+      toast.error(t("errors.errorSave"));
     }
   };
 
@@ -264,18 +274,19 @@ int main() {
         overwrite,
         temps_passe: Math.floor((Date.now() - startTime) / 1000),
       });
-      toast.success("Exercice soumis");
+      toast.success(t("messages.exoSubmitted"));
     } catch {
-      toast.error("Erreur lors de la soumission");
+      toast.error(t("errors.errorSubmit"));
     }
   };
 
-  // -------- JSX et context --------
+  // ---------------- Context ----------------
   const exerciseContextValue = {
     id: exerciceId,
     titre: exercise?.titre_exo,
     enonce: exercise?.enonce,
     code: userCode,
+    defaultCode,
     output,
     onHintRequest: () => setOpenAssistant(true),
   };
@@ -284,15 +295,16 @@ int main() {
   // ------------------- JSX -------------------
   return (
     <ExerciseContext.Provider value={exerciseContextValue}>
-      <div
-        className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
-        style={{ marginLeft: sidebarWidth }}
-      >
-        <div className="hidden lg:block">
-          <NavBar />
-        </div>
+       <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                               {/* Sidebar */}
+                               <div>
+                                 <NavBar />
+                               </div>
 
-        <div className="flex-1 p-4 md:p-8 lg:ml-72 transition-all duration-300 ml-10">
+        <div className={`
+            flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+            ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+          `}>
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center mb-10 gap-6 md:gap-0">
             <div className="flex-1">
@@ -346,7 +358,7 @@ int main() {
             {exercise ? (
               <>
                 <p className="font-semibold text-muted text-[20px]">
-                  Exercice: {exercise.titre_exo}
+                  {t("header.label")}  {exercise.titre_exo}
                 </p>
                 <p className="mt-3 text-muted text-sm md:text-base">
                   {exercise.enonce}
@@ -354,7 +366,7 @@ int main() {
               </>
             ) : (
               <p className="text-red-500 text-sm">
-                Impossible de charger l'exercice.
+                {t("errors.exerciseNOTLoad")}
               </p>
             )}
           </div>
@@ -388,11 +400,11 @@ int main() {
           </div>
           {/* Input pour scanf */}
           <div className="mb-4">
-            <label className="text-sm text-gray-300 mb-1 block">Entrées (stdin)</label>
+            <label className="text-sm text-gray-300 mb-1 block">{t("input.stdinLabel")}</label>
             <textarea
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
-              placeholder="Tapez ici vos entrées, séparées par Enter"
+              placeholder={t("input.stdinPlaceholder")}
               className="w-full p-2 rounded bg-gray-900 text-white font-mono resize-none"
               rows={4}
             />
@@ -403,7 +415,8 @@ int main() {
           <div className="flex flex-wrap justify-center gap-4 mb-10">
             <ActionButton
               icon={<Play size={18} />}
-              label={isRunning ? "Exécution..." : t("buttons.run")}
+              label={isRunning ? t("messages.runningEXE") : t("buttons.run")}
+
               bg="var(--grad-button)"
               onClick={runCode}
             />
@@ -424,8 +437,9 @@ int main() {
               label={t("buttons.reset")}
               bg="linear-gradient(#FFFFFF,#A3AAED,#A3AAED)"
               text="rgb(var(--color-text))"
-              onClick={resetCode}
+              onClick={resetExercise}
             />
+
           </div>
 
 
@@ -449,7 +463,8 @@ int main() {
       `}
                 style={!canSubmit ? { backgroundImage: "none" } : { backgroundImage: "var(--grad-1)" }}
               >
-                {t("send_solution")}
+                {t("buttons.sendSolution")}
+
               </button>
             </div>
           )}
@@ -460,7 +475,9 @@ int main() {
             {t("output.title")}
           </p>
           <div className="rounded-2xl p-4 md:p-6 text-white shadow-strong text-[14px] md:text-[15px] leading-6 md:leading-7 mb-10 bg-output">
-            {output.split("\n").map((line, i) => (
+            {/* {output.split("\n").map((line, i) => ( */}
+            {(output || t("output.noOutput")).split("\n").map((line, i) => (
+
               <div key={i}>{line}</div>
             ))}
           </div>
@@ -479,14 +496,20 @@ int main() {
                 />
               </div>
               <div className="text-[rgb(var(--color-primary))] font-medium">
-                Besoin d'aide ? Discutez avec l'Assistant IA
+                {t("assistant.help")}
+
               </div>
             </button>
           </div>
 
           {openAssistant && (
-            <AssistantIA onClose={() => setOpenAssistant(false)} />
+            <AssistantIA
+              onClose={() => setOpenAssistant(false)}
+              mode="exercise"      // très important pour que l'IA sache que c'est un exo
+              course={null}        // pas de cours ici
+            />
           )}
+
 
         </div>
       </div>

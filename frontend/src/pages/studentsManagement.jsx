@@ -1,337 +1,587 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
-import AddModal from "../components/common/AddModel";
-import { Search, SquarePen, Trash2, Code } from "lucide-react";
-import "../styles/index.css";
+import ProgressBar from "../components/ui/ProgressBar";
+import Navbar from "../components/common/NavBar";
+import { Trash2, SquarePen, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-// Navigation entre routes (React Router)
-import { useNavigate } from "react-router-dom";
-import api from "../services/courseService";
-import { toast } from 'react-hot-toast';
-// Thème global (dark/light mode)
-import ThemeContext from "../context/ThemeContext";
-import UserCircle from "../components/common/UserCircle";
 import ContentSearchBar from "../components/common/ContentSearchBar";
+import ThemeContext from "../context/ThemeContext";
+import { toast } from "react-hot-toast";
+import Input from "../components/common/Input.jsx";
+import ModernDropdown from "../components/common/ModernDropdown.jsx";
 
-export default function ExercisesManagement() {
-  // SEARCH contrôlé
-  const [search, setSearch] = useState("");
-  // Hook pour naviguer vers d'autres pages
-  const navigate = useNavigate();
+// ================= MODAL DÉTAIL =================
+// ================= MODAL DÉTAIL =================
+function StudentDetailModal({ studentId, onClose }) {
+  const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!studentId) return;
+
+    const fetchStudent = async () => {
+      const token = localStorage.getItem("admin_token");
+      if (!token) return setError("Token JWT manquant");
+
+      setLoading(true);
+      try {
+        const res = await fetch(`http://localhost:8000/api/users/utilisateurs/${studentId}/progression/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        const data = await res.json();
+        setStudent(data);
+      } catch (err) {
+        console.error(err);
+        setError("Impossible de charger les informations de l'étudiant.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudent();
+  }, [studentId]);
+  console.log({ student });
+  if (!studentId) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg relative overflow-y-auto max-h-[80vh]">
+        <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800" onClick={onClose}>✕</button>
+
+        {loading ? (
+          <p>Chargement...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : student ? (
+          <>
+            {/* Informations générales */}
+            <h2 className="text-2xl font-bold mb-2">{student.utilisateur.nom} {student.utilisateur.prenom}</h2>
+            <p className="text-sm text-gray-500 mb-4">{student.utilisateur.email}</p>
+
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p><strong>Date de naissance:</strong> {student.utilisateur.date_naissance || "—"}</p>
+              <p><strong>Matricule:</strong> {student.utilisateur.matricule || "—"}</p>
+              <p><strong>Spécialité:</strong> {student.utilisateur.specialite || "—"}</p>
+              <p><strong>Année d'étude:</strong> {student.utilisateur.annee_etude || "—"}</p>
+            </div>
+
+            {/* Progression */}
+            <h3 className="font-semibold text-lg mb-2">Cours lus: {student.cours_lus?.length}</h3>
+            {student.cours_lus?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.cours_lus.map((c, idx) => <li key={idx}>{c.titre_cour}</li>)}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun cours lu</p>}
+
+            <h3 className="font-semibold text-lg mb-2">Exercices faits: {student.exercices_faits?.length} </h3>
+            {student.exercices_faits?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.exercices_faits.map((e, idx) => <li key={idx}>{e.titre_exo}</li>)}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun exercice fait</p>}
+
+            <h3 className="font-semibold text-lg mb-2">Quiz faits : {student.quiz_faits?.length}</h3>
+            {student.quiz_faits?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.quiz_faits.map((q, idx) => (
+                  <li key={idx}>{q.titre_quiz} – Score: {q.score_obtenu}</li>
+                ))}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun quiz fait</p>}
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+
+// ================= MODAL ÉDITION =================
+function StudentEditModal({ studentForm, setStudentForm, onClose, onSubmit }) {
+  if (!studentForm) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg relative">
+        <button
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        <h2 className="text-2xl font-bold mb-4">Modifier {studentForm.nom} {studentForm.prenom}</h2>
+
+        <form onSubmit={onSubmit} className="space-y-3">
+          {["nom", "prenom", "email", "date_naissance", "matricule", "specialite", "annee_etude"].map((field) => (
+            <div key={field}>
+              <label className="block text-sm font-medium text-gray-700">{field.replace("_", " ")}</label>
+              <input
+                type={field === "date_naissance" ? "date" : "text"}
+                value={studentForm[field] || ""}
+                onChange={(e) => setStudentForm({ ...studentForm, [field]: e.target.value })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+              />
+            </div>
+          ))}
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="secondary" onClick={onClose}>Annuler</Button>
+            <Button type="submit" variant="primary">Enregistrer</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+//================= MODAL CREER ===================
+// ================= MODAL AJOUT =================
+function StudentAddModal({ onClose, studentForm, setStudentForm, onSubmit, addErrors }) {
+  if (!studentForm) return null; // sécurité
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+      <div className="bg-card rounded-xl p-6 w-full max-w-xl overflow-y-auto max-h-[90vh]">
+        <h2 className="text-xl font-bold mb-4">Ajouter un étudiant</h2>
+
+        <form onSubmit={onSubmit} className="space-y-4">
+          {/* Nom / Prénom */}
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Nom"
+              value={studentForm.nickname}
+              onChange={e => setStudentForm({ ...studentForm, nickname: e.target.value })}
+              error={addErrors.nickname}
+            />
+            <Input
+              label="Prénom"
+              value={studentForm.fullname}
+              onChange={e => setStudentForm({ ...studentForm, fullname: e.target.value })}
+              error={addErrors.fullname}
+            />
+          </div>
+
+          {/* Email */}
+          <Input
+            label="Email"
+            value={studentForm.email}
+            onChange={e => setStudentForm({ ...studentForm, email: e.target.value })}
+            error={addErrors.email}
+          />
+
+          {/* Date de naissance / Matricule */}
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              type="date"
+              label="Date de naissance"
+              value={studentForm.dob}
+              onChange={e => setStudentForm({ ...studentForm, dob: e.target.value })}
+              error={addErrors.dob}
+            />
+            <Input
+              label="Matricule"
+              value={studentForm.regnumber}
+              onChange={e => setStudentForm({ ...studentForm, regnumber: e.target.value })}
+              error={addErrors.regnumber}
+            />
+          </div>
+
+          {/* Spécialité / Année */}
+          <div className="grid grid-cols-2 gap-4">
+            <ModernDropdown
+              value={studentForm.field}
+              onChange={(v) => setStudentForm({ ...studentForm, field: v })}
+              options={[
+                { value: "math", label: "Math" },
+                { value: "cs", label: "Informatique" },
+                { value: "ST", label: "ST" },
+              ]}
+              placeholder="Spécialité"
+              error={addErrors.field}
+            />
+            <ModernDropdown
+              value={studentForm.year}
+              onChange={(v) => setStudentForm({ ...studentForm, year: v })}
+              options={[
+                { value: "L1", label: "L1" },
+                { value: "L2", label: "L2" },
+                { value: "L3", label: "L3" },
+                { value: "M1", label: "M1" },
+                { value: "M2", label: "M2" },
+              ]}
+              placeholder="Année"
+              error={addErrors.year}
+            />
+          </div>
+
+          {/* Boutons */}
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="secondary" onClick={onClose}>Annuler</Button>
+            <Button type="submit" variant="primary">Créer</Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+// ================= COMPOSANT PRINCIPAL =================
+export default function StudentsManagement() {
+  const { t } = useTranslation("StudentsManagement");
   const { toggleDarkMode } = useContext(ThemeContext);
-  const { t, i18n } = useTranslation("ExerciseManagement");
 
-  // États pour la responsivité
+  const [search, setSearch] = useState("");
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [editStudent, setEditStudent] = useState(null);
+  const [studentForm, setStudentForm] = useState(null);
 
-
-  // LISTE
-  const [exercises, setExercises] = useState([]);
-  const [editModal, setEditModal] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState(null);
-
-
-  const [editValues, setEditValues] = useState({
-    titre_exo: "",
-    categorie: "",
-    enonce: "",
-    niveau_exo: "debutant",
-    visibilite_exo: false,
-    cours: 1,
-    utilisateur: 1
-  });
-
-
-  /* ================= FETCH ================= */
+  // ================= FETCH =================
   useEffect(() => {
-    fetch("http://localhost:8000/api/exercices/api/exo")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!Array.isArray(data)) {
-          console.error(t("errors.invalidData"), data);
-          setExercises([]);
-          return;
-        }
+    const fetchStudents = async () => {
+      const token = localStorage.getItem("admin_token");
+      if (!token) return setError("Token JWT manquant.");
 
-        const formatted = data.map((ex) => ({
-          id_exercice: ex.id_exercice,
-          titre_exo: ex.titre_exo,
-          categorie: ex.categorie,
-          enonce: ex.enonce,
-          niveau_exo: ex.niveau_exo, // debutant / intermediaire / avance
-          niveau_exercice_label: ex.niveau_exercice_label, // Débutant / Intermédiaire / Avancé
-          cours: ex.cours,
-          utilisateur: ex.utilisateur,
-          utilisateur_name: ex.utilisateur_name,
-          visibilite_exo: ex.visibilite_exo, //est un boolean
+      setLoading(true);
+      try {
+        const res = await fetch(
+          "http://localhost:8000/api/users/students-with-progress/",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) throw new Error(`Erreur (${res.status})`);
+        const data = await res.json();
+
+        const formatted = data.map(s => ({
+          ...s,
+          courses: s.courses || [],
+          courses_count: s.courses_count || s.courses?.length || 0,
         }));
 
-        setExercises(formatted);
-      })
-      .catch((err) => {
-        console.error(t("errors.fetchExercises"), err);
-        setExercises([]);
-      });
+        setStudents(formatted);
+      } catch (err) {
+        console.error(err);
+        setError("Impossible de charger les étudiants.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
   }, []);
 
 
-  /* ================= FILTER ================= */
-  const filtered = exercises.filter((e) =>
-    (e.titre_exo || "").toLowerCase().includes(search.toLowerCase())
-  );
 
+  // ================= RESIZE =================
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  /* ================= EDIT ================= */
-  const openEdit = (ex) => {
-    setSelectedExercise(ex);
-    setEditValues({
-      titre_exo: ex.titre_exo,
-      categorie: ex.categorie,
-      enonce: ex.enonce,
-      niveau_exo: ex.niveau_exo,
-      cours: ex.cours,
-      visibilite_exo: ex.visibilite_exo,
-      utilisateur: ex.utilisateur,
-    });
-    setEditModal(true);
-  };
-  const token = localStorage.getItem("admin_token"); // JWT admin
-
-
-  const submitEdit = async () => {
-    if (!selectedExercise) return;
-
-    const token = localStorage.getItem("admin_token"); // ou "token"
-
-    console.log({ selectedExercise });
+  // ================= SUPPRIMER =================
+  const handleDelete = async (studentId) => {
+    const token = localStorage.getItem("admin_token");
+    if (!token) return setError("Token JWT manquant.");
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cet étudiant ?")) return;
 
     try {
-      const res = await api.put(
-        `exercices/${selectedExercise.id_exercice}/`,
-        {
-          titre_exo: editValues.titre_exo,
-          enonce: editValues.enonce,
-          niveau_exo: editValues.niveau_exo,
-          categorie: editValues.categorie,
-          visibilite_exo: editValues.visibilite_exo,
-          utilisateur: editValues.utilisateur,
-          cours: editValues.cours
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      // ✅ Toast ou alert succès
-      toast.success("Exercice mis à jour avec succès !");
-
-      // Mettre à jour la liste localement
-      const updatedExo = res.data;
-      setExercises((prev) =>
-        prev.map((ex) =>
-          ex.id_exercice === updatedExo.id_exercice ? updatedExo : ex
-        )
-      );
-
-      // Fermer modal
-      setEditModal(false);
-      setSelectedExercise(null);
-
-      return updatedExo.id_exercice;
+      const res = await fetch(`http://localhost:8000/api/users/admin/users/${studentId}/`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Erreur lors de la suppression");
+      }
+      setStudents(prev => prev.filter(s => s.id === studentId ? false : true));
+      toast.success("Étudiant supprimé avec succès !");
     } catch (err) {
-      console.error("Erreur mise à jour:", err.response?.data || err.message);
-      alert("Erreur lors de la mise à jour de l'exercice");
-      return null;
+      console.error(err);
+      setError(err.message || "Impossible de supprimer l’étudiant");
+    }
+  };
+
+  // ================= MODIFIER =================
+  const handleEdit = (student) => {
+    setEditStudent(student);
+    setStudentForm({ ...student });
+  };
+
+  const handleUpdate = async (e) => {
+    //e.preventDefault();
+    const token = localStorage.getItem("admin_token");
+    if (!token || !editStudent) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/users/etudiants/${editStudent.id}/update/`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(studentForm),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Erreur lors de la mise à jour");
+      }
+      const updatedStudent = await res.json();
+      setStudents(prev => prev.map(s => s.id === editStudent.id ? updatedStudent : s));
+      toast.success("Étudiant mis à jour avec succès !");
+      setEditStudent(null);
+      setStudentForm(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de la mise à jour de l'étudiant");
     }
   };
 
 
-  /* ================= DELETE ================= */
-  const handleDelete = (id) => {
-    if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
-    fetch(`http://localhost:8000/api/exercices/${id}/`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }).then(() =>
-      setExercises(exercises.filter((ex) => ex.id_exercice !== id))
-    );
+  //===========AJOUTER UN ETUDIANT==========
+  const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
+  const [newStudentForm, setNewStudentForm] = useState({
+    nickname: "",
+    fullname: "",
+    email: "",
+    dob: "",
+    regnumber: "",
+    field: "",
+    year: "",
+  });
+
+
+  const [addErrors, setAddErrors] = useState({});
+
+
+  const validateAddStudent = () => {
+    const errors = {};
+
+    // Nom
+    if (!newStudentForm.nickname) errors.nickname = "Champ requis";
+    else if (/\d/.test(newStudentForm.nickname)) errors.nickname = "Pas de chiffres";
+
+    // Prénom
+    if (!newStudentForm.fullname) errors.fullname = "Champ requis";
+    else if (/\d/.test(newStudentForm.fullname)) errors.fullname = "Pas de chiffres";
+
+    // Email
+    if (!newStudentForm.email || !newStudentForm.email.trim()) errors.email = "Email requis";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newStudentForm.email.trim())) errors.email = "Email invalide";
+
+
+    // Date de naissance
+    if (!newStudentForm.dob) {
+      errors.dob = "Champ requis";
+    } else {
+      const dob = new Date(newStudentForm.dob);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+      const dayDiff = today.getDate() - dob.getDate();
+      if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) age--;
+      if (age < 16) errors.dob = "L'étudiant doit avoir au moins 16 ans";
+    }
+
+    // Matricule
+    if (!newStudentForm.regnumber) errors.regnumber = "Champ requis";
+    else if (!/^\d{12}$/.test(newStudentForm.regnumber)) errors.regnumber = "Matricule invalide";
+
+    // Spécialité
+    if (!newStudentForm.field) errors.field = "Champ requis";
+
+    // Année
+    if (!newStudentForm.year) errors.year = "Champ requis";
+
+    setAddErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
-  // Effet pour la responsivité
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+  const handleCreateStudent = async (e) => {
+    e.preventDefault();
+
+    if (!validateAddStudent()) {
+      toast.error("Corrigez les erreurs avant de continuer");
+      return;
+    }
+
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      toast.error("Token JWT manquant");
+      return;
+    }
+
+    const payload = {
+      nom: newStudentForm.nickname,
+      prenom: newStudentForm.fullname,
+      email: newStudentForm.email, // <-- changer ici
+      date_naissance: newStudentForm.dob,
+      matricule: newStudentForm.regnumber,
+      specialite: newStudentForm.field,
+      annee_etude: newStudentForm.year,
+      role: "etudiant",
     };
 
-    // Gestion de la sidebar
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("sidebarChanged", handleSidebarChange);
+    try {
+      const res = await fetch("http://localhost:8000/api/users/admin/etudiants/create/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("sidebarChanged", handleSidebarChange);
-    };
-  }, []);
+      const data = await res.json();
 
+      if (!res.ok) {
+        console.error("Backend error:", data);
+        throw new Error(data.error || "Erreur lors de la création");
+      }
 
-  const difficultyBgMap = {
-    debutant: "bg-grad-2",
-    intermediaire: "bg-grad-3",
-    avance: "bg-grad-4",
+      // Ajouter le nouvel étudiant à la liste
+      setStudents((prev) => [
+        ...prev,
+        {
+          id: data.id_utilisateur || Date.now(), // fallback ID
+          nom: payload.nom,
+          prenom: payload.prenom,
+          email: payload.adresse_email,
+          progress: 0,
+          courses_count: 0,
+        },
+      ]);
+
+      toast.success("Étudiant créé avec succès");
+
+      // Reset formulaire
+      setNewStudentForm({
+        nickname: "",
+        fullname: "",
+        email: "",
+        dob: "",
+        regnumber: "",
+        field: "",
+        year: "",
+      });
+      setAddErrors({});
+      setAddStudentModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Erreur création étudiant");
+    }
   };
+
+
+  const getGridCols = () => {
+    if (windowWidth < 640) return 1;
+    if (windowWidth < 1024) return 2;
+    return 3;
+  };
+
+  const filteredStudents = students.filter(s =>
+    `${s.nom} ${s.prenom}`.toLowerCase().includes(search.toLowerCase())
+  );
+  console.log({ filteredStudents });
 
   return (
-    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      {/* Sidebar */}
-      <div>
-        <Navbar />
-      </div>
-
-      {/* Main Content */}
-      <main className={`
-                flex-1 p-6 pt-10 space-y-5 transition-all duration-300
-                ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-            `}>
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      <Navbar />
+      <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
-            <p className="text-gray">{t("description")}</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("StudentsManagement.StudentsManagement")}</h1>
+            <p className="text-gray">{t("StudentsManagement.view")}</p>
           </div>
-
-
-        </div>
-
-        {/* Search */}
-        <div className="relative mb-6 sm:mb-10 w-full max-w-md">
-          <ContentSearchBar
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className="w-full"
+          <Button
+            text={<span className="flex items-center gap-2"><UserPlus size={18} />Ajouter</span>}
+            variant="primary"
+            className="!w-auto px-6 py-2 rounded-xl"
+            onClick={() => setAddStudentModalOpen(true)}
           />
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filtered.map((item) => (
-            <div
-              key={item.id_exercice}
-              className={`${difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
-                  <Code size={24} className="text-muted" />
-                </div>
-                <span
-                  className={`px-3 py-1 text-xs font-medium rounded-full ${item.niveau_exo === "debutant"
-                    ? "bg-muted/20 text-muted"
-                    : item.niveau_exo === "intermediaire"
-                      ? "bg-pink/20 text-pink"
-                      : "bg-purple/20 text-purple"
-                    }`}
-                >
-                  {item.niveau_exercice_label}
-                </span>
+        {/* Search */}
+        <ContentSearchBar value={search} onChange={e => setSearch(e.target.value)} placeholder={t("searchPlaceholder")} className="w-full max-w-md mb-6 sm:mb-10" />
 
+        {/* Grid */}
+        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
+          {filteredStudents.map((s, index) => (
+            <div key={index} className="bg-grad-2 rounded-2xl p-6 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-lg transition" onClick={() => setSelectedStudent(s.id)} >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-12 h-12 rounded-full bg-grad-1 text-white flex items-center justify-center text-lg font-semibold">{s.initials}</div>
+                  <div className="truncate">
+                    <h2 className="font-semibold text-lg truncate">{s.nom} {s.prenom}</h2>
+                    <p className="text-sm text-grayc truncate">{s.email}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 text-gray-500">
+                  <SquarePen size={20} className="text-muted hover:opacity-80" onClick={(e) => { e.stopPropagation(); handleEdit(s); }} />
+                  <Trash2 size={20} className="text-red hover:opacity-80" onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }} />
+                </div>
               </div>
 
-              <h3 className="font-semibold text-lg mb-2">
-                {item.titre_exo}
-              </h3>
-              <p className="text-grayc text-sm mb-4">
-                {item.categorie}
-              </p>
+              <div className="mb-2">
+                <p className="text-sm text-grayc mb-1">{t("StudentsManagement.Encolled")}: {s.courses_count || 0}</p>
+              </div>
 
-              <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
-                <span>{t("submissions", { count: item.submissions })}</span>
-                <div className="flex gap-3" >
-                  <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
-                    <SquarePen size={20} />
-                  </button>
-                  <button className="text-red hover:opacity-80" onClick={() => handleDelete(item.id_exercice)}>
-                    <Trash2 size={20} />
-                  </button>
+              <div className="mb-2">
+                <div className="flex justify-between text-sm text-gray-400 mb-1">
+                  <span>{t("StudentsManagement.Overal")}</span>
+                  <span>{s.progress}%</span>
                 </div>
+                <ProgressBar value={s.progress} />
+              </div>
+
+              <div className="flex justify-between text-sm text-grayc mt-4">
+                <span>{t("StudentsManagement.joined")}</span>
+                <span className="font-medium">{s.joined}</span>
               </div>
             </div>
           ))}
         </div>
-
       </main>
 
       {/* Modals */}
-
-
-      <AddModal
-        open={editModal}
-        onClose={() => setEditModal(false)}
-        title={t("modal.edit.title")}
-        subtitle={t("modal.edit.subtitle")}
-        submitLabel={t("modal.edit.submit")}
-        cancelLabel={t("modal.edit.cancel")}
-        onSubmit={submitEdit}
-        fields={[
-          {
-            label: t("field.title"),
-            placeholder: t("field.titlePlaceholder"),
-            value: editValues.titre_exo,               // ✅ correct
-            onChange: (e) => setEditValues({ ...editValues, titre_exo: e.target.value }),
-          },
-          {
-            label: t("field.category"),
-            element: (
-              <select
-                value={editValues.categorie}
-                onChange={(e) => setEditValues({ ...editValues, categorie: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="code">{t("categorie.code")}</option>
-                <option value="question_cours">{t("categorie.question_cours")}</option>
-              </select>
-            )
-
-          },
-          {
-            label: t("field.difficulty"),
-            element: (
-              <select
-                value={editValues.niveau_exo}
-                onChange={(e) => setEditValues({ ...editValues, niveau_exo: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="debutant">{t("difficulty.easy")}</option>
-                <option value="intermediaire">{t("difficulty.medium")}</option>
-                <option value="avance">{t("difficulty.hard")}</option>
-              </select>
-            ),
-          },
-          {
-            label: t("field.visibilite"),
-            element: (
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={editValues.visibilite_exo}   // ✅ checked
-                  onChange={(e) =>
-                    setEditValues({
-                      ...editValues,
-                      visibilite_exo: e.target.checked, // ✅ boolean
-                    })
-                  }
-                />
-                <span>{t("field.visibiliteLabel")}</span>
-              </label>
-            ),
-          }
-
-        ]}
+      <StudentDetailModal
+        studentId={selectedStudent}   // ici selectedStudent est l'ID
+        onClose={() => setSelectedStudent(null)}
       />
+      <StudentEditModal studentForm={studentForm} setStudentForm={setStudentForm} onClose={() => { setEditStudent(null); setStudentForm(null); }} onSubmit={handleUpdate} />
+      {addStudentModalOpen && (
+        <StudentAddModal
+          studentForm={newStudentForm}
+          setStudentForm={setNewStudentForm}
+          onClose={() => {
+            setAddStudentModalOpen(false);
+            setNewStudentForm({
+              nickname: "",
+              fullname: "",
+              email: "",
+              dob: "",
+              regnumber: "",
+              field: "",
+              year: "",
+            });
+          }}
+          onSubmit={handleCreateStudent}
+          addErrors={addErrors}
+        />
+      )}
+
+
 
     </div>
   );

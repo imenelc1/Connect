@@ -11,6 +11,12 @@ import ThemeContext from "../context/ThemeContext";
 import api from "../services/courseService";
 import { toast } from 'react-hot-toast';
 
+const buttonStyles = {
+  Débutant: "bg-blue text-white",
+  Intermédiaire: "bg-purple text-white",
+  Avancé: "bg-pink text-white",
+};
+
 
 export default function QuizzesManagement() {
   const { t } = useTranslation("QuizManagement");
@@ -56,6 +62,7 @@ export default function QuizzesManagement() {
             score: q.scoreMinimum || 0,
             visibilite_exo: q.exercice?.visibilite_exo,
             niveau_exo: q.exercice?.niveau_exo || "debutant",
+            niveau_exercice_label:q.exercice?.niveau_exercice_label,
             icon: <FileText size={22} />,
           }))
         );
@@ -188,6 +195,13 @@ export default function QuizzesManagement() {
                   </div>
                 </div>
                 <div className="flex gap-3">
+                   <Button
+                                                        variant="courseStart"
+                                                        className={`px-4 py-2 whitespace-nowrap ${buttonStyles[q.niveau_exercice_label]}`}
+                                                       onClick={() => navigate(`/Voir-quiz/${q.exerciceId}`)}
+                                                      >
+                                                        Voir Quiz
+                                                      </Button>
                   <button
                     className="text-muted hover:opacity-80"
                     onClick={() => handleEdit(q)}

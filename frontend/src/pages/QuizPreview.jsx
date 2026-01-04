@@ -116,7 +116,7 @@ export default function QuizPreview() {
         {quiz.questions.map((q, index) => (
           <div
             key={q.id}
-            className="bg-white rounded-xl shadow p-4"
+            className="bg-primary/20 rounded-xl shadow p-4"
           >
             <h3 className="font-semibold mb-2">
               {index + 1}. {q.texte}
@@ -130,7 +130,7 @@ export default function QuizPreview() {
               {q.options.map((opt) => (
                 <li
                   key={opt.id}
-                  className="border rounded-md px-3 py-2 bg-gray-50"
+                  className="border rounded-md px-3 py-2 bg-card"
                 >
                   {opt.texte}
                 </li>

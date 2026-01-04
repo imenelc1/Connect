@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 
-
+from badges.views import check_top_commentateur_badge, check_top_forum_badge
 from .models import Forum, Message, Commentaire, Like, MessageLike
 from .serializers import ForumSerializer, MessageSerializer, CommentaireSerializer
 from users.jwt_helpers import IsAuthenticatedJWT
@@ -243,6 +243,9 @@ def like_forum(request, forum_id):
     likes_count = Like.objects.filter(forum=forum).count()
 
 
+
+    check_top_forum_badge(request.user)
+    
     return Response({
         'message': f'Forum {action} avec succès',
         'likes_count': likes_count,
@@ -484,6 +487,12 @@ def create_comment(request, message_id):
     serializer = CommentaireSerializer(commentaire, context={'request': request})
     return Response(serializer.data, status=201)
 
+    serializer = CommentaireSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save(message=message, utilisateur=request.user)
+        return Response(serializer.data, status=201)
+    check_top_commentateur_badge(request.user)
+    return Response(serializer.errors, status=400)
 
 
 @api_view(['DELETE'])

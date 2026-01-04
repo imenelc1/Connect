@@ -81,4 +81,3 @@ class TentativeExerciceWriteSerializer(serializers.ModelSerializer):
             defaults=validated_data
         )
         return tentative
-

@@ -1,0 +1,21 @@
+{
+    "title": "Notifications",
+    "aria": "Notifications ({{count}} non lues)",
+    "unread": "{{count}} non lue",
+    "markAll": "Tout lire",
+    "markAllRead": "Tout marquer comme lu",
+    "refresh": "Rafraîchir",
+    "loading": "Chargement des notifications...",
+    "empty": "Aucune notification",
+    "emptyHint": "Vous serez notifié ici des nouvelles activités",
+    "viewAll": "Voir toutes les notifications",
+    "from": "De :",
+    "recently": "récemment",
+    "justNow": "à l'instant",
+    "minutesAgo": "il y a {{count}} min",
+    "hoursAgo": "il y a {{count}} h",
+    "daysAgo": "il y a {{count}} j",
+    "errorLoading": "Erreur lors du chargement des notifications",
+    "tryAgain": "Réessayer",
+    "allRead": "Toutes lues"
+}

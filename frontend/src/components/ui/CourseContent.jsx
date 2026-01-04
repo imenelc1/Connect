@@ -86,19 +86,15 @@ useEffect(() => {
   );
 
   // Marquer leçons visitées
-  useEffect(() => {
-    currentLessons.forEach((lesson) => {
-      if (!lesson.visited) {
-        markLessonVisited(lesson.id);
-        updateSectionProgress(currentSectionIndex, lesson.id);
-      }
-    });
-
-    if (currentLessons.some((l) => !l.visited)) {
-      setSecondsSpent(0);
-      localStorage.setItem(`courseTimer_${courseId}`, "0");
+ useEffect(() => {
+  currentLessons.forEach((lesson) => {
+    if (!lesson.visited) {
+      markLessonVisited(lesson.id);
+      updateSectionProgress(currentSectionIndex, lesson.id);
     }
-  }, [currentLessons, currentSectionIndex, markLessonVisited, updateSectionProgress, courseId]);
+  });
+}, [currentLessons, currentSectionIndex, markLessonVisited, updateSectionProgress]);
+
 
   // Navigation
   const goToLessonPage = (page) => {
@@ -249,7 +245,7 @@ useEffect(() => {
                 <p className="mt-2 text-sm sm:text-base text-textc leading-relaxed">{lesson.content}</p>
               )}
               {lesson.type === "example" && lesson.content && (
-                <pre className="mt-2 p-4 bg-gray-100 rounded-xl overflow-x-auto">{lesson.content}</pre>
+                <pre className="mt-2 p-4 bg-grad-dark-3 rounded-xl overflow-x-auto">{lesson.content}</pre>
               )}
             </div>
           ))
@@ -262,9 +258,6 @@ useEffect(() => {
         <div className="mb-4 p-4  text-center">
           <p className="text-green-700 font-semibold text-sm sm:text-base">
              Cours terminé !
-          </p>
-          <p className="text-muted text-xs sm:text-sm mt-1">
-            Vous progressez, continuez ainsi
           </p>
         </div>
       )}

@@ -1,9 +1,12 @@
 {
   "community": {
     "title": "Community",
-    "subtitle": "Exchange with other instructors and share your experience",
+    "subtitle": "Exchange with others and share your experience",
     "placeholder": "Share with the community...",
-    "send": "Send"
+    "send": "Send",
+    "notConnected": "Not connected",
+    "pleaseLogin": "Please log in",
+    "login": "Log in"
   },
   "tabs": {
     "recent": "Recent",
@@ -13,8 +16,86 @@
   "forums": {
     "select": "Select forum type",
     "all": "All forums",
-    "teacher-teacher": "Teacher ↔ Teacher",
-    "teacher-student": "Teacher ↔ Student",
-    "student-student": "Student ↔ Student"
+    "teacher-teacher": "Instructor ↔ Instructor",
+    "teacher-student": "Instructor ↔ Student",
+    "student-student": "Student ↔ Student",
+    "student-teacher": "Student ↔ Instructor",
+    "studentReserved":"for Students only",
+    "instructorReserved":"for instructors only",
+    "teacher-teacher-short": "teachers",
+  "teacher-student-short": "students",
+  "student-student-short": "students",
+  "student-teacher-short": "teachers",
+    "defaultTarget": "students"
+  },
+  "actions": {
+    "like": "Like",
+    "likes": "Likes",
+    "comment": "Comment",
+    "comments": "Comments",
+    "deleteForum": "Delete forum",
+    "deleteComment": "Delete comment",
+    "cancel": "Cancel",
+    "sendMessage": "Send reply",
+    "sendComment": "Send comment",
+    "yourForum": "Your forum",
+    "studentQuestion": "Student question",
+    "hideMessages": "Hide messages",
+    "showMessages": "Show messages"
+  },
+  "placeholders": {
+    "writeResponse": "Write your reply... (max 2000 characters)",
+    "writeComment": "Write a comment... (max 1000 characters)",
+    "selectPlaceholder": "Select a type"
+  },
+  "messages": {
+    "deleteForumConfirm": "Delete this forum? This action is irreversible. All messages and comments will be deleted.",
+    "deleteCommentConfirm": "Delete this comment?",
+    "noForums": "No forums",
+    "firstForum": "Be the first to create a forum!",
+    "noForumType": "No forum of type \"{{type}}\"",
+    "likeError": "Error while liking the forum",
+    "deleteError": "Error while deleting the forum",
+    "noPermission": "This forum is {{type}}. You do not have permission to reply.",
+    "forumNOTfound":"Forum not found",
+    "loginDel":"You must login to delete a forum",
+    "recently": "recently",
+  "justNow": "just now",
+  "minutesAgo": "{{count}} min ago",
+  "hoursAgo": "{{count}} h ago",
+  "daysAgo": "{{count}} days ago",
+  "teacherStudent": "This forum will be visible and answerable by students. Teachers will not have access. Continue?",
+  "teacherTeacher": "This forum will be reserved for teachers only. Students will not have access. Continue?",
+  "studentTeacher": "This forum will be visible and answerable by teachers. Other students will not have access. Continue?",
+  "studentStudent": "This forum will be reserved for students only. Teachers will not have access. Continue?"
+  },
+  "notifications": {
+    "posting": "Posting...",
+    "deleting": "Deleting...",
+    "likesCount": "{{count}} like",
+    "likesCount_plural": "{{count}} likes",
+    "commentsCount": "{{count}} comment",
+    "commentsCount_plural": "{{count}} comments",
+    "characters": "{{count}}/2000 characters",
+    "commentCharacters": "{{count}}/1000 characters"
+  },
+  "errors": {
+    "loadMessages": "Error loading messages",
+    "forumNotFound": "Forum not found",
+    "emptyMessage": "Please write a message",
+    "loginRequired": "You must be logged in",
+    "maxCharacters": "Message exceeds character limit(2000)",
+    "sendMessage": "Error sending message",
+    "likeError": "Error while liking the forum",
+    "deleteError": "Error while deleting the forum",
+    "noPermission": "This forum is {{type}}. You do not have permission to reply.",
+    "unknownError":"Unknown error",
+    "networkLike":"Network Error while liking",
+    "networkDelete": "Network error while deleting the forum",
+    "loginLike": "You must be logged in to like",
+     "missingToken": "Missing token - Please log in again",
+     "loadForums": "Error loading forums. Please check your connection.",
+       "loadForumsError": "Error loading forums:"
+
   }
 }

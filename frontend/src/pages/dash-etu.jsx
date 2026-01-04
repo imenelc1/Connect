@@ -2,12 +2,12 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { 
-  TrendingDown, 
-  CircleCheckBig, 
-  Clock3, 
-  Book, 
-  Search 
+import {
+  TrendingDown,
+  CircleCheckBig,
+  Clock3,
+  Book,
+  Search
 } from "lucide-react";
 import dayjs from "dayjs";
 
@@ -21,6 +21,7 @@ import ProgressBar from "../components/ui/ProgressBar";
 import UserCircle from "../components/common/UserCircle";
 import Input from "../components/common/Input";
 import NotificationBell from "../components/common/NotificationBell";
+
 
 // Contextes & Services
 import ThemeContext from "../context/ThemeContext";
@@ -53,8 +54,8 @@ export default function Dashboardetu() {
   const [dailyTime, setDailyTime] = useState(0);
   const [successRate, setSuccessRate] = useState(0);
   useEffect(() => {
-  fetchNotifications(); // récupère les notifications dès le montage
-}, [fetchNotifications]);
+    fetchNotifications(); // récupère les notifications dès le montage
+  }, [fetchNotifications]);
   // Gestion de la responsivité
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -80,7 +81,7 @@ export default function Dashboardetu() {
         // Cours actifs
         const coursesCount = await progressionService.getActiveCoursesCount();
         setActiveCoursesCount(coursesCount);
-        
+
         // Progression globale
         const progress = await progressionService.getGlobalProgress();
         setGlobalProgress(progress);
@@ -90,7 +91,7 @@ export default function Dashboardetu() {
         setSuccessRate(rate);
 
       } catch (err) {
-        console.error("Erreur lors du chargement des données:", err);
+        console.error(t("Dashboard.LoadDataError"), err);
       } finally {
         setLoading(false);
       }
@@ -112,13 +113,13 @@ export default function Dashboardetu() {
         );
         setDailyTime(res.data.total_seconds || 0);
       } catch (err) {
-        console.error("Erreur fetching daily time:", err);
+        console.error(t("Dashboard.FetchDailyTimeError"), err);
       }
     };
 
     fetchDailyTime();
     const interval = setInterval(fetchDailyTime, 60000);
-    
+
     return () => clearInterval(interval);
   }, [user]);
 
@@ -167,10 +168,10 @@ export default function Dashboardetu() {
   // Formater les notifications pour l'affichage
   const formatNotificationsForFeed = () => {
     if (!notifications || notifications.length === 0) return [];
-    
+
     return notifications.slice(0, 4).map(notif => {
       const dateObj = notif.date_envoie ? dayjs(notif.date_envoie) : dayjs();
-      
+
       return {
         title: notif.message_notif || "Notification",
         date: dateObj.format("DD/MM/YYYY"),
@@ -192,30 +193,23 @@ export default function Dashboardetu() {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface">
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* Sidebar */}
-      <Navbar />
-
+      <div>
+        <Navbar />
+      </div>
       {/* Contenu principal */}
+
       <main className={`
-        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 
-        min-h-screen w-full overflow-x-hidden
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
-        
-        {/* En-tête */}
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          {/* Barre de recherche */}
-          <form className="w-full sm:flex-1 max-w-full lg:max-w-sm order-2 sm:order-1">
-            <Input
-              placeholder={t("Dashboard.Search")}
-              icon={<Search size={isMobile ? 14 : 16} />}
-              className="w-full"
-            />
-          </form>
 
-          {/* Notifications et profil */}
-          <div className="flex items-center gap-3 order-1 sm:order-2 self-end sm:self-auto">
+        <header className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+
+
+          {/* Notifications et profil — alignés à droite */}
+          <div className="flex items-center gap-3 ml-auto">
             <NotificationBell />
             <UserCircle
               initials={initials}
@@ -224,7 +218,10 @@ export default function Dashboardetu() {
               size={isMobile ? "sm" : "md"}
             />
           </div>
+
         </header>
+
+
 
         {/* Bannière de bienvenue */}
         <div className="relative bg-grad-1 text-white p-4 rounded-2xl shadow-md 
@@ -237,7 +234,7 @@ export default function Dashboardetu() {
               {t("Dashboard.Welcome")} {user ? `${user.nom} ${user.prenom}` : "..."}
             </h1>
             <p className="text-xs sm:text-sm opacity-90 mt-1">
-              {t("Dashboard.Alwaysp")}
+              {t("Dashboard.AlwayspStudent")}
             </p>
           </div>
           <Mascotte className="w-28 sm:w-36 lg:w-44 mt-4 lg:mt-0" />
@@ -245,31 +242,31 @@ export default function Dashboardetu() {
 
         {/* Statistiques rapides */}
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 text-textc">
-          <Cards 
-            text={t("Dashboard.AverageS")} 
-            value={`${submittedExercises}/${totalExercises}`} 
-            icon={<TrendingDown size={isMobile ? 16 : 18} />} 
+          <Cards
+            text={t("Dashboard.AverageS")}
+            value={`${submittedExercises}/${totalExercises}`}
+            icon={<TrendingDown size={isMobile ? 16 : 18} />}
             bg="bg-grad-2"
             isMobile={isMobile}
           />
-          <Cards 
-            text={t("Dashboard.Success")} 
-            value={`${successRate}%`} 
-            icon={<CircleCheckBig size={isMobile ? 16 : 18} />} 
+          <Cards
+            text={t("Dashboard.Success")}
+            value={`${Math.round(successRate)}%`}
+            icon={<CircleCheckBig size={isMobile ? 16 : 18} />}
             bg="bg-grad-3"
             isMobile={isMobile}
           />
-          <Cards 
-            text={t("Dashboard.AverageT")} 
-            value={formatTimeStyled(dailyTime)} 
-            icon={<Book size={isMobile ? 16 : 18} />} 
+          <Cards
+            text={t("Dashboard.AverageT")}
+            value={formatTimeStyled(dailyTime)}
+            icon={<Book size={isMobile ? 16 : 18} />}
             bg="bg-grad-4"
             isMobile={isMobile}
           />
-          <Cards 
-            text={t("Dashboard.ActiveC")} 
-            value={activeCoursesCount} 
-            icon={<Clock3 size={isMobile ? 16 : 18} />} 
+          <Cards
+            text={t("Dashboard.ActiveC")}
+            value={activeCoursesCount}
+            icon={<Clock3 size={isMobile ? 16 : 18} />}
             bg="bg-grad-2"
             isMobile={isMobile}
           />
@@ -277,8 +274,8 @@ export default function Dashboardetu() {
 
         {/* Barre de progression globale */}
         <div className="bg-card text-primary p-4 sm:p-6 md:p-8 lg:p-10 rounded-2xl w-full shadow-lg">
-          <ProgressBar 
-            value={globalProgress} 
+          <ProgressBar
+            value={globalProgress}
             title={t("Dashboard.GlobalP")}
             className="text-sm sm:text-base"
           />

@@ -119,7 +119,7 @@ export default function PostCreationForm({
   };
 
   return (
-    <div className="bg-card dark:bg-gray-800 shadow-lg rounded-3xl p-5 mb-8 border border-blue/20 dark:border-blue-800/30">
+    <div className="bg-grad-2  w-full shadow-lg rounded-3xl p-4 mb-8 border border-blue/20 dark:border-blue-800/30">
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Titre du forum *

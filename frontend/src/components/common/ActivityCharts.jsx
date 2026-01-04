@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Bar, Line } from "react-chartjs-2";
+"use client"
+
+import React, { useEffect, useState } from "react"
+import { Bar, Line } from "react-chartjs-2"
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -8,8 +10,20 @@ import {
   BarElement,
   LineElement,
   Tooltip,
-  Legend
-} from "chart.js";
+  Legend,
+} from "chart.js"
+import { useTranslation } from "react-i18next"
+import { FaChartBar } from "react-icons/fa"
+const getCssRgb = (varName, alpha = 1) => {
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue(varName)
+    .trim()
+
+  // "79 157 222" -> "79,157,222"
+  const rgb = raw.replace(/\s+/g, ",")
+
+  return `rgba(${rgb}, ${alpha})`
+}
 
 ChartJS.register(
   CategoryScale,
@@ -19,80 +33,150 @@ ChartJS.register(
   LineElement,
   Tooltip,
   Legend
-);
+)
 
 const ActivityCharts = () => {
+  const { t } = useTranslation("DashboardAdmin")
+
   const [stats, setStats] = useState({
+    labels: [],
     registrations: [],
     logins: [],
     coursesFollowed: [],
-    labels: []
-  });
+  })
 
+  const [colors, setColors] = useState(null)
+
+
+  /* ================= FETCH ================= */
   useEffect(() => {
-    fetchActivityStats();
-  }, []);
-
-  const fetchActivityStats = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/api/activity/stats");
-      const data = await res.json();
-
-      setStats({
-        labels: data.labels, // ex: ["Jan","Feb","Mar"]
-        registrations: data.registrations,
-        logins: data.logins,
-        coursesFollowed: data.coursesFollowed
-      });
-    } catch (err) {
-      console.error("Erreur chargement stats :", err);
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem("admin_token")
+        const res = await fetch(
+          "http://localhost:8000/api/dashboard/activity/stats/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        if (!res.ok) throw new Error("Erreur API")
+        setStats(await res.json())
+      } catch (e) {
+        console.error(e)
+      }
     }
-  };
 
+    fetchStats()
+  }, [])
+  useEffect(() => {
+    setColors({
+      primary: getCssRgb("--color-primary", 0.75),
+      secondary: getCssRgb("--color-secondary", 0.75),
+      line: getCssRgb("--color-blue", 1),
+      fill: getCssRgb("--color-blue", 0.18),
+      grid: getCssRgb("--color-gray-light", 0.4),
+      text: getCssRgb("--color-text", 0.8),
+    })
+  }, [])
+
+  /* ================= COLORS (AFTER MOUNT) ================= */
+
+
+  /* ⛔ Ne pas render tant que les couleurs ne sont pas prêtes */
+  if (!colors) return null
+
+  /* ================= DATA ================= */
   const barData = {
     labels: stats.labels,
     datasets: [
       {
-        label: "Inscriptions",
+        label: t("charts.registrations"),
         data: stats.registrations,
-        backgroundColor: "rgba(54, 162, 235, 0.6)"
+        backgroundColor: colors.primary,
+        hoverBackgroundColor: colors.primary,
+        borderColor: "transparent",
+        borderRadius: 8,
       },
       {
-        label: "Connexions",
+        label: t("charts.logins"),
         data: stats.logins,
-        backgroundColor: "rgba(255, 206, 86, 0.6)"
-      }
-    ]
-  };
+        backgroundColor: colors.secondary,
+        hoverBackgroundColor: colors.secondary,
+        borderColor: "transparent",
+        borderRadius: 8,
+      },
+    ],
+  }
 
-  const coursesLineData = {
-    labels: stats.labels,
-    datasets: [
-      {
-        label: "Cours suivis",
-        data: stats.coursesFollowed,
-        borderColor: "rgba(75, 192, 192, 1)",
-        tension: 0.3
-      }
-    ]
-  };
+
+  const lineData = {
+  labels: stats.labels,
+  datasets: [
+    {
+      label: t("charts.coursesFollowed"),
+      data: stats.coursesFollowed,
+      borderColor: colors.line,
+      backgroundColor: colors.fill,
+      fill: true,
+      tension: 0.35,
+      pointRadius: 4,
+    },
+  ],
+}
+
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          color: colors.text,
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { color: colors.grid },
+        ticks: { color: colors.text },
+      },
+      y: {
+        beginAtZero: true,
+        grid: { color: colors.grid },
+        ticks: { color: colors.text },
+      },
+    },
+  }
 
   return (
-    <div className="charts-container">
+    <div className="p-6 space-y-8">
+      <h2 className="flex items-center gap-3 text-2xl font-semibold text-textc">
+        <FaChartBar className="text-primary" />
+        {t("charts.activityTitle")}
+      </h2>
 
-      <h2>📊 Activité de la plateforme</h2>
-
-      <div className="chart-card">
-        <h3>📥 Inscriptions & 🔐 Connexions</h3>
-        <Bar data={barData} />
+      <div className="bg-card rounded-xl shadow-card p-5">
+        <h3 className="text-lg font-medium mb-4 text-textc">
+          {t("charts.registrationsAndLogins")}
+        </h3>
+        <div className="h-64">
+          <Bar data={barData} options={chartOptions} />
+        </div>
       </div>
 
-      <div className="chart-card">
-        <h3>📚 Cours suivis</h3>
-        <Line data={coursesLineData} />
+      <div className="bg-card rounded-xl shadow-card p-5">
+        <h3 className="text-lg font-medium mb-4 text-textc">
+          {t("charts.coursesFollowed")}
+        </h3>
+        <div className="h-64">
+          <Line data={lineData} options={chartOptions} />
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ActivityCharts;
+export default ActivityCharts

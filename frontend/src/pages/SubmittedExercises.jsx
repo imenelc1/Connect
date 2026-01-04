@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import { CheckCircle, Clock, MessageCircle, Calendar, ChevronRight } from "lucide-react";
 import { getTentatives } from "../services/progressionService";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,8 @@ export default function SubmittedExercises() {
   const [filter, setFilter] = useState("All");
   const [expandedCards, setExpandedCards] = useState({});
   const [loading, setLoading] = useState(true);
+   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -78,6 +80,19 @@ export default function SubmittedExercises() {
 
     fetchExercises();
   }, []);
+  useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth < 768);
+  const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+
+  window.addEventListener("resize", handleResize);
+  window.addEventListener("sidebarChanged", handleSidebarChange);
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+    window.removeEventListener("sidebarChanged", handleSidebarChange);
+  };
+}, []);
+
 
   const filtered = exercises.filter((ex) => {
     if (filter === "All") return true;
@@ -104,12 +119,26 @@ export default function SubmittedExercises() {
   };
 
   return (
-    <div className="flex">
-      <Navbar />
 
-      <main className="flex-1 ml-16 sm:ml-56 p-6">
-        <h1 className="text-3xl font-semibold text-primary">{t("submittedExercises") || "Exercices Soumis"}</h1>
-        <div className="text-primary font-medium text-sm border border-primary px-3 py-1 rounded-md shadow-sm bg-bg inline-block mt-2">
+        <div className="flex flex-row min-h-screen bg-surface overflow-x-hidden">
+
+          {/* Sidebar */}
+          <div className={`fixed left-0 top-0 h-full z-50`}>
+            <Navbar />
+          </div>
+
+     <main
+  className={`
+    flex-1 p-4 sm:p-6 pt-6 space-y-5 min-h-screen
+    transition-all duration-300
+    overflow-x-hidden
+    ${isMobile ? "ml-16" : sidebarCollapsed ? "ml-16" : "ml-64"}
+  `}
+>
+
+
+        <h1 className="text-3xl font-semibold text-muted">{t("submittedExercises") || "Exercices Soumis"}</h1>
+        <div className="text-primary font-medium text-sm border border-primary px-3 py-1 rounded-md shadow-sm bg-surface inline-block mt-2">
           {t("total") || "Total"}: {filtered.length} {t("exercises") || "exercices"}
         </div>
 
@@ -117,131 +146,154 @@ export default function SubmittedExercises() {
         <div className="flex gap-3 mt-4 mb-6">
           <button
             onClick={() => setFilter("All")}
-            className={`border px-3 py-1 rounded ${filter === "All" ? "bg-primary text-white" : "bg-bg text-primary"}`}
+            className={`border px-3 py-1 rounded ${filter === "All" ? "bg-primary text-white" : "bg-bg text-muted"}`}
           >
             {t("all") || "Tous"}
           </button>
           <button
             onClick={() => setFilter("Soumis")}
-            className={`border px-3 py-1 rounded ${filter === "Soumis" ? "bg-primary text-white" : "bg-bg text-primary"}`}
+            className={`border px-3 py-1 rounded ${filter === "Soumis" ? "bg-primary text-white" : "bg-bg text-muted"}`}
           >
             {t("submitted") || "Soumis"}
           </button>
           <button
             onClick={() => setFilter("Brouillon")}
-            className={`border px-3 py-1 rounded ${filter === "Brouillon" ? "bg-primary text-white" : "bg-bg text-primary"}`}
+            className={`border px-3 py-1 rounded ${filter === "Brouillon" ? "bg-primary text-white" : "bg-bg text-muted"}`}
           >
             {t("brouillon") || "Brouillon"}
           </button>
         </div>
 
         {/* LIST OF CARDS - AVEC SPINNER DE CHARGEMENT ET MESSAGE QUAND VIDE */}
-        <div className="flex flex-col gap-5 mt-6">
-          {loading ? (
-            <div className="flex justify-center py-10">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-10 text-gray-500">
-              Aucun exercice {filter !== "All" ? filter.toLowerCase() : ""} trouvé
-            </div>
-          ) : (
-            filtered.map((ex) => {
-              const isExpanded = expandedCards[ex.id] || false;
-              return (
-                <div key={ex.id} className={`${ex.bgClass} shadow rounded-xl p-4 sm:p-6 border flex flex-col relative`}>
-                  {/* Status Badge */}
-                  <span
-                    className={`absolute top-3 right-3 flex items-center gap-1 text-xs px-2 py-1 rounded 
-                    ${ex.status === "Soumis" ? "bg-secondary/30" : ex.status === "Brouillon" ? "bg-pink/30" : "bg-green/30"}`}>
-                    {ex.status === "Soumis" ? <CheckCircle size={14} /> : <Clock size={14} />}
-                    {ex.status}
-                  </span>
+       <div className="flex flex-col gap-5 mt-6">
+  {loading ? (
+    <div className="flex justify-center py-10">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>
+  ) : filtered.length === 0 ? (
+    <div className="text-center py-10 text-gray-500">
+      Aucun exercice {filter !== "All" ? filter.toLowerCase() : ""} trouvé
+    </div>
+  ) : (
+    filtered.map((ex) => {
+      const isExpanded = expandedCards[ex.id] || false;
 
-                  {/* Title */}
-                  <h2 className="text-xl font-semibold pr-20">{ex.title}</h2>
+      return (
+        <div
+          key={ex.id}
+          className={`
+            ${ex.bgClass}
+            shadow rounded-xl p-4 sm:p-6 border
+            flex flex-col relative
+            overflow-hidden
+          `}
+        >
+          {/* Status Badge */}
+          <span
+            className={`absolute top-3 right-3 flex items-center gap-1 text-xs px-2 py-1 rounded 
+            ${ex.status === "Soumis"
+              ? "bg-secondary/30"
+              : ex.status === "Brouillon"
+              ? "bg-pink/30"
+              : "bg-green/30"}`}
+          >
+            {ex.status === "Soumis" ? <CheckCircle size={14} /> : <Clock size={14} />}
+            {ex.status}
+          </span>
 
-                  {/* Description prévisualisée */}
-                  <p className="text-textc text-sm leading-relaxed mt-2 line-clamp-2">
-                    {ex.description}
-                  </p>
+          {/* Title */}
+          <h2 className="text-lg sm:text-xl font-semibold pr-14 sm:pr-20 break-words">
+            {ex.title}
+          </h2>
 
-                  {/* ArrowRight clickable - NAVIGATION DIFFÉRENCIÉE PAR CATÉGORIE */}
-                  <div className="flex justify-between items-center mt-4">
-                    <div className="flex flex-wrap items-center gap-4 text-textc text-sm">
-                      <div className="flex items-center gap-1">
-                        <Calendar size={14} className="text-primary" /> 
-                        {formatDate(ex.submittedDate)}
-                      </div>
-                      {/* Type code badge - BASÉ SUR categorie */}
-                      {ex.categorie === "code" && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-primary font-bold">{`</>`}</span> {ex.language}
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <span
-                          className={`w-3 h-3 rounded-full ${
-                            ex.difficulty === "Very easy"
-                              ? "bg-secondary"
-                              : ex.difficulty === "Moderate"
-                              ? "bg-primary"
-                              : "bg-pink"
-                          }`}
-                        ></span>
-                        {ex.difficulty}
-                      </div>
-                      {ex.hasFeedback && (
-                        <div className="flex items-center gap-1 text-green-600">
-                          <MessageCircle size={14} />
-                          <span className="text-xs font-medium">Feedback disponible</span>
-                        </div>
-                      )}
-                    </div>
-                    <ChevronRight
-                      size={20}
-                      className="text-primary cursor-pointer hover:text-primary/80"
-                      // NAVIGATION DIFFÉRENCIÉE PAR CATÉGORIE COMME DANS LE DEUXIÈME FICHIER
-                      onClick={() => {
-                        ex.categorie === "code"
-                          ? window.location.href = `/submitted-exercise/${ex.id}`
-                          : window.location.href = `/submitted-exercise-theory/${ex.id}`;
-                      }}
-                    />
-                  </div>
+          {/* Description */}
+          <p className="text-textc text-sm leading-relaxed mt-2 line-clamp-2 break-words">
+            {ex.description}
+          </p>
 
-                  {/* Détails supplémentaires (dépliables) - MOINS DE DÉTAILS COMME DANS LE DEUXIÈME */}
-                  <div className={`${isExpanded ? "block" : "hidden"} sm:block mt-4 space-y-3`}>
-                    {/* Feedback (si disponible) */}
-                    {ex.hasFeedback && (
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2 mb-1">
-                          <MessageCircle size={16} className="text-primary" />
-                          <span className="font-semibold text-sm text-primary">
-                            {t("teacherFeedback") || "Feedback du professeur"}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-md bg-white/70 border border-primary/20">
-                          <p className="text-sm text-textc whitespace-pre-wrap">
-                            {ex.feedback || t("noFeedback") || "Aucun feedback pour le moment"}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+          {/* Infos + navigation */}
+          <div className="flex justify-between items-start mt-4 gap-3">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-textc text-sm">
+              <div className="flex items-center gap-1">
+                <Calendar size={14} className="text-primary shrink-0" />
+                <span className="break-words">
+                  {formatDate(ex.submittedDate)}
+                </span>
+              </div>
 
-                  {/* Bouton pour déplier/replier */}
-                  <button
-                    onClick={() => toggleCard(ex.id)}
-                    className="self-end mt-2 text-sm text-primary hover:underline flex items-center gap-1"
-                  >
-                    {isExpanded ? "Voir moins" : "Voir plus de détails"}
-                  </button>
+              {ex.categorie === "code" && (
+                <div className="flex items-center gap-1">
+                  <span className="text-primary font-bold">{`</>`}</span>
+                  <span className="break-words">{ex.language}</span>
                 </div>
-              );
-            })
-          )}
+              )}
+
+              <div className="flex items-center gap-1">
+                <span
+                  className={`w-3 h-3 rounded-full shrink-0 ${
+                    ex.difficulty === "Very easy"
+                      ? "bg-secondary"
+                      : ex.difficulty === "Moderate"
+                      ? "bg-primary"
+                      : "bg-pink"
+                  }`}
+                />
+                {ex.difficulty}
+              </div>
+
+              {ex.hasFeedback && (
+                <div className="flex items-center gap-1 text-green-600">
+                  <MessageCircle size={14} className="shrink-0" />
+                  <span className="text-xs font-medium">
+                    Feedback disponible
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <ChevronRight
+              size={20}
+              className="text-primary cursor-pointer hover:text-primary/80 shrink-0"
+              onClick={() => {
+                ex.categorie === "code"
+                  ? (window.location.href = `/submitted-exercise/${ex.id}`)
+                  : (window.location.href = `/submitted-exercise-theory/${ex.id}`);
+              }}
+            />
+          </div>
+
+          {/* Détails */}
+          <div className={`${isExpanded ? "block" : "hidden"} sm:block mt-4 space-y-3`}>
+            {ex.hasFeedback && (
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 mb-1">
+                  <MessageCircle size={16} className="text-primary" />
+                  <span className="font-semibold text-sm text-primary">
+                    {t("teacherFeedback") || "Feedback du professeur"}
+                  </span>
+                </div>
+                <div className="p-3 rounded-md bg-white/70 border border-primary/20">
+                  <p className="text-sm text-textc whitespace-pre-wrap break-words">
+                    {ex.feedback || t("noFeedback") || "Aucun feedback"}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Toggle */}
+          <button
+            onClick={() => toggleCard(ex.id)}
+            className="self-end mt-2 text-sm text-primary hover:underline"
+          >
+            {isExpanded ? "Voir moins" : "Voir plus de détails"}
+          </button>
         </div>
+      );
+    })
+  )}
+</div>
+
 
         {/* BOTTOM STATS - 2 STATISTIQUES COMME DANS LE DEUXIÈME FICHIER */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">

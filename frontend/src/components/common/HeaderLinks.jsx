@@ -28,9 +28,14 @@ export default function HeaderLinks() {
   ];
 
 
-  // 🔥 Chemin Dashboard selon rôle
+  //  Chemin Dashboard selon rôle
   const dashboardLink =
-    user?.role === "enseignant" ? "/dashboard-ens" : "/dashboard-etu";
+    user?.role === "enseignant"
+      ? "/dashboard-ens"
+      : user?.role === "admin"
+        ? "/Dashboard-admin"
+        : "/dashboard-etu";
+
 
   return (
     <nav className="w-full flex items-center justify-between px-4 md:px-16 lg:px-16 py-4 bg-surface relative">
@@ -55,7 +60,7 @@ export default function HeaderLinks() {
         {user && (
           <NavLink to={dashboardLink}>
             <button className="hover:text-primary transition font-medium whitespace-nowrap">
-              Dashboard
+               {t("acceuil.dashboard")}
             </button>
           </NavLink>
         )}

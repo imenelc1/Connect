@@ -3,46 +3,52 @@ import axios from "axios";
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
-export const getSystemPrompt = ({ lang = "fr", exercise, student, memory, profile }) => {
+export const getSystemPrompt = ({
+  lang = "fr",
+  mode = "generic",
+  exercise,
+  student,
+  memory,
+  courseContext = ""
+}) => {
   const historyText = (memory || [])
-    .map((m) => `${m.from}: ${m.text}`)
+    .map(m => `${m.from}: ${m.text}`)
     .join("\n");
 
-  return `
-Tu es **Coach C**, un professeur d'algorithmique strict mais bienveillant.
+  if (mode === "exercise" && exercise) {
+    return `
+Tu es un Coach Exercice pédagogique.
+Tu aides l'étudiant à comprendre sans tricher.
 
-🎓 Objectif :
-Aider l’étudiant à COMPRENDRE — jamais copier.
+Exercice :
+Titre : ${exercise.titre}
+Énoncé : ${exercise.enonce}
 
-👤 Étudiant :
-- Nom : ${student?.name || "Inconnu"}
-- Niveau : ${student?.level || "N/A"}
-- Difficultés : ${profile?.difficulties?.join(", ") || "Aucune"}
-- Erreurs fréquentes : ${profile?.commonErrors?.join(", ") || "Aucune"}
-
-📘 Exercice :
-${exercise?.titre || ""}
-${exercise?.enonce || ""}
-
-💻 Code actuel :
-${exercise?.code || "Aucun code soumis"}
-
-📝 Historique récent :
+Historique :
 ${historyText}
 
-🚫 Règles :
-- Réponds STRICTEMENT en ${lang}
-- Ne donne jamais la solution complète
-- Pas de code final prêt à compiler
-- Fournis des indices progressifs (max 3)
-- Pose toujours au moins une question
+Réponds STRICTEMENT en ${lang}.
+`;
+  }
 
-📌 Format attendu :
-🔎 Diagnostic
-🧠 Raisonnement
-💡 Indices
+  if (mode === "course" && courseContext) {
+    return `
+Tu es Coach Cours.
+Cours :
+${courseContext.slice(0, 3000)}
+
+Historique :
+${historyText}
+
+Réponds STRICTEMENT en ${lang}.
+`;
+  }
+
+  return `
+Tu es Coach IA.
+🧠 Explication
+💡 Exemple
 ❓ Question
-✨ Rappel conceptuel
 `;
 };
 
@@ -56,20 +62,20 @@ export async function getAIAnswer({ systemPrompt, userPrompt }) {
         max_tokens: 700,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
+          { role: "user", content: userPrompt }
+        ]
       },
       {
         headers: {
           Authorization: `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+          "Content-Type": "application/json"
+        }
       }
     );
 
     return res.data?.choices?.[0]?.message?.content?.trim() || "Réponse vide.";
   } catch (err) {
-    console.error("Erreur IA :", err);
-    return "❌ Erreur lors de la génération de la réponse.";
+    console.error("❌ Erreur IA :", err);
+    return "❌ Erreur lors de la génération.";
   }
 }

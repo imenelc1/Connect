@@ -59,3 +59,146 @@ Badge.objects.create(
     numpoints=150,
     icone="badges/problem_solver.png"
 )
+
+
+# Badge : Speed Demon
+Badge.objects.create(
+    nom="Speed Demon",
+    description="Solve 5 different exercises in under an hour",
+    condition="Résoudre 5 exercices différents en moins d'une heure",
+    categorie="success",
+    numpoints=200,
+    icone="badges/speed_demon.png"
+)
+
+Badge.objects.get_or_create(
+    nom="7 Day Streak",
+    description="Solve exercises for 7 consecutive days",
+    condition="Résoudre au moins un exercice chaque jour pendant 7 jours consécutifs",
+    categorie="success",
+    numpoints=150,
+    icone="badges/7_day_streak.png"
+)
+
+
+
+# Création du badge Quiz Novice
+badge, created = Badge.objects.get_or_create(
+    nom="Quiz Novice",
+    defaults={
+        "description": "Complete your first quiz",
+        "condition": "Réussir au moins un quiz",
+        "categorie": "success",
+        "numpoints": 50,
+        "icone": "badges/quiz_novice.png"
+    }
+)
+
+/// insertion auto 
+badge, created = Badge.objects.get_or_create(
+    nom="Quiz Whiz",
+    defaults={
+        "description": "Get a perfect score in a quiz",
+        "condition": "Obtenir 100% dans un quiz",
+        "categorie": "success",
+        "numpoints": 100,
+        "icone": "badges/quiz_whiz.png"
+    }
+)
+
+
+
+badge, created = Badge.objects.get_or_create(
+    nom="Quiz Master",
+    defaults={
+        "description": "Finish 10 quizzes",
+        "condition": "Terminer 10 quiz",
+        "categorie": "success",
+        "numpoints": 150,
+        "icone": "badges/quiz_master.png"
+    }
+)
+
+
+
+ai_badge, created = Badge.objects.get_or_create(
+    nom="AI Learner",
+    defaults={
+        "description": "Use the AI explanation feature for the first time",
+        "condition": "Utiliser la fonction d'explication IA pour la première fois",
+        "categorie": "success",
+        "numpoints": 50,
+        "icone": "badges/ai_learner.png"
+    }
+)
+
+
+# ===== All-Rounder =====
+all_rounder_badge, created = Badge.objects.get_or_create(
+    nom="All-Rounder",
+    defaults={
+        "description": "Complete one course, one exercise, and one quiz",
+        "condition": "Compléter au moins un cours, un exercice et un quiz",
+        "categorie": "success",
+        "numpoints": 200,
+        "icone": "badges/all_rounder.png"
+    }
+)
+
+
+# ===== Legendary Coder =====
+legendary_badge, created = Badge.objects.get_or_create(
+    nom="Legendary Coder",
+    defaults={
+        "description": "Complete all courses, exercises, and quizzes on the platform",
+        "condition": "Compléter tous les cours, exercices et quiz de la plateforme",
+        "categorie": "special",
+        "numpoints": 1000,
+        "icone": "badges/legendary_coder.png"
+    }
+)
+
+
+badge, created = Badge.objects.get_or_create(
+    nom="Night Owl",
+    defaults={
+        "description": "Submit an exercise between midnight and 6 AM",
+        "condition": "Soumettre un exercice entre 00h00 et 06h00",
+        "categorie": "special",
+        "numpoints": 200,
+        "icone": "badges/night_owl.png"
+    }
+)
+
+badge, created = Badge.objects.get_or_create(
+    nom="Top Commentateur",
+    defaults={
+        "description": "Poster le plus de commentaires sur le forum",
+        "condition": "Publier un certain nombre de commentaires",
+        "categorie": "special",
+        "numpoints": 250,
+        "icone": "badges/top_commentateur.png"
+    }
+)
+
+
+badge, created = Badge.objects.get_or_create(
+    nom="Top Forum Likeur",
+    defaults={
+        "description": "Attribué à l'utilisateur dont le forum reçoit le plus de likes",
+        "condition": "Avoir un forum avec beaucoup de likes",
+        "categorie": "special",
+        "numpoints": 500,
+        "icone": "badges/top_forum_likeur.png"
+    }
+)
+
+
+
+
+
+
+
+
+
+

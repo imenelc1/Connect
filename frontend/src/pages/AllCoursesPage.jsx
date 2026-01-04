@@ -28,6 +28,7 @@ export default function AllCoursesPage() {
   const [filterLevel, setFilterLevel] = useState("ALL");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const navigate = useNavigate();
   const { t } = useTranslation("allcourses");
@@ -127,24 +128,33 @@ export default function AllCoursesPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface dark:bg-gray-900">
-      <Navbar />
-      <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-        <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
-      </div>
-
-      <main className="flex-1 p-4 md:p-8 transition-all duration-300" style={{ marginLeft: sidebarWidth }}>
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl font-bold text-muted">{t("coursesTitle")}</h1>
-        </div>
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                  {/* Sidebar */}
+                  <div>
+                    <Navbar />
+                  </div>
+     
+      <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+                <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+          {/* Titre */}
+          <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
+            {t("coursesTitle")}
+          </h1>
+        
+          {/* Notifications + User */}
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
+            />
+          </div>
+        </header>
+       
 
         <ContentSearchBar value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
 
@@ -182,8 +192,10 @@ export default function AllCoursesPage() {
             >
               {userRole === "etudiant" && (
                 <Button
+                
                   variant="courseStart"
                   className="mt-2 w-full"
+                  
                   onClick={() => {
                     if (course.action === "start") {
                       navigate(`/course/${course.id}/lesson/first`);

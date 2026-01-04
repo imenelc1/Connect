@@ -117,6 +117,11 @@ import translationENSpacesPage from "./locales/addSpace/en.json";
 
 import translationFRInstructors from "./locales/addinstructors/fr.json";
 import translationENInstructors from "./locales/addinstructors/en.json";
+import translationFRNotification from "./locales/notifications/fr-notif/translation.json";
+import translationENNotification from "./locales/notifications/en-notif/translation.json";
+import translationENAssistant from "./locales/AssistantIA/en-assistant/translation.json"
+import translationFRAssistant from "./locales/AssistantIA/fr-assistant/translation.json"
+
 
 const resources = {
   fr: {
@@ -154,12 +159,14 @@ const resources = {
     CoursesManagement: translationFRCourseManagement,
     ValidationCourses: translationFRValidationCourses,
     DashboardAdmin: translationFRDashboardAdmin,
-    ForumManagement: translationFRForumManagement,
-    BadgesManagement: translationFRBadgesManagement,
-    StudentsManagement: translationFRStudentsManagement,
+     ForumManagement:translationFRForumManagement,
+     BadgesManagement:translationFRBadgesManagement,
+    StudentsManagement:translationFRStudentsManagement,
+    notifications:translationFRNotification,
+   assistant:translationFRAssistant,
     space: translationFRSpacesPage,
-    instructors: translationFRInstructors,
-  },
+    instructors: translationFRInstructors
+    },
 
   en: {
     translation: translationEN,
@@ -196,11 +203,16 @@ const resources = {
     CoursesManagement: translationENCourseManagement,
     ValidationCourses: translationENValidationCourses,
     DashboardAdmin: translationENDashboardAdmin,
-    ForumManagement: translationENForumManagement,
-    BadgesManagement: translationENBadgesManagement,
-    StudentsManagement: translationENStudentsManagement,
-    space: translationENSpacesPage,
-    instructors: translationENInstructors,
+     ForumManagement:translationENForumManagement,
+       BadgesManagement:translationENBadgesManagement,
+      StudentsManagement:translationENStudentsManagement,
+       space: translationENSpacesPage,
+      instructors: translationENInstructors,
+      notifications:translationENNotification,
+      assistant:translationENAssistant
+
+
+
   },
 };
 
