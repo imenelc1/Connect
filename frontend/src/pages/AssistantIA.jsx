@@ -6,11 +6,14 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getSystemPrompt, getAIAnswer } from "../services/iaService";
 
-const detectLanguage = text => /[àâçéèêëîïôûùüÿñæœ]/i.test(text) ? "fr" : "en";
-const isExerciseQuestion = msg => /je comprends pas|j'ai pas compris|pas compris|rien compris|c'est flou/i.test(msg.toLowerCase());
-const asksAboutCode = msg =>
+const detectLanguage = (text) =>
+  /[àâçéèêëîïôûùüÿñæœ]/i.test(text) ? "fr" : "en";
+const isExerciseQuestion = (msg) =>
+  /je comprends pas|j'ai pas compris|pas compris|rien compris|c'est flou/i.test(
+    msg.toLowerCase()
+  );
+const asksAboutCode = (msg) =>
   /mon code|le code|ça marche pas|bug|erreur|probleme/i.test(msg.toLowerCase());
-
 
 import axios from "axios";
 
@@ -18,11 +21,15 @@ const API_URL = "http://localhost:8000/api/badges/ai-explanation-badge/"; // ton
 
 async function awardAIBadge() {
   try {
-    const res = await axios.post(API_URL, {}, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}` // ou selon ton auth
+    const res = await axios.post(
+      API_URL,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // ou selon ton auth
+        },
       }
-    });
+    );
     console.log(res.data.message);
     return res.data;
   } catch (err) {
@@ -30,32 +37,41 @@ async function awardAIBadge() {
   }
 }
 
-
-export default function AssistantIA({ onClose, mode = "generic", course = null }) {
-  const exercise = useContext(ExerciseContext);  // récupère l'exercice
+export default function AssistantIA({
+  onClose,
+  mode = "generic",
+  course = null,
+}) {
+  const exercise = useContext(ExerciseContext); // récupère l'exercice
   const [student, setStudent] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [helpLevel, setHelpLevel] = useState(0);
+
+  const [aiBadgeSent, setAiBadgeSent] = useState(false);
+
   const hasMeaningfulCode = (code, defaultCode) => {
     if (!code) return false;
 
-    const normalize = str =>
-      str.replace(/\s+/g, "").replace(/\/\*.*?\*\//g, "").replace(/\/\/.*$/gm, "");
+    const normalize = (str) =>
+      str
+        .replace(/\s+/g, "")
+        .replace(/\/\*.*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "");
 
     return normalize(code) !== normalize(defaultCode);
   };
-
 
   const scrollRef = useRef(null);
 
   // Mode dynamique si exercice détecté
   const actualMode = exercise?.id ? "exercise" : mode;
-  const chatTargetId = actualMode === "exercise"
-    ? exercise?.id
-    : actualMode === "course"
+  const chatTargetId =
+    actualMode === "exercise"
+      ? exercise?.id
+      : actualMode === "course"
       ? course?.id
       : "global";
 
@@ -64,26 +80,38 @@ export default function AssistantIA({ onClose, mode = "generic", course = null }
     const stored = localStorage.getItem("user");
     if (!stored) return;
     const u = JSON.parse(stored);
-    setStudent({ id: u.user_id, name: `${u.prenom || ""} ${u.nom || ""}`.trim() || "Étudiant" });
+    setStudent({
+      id: u.user_id,
+      name: `${u.prenom || ""} ${u.nom || ""}`.trim() || "Étudiant",
+    });
   }, []);
 
   // ---------- Load chat ----------
   useEffect(() => {
     if (!student?.id) return;
-    const storedChat = localStorage.getItem(`edu.chat.${student.id}.${actualMode}.${chatTargetId}`);
+    const storedChat = localStorage.getItem(
+      `edu.chat.${student.id}.${actualMode}.${chatTargetId}`
+    );
     if (storedChat) {
       const parsed = JSON.parse(storedChat);
       if (parsed?.messages?.length) setMessages(parsed.messages);
     } else {
-      setMessages([{
-        id: Date.now(),
-        from: "bot",
-        text: actualMode === "exercise"
-          ? `Bonjour ${student.name} 👋\nJe vois que tu travailles sur l'exercice : **${exercise?.titre || "en cours"}**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
-          : actualMode === "course"
-            ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
-            : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`
-      }]);
+      setMessages([
+        {
+          id: Date.now(),
+          from: "bot",
+          text:
+            actualMode === "exercise"
+              ? `Bonjour ${
+                  student.name
+                } 👋\nJe vois que tu travailles sur l'exercice : **${
+                  exercise?.titre || "en cours"
+                }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
+              : actualMode === "course"
+              ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
+              : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`,
+        },
+      ]);
     }
   }, [student, actualMode, chatTargetId, exercise]);
 
@@ -94,7 +122,10 @@ export default function AssistantIA({ onClose, mode = "generic", course = null }
       `edu.chat.${student.id}.${actualMode}.${chatTargetId}`,
       JSON.stringify({ messages, updatedAt: Date.now() })
     );
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages, student, actualMode, chatTargetId]);
 
   // ---------- Send message ----------
@@ -103,9 +134,11 @@ export default function AssistantIA({ onClose, mode = "generic", course = null }
     const userText = input.trim();
     const lang = detectLanguage(userText);
 
-    setMessages(m => [...m, { id: Date.now(), from: "user", text: userText }]);
+    setMessages((m) => [
+      ...m,
+      { id: Date.now(), from: "user", text: userText },
+    ]);
     setInput("");
-
 
     let pedagogicRule = "";
 
@@ -137,25 +170,18 @@ Invite l'étudiant à essayer d'écrire une première version liée à l'exercic
 Donne seulement des indices.
 Sois encourageant.
 `;
-      }
-
-
-      else if (nextLevel === 1) {
+      } else if (nextLevel === 1) {
         pedagogicRule = `
 Donne UNIQUEMENT des indices.
 Explique le principe sans écrire de code.
 `;
-      }
-
-      else if (nextLevel === 2) {
+      } else if (nextLevel === 2) {
         pedagogicRule = `
 Explique la logique étape par étape.
 Tu peux utiliser du pseudo-code.
 Ne donne PAS la solution complète.
 `;
-      }
-
-      else {
+      } else {
         pedagogicRule = `
 Donne maintenant la solution complète en C,
 avec une explication ligne par ligne.
@@ -163,7 +189,6 @@ Ne pose AUCUNE question à l'étudiant.
 `;
       }
     }
-
 
     setLoading(true);
     try {
@@ -174,7 +199,7 @@ Ne pose AUCUNE question à l'étudiant.
           exercise,
           student,
           memory: messages.slice(-6),
-          courseContext: course?.context || ""
+          courseContext: course?.context || "",
         }) +
         `
 
@@ -200,26 +225,21 @@ INSTRUCTIONS IMPORTANTES :
         "\n" +
         pedagogicRule;
 
-
-
       const answer = await getAIAnswer({ systemPrompt, userPrompt: userText });
-      setMessages(m => [...m, { id: Date.now() + 2, from: "bot", text: answer }]);
+      setMessages((m) => [
+        ...m,
+        { id: Date.now() + 2, from: "bot", text: answer },
+      ]);
 
-      // Ici on appelle le badge IA
-      if (actualMode !== "exercise") { // ou condition si tu veux uniquement pour IA générique
-        const badgeRes = await awardAIBadge();
-        if (badgeRes?.message) {
-          alert(badgeRes.message); // ou toast si tu utilises react-toastify
-        }
+      // Badge IA — silencieux, une seule fois
+      if (actualMode !== "exercise" && !aiBadgeSent) {
+        await awardAIBadge();
+        setAiBadgeSent(true);
       }
-
-    } finally { setLoading(false); }
-    console.log("Appel badge IA...");
-    const badgeRes = await awardAIBadge();
-    console.log("Réponse badge :", badgeRes);
-
+    } finally {
+      setLoading(false);
+    }
   };
-
 
   if (!student?.id) return null;
 
@@ -234,7 +254,11 @@ INSTRUCTIONS IMPORTANTES :
             <img src={Mascotte} className="w-8 h-8" />
             <div>
               <p className="font-semibold">
-                {actualMode === "course" ? "Assistant Cours" : actualMode === "exercise" ? "Assistant Exercice" : "Assistant IA"}
+                {actualMode === "course"
+                  ? "Assistant Cours"
+                  : actualMode === "exercise"
+                  ? "Assistant Exercice"
+                  : "Assistant IA"}
               </p>
               <span className="text-xs opacity-80">{student.name}</span>
             </div>
@@ -249,15 +273,34 @@ INSTRUCTIONS IMPORTANTES :
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map(m => (
-            <div key={m.id} className={`flex ${m.from === "user" ? "justify-end" : ""}`}>
-              {m.from === "bot" && <img src={Mascotte} className="w-7 h-7 mr-2" />}
-              <div className={`p-4 rounded-2xl text-sm max-w-[75%] ${m.from === "user" ? "bg-grad-1 text-white" : "bg-card text-text"}`}>
-                {m.from === "bot" ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.text}</ReactMarkdown> : <p>{m.text}</p>}
+          {messages.map((m) => (
+            <div
+              key={m.id}
+              className={`flex ${m.from === "user" ? "justify-end" : ""}`}
+            >
+              {m.from === "bot" && (
+                <img src={Mascotte} className="w-7 h-7 mr-2" />
+              )}
+              <div
+                className={`p-4 rounded-2xl text-sm max-w-[75%] ${
+                  m.from === "user"
+                    ? "bg-grad-1 text-white"
+                    : "bg-card text-text"
+                }`}
+              >
+                {m.from === "bot" ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {m.text}
+                  </ReactMarkdown>
+                ) : (
+                  <p>{m.text}</p>
+                )}
               </div>
             </div>
           ))}
-          {loading && <p className="text-xs text-gray-400">L’assistant écrit…</p>}
+          {loading && (
+            <p className="text-xs text-gray-400">L’assistant écrit…</p>
+          )}
         </div>
 
         {/* Input */}
@@ -265,9 +308,13 @@ INSTRUCTIONS IMPORTANTES :
           <div className="relative">
             <input
               value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleSend()}
-              placeholder={actualMode === "course" ? "Pose une question sur le cours…" : "Explique ton problème…"}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder={
+                actualMode === "course"
+                  ? "Pose une question sur le cours…"
+                  : "Explique ton problème…"
+              }
               className="w-full rounded-full border px-4 py-2 pr-12"
             />
             <button

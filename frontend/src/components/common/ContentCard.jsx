@@ -201,14 +201,16 @@ export default function ContentCard({
                 {course.isBlocked && (
                   <p className="text-sm text-red-500 font-semibold">
                     {course.tentativesRestantes <= 0
-                      ? "Nombre maximum de tentatives atteint"
-                      : `Réessayez dans ${course.minutesRestantes} min`}
+                      ? t("course.maxAttemptsReached")
+                      : t("course.retryIn", { minutes: course.minutesRestantes })}
                   </p>
                 )}
 
                 {course.tentativesRestantes > 0 && (
                   <p className="text-xs text-gray-400">
-                    Tentatives restantes : {course.tentativesRestantes}
+                    {t("course.remainingAttempts", {
+                      count: course.tentativesRestantes,
+                    })}
                   </p>
                 )}
               </div>

@@ -12,7 +12,7 @@ import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
 import IaAssistant from "../components/ui/IaAssistant";
 
-import NavBar from "../components/common/Navbar";
+import NavBar from "../components/common/NavBar";
 import AssistantIA from "../pages/AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";

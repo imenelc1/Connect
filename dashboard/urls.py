@@ -50,8 +50,7 @@ path("all-students-submissions/", views.all_students_submissions, name="all-stud
 path("quiz_success_rate_prof/", views.quiz_success_rate_prof, name="quiz_success_rate_prof"),
 path("professor_content_counts_global/", views.professor_content_counts_global, name="professor_content_counts_global"),
 path("tentatives/my-last/<int:exercice_id>/", views.my_last_tentative, name="my-last-tentative"),
-
-
+path("activity/stats/", views.activity_stats, name="activity-stats"),
 
 
 

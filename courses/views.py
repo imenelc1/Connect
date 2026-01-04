@@ -14,11 +14,23 @@ from users.jwt_auth import IsAuthenticatedJWT, jwt_required
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
-from datetime import timedelta
+from datetime import datetime, timedelta
 import os
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.db.models import Q
-
+from dashboard.models import ActivityEvent
+def log_activity(user, event_type):
+    """
+    Crée un événement d'activité pour l'utilisateur
+    seulement si ce type d'événement n'a pas encore été enregistré aujourd'hui.
+    """
+    today = datetime.now().date()
+    if not ActivityEvent.objects.filter(
+        user=user,
+        event_type=event_type,
+        created_at__date=today
+    ).exists():
+        ActivityEvent.objects.create(user=user, event_type=event_type)
 class CreateCoursView(APIView):
 
     @jwt_required
@@ -253,6 +265,10 @@ class CoursesWithProgressView(APIView):
                 cours=course
             ).first()
             progress = progress_obj.avancement_cours if progress_obj else 0.0
+            # 🔹 Ajouter l'événement "course_followed" si l'utilisateur a commencé le cours
+            if progress > 0:
+              log_activity(user, "course_followed")
+
             temps_passe = progress_obj.temps_passe if progress_obj else timedelta(seconds=0)
 
             # Niveau lisible

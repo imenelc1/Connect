@@ -1,4 +1,4 @@
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime,date
 from django.utils.timezone import make_aware
 from django.utils import timezone
 from django.utils.timezone import now, localtime
@@ -17,7 +17,7 @@ from exercices.serializers import ExerciceSerializer
 from quiz.models import Question, Quiz, ReponseQuestion, ReponseQuiz
 from spaces.models import Space, SpaceEtudiant, SpaceExo
 from spaces.views import etudiant_appartient_a_lespace
-from users.jwt_auth import IsAuthenticatedJWT, jwt_required
+from users.jwt_auth import IsAuthenticatedJWT, jwt_required,jwt_authenticate
 from users.models import Etudiant, Utilisateur
 from .models import LeconComplete, ProgressionCours, ProgressionHistory, SessionDuration, TentativeExercice
 from django.views.decorators.csrf import csrf_exempt
@@ -26,6 +26,8 @@ from feedback.views import FeedbackExercice
 from rest_framework.exceptions import PermissionDenied
 from django.db.models.functions import TruncWeek
 from django.db.models import Count
+from dashboard.models import ActivityEvent
+from collections import defaultdict
 
 
 
@@ -1433,3 +1435,41 @@ def my_last_tentative(request, exercice_id):
         "score": last_tentative.score,
     }
     return Response(data, status=status.HTTP_200_OK)
+
+@api_view(["GET"])
+def activity_stats(request):
+    try:
+        user, payload = jwt_authenticate(request)
+        role = payload.get("role")
+    except Exception:
+        return Response({"detail": "Non autorisé"}, status=403)
+
+    today = date.today()
+    # ✅ 7 derniers jours
+    last_7_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+
+    # Filtrer selon le rôle
+    if role == "admin":
+        queryset = ActivityEvent.objects.filter(created_at__date__gte=last_7_days[0])
+    else:
+        queryset = ActivityEvent.objects.filter(user=user, created_at__date__gte=last_7_days[0])
+
+    totals = defaultdict(lambda: {"registration": 0, "login": 0, "course_followed": 0})
+
+    for e in queryset.values("created_at__date", "event_type").annotate(total=Count("id")):
+        dt = e["created_at__date"]
+        if isinstance(dt, datetime):
+            dt = dt.date()
+        totals[dt][e["event_type"]] = e["total"]
+
+    labels = [d.strftime("%d %b") for d in last_7_days]
+    registrations = [totals[d]["registration"] for d in last_7_days]
+    logins = [totals[d]["login"] for d in last_7_days]
+    coursesFollowed = [totals[d]["course_followed"] for d in last_7_days]
+
+    return Response({
+        "labels": labels,
+        "registrations": registrations,
+        "logins": logins,
+        "coursesFollowed": coursesFollowed
+    })

@@ -163,7 +163,9 @@ const resources = {
      BadgesManagement:translationFRBadgesManagement,
     StudentsManagement:translationFRStudentsManagement,
     notifications:translationFRNotification,
-   assistant:translationFRAssistant
+   assistant:translationFRAssistant,
+    space: translationFRSpacesPage,
+    instructors: translationFRInstructors
     },
 
   en: {

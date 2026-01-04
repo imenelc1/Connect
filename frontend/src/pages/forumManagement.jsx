@@ -1,7 +1,20 @@
 import React, { useState, useEffect, useContext, useMemo, useCallback } from "react";
 import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
-import { createForum, updateForum, deleteForum } from "../services/forumService";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { 
+  createForum, 
+  updateForum, 
+  deleteForum, 
+  fetchForums,
+  createMessage,
+  fetchForumMessages,
+  deleteMessage,
+  createComment,
+  deleteComment,
+  likeMessage
+} from "../services/forumService";
 import { 
   MessageSquare, 
   TrendingUp, 
@@ -187,13 +200,27 @@ const ForumViewModal = ({
                   {/* En-tête du message */}
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-grad-2 rounded-full flex items-center justify-center text-white font-bold shadow-sm">
-                        {message.utilisateur_nom?.[0] || message.utilisateur?.nom?.[0] || "U"}
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${
+                        message.administrateur || message.auteur_type === 'admin' 
+                          ? 'bg-gradient-to-br from-purple-500 to-pink-500'
+                          : 'bg-gradient-to-br from-blue-500 to-teal-400'
+                      }`}>
+                        {message.administrateur || message.auteur_type === 'admin' 
+                          ? '👑'
+                          : (message.utilisateur_nom?.[0] || message.utilisateur?.nom?.[0] || 'U').toUpperCase()
+                        }
                       </div>
                       <div>
-                        <h4 className="font-semibold text-muted">
-                          {message.utilisateur_nom || message.utilisateur?.nom || "Utilisateur"} {message.utilisateur_prenom || message.utilisateur?.prenom || ""}
-                        </h4>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold text-muted">
+                            {message.auteur_nom || (message.utilisateur_nom ? `${message.utilisateur_nom} ${message.utilisateur_prenom}` : 'Utilisateur')}
+                          </h4>
+                          {message.administrateur || message.auteur_type === 'admin' ? (
+                            <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full font-medium">
+                              Admin
+                            </span>
+                          ) : null}
+                        </div>
                         <p className="text-sm text-gray flex items-center gap-1">
                           <Clock size={12} />
                           {new Date(message.date_publication).toLocaleDateString("fr-FR", {
@@ -438,6 +465,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
       onClose();
     } catch (err) {
       setError(err.message || "Erreur inconnue");
+      toast.error(err.message || "Une erreur est survenue");
     } finally {
       setLoading(false);
     }
@@ -644,6 +672,7 @@ export default function ForumManagement() {
       const token = localStorage.getItem("admin_token");
 
       if (!token) {
+        toast.error("Admin non authentifié");
         throw new Error("Admin non authentifié");
       }
 
@@ -656,6 +685,7 @@ export default function ForumManagement() {
 
       if (!res.ok) {
         const text = await res.text();
+        toast.error(text || "Erreur serveur");
         throw new Error(text || "Erreur serveur");
       }
 
@@ -678,6 +708,7 @@ export default function ForumManagement() {
     } catch (err) {
       console.error("Erreur chargement forums :", err);
       setError("Impossible de charger les forums");
+      toast.error("Impossible de charger les forums");
     } finally {
       setLoading(false);
     }
@@ -712,352 +743,375 @@ export default function ForumManagement() {
   // =========================
   // HANDLERS FORUMS
   // =========================
-  // Importez le service au début du fichier
-
-
-// Ensuite, remplacez la fonction handleCreateForum par :
-const handleCreateForum = async (formData) => {
-  const token = localStorage.getItem("admin_token");
-  const adminData = JSON.parse(localStorage.getItem("admin")) || {};
-  
-  console.log("=== DEBUG CREATE FORUM ===");
-  console.log("Token:", token ? "Token exists" : "No token");
-  console.log("Admin data:", adminData);
-  console.log("Form data:", formData);
-  
-  if (!token) {
-    alert("Token manquant. Veuillez vous reconnecter.");
-    return;
-  }
-
-  try {
-    // CORRECTION: Utilisez les types que Django attend
-    const forumType = formData.cible === "etudiants" 
-      ? "admin-student-forum"  // Django attend ce format
-      : "admin-teacher-forum"; // Django attend ce format
+  const handleCreateForum = async (formData) => {
+    const token = localStorage.getItem("admin_token");
     
-    const forumData = {
-      titre_forum: formData.titre_forum,
-      contenu_forum: formData.contenu_forum,
-      cible: formData.cible,
-      type: forumType  // Envoyer le bon format
-    };
+    if (!token) {
+      toast.error("Token manquant. Veuillez vous reconnecter.");
+      return;
+    }
 
-    console.log("Sending forum data to Django:", forumData);
-
-    if (editingForum) {
-      // MODIFICATION
-      const updatedForum = await updateForum(token, editingForum.id, forumData);
-      console.log("Update response:", updatedForum);
-
-      // Mettre à jour l'état local
-      setForums(prevForums => prevForums.map(f => 
-        f.id === editingForum.id 
-          ? {
-              ...f,
-              title: updatedForum.titre_forum,
-              cible: updatedForum.cible,
-              originalData: updatedForum
-            }
-          : f
-      ));
-
-      alert("✅ Forum modifié avec succès !");
-    } else {
-      // CRÉATION
-      console.log("Creating new forum...");
-      const newForum = await createForum(token, forumData);
-      console.log("Create response:", newForum);
-
-      // Format the new forum for display
-      const formattedForum = {
-        id: newForum.id_forum,
-        title: newForum.titre_forum,
-        threads: newForum.nombre_messages || 0,
-        posts: newForum.nombre_likes || 0,
-        members: newForum.nombre_likes || 0,
-        userHasLiked: newForum.user_has_liked || false,
-        cible: newForum.cible,
-        utilisateur: newForum.administrateur ? "Administrateur" : 
-                    `${newForum.utilisateur_nom || ''} ${newForum.utilisateur_prenom || ''}`,
-        date_creation: new Date(newForum.date_creation).toLocaleDateString("fr-FR"),
-        originalData: newForum,
+    try {
+      // FORMAT EXACT pour Django
+      const forumData = {
+        titre_forum: formData.titre_forum.trim(),
+        contenu_forum: formData.contenu_forum.trim(),
+        cible: formData.cible,
+        type: formData.cible === "etudiants" 
+          ? "admin_student_forum"
+          : "admin_teacher_forum"
       };
 
-      console.log("Formatted forum:", formattedForum);
+      console.log("📤 Sending forum data to Django:", forumData);
+
+      if (editingForum) {
+        // MODIFICATION - Utilise l'URL admin
+        const updatedForum = await updateForum(token, editingForum.id, forumData);
+        
+        // Mettre à jour l'état local
+        setForums(prevForums => prevForums.map(f => 
+          f.id === editingForum.id 
+            ? {
+                ...f,
+                title: updatedForum.titre_forum,
+                cible: updatedForum.cible,
+                originalData: updatedForum
+              }
+            : f
+        ));
+
+        toast.success("✅ Forum modifié avec succès !");
+      } else {
+        // CRÉATION - Utilise l'URL standard
+        const newForum = await createForum(token, forumData);
+        
+        console.log("✅ Response from Django:", newForum);
+        
+        // Vérifiez la réponse
+        if (!newForum.id_forum) {
+          console.error("❌ Invalid response from server:", newForum);
+          toast.error("Réponse invalide du serveur: id_forum manquant");
+          throw new Error("Réponse invalide du serveur: id_forum manquant");
+        }
+
+        // Formater pour l'affichage
+        const formattedForum = {
+          id: newForum.id_forum,
+          title: newForum.titre_forum,
+          threads: newForum.nombre_messages || 0,
+          posts: newForum.nombre_likes || 0,
+          members: newForum.nombre_likes || 0,
+          userHasLiked: newForum.user_has_liked || false,
+          cible: newForum.cible,
+          utilisateur: newForum.administrateur 
+            ? "Administrateur" 
+            : `${newForum.utilisateur_nom || ''} ${newForum.utilisateur_prenom || ''}`.trim(),
+          date_creation: newForum.date_creation 
+            ? new Date(newForum.date_creation).toLocaleDateString("fr-FR", {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+              })
+            : new Date().toLocaleDateString("fr-FR"),
+          originalData: newForum,
+        };
+
+        console.log("✅ Formatted forum for display:", formattedForum);
+        
+        setForums(prevForums => [formattedForum, ...prevForums]);
+        toast.success("✅ Forum créé avec succès !");
+      }
+
+      // Fermer le modal
+      setIsModalOpen(false);
+      setEditingForum(null);
+
+    } catch (err) {
+      console.error("❌ Detailed error:", err);
       
-      setForums(prevForums => [formattedForum, ...prevForums]);
-      alert("✅ Forum créé avec succès !");
+      // Messages d'erreur plus clairs
+      let userMessage = err.message;
+      
+      if (err.message.includes("400")) {
+        userMessage = "Données invalides. Vérifiez que tous les champs sont correctement remplis.";
+      } else if (err.message.includes("403")) {
+        userMessage = "Accès interdit. Vous n'avez pas les permissions nécessaires.";
+      } else if (err.message.includes("401")) {
+        userMessage = "Session expirée. Veuillez vous reconnecter.";
+      } else if (err.message.includes("500")) {
+        userMessage = "Erreur serveur. Veuillez réessayer plus tard.";
+      } else if (err.message.includes("NetworkError")) {
+        userMessage = "Erreur réseau. Vérifiez votre connexion internet.";
+      }
+      
+      toast.error(`❌ ${userMessage}`);
     }
-
-    // Fermer le modal et réinitialiser
-    setIsModalOpen(false);
-    setEditingForum(null);
-
-  } catch (err) {
-    console.error("Erreur détaillée:", err);
-    console.error("Error stack:", err.stack);
-    alert(`❌ Erreur: ${err.message}`);
-  }
-};
+  };
 
   const handleDeleteForum = async () => {
-  if (!forumToDelete) return;
+    if (!forumToDelete) return;
 
-  const token = localStorage.getItem("admin_token");
-  const userRole = JSON.parse(localStorage.getItem("admin"))?.role || "admin";
-
-  if (!token) {
-    alert("Token manquant. Veuillez vous reconnecter.");
-    return;
-  }
-
-  if (userRole !== "admin") {
-    alert("Seuls les administrateurs peuvent supprimer des forums");
-    return;
-  }
-
-  try {
-    const confirmed = window.confirm(
-      `Êtes-vous sûr de vouloir supprimer le forum "${forumToDelete.title}" ? Cette action est irréversible.`
-    );
-
-    if (!confirmed) return;
-
-    await deleteForum(token, forumToDelete.id);
-
-    // Mettre à jour l'état local
-    setForums(prevForums => prevForums.filter(f => f.id !== forumToDelete.id));
-
-    // Fermer les modals si nécessaire
-    if (selectedForum && selectedForum.id === forumToDelete.id) {
-      setIsViewModalOpen(false);
-      setSelectedForum(null);
-      setForumMessages([]);
+    const token = localStorage.getItem("admin_token");
+    
+    if (!token) {
+      toast.error("Token manquant. Veuillez vous reconnecter.");
+      return;
     }
 
-    setIsDeleteModalOpen(false);
-    setForumToDelete(null);
+    try {
+      await deleteForum(token, forumToDelete.id);
+      
+      // Mettre à jour l'état local
+      setForums(prevForums => prevForums.filter(f => f.id !== forumToDelete.id));
 
-    alert("✅ Forum supprimé avec succès !");
+      // Fermer les modals si nécessaire
+      if (selectedForum && selectedForum.id === forumToDelete.id) {
+        setIsViewModalOpen(false);
+        setSelectedForum(null);
+        setForumMessages([]);
+      }
 
-  } catch (err) {
-    console.error("Erreur lors de la suppression:", err);
-    alert(`❌ Erreur: ${err.message}`);
-  }
-};
+      setIsDeleteModalOpen(false);
+      setForumToDelete(null);
+
+      toast.success("✅ Forum supprimé avec succès !");
+
+    } catch (err) {
+      console.error("❌ Erreur lors de la suppression:", err);
+      toast.error(`❌ Erreur: ${err.message}`);
+    }
+  };
 
   // =========================
-  // HANDLERS VIEW MODAL
+  // HANDLER LIKE FORUM
   // =========================
-  const handleViewForum = async (forum) => {
-  console.log("👁️ handleViewForum appelé pour le forum:", forum);
-  
-  try {
-    setSelectedForum(forum);
-    
-    const token = localStorage.getItem("admin_token");
-    console.log("🔑 Token:", token ? "Présent" : "Absent");
-    
-    // ESSAYEZ CES DEUX URLs (l'une peut être la bonne)
-    const url = `http://localhost:8000/api/forums/${forum.id}/messages/`;
-    console.log("🌐 Tentative avec URL:", url);
-    
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+  const handleLikeForum = async (forumId) => {
+    try {
+      const token = localStorage.getItem("admin_token");
+      
+      if (!token) {
+        toast.error("Vous devez être connecté pour aimer un forum");
+        return;
+      }
 
-    console.log("📡 Statut de la réponse:", res.status);
-    console.log("📡 OK ?:", res.ok);
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("❌ Erreur du serveur:", errorText);
-      
-      // ESSAYEZ L'AUTRE URL
-      console.log("🔄 Essai avec une autre URL...");
-      const alternativeUrl = `http://localhost:8000/api/forums/${forum.id}/messages`;
-      console.log("🌐 Essai avec URL:", alternativeUrl);
-      
-      const res2 = await fetch(alternativeUrl, {
+      const res = await fetch(`http://localhost:8000/api/forums/${forumId}/like/`, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
+
+      if (res.ok) {
+        const data = await res.json();
+        
+        // Mettre à jour l'état local
+        setForums(prevForums => prevForums.map(forum => {
+          if (forum.id === forumId) {
+            const newLikeStatus = data.liked !== undefined ? data.liked : !forum.userHasLiked;
+            const newLikeCount = data.nombre_likes !== undefined ? data.nombre_likes : 
+              (newLikeStatus ? (forum.posts || 0) + 1 : Math.max(0, (forum.posts || 0) - 1));
+            
+            return {
+              ...forum,
+              userHasLiked: newLikeStatus,
+              posts: newLikeCount,
+              originalData: {
+                ...forum.originalData,
+                user_has_liked: newLikeStatus,
+                nombre_likes: newLikeCount
+              }
+            };
+          }
+          return forum;
+        }));
+
+        // Message de succès
+        toast.success(data.liked ? "❤️" : "💔", {
+          position: "bottom-right",
+          autoClose: 1000,
+        });
+        
+      } else {
+        const errorText = await res.text();
+        toast.error(`❌ ${errorText}`);
+      }
+    } catch (err) {
+      console.error("Erreur lors du like:", err);
+      toast.error("❌ Erreur réseau");
+    }
+  };
+
+  // =========================
+  // HANDLERS VIEW MODAL
+  // =========================
+  const handleViewForum = async (forum) => {
+    setSelectedForum(forum);
+
+    // ⛔ empêche le rechargement si déjà chargé
+    if (forumMessages.length > 0 && selectedForum?.id === forum.id) {
+      setIsViewModalOpen(true);
+      return;
+    }
+    console.log("👁️ handleViewForum appelé pour le forum:", forum);
+    
+    try {
+      setSelectedForum(forum);
       
-      if (res2.ok) {
-        const messagesData = await res2.json();
-        console.log("✅ Messages chargés (alternative):", messagesData.length, "messages");
+      const token = localStorage.getItem("admin_token");
+      console.log("🔑 Token:", token ? "Présent" : "Absent");
+      
+      // ESSAYEZ CES DEUX URLs (l'une peut être la bonne)
+      const url = `http://localhost:8000/api/forums/${forum.id}/messages/`;
+      console.log("🌐 Tentative avec URL:", url);
+      
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("📡 Statut de la réponse:", res.status);
+      console.log("📡 OK ?:", res.ok);
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("❌ Erreur du serveur:", errorText);
+        
+        // ESSAYEZ L'AUTRE URL
+        console.log("🔄 Essai avec une autre URL...");
+        const alternativeUrl = `http://localhost:8000/api/forums/${forum.id}/messages`;
+        console.log("🌐 Essai avec URL:", alternativeUrl);
+        
+        const res2 = await fetch(alternativeUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (res2.ok) {
+          const messagesData = await res2.json();
+          console.log("✅ Messages chargés (alternative):", messagesData.length, "messages");
+          setForumMessages(messagesData);
+          setIsViewModalOpen(true);
+        } else {
+          const errorText2 = await res2.text();
+          console.error("❌ Deuxième erreur:", errorText2);
+          toast.error("Impossible de charger les messages");
+        }
+      } else {
+        const messagesData = await res.json();
+        console.log("✅ Messages chargés:", messagesData.length, "messages");
         setForumMessages(messagesData);
         setIsViewModalOpen(true);
-      } else {
-        const errorText2 = await res2.text();
-        console.error("❌ Deuxième erreur:", errorText2);
-        alert("Impossible de charger les messages");
       }
-    } else {
-      const messagesData = await res.json();
-      console.log("✅ Messages chargés:", messagesData.length, "messages");
-      setForumMessages(messagesData);
-      setIsViewModalOpen(true);
+    } catch (err) {
+      console.error("❌ Erreur:", err);
+      console.error("❌ Stack:", err.stack);
+      toast.error("Erreur lors du chargement du forum");
     }
-  } catch (err) {
-    console.error("❌ Erreur:", err);
-    console.error("❌ Stack:", err.stack);
-    alert("Erreur lors du chargement du forum");
-  }
-};
+  };
 
   // =========================
   // HANDLERS MESSAGES
   // =========================
   const handlePostMessage = useCallback(async (messageContent) => {
-  if (!selectedForum) {
-    console.error("❌ Aucun forum sélectionné");
-    alert("Erreur : Aucun forum sélectionné");
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("admin_token");
-    if (!token) {
-      console.error("❌ Token manquant");
-      alert("Erreur : Vous devez être connecté");
+    if (!selectedForum) {
+      toast.error("❌ Aucun forum sélectionné !");
       return;
     }
 
-    // OPTION 1 : URL avec forum_id dans le path
-    const url = `http://localhost:8000/api/forums/${selectedForum.id}/messages/create/`;
-    
-    // OPTION 2 : URL alternative (essaye les deux)
-    // const url = `http://localhost:8000/api/messages/create/`;
-    
-    console.log("📤 Envoi POST vers:", url);
-    console.log("📝 Message:", messageContent);
-    console.log("🔑 Token présent:", !!token);
-    console.log("🎯 Forum ID:", selectedForum.id);
-
-    // Structure des données - essaie différentes options
-    const payload = {
-      contenu_message: messageContent.trim(),
-      forum_id: selectedForum.id,  // Important si backend le demande
-      // forum: selectedForum.id,   // Alternative
-      // message: messageContent.trim(),  // Alternative
-    };
-
-    console.log("📦 Payload:", payload);
-
-    // D'abord, teste avec une requête simple
-    console.log("🧪 Test de connexion à l'API...");
     try {
-      const testRes = await fetch(`http://localhost:8000/api/forums/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("✅ Test API réussi, statut:", testRes.status);
-    } catch (testErr) {
-      console.error("❌ Test API échoué:", testErr);
-    }
-
-    // Maintenant la vraie requête
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    console.log("📡 Réponse statut:", res.status);
-    console.log("📡 Réponse OK?:", res.ok);
-
-    // Récupère le texte de la réponse d'abord
-    const responseText = await res.text();
-    console.log("📡 Réponse texte:", responseText);
-
-    if (!res.ok) {
-      let errorMessage = `Erreur ${res.status}`;
-      
-      try {
-        // Essaye de parser comme JSON
-        const errorData = JSON.parse(responseText);
-        errorMessage = errorData.error || errorData.detail || errorData.message || responseText;
-        console.error("❌ Erreur JSON:", errorData);
-      } catch (jsonError) {
-        // Si ce n'est pas du JSON, utilise le texte brut
-        console.error("❌ Réponse non-JSON:", responseText);
-        errorMessage = responseText || "Erreur inconnue";
+      const token = localStorage.getItem("admin_token");
+      if (!token) {
+        toast.warning("⚠️ Vous devez être connecté !");
+        return;
       }
-      
-      throw new Error(errorMessage);
+
+      const url = `http://localhost:8000/api/forums/${selectedForum.id}/messages/create/`;
+
+      const payload = {
+        contenu_message: messageContent.trim(),
+        forum_id: selectedForum.id,
+      };
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const responseText = await res.text();
+
+      if (!res.ok) {
+        let errorMessage = `Erreur ${res.status}`;
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorData.detail || errorData.message || responseText;
+        } catch {
+          errorMessage = responseText || "Erreur inconnue";
+        }
+
+        toast.error(`❌ ${errorMessage}`);
+        throw new Error(errorMessage);
+      }
+
+      let newMessage;
+      try {
+        newMessage = JSON.parse(responseText);
+      } catch {
+        toast.error("❌ Réponse invalide du serveur");
+        throw new Error("Réponse invalide du serveur");
+      }
+
+      const enrichedMessage = {
+        ...newMessage,
+        id_message: newMessage.id_message || newMessage.id,
+        contenu_message: newMessage.contenu_message || messageContent,
+        utilisateur_nom: newMessage.utilisateur_nom || "Administrateur",
+        utilisateur_prenom: newMessage.utilisateur_prenom || "",
+        date_publication: newMessage.date_publication || new Date().toISOString(),
+        nombre_likes: newMessage.nombre_likes || 0,
+        user_has_liked: newMessage.user_has_liked || false,
+        commentaires: newMessage.commentaires || [],
+      };
+
+      setForumMessages(prev => [enrichedMessage, ...prev]);
+
+      setForums(prevForums => prevForums.map(f =>
+        f.id === selectedForum.id
+          ? { ...f, threads: (f.threads || 0) + 1 }
+          : f
+      ));
+
+      toast.success("✅ Message envoyé avec succès !");
+      return enrichedMessage;
+
+    } catch (err) {
+      if (err.message.includes("403")) {
+        toast.error("❌ Accès interdit. Vérifiez vos permissions.");
+      } else if (err.message.includes("404")) {
+        toast.error("❌ Endpoint non trouvé. Vérifiez l'URL de l'API.");
+      } else if (err.message.includes("500")) {
+        toast.error("❌ Erreur serveur. Vérifiez les logs Django.");
+      } else {
+        toast.error(`❌ Erreur: ${err.message}`);
+      }
+
+      throw err;
     }
-
-    // Parse la réponse JSON
-    let newMessage;
-    try {
-      newMessage = JSON.parse(responseText);
-      console.log("✅ Message créé:", newMessage);
-    } catch (parseError) {
-      console.error("❌ Impossible de parser la réponse:", responseText);
-      throw new Error("Réponse invalide du serveur");
-    }
-
-    // Ajoute des champs manquants si nécessaire
-    const enrichedMessage = {
-      ...newMessage,
-      id_message: newMessage.id_message || newMessage.id,
-      contenu_message: newMessage.contenu_message || messageContent,
-      utilisateur_nom: newMessage.utilisateur_nom || "Administrateur",
-      utilisateur_prenom: newMessage.utilisateur_prenom || "",
-      date_publication: newMessage.date_publication || new Date().toISOString(),
-      nombre_likes: newMessage.nombre_likes || 0,
-      user_has_liked: newMessage.user_has_liked || false,
-      commentaires: newMessage.commentaires || [],
-    };
-
-    // Met à jour l'état
-    setForumMessages(prev => [enrichedMessage, ...prev]);
-
-    // Met à jour le compteur dans la liste des forums
-    setForums(prevForums => prevForums.map(f =>
-      f.id === selectedForum.id
-        ? { ...f, threads: (f.threads || 0) + 1 }
-        : f
-    ));
-
-    console.log("✅ Message ajouté à l'état local");
-    return enrichedMessage;
-
-  } catch (err) {
-    console.error("❌ Erreur complète:", err);
-    console.error("❌ Stack:", err.stack);
-    
-    // Messages d'erreur plus clairs
-    if (err.message.includes("403")) {
-      alert("❌ Accès interdit. Vérifiez vos permissions.");
-    } else if (err.message.includes("404")) {
-      alert("❌ Endpoint non trouvé. Vérifiez l'URL de l'API.");
-    } else if (err.message.includes("500")) {
-      alert("❌ Erreur serveur. Vérifiez les logs Django.");
-    } else {
-      alert(`❌ Erreur: ${err.message}`);
-    }
-    
-    throw err; // Propage l'erreur
-  }
-}, [selectedForum]);
+  }, [selectedForum]);
 
   const handlePostComment = useCallback(async (messageId, commentContent) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/commentaires/`, {
+      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/comments/create/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1076,10 +1130,14 @@ const handleCreateForum = async (formData) => {
               }
             : msg
         ));
+        toast.success("✅");
+      } else {
+        const errorText = await res.text();
+        toast.error(`❌ ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
-      alert("Erreur lors de l'envoi du commentaire");
+      toast.error("❌ Erreur");
     }
   }, []);
 
@@ -1105,16 +1163,19 @@ const handleCreateForum = async (formData) => {
               }
             : msg
         ));
+      } else {
+        toast.error("❌");
       }
     } catch (err) {
       console.error("Erreur:", err);
+      toast.error("❌");
     }
   }, []);
 
   const handleDeleteMessage = useCallback(async (messageId) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/`, {
+      const res = await fetch(`http://localhost:8000/api/messages/${messageId}/delete/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1130,16 +1191,21 @@ const handleCreateForum = async (formData) => {
               : f
           ));
         }
+        toast.success("✅");
+      } else {
+        const errorText = await res.text();
+        toast.error(`❌ ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
+      toast.error("❌");
     }
   }, [selectedForum]);
 
   const handleDeleteComment = useCallback(async (commentId, messageId) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`http://localhost:8000/api/commentaires/${commentId}/`, {
+      const res = await fetch(`http://localhost:8000/api/comments/${commentId}/delete/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1157,9 +1223,14 @@ const handleCreateForum = async (formData) => {
               }
             : msg
         ));
+        toast.success("✅");
+      } else {
+        const errorText = await res.text();
+        toast.error(`❌ ${errorText}`);
       }
     } catch (err) {
       console.error("Erreur:", err);
+      toast.error("❌");
     }
   }, []);
 
@@ -1267,242 +1338,226 @@ const handleCreateForum = async (formData) => {
           ))}
         </div>
 
-        {/* GRID: FORUMS + ACTIVITÉ */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* LEFT: Forums List */}
-          <div className="bg-card rounded-2xl p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-muted mb-4">Forums de discussion</h2>
+        {/* GRID: FORUMS ONLY (removed activities section) */}
+        <div className="bg-card rounded-2xl p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-muted mb-4">Forums de discussion</h2>
 
-            {/* TABS */}
-            <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
-              {filterTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveFilter(tab.id)}
-                  className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm
-                    ${activeFilter === tab.id 
-                      ? "text-white bg-primary shadow-md"
-                      : "text-primary/70"
-                    }`}
-                >
-                  {tab.label} {tab.id !== "all" && `(${forums.filter(f => f.cible === tab.id).length})`}
-                </button>
-              ))}
-            </div>
+          {/* TABS */}
+          <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
+            {filterTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm
+                  ${activeFilter === tab.id 
+                    ? "text-white bg-primary shadow-md"
+                    : "text-primary/70"
+                  }`}
+              >
+                {tab.label} {tab.id !== "all" && `(${forums.filter(f => f.cible === tab.id).length})`}
+              </button>
+            ))}
+          </div>
 
-            {/* BARRE DE RECHERCHE ET BOUTON CRÉER */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="relative flex-1 max-w-xl">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Rechercher un forum..."
-                    className="w-full pl-12 pr-4 py-3 bg-surface border border-gray-800/20 rounded-xl text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
+          {/* BARRE DE RECHERCHE ET BOUTON CRÉER */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative flex-1 max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Rechercher un forum..."
+                  className="w-full pl-12 pr-4 py-3 bg-surface border border-gray-800/20 rounded-xl text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                />
               </div>
-              
+            </div>
+            
+            <Button
+              text={
+                <span className="flex items-center gap-2">
+                  <Plus size={18} />
+                  {t("ForumManagement.createF") || "Créer un forum"}
+                </span>
+              }
+              variant="primary"
+              className="!w-auto px-6 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+              onClick={() => {
+                setEditingForum(null);
+                setIsModalOpen(true);
+              }}
+            />
+          </div>
+
+          {/* États de chargement/erreur */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+              <p className="text-gray">Chargement des forums...</p>
+            </div>
+          )}
+
+          {error && !loading && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center mb-6">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <p className="text-red-500 mb-3">{error}</p>
               <Button
-                text={
-                  <span className="flex items-center gap-2">
-                    <Plus size={18} />
-                    {t("ForumManagement.createF") || "Créer un forum"}
-                  </span>
-                }
-                variant="primary"
-                className="!w-auto px-6 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                onClick={() => {
-                  setEditingForum(null);
-                  setIsModalOpen(true);
-                }}
-              />
+                variant="secondary"
+                onClick={fetchForums}
+                className="px-4 py-2"
+              >
+                Réessayer
+              </Button>
             </div>
+          )}
 
-            {/* États de chargement/erreur */}
-            {loading && (
-              <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-                <p className="text-gray">Chargement des forums...</p>
-              </div>
-            )}
-
-            {error && !loading && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center mb-6">
-                <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <p className="text-red-500 mb-3">{error}</p>
-                <Button
-                  variant="secondary"
-                  onClick={fetchForums}
-                  className="px-4 py-2"
-                >
-                  Réessayer
-                </Button>
-              </div>
-            )}
-
-            {/* Liste des forums */}
-            {!loading && !error && (
-              <div className="space-y-4">
-                {filteredForums.length === 0 ? (
-                  <div className="text-center py-12">
-                    <MessageSquare className="w-16 h-16 text-gray mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-muted mb-2">Aucun forum trouvé</h3>
-                    <p className="text-gray mb-6 max-w-md mx-auto">
-                      {search ? "Aucun forum ne correspond à votre recherche." : "Commencez par créer votre premier forum."}
-                    </p>
-                    {!search && (
-                      <Button
-                        variant="primary"
-                        onClick={() => {
-                          setEditingForum(null);
-                          setIsModalOpen(true);
-                        }}
-                        className="px-6 py-3"
-                      >
-                        <Plus size={18} className="mr-2" />
-                        Créer un forum
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  filteredForums.map((forum) => (
-                    <div
-                      key={forum.id}
-                      className="bg-surface rounded-2xl p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300"
+          {/* Liste des forums */}
+          {!loading && !error && (
+            <div className="space-y-4">
+              {filteredForums.length === 0 ? (
+                <div className="text-center py-12">
+                  <MessageSquare className="w-16 h-16 text-gray mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-muted mb-2">Aucun forum trouvé</h3>
+                  <p className="text-gray mb-6 max-w-md mx-auto">
+                    {search ? "Aucun forum ne correspond à votre recherche." : "Commencez par créer votre premier forum."}
+                  </p>
+                  {!search && (
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        setEditingForum(null);
+                        setIsModalOpen(true);
+                      }}
+                      className="px-6 py-3"
                     >
-                      <div className="flex flex-col lg:flex-row lg:items-start gap-5">
-                        {/* Icône et info de base */}
-                        <div className="flex items-start gap-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                            forum.cible === "etudiants" ? "bg-grad-4" : "bg-grad-2"
-                          }`}>
-                            {forum.cible === "etudiants" ? (
-                              <GraduationCap className="w-6 h-6 text-white" />
-                            ) : (
-                              <Users className="w-6 h-6 text-white" />
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <h3 className="text-lg font-semibold text-muted">
-                                {forum.title}
-                              </h3>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                forum.cible === "etudiants"
-                                  ? "bg-primary/20 text-primary"
-                                  : "bg-pink/20 text-pink"
-                              }`}>
-                                {forum.cible === "etudiants" ? "Pour étudiants" : "Pour enseignants"}
-                              </span>
-                            </div>
-                            
-                            <p className="text-gray text-sm mb-3 line-clamp-2">
-                              {forum.originalData?.contenu_forum || "Pas de description"}
-                            </p>
-                            
-                            <div className="flex flex-wrap gap-4 text-sm text-gray">
-                              <span className="flex items-center gap-1">
-                                <MessageSquare size={14} />
-                                {forum.threads} discussions
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <TrendingUp size={14} />
-                                {forum.posts} likes
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <User size={14} />
-                                Créé par {forum.utilisateur}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock size={14} />
-                                {forum.date_creation}
-                              </span>
-                            </div>
-                          </div>
+                      <Plus size={18} className="mr-2" />
+                      Créer un forum
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                filteredForums.map((forum) => (
+                  <div
+                    key={forum.id}
+                    className="bg-surface rounded-2xl p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300"
+                  >
+                    <div className="flex flex-col lg:flex-row lg:items-start gap-5">
+                      {/* Icône et info de base */}
+                      <div className="flex items-start gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          forum.cible === "etudiants" ? "bg-grad-4" : "bg-grad-2"
+                        }`}>
+                          {forum.cible === "etudiants" ? (
+                            <GraduationCap className="w-6 h-6 text-white" />
+                          ) : (
+                            <Users className="w-6 h-6 text-white" />
+                          )}
                         </div>
                         
-                        {/* Boutons d'action */}
-                        <div className="flex lg:flex-col gap-2 lg:border-l lg:pl-5 border-gray-800/20">
-                          <Button
-                            variant="secondary"
-                            onClick={() => handleViewForum(forum)}
-                            className="flex items-center gap-2 px-3 py-2"
-                          >
-                            <Eye size={16} />
-                            Voir
-                          </Button>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h3 className="text-lg font-semibold text-muted">
+                              {forum.title}
+                            </h3>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              forum.cible === "etudiants"
+                                ? "bg-primary/20 text-primary"
+                                : "bg-pink/20 text-pink"
+                            }`}>
+                              {forum.cible === "etudiants" ? "Pour étudiants" : "Pour enseignants"}
+                            </span>
+                          </div>
                           
-                          <Button
-                            variant="manage"
-                            onClick={() => navigate(`/forum/${forum.id}/manage`)}
-                            className="flex items-center gap-2 px-3 py-2"
-                          >
-                            <Users size={16} />
-                            Gérer
-                          </Button>
+                          <p className="text-gray text-sm mb-3 line-clamp-2">
+                            {forum.originalData?.contenu_forum || "Pas de description"}
+                          </p>
                           
-                          <Button
-                            variant="secondary"
-                            onClick={() => {
-                              setEditingForum(forum);
-                              setIsModalOpen(true);
-                            }}
-                            className="flex items-center gap-2 px-3 py-2"
-                          >
-                            <Edit2 size={16} />
-                            Modifier
-                          </Button>
-                          
-                          <Button
-                            variant="secondary"
-                            onClick={() => {
-                              setForumToDelete(forum);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            className="flex items-center gap-2 px-3 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                          >
-                            <Trash2 size={16} />
-                            Supprimer
-                          </Button>
+                          <div className="flex flex-wrap gap-4 text-sm text-gray">
+                            <span className="flex items-center gap-1">
+                              <MessageSquare size={14} />
+                              {forum.threads} discussions
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <TrendingUp size={14} />
+                              {forum.posts} likes
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <User size={14} />
+                              Créé par {forum.utilisateur}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock size={14} />
+                              {forum.date_creation}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      
+                      {/* Boutons d'action */}
+                      <div className="flex lg:flex-col gap-2 lg:border-l lg:pl-5 border-gray-800/20">
+                        <Button
+                          variant="manage"
+                          onClick={() => handleViewForum(forum)}
+                          className="flex items-center gap-2 px-3 py-2"
+                        >
+                          <Eye size={16} />
+                          Voir
+                        </Button>
+                        
+                        <Button
+                          variant="manage"
+                          onClick={() => {
+                            setEditingForum(forum);
+                            setIsModalOpen(true);
+                          }}
+                          className="flex items-center gap-2 px-3 py-2"
+                        >
+                          <Edit2 size={16} />
+                          Modifier
+                        </Button>
+                        
+                        {/* BOUTON J'AIME SEUL AJOUTÉ */}
+                        <Button
+                          variant="manage"
+                          onClick={() => handleLikeForum(forum.id)}
+                          className={`flex items-center gap-2 px-3 py-2 transition-all duration-200 ${
+                            forum.userHasLiked 
+                              ? "bg-red-500/10 text-red-500 hover:bg-red-500/20" 
+                              : "hover:bg-primary/10"
+                          }`}
+                        >
+                          <Heart 
+                            size={16} 
+                            fill={forum.userHasLiked ? "currentColor" : "none"}
+                          />
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                            forum.userHasLiked 
+                              ? "bg-red-500/20" 
+                              : "bg-primary/20"
+                          }`}>
+                            {forum.posts || 0}
+                          </span>
+                        </Button>
+                        
+                        <Button
+                          variant="manage"
+                          onClick={() => {
+                            setForumToDelete(forum);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                        >
+                          <Trash2 size={16} />
+                          Supprimer
+                        </Button>
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT: Activités récentes */}
-          <div className="bg-card rounded-2xl p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-muted mb-4">Activités récentes</h2>
-
-            <ul className="flex flex-col gap-4">
-              {forums.slice(0, 5).map((forum, i) => (
-                <li key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-grad-2 text-muted flex items-center justify-center font-bold">
-                    {forum.utilisateur?.[0] || "F"}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-muted font-medium">{forum.utilisateur}</p>
-                    <p className="text-gray text-sm">a créé "{forum.title}"</p>
-                    <span className="text-gray-400 text-xs">{forum.date_creation}</span>
-                  </div>
-                </li>
-              ))}
-              {forums.length === 0 && (
-                <li className="text-center py-4">
-                  <MessageSquare className="w-12 h-12 text-gray mx-auto mb-2" />
-                  <p className="text-gray text-sm">Aucune activité récente</p>
-                </li>
+                ))
               )}
-            </ul>
-          </div>
+            </div>
+          )}
         </div>
       </main>
 

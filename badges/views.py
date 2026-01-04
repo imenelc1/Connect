@@ -117,6 +117,7 @@ def delete_badge(request, pk):
 
 
 @api_view(['GET'])
+
 def utilisateurs_par_badge(request, badge_id):
     try:
         badge = Badge.objects.get(id=badge_id)

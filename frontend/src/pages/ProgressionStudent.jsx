@@ -27,7 +27,6 @@ export default function ProgressStudent() {
   const [loading, setLoading] = useState(true);
   const studentIdParam = useParams().studentId;
   const [quizzes, setQuizzes] = useState([]);
-  
 
 
 
