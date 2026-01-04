@@ -244,16 +244,17 @@ export default function Dashboardens() {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface">
-      {/* Sidebar */}
-      <Navbar />
-
-      {/* Contenu principal */}
-      <main className={`
-        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 
-        min-h-screen w-full overflow-x-hidden
-        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-      `}>
+     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                         {/* Sidebar */}
+                         <div>
+                           <Navbar />
+                         </div>
+          {/* Contenu principal */}
+          
+          <main className={`
+            flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+            ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+          `}>
         
         {/* En-tête */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
@@ -328,7 +329,7 @@ export default function Dashboardens() {
         </div>
 
         {/* Courbe d'apprentissage */}
-        <div className="p-3 w-full" style={{ height: isMobile ? "280px" : "330px" }}>
+        <div className="p-3 w-full" style={{ height: "360px" }}>
           <LearningCurve />
         </div>
 

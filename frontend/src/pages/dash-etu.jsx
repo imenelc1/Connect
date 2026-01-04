@@ -138,7 +138,7 @@ export default function Dashboardetu() {
         setSubmittedExercises(res.data.total_submitted_attempts || 0);
         setTotalExercises(res.data.total_exercises || 0);
       } catch (err) {
-        console.error(t("Dashboard.FetchExercisesError"), err);
+        console.error("Erreur fetching exercises:", err);
       }
     };
 
@@ -193,30 +193,31 @@ export default function Dashboardetu() {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface">
-      {/* Sidebar */}
-      <Navbar />
-
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                     {/* Sidebar */}
+                     <div>
+                       <Navbar />
+                     </div>
       {/* Contenu principal */}
+      
       <main className={`
-        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 
-        min-h-screen w-full overflow-x-hidden
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
         
         {/* En-tête */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
-          {/* Barre de recherche
+          {/* Barre de recherche */}
           <form className="w-full sm:flex-1 max-w-full lg:max-w-sm order-2 sm:order-1">
             <Input
               placeholder={t("Dashboard.Search")}
               icon={<Search size={isMobile ? 14 : 16} />}
               className="w-full"
             />
-          </form> */}
+          </form>
 
           {/* Notifications et profil */}
-          <div className="ml-auto flex items-center gap-3 order-1 sm:order-2 self-end sm:self-auto">
+          <div className="flex items-center gap-3 order-1 sm:order-2 self-end sm:self-auto">
             <NotificationBell />
             <UserCircle
               initials={initials}
@@ -300,11 +301,11 @@ export default function Dashboardetu() {
           <div className="space-y-3">
             {loadingNotifications ? (
               <div className="flex items-center justify-center py-4">
-                <p className="text-sm text-gray-500">{t("Dashboard.LoadingNotifications")}</p>
+                <p className="text-sm text-gray-500">Chargement des notifications...</p>
               </div>
             ) : formattedNotifications.length === 0 ? (
               <div className="flex items-center justify-center py-4">
-                <p className="text-sm text-gray-500">{t("Dashboard.NoNotifications")}</p>
+                <p className="text-sm text-gray-500">Aucune notification disponible.</p>
               </div>
             ) : (
               formattedNotifications.map((item, index) => (

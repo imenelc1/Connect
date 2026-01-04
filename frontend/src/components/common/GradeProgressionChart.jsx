@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 export default function GradeProgressionChart({ data, title }) {
    const { t } = useTranslation("ProgressStudent");
   return (
-    <div className="p-6 bg-white rounded-2xl shadow-md">
+    <div className="p-6 bg-card rounded-2xl shadow-md">
       <h2 className="font-semibold text-lg mb-4">{title|| t("grade")}</h2>
 
       <div className="w-full h-72">

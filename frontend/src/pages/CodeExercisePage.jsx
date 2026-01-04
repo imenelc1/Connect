@@ -4,7 +4,7 @@ import { MdAutoAwesome } from "react-icons/md";
 
 import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
-import NavBar from "../components/common/NavBar";
+import NavBar from "../components/common/Navbar";
 import AssistantIA from "./AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
@@ -16,6 +16,7 @@ import progressionService from "../services/progressionService";
 import Editor from "@monaco-editor/react";
 import ExerciseContext from "../context/ExerciseContext";
 import { loadEditorCode } from "../utils/editorStorage";
+
 
 // ⚡ Ajout de saveEditorCode ici
 export const saveEditorCode = (userId, exerciseId, code) => {
@@ -42,6 +43,22 @@ export default function StartExercise() {
   const [notifications, setNotifications] = useState([]);
   const [canSubmit, setCanSubmit] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
+  // / États de l'interface
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Gestion de la responsivité
+    useEffect(() => {
+      const handleResize = () => setIsMobile(window.innerWidth < 768);
+      const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+  
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("sidebarChanged", handleSidebarChange);
+  
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("sidebarChanged", handleSidebarChange);
+      };
+    }, []); 
 
   const controllerRef = useRef(null);
 
@@ -278,15 +295,16 @@ useEffect(() => {
   // ------------------- JSX -------------------
   return (
     <ExerciseContext.Provider value={exerciseContextValue}>
-      <div
-        className="flex-1 p-4 md:p-8 transition-all duration-300 min-w-0 bg-surface"
-        style={{ marginLeft: sidebarWidth }}
-      >
-        <div className="hidden lg:block">
-          <NavBar />
-        </div>
+       <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                               {/* Sidebar */}
+                               <div>
+                                 <NavBar />
+                               </div>
 
-        <div className="flex-1 p-4 md:p-8 lg:ml-72 transition-all duration-300 ml-10">
+        <div className={`
+            flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+            ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+          `}>
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center mb-10 gap-6 md:gap-0">
             <div className="flex-1">
@@ -512,4 +530,3 @@ function ActionButton({ icon, label, bg, text = "white", onClick }) {
     </button>
   );
 }
-
