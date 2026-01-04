@@ -64,3 +64,5 @@ class SpaceQuiz(models.Model):
 
     def __str__(self):
         return f"{self.quiz.exercice.titre_exo} Quiz dans {self.space.nom_space}"
+
+

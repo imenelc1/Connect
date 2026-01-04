@@ -541,3 +541,4 @@ def delete_space(request, space_id):
         {"message": "Espace supprimé avec succès"},
         status=status.HTTP_204_NO_CONTENT
     )
+
