@@ -31,7 +31,8 @@
     "studentInfo": "{{specialite}} - {{annee}}e année",
     "modalTitle": "Étudiants ayant obtenu « {{title}} »",
     "createBadge": "Créer un badge",
-    "editTitle": "Modifier le badge"
+    "editTitle": "Modifier le badge",
+    "viewStudents": "Voir étudiants"
   },
   "common": {
     "close": "Fermer",
