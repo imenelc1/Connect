@@ -1338,256 +1338,226 @@ export default function ForumManagement() {
           ))}
         </div>
 
-        {/* GRID: FORUMS + ACTIVITÉ */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* LEFT: Forums List */}
-          <div className="bg-card rounded-2xl p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-muted mb-4">Forums de discussion</h2>
+        {/* GRID: FORUMS ONLY (removed activities section) */}
+        <div className="bg-card rounded-2xl p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-muted mb-4">Forums de discussion</h2>
 
-            {/* TABS */}
-            <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
-              {filterTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveFilter(tab.id)}
-                  className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm
-                    ${activeFilter === tab.id 
-                      ? "text-white bg-primary shadow-md"
-                      : "text-primary/70"
-                    }`}
-                >
-                  {tab.label} {tab.id !== "all" && `(${forums.filter(f => f.cible === tab.id).length})`}
-                </button>
-              ))}
-            </div>
+          {/* TABS */}
+          <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
+            {filterTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm
+                  ${activeFilter === tab.id 
+                    ? "text-white bg-primary shadow-md"
+                    : "text-primary/70"
+                  }`}
+              >
+                {tab.label} {tab.id !== "all" && `(${forums.filter(f => f.cible === tab.id).length})`}
+              </button>
+            ))}
+          </div>
 
-            {/* BARRE DE RECHERCHE ET BOUTON CRÉER */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="relative flex-1 max-w-xl">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Rechercher un forum..."
-                    className="w-full pl-12 pr-4 py-3 bg-surface border border-gray-800/20 rounded-xl text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
+          {/* BARRE DE RECHERCHE ET BOUTON CRÉER */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative flex-1 max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Rechercher un forum..."
+                  className="w-full pl-12 pr-4 py-3 bg-surface border border-gray-800/20 rounded-xl text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                />
               </div>
-              
+            </div>
+            
+            <Button
+              text={
+                <span className="flex items-center gap-2">
+                  <Plus size={18} />
+                  {t("ForumManagement.createF") || "Créer un forum"}
+                </span>
+              }
+              variant="primary"
+              className="!w-auto px-6 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+              onClick={() => {
+                setEditingForum(null);
+                setIsModalOpen(true);
+              }}
+            />
+          </div>
+
+          {/* États de chargement/erreur */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+              <p className="text-gray">Chargement des forums...</p>
+            </div>
+          )}
+
+          {error && !loading && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center mb-6">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <p className="text-red-500 mb-3">{error}</p>
               <Button
-                text={
-                  <span className="flex items-center gap-2">
-                    <Plus size={18} />
-                    {t("ForumManagement.createF") || "Créer un forum"}
-                  </span>
-                }
-                variant="primary"
-                className="!w-auto px-6 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                onClick={() => {
-                  setEditingForum(null);
-                  setIsModalOpen(true);
-                }}
-              />
+                variant="secondary"
+                onClick={fetchForums}
+                className="px-4 py-2"
+              >
+                Réessayer
+              </Button>
             </div>
+          )}
 
-            {/* États de chargement/erreur */}
-            {loading && (
-              <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-                <p className="text-gray">Chargement des forums...</p>
-              </div>
-            )}
-
-            {error && !loading && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center mb-6">
-                <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <p className="text-red-500 mb-3">{error}</p>
-                <Button
-                  variant="secondary"
-                  onClick={fetchForums}
-                  className="px-4 py-2"
-                >
-                  Réessayer
-                </Button>
-              </div>
-            )}
-
-            {/* Liste des forums */}
-            {!loading && !error && (
-              <div className="space-y-4">
-                {filteredForums.length === 0 ? (
-                  <div className="text-center py-12">
-                    <MessageSquare className="w-16 h-16 text-gray mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-muted mb-2">Aucun forum trouvé</h3>
-                    <p className="text-gray mb-6 max-w-md mx-auto">
-                      {search ? "Aucun forum ne correspond à votre recherche." : "Commencez par créer votre premier forum."}
-                    </p>
-                    {!search && (
-                      <Button
-                        variant="primary"
-                        onClick={() => {
-                          setEditingForum(null);
-                          setIsModalOpen(true);
-                        }}
-                        className="px-6 py-3"
-                      >
-                        <Plus size={18} className="mr-2" />
-                        Créer un forum
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  filteredForums.map((forum) => (
-                    <div
-                      key={forum.id}
-                      className="bg-surface rounded-2xl p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300"
+          {/* Liste des forums */}
+          {!loading && !error && (
+            <div className="space-y-4">
+              {filteredForums.length === 0 ? (
+                <div className="text-center py-12">
+                  <MessageSquare className="w-16 h-16 text-gray mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-muted mb-2">Aucun forum trouvé</h3>
+                  <p className="text-gray mb-6 max-w-md mx-auto">
+                    {search ? "Aucun forum ne correspond à votre recherche." : "Commencez par créer votre premier forum."}
+                  </p>
+                  {!search && (
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        setEditingForum(null);
+                        setIsModalOpen(true);
+                      }}
+                      className="px-6 py-3"
                     >
-                      <div className="flex flex-col lg:flex-row lg:items-start gap-5">
-                        {/* Icône et info de base */}
-                        <div className="flex items-start gap-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                            forum.cible === "etudiants" ? "bg-grad-4" : "bg-grad-2"
-                          }`}>
-                            {forum.cible === "etudiants" ? (
-                              <GraduationCap className="w-6 h-6 text-white" />
-                            ) : (
-                              <Users className="w-6 h-6 text-white" />
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <h3 className="text-lg font-semibold text-muted">
-                                {forum.title}
-                              </h3>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                forum.cible === "etudiants"
-                                  ? "bg-primary/20 text-primary"
-                                  : "bg-pink/20 text-pink"
-                              }`}>
-                                {forum.cible === "etudiants" ? "Pour étudiants" : "Pour enseignants"}
-                              </span>
-                            </div>
-                            
-                            <p className="text-gray text-sm mb-3 line-clamp-2">
-                              {forum.originalData?.contenu_forum || "Pas de description"}
-                            </p>
-                            
-                            <div className="flex flex-wrap gap-4 text-sm text-gray">
-                              <span className="flex items-center gap-1">
-                                <MessageSquare size={14} />
-                                {forum.threads} discussions
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <TrendingUp size={14} />
-                                {forum.posts} likes
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <User size={14} />
-                                Créé par {forum.utilisateur}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock size={14} />
-                                {forum.date_creation}
-                              </span>
-                            </div>
-                          </div>
+                      <Plus size={18} className="mr-2" />
+                      Créer un forum
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                filteredForums.map((forum) => (
+                  <div
+                    key={forum.id}
+                    className="bg-surface rounded-2xl p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300"
+                  >
+                    <div className="flex flex-col lg:flex-row lg:items-start gap-5">
+                      {/* Icône et info de base */}
+                      <div className="flex items-start gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          forum.cible === "etudiants" ? "bg-grad-4" : "bg-grad-2"
+                        }`}>
+                          {forum.cible === "etudiants" ? (
+                            <GraduationCap className="w-6 h-6 text-white" />
+                          ) : (
+                            <Users className="w-6 h-6 text-white" />
+                          )}
                         </div>
                         
-                        {/* Boutons d'action */}
-                        <div className="flex lg:flex-col gap-2 lg:border-l lg:pl-5 border-gray-800/20">
-                          <Button
-                            variant="manage"
-                            onClick={() => handleViewForum(forum)}
-                            className="flex items-center gap-2 px-3 py-2"
-                          >
-                            <Eye size={16} />
-                            Voir
-                          </Button>
-                          
-                          <Button
-                            variant="manage"
-                            onClick={() => {
-                              setEditingForum(forum);
-                              setIsModalOpen(true);
-                            }}
-                            className="flex items-center gap-2 px-3 py-2"
-                          >
-                            <Edit2 size={16} />
-                            Modifier
-                          </Button>
-                          
-                          {/* BOUTON J'AIME SEUL AJOUTÉ */}
-                          <Button
-                            variant="manage"
-                            onClick={() => handleLikeForum(forum.id)}
-                            className={`flex items-center gap-2 px-3 py-2 transition-all duration-200 ${
-                              forum.userHasLiked 
-                                ? "bg-red-500/10 text-red-500 hover:bg-red-500/20" 
-                                : "hover:bg-primary/10"
-                            }`}
-                          >
-                            <Heart 
-                              size={16} 
-                              fill={forum.userHasLiked ? "currentColor" : "none"}
-                            />
-                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                              forum.userHasLiked 
-                                ? "bg-red-500/20" 
-                                : "bg-primary/20"
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h3 className="text-lg font-semibold text-muted">
+                              {forum.title}
+                            </h3>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              forum.cible === "etudiants"
+                                ? "bg-primary/20 text-primary"
+                                : "bg-pink/20 text-pink"
                             }`}>
-                              {forum.posts || 0}
+                              {forum.cible === "etudiants" ? "Pour étudiants" : "Pour enseignants"}
                             </span>
-                          </Button>
+                          </div>
                           
-                          <Button
-                            variant="manage"
-                            onClick={() => {
-                              setForumToDelete(forum);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            className="flex items-center gap-2 px-3 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                          >
-                            <Trash2 size={16} />
-                            Supprimer
-                          </Button>
+                          <p className="text-gray text-sm mb-3 line-clamp-2">
+                            {forum.originalData?.contenu_forum || "Pas de description"}
+                          </p>
+                          
+                          <div className="flex flex-wrap gap-4 text-sm text-gray">
+                            <span className="flex items-center gap-1">
+                              <MessageSquare size={14} />
+                              {forum.threads} discussions
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <TrendingUp size={14} />
+                              {forum.posts} likes
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <User size={14} />
+                              Créé par {forum.utilisateur}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock size={14} />
+                              {forum.date_creation}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      
+                      {/* Boutons d'action */}
+                      <div className="flex lg:flex-col gap-2 lg:border-l lg:pl-5 border-gray-800/20">
+                        <Button
+                          variant="manage"
+                          onClick={() => handleViewForum(forum)}
+                          className="flex items-center gap-2 px-3 py-2"
+                        >
+                          <Eye size={16} />
+                          Voir
+                        </Button>
+                        
+                        <Button
+                          variant="manage"
+                          onClick={() => {
+                            setEditingForum(forum);
+                            setIsModalOpen(true);
+                          }}
+                          className="flex items-center gap-2 px-3 py-2"
+                        >
+                          <Edit2 size={16} />
+                          Modifier
+                        </Button>
+                        
+                        {/* BOUTON J'AIME SEUL AJOUTÉ */}
+                        <Button
+                          variant="manage"
+                          onClick={() => handleLikeForum(forum.id)}
+                          className={`flex items-center gap-2 px-3 py-2 transition-all duration-200 ${
+                            forum.userHasLiked 
+                              ? "bg-red-500/10 text-red-500 hover:bg-red-500/20" 
+                              : "hover:bg-primary/10"
+                          }`}
+                        >
+                          <Heart 
+                            size={16} 
+                            fill={forum.userHasLiked ? "currentColor" : "none"}
+                          />
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                            forum.userHasLiked 
+                              ? "bg-red-500/20" 
+                              : "bg-primary/20"
+                          }`}>
+                            {forum.posts || 0}
+                          </span>
+                        </Button>
+                        
+                        <Button
+                          variant="manage"
+                          onClick={() => {
+                            setForumToDelete(forum);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="flex items-center gap-2 px-3 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                        >
+                          <Trash2 size={16} />
+                          Supprimer
+                        </Button>
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT: Activités récentes */}
-          <div className="bg-card rounded-2xl p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-muted mb-4">Activités récentes</h2>
-
-            <ul className="flex flex-col gap-4">
-              {forums.slice(0, 5).map((forum, i) => (
-                <li key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-grad-2 text-muted flex items-center justify-center font-bold">
-                    {forum.utilisateur?.[0] || "F"}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-muted font-medium">{forum.utilisateur}</p>
-                    <p className="text-gray text-sm">a créé "{forum.title}"</p>
-                    <span className="text-gray-400 text-xs">{forum.date_creation}</span>
-                  </div>
-                </li>
-              ))}
-              {forums.length === 0 && (
-                <li className="text-center py-4">
-                  <MessageSquare className="w-12 h-12 text-gray mx-auto mb-2" />
-                  <p className="text-gray text-sm">Aucune activité récente</p>
-                </li>
+                ))
               )}
-            </ul>
-          </div>
+            </div>
+          )}
         </div>
       </main>
 
