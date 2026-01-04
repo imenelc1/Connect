@@ -120,6 +120,7 @@ export default function Navbar() {
 
   const quizRoutes = [
     "/all-quizzes",
+    "/quiz-preview"
 
   ];
   const classementRoutes = [
