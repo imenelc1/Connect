@@ -249,7 +249,7 @@ def check_user_like(request, forum_id):
 def like_message(request, message_id):
     """
     Like / Unlike un message.
-    Supporte les utilisateurs et les administrateurs.
+    Supporte les administrateurs et les utilisateurs.
     """
     try:
         message = Message.objects.get(pk=message_id)
@@ -259,55 +259,46 @@ def like_message(request, message_id):
     role = getattr(request, "user_role", None)
 
     # ---------------------------
-    # Utilisateur normal
-    # ---------------------------
-    if role == "utilisateur":
-        utilisateur = request.user
-
-        like_qs = MessageLike.objects.filter(
-            message=message,
-            utilisateur=utilisateur
-        )
-
-        if like_qs.exists():
-            like_qs.delete()
-            action = "unliked"
-            user_has_liked = False
-        else:
-            MessageLike.objects.create(
-                message=message,
-                utilisateur=utilisateur
-            )
-            action = "liked"
-            user_has_liked = True
-
-    # ---------------------------
     # Administrateur
     # ---------------------------
-    elif role == "admin":
-        # Ici tu dois récupérer l’admin depuis le payload JWT
-        admin_id = getattr(request, "user_id", None)  # ton decorator met user_id pour admin
+    if role == "admin":
+        admin_id = getattr(request, "user_id", None)  # décorateur JWT met user_id pour admin
         try:
             administrateur = Administrateur.objects.get(pk=admin_id)
         except Administrateur.DoesNotExist:
             return Response({'error': 'Administrateur non trouvé'}, status=status.HTTP_403_FORBIDDEN)
 
-        like_qs = MessageLike.objects.filter(
-            message=message,
-            administrateur=administrateur
-        )
+        like_qs = MessageLike.objects.filter(message=message, administrateur=administrateur)
 
         if like_qs.exists():
             like_qs.delete()
             action = "unliked"
             user_has_liked = False
         else:
-            MessageLike.objects.create(
-                message=message,
-                administrateur=administrateur
-            )
+            MessageLike.objects.create(message=message, administrateur=administrateur)
             action = "liked"
             user_has_liked = True
+
+    # ---------------------------
+    # Utilisateur normal
+    # ---------------------------
+    # ---------------------------
+# Utilisateur normal (étudiant ou enseignant)
+# ---------------------------
+    elif role in ["utilisateur", "etudiant", "enseignant"]:
+        utilisateur = request.user
+
+        like_qs = MessageLike.objects.filter(message=message, utilisateur=utilisateur)
+
+        if like_qs.exists():
+            like_qs.delete()
+            action = "unliked"
+            user_has_liked = False
+        else:
+            MessageLike.objects.create(message=message, utilisateur=utilisateur)
+            action = "liked"
+            user_has_liked = True
+
 
     else:
         return Response({'error': 'Rôle inconnu'}, status=status.HTTP_403_FORBIDDEN)
@@ -439,7 +430,7 @@ def create_comment(request, message_id):
     if not contenu:
         return Response({'error': 'Le contenu du commentaire est requis'}, status=400)
 
-    if role == 'utilisateur':
+    if role in ["utilisateur", "etudiant", "enseignant"]:
         commentaire = Commentaire.objects.create(
             message=message,
             contenu_comm=contenu,
