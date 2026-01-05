@@ -34,7 +34,8 @@
     "FetchHistoryError": "Error while fetching professor history",
     "LoadingNotifications": "Loading notifications...",
     "NoNotifications": "No notifications available.",
-    "FetchExercisesError": "Error while fetching exercises"
+    "FetchExercisesError": "Error while fetching exercises",
+    "mystudents": "My students"
 
   }
 }

@@ -15,6 +15,7 @@ import ContentSearchBar from "../components/common/ContentSearchBar";
 import ThemeContext from "../context/ThemeContext";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import ModernDropdown from "../components/common/ModernDropdown";
 
 export default function SpacesPage() {
   const { t } = useTranslation("space");
@@ -290,20 +291,29 @@ const handleRemoveStudentFromSpace = async (student) => {
     toast.error(err.message || "Impossible de supprimer l'étudiant");
   }
 };
+const teacherOptions = teachers.map((t) => ({
+  value: t.id_utilisateur,
+  label: `${t.prenom} ${t.nom}`,
+}));
 
   // ================= FIELDS FOR SPACE MODAL =================
   const fields = [
     { label: "Nom", placeholder: "Nom de l'espace", value: newSpace.title, onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }) },
     { label: "Description", placeholder: "Description", value: newSpace.description, onChange: (e) => setNewSpace({ ...newSpace, description: e.target.value }) },
     {
-      label: "Propriétaire",
-      element: (
-        <select value={newSpace.utilisateur} onChange={(e) => setNewSpace({ ...newSpace, utilisateur: e.target.value })} className="w-full p-2  rounded-lg bg-surface">
-          <option value="">-- Sélectionner un enseignant --</option>
-          {teachers.map((t) => <option key={t.id_utilisateur} value={t.id_utilisateur}>{t.prenom} {t.nom}</option>)}
-        </select>
-      ),
-    },
+  label: "Propriétaire",
+  element: (
+    <ModernDropdown
+      value={newSpace.utilisateur}
+      onChange={(value) =>
+        setNewSpace({ ...newSpace, utilisateur: value })
+      }
+      options={teacherOptions}
+      placeholder="-- Sélectionner un enseignant --"
+      style={{ width: "100%" }}
+    />
+  ),
+}
   ];
 
   return (

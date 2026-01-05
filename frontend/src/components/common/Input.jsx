@@ -10,7 +10,7 @@ export default function Input({
   ...props
 }) {
   return (
-    <div className="flex flex-col mb-4 shadow-md">
+    <div className="flex flex-col mb-4">
 
       {label && (
         <label className="mb-1 font-semibold text-sm text-gray-700 dark:text-gray-300">
