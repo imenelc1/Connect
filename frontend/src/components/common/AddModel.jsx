@@ -60,8 +60,8 @@ export default function AddModal({
                   placeholder={field.placeholder}
                   value={field.value}
                   onChange={field.onChange}
-                  className="w-full bg-gray-50 rounded-lg px-4 py-2 text-gray-800
-                             border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary
+                  className="w-full bg-surface rounded-lg px-4 py-2 
+                              focus:outline-none focus:ring-2 focus:ring-primary
                              focus:border-primary transition duration-200 placeholder-gray-400"
                 />
               )}

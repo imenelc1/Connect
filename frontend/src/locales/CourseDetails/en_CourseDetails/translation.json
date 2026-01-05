@@ -9,6 +9,9 @@
   },
   "coursesTitle": "Courses",
   "addCourse": "Add Course",
+  "addExo": "Add Exrcice",
+  "addQuiz": "Add Quiz",
+
   "createdOn": "Created on",
   "addCourseTitle": "Add Course",
   "addCourseSubtitle": "Add a new course to Mobile Design Patterns",

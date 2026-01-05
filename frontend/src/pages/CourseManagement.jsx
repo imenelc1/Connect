@@ -209,14 +209,7 @@ export default function CoursesManagement() {
         <Navbar />
         <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
         <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
+       
       </div>
       </div>
 
@@ -288,7 +281,7 @@ export default function CoursesManagement() {
                 </p>
               {teachers.length > 0 && (
                 <p className="text-grayc text-sm mb-2">
-                  Auteur: {teachers.find(t => t.id_utilisateur === item.utilisateur)?.nom}{" "}
+                  {t("auteur")}: {teachers.find(t => t.id_utilisateur === item.utilisateur)?.nom}{" "}
                   {teachers.find(t => t.id_utilisateur === item.utilisateur)?.prenom}
                 </p>
               )}
@@ -297,13 +290,13 @@ export default function CoursesManagement() {
               )}
 
               <div className="flex justify-end mt-auto pt-4">
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                    <Button
                     variant="courseStart"
-                    className={`px-4 py-2 whitespace-nowrap ${buttonStyles[item.niveau_cour_label]}`}
+                    className={`px-2 py-2 whitespace-nowrap ${buttonStyles[item.niveau_cour_label]}`}
                     onClick={() => navigate(`/Cours/${item.id_cours}`)}
                   >
-                    Voir Cours
+                    {t("voir_cours")}
                   </Button>
                   <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
                     <SquarePen size={20} />

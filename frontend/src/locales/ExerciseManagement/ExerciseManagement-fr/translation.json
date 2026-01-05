@@ -2,6 +2,8 @@
   "title": "Gestion des exercices",
   "description": "Gérez les exercices et problèmes de codage.",
   "searchPlaceholder": "Rechercher des exercices...",
+  "voir_exo": "Voir l'exercise",
+
   "difficulty": {
     "easy": "Facile",
     "medium": "Moyen",

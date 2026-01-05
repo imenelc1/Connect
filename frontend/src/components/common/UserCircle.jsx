@@ -37,7 +37,7 @@ export default function UserCircle({
       {/* Cercle utilisateur */}
       <div
         onClick={clickable ? () => setOpen(!open) : undefined}
-        className={`w-14 h-14 rounded-full bg-grad-1 text-white flex items-center justify-center 
+        className={`w-12 h-12 rounded-full bg-grad-1 text-white flex items-center justify-center 
         font-semibold shadow-lg ${
           clickable ? "cursor-pointer hover:opacity-90" : ""
         }`}

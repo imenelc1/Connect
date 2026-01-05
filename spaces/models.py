@@ -35,6 +35,7 @@ class SpaceCour(models.Model):
     date_ajout = models.DateTimeField(auto_now_add=True)
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
     cours = models.ForeignKey(Cours, on_delete=models.CASCADE)
+    ai_enabled = models.BooleanField(default=True)  # 👈 NOUVEAU
 
     class Meta:
         unique_together = ('space', 'cours') 
@@ -47,6 +48,7 @@ class SpaceExo(models.Model):
     date_ajout = models.DateTimeField(auto_now_add=True)
     space = models.ForeignKey(Space, on_delete=models.CASCADE)
     exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE)
+    ai_enabled = models.BooleanField(default=True)  # 👈 NOUVEAU
 
     class Meta:
         unique_together = ('space', 'exercice')  # un exercice ne peut être ajouté qu'une fois dans un space
@@ -64,3 +66,5 @@ class SpaceQuiz(models.Model):
 
     def __str__(self):
         return f"{self.quiz.exercice.titre_exo} Quiz dans {self.space.nom_space}"
+
+

@@ -382,21 +382,6 @@ def handle_study_session(sender, instance, created, **kwargs):
             message=f"💪 Excellente session ! {hours}h{minutes}min d'apprentissage productif."
         )
     
-    # ========= TEMPS QUOTIDIEN =========
-    today = timezone.now().date()
-    total_today = SessionDuration.objects.filter(
-        utilisateur=user,
-        date__date=today
-    ).aggregate(total=Sum('duration'))['total'] or 0
-    
-    if total_today >= 14400:  # 4 heures
-        create_notification(
-            destinataire=user,
-            action_type='daily_commitment',
-            module_source='progress',
-            message="⏳ Engagement impressionnant ! 4+ heures d'étude aujourd'hui."
-        )
-    
     # ========= SÉRIE DE JOURS =========
     streak = calculate_streak(user)
     

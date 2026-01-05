@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import ModernDropdown from "../components/common/ModernDropdown.jsx";
@@ -333,12 +333,14 @@ export default function InstructorsPage() {
 
   // ================= RENDER =================
   return (
-    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+    <div className="flex flex-col md:flex-row min-h-screen bg-surface gap-4 md:gap-1">
+
       <Navbar />
       <main
-        className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""
-          }`}
+        className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300
+    ${isMobile ? "ml-14" : sidebarCollapsed ? "md:ml-16" : "md:ml-64"}`}
       >
+
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div className="flex items-center gap-3">
@@ -363,38 +365,88 @@ export default function InstructorsPage() {
         </div>
 
         {/* TABLE */}
-        <div className="bg-card rounded-xl shadow-sm overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-grad-3">
-              <tr>
-                <th className="px-6 py-3">{t("firstName")}</th>
-                <th className="px-6 py-3">{t("lastName")}</th>
-                <th className="px-6 py-3 hidden sm:table-cell">{t("email")}</th>
-                <th className="px-6 py-3 hidden md:table-cell">{t("birthdate")}</th>
-                <th className="px-6 py-3 hidden lg:table-cell">{t("rank")}</th>
-                <th className="px-6 py-3 hidden lg:table-cell">{t("matricule")}</th>
-                <th className="px-6 py-3">{t("actions")}</th>
-              </tr>
-            </thead>
+        {/* TABLE / LIST RESPONSIVE */}
+        <div className="bg-card rounded-xl shadow-sm">
+          {/* 📱 VUE MOBILE = CARDS */}
+          <div className="md:hidden space-y-3">
+            {filtered.map((i, index) => (
+              <div
+                key={index}
+                onClick={() => handleRowClick(i)}
+                className="border rounded-lg p-4 flex justify-between items-start hover:bg-muted/20"
+              >
+                <div>
+                  <p className="font-semibold">{i.nickname} {i.fullname}</p>
+                  <p className="text-sm text-gray">{i.email}</p>
+                  <p className="text-sm text-gray">{t("matricule")}: {i.regnumber}</p>
+                </div>
 
-            <tbody>
-              {filtered.map((i, index) => (
-                <tr key={index} onClick={() => handleRowClick(i)} className="border-t hover:bg-card cursor-pointer">
-                  <td className="px-6 py-4">{i.nickname}</td>
-                  <td className="px-6 py-4">{i.fullname}</td>
-                  <td className="px-6 py-4 hidden sm:table-cell">{i.email}</td>
-                  <td className="px-6 py-4 hidden md:table-cell"><Calendar size={14} className="inline mr-2" />{i.dob}</td>
-                  <td className="px-6 py-4 hidden lg:table-cell">{i.rank}</td>
-                  <td className="px-6 py-4 hidden lg:table-cell">{i.regnumber}</td>
-                  <td className="px-6 py-4">
-                    <Edit size={18} className="inline mr-3 text-blue" onClick={e => { e.stopPropagation(); handleEdit(index); }} />
-                    <Trash2 size={18} className="inline text-red" onClick={e => { e.stopPropagation(); handleDelete(index); }} />
-                  </td>
+                <div className="flex gap-3">
+                  <Edit
+                    size={18}
+                    className="text-blue"
+                    onClick={e => { e.stopPropagation(); handleEdit(index); }}
+                  />
+                  <Trash2
+                    size={18}
+                    className="text-red"
+                    onClick={e => { e.stopPropagation(); handleDelete(index); }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* 🖥️ VUE DESKTOP = TABLE */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-grad-3">
+                <tr>
+                  <th className="px-6 py-3">{t("firstName")}</th>
+                  <th className="px-6 py-3">{t("lastName")}</th>
+                  <th className="px-6 py-3 hidden sm:table-cell">{t("email")}</th>
+                  <th className="px-6 py-3 hidden md:table-cell">{t("birthdate")}</th>
+                  <th className="px-6 py-3 hidden lg:table-cell">{t("rank")}</th>
+                  <th className="px-6 py-3 hidden lg:table-cell">{t("matricule")}</th>
+                  <th className="px-6 py-3">{t("actions")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {filtered.map((i, index) => (
+                  <tr
+                    key={index}
+                    onClick={() => handleRowClick(i)}
+                    className="border-t hover:bg-card cursor-pointer"
+                  >
+                    <td className="px-6 py-4">{i.nickname}</td>
+                    <td className="px-6 py-4">{i.fullname}</td>
+                    <td className="px-6 py-4 hidden sm:table-cell">{i.email}</td>
+                    <td className="px-6 py-4 hidden md:table-cell">
+                      <Calendar size={14} className="inline mr-2" />
+                      {i.dob}
+                    </td>
+                    <td className="px-6 py-4 hidden lg:table-cell">{i.rank}</td>
+                    <td className="px-6 py-4 hidden lg:table-cell">{i.regnumber}</td>
+                    <td className="px-6 py-4">
+                      <Edit
+                        size={18}
+                        className="inline mr-3 text-blue"
+                        onClick={e => { e.stopPropagation(); handleEdit(index); }}
+                      />
+                      <Trash2
+                        size={18}
+                        className="inline text-red"
+                        onClick={e => { e.stopPropagation(); handleDelete(index); }}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </main>
 
       {/* MODALS */}

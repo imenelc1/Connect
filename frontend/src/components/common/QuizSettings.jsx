@@ -68,13 +68,13 @@ const handleChange = (field, value) => {
 
         {/* VISIBILITÉ */}
         <div className="flex flex-col gap-2">
-          <label>{t("exercises.visibility")}</label>
+          <label>{t("visibility")}</label>
           <ModernDropdown
             value={quizData.visibility || "public"}
             onChange={(val) => handleChange("visibility", val)}
             options={[
-              { value: "public", label: t("select.public") },
-              { value: "private", label: t("select.private") },
+              { value: "public", label: t("public") },
+              { value: "private", label: t("private") },
             ]}
           />
         </div>

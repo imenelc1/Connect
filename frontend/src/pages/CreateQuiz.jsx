@@ -39,8 +39,8 @@ export default function CreateQuiz() {
     }`.toUpperCase();
 
   const exerciseSteps = [
-    { label: t("quiz.info"), icon: FileText },
-    { label: t("quiz.preview"), icon: Activity },
+    { label: t("info"), icon: FileText },
+    { label: t("preview"), icon: Activity },
   ];
   const [quizData, setQuizData] = useState({
     title: "",

@@ -40,5 +40,8 @@
   "deleteSuccess": "Instructeur supprimé avec succès",
   "updateSuccess": "Instructeur mis à jour avec succès",
   "createSuccess": "Instructeur créé avec succès",
-  "joinedAt": "Date d'inscription"
+  "joinedAt": "Date d'inscription",
+  "prof": "Professeur",
+  "MC": "Maître de conférences ",
+  "MA": "Maître assistant"
 }

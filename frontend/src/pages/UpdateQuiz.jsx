@@ -27,8 +27,8 @@ const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
 
   const exerciseSteps = [
-    { label: t("quiz.info"), icon: FileText },
-    { label: t("quiz.preview"), icon: Activity },
+    { label: t("info"), icon: FileText },
+    { label: t("preview"), icon: Activity },
   ];
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);

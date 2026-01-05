@@ -6,7 +6,6 @@ import InfoCard from "../components/common/InfoCard";
 import { MessageCircle, File } from "lucide-react";
 import { getTentativeById } from "../services/progressionService";
 import axios from "axios"; // ← Ajoutez cette importation
-
 export default function SubmittedExercise() {
   const { t } = useTranslation("SubmittedExercise");
   const { tentativeId } = useParams();
@@ -84,11 +83,12 @@ export default function SubmittedExercise() {
   }
 
   return (
-    <div className="flex bg-background min-h-screen">
+    <div className="flex bg-surface min-h-screen">
       <Navbar />
 
       <main className="flex-1 ml-16 md:ml-56 p-6">
         {/* INFO CARD */}
+        
         <h1 className="text-3xl ml-5 mb-5 font-semibold text-primary">{t("Completed Exercise")}</h1>
         <InfoCard exercise={exerciseData}/>
 

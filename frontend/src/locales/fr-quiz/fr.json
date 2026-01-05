@@ -1,4 +1,6 @@
 {
+  "preview":"Aperçu du quiz",
+  "info": "Infromations du quiz",
   "newQuiz": "Nouveau Quiz",
   "exitPreview": "Quitter l’aperçu",
   "noData": "Aucune donnée de quiz trouvée.",
@@ -10,6 +12,20 @@
   "questionText": "Entrez votre question ici...",
   "answerOption": "Option de réponse...",
   "sendQuiz": "Envoyer le quiz",
+
+
+   "selectCourse": "Selectionnez le cours",
+  "chooseCourse": "Choisir",
+  "visibility": "visibilité",
+  "public":"public",
+  "private":"privé",
+  "selectLevel": "selectionnez le niveau",
+  "scoreMinimum": "Score minimum",
+  "maxAttempts":"Tentatives maximum",
+  "delais_entre_tentative": "délais entre tentatives",
+  "enableDuration": "activer le temps", 
+
+
 
   "quizSettings": "Paramètres du Quiz",
   "quizTitle": "Titre du Quiz",

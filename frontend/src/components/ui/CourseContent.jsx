@@ -250,14 +250,14 @@ useEffect(() => {
             </div>
           ))
         ) : (
-          <p className="text-center text-sm sm:text-base text-gray-500 mt-4">Aucune leçon disponible</p>
+          <p className="text-center text-sm sm:text-base text-gray-500 mt-4"> {t("leconNondispo")}</p>
         )}
       </div>
 
             {isLastPage && (
         <div className="mb-4 p-4  text-center">
           <p className="text-green-700 font-semibold text-sm sm:text-base">
-             Cours terminé !
+             {t("coursTermine")}!
           </p>
         </div>
       )}

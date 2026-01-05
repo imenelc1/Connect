@@ -54,7 +54,7 @@ export default function BadgeHeader({ stats }) {
 
         {/* BOUTONS */}
         <div className="flex justify-center sm:justify-end items-center gap-2 flex-wrap">
-          <IaAssistant className="w-6 h-6" />
+         
 
           <button className="px-4 py-1 sm:px-4 sm:py-2 rounded-md bg-tertiary text-white font-semibold text-xs sm:text-sm">
             {stats ? `Level ${stats.level}` : tBadges("header.level")}

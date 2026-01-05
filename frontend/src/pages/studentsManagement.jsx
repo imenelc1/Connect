@@ -1,97 +1,133 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useTranslation } from "react-i18next";
 import Button from "../components/common/Button";
 import ProgressBar from "../components/ui/ProgressBar";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import { Trash2, SquarePen, UserPlus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ThemeContext from "../context/ThemeContext";
 import { toast } from "react-hot-toast";
 import Input from "../components/common/Input.jsx";
 import ModernDropdown from "../components/common/ModernDropdown.jsx";
-import StudentDetailModal from "../components/ui/StudentDetailModal.jsx";
+
+// ================= MODAL DÉTAIL =================
+// ================= MODAL DÉTAIL =================
+function StudentDetailModal({ studentId, onClose }) {
+  const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+ 
+  useEffect(() => {
+    if (!studentId) return;
+
+    const fetchStudent = async () => {
+      const token = localStorage.getItem("admin_token");
+      if (!token) return setError("Token JWT manquant");
+
+      setLoading(true);
+      try {
+        const res = await fetch(`http://localhost:8000/api/users/utilisateurs/${studentId}/progression/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`Erreur ${res.status}`);
+        const data = await res.json();
+        setStudent(data);
+      } catch (err) {
+        console.error(err);
+        setError("Impossible de charger les informations de l'étudiant.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudent();
+  }, [studentId]);
+  console.log({ student });
+  if (!studentId) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg relative overflow-y-auto max-h-[80vh]">
+        <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800" onClick={onClose}>✕</button>
+
+        {loading ? (
+          <p>Chargement...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : student ? (
+          <>
+            {/* Informations générales */}
+            <h2 className="text-2xl font-bold mb-2">{student.utilisateur.nom} {student.utilisateur.prenom}</h2>
+            <p className="text-sm text-gray-500 mb-4">{student.utilisateur.email}</p>
+
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <p><strong>Date de naissance:</strong> {student.utilisateur.date_naissance || "—"}</p>
+              <p><strong>Matricule:</strong> {student.utilisateur.matricule || "—"}</p>
+              <p><strong>Spécialité:</strong> {student.utilisateur.specialite || "—"}</p>
+              <p><strong>Année d'étude:</strong> {student.utilisateur.annee_etude || "—"}</p>
+            </div>
+
+            {/* Progression */}
+            <h3 className="font-semibold text-lg mb-2">Cours lus: {student.cours_lus?.length}</h3>
+            {student.cours_lus?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.cours_lus.map((c, idx) => <li key={idx}>{c.titre_cour}</li>)}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun cours lu</p>}
+
+            <h3 className="font-semibold text-lg mb-2">Exercices faits: {student.exercices_faits?.length} </h3>
+            {student.exercices_faits?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.exercices_faits.map((e, idx) => <li key={idx}>{e.titre_exo}</li>)}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun exercice fait</p>}
+
+            <h3 className="font-semibold text-lg mb-2">Quiz faits : {student.quiz_faits?.length}</h3>
+            {student.quiz_faits?.length > 0 ? (
+              <ul className="mb-4 list-disc list-inside">
+                {student.quiz_faits.map((q, idx) => (
+                  <li key={idx}>{q.titre_quiz} – Score: {q.score_obtenu}</li>
+                ))}
+              </ul>
+            ) : <p className="mb-4 text-sm text-gray-500">Aucun quiz fait</p>}
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 
 // ================= MODAL ÉDITION =================
-function StudentEditModal({ studentForm, setStudentForm, onClose, onSubmit, editErrors = {}, t }) {
+function StudentEditModal({ studentForm, setStudentForm, onClose, onSubmit }) {
   if (!studentForm) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-card rounded-xl p-6 w-full max-w-xl overflow-y-auto max-h-[90vh]">
-        <h2 className="text-xl font-bold mb-4">
-          {t("StudentsManagement.editStudent")}: {studentForm.nom} {studentForm.prenom}
-        </h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg relative">
+        <button
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+          onClick={onClose}
+        >
+          ✕
+        </button>
+        <h2 className="text-2xl font-bold mb-4">Modifier {studentForm.nom} {studentForm.prenom}</h2>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label={t("StudentsManagement.labels.lastName")}
-              value={studentForm.nom || ""}
-              onChange={e => setStudentForm({ ...studentForm, nom: e.target.value })}
-              error={editErrors.nom && t(`StudentsManagement.errors.${editErrors.nom}`)}
-            />
-            <Input
-              label={t("StudentsManagement.labels.firstName")}
-              value={studentForm.prenom || ""}
-              onChange={e => setStudentForm({ ...studentForm, prenom: e.target.value })}
-              error={editErrors.prenom && t(`StudentsManagement.errors.${editErrors.prenom}`)}
-            />
-          </div>
-
-          <Input
-            label={t("StudentsManagement.labels.email")}
-            value={studentForm.email || ""}
-            onChange={e => setStudentForm({ ...studentForm, email: e.target.value })}
-            error={editErrors.email && t(`StudentsManagement.errors.${editErrors.email}`)}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="date"
-              label={t("StudentsManagement.labels.dob")}
-              value={studentForm.dob || ""}
-              onChange={e => setStudentForm({ ...studentForm, dob: e.target.value })}
-              error={editErrors.dob && t(`StudentsManagement.errors.${editErrors.dob}`)}
-            />
-
-            <Input
-              label={t("StudentsManagement.labels.regNumber")}
-              value={studentForm.matricule || ""}
-              onChange={e => setStudentForm({ ...studentForm, matricule: e.target.value })}
-              error={editErrors.matricule && t(`StudentsManagement.errors.${editErrors.matricule}`)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <ModernDropdown
-              value={studentForm.specialite || ""}
-              onChange={v => setStudentForm({ ...studentForm, specialite: v })}
-              options={[
-                { value: "math", label: "Math" },
-                { value: "cs", label: "Informatique" },
-                { value: "ST", label: "ST" },
-              ]}
-              placeholder={t("StudentsManagement.labels.speciality")}
-              error={editErrors.specialite && t(`StudentsManagement.errors.${editErrors.specialite}`)}
-            />
-            <ModernDropdown
-              value={studentForm.annee_etude || ""}
-              onChange={v => setStudentForm({ ...studentForm, annee_etude: v })}
-              options={[
-                { value: "L1", label: "L1" },
-                { value: "L2", label: "L2" },
-                { value: "L3", label: "L3" },
-                { value: "M1", label: "M1" },
-                { value: "M2", label: "M2" },
-              ]}
-              placeholder={t("StudentsManagement.labels.year")}
-              error={editErrors.annee_etude && t(`StudentsManagement.errors.${editErrors.annee_etude}`)}
-            />
-          </div>
-
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="secondary" onClick={onClose}>{t("StudentsManagement.buttons.cancel")}</Button>
-            <Button type="submit" variant="primary">{t("StudentsManagement.buttons.save")}</Button>
+        <form onSubmit={onSubmit} className="space-y-3">
+          {["nom", "prenom", "email", "date_naissance", "matricule", "specialite", "annee_etude"].map((field) => (
+            <div key={field}>
+              <label className="block text-sm font-medium text-gray-700">{field.replace("_", " ")}</label>
+              <input
+                type={field === "date_naissance" ? "date" : "text"}
+                value={studentForm[field] || ""}
+                onChange={(e) => setStudentForm({ ...studentForm, [field]: e.target.value })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
+              />
+            </div>
+          ))}
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="secondary" onClick={onClose}>Annuler</Button>
+            <Button type="submit" variant="primary">Enregistrer</Button>
           </div>
         </form>
       </div>
@@ -99,69 +135,74 @@ function StudentEditModal({ studentForm, setStudentForm, onClose, onSubmit, edit
   );
 }
 
+//================= MODAL CREER ===================
 // ================= MODAL AJOUT =================
-function StudentAddModal({ studentForm, setStudentForm, onClose, onSubmit, addErrors, t }) {
-  if (!studentForm) return null;
+function StudentAddModal({ onClose, studentForm, setStudentForm, onSubmit, addErrors }) {
+  if (!studentForm) return null; // sécurité
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
       <div className="bg-card rounded-xl p-6 w-full max-w-xl overflow-y-auto max-h-[90vh]">
-        <h2 className="text-xl font-bold mb-4">{t("StudentsManagement.addStudent")}</h2>
+        <h2 className="text-xl font-bold mb-4">Ajouter un étudiant</h2>
 
         <form onSubmit={onSubmit} className="space-y-4">
+          {/* Nom / Prénom */}
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label={t("StudentsManagement.labels.lastName")}
+              label="Nom"
               value={studentForm.nickname}
               onChange={e => setStudentForm({ ...studentForm, nickname: e.target.value })}
-              error={addErrors.nickname && t(`StudentsManagement.errors.${addErrors.nickname}`)}
+              error={addErrors.nickname}
             />
             <Input
-              label={t("StudentsManagement.labels.firstName")}
+              label="Prénom"
               value={studentForm.fullname}
               onChange={e => setStudentForm({ ...studentForm, fullname: e.target.value })}
-              error={addErrors.fullname && t(`StudentsManagement.errors.${addErrors.fullname}`)}
+              error={addErrors.fullname}
             />
           </div>
 
+          {/* Email */}
           <Input
-            label={t("StudentsManagement.labels.email")}
+            label="Email"
             value={studentForm.email}
             onChange={e => setStudentForm({ ...studentForm, email: e.target.value })}
-            error={addErrors.email && t(`StudentsManagement.errors.${addErrors.email}`)}
+            error={addErrors.email}
           />
 
+          {/* Date de naissance / Matricule */}
           <div className="grid grid-cols-2 gap-4">
             <Input
               type="date"
-              label={t("StudentsManagement.labels.dob")}
+              label="Date de naissance"
               value={studentForm.dob}
               onChange={e => setStudentForm({ ...studentForm, dob: e.target.value })}
-              error={addErrors.dob && t(`StudentsManagement.errors.${addErrors.dob}`)}
+              error={addErrors.dob}
             />
             <Input
-              label={t("StudentsManagement.labels.regNumber")}
+              label="Matricule"
               value={studentForm.regnumber}
               onChange={e => setStudentForm({ ...studentForm, regnumber: e.target.value })}
-              error={addErrors.regnumber && t(`StudentsManagement.errors.${addErrors.regnumber}`)}
+              error={addErrors.regnumber}
             />
           </div>
 
+          {/* Spécialité / Année */}
           <div className="grid grid-cols-2 gap-4">
             <ModernDropdown
               value={studentForm.field}
-              onChange={v => setStudentForm({ ...studentForm, field: v })}
+              onChange={(v) => setStudentForm({ ...studentForm, field: v })}
               options={[
                 { value: "math", label: "Math" },
                 { value: "cs", label: "Informatique" },
                 { value: "ST", label: "ST" },
               ]}
-              placeholder={t("StudentsManagement.labels.speciality")}
-              error={addErrors.field && t(`StudentsManagement.errors.${addErrors.field}`)}
+              placeholder="Spécialité"
+              error={addErrors.field}
             />
             <ModernDropdown
               value={studentForm.year}
-              onChange={v => setStudentForm({ ...studentForm, year: v })}
+              onChange={(v) => setStudentForm({ ...studentForm, year: v })}
               options={[
                 { value: "L1", label: "L1" },
                 { value: "L2", label: "L2" },
@@ -169,20 +210,22 @@ function StudentAddModal({ studentForm, setStudentForm, onClose, onSubmit, addEr
                 { value: "M1", label: "M1" },
                 { value: "M2", label: "M2" },
               ]}
-              placeholder={t("StudentsManagement.labels.year")}
-              error={addErrors.year && t(`StudentsManagement.errors.${addErrors.year}`)}
+              placeholder="Année"
+              error={addErrors.year}
             />
           </div>
 
+          {/* Boutons */}
           <div className="flex justify-end gap-3 mt-4">
-            <Button variant="secondary" onClick={onClose}>{t("StudentsManagement.buttons.cancel")}</Button>
-            <Button type="submit" variant="primary">{t("StudentsManagement.buttons.create")}</Button>
+            <Button variant="secondary" onClick={onClose}>Annuler</Button>
+            <Button type="submit" variant="primary">Créer</Button>
           </div>
         </form>
       </div>
     </div>
   );
 }
+
 
 
 
@@ -205,48 +248,77 @@ export default function StudentsManagement() {
 
   // ================= FETCH =================
   useEffect(() => {
-    const fetchStudents = async () => {
-      const token = localStorage.getItem("admin_token");
-      if (!token) return setError("Token JWT manquant.");
+  const fetchStudents = async () => {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      setError("Token JWT manquant.");
+      return;
+    }
 
-      setLoading(true);
-      try {
-        const res = await fetch(
-          "http://localhost:8000/api/users/students-with-progress/",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) throw new Error(`Erreur (${res.status})`);
-        const data = await res.json();
+    setLoading(true);
+    try {
+      // 1️⃣ Liste existante des étudiants
+      const res = await fetch(
+        "http://localhost:8000/api/users/students-with-progress/",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error(`Erreur (${res.status})`);
 
-        const formatted = data.map(s => ({
-          ...s,
-          courses: s.courses || [],
-          courses_count: s.courses_count || s.courses?.length || 0,
-        }));
+      const studentsData = await res.json();
 
-        setStudents(formatted);
-      } catch (err) {
-        console.error(err);
-        setError("Impossible de charger les étudiants.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStudents();
-  }, []);
+      // 2️⃣ Pour chaque étudiant → vraie progression globale (dashboard)
+      const studentsWithRealProgress = await Promise.all(
+        studentsData.map(async (s) => {
+          const progRes = await fetch(
+            `http://localhost:8000/api/dashboard/global-progress/${s.id}/`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          if (!progRes.ok) {
+            console.warn("Erreur progression pour étudiant", s.id);
+            return { ...s, progress: 0 };
+          }
+
+          const progData = await progRes.json();
+
+          return {
+            ...s,
+            progress: progData.global_progress ?? 0,
+          };
+        })
+      );
+
+      setStudents(studentsWithRealProgress);
+
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de charger les étudiants.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchStudents();
+}, []);
 
 
 
   // ================= RESIZE =================
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
+  // Handle window resize
+    useEffect(() => {
+      const resizeHandler = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", resizeHandler);
+      return () => window.removeEventListener("resize", resizeHandler);
+    }, []);
+     // Sidebar collapsed
+      useEffect(() => {
+        const handler = (e) => setSidebarCollapsed(e.detail);
+        window.addEventListener("sidebarChanged", handler);
+        return () => window.removeEventListener("sidebarChanged", handler);
+      }, []);
+    
+      const sidebarWidth = sidebarCollapsed ? 60 : 240;
+      
   // ================= SUPPRIMER =================
   const handleDelete = async (studentId) => {
     const token = localStorage.getItem("admin_token");
@@ -273,28 +345,8 @@ export default function StudentsManagement() {
   // ================= MODIFIER =================
   const handleEdit = (student) => {
     setEditStudent(student);
-
-    // Convertir la date au format YYYY-MM-DD
-    let dobFormatted = "";
-    if (student.date_naissance) {
-      const date = new Date(student.date_naissance);
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, "0"); // mois commence à 0
-      const dd = String(date.getDate()).padStart(2, "0");
-      dobFormatted = `${yyyy}-${mm}-${dd}`;
-    }
-
-    setStudentForm({
-      nom: student.nom || "",
-      prenom: student.prenom || "",
-      email: student.email || "",
-      dob: dobFormatted,   // ici la date correctement formatée
-      matricule: student.matricule || "",
-      specialite: student.specialite || "",
-      annee_etude: student.annee_etude || "",
-    });
+    setStudentForm({ ...student });
   };
-
 
   const handleUpdate = async (e) => {
     //e.preventDefault();
@@ -471,9 +523,17 @@ export default function StudentsManagement() {
   console.log({ filteredStudents });
 
   return (
-    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      <Navbar />
-      <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
+       <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+     
+      <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
@@ -494,7 +554,7 @@ export default function StudentsManagement() {
         {/* Grid */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredStudents.map((s, index) => (
-            <div key={index} className="bg-grad-2 rounded-2xl p-6 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-lg transition" onClick={() => setSelectedStudent(s)} >
+            <div key={index} className="bg-grad-2 rounded-2xl p-6 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-lg transition" onClick={() => setSelectedStudent(s.id)} >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-12 h-12 rounded-full bg-grad-1 text-white flex items-center justify-center text-lg font-semibold">{s.initials}</div>
@@ -533,20 +593,10 @@ export default function StudentsManagement() {
 
       {/* Modals */}
       <StudentDetailModal
-        open={!!selectedStudent}
-        studentId={selectedStudent?.id} // juste l'ID pour fetch les détails
+        studentId={selectedStudent}   // ici selectedStudent est l'ID
         onClose={() => setSelectedStudent(null)}
       />
-
-
-      <StudentEditModal
-        studentForm={studentForm}
-        setStudentForm={setStudentForm}
-        onClose={() => { setEditStudent(null); setStudentForm(null); }}
-        onSubmit={handleUpdate}
-        editErrors={{}} // si tu veux
-        t={t}          // <-- ajouter ça
-      />
+      <StudentEditModal studentForm={studentForm} setStudentForm={setStudentForm} onClose={() => { setEditStudent(null); setStudentForm(null); }} onSubmit={handleUpdate} />
       {addStudentModalOpen && (
         <StudentAddModal
           studentForm={newStudentForm}
@@ -565,7 +615,6 @@ export default function StudentsManagement() {
           }}
           onSubmit={handleCreateStudent}
           addErrors={addErrors}
-          t={t}          // <-- ajouter ça
         />
       )}
 
