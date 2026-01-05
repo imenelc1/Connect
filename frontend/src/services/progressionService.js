@@ -9,6 +9,10 @@ const getAuthHeader = () => {
   if (!token) throw new Error("Token not found");
   return { Authorization: `Bearer ${token}` };
 };
+const getAuthHeaderWithToken = (token) => {
+  if (!token) throw new Error("Admin token not provided");
+  return { Authorization: `Bearer ${token}` };
+};
 
 // Récupérer la progression de tous les cours
 export const getCoursesProgress = async () => {
@@ -216,6 +220,23 @@ export const getMyLastTentative = async (studentId, exerciceId) => {
 };
 
 
+// Récupérer la progression actuelle des étudiants (admin)
+export const getCurrentProgressStudentsAdmin = async (admin_token) => {
+  const res = await api.get(
+    "dashboard/current-progress/students/",
+    { headers: getAuthHeaderWithToken(admin_token) }
+  );
+  return res.data;
+};
+
+// Récupérer l’historique global des étudiants (admin)
+export const getGlobalProgressStudentsAdmin = async (admin_token) => {
+  const res = await api.get(
+    "dashboard/global-progress/students/",
+    { headers: getAuthHeaderWithToken(admin_token) }
+  );
+  return res.data;
+};
 
 
  export default {
@@ -241,7 +262,8 @@ export const getMyLastTentative = async (studentId, exerciceId) => {
   getAverageTimeProf,
   getGlobalProgressStudents,
   getCurrentProgressStudents,
-    getMyLastTentative,
-
-
+  getMyLastTentative,
+  getGlobalProgressStudentsAdmin,
+  getCurrentProgressStudentsAdmin, // <-- ajouter ici
 };
+

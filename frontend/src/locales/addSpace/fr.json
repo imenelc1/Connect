@@ -8,11 +8,24 @@
   "create": "Créer",
   "update": "Mettre à jour",
   "cancel": "Annuler",
-  "editModalTitle":"Titre de l'espace",
-  "editModalSubtitle":"Description de l'espace",
-  "subtitlePlaceholder":"Décrivez votre espace",
+   "editModalTitle": "Titre de l'espace",
+  "editModalSubtitle": "Description de l'espace",
+  "subtitlePlaceholder": "Décrivez votre espace",
+  "spaceOwner": "Propriétaire",
   "modalTitle": "Créer un nouvel espace",
-  "modalSubtitle": "Remplissez les informations pour créer un espace"
-
-  
+  "modalSubtitle": "Remplissez les informations pour créer un espace",
+  "studentsTab": "Étudiants",
+  "contentsTab": "Contenus",
+  "alreadyInSpace": "Déjà dans l'espace",
+  "addToSpace": "Ajouter à l'espace",
+  "allStudentsInSpace": "Tous les étudiants sont déjà dans cet espace",
+  "courses": "Cours",
+  "exercises": "Exercices",
+  "quiz": "Quiz",
+  "noCourses": "Aucun cours",
+  "noExercises": "Aucun exercice",
+  "noQuiz": "Aucun quiz",
+  "confirmDeleteSpace": "Voulez-vous vraiment supprimer cet espace ?",
+  "confirmRemoveStudent": "Voulez-vous vraiment retirer {{name}} de l'espace ?",
+  "addStudentsError": "Sélectionnez au moins un étudiant"
 }

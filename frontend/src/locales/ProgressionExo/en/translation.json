@@ -2,10 +2,11 @@
   "ProgressExercice": {
      "AvarageG": "Average Score" ,
     "Submission":"Submission Rate",
-    "Completed": "Completed courses",
+    "Completed": "Completed",
      "exercice":"Exercise",
      "Progression":"Progress",
     "completedexo": "Completed Exercises",
+    "completedcours":"completed courses",
     "courses": "Active Courses",
     "Weekly": "Weekly Submission Rate",
     "grade":"Score Progression Over Time",

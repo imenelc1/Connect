@@ -4,6 +4,7 @@ import { Loader } from "lucide-react";
 import Input from "../common/Input";
 import Button from "../common/Button";
 import { validateForumData, getConfirmationMessage, getCibleFromForumType } from "../../utils/formUtils";
+import { useTranslation } from "react-i18next";
 
 export default function PostCreationForm({
   forumTypeToCreate,
@@ -15,9 +16,9 @@ export default function PostCreationForm({
   setPosts,
   setError,
   triggerNotificationEvent,
-  API_URL,
-  t
+  API_URL
 }) {
+ const { t, i18n } = useTranslation("community");
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
@@ -35,12 +36,12 @@ export default function PostCreationForm({
     };
 
     if (!allowedForumTypes[role]?.includes(forumTypeToCreate)) {
-      setError("Vous ne pouvez pas créer ce type de forum");
+      setError(t("errors.cannotCreateForum"));
       return;
     }
 
     if (!token) {
-      setError("Vous devez être connecté pour créer un forum");
+      setError(t("errors.mustBeLogged"));
       return;
     }
 
@@ -73,7 +74,7 @@ export default function PostCreationForm({
       });
 
       if (!response.ok) {
-        let errorMessage = `Erreur HTTP: ${response.status}`;
+        let errorMessage = `HTTP Error: ${response.status}`;
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorData.detail || errorMessage;
@@ -84,7 +85,7 @@ export default function PostCreationForm({
       const createdForum = await response.json();
 
       if (!createdForum.id_forum) {
-        throw new Error("Réponse serveur invalide: ID manquant");
+        throw new Error(t("errors.invalidServerResponse"));
       }
 
       const newForum = {
@@ -111,64 +112,60 @@ export default function PostCreationForm({
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
     } catch (error) {
-      console.error("Erreur lors de la création du forum:", error);
-      setError(`Échec de la création: ${error.message}`);
+      console.error("Error creating forum:", error);
+      setError(t("errors.createFailed", { error: error.message }));
     } finally {
       setIsCreatingPost(false);
     }
   };
 
   return (
-    <div className="bg-grad-2  w-full shadow-lg rounded-3xl p-4 mb-8 border border-blue/20 dark:border-blue-800/30">
+    <div className="bg-grad-2 w-full shadow-lg rounded-3xl p-4 mb-8 border border-blue/20 dark:border-blue-800/30">
+      {/* Forum Title */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Titre du forum *
+          {t("postCreation.forumTitle")}
         </label>
         <Input
-          placeholder="Donnez un titre à votre discussion (max 200 caractères)"
+          placeholder={t("postCreation.forumTitlePlaceholder")}
           value={newPostTitle}
-          onChange={(e) => {
-            setNewPostTitle(e.target.value);
-            setError("");
-          }}
-          className="bg-surface dark:bg-gray-700 text-textc dark:text-white border border-blue/20 dark:border-gray-600 rounded-xl px-5 py-3 font-semibold"
+          onChange={(e) => { setNewPostTitle(e.target.value); setError(""); }}
+          className="bg-[rgb(var(--color-input-bg))] text-[rgb(var(--color-input-text))] placeholder-[rgb(var(--color-input-placeholder))] border border-[rgb(var(--color-input-border))] rounded-xl px-5 py-3 font-semibold focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
           disabled={isCreatingPost}
           maxLength={200}
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
-          {newPostTitle.length}/200 caractères
+          {t("postCreation.forumTitleCount", { count: newPostTitle.length })}
         </p>
       </div>
-      
+
+      {/* Initial Message */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Votre message initial *
+          {t("postCreation.initialMessage")}
         </label>
         <textarea
-          placeholder="Écrivez votre message... (max 2000 caractères)"
+          placeholder={t("postCreation.initialMessagePlaceholder")}
           value={newPostContent}
-          onChange={(e) => {
-            setNewPostContent(e.target.value);
-            setError("");
-          }}
-          className="w-full bg-white dark:bg-gray-700 text-textc dark:text-white border border-grayc/20 dark:border-gray-600 rounded-xl px-5 py-3 h-40 resize-none
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 transition"
+          onChange={(e) => { setNewPostContent(e.target.value); setError(""); }}
+          className="w-full bg-[rgb(var(--color-input-bg))] text-[rgb(var(--color-input-text))] placeholder-[rgb(var(--color-input-placeholder))] border border-[rgb(var(--color-input-border))] rounded-xl px-5 py-3 h-40 resize-none focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] transition"
           disabled={isCreatingPost}
           maxLength={2000}
         />
         <div className="flex justify-between mt-1">
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Ce message sera le point de départ de la discussion
+            {t("postCreation.initialMessageInfo")}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            {newPostContent.length}/2000 caractères
+            {t("postCreation.initialMessageCount", { count: newPostContent.length })}
           </p>
         </div>
       </div>
-      
+
+      {/* Publish For */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Publier pour :
+          {t("postCreation.publishFor")}
         </label>
         <div className="flex flex-col sm:flex-row gap-3">
           {role === "enseignant" && (
@@ -180,13 +177,11 @@ export default function PostCreationForm({
                 className="w-full justify-start"
               >
                 <div className="text-left">
-                  <div className="font-medium">Aux enseignants</div>
-                  <div className="text-xs mt-1 opacity-80">
-                    Visible par tous les enseignants
-                  </div>
+                  <div className="font-medium">{t("postCreation.toTeachers")}</div>
+                  <div className="text-xs mt-1 opacity-80">{t("postCreation.visibleByTeachers")}</div>
                 </div>
               </Button>
-              
+
               <Button
                 type="button"
                 variant={forumTypeToCreate === "teacher-student" ? "tabActive" : "tab"}
@@ -194,15 +189,13 @@ export default function PostCreationForm({
                 className="w-full justify-start"
               >
                 <div className="text-left">
-                  <div className="font-medium">Aux étudiants</div>
-                  <div className="text-xs mt-1 opacity-80">
-                    Visible uniquement par les étudiants
-                  </div>
+                  <div className="font-medium">{t("postCreation.toStudents")}</div>
+                  <div className="text-xs mt-1 opacity-80">{t("postCreation.visibleOnlyStudents")}</div>
                 </div>
               </Button>
             </>
           )}
-          
+
           {role === "etudiant" && (
             <>
               <Button
@@ -212,13 +205,11 @@ export default function PostCreationForm({
                 className="w-full justify-start"
               >
                 <div className="text-left">
-                  <div className="font-medium">Aux étudiants</div>
-                  <div className="text-xs mt-1 opacity-80">
-                    Visible par tous les étudiants
-                  </div>
+                  <div className="font-medium">{t("postCreation.toStudents")}</div>
+                  <div className="text-xs mt-1 opacity-80">{t("postCreation.visibleByStudents")}</div>
                 </div>
               </Button>
-              
+
               <Button
                 type="button"
                 variant={forumTypeToCreate === "student-teacher" ? "tabActive" : "tab"}
@@ -226,28 +217,27 @@ export default function PostCreationForm({
                 className="w-full justify-start"
               >
                 <div className="text-left">
-                  <div className="font-medium">Aux enseignants</div>
-                  <div className="text-xs mt-1 opacity-80">
-                    Visible uniquement par les enseignants
-                  </div>
+                  <div className="font-medium">{t("postCreation.toTeachers")}</div>
+                  <div className="text-xs mt-1 opacity-80">{t("postCreation.visibleOnlyTeachers")}</div>
                 </div>
               </Button>
             </>
           )}
         </div>
       </div>
-      
+
+      {/* Footer */}
       <div className="flex justify-between items-center mt-4">
         <div className="text-sm text-grayc dark:text-gray-400">
-          Posté par <span className="font-semibold">{initials}</span>
+          {t("postCreation.postedBy")} <span className="font-semibold">{initials}</span>
           <span className="ml-2 px-2 py-1 text-xs bg-blue/10 dark:bg-blue-900/30 text-blue dark:text-blue-300 rounded">
-            {role === "enseignant" ? "Enseignant" : "Étudiant"}
+            {role === "enseignant" ? t("postCreation.roleTeacher") : t("postCreation.roleStudent")}
           </span>
         </div>
-        
+
         <Button
           variant="send"
-          text={isCreatingPost ? "Publication..." : t("community.send")}
+          text={isCreatingPost ? t("postCreation.posting") : t("postCreation.send")}
           className="!w-auto px-6 py-2"
           onClick={handleCreatePost}
           disabled={isCreatingPost || !newPostTitle.trim() || !newPostContent.trim()}

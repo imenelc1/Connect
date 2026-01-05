@@ -69,6 +69,27 @@
   "studentTeacher": "This forum will be visible and answerable by teachers. Other students will not have access. Continue?",
   "studentStudent": "This forum will be reserved for students only. Teachers will not have access. Continue?"
   },
+   "postCreation": {
+    "forumTitle": "Forum Title *",
+    "forumTitlePlaceholder": "Give a title to your discussion (max 200 characters)",
+    "forumTitleCount": "{{count}}/200 characters",
+    "initialMessage": "Your initial message *",
+    "initialMessagePlaceholder": "Write your message... (max 2000 characters)",
+    "initialMessageInfo": "This message will start the discussion",
+    "initialMessageCount": "{{count}}/2000 characters",
+    "publishFor": "Publish for:",
+    "toTeachers": "To Teachers",
+    "toStudents": "To Students",
+    "visibleByTeachers": "Visible by all teachers",
+    "visibleByStudents": "Visible by all students",
+    "visibleOnlyStudents": "Visible only to students",
+    "visibleOnlyTeachers": "Visible only to teachers",
+    "postedBy": "Posted by",
+    "roleTeacher": "Teacher",
+    "roleStudent": "Student",
+    "posting": "Posting...",
+    "send": "Send"
+  },
   "notifications": {
     "posting": "Posting...",
     "deleting": "Deleting...",
@@ -95,7 +116,11 @@
     "loginLike": "You must be logged in to like",
      "missingToken": "Missing token - Please log in again",
      "loadForums": "Error loading forums. Please check your connection.",
-       "loadForumsError": "Error loading forums:"
+       "loadForumsError": "Error loading forums:",
+        "cannotCreateForum": "You cannot create this type of forum",
+    "mustBeLogged": "You must be logged in to create a forum",
+    "invalidServerResponse": "Invalid server response: missing ID",
+    "createFailed": "Failed to create forum: {{error}}"
 
   }
 }

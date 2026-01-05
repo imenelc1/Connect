@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import Button from "../components/common/Button";
 import ProgressBar from "../components/ui/ProgressBar";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import { Trash2, SquarePen, UserPlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ContentSearchBar from "../components/common/ContentSearchBar";
@@ -16,7 +16,7 @@ function StudentDetailModal({ studentId, onClose }) {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+ 
   useEffect(() => {
     if (!studentId) return;
 
@@ -281,15 +281,21 @@ export default function StudentsManagement() {
 
 
   // ================= RESIZE =================
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
+  // Handle window resize
+    useEffect(() => {
+      const resizeHandler = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", resizeHandler);
+      return () => window.removeEventListener("resize", resizeHandler);
+    }, []);
+     // Sidebar collapsed
+      useEffect(() => {
+        const handler = (e) => setSidebarCollapsed(e.detail);
+        window.addEventListener("sidebarChanged", handler);
+        return () => window.removeEventListener("sidebarChanged", handler);
+      }, []);
+    
+      const sidebarWidth = sidebarCollapsed ? 60 : 240;
+      
   // ================= SUPPRIMER =================
   const handleDelete = async (studentId) => {
     const token = localStorage.getItem("admin_token");
@@ -494,9 +500,17 @@ export default function StudentsManagement() {
   console.log({ filteredStudents });
 
   return (
-    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      <Navbar />
-      <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
+       <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+     
+      <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>

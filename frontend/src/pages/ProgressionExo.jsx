@@ -147,9 +147,9 @@ export default function ProgressExercice() {
                 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
               `}>
         {/* Profile Header */}
-        <div className="bg-white dark:bg-grad-1 rounded-3xl shadow-md p-6 sm:p-8 mb-6 sm:mb-8 w-full max-w-full lg:max-w-5xl mx-auto">
+        <div className="bg-white dark:bg-primary rounded-3xl shadow-md p-6 sm:p-8 mb-6 sm:mb-8 w-full max-w-full lg:max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center sm:gap-6">
-            <UserCircle initials={initials} className="w-14 h-14" />
+            <UserCircle initials={initials} clickable={false}  className="w-14 h-14" />
             <div className="mt-4 sm:mt-0 text-center sm:text-left">
               <h2 className="text-xl sm:text-2xl font-semibold text-black">
                 {nom} {prenom}
@@ -176,7 +176,7 @@ export default function ProgressExercice() {
               <p className="text-gray">{t("ProgressExercice.Submission")}</p>
             </div>
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-pink">{completedRatio}</p>
+              <p className="text-xl sm:text-2xl font-bold text-blue">{completedRatio}</p>
               <p className="text-gray">{t("ProgressExercice.completedexo")}</p>
             </div>
           </div>

@@ -17,21 +17,21 @@ export default function StudentExercice() {
   const [feedbacksMap, setFeedbacksMap] = useState({});
   const [evaluatedCount, setEvaluatedCount] = useState(0);
   // / États de l'interface
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    // Gestion de la responsivité
-      useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-    
-        window.addEventListener("resize", handleResize);
-        window.addEventListener("sidebarChanged", handleSidebarChange);
-    
-        return () => {
-          window.removeEventListener("resize", handleResize);
-          window.removeEventListener("sidebarChanged", handleSidebarChange);
-        };
-      }, []); 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Gestion de la responsivité
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
 
   const token = localStorage.getItem("token");
   const BACKEND_URL = "http://127.0.0.1:8000";
@@ -139,25 +139,25 @@ export default function StudentExercice() {
       ? Math.round((submittedCount / totalExercises) * 100)
       : 0;
   const completedRatio = `${submittedCount}/${totalExercises}`;
-  
-    
+
+
 
   return (
-     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-                                   {/* Sidebar */}
-                                   <div>
-                                     <Navbar />
-                                   </div>
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
       <div className={`
             flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
             ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
           `}>
         {/* Header étudiant */}
-        <div className="mb-6 sm:mb-8 bg-white dark:bg-grad-1 rounded-3xl shadow-md p-6 w-full max-w-full lg:max-w-5xl mx-auto">
+        <div className="mb-6 sm:mb-8 bg-white dark:bg-primary rounded-3xl shadow-md p-6 w-full max-w-full lg:max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center sm:gap-6">
-            <UserCircle initials={initials} className="w-14 h-14" />
+            <UserCircle initials={initials} clickable={false} className="w-14 h-14" />
             <div className="mt-4 sm:mt-0 text-center sm:text-left">
-              <h2 className="text-xl sm:text-2xl font-semibold text-black">
+              <h2 className="text-xl sm:text-2xl font-semibold text-text">
                 {nom} {prenom}
               </h2>
               <p className="text-gray text-sm sm:text-base">{adresse_email}</p>
@@ -186,7 +186,7 @@ export default function StudentExercice() {
             </div>
 
             <div>
-              <p className="text-xl sm:text-2xl font-bold text-primary">
+              <p className="text-xl sm:text-2xl font-bold text-blue">
                 {evaluatedCount}
               </p>
               <p className="text-gray">évaluées</p>
@@ -222,13 +222,13 @@ export default function StudentExercice() {
 
             if (tentatives.length === 0) {
               return (
-                <div
-                  key={ex.id_exercice}
-                  className="bg-white rounded-3xl shadow-md p-6 border-2 border-gray"
-                >
-                  <h3 className="text-lg font-bold">{ex.nom_exercice}</h3>
-                  <p className="text-gray-500 mt-2">Aucune tentative soumise</p>
+                <div className="bg-[rgb(var(--color-card))] dark:bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text))] rounded-3xl shadow-md p-6 border border-[rgb(var(--color-input-border))]">
+                  <h3 className="text-lg font-bold text-[rgb(var(--color-text))]">{ex.nom_exercice}</h3>
+                  <p className="text-[rgb(var(--color-gray))] mt-2">
+                    Aucune tentative soumise
+                  </p>
                 </div>
+
               );
             }
 

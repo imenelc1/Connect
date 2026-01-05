@@ -18,12 +18,17 @@ export default function Courses() {
   const { id: coursId } = useParams();
   const location = useLocation();
 
+  //Verifer pour l'ia 
+  const [courseAiEnabled, setCourseAiEnabled] = useState(true);
+
   const storedUser = localStorage.getItem("user");
   const userData =
     storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null;
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
+  const userId = userData?.user_id || userData?.id_utilisateur || userData?.id || null;
+  const userRole = userData?.role || "";
 
   const [sections, setSections] = useState([]);
   const [title, setTitle] = useState("");
@@ -150,6 +155,41 @@ export default function Courses() {
     );
   };
 
+useEffect(() => {
+  if (!coursId  || !userId) return;
+  if(userRole !== "etudiant") return;
+  const checkAIStatusForCourse = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/spaces/cours/${coursId}/student/${userId}/check/`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Erreur vérification IA pour le cours");
+
+      const data = await res.json();
+
+      // si un espace commun existe et que ai_enabled === false => IA désactivée
+      if (data.same_space) {
+        const disabled = data.spaces.some(space => space.ai_enabled === false);
+        setCourseAiEnabled(!disabled);
+      } else {
+        setCourseAiEnabled(true);
+      }
+    } catch (err) {
+      console.error("Erreur vérification IA pour le cours :", err);
+      setCourseAiEnabled(true); // fallback : IA activée
+    }
+  };
+
+  checkAIStatusForCourse();
+}, [coursId, userId]);
+console.log({courseAiEnabled});
+
   return (
     <CourseContext.Provider
       value={{
@@ -169,19 +209,23 @@ export default function Courses() {
               <ContentSearchBar />
             </div>
             <HeadMascotte
-              courseData={
-                sections.length > 0
-                  ? {
-                    id: coursId,
-                    title,
-                    description,
-                    level,
-                    duration,
-                    sections, // HeadMascotte s'occupe de créer course.context
-                  }
-                  : null
-              }
-            />
+  courseData={
+    sections.length > 0
+      ? {
+          id: coursId,
+          title,
+          description,
+          level,
+          duration,
+          sections,
+        }
+      : null
+  }
+  aiEnabled={courseAiEnabled} // <-- nouveau prop
+/>
+
+
+
 
             <UserCircle
               initials={initials}

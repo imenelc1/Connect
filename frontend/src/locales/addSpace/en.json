@@ -11,6 +11,21 @@
   "editModalTitle": "Space Title",
   "editModalSubtitle": "Space Description",
   "subtitlePlaceholder": "Describe your space",
+  "spaceOwner": "Owner",
   "modalTitle": "Create New Space",
-  "modalSubtitle": "Fill in the information to create a space"
+  "modalSubtitle": "Fill in the information to create a space",
+  "studentsTab": "Students",
+  "contentsTab": "Contents",
+  "alreadyInSpace": "Already in the space",
+  "addToSpace": "Add to space",
+  "allStudentsInSpace": "All students are already in this space",
+  "courses": "Courses",
+  "exercises": "Exercises",
+  "quiz": "Quiz",
+  "noCourses": "No courses",
+  "noExercises": "No exercises",
+  "noQuiz": "No quiz",
+  "confirmDeleteSpace": "Do you really want to delete this space?",
+  "confirmRemoveStudent": "Do you really want to remove {{name}} from the space?",
+  "addStudentsError": "Select at least one student"
 }
