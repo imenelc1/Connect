@@ -8,21 +8,15 @@ export const ThemeProvider = ({ children }) => {
     setDarkMode(prev => !prev);
   };
 
-  // **Ici on ajoute la classe `dark` sur <body>**
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("dark");
-    }
-  }, [darkMode]);
-
+  // Charger la valeur stockée au démarrage
   useEffect(() => {
     const saved = localStorage.getItem("darkMode");
     if (saved !== null) setDarkMode(saved === "true");
   }, []);
 
+  // Appliquer la classe sur <html> + sauvegarder
   useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
     localStorage.setItem("darkMode", darkMode);
   }, [darkMode]);
 

@@ -208,11 +208,50 @@ class IsAdminJWT(BasePermission):
 # User Profile
 # -----------------------------
 
-from .serializers import ProfileSerializer, AdminProfileSerializer
-from .models import Administrateur, Utilisateur
+from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
+class UserProfileView(GenericAPIView):
+    permission_classes = [IsAuthenticatedJWT]
 
-class UserProfileView(generics.RetrieveUpdateAPIView):
+    def get_serializer_class(self):
+        user = self.request.user
+
+        if isinstance(user, Administrateur):
+            return AdminProfileSerializer
+        
+        return ProfileSerializer
+
+    def get(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+
+        # Champs Utilisateur
+        user.nom = data.get("nom", user.nom)
+        user.prenom = data.get("prenom", user.prenom)
+        user.adresse_email = data.get("adresse_email", user.adresse_email)
+        user.date_naissance = data.get("date_naissance", user.date_naissance)
+        user.matricule = data.get("matricule", user.matricule)
+        user.save()
+
+        # Champs Etudiant
+        if hasattr(user, "etudiant"):
+            user.etudiant.specialite = data.get("specialite", user.etudiant.specialite)
+            user.etudiant.annee_etude = data.get("annee_etude", user.etudiant.annee_etude)
+            user.etudiant.save()
+
+        # Champs Enseignant
+        if hasattr(user, "enseignant"):
+            user.enseignant.grade = data.get("grade", user.enseignant.grade)
+            user.enseignant.save()
+
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=200)
+
     permission_classes = [IsAuthenticatedJWT]
 
     def get_object(self):
