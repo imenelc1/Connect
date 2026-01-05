@@ -36,7 +36,7 @@ export default function AllExercisesPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
+  const [searchTerm, setSearchTerm] = useState("");
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
@@ -69,6 +69,43 @@ export default function AllExercisesPage() {
         setExercises([]);
       });
   }, [currentUserId]);
+
+
+
+ //Recherche exercice
+  
+  useEffect(() => {
+  const controller = new AbortController();
+
+  fetch(`http://localhost:8000/api/exercices/exo?search=${searchTerm}`, {
+    signal: controller.signal
+  })
+    .then(res => res.json())
+    .then(data => {
+      const formatted = data.map(c => ({
+        id: c.id_exercice,
+        title: c.titre_exo,
+        level: c.niveau_exercice_label,
+        categorie: c.categorie,
+        description: c.enonce,
+        author: c.utilisateur_name,
+        coursId: c.cours,
+        initials: c.utilisateur_name
+          .split(" ")
+          .map(n => n[0])
+          .join("")
+          .toUpperCase(),
+        isMine: c.utilisateur === currentUserId
+      }));
+      setExercises(formatted);
+    })
+    .catch(err => {
+      if (err.name !== "AbortError") console.error(err);
+    });
+
+  return () => controller.abort();
+}, [searchTerm]);
+
 
   const handleDeleteExo = async (exoId) => {
     if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
@@ -143,7 +180,10 @@ export default function AllExercisesPage() {
      
      
 
-        <ContentSearchBar />
+        <ContentSearchBar
+         value={searchTerm}
+         onChange={(e) => setSearchTerm(e.target.value)}
+       />
 
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters

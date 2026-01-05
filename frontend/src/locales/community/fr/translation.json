@@ -28,6 +28,27 @@
   "student-teacher-short": "enseignants",
    "defaultTarget": "étudiants"
   },
+   "postCreation": {
+    "forumTitle": "Titre du forum *",
+    "forumTitlePlaceholder": "Donnez un titre à votre discussion (max 200 caractères)",
+    "forumTitleCount": "{{count}}/200 caractères",
+    "initialMessage": "Votre message initial *",
+    "initialMessagePlaceholder": "Écrivez votre message... (max 2000 caractères)",
+    "initialMessageInfo": "Ce message sera le point de départ de la discussion",
+    "initialMessageCount": "{{count}}/2000 caractères",
+    "publishFor": "Publier pour :",
+    "toTeachers": "Aux enseignants",
+    "toStudents": "Aux étudiants",
+    "visibleByTeachers": "Visible par tous les enseignants",
+    "visibleByStudents": "Visible par tous les étudiants",
+    "visibleOnlyStudents": "Visible uniquement par les étudiants",
+    "visibleOnlyTeachers": "Visible uniquement par les enseignants",
+    "postedBy": "Posté par",
+    "roleTeacher": "Enseignant",
+    "roleStudent": "Étudiant",
+    "posting": "Publication en cours...",
+    "send": "Envoyer"
+  },
   "actions": {
     "like": "Aimer",
     "likes": "Likes",
@@ -88,7 +109,11 @@
     "missingToken": "Token manquant - Veuillez vous reconnecter",
       "loadForums": "Impossible de charger les forums. Vérifiez votre connexion.",
       "loadForumsError": "Erreur chargement forums:",
-"selectPlaceholder": "Sélectionner un type"
+"selectPlaceholder": "Sélectionner un type",
+ "cannotCreateForum": "Vous ne pouvez pas créer ce type de forum",
+    "mustBeLogged": "Vous devez être connecté pour créer un forum",
+    "invalidServerResponse": "Réponse serveur invalide: ID manquant",
+    "createFailed": "Échec de la création: {{error}}"
 
 
   }

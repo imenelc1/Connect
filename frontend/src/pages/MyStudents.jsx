@@ -255,6 +255,7 @@ useEffect(() => {
                   <div className="flex items-center gap-4">
                     <UserCircle
                       initials={(st.prenom[0] || "") + (st.nom[0] || "")}
+                       clickable={false}
                       className="w-12 h-12"
                     />
                     <h2 className="font-semibold text-base sm:text-lg text-textc">
@@ -275,7 +276,7 @@ useEffect(() => {
                   {st.spaces.map((spName, i) => (
                     <span
                       key={i}
-                      className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2"
+                      className="px-3 py-1 text-xs rounded-full bg-grad-3 text-textc flex items-center gap-2"
                     >
                       {spName}
                       <button

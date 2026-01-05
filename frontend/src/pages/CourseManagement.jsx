@@ -209,14 +209,7 @@ export default function CoursesManagement() {
         <Navbar />
         <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
         <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
+       
       </div>
       </div>
 

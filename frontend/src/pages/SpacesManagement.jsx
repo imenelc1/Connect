@@ -298,8 +298,11 @@ const handleRemoveStudentFromSpace = async (student) => {
   ];
 
   return (
-    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      <Navbar />
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                      {/* Sidebar */}
+                      <div>
+                        <Navbar />
+                      </div>
       <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
