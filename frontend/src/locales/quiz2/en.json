@@ -7,5 +7,7 @@
   "question": "Question",
   "point": "point",
   "prev": "Previous",
-  "next": "Next"
+  "next": "Next",
+  "selectAnswer": "Please select an answer"
+
 }

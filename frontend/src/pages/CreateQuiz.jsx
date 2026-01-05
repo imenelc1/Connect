@@ -18,6 +18,7 @@ import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
 import Topbar from "../components/common/TopBar";
 import { FaClock, FaMedal, FaStar } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 
 
@@ -129,9 +130,11 @@ export default function CreateQuiz() {
   const handleSaveStep1 = async () => {
     const token = localStorage.getItem("token");
     const currentUserId = getCurrentUserId();
+    
 
     if (!token || !currentUserId) {
-      alert("Utilisateur non connecté");
+      toast.error("Utilisateur non connecté");
+
       return null;
     }
 
@@ -142,7 +145,8 @@ export default function CreateQuiz() {
       !quizData.level ||
       !quizData.courseId
     ) {
-      alert("Veuillez remplir tous les champs obligatoires");
+      toast.warning("Veuillez remplir tous les champs obligatoires");
+
       return null;
     }
 
@@ -176,7 +180,7 @@ export default function CreateQuiz() {
         "❌ Erreur création exercice :",
         error.response?.data || error.message
       );
-      alert("Erreur lors de la sauvegarde de l'exercice");
+      toast.error("Erreur lors de la sauvegarde de l'exercice");
       return null;
     }
   };
@@ -219,10 +223,11 @@ export default function CreateQuiz() {
         "❌ Erreur création quiz :",
         error.response?.data || error.message
       );
-      alert("Erreur lors de la création du quiz");
+      toast.error("Erreur lors de la création du quiz");
       return null;
     }
   };
+  
   /* step 3 les questions et option*/
   const handleSaveStep3 = async (idQuiz) => {
     const token = localStorage.getItem("token");
@@ -261,12 +266,12 @@ export default function CreateQuiz() {
       }
 
       console.log("✅ Toutes les questions et options créées !");
-      alert("Quiz complet créé avec succès !");
+      toast.success("Quiz complet créé avec succès !");
       return true;
 
     } catch (error) {
       console.error("❌ Erreur création questions/options :", error.response?.data || error.message);
-      alert("Erreur lors de la création des questions");
+      toast.error("Erreur lors de la création des questions");
       return false;
     }
   };
@@ -385,7 +390,6 @@ export default function CreateQuiz() {
 
                 {/* ACTION BUTTONS */}
                 <div className="mt-6 flex flex-col sm:flex-row gap-4 sm:justify-between">
-                  <SaveDraftButton onClick={handleSaveDraft} />
                   <PublishQuizButton onClick={() => setActiveStep(2)} />
                 </div>
 
@@ -411,33 +415,33 @@ export default function CreateQuiz() {
 
               {/* OVERVIEW CARDS */}
               <div className="grid grid-cols-2 md:flex md:flex-wrap justify-center gap-3 md:gap-4 mb-6">
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-blue text-white text-xs md:text-sm">
-    <FaClock className="w-3 h-3 md:w-4 md:h-4" /> 
-    <span>{quizData.durationEnabled ? quizData.duration : "-"} {t("minutes")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-blue text-white text-xs md:text-sm">
+                  <FaClock className="w-3 h-3 md:w-4 md:h-4" />
+                  <span>{quizData.durationEnabled ? quizData.duration : "-"} {t("minutes")}</span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-purple text-white text-xs md:text-sm">
-    <FaMedal className="w-3 h-3 md:w-4 md:h-4" /> 
-    <span>{quizData.questions.reduce((sum, q) => sum + (q.points || 1), 0)} {t("points")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-purple text-white text-xs md:text-sm">
+                  <FaMedal className="w-3 h-3 md:w-4 md:h-4" />
+                  <span>{quizData.questions.reduce((sum, q) => sum + (q.points || 1), 0)} {t("points")}</span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-pink text-white text-xs md:text-sm">
-    <FaStar className="w-3 h-3 md:w-4 md:h-4" /> 
-    <span>{quizData.level || t("level")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-pink text-white text-xs md:text-sm">
+                  <FaStar className="w-3 h-3 md:w-4 md:h-4" />
+                  <span>{quizData.level || t("level")}</span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-green text-white text-xs md:text-sm">
-    <span>{quizData.maxAttempts || t("unlimited")} {t("maxAttempts")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-green text-white text-xs md:text-sm">
+                  <span>{quizData.maxAttempts || t("unlimited")} {t("maxAttempts")}</span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
-    <span>{quizData.passingScore || 0} {t("scoreMinimum")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
+                  <span>{quizData.passingScore || 0} {t("scoreMinimum")}</span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
-    <span>{quizData.delais_entre_tentative || 0} {t("delais_entre_tentative")}</span>
-  </div>
-</div> 
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
+                  <span>{quizData.delais_entre_tentative || 0} {t("delais_entre_tentative")}</span>
+                </div>
+              </div>
 
               {/* QUESTIONS PREVIEW */}
               <div className="flex flex-col gap-4">

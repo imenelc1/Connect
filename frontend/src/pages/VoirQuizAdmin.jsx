@@ -5,11 +5,12 @@ import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 import Button from "../components/common/Button";
 import { FaTrophy, FaRedoAlt, FaHome } from "react-icons/fa";
-
+import Navbar from "../components/common/Navbar";
 
 export default function VoirQuizAdmin() {
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("createQuiz");
@@ -66,85 +67,128 @@ export default function VoirQuizAdmin() {
   );
 
   return (
-    <div className="min-h-screen px-4 md:px-8 py-6 bg-[rgb(var(--color-bg))]">
-
-      {/* ACTIONS */}
-      <div className="absolute top-4 right-4 flex gap-3">
-        <div
-          onClick={toggleLanguage}
-          className="cursor-pointer p-2 rounded-md bg-white/20 hover:bg-white/30"
-        >
-          <Globe size={18} />
-        </div>
-
-        
-      </div>
-
-      {/* TITRE */}
-      <h1 className="text-2xl md:text-3xl font-bold text-center mt-10 text-muted">
-        {quiz.exercice.titre}
-      </h1>
-
-      {/* ENONCÉ */}
-      <p className="text-grayc mt-4 max-w-3xl mx-auto">
-        {quiz.exercice.enonce}
-      </p>
-
-      {/* INFOS */}
-      <div className="flex justify-center gap-6 mt-8 text-sm">
-
-        <div className="flex items-center gap-2 bg-blue text-white px-6 py-2 rounded-md">
-  <FaClock />
-  {quiz.activerDuration
-    ? `${quiz.durationMinutes} ${t("minutes")}`
-    : t("nonLimited")}
-</div>
-
-        <div className="flex items-center gap-2 bg-purple text-white px-6 py-2 rounded-md">
-          <FaMedal /> {totalPoints} {t("points")}
-        </div>
-
-        <div className="flex items-center gap-2 bg-pink text-white px-6 py-2 rounded-md">
-          <FaStar /> {quiz.exercice.niveau}
-        </div>
-
-      </div>
-
-      {/* QUESTIONS */}
-      <div className="mt-10 max-w-4xl mx-auto flex flex-col gap-4">
-
-        {quiz.questions.map((q, index) => (
-          <div
-            key={q.id}
-            className="bg-white rounded-xl shadow p-4"
-          >
-            <h3 className="font-semibold mb-2">
-              {index + 1}. {q.texte}
-            </h3>
-
-            <p className="text-xs text-grayc mb-3">
-              {q.score} {t("points")}
-            </p>
-
-            <ul className="flex flex-col gap-2">
-              {q.options.map((opt) => (
-                <li
-                  key={opt.id}
-                  className="border rounded-md px-3 py-2 bg-gray-50"
-                >
-                  {opt.texte}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-<Button
-            text={<span className="flex items-center gap-2"><FaHome /> {t("backMenu")}</span>}
-            variant="quizBack"
-            onClick={() => navigate("/QuizManagement")}
-          />
-      </div>
-      
-    </div>
-  );
-}
+     <div className="flex min-h-screen bg-surface">
+       <Navbar />
+ 
+       <main
+         className={`
+           flex-1 transition-all duration-300
+           px-4 md:px-10 py-8
+           ${sidebarCollapsed ? "md:ml-16" : "md:ml-56"}
+         `}
+       >
+         {/* ===== HERO ===== */}
+         <section className="max-w-5xl mx-auto text-center mb-10 animate-slide-in">
+           <h1 className="
+             text-4xl md:text-5xl font-extrabold
+             bg-grad-all bg-clip-text text-transparent
+           ">
+             {quiz.exercice.titre}
+           </h1>
+ 
+           <p className="mt-4 text-gray max-w-3xl mx-auto leading-relaxed">
+             {quiz.exercice.enonce}
+           </p>
+         </section>
+ 
+         {/* ===== STATS ===== */}
+         <section className="
+           max-w-4xl mx-auto
+           grid grid-cols-1 sm:grid-cols-3 gap-4
+           mb-12
+         ">
+           <StatCard
+             icon={<FaClock />}
+             label={quiz.activerDuration ? `${quiz.durationMinutes} ${t("minutes")}` : t("nonLimited")}
+             gradient="bg-grad-2"
+           />
+           <StatCard
+             icon={<FaMedal />}
+             label={`${totalPoints} ${t("points")}`}
+             gradient="bg-grad-3"
+           />
+           <StatCard
+             icon={<FaStar />}
+             label={quiz.exercice.niveau}
+             gradient="bg-grad-4"
+           />
+         </section>
+ 
+         {/* ===== QUESTIONS ===== */}
+         <section className="max-w-5xl mx-auto space-y-4">
+           {quiz.questions.map((q, index) => (
+             <div
+               key={q.id}
+               className="
+                 bg-card rounded-2xl p-5
+                 shadow-card hover:shadow-strong
+                 transition
+               "
+             >
+               <div className="flex justify-between items-center mb-3">
+                 <h3 className="font-semibold text-lg">
+                   {index + 1}. {q.texte}
+                 </h3>
+                 <span className="
+                   text-sm px-3 py-1 rounded-full
+                   bg-primary/10 text-primary font-medium
+                 ">
+                   {q.score} pts
+                 </span>
+               </div>
+ 
+               <ul className="grid gap-2">
+                 {q.options.map((opt) => (
+                   <li
+                     key={opt.id}
+                     className="
+                       rounded-xl px-4 py-2
+                       border border-gray-light
+                       bg-grad-2
+                       hover:bg-grad-3
+                       transition
+                     "
+                   >
+                     {opt.texte}
+                   </li>
+                 ))}
+               </ul>
+             </div>
+           ))}
+         </section>
+ 
+         {/* ===== ACTION ===== */}
+         <div className="flex justify-center mt-12">
+           <Button
+             variant="quizBack"
+             text={
+               <span className="flex items-center gap-2">
+                 <FaHome /> {t("backMenu")}
+               </span>
+             }
+             onClick={() => navigate("/all-quizzes")}
+           />
+         </div>
+       </main>
+     </div>
+   );
+ }
+ 
+ /* ===== SMALL COMPONENT ===== */
+ function StatCard({ icon, label, gradient }) {
+   return (
+     <div
+       className={`
+         ${gradient}
+         rounded-2xl p-4
+         shadow-card
+         flex flex-col items-center justify-center
+         gap-2
+       `}
+     >
+       <div className="text-primary text-xl">{icon}</div>
+       <span className="font-semibold text-sm text-center">{label}</span>
+     </div>
+   );
+ }
+ 

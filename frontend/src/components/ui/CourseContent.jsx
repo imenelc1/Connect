@@ -353,7 +353,10 @@ useEffect(() => {
         </div>
 
         <textarea
-          className="w-full h-36 sm:h-48 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
+          className="w-full h-36 sm:h-48 border  rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none bg-[rgb(var(--color-input-bg))]
+        text-[rgb(var(--color-input-text))]
+        placeholder-[rgb(var(--color-input-placeholder))]
+        border border-[rgb(var(--color-input-border))] text-sm sm:text-base"
           placeholder={t("feedbackPlaceholder")}
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
