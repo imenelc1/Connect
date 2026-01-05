@@ -194,13 +194,12 @@ export default function DashboardAdmin() {
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <div>
+        <div className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
             <p className="text-gray">{t("subtitle")}</p>
           </div>
-          
-          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
+           <div className="flex items-center gap-3 ml-auto">
             <NotificationBell />
             <UserCircle
               initials={initials}
@@ -211,6 +210,9 @@ export default function DashboardAdmin() {
               }}
             />
           </div>
+         
+          
+         
         </div>
 
         {/* STATS WITH PROTOTYPE COLORS */}

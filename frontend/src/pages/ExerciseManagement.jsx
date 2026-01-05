@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Search, SquarePen, Trash2, Code } from "lucide-react";
@@ -255,10 +255,17 @@ const openView = (exercise) => {
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filtered.map((item) => (
-            <div
-              key={item.id_exercice}
-              className={`${difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
-            >
+         <div
+  key={item.id_exercice}
+  className={`
+    ${difficultyBgMap[item.niveau_exo] || "bg-white"}
+    rounded-2xl p-6 shadow-sm hover:shadow-md transition
+    flex flex-col
+    overflow-hidden
+  `}
+>
+
+
               <div className="flex justify-between items-center mb-4">
                 <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
                   <Code size={24} className="text-muted" />
@@ -280,13 +287,13 @@ const openView = (exercise) => {
 
               </div>
 
-              <h3 className="font-semibold text-lg mb-2">
+              <h3 className="font-semibold text-lg mb-2 whitespace-normal break-words ">
                 {item.titre_exo}
               </h3>
-              <p className="text-grayc text-sm mb-4">
+              <p className="text-grayc text-sm mb-4 whitespace-normal break-words">
                 {item.utilisateur_name}
               </p>
-              <p className="text-grayc text-sm mb-4">
+              <p className="text-grayc text-sm mb-4 whitespace-normal break-words">
                 {item.categorie}
               </p>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import { Folder, SquarePen, Trash2, Plus } from "lucide-react";
 import Button from "../components/common/Button";
 import AddModel from "../components/common/AddModel";
@@ -289,7 +289,7 @@ const handleRemoveStudentFromSpace = async (student) => {
     {
       label: "Propriétaire",
       element: (
-        <select value={newSpace.utilisateur} onChange={(e) => setNewSpace({ ...newSpace, utilisateur: e.target.value })} className="w-full p-2 border border-gray-300 rounded-lg">
+        <select value={newSpace.utilisateur} onChange={(e) => setNewSpace({ ...newSpace, utilisateur: e.target.value })} className="w-full p-2  rounded-lg bg-surface">
           <option value="">-- Sélectionner un enseignant --</option>
           {teachers.map((t) => <option key={t.id_utilisateur} value={t.id_utilisateur}>{t.prenom} {t.nom}</option>)}
         </select>
@@ -437,10 +437,11 @@ const handleRemoveStudentFromSpace = async (student) => {
       id={`student-${student.id_utilisateur}`}
       checked={selectedStudents.includes(student.id_utilisateur)}
       onChange={() => toggleStudent(student.id_utilisateur)}
+      
     />
     <label
       htmlFor={`student-${student.id_utilisateur}`}
-      className="truncate font-medium text-base"
+      className="truncate font-medium text-base "
     >
       {student.nom} {student.prenom} ({student.adresse_email || student.email})
     </label>

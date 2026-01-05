@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext, useMemo, useCallback } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Input from "../components/common/Input";
 import {
   createForum,
   updateForum,
@@ -472,7 +473,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-2xl p-6 w-full max-w-md border border-gray-800/20">
+      <div className="bg-card rounded-2xl p-6 w-full max-w-md border border-gray-800/20">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-muted">
             {editingForum ? "Modifier le forum" : t("ForumManagement.createF")}
@@ -490,7 +491,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
             <label className="block text-sm font-medium text-gray mb-2">
               Titre du forum *
             </label>
-            <input
+            <Input
               type="text"
               required
               value={formData.titre_forum}
@@ -512,7 +513,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
               onChange={(e) =>
                 setFormData({ ...formData, contenu_forum: e.target.value })
               }
-              className="w-full p-3 border border-gray-800/20 rounded-lg bg-surface text-muted min-h-[120px] focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full p-3 rounded-lg bg-surface text-muted min-h-[120px] focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Décrivez le sujet de ce forum..."
             />
           </div>
@@ -526,7 +527,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
                 type="button"
                 onClick={() => setFormData({ ...formData, cible: "etudiants" })}
                 className={`flex-1 p-4 border rounded-xl flex flex-col items-center gap-2 transition-all ${formData.cible === "etudiants"
-                  ? "border-primary bg-primary/10 text-primary shadow-sm"
+                  ? "border-muted bg-muted/10 text-muted shadow-sm"
                   : "border-gray-800/20 bg-surface text-gray hover:border-primary/30"
                   }`}
               >
@@ -537,7 +538,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
                 type="button"
                 onClick={() => setFormData({ ...formData, cible: "enseignants" })}
                 className={`flex-1 p-4 border rounded-xl flex flex-col items-center gap-2 transition-all ${formData.cible === "enseignants"
-                  ? "border-primary bg-primary/10 text-primary shadow-sm"
+                  ? "border-muted bg-muted/10 text-muted shadow-sm"
                   : "border-gray-800/20 bg-surface text-gray hover:border-primary/30"
                   }`}
               >
@@ -708,6 +709,14 @@ export default function ForumManagement() {
       setLoading(false);
     }
   };
+  
+
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth < 768);
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
 
   useEffect(() => {
     fetchForums();
@@ -716,24 +725,22 @@ export default function ForumManagement() {
   // =========================
   // RESPONSIVE EFFECTS
   // =========================
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (mobile) setSidebarCollapsed(true);
-    };
-
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-
-    handleResize(); // Appeler au chargement initial
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("sidebarChanged", handleSidebarChange);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("sidebarChanged", handleSidebarChange);
-    };
-  }, []);
+  // Effet pour la responsivité
+    useEffect(() => {
+      const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+  
+      // Gestion de la sidebar
+      const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("sidebarChanged", handleSidebarChange);
+  
+      return () => { 
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("sidebarChanged", handleSidebarChange);
+      };
+    }, []);
 
   // =========================
   // HANDLERS FORUMS
@@ -1281,10 +1288,10 @@ export default function ForumManagement() {
   // =========================
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      {/* Sidebar */}
-      <div>
-        <Navbar />
-      </div>
+         {/* Sidebar */}
+         <div>
+           <Navbar />
+         </div>
 
       {/* Main Content */}
       <main className={`
@@ -1331,7 +1338,7 @@ export default function ForumManagement() {
           <h2 className="text-xl font-semibold text-muted mb-4">Forums de discussion</h2>
 
           {/* TABS */}
-          <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
+          <div className="flex overflow-x-auto gap-2 bg-grad-1 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
             {filterTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -1428,7 +1435,7 @@ export default function ForumManagement() {
                 filteredForums.map((forum) => (
                   <div
                     key={forum.id}
-                    className="bg-surface rounded-2xl p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300"
+                    className="bg-grad-5 rounded-2xl p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300"
                   >
                     <div className="flex flex-col lg:flex-row lg:items-start gap-5">
                       {/* Icône et info de base */}
@@ -1438,9 +1445,9 @@ export default function ForumManagement() {
                           : "bg-grad-2"
                           }`}>
                           {forum.cible === "etudiants" ? (
-                            <GraduationCap className="w-6 h-6 text-white dark:text-purple" />
+                            <GraduationCap className="w-6 h-6 text-muted dark:text-purple" />
                           ) : (
-                            <Users className="w-6 h-6 text-white dark:text-pink" />
+                            <Users className="w-6 h-6 text-muted dark:text-pink" />
                           )}
                         </div>
 
@@ -1451,7 +1458,7 @@ export default function ForumManagement() {
                               {forum.title}
                             </h3>
                             <span className={`text-xs px-2 py-1 rounded-full ${forum.cible === "etudiants"
-                                ? "bg-primary/20 text-primary"
+                                ? "bg-muted/20 text-muted"
                                 : "bg-pink/20 text-pink"
                               }`}>
                               {forum.cible === "etudiants" ? "Pour étudiants" : "Pour enseignants"}
