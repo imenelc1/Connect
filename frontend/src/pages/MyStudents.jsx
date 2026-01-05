@@ -276,7 +276,7 @@ useEffect(() => {
                   {st.spaces.map((spName, i) => (
                     <span
                       key={i}
-                      className="px-3 py-1 text-xs rounded-full bg-grad-6 text-textc flex items-center gap-2"
+                      className="px-3 py-1 text-xs rounded-full bg-grad-3 text-textc flex items-center gap-2"
                     >
                       {spName}
                       <button

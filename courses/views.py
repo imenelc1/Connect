@@ -19,6 +19,8 @@ import os
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.db.models import Q
 from dashboard.models import ActivityEvent
+from users.models import Administrateur
+
 def log_activity(user, event_type):
     """
     Crée un événement d'activité pour l'utilisateur
@@ -210,13 +212,16 @@ class CoursDetailView(generics.RetrieveUpdateAPIView):
         enseignant = cours.utilisateur
 
         # Vérifier si l'utilisateur courant est un admin dans ta table Administrateur
-        if Administrateur.objects.filter(email_admin=request.user.adresse_email).exists() and enseignant:
-            Notification.objects.create(
-                utilisateur_destinataire=enseignant,
-                action_type='course_updated_by_admin',
-                module_source='courses',
-                message_notif=f"📢 Les informations de votre cours '{cours.titre_cour}' ont été modifiées par un administrateur."
-            )
+        user = request.user
+        if user.is_authenticated:
+          if Administrateur.objects.filter(email_admin=user.adresse_email).exists() and enseignant:
+             Notification.objects.create(
+            utilisateur_destinataire=enseignant,
+            action_type='course_updated_by_admin',
+            module_source='courses',
+            message_notif=f"📢 Les informations de votre cours '{cours.titre_cour}' ont été modifiées par un administrateur."
+        )
+
 
         return response
 
