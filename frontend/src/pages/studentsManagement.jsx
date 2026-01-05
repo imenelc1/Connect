@@ -248,35 +248,58 @@ export default function StudentsManagement() {
 
   // ================= FETCH =================
   useEffect(() => {
-    const fetchStudents = async () => {
-      const token = localStorage.getItem("admin_token");
-      if (!token) return setError("Token JWT manquant.");
+  const fetchStudents = async () => {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      setError("Token JWT manquant.");
+      return;
+    }
 
-      setLoading(true);
-      try {
-        const res = await fetch(
-          "http://localhost:8000/api/users/students-with-progress/",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) throw new Error(`Erreur (${res.status})`);
-        const data = await res.json();
+    setLoading(true);
+    try {
+      // 1️⃣ Liste existante des étudiants
+      const res = await fetch(
+        "http://localhost:8000/api/users/students-with-progress/",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error(`Erreur (${res.status})`);
 
-        const formatted = data.map(s => ({
-          ...s,
-          courses: s.courses || [],
-          courses_count: s.courses_count || s.courses?.length || 0,
-        }));
+      const studentsData = await res.json();
 
-        setStudents(formatted);
-      } catch (err) {
-        console.error(err);
-        setError("Impossible de charger les étudiants.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStudents();
-  }, []);
+      // 2️⃣ Pour chaque étudiant → vraie progression globale (dashboard)
+      const studentsWithRealProgress = await Promise.all(
+        studentsData.map(async (s) => {
+          const progRes = await fetch(
+            `http://localhost:8000/api/dashboard/global-progress/${s.id}/`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          if (!progRes.ok) {
+            console.warn("Erreur progression pour étudiant", s.id);
+            return { ...s, progress: 0 };
+          }
+
+          const progData = await progRes.json();
+
+          return {
+            ...s,
+            progress: progData.global_progress ?? 0,
+          };
+        })
+      );
+
+      setStudents(studentsWithRealProgress);
+
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de charger les étudiants.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchStudents();
+}, []);
 
 
 
