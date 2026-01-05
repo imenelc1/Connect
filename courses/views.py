@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 # Create your views here.
 from rest_framework import generics, viewsets, permissions
-from feedback.models import Notification;
+
 import courses
 from dashboard.models import LeconComplete, ProgressionCours
 from users.models import Utilisateur
@@ -14,7 +14,7 @@ from users.jwt_auth import IsAuthenticatedJWT, jwt_required
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
-from datetime import datetime, timedelta
+from datetime import timedelta
 import os
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.db.models import Q
@@ -307,10 +307,6 @@ class CoursesWithProgressView(APIView):
                 cours=course
             ).first()
             progress = progress_obj.avancement_cours if progress_obj else 0.0
-            # 🔹 Ajouter l'événement "course_followed" si l'utilisateur a commencé le cours
-            if progress > 0:
-              log_activity(user, "course_followed")
-
             temps_passe = progress_obj.temps_passe if progress_obj else timedelta(seconds=0)
 
             # Niveau lisible
