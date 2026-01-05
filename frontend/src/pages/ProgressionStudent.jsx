@@ -148,18 +148,18 @@ export default function ProgressStudent() {
 
 
   useEffect(() => {
-  const fetchQuizzes = async () => {
-    try {
-      const res = await api.get("quiz/student/quizzes-faits/");
-      console.log("Quizzes fetched:", res.data); // pour debug
-      setQuizzes(res.data); // <-- important, mettre à jour le state
-    } catch (err) {
-      console.error(err.response?.status, err.response?.data);
-    }
-  };
+    const fetchQuizzes = async () => {
+      try {
+        const res = await api.get("quiz/student/quizzes-faits/");
+        console.log("Quizzes fetched:", res.data); // pour debug
+        setQuizzes(res.data); // <-- important, mettre à jour le state
+      } catch (err) {
+        console.error(err.response?.status, err.response?.data);
+      }
+    };
 
-  fetchQuizzes();
-}, [studentId]);
+    fetchQuizzes();
+  }, [studentId]);
 
 
 
@@ -179,7 +179,7 @@ export default function ProgressStudent() {
         {student && (
           <div className="bg-card rounded-3xl shadow-md p-6 sm:p-8 mb-6 sm:mb-8 w-full max-w-full lg:max-w-5xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center sm:gap-6">
-              <UserCircle initials={initials} />
+              <UserCircle clickable={false} initials={initials} />
               <div className="mt-4 sm:mt-0 text-center sm:text-left">
                 <h2 className="text-xl sm:text-2xl font-semibold">{student.full_name}</h2>
                 <p className="text-gray text-sm sm:text-base">{student.email}</p>
@@ -189,7 +189,7 @@ export default function ProgressStudent() {
             {/* Stats */}
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-16 mt-4 sm:mt-6 text-center justify-center">
               <div>
-                <p className="text-xl sm:text-2xl font-bold text-primary">{averageScore}%</p>
+                <p className="text-xl sm:text-2xl font-bold text-blue">{averageScore}%</p>
                 <p className="text-gray">{t("ProgressStudent.AverageG")}</p>
               </div>
               <div>
@@ -207,7 +207,7 @@ export default function ProgressStudent() {
         )}
 
 
-         <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-full sm:max-w-5xl py-2 px-4 sm:px-6 bg-gradient-to-r from-primary/30 to-purple rounded-full mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center w-full max-w-full sm:max-w-5xl py-2 px-4 sm:px-6 bg-gradient-to-r from-primary/30 to-purple rounded-full mb-6 sm:mb-8">
           <span
             role="button"
             className="px-12 py-1 text-gray/10 font-semibold rounded-full mb-2 sm:mb-0"
@@ -218,9 +218,9 @@ export default function ProgressStudent() {
           <span
             role="button"
             className="px-12 py-1 text-gray/10 rounded-full font-semibold mb-2 sm:mb-0 bg-card"
-             onClick={() => navigate("/progress-student")}
+            onClick={() => navigate("/progress-student")}
           >
-            {t("ProgressStudent.title")}
+            {t("Progression")}
           </span>
         </div>
 
@@ -279,10 +279,11 @@ export default function ProgressStudent() {
                     </div>
                     <div className="w-full h-2 bg-gray/20 rounded-full m-3 overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${colorClasses[course.color]?.bar}`}
+                        className="h-full rounded-full bg-blue"
                         style={{ width: `${course.progress ?? 0}%` }}
                       ></div>
                     </div>
+
                     <span className={`text-sm font-semibold ${colorClasses[course.color]?.text}`}>
                       {course.progress ?? 0}%
                     </span>

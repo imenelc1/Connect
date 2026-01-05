@@ -3,7 +3,12 @@
     "title": "Bienvenue sur",
     "connect": "connect",
     "email": "Adresse email",
+    "admin": "Administrateur",
+    "login": "Connexion",
+    "successAdmin": "Connexion administrateur réussie",
+    "accessDenied": "Accès refusé",
     "password": "Mot de passe",
+    "seconnect": "Se connecter",
     "or": "Ou",
     "noAccount": "Vous n'avez pas de compte ?",
     "signUp": "S'inscrire",
@@ -23,7 +28,7 @@
     "passwordUpdated": "Mot de passe mis à jour avec succès",
     "error": "Une erreur est survenue",
     "language": "Langue",
-     "api":"Reponse api login:"
+    "api": "Reponse api login:"
   },
   "errors": {
     "emailNotFound": "Adresse email inconnue",

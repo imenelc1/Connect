@@ -6,7 +6,7 @@ import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
 import Mascotte from "../assets/head_mascotte.svg";
 
-import NavBar from "../components/common/Navbar";
+import NavBar from "../components/common/NavBar";
 import AssistantIA from "./AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
@@ -367,23 +367,10 @@ console.log({aiAllowed});
 
             <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0 relative">
               <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
-                <button
-                  onClick={() => aiAllowed && setOpenAssistant(true)}
-                  disabled={!aiAllowed} // désactive le clic si IA interdite
-                  className={`flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl 
-                    font-medium shadow-md transition
-                    ${aiAllowed 
-                       ? "bg-[rgb(var(--color-primary))] text-white hover:brightness-110" 
-                       : "bg-gray-300 text-gray-500 cursor-not-allowed"}
-                  `}
-                >
-                  <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
-                </button>
-                <img
-                              src={Mascotte}
-                              className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11"
-                              alt="Mascotte"
-                            />
+                <HeadMascotte
+                  courseData={exercise}
+                  aiEnabled={aiAllowed} // <-- nouveau prop
+                />
 
                 {/* Notifications */}
                 <div className="fixed top-20 right-6 flex flex-col gap-3 z-[9999]">
@@ -550,9 +537,23 @@ console.log({aiAllowed});
           {/* Assistant IA */}
           <div className="flex justify-center mb-16">
             <button
-              onClick={() => setOpenAssistant(true)}
-              className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
-            >
+  onClick={() => {
+    if (!aiAllowed) {
+      toast.error(t("assistant_disabled") || "Assistant IA désactivé pour cet exercice");
+      return;
+    }
+    setOpenAssistant(true);
+  }}
+  disabled={!aiAllowed}
+  className={`
+    flex items-center gap-3 px-4 md:px-6 py-2 rounded-full border shadow-card transition text-sm
+    ${aiAllowed
+      ? "bg-white hover:brightness-95 cursor-pointer"
+      : "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
+    }
+  `}
+>
+
               <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgb(var(--color-gray-light))]">
                 <MessageCircle
                   size={18}

@@ -37,34 +37,9 @@ def notify_students_on_course_publish(sender, instance, created, **kwargs):
                     }
                 )
             )
-    else:
-        # --- Cours privé : notifier seulement les étudiants des espaces du prof ---
-        espaces_prof = cours.utilisateur.space_set.all()
-        for espace in espaces_prof:
-            etudiants = Utilisateur.objects.filter(
-                etudiant__isnull=False,
-                spaceetudiant__space=espace
-            ).distinct()
-
-            for etudiant in etudiants:
-                notifications.append(
-                    Notification(
-                        message_notif=f"Nouveau cours privé publié '{cours.titre_cour}'",
-                        utilisateur_destinataire=etudiant,
-                        utilisateur_envoyeur=prof,
-                        content_type=content_type,
-                        object_id=cours.id_cours,
-                        action_type="course_published",
-                        module_source="cours",
-                        extra_data={
-                            "cours_titre": cours.titre_cour,
-                            "niveau": cours.niveau_cour,
-                            "public": False,
-                            "espace_id": espace.id_space,
-                            "espace_nom": espace.nom_space
-                        }
-                    )
-                )
+    
+        # --- Cours privé : notifier rien  ---
+        
 
     # --- Notifications pour tous les admins ---
     admins = Administrateur.objects.all()

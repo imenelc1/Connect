@@ -1,12 +1,46 @@
-
 {
   "StudentsManagement": {
-    "StudentsManagement": "Students Management" ,
-    "view":"View and manage student accounts",
+    "StudentsManagement": "Students Management",
+    "view": "View and manage student accounts",
     "buttonAdd": "Add Student",
-    "Search": "Search Students ...",
-    "Encolled":"Enrolled Courses",
-    "Overal":"Overal Progress",
-    "joined":"Joined"
+    "searchPlaceholder": "Search students...",
+    "Encolled": "Enrolled Courses",
+    "Overal": "Overall Progress",
+    "joined": "Joined",
+    "close": "Close",
+    
+    "editStudent": "Edit Student",
+    "addStudent": "Add Student",
+    
+    "labels": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "dob": "Date of Birth",
+      "regNumber": "Registration Number",
+      "speciality": "Speciality",
+      "year": "Year"
+    },
+    
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save",
+      "create": "Create"
+    },
+    
+    "errors": {
+      "required": "Required",
+      "invalidEmail": "Invalid email",
+      "minAge": "Student must be at least 16 years old",
+      "invalidRegNumber": "Invalid registration number",
+      "noNumbers": "No numbers allowed"
+    },
+    
+    "detailLabels": {
+      "coursesRead": "Courses Completed",
+      "exercisesDone": "Exercises Done",
+      "quizzesDone": "Quizzes Done",
+      "joinedOn": "Joined On"
+    }
   }
 }

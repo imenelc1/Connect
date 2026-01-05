@@ -39,7 +39,7 @@ export default function WeeklySubmissionChart({ studentId = null }) {
   }, [studentId, token]);
 
   return (
-    <div className="bg-white rounded-2xl shadow p-6 w-full">
+    <div className="bg-card rounded-2xl shadow p-6 w-full">
       <h2 className="font-semibold text-lg mb-4">
         {t("ProgressStudent.Weekly")}
       </h2>
@@ -56,7 +56,7 @@ export default function WeeklySubmissionChart({ studentId = null }) {
                   const date = new Date(day.date);
 
                   return (
-                    <div className="bg-white p-2 rounded shadow border">
+                    <div className="bg-white dark:bg-grad-1 p-2 rounded shadow border">
                       <p className="font-semibold">
                         {date.toLocaleDateString()}
                       </p>

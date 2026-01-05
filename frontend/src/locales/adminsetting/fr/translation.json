@@ -1,0 +1,11 @@
+{
+  "AdminSettings": {
+    "Title": "Paramètres Admin",
+    "Theme": "Thème",
+    "LightMode": "Mode clair",
+    "DarkMode": "Mode sombre",
+    "Language": "Langue",
+    "French": "Français",
+    "English": "Anglais"
+  }
+}

@@ -43,6 +43,10 @@
   --color-red: 240 80 80;
   --color-green:34 197 94;
   --color-blue-primary-light: 240 245 253;
+   --color-input-bg: 245 247 250;      /* gris très clair pour le fond */
+  --color-input-text: 10 10 10;       /* texte sombre */
+  --color-input-border: 200 210 220;  /* bordure gris clair */
+  --color-input-placeholder: 153 161 175; /* texte placeholder */
 
   /* 🎨 Couleurs Stats du prototype */
   --stat-blue-1: #E8F2FF;
@@ -95,6 +99,13 @@
   --color-card: 47 79 112;
   --color-nav:255 255 255;
   --color-code:30 41 57;
+   
+    --color-input-bg: 30 41 59;        /* slate-800 */
+  --color-input-text: 229 231 235;   /* gris clair */
+  --color-input-border: 71 85 105;   /* slate-600 */
+  --color-input-placeholder: 148 163 184; /* slate-400 */
+
+
 
   --grad-dark-1: linear-gradient(135deg, #4F9DDE, #A3AAED);
   --grad-dark-2: linear-gradient(135deg, #4f9ede8c, rgba(47, 79, 112, 0.459));
@@ -172,13 +183,14 @@
   background-image: radial-gradient(circle at center, #2F4F70, #1E2939);
 }
 
-/* Fix autofill bleu */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  box-shadow: 0 0 0 30px white inset !important;
-  -webkit-text-fill-color: rgb(172, 179, 194) !important;
+  -webkit-text-fill-color: #000 !important;
+  transition: background-color 0s ease-in-out 0s;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important; /* garde le fond blanc */
 }
+
 
 @keyframes dropdown {
   from { opacity: 0; transform: translateY(-6px); }

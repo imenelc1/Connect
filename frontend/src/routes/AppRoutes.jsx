@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { PrivateRoute } from "../context/PrivateRoute.jsx";
 
 /* ================= PUBLIC ================= */
 import Acceuil from "../pages/Acceuil.jsx";
@@ -9,6 +10,7 @@ import LoginInstructor from "../pages/LoginInstructor";
 import LoginStudent from "../pages/LoginStudent";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import WelcomeResetPassword from "../pages/WelcomeResetPassword.jsx";
 
 /* ================= DASHBOARDS ================= */
 import Dashboardens from "../pages/dash-ens";
@@ -21,7 +23,6 @@ import CommunityPage from "../pages/CommunityPage";
 import Badges from "../pages/Badges";
 import MyStudents from "../pages/MyStudents";
 import Spaces from "../pages/Spaces";
-import WelcomeResetPassword from "../pages/WelcomeResetPassword.jsx";
 
 /* ================= COURSES ================= */
 import AllCoursesPage from "../pages/AllCoursesPage";
@@ -67,7 +68,9 @@ import InstructorsManagement from "../pages/InstructorsManagement.jsx";
 import StudentsManagement from "../pages/studentsManagement.jsx";
 import UpdateQuiz from "../pages/UpdateQuiz.jsx";
 import VoirCoursAdmin from "../pages/VoirCoursAdmin.jsx";
-import VoirQuizAdmin from "../pages/VoirQuizAdmin.jsx"
+import VoirQuizAdmin from "../pages/VoirQuizAdmin.jsx";
+import AdminSetting from "../pages/AdminSetting.jsx";
+
 export default function AppRoutes() {
   return (
     <BrowserRouter>
@@ -76,29 +79,72 @@ export default function AppRoutes() {
         {/* ========= PUBLIC ========= */}
         <Route path="/" element={<Acceuil />} />{/* QOWA*/}
         <Route path="/choice" element={<Choice />} />{/*QOWA */}
-        <Route path="/signup/student" element={<StudentSignup />} />{/* */}
-        <Route path="/signup/instructor" element={<InstructorSignup />} />{/* */}
-        <Route path="/login/student" element={<LoginStudent />} />{/* */}
-        <Route path="/login/instructor" element={<LoginInstructor />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/signup/student" element={<StudentSignup />} />{/* bien*/}
+        <Route path="/signup/instructor" element={<InstructorSignup />} />{/* bien*/}
+        <Route path="/login/student" element={<LoginStudent />} />{/* bien*/}
+        <Route path="/login/instructor" element={<LoginInstructor />} />{/* bien*/}
+        <Route path="/forgot-password" element={<ForgotPassword />} />{/* bien*/}
+        <Route path="/reset-password" element={<ResetPassword />} />{/* bien*/}
 
         {/* ========= DASHBOARDS ========= */}
-       <Route path="/dashboard-etu" element={<Dashboardetu />} />   {/* */}
-        <Route path="/dashboard-ens" element={<Dashboardens />} />{/* */}
-        <Route path="/dashboard-admin" element={<Dashboard />} />{/* */}
+       <Route path="/dashboard-etu" element={<Dashboardetu />} />   {/*bien */}
+        <Route path="/dashboard-ens" element={<Dashboardens />} />{/*bien */}
+        <Route path="/dashboard-admin" element={<Dashboard />} />{/*ca va il manque juste les dates et la nav ynes */}
 
         {/* ========= COMMON ========= */}
         <Route path="/settings" element={<Setting />} />{/*Qowa */}
-        <Route path="/community" element={<CommunityPage />} />{/* */}
+        <Route path="/community" element={<CommunityPage />} />{/* la fin ni etu, meme chose ens */}
         <Route path="/badges" element={<Badges/>} />{/* mazal les graphes ni*/}
         <Route path="/my-students" element={<MyStudents />} /> {/*qowa */}
         <Route path="/spaces" element={<Spaces />} /> {/*bof */}
         <Route path="/welcome-reset-password/:token" element={<WelcomeResetPassword />} /> {/*qowaaaa */}
 
+        {/* ========= DASHBOARDS ========= */}
+        <Route path="/dashboard-etu" element={
+          <PrivateRoute allowedRoles={["etudiant"]}>
+            <Dashboardetu />
+          </PrivateRoute>
+        }/>
+        <Route path="/dashboard-ens" element={
+          <PrivateRoute allowedRoles={["enseignant"]}>
+            <Dashboardens />
+          </PrivateRoute>
+        }/>
+        <Route path="/dashboard-admin" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <Dashboard />
+          </PrivateRoute>
+        }/>
+
+        {/* ========= COMMON ========= */}
+        <Route path="/settings" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <Setting />
+          </PrivateRoute>
+        }/>
+        <Route path="/community" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <CommunityPage />
+          </PrivateRoute>
+        }/>
+        <Route path="/badges" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <Badges />
+          </PrivateRoute>
+        }/>
+        <Route path="/my-students" element={
+          <PrivateRoute allowedRoles={["enseignant"]}>
+            <MyStudents />
+          </PrivateRoute>
+        }/>
+        <Route path="/spaces" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <Spaces />
+          </PrivateRoute>
+        }/>
 
         {/* ========= COURSES ========= */}
-        <Route path="/all-courses" element={<AllCoursesPage />} /> {/* */}
+        <Route path="/all-courses" element={<AllCoursesPage />} /> {/*mli7a */}
         <Route path="/CourseDetails/:id" element={<CourseDetails />} />{/* */}
         <Route path="/course-details" element={<CourseDetails />} />{/* */}
         <Route path="/Seecourses/:id" element={<Courses />} />{/* */}
@@ -111,48 +157,106 @@ export default function AppRoutes() {
         <Route path="/ListeExercices" element={<CourseExercisesPage />} />{/* */}
         <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
 
-        <Route path="/student-exercice" element={<StudentExercice />} />
-        <Route path="/student-exercises/:studentId" element={<StudentExercice />} />
-        <Route path="/students/:studentId/progression" element={<ProgressExercice />} />
-        
-        <Route path="/start-exercise/:exerciceId" element={<TheoryExercisePage />} />
-        <Route path="/start-exerciseCode/:exerciceId" element={<CodeExercisePage />} />
-        <Route path="/submitted-exercise/:tentativeId" element={<SubmittedExercise />} />
-        <Route path="/SubmittedExos" element={<SubmittedExercises />} />
-        <Route path="/submitted-exercise-theory/:tentativeId" element={<SubmittedExoTheory />} />
-        <Route path="/submitted-exercise-theory/" element={<SubmittedExoTheory />} />
+        {/* ========= QUIZZES ========= */}
+        <Route path="/all-quizzes" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <AllQuizzesPage />
+          </PrivateRoute>
+        }/>
+        <Route path="/create-quiz" element={
+          <PrivateRoute allowedRoles={["enseignant"]}>
+            <CreateQuiz />
+          </PrivateRoute>
+        }/>
+        <Route path="/quiz-preview/:exerciceId" element={
+          <PrivateRoute allowedRoles={["enseignant"]}>
+            <QuizPreview />
+          </PrivateRoute>
+        }/>
+        <Route path="/quiz-intro/:exerciceId" element={
+          <PrivateRoute allowedRoles={["etudiant"]}>
+            <QuizIntroPage />
+          </PrivateRoute>
+        }/>
+        <Route path="/quizTake/:exerciceId" element={
+          <PrivateRoute allowedRoles={["etudiant"]}>
+            <QuizTakePage />
+          </PrivateRoute>
+        }/>
+        <Route path="/QuizRecape/:exerciceId" element={
+          <PrivateRoute allowedRoles={["etudiant"]}>
+            <QuizRecapPage />
+          </PrivateRoute>
+        }/>
+        <Route path="/quiz/edit/:exerciceId" element={
+          <PrivateRoute allowedRoles={["enseignant"]}>
+            <UpdateQuiz />
+          </PrivateRoute>
+        }/>
 
-        <Route path="/progress-exercice" element={<ProgressExercice />} />
-       
-        <Route path="/progress-student/" element={<ProgressStudent />} />
-        <Route path="/new-exercise" element={<NewExercise />} />
-        <Route path="/exercise-preview" element={<ExercisePreview />} />
-        <Route path="/exercices/edit/:id" element={<UpdateExercice />} />
-       
-
-         {/* ========= QUIZZES ========= */}
-       <Route path="/all-quizzes" element={<AllQuizzesPage />} />
-        <Route path="/create-quiz" element={<CreateQuiz />} />
-        <Route path="/quiz-preview/:exerciceId" element={<QuizPreview />} />
-        <Route path="/quiz-intro/:exerciceId" element={<QuizIntroPage />} />
-        <Route path="/quizTake/:exerciceId" element={<QuizTakePage />} />
-        <Route path="/QuizRecape/:exerciceId" element={<QuizRecapPage />} />
-        <Route path="/quiz/edit/:exerciceId" element={<UpdateQuiz />} />
         {/* ========= ADMIN ========= */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/CourseManagement" element={<CoursesManagement />} />
-        <Route path="/ExerciseManagement" element={<ExercisesManagement />} />
-        <Route path="/badgesManagement" element={<BadgesManagement />} />
-        <Route path="/QuizManagement" element={<QuizManagement />} />
-        <Route path="/StudentsManagement" element={<StudentsManagement />} />
-        <Route path="/validation-courses" element={<ValidationCourses />} />
-        <Route path="/ForumManagement" element={<ForumManagement />} />
-        <Route path="/SpacesManagement" element={<SpacesManagement />} />
-        <Route path="/InstructorsManagement" element={<InstructorsManagement />} />
-        <Route path="/cours/:id_cours" element={<VoirCoursAdmin />} />
-        <Route path="/Voir-quiz/:exerciceId" element={<VoirQuizAdmin />} />
+        <Route path="/CourseManagement" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <CoursesManagement />
+          </PrivateRoute>
+        }/>
+        <Route path="/ExerciseManagement" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <ExercisesManagement />
+          </PrivateRoute>
+        }/>
+        <Route path="/badgesManagement" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <BadgesManagement />
+          </PrivateRoute>
+        }/>
+        <Route path="/QuizManagement" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <QuizManagement />
+          </PrivateRoute>
+        }/>
+        <Route path="/StudentsManagement" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <StudentsManagement />
+          </PrivateRoute>
+        }/>
+        <Route path="/validation-courses" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <ValidationCourses />
+          </PrivateRoute>
+        }/>
+        <Route path="/ForumManagement" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <ForumManagement />
+          </PrivateRoute>
+        }/>
+        <Route path="/SpacesManagement" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <SpacesManagement />
+          </PrivateRoute>
+        }/>
+        <Route path="/InstructorsManagement" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <InstructorsManagement />
+          </PrivateRoute>
+        }/>
+        <Route path="/cours/:id_cours" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <VoirCoursAdmin />
+          </PrivateRoute>
+        }/>
+        <Route path="/Voir-quiz/:exerciceId" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <VoirQuizAdmin />
+          </PrivateRoute>
+        }/>
+        <Route path="/admin-settings" element={
+          <PrivateRoute allowedRoles={["admin"]}>
+            <AdminSetting />
+          </PrivateRoute>
+        }/>
 
-   
       </Routes>
     </BrowserRouter>
   );

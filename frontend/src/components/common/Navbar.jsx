@@ -107,6 +107,7 @@ export default function Navbar() {
   const courseRoutes = [
     "/all-courses",
     "/CoursInfo",
+    "/courses/edit/",
 
   ];
   const exerciseRoutes = [
@@ -145,13 +146,13 @@ export default function Navbar() {
 
   return (
 
-   <aside
-  className={`fixed h-screen overflow-visible bg-card rounded-3xl shadow-2xl p-3
+    <aside
+      className={`fixed h-screen overflow-visible bg-card rounded-3xl shadow-2xl p-3
   top-0 left-0 z-50 transition-all duration-300
   w-16
   md:${collapsed ? "w-16" : "w-56"}
 `}
->
+    >
 
 
 
@@ -231,10 +232,9 @@ export default function Navbar() {
       <div className="mt-auto flex flex-col gap-1 pt-1">
 
         <NavLink
-          to="/settings"
+          to={userData.role === "admin" ? "/admin-settings" : "/settings"}
           className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
-            }`
+            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"}`
           }
         >
           <Settings size={17} strokeWidth={1.5} />

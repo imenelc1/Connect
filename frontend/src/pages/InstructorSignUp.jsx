@@ -173,69 +173,82 @@ const { loginUser } = useContext(AuthContext);
 
   // SUBMIT
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateForm()) {
-      toast.error(t("fixErrors"));
-      return;
-    }
+  // Validation du formulaire
+  if (!validateForm()) {
+    toast.error(t("fixErrors"));
+    return;
+  }
 
-    const payload = {
-      nom: formData.nickname,
-      prenom: formData.fullname,
-      adresse_email: formData.email,
-      mot_de_passe: formData.password,
-      date_naissance: formData.dob,
-      matricule: formData.regnumber,
-      grade: formData.rank,
-      role: "enseignant"
+  // Préparer le payload pour l'API
+  const payload = {
+    nom: formData.nickname,
+    prenom: formData.fullname,
+    adresse_email: formData.email,
+    mot_de_passe: formData.password,
+    date_naissance: formData.dob,
+    matricule: formData.regnumber,
+    grade: formData.rank,
+    role: "enseignant"
+  };
+
+  try {
+    const res = await api.post("register/", payload);
+
+    // 🔹 Créer userData à partir de la réponse backend
+    const userData = {
+      ...res.data.user,
+      role: res.data.role || res.data.user.role
     };
 
-    try {
-      const res = await api.post("register/", payload);
+    // 🔹 Mettre à jour le contexte Auth avec token + user
+    loginUser(res.data.token, userData);
 
-      // stocker le token
-      localStorage.setItem("token", res.data.token);
+    // 🔹 Stocker dans localStorage si tu veux persistance
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(userData));
 
-      // mettre à jour le contexte Auth
-      loginUser(res.data.token);
+    toast.success(t("successSignUp"));
 
-      // stocker les infos utilisateur si besoin
-      const userWithRole = {
-        ...res.data.user,
-        role: res.data.role || res.data.user.role
-      };
-      localStorage.setItem("user", JSON.stringify(userWithRole));
+    // 🔹 Rediriger vers dashboard enseignant
+    navigate("/dashboard-ens");
 
-      toast.success(t("successSignUp"));
-      navigate("/dashboard-ens"); // ✅ navigation via react-router
+  } catch (err) {
+    const apiErrors = err.response?.data;
 
-    } catch (err) {
-      const apiErrors = err.response?.data;
-
-      if (apiErrors) {
-        if (apiErrors.error) {
-          toast.error(apiErrors.error);
-          return;
-        }
-
-        const backendMappedErrors = {};
-        Object.keys(apiErrors).forEach((key) => {
-          const frontendKey = fieldMap[key] || key;
-          // backend peut retourner array
-          const firstErr = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key];
-          backendMappedErrors[frontendKey] = firstErr;
-        });
-
-        setErrors((prev) => ({ ...prev, ...backendMappedErrors }));
-
-        toast.error(Object.values(backendMappedErrors).join("\n"));
+    if (apiErrors) {
+      if (apiErrors.error) {
+        toast.error(apiErrors.error);
         return;
       }
 
-      toast.error(t("networkError"));
+      const fieldMap = {
+        nom: "nickname",
+        prenom: "fullname",
+        adresse_email: "email",
+        mot_de_passe: "password",
+        date_naissance: "dob",
+        matricule: "regnumber",
+        grade: "rank"
+      };
+
+      const backendMappedErrors = {};
+      Object.keys(apiErrors).forEach((key) => {
+        const frontendKey = fieldMap[key] || key;
+        const firstErr = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key];
+        backendMappedErrors[frontendKey] = firstErr;
+      });
+
+      setErrors(prev => ({ ...prev, ...backendMappedErrors }));
+      toast.error(Object.values(backendMappedErrors).join("\n"));
+      return;
     }
-  };
+
+    toast.error(t("networkError"));
+  }
+};
+
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";

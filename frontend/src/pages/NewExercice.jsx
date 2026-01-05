@@ -45,8 +45,8 @@ export default function NewExercise() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const token = localStorage.getItem("token");
-  // États pour la responsivité
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+   // États pour la responsivité
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const currentUserId = getCurrentUserId();
 
@@ -65,12 +65,12 @@ export default function NewExercise() {
         }));
         setCourses(formatted);
       })
-      .catch((err) => console.error(t("Errors.CourseLoadFailed"), err));
-
+      .catch((err) => console.error("Erreur chargement cours :", err));
   }, []);
 
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
-    }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
   const exerciseSteps = [
     { label: t("exercises.info"), icon: FileText },
@@ -83,7 +83,7 @@ export default function NewExercise() {
     const currentUserId = getCurrentUserId();
 
     if (!token || !currentUserId) {
-       alert(t("Errors.NotLoggedIn"));
+      alert("Utilisateur non connecté");
       return null;
     }
 
@@ -116,10 +116,10 @@ export default function NewExercise() {
       return exoId;
     } catch (err) {
       console.error(
-        t("Errors.CourseCreationFailed"),
+        "Erreur création cours :",
         err.response?.data || err.message
       );
-     alert(t("Errors.ExerciseCreationFailed"));
+      alert("Erreur lors de la création de l'exercice");
       return null;
     }
   };
@@ -278,19 +278,19 @@ export default function NewExercise() {
                 />
               </div>
 
-              <div className="flex flex-col w-150px">
+               <div className="flex flex-col w-150px">
                 <label className="block text-textc font-semibold">
-                  {t("form.max_submissions") ||
+                  {t("max soumissions") ||
                     "Nombre max de soumissions (0 = illimité)"}
                 </label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={maxSoumissions}
-                  onChange={(e) => setMaxSoumissions(Number(e.target.value))}
-                  placeholder="0"
-                  className="w-36 border border-grayc shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 !bg-card dark:text-white"
-                />
+               <Input
+                type="number"
+                min={0}
+                value={maxSoumissions}
+                onChange={(e) => setMaxSoumissions(Number(e.target.value))}
+                placeholder="0"
+                className="w-36 border border-grayc shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 !bg-card dark:text-white"
+              />
 
               </div>
             </div>
@@ -342,10 +342,10 @@ export default function NewExercise() {
                 </p>
 
                 <p>
-                  <strong>{t("form.max_submissions") || "Max soumissions"} :</strong> {maxSoumissions === 0 ?  t("form.unlimited") : maxSoumissions}
-                </p>
+                <strong>{t("max soumissions") || "Max soumissions"} :</strong> {maxSoumissions === 0 ? "Illimité" : maxSoumissions}
+              </p>
 
-                <p>
+              <p>
                   <strong>{t("solution")} :</strong> {solution || "-"}
                 </p>
 

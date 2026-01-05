@@ -6,7 +6,7 @@ import { useNotifications } from "../context/NotificationContext";
 import { FiSend } from "react-icons/fi";
 import { Loader, Heart, Trash2, Send, ChevronDown, ChevronUp, MessageSquare } from "lucide-react";
 
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import UserCircle from "../components/common/UserCircle";
 import Input from "../components/common/Input";
 import Tabs from "../components/common/Tabs";
@@ -319,50 +319,55 @@ export default function CommunityPage() {
         <div className="flex-1 ">
 
 
-          <PostCreationForm
-            forumTypeToCreate={forumTypeToCreate}
-            setForumTypeToCreate={setForumTypeToCreate}
-            role={role}
-            token={token}
-            initials={initials}
-            userData={userData}
-            setPosts={setPosts}
-            setError={setError}
-            triggerNotificationEvent={triggerNotificationEvent}
-            API_URL={API_URL}
-            t={t}
-          />
 
-          <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          <div className="flex-1 ">
 
-          <div className="flex justify-end mt-4 mb-8">
-            <ModernDropdown
-              value={forumType}
-              onChange={setForumType}
-              options={forumOptions}
-              placeholder="Sélectionner un type"
-              disabled={isLoading}
+
+            <PostCreationForm
+              forumTypeToCreate={forumTypeToCreate}
+              setForumTypeToCreate={setForumTypeToCreate}
+              role={role}
+              token={token}
+              initials={initials}
+              userData={userData}
+              setPosts={setPosts}
+              setError={setError}
+              triggerNotificationEvent={triggerNotificationEvent}
+              API_URL={API_URL}
+              t={t}
+            />
+
+            <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            <div className="flex justify-end mt-4 mb-8">
+              <ModernDropdown
+                value={forumType}
+                onChange={setForumType}
+                options={forumOptions}
+                placeholder="Sélectionner un type"
+                disabled={isLoading}
+              />
+            </div>
+
+            <ForumList
+              isLoading={isLoading}
+              finalPosts={finalPosts}
+              forumType={forumType}
+              forumOptions={forumOptions}
+              posts={posts}
+              setPosts={setPosts}
+              token={token}
+              API_URL={API_URL}
+              role={role}
+              userId={userId}
+              setError={setError}
+              triggerNotificationEvent={triggerNotificationEvent}
+              getForumTypeLabel={getDisplayForumTypeLabel}
+              getForumTypeClasses={getForumTypeClasses}
+              formatTimeAgo={formatTimeAgo}
+              t={t}
             />
           </div>
-
-          <ForumList
-            isLoading={isLoading}
-            finalPosts={finalPosts}
-            forumType={forumType}
-            forumOptions={forumOptions}
-            posts={posts}
-            setPosts={setPosts}
-            token={token}
-            API_URL={API_URL}
-            role={role}
-            userId={userId}
-            setError={setError}
-            triggerNotificationEvent={triggerNotificationEvent}
-            getForumTypeLabel={getDisplayForumTypeLabel}
-            getForumTypeClasses={getForumTypeClasses}
-            formatTimeAgo={formatTimeAgo}
-            t={t}
-          />
         </div>
       </div>
     </div>

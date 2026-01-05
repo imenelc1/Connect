@@ -717,6 +717,9 @@ def check_top_forum_badge(user):
     return True
 
 
+
+
+
 def get_badge_streak(user):
     """
     Retourne le nombre de jours consécutifs où l'utilisateur a débloqué au moins un badge.
@@ -744,7 +747,19 @@ def get_badge_streak(user):
 
     return max_streak
 
-
+def calculate_level(total_xp):
+    if total_xp < 200:
+        return 1
+    elif total_xp < 500:
+        return 2
+    elif total_xp < 1000:
+        return 3
+    elif total_xp < 2000:
+        return 4
+    elif total_xp < 4000:
+        return 5
+    else:
+        return 6
 
 
 @api_view(["GET"])
@@ -766,11 +781,15 @@ def user_stats(request):
     streak_days = get_badge_streak(user)          
     streak_pct = min((streak_days / 7) * 100, 100)  # % par rapport au streak idéal de 7 jours
 
+    level = calculate_level(total_xp)
+
     return Response({
+    "level": level,
     "total_badges": total_badges,
     "unlocked_count": unlocked_count,
     "total_xp": total_xp,        # <-- pour l'affichage total
     "max_xp": max_xp,            # <-- pour la barre de progression
     "streak_days": streak_days,
     "streak_pct": streak_pct
+    
 })

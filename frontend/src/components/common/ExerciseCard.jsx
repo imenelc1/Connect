@@ -42,8 +42,7 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
   if (!exercise) return null;
 
   const handleDelete = async () => {
-    if (!window.confirm(t("Errors.ConfirmDeleteExercise"))) return;
-
+    if (!window.confirm("Supprimer cet exercice ?")) return;
 
     try {
       await axios.delete(
@@ -55,7 +54,7 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
 
       onDelete?.(exercise.id);
     } catch (err) {
-      console.error(t("Errors.DeleteFailed"), err);
+      console.error("Erreur suppression:", err);
     }
   };
 
@@ -116,7 +115,7 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
                 : navigate(`/start-exercise/${exercise.id}`);
             }}
           >
-            {t("start")}
+            {t("startExercise")}
           </Button>
         ) : (
           <Button
@@ -128,7 +127,7 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
                 : navigate(`/start-exercise/${exercise.id}`);
             }}
           >
-           {t("CheckQuiz")}
+            Check quiz
           </Button>
         )}
 

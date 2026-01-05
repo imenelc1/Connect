@@ -5,7 +5,7 @@ import ExerciseContext from "../context/ExerciseContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getSystemPrompt, getAIAnswer } from "../services/iaService";
-import { useTranslation } from "react-i18next";
+
 const detectLanguage = (text) =>
   /[àâçéèêëîïôûùüÿñæœ]/i.test(text) ? "fr" : "en";
 const isExerciseQuestion = (msg) =>
@@ -33,7 +33,7 @@ async function awardAIBadge() {
     console.log(res.data.message);
     return res.data;
   } catch (err) {
-    console.error(t("aiBadgeError"), err.response?.data || err);
+    console.error("Erreur badge IA :", err.response?.data || err);
   }
 }
 
@@ -42,7 +42,6 @@ export default function AssistantIA({
   mode = "generic",
   course = null,
 }) {
-  const { t } = useTranslation("assistant");
   const exercise = useContext(ExerciseContext); // récupère l'exercice
   const [student, setStudent] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -97,40 +96,21 @@ export default function AssistantIA({
       const parsed = JSON.parse(storedChat);
       if (parsed?.messages?.length) setMessages(parsed.messages);
     } else {
-      // setMessages([
-      //   {
-      //     id: Date.now(),
-      //     from: "bot",
-      //     text:
-      //       actualMode === "exercise"
-      //         ? `Bonjour ${
-      //             student.name
-      //           } 👋\nJe vois que tu travailles sur l'exercice : **${
-      //             exercise?.titre || "en cours"
-      //           }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
-      //         : actualMode === "course"
-      //         ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
-      //         : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`,
-      //   },
-      // ]);
-      // }
       setMessages([
         {
           id: Date.now(),
           from: "bot",
           text:
             actualMode === "exercise"
-              ? t("exerciseGreeting", {
-                name: student.name,
-                exerciseTitle: exercise?.titre || t("untitledExercise")
-              })
+              ? `Bonjour ${student.name
+              } 👋\nJe vois que tu travailles sur l'exercice : **${exercise?.titre || "en cours"
+              }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
               : actualMode === "course"
-                ? t("courseGreeting", { name: student.name })
-                : t("genericGreeting", { name: student.name }),
+                ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
+                : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`,
         },
       ]);
     }
-
   }, [student, actualMode, chatTargetId, exercise]);
 
   // ---------- Persist chat + scroll ----------
@@ -162,14 +142,13 @@ export default function AssistantIA({
 
     // 🧠 Cas 1 : question sur le CODE
     if (actualMode === "exercise" && asksAboutCode(userText)) {
-      //       pedagogicRule = `
-      // Analyse le code fourni ci-dessus.
-      // Explique précisément ce qui ne va pas.
-      // N'écris PAS la solution complète.
-      // N'améliore pas le code.
-      // Indique les erreurs logiques, syntaxiques ou conceptuelles.
-      // `;
-      pedagogicRule = t("codeAnalysis");
+      pedagogicRule = `
+Analyse le code fourni ci-dessus.
+Explique précisément ce qui ne va pas.
+N'écris PAS la solution complète.
+N'améliore pas le code.
+Indique les erreurs logiques, syntaxiques ou conceptuelles.
+`;
     }
 
     // 🧠 Cas 2 : blocage pédagogique (progressif)
@@ -182,34 +161,30 @@ export default function AssistantIA({
         nextLevel >= 3 &&
         !hasMeaningfulCode(exercise?.code, exercise?.defaultCode)
       ) {
-        //         pedagogicRule = `
-        // Refuse de donner la solution complète.
-        // Explique que le code actuel est encore le code de base.
-        // Invite l'étudiant à essayer d'écrire une première version liée à l'exercice.
-        // Donne seulement des indices.
-        // Sois encourageant.
-        // `;
-        pedagogicRule = t("noCodeYet");
+        pedagogicRule = `
+Refuse de donner la solution complète.
+Explique que le code actuel est encore le code de base.
+Invite l'étudiant à essayer d'écrire une première version liée à l'exercice.
+Donne seulement des indices.
+Sois encourageant.
+`;
       } else if (nextLevel === 1) {
-        //         pedagogicRule = `
-        // Donne UNIQUEMENT des indices.
-        // Explique le principe sans écrire de code.
-        // `;
-        pedagogicRule = t("onlyHints");
+        pedagogicRule = `
+Donne UNIQUEMENT des indices.
+Explique le principe sans écrire de code.
+`;
       } else if (nextLevel === 2) {
-        //         pedagogicRule = `
-        // Explique la logique étape par étape.
-        // Tu peux utiliser du pseudo-code.
-        // Ne donne PAS la solution complète.
-        // `;
-        pedagogicRule = t("stepByStep");
+        pedagogicRule = `
+Explique la logique étape par étape.
+Tu peux utiliser du pseudo-code.
+Ne donne PAS la solution complète.
+`;
       } else {
-        //         pedagogicRule = `
-        // Donne maintenant la solution complète en C,
-        // avec une explication ligne par ligne.
-        // Ne pose AUCUNE question à l'étudiant.
-        // `;
-        pedagogicRule = t("fullSolution");
+        pedagogicRule = `
+Donne maintenant la solution complète en C,
+avec une explication ligne par ligne.
+Ne pose AUCUNE question à l'étudiant.
+`;
       }
     }
 
@@ -278,10 +253,10 @@ INSTRUCTIONS IMPORTANTES :
             <div>
               <p className="font-semibold">
                 {actualMode === "course"
-                  ? t("header.assistantCourse")
+                  ? "Assistant Cours"
                   : actualMode === "exercise"
-                    ? t("header.assistantExercise")
-                    : t("header.assistantIA")}
+                    ? "Assistant Exercice"
+                    : "Assistant IA"}
               </p>
               <span className="text-xs opacity-80">{student.name}</span>
             </div>
@@ -306,8 +281,8 @@ INSTRUCTIONS IMPORTANTES :
               )}
               <div
                 className={`p-4 rounded-2xl text-sm max-w-[75%] ${m.from === "user"
-                  ? "bg-grad-1 text-white"
-                  : "bg-card text-text"
+                    ? "bg-grad-1 text-white"
+                    : "bg-card text-text"
                   }`}
               >
                 {m.from === "bot" ? (
@@ -321,7 +296,7 @@ INSTRUCTIONS IMPORTANTES :
             </div>
           ))}
           {loading && (
-            <p className="text-xs text-gray-400">{t("assistant_typing")}</p>
+            <p className="text-xs text-gray-400">L’assistant écrit…</p>
           )}
         </div>
 
@@ -332,16 +307,15 @@ INSTRUCTIONS IMPORTANTES :
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder={
-                actualMode === "course"
-                  ? t("coursePlaceholder")
-                  : t("problemPlaceholder")
-              }
-              className="w-full rounded-full border px-4 py-2 pr-12"
+              placeholder={actualMode === "course" ? "Pose une question sur le cours…" : "Explique ton problème…"}
+              className="w-full rounded-full border border-input-border px-4 py-2 pr-12
+          bg-input-bg text-input-text placeholder-input-placeholder
+          dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-light"
             />
             <button
               onClick={handleSend}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center
+          bg-grad-button text-white hover:opacity-90 transition"
             >
               <Send size={14} />
             </button>

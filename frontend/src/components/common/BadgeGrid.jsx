@@ -1,5 +1,4 @@
 import { FaLock } from "react-icons/fa";
-import { useTranslation } from "react-i18next";
 
 const CATEGORY_COLORS = {
   progress: {
@@ -25,7 +24,6 @@ const CATEGORY_COLORS = {
 };
 
 export default function BadgeGrid({ badges, getBadgeIcon }) {
-    const { t, i18n } = useTranslation("badges");
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
       {badges.map((badge, i) => {
@@ -70,8 +68,7 @@ export default function BadgeGrid({ badges, getBadgeIcon }) {
                 }
               `}
             >
-             {badge.locked ? t("locked") : badge.xp}
-
+              {badge.locked ? "Locked" : badge.xp}
             </p>
           </div>
         );

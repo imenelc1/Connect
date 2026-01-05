@@ -125,6 +125,10 @@ import translationFRWelcomereset from "./locales/welcomeresetpassword/fr/auth.js
 import translationENWelcomereset from "./locales/welcomeresetpassword/en/auth.json"
 import translationFRAllExercises from "./locales/AllExercises/fr/translation.json"
 import translationENAllExercises from "./locales/AllExercises/en/translation.json"
+import translationENAllCourses from "./locales/AllCourses/en/translation.json"
+import translationFRAllCourses from "./locales/AllCourses/fr/translation.json"
+import translationFRAllQuizzes from "./locales/AllQuizzes/fr/translation.json"
+import translationENAllQuizzes from "./locales/AllQuizzes/en/translation.json"
 
 
 
@@ -175,7 +179,9 @@ const resources = {
     space: translationFRSpacesPage,
     instructors: translationFRInstructors,
     auth: translationFRWelcomereset,
-    allExercises:translationFRAllExercises
+    allExercises:translationFRAllExercises,
+    allcourses:translationFRAllCourses,
+    allQuizzes:translationFRAllQuizzes
   },
 
   en: {
@@ -221,7 +227,9 @@ const resources = {
     notifications: translationENNotification,
     assistant: translationENAssistant,
     auth: translationENWelcomereset,
-    allExercises:translationENAllExercises
+    allExercises:translationENAllExercises,
+    allcourses:translationENAllCourses,
+    allQuizzes:translationENAllQuizzes
 
 
 
@@ -236,3 +244,4 @@ i18n.use(initReactI18next).init({
 });
 
 export default i18n;
+

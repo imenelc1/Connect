@@ -7,6 +7,7 @@
      "exercice":"Exercice",
      "Progression":"Progression",
     "completedexo": "Exercices terminés",
+    "completedcours":"Cours terminés",
     "courses": "Cours actifs",
     "Weekly": "Taux de soumission hebdomadaire",
     "grade":"Progression des scores au fil du temps",

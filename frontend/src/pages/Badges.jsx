@@ -73,7 +73,7 @@ const getBadgeIcon = (title) => {
 
 export default function Badges() {
   const [activeTab, setActiveTab] = useState("all");
-  const { t, i18n } = useTranslation("badges");
+  const { t, i18n } = useTranslation("courses");
   const { toggleDarkMode } = useContext(ThemeContext);
 
   // États pour la responsivité
@@ -103,10 +103,10 @@ export default function Badges() {
       try {
         const res = await api.get("/badges/user-badges/");
         setUserBadges(res.data);
-       console.log(t("Errors.BadgesLoaded"), res.data);
+        console.log("Badges récupérés :", res.data);
 
       } catch (err) {
-       console.error(t("Errors.BadgesLoadFailed"), err);
+        console.error("Erreur récupération badges :", err);
       }
     };
     fetchBadges();
@@ -215,7 +215,7 @@ export default function Badges() {
               className="px-12 py-1 text-gray/10 rounded-full font-semibold mb-2 sm:mb-0"
               onClick={() => navigate("/progress-student")}
             >
-              {t("progression")}
+              {t("Progression")}
             </span>
           </div>
 

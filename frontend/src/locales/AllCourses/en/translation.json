@@ -1,10 +1,15 @@
 {
   "coursesTitle": "Courses",
-  "createCourseBtn": "Create a new Course",
+  "createCourseBtn": "Create a New Course",
   "levels": {
     "Débutant": "Beginner",
     "Intermédiaire": "Intermediate",
     "Avancé": "Advanced"
   },
-  "searchPlaceholder": "Search for courses..."
+  "searchPlaceholder": "Search for a course...",
+  "errors": {
+    "loadCourses": "Error while loading courses",
+      "deleteError": "Error deleting the course"
+  },
+  "confirmDelete": "Are you sure you want to delete this course?"
 }

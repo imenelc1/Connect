@@ -34,6 +34,8 @@ export default function ForumItem({
   const [expandedComments, setExpandedComments] = useState({});
   const [deletingCommentId, setDeletingCommentId] = useState(null);
   const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState(null);
+  const [deletingMessageId, setDeletingMessageId] = useState(null);
+  const [showDeleteMessageConfirm, setShowDeleteMessageConfirm] = useState(null);
   
   const messagesEndRef = useRef(null);
 
@@ -154,6 +156,56 @@ export default function ForumItem({
     }
   }, [token, API_URL, setMessages, setPosts]);
 
+  // AJOUT: Fonction pour supprimer un message
+  const handleDeleteMessage = useCallback(async (messageId, forumId) => {
+    if (!token) {
+      return;
+    }
+    
+    setDeletingMessageId(messageId);
+    
+    try {
+      const response = await fetch(`${API_URL}/messages/${messageId}/delete/`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        // Supprimer le message de l'état local
+        setMessages(prev => {
+          const forumMessages = prev[forumId] || [];
+          const updatedMessages = forumMessages.filter(msg => msg.id_message !== messageId);
+          return { ...prev, [forumId]: updatedMessages };
+        });
+        
+        // Mettre à jour le compteur de messages dans le post
+        setPosts(prev => prev.map(post => {
+          if (post.id === forumId) {
+            return {
+              ...post,
+              commentsCount: Math.max(0, (post.commentsCount || 0) - 1)
+            };
+          }
+          return post;
+        }));
+        
+        // Émettre un événement de notification si nécessaire
+        triggerNotificationEvent();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(t("errors.delError"), errorData.error || `Erreur ${response.status}`);
+      }
+    } catch (error) {
+      console.error(t("errors.delNetworkerror"), error);
+    } finally {
+      setDeletingMessageId(null);
+      setShowDeleteMessageConfirm(null);
+    }
+  }, [token, API_URL, setMessages, setPosts, triggerNotificationEvent]);
+
   const handleLikeMessage = useCallback(async (messageId, forumId) => {
     if (!token) {
       return;
@@ -252,6 +304,11 @@ export default function ForumItem({
     }
   }, [token, API_URL, messages, triggerNotificationEvent, setMessages]);
 
+  // Fonction pour vérifier si l'utilisateur peut supprimer un message
+  const canDeleteMessage = useCallback((message) => {
+    return message.utilisateur === userId || role === "admin";
+  }, [userId, role]);
+
   return (
     <div className="bg-grad-2 dark:bg-gray-800 rounded-3xl p-6 shadow-md border border-blue/10 dark:border-gray-700">
       <div className="flex items-center justify-between mb-4">
@@ -270,7 +327,6 @@ export default function ForumItem({
               </span>
               {post.type === "student-teacher" && (
                 <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded border border-yellow-200 dark:border-yellow-800">
-                  {/* Question d'étudiant */}
                   {t("actions.studentQuestion")}
                 </span>
               )}
@@ -279,8 +335,7 @@ export default function ForumItem({
         </div>
         {post.isMine && (
           <span className="px-3 py-1 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full">
-            {/* Votre forum */}
-              {t("actions.yourForum")}
+            {t("actions.yourForum")}
           </span>
         )}
       </div>
@@ -337,9 +392,20 @@ export default function ForumItem({
             <button 
               onClick={() => setShowDeleteConfirm(post.id)}
               disabled={deletingForumId === post.id}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-500 text-red-700 dark:text-red-300 
-                       hover:bg-red-100 dark:hover:bg-red-900/30 hover:border-red-600 hover:text-red-800 dark:hover:text-red-200 transition-colors 
-                       disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+              className="
+                w-full sm:w-auto
+                flex items-center justify-center gap-2
+                px-3 sm:px-4 py-2
+                rounded-xl
+                bg-red-50 dark:bg-red-900/20
+                border border-red-500
+                text-red-700 dark:text-red-300
+                hover:bg-red-100 dark:hover:bg-red-900/30
+                hover:border-red-600 hover:text-red-800
+                transition-colors
+                disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-sm text-sm
+              "
               aria-label="Supprimer le forum"
             >
               {deletingForumId === post.id ? (
@@ -437,13 +503,13 @@ export default function ForumItem({
                   <div key={message.id_message} className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                     <div className="flex items-start space-x-3">
                       <div className="w-8 h-8 rounded-full bg-blue/20 dark:bg-blue-900/40 flex items-center justify-center text-sm font-bold">
-                        {`${message.utilisateur_prenom?.[0] || ""}${message.utilisateur_nom?.[0] || ""}`.toUpperCase()}
+                        {`${message.auteur_prenom?.[0] || ""}${message.auteur_nom?.[0] || ""}`.toUpperCase()}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div>
                             <span className="font-medium dark:text-white">
-                              {message.utilisateur_prenom} {message.utilisateur_nom}
+                              {message.auteur_prenom} {message.auteur_nom}
                             </span>
                             <span className="text-xs text-grayc dark:text-gray-400 ml-2">
                               {formatTimeAgo(message.date_publication)}
@@ -470,6 +536,47 @@ export default function ForumItem({
                                 {message.nombre_likes || 0} {message.nombre_likes === 1 ? 'like' : 'likes'}
                               </span>
                             </button>
+                            
+                            {/* AJOUT: Bouton pour supprimer le message */}
+                            {canDeleteMessage(message) && (
+                              <div className="relative">
+                                <button
+                                  onClick={() => setShowDeleteMessageConfirm(message.id_message)}
+                                  disabled={deletingMessageId === message.id_message}
+                                  className="text-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                                  aria-label="Supprimer le message"
+                                >
+                                  {deletingMessageId === message.id_message ? (
+                                    <Loader className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <Trash2 size={14} />
+                                  )}
+                                </button>
+                                
+                                {showDeleteMessageConfirm === message.id_message && (
+                                  <div className="absolute top-full right-0 mt-1 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-red-200 dark:border-red-800 p-3 z-10">
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                                      Supprimer ce message ?
+                                    </p>
+                                    <div className="flex justify-end gap-2">
+                                      <button
+                                        onClick={() => setShowDeleteMessageConfirm(null)}
+                                        className="px-3 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                                      >
+                                        Annuler
+                                      </button>
+                                      <button
+                                        onClick={() => handleDeleteMessage(message.id_message, post.id)}
+                                        disabled={deletingMessageId === message.id_message}
+                                        className="px-3 py-1 text-xs bg-red-600 dark:hover:bg-gray-700 rounded hover:bg-red-700 disabled:opacity-50"
+                                      >
+                                        {deletingMessageId === message.id_message ? 'Suppression...' : 'Supprimer'}
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
 
