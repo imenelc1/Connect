@@ -23,6 +23,11 @@ const initialsBgMap = {
   Intermédiaire: "bg-purple",
   Avancé: "bg-pink",
 };
+const levelKeyMap = {
+  Débutant: "beginner",
+  Intermédiaire: "intermediate",
+  Avancé: "advanced",
+};
 
 /* ===================== UTILS ===================== */
 const getInitials = (name = "") =>
@@ -37,7 +42,7 @@ const getInitials = (name = "") =>
 export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const { t } = useTranslation("allExercises");
+  const { t } = useTranslation("contentPage");
 
   if (!exercise) return null;
 
@@ -75,7 +80,8 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
           <span
             className={`px-3 py-1 text-xs rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
           >
-            {exercise.level}
+                        {t(`levels.${levelKeyMap[exercise.level]}`)}
+
           </span>
         </div>
 

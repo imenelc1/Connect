@@ -5,6 +5,9 @@
   "searchPlaceholder": "Search courses...",
   "submissions": "{{count}} students",
   "validationButton": "Course validation",
+  "auteur": "Author",
+  "voir_cours":"View the course",
+
   "difficulty": {
     "Beginner": "Beginner",
     "Intermediate": "Intermediate",

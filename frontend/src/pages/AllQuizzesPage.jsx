@@ -1,5 +1,5 @@
   import React, { useEffect, useState, useContext, useMemo } from "react";
-  import Navbar from "../components/common/Navbar";
+  import Navbar from "../components/common/NavBar";
   import { Plus, Bell } from "lucide-react";
   import ContentCard from "../components/common/ContentCard";
   import Button from "../components/common/Button";
@@ -22,7 +22,7 @@
     const token = localStorage.getItem("token");
     const currentUserId = getCurrentUserId();
     const navigate = useNavigate();
-    const { t } = useTranslation("allQuizzes");
+    const { t } = useTranslation("contentPage");
     const { toggleDarkMode } = useContext(ThemeContext);
 
     const userData = JSON.parse(localStorage.getItem("user"));
