@@ -72,8 +72,8 @@ export default function AssistantIA({
     actualMode === "exercise"
       ? exercise?.id
       : actualMode === "course"
-      ? course?.id
-      : "global";
+        ? course?.id
+        : "global";
 
   // ---------- Load student ----------
   useEffect(() => {
@@ -102,14 +102,12 @@ export default function AssistantIA({
           from: "bot",
           text:
             actualMode === "exercise"
-              ? `Bonjour ${
-                  student.name
-                } 👋\nJe vois que tu travailles sur l'exercice : **${
-                  exercise?.titre || "en cours"
-                }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
+              ? `Bonjour ${student.name
+              } 👋\nJe vois que tu travailles sur l'exercice : **${exercise?.titre || "en cours"
+              }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
               : actualMode === "course"
-              ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
-              : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`,
+                ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
+                : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`,
         },
       ]);
     }
@@ -257,8 +255,8 @@ INSTRUCTIONS IMPORTANTES :
                 {actualMode === "course"
                   ? "Assistant Cours"
                   : actualMode === "exercise"
-                  ? "Assistant Exercice"
-                  : "Assistant IA"}
+                    ? "Assistant Exercice"
+                    : "Assistant IA"}
               </p>
               <span className="text-xs opacity-80">{student.name}</span>
             </div>
@@ -282,11 +280,10 @@ INSTRUCTIONS IMPORTANTES :
                 <img src={Mascotte} className="w-7 h-7 mr-2" />
               )}
               <div
-                className={`p-4 rounded-2xl text-sm max-w-[75%] ${
-                  m.from === "user"
+                className={`p-4 rounded-2xl text-sm max-w-[75%] ${m.from === "user"
                     ? "bg-grad-1 text-white"
                     : "bg-card text-text"
-                }`}
+                  }`}
               >
                 {m.from === "bot" ? (
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -310,16 +307,15 @@ INSTRUCTIONS IMPORTANTES :
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder={
-                actualMode === "course"
-                  ? "Pose une question sur le cours…"
-                  : "Explique ton problème…"
-              }
-              className="w-full rounded-full border px-4 py-2 pr-12"
+              placeholder={actualMode === "course" ? "Pose une question sur le cours…" : "Explique ton problème…"}
+              className="w-full rounded-full border border-input-border px-4 py-2 pr-12
+          bg-input-bg text-input-text placeholder-input-placeholder
+          dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-light"
             />
             <button
               onClick={handleSend}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center
+          bg-grad-button text-white hover:opacity-90 transition"
             >
               <Send size={14} />
             </button>
