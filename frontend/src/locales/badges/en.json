@@ -21,5 +21,13 @@
     "streak": "Current Streak",
     "xp": "XP",
     "totalPoints": "Total Points"
-  }
+  },
+   "locked": "Locked",
+   "progression":"Progress",
+ 
+   "Errors": {
+   
+     "BadgesLoadFailed": "Failed to load badges",
+    "BadgesLoaded": "Badges loaded"
+}
 }

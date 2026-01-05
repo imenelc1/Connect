@@ -15,20 +15,20 @@
     "Week": "Week",
     "level": "Grade",
     "submissionsLabel": "Submissions",
-    "dashboardError": "Error while fetching dashboard",
     "submitted": "Submitted Exercises",
     "empty": "No exercises submitted yet",
     "completed": "Completed Quizzes",
     "noneCompleted": "No quizzes completed yet",
     "QuizAverageScore": "Quiz Average Score",
-     "weeklyDataLog": "Weekly data",
-     "untitledExercise": "Untitled"
-  
+    "weeklyDataLog": "Weekly data",
+    "untitledExercise": "Untitled",
+    "title":"Progress"
+
   },
   "errors": {
     "dashboardError": "Error while fetching dashboard",
     "averageScore": "Error while fetching average score",
     "attempts": "Error while fetching attempts",
-     "weeklySubmissionsError": "Error fetching weekly submissions"
+    "weeklySubmissionsError": "Error fetching weekly submissions"
   }
 }

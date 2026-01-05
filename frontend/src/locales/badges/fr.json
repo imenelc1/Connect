@@ -21,5 +21,12 @@
     "streak": "Série en cours",
     "xp": "XP",
     "totalPoints": "Points totaux"
-  }
+  },
+   "locked": "Verrouillé",
+      "progression":"Progression",
+   "Errors": {
+   
+     "BadgesLoadFailed": "Erreur récupération badges",
+    "BadgesLoaded": "Badges récupérés"
+}
 }

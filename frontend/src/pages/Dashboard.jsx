@@ -9,6 +9,10 @@ import ContentFilters from "../components/common/ContentFilters";
 import ActivityCharts from "../components/common/ActivityCharts";
 import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
+import dayjs from "dayjs";
+
+// Composant NotificationItem IDENTIQUE à celui du dashboard enseignant
+import NotificationItem from "../components/common/AcivityFeed"; // Même composant
 
 export default function DashboardAdmin() {
   const { toggleDarkMode } = useContext(ThemeContext);
@@ -22,6 +26,10 @@ export default function DashboardAdmin() {
   const token = localStorage.getItem("admin_token");
   const adminData = JSON.parse(localStorage.getItem("admin")) || {};
   const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
+  
+  // États pour les notifications - IDENTIQUE
+  const { notifications, loading: loadingNotifications, fetchNotifications } = useNotifications();
+
   // Effet pour la responsivité
   useEffect(() => {
     const handleResize = () => {
@@ -38,6 +46,59 @@ export default function DashboardAdmin() {
       window.removeEventListener("sidebarChanged", handleSidebarChange);
     };
   }, []);
+
+  // Effet pour charger les notifications - IDENTIQUE
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Fonction pour formater les notifications - IDENTIQUE
+  const formatNotificationsForFeed = () => {
+    if (!Array.isArray(notifications) || notifications.length === 0) {
+      // Retourner des données mock si aucune notification
+      return [
+        { 
+          title: "Nouvelle inscription étudiant", 
+          date: dayjs().format("DD/MM/YYYY"), 
+          day: dayjs().format("dddd"), 
+          time: dayjs().format("HH:mm") 
+        },
+        { 
+          title: "Cours 'Algorithmes' approuvé", 
+          date: dayjs().subtract(1, 'day').format("DD/MM/YYYY"), 
+          day: dayjs().subtract(1, 'day').format("dddd"), 
+          time: "14:15" 
+        },
+        { 
+          title: "Exercice soumis par étudiant", 
+          date: dayjs().subtract(2, 'day').format("DD/MM/YYYY"), 
+          day: dayjs().subtract(2, 'day').format("dddd"), 
+          time: "16:45" 
+        },
+        { 
+          title: "Nouveau professeur inscrit", 
+          date: dayjs().subtract(3, 'day').format("DD/MM/YYYY"), 
+          day: dayjs().subtract(3, 'day').format("dddd"), 
+          time: "09:20" 
+        }
+      ];
+    }
+
+    return notifications.slice(0, 4).map(notif => {
+      const dateObj = notif.date_envoie
+        ? dayjs(notif.date_envoie)
+        : dayjs();
+
+      return {
+        title: notif.message_notif || "Notification",
+        date: dateObj.format("DD/MM/YYYY"),
+        day: dateObj.format("dddd"),
+        time: dateObj.format("HH:mm"),
+      };
+    });
+  };
+
+  const formattedNotifications = formatNotificationsForFeed();
 
   // ----- MOCK COURSES -----
   const pendingCourses = [
@@ -106,15 +167,6 @@ export default function DashboardAdmin() {
     "bg-grad-3",
   ];
 
-  // ----- MOCK RECENT ACTIVITY -----
-  const recentActivity = [
-    { name: "Alice Martin", action: "Completed 'Pointers'", time: "5 min ago" },
-    { name: "Bob Johnson", action: "Started 'Binary'", time: "12 min ago" },
-    { name: "Carol Smith", action: "Submitted Quiz", time: "23 min ago" },
-    { name: "David Lee", action: "Earned 'Master of Algo'", time: "1 hour ago" },
-    { name: "Emma Wilson", action: "Posted in Recursion", time: "2 hours ago" },
-  ];
-
   useEffect(() => {
     fetch("http://localhost:8000/api/users/admin/stats/", {
       headers: {
@@ -149,16 +201,16 @@ export default function DashboardAdmin() {
           </div>
           
           <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-                  <NotificationBell />
-                  <UserCircle
-                    initials={initials}
-                    onToggleTheme={toggleDarkMode}
-                    onChangeLang={(lang) => {
-                      const i18n = window.i18n;
-                      if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-                    }}
-                  />
-                </div>
+            <NotificationBell />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => {
+                const i18n = window.i18n;
+                if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+              }}
+            />
+          </div>
         </div>
 
         {/* STATS WITH PROTOTYPE COLORS */}
@@ -182,30 +234,40 @@ export default function DashboardAdmin() {
         {/* GRID: ACTIVITY + COURSES */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* LEFT: Recent Activity */}
-          <div className="bg-card  rounded-2xl p-6 shadow-sm">
+          {/* LEFT: Recent Activity - NOUVEAU STYLE IDENTIQUE AU DASHBOARD ENSEIGNANT */}
+          <div className="bg-card rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-muted mb-4">{t("recentActivity")}</h2>
-
-            <ul className="flex flex-col gap-4">
-              {recentActivity.map((item, i) => (
-                <li key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-grad-2 text-muted flex items-center justify-center font-bold">
-                    {item.name.charAt(0)}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-muted font-medium">{item.name}</p>
-                    <p className="text-gray text-sm">{item.action}</p>
-                    <span className="text-gray-400 text-xs">{item.time}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <p className="text-gray-500 text-xs mb-4">
+                        {dayjs().startOf('week').format("DD MMM")} - {dayjs().endOf('week').format("DD MMM")}
+                      </p>
+            {/* Même structure que le dashboard enseignant */}
+            <div className="space-y-3">
+              {loadingNotifications ? (
+                <div className="flex items-center justify-center py-4">
+                  <p className="text-sm text-gray-500">Chargement des notifications...</p>
+                </div>
+              ) : formattedNotifications.length === 0 ? (
+                <div className="flex items-center justify-center py-4">
+                  <p className="text-sm text-gray-500">Aucune notification pour le moment</p>
+                </div>
+              ) : (
+                formattedNotifications.map((item, index) => (
+                  <NotificationItem
+                    key={index}
+                    title={item.title}
+                    date={item.date}
+                    day={item.day}
+                    time={item.time}
+                    isMobile={isMobile}
+                  />
+                ))
+              )}
+            </div>
           </div>
 
           {/* RIGHT: COURSES VALIDATION */}
           <div className="bg-card  rounded-2xl p-6 shadow-sm">
             <ActivityCharts />
-
           </div>
         </div>
       </main>

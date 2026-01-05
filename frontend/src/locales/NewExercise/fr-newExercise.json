@@ -11,7 +11,10 @@
     "duration_label": "Durée",
     "level_label": "Niveau",
     "cours": "Cours",
-    "solution_label": "Solution (optionnel — visible après réalisation de l’exercice)"
+    "solution_label": "Solution (optionnel — visible après réalisation de l’exercice)",
+          "solution_placeholder": "Écrire la solution ici (facultatif)",
+              "max_submissions": " max de soumissions",
+              "unlimited": "Illimité"
 
   },
   "select": {
@@ -48,6 +51,14 @@
     "courseVisibility": "Visibilité",
     "course_selected": "Cours sélectionné"
   },
-      "solution_note": "Cette solution est visible uniquement par l’enseignant. Elle ne sera révélée à l’étudiant qu’après qu’il aura terminé l’exercice."
+      "solution_note": "Cette solution est visible uniquement par l’enseignant. Elle ne sera révélée à l’étudiant qu’après qu’il aura terminé l’exercice.",
+
+"Errors": {
+    "CourseLoadFailed": "Erreur chargement cours",
+    "NotLoggedIn": "Utilisateur non connecté",
+    "CourseCreationFailed": "Erreur création cours",
+    "ExerciseCreationFailed": "Erreur lors de la création de l'exercice"
+ 
+}
 
 }

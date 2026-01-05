@@ -74,41 +74,41 @@ export default function AppRoutes() {
       <Routes>
 
         {/* ========= PUBLIC ========= */}
-        <Route path="/" element={<Acceuil />} />
-        <Route path="/choice" element={<Choice />} />
-        <Route path="/signup/student" element={<StudentSignup />} />
-        <Route path="/signup/instructor" element={<InstructorSignup />} />
-        <Route path="/login/student" element={<LoginStudent />} />
+        <Route path="/" element={<Acceuil />} />{/* QOWA*/}
+        <Route path="/choice" element={<Choice />} />{/*QOWA */}
+        <Route path="/signup/student" element={<StudentSignup />} />{/* */}
+        <Route path="/signup/instructor" element={<InstructorSignup />} />{/* */}
+        <Route path="/login/student" element={<LoginStudent />} />{/* */}
         <Route path="/login/instructor" element={<LoginInstructor />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* ========= DASHBOARDS ========= */}
-        <Route path="/dashboard-etu" element={<Dashboardetu />} />
-        <Route path="/dashboard-ens" element={<Dashboardens />} />
-        <Route path="/dashboard-admin" element={<Dashboard />} />
+       <Route path="/dashboard-etu" element={<Dashboardetu />} />   {/* */}
+        <Route path="/dashboard-ens" element={<Dashboardens />} />{/* */}
+        <Route path="/dashboard-admin" element={<Dashboard />} />{/* */}
 
         {/* ========= COMMON ========= */}
-        <Route path="/settings" element={<Setting />} />
-        <Route path="/community" element={<CommunityPage />} />
-        <Route path="/badges" element={<Badges/>} />
-        <Route path="/my-students" element={<MyStudents />} />
-        <Route path="/spaces" element={<Spaces />} />
-        <Route path="/welcome-reset-password/:token" element={<WelcomeResetPassword />} />
+        <Route path="/settings" element={<Setting />} />{/*Qowa */}
+        <Route path="/community" element={<CommunityPage />} />{/* */}
+        <Route path="/badges" element={<Badges/>} />{/* mazal les graphes ni*/}
+        <Route path="/my-students" element={<MyStudents />} /> {/*qowa */}
+        <Route path="/spaces" element={<Spaces />} /> {/*bof */}
+        <Route path="/welcome-reset-password/:token" element={<WelcomeResetPassword />} /> {/*qowaaaa */}
 
 
         {/* ========= COURSES ========= */}
-        <Route path="/all-courses" element={<AllCoursesPage />} />
-        <Route path="/CourseDetails/:id" element={<CourseDetails />} />
-        <Route path="/course-details" element={<CourseDetails />} />
-        <Route path="/Seecourses/:id" element={<Courses />} />
-        <Route path="/courses/edit/:id" element={<CourseUpdate />} />
-        <Route path="/courses" element={<CourseUpdate />} />
-        <Route path="/CoursInfo" element={<CoursInfo />} />
+        <Route path="/all-courses" element={<AllCoursesPage />} /> {/* */}
+        <Route path="/CourseDetails/:id" element={<CourseDetails />} />{/* */}
+        <Route path="/course-details" element={<CourseDetails />} />{/* */}
+        <Route path="/Seecourses/:id" element={<Courses />} />{/* */}
+        <Route path="/courses/edit/:id" element={<CourseUpdate />} />{/* */}
+        <Route path="/courses" element={<CourseUpdate />} />{/* */}
+        <Route path="/CoursInfo" element={<CoursInfo />} />{/* */}
 
         {/* ========= EXERCISES ========= */}
-        <Route path="/all-exercises" element={<AllExercisesPage />} />
-        <Route path="/ListeExercices" element={<CourseExercisesPage />} />
+        <Route path="/all-exercises" element={<AllExercisesPage />} />{/* */}
+        <Route path="/ListeExercices" element={<CourseExercisesPage />} />{/* */}
         <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
 
         <Route path="/student-exercice" element={<StudentExercice />} />

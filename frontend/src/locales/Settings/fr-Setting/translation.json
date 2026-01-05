@@ -1,5 +1,5 @@
 {
-   "Setting": {
+  "Setting": {
     "Profile": "Profil",
     "Preferences": "Préférences",
     "Account": "Compte"
@@ -48,11 +48,12 @@
     "PasswordsMismatch": "Les mots de passe ne correspondent pas",
     "EmailRequired": "Email obligatoire",
     "EmailInvalid": "Format d'email invalide",
-        "PasswordUpdateSuccess": "Mot de passe mis à jour avec succès !",
-    "ProfileUpdateSuccess":"Profil mis à jour avec succès !",
+    "PasswordUpdateSuccess": "Mot de passe mis à jour avec succès !",
+    "ProfileUpdateSuccess": "Profil mis à jour avec succès !",
     "PasswordUpdateFailed": "Erreur lors de la mise à jour du mot de passe",
     "ProfileLoadFailed": "Impossible de charger le profil utilisateur",
-    "ProfileUpdateFailed": "Erreur lors de la mise à jour du profil"
+    "ProfileUpdateFailed": "Erreur lors de la mise à jour du profil",
+    "FormErrors": "Erreurs dans le formulaire"
   },
   "Global": {
     "Loading": "Chargement..."

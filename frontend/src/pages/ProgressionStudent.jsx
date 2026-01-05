@@ -220,7 +220,7 @@ export default function ProgressStudent() {
             className="px-12 py-1 text-gray/10 rounded-full font-semibold mb-2 sm:mb-0 bg-card"
              onClick={() => navigate("/progress-student")}
           >
-            {t("Progression")}
+            {t("ProgressStudent.title")}
           </span>
         </div>
 
