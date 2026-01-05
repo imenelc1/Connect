@@ -107,6 +107,7 @@ export default function Navbar() {
   const courseRoutes = [
     "/all-courses",
     "/CoursInfo",
+    "/courses/edit/",
 
   ];
   const exerciseRoutes = [

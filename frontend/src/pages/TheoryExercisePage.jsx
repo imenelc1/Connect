@@ -5,7 +5,7 @@ import { MessageCircle, Globe } from "lucide-react";
 import { MdAutoAwesome } from "react-icons/md";
 import { useParams } from "react-router-dom";
 
-import NavBar from "../components/common/Navbar";
+import NavBar from "../components/common/NavBar";
 import Mascotte from "../assets/head_mascotte.svg";
 import HeadMascotte from "../components/ui/HeadMascotte";
 

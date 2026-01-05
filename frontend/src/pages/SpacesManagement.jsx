@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/Navbar";
+import Navbar from "../components/common/NavBar";
 import { Folder, SquarePen, Trash2, Plus } from "lucide-react";
 import Button from "../components/common/Button";
 import AddModel from "../components/common/AddModel";
