@@ -60,36 +60,6 @@ class ExerciceDetailView(generics.RetrieveUpdateDestroyAPIView):
         context['request'] = self.request
         return context
 
-    # 🔹 update : notifie seulement l'enseignant
-    def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        exercice = self.get_object()
-        enseignant = exercice.utilisateur
-        if request.user.is_staff and enseignant:  # notification à l'enseignant seulement
-            Notification.objects.create(
-                utilisateur_destinataire=enseignant,
-                action_type='exercise_updated',
-                module_source='exercices',
-                message_notif=f"📢 Votre exercice '{exercice.titre_exo}' a été modifié."
-            )
-        return response
-
-    # 🔹 destroy : notifie seulement l'enseignant
-    def destroy(self, request, *args, **kwargs):
-        exercice = self.get_object()  # récupérer avant suppression
-        enseignant = exercice.utilisateur
-        if request.user.is_staff and enseignant:  # notification à l'enseignant seulement
-            Notification.objects.create(
-                utilisateur_destinataire=enseignant,
-                action_type='exercise_deleted',
-                module_source='exercices',
-                message_notif=f"❌ Votre exercice '{exercice.titre_exo}' a été supprimé."
-            )
-        return super().destroy(request, *args, **kwargs)
-
-
-    
-
 @api_view (['DELETE'])
 def delete_exercice(request, pk):
     try:

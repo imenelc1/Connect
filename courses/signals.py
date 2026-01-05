@@ -64,3 +64,65 @@ def notify_students_on_course_publish(sender, instance, created, **kwargs):
     if notifications:
         Notification.objects.bulk_create(notifications)
 
+import threading
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.contrib.contenttypes.models import ContentType
+from courses.models import Cours
+from feedback.models import Notification
+from users.models import Administrateur
+
+@receiver(post_save, sender=Cours)
+def notify_prof_on_course_update(sender, instance, created, **kwargs):
+    if created:
+        return  # ignore creation
+
+    # Récupère l'admin courant depuis le middleware
+      # pas d'admin connecté → pas de notif
+
+    prof = instance.utilisateur
+    if not prof:
+        return
+
+    Notification.objects.create(
+        message_notif=f"Votre cours '{instance.titre_cour}' a été modifié par un administrateur.",
+        utilisateur_destinataire=prof,
+        admin_destinataire=None,  # ADMIN non destinataire
+        action_type="UPDATE",
+        module_source="COURS",
+        content_type=ContentType.objects.get_for_model(instance),
+        object_id=instance.id_cours,
+        extra_data={
+            "admin_id": admin.id_admin,
+            "admin_email": admin.email_admin
+        }
+    )
+
+# -----------------------------
+# SIGNAL DELETE
+# -----------------------------
+@receiver(post_delete, sender=Cours)
+def notify_prof_on_course_delete(sender, instance, **kwargs):
+    admin = getattr(threading.current_thread(), "current_admin", None)
+    if not admin:
+        return
+
+    prof = instance.utilisateur
+    if not prof:
+        return
+
+    Notification.objects.create(
+        message_notif=f"Votre cours '{instance.titre_cour}' a été supprimé par un administrateur.",
+        utilisateur_destinataire=prof,
+        admin_destinataire=None,  # ADMIN non destinataire
+        action_type="DELETE",
+        module_source="COURS",
+        content_type=ContentType.objects.get_for_model(instance),
+        object_id=instance.id_cours,
+        extra_data={
+            "deleted_course_id": instance.id_cours,
+            "deleted_course_title": instance.titre_cour,
+            "admin_id": admin.id_admin,
+            "admin_email": admin.email_admin
+        }
+    )
