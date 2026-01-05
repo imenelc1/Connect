@@ -195,7 +195,7 @@ export default function QuizzesManagement() {
                                                         className={`px-4 py-2 whitespace-nowrap ${buttonStyles[q.niveau_exercice_label]}`}
                                                        onClick={() => navigate(`/Voir-quiz/${q.exerciceId}`)}
                                                       >
-                                                        Voir Quiz
+                                                        {t("voir_quiz")}
                                                       </Button>
                   <button
                     className="text-muted hover:opacity-80"

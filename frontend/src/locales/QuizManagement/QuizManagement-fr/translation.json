@@ -2,6 +2,7 @@
     "title": "Gestion des Quiz",
     "subtitle": "Créer et gérer les quiz du cours",
     "searchPlaceholder": "Rechercher des quiz...",
+    "voir_quiz": "Voir le quiz",
     "stats": {
         "questions": "Questions",
         "attempts": "Tentatives",

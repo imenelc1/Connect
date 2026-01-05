@@ -1,4 +1,6 @@
 {
+  "preview":"preview quiz",
+  "info": "quiz information",
   "newQuiz": "NEW Quiz",
   "exitPreview": "Exit Preview",
   "noData": "No quiz data found.",
@@ -10,6 +12,18 @@
   "questionText": "Enter your question here...",
   "answerOption": "Answer option...",
   "sendQuiz": "Send Quiz",
+
+
+  "selectCourse": "Select a course",
+  "chooseCourse": "choose",
+  "visibility": "visibility",
+  "public":"public",
+  "private":"private",
+  "selectLevel": "select level",
+  "scoreMinimum": "Score minimum",
+  "maxAttempts":"max attempts",
+  "delais_entre_tentative": "Delay between attempts",
+  "enableDuration": "Activate timer", 
 
   "quizSettings": "Quiz Settings",
   "quizTitle": "Quiz Title",

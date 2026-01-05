@@ -29,17 +29,33 @@ from users.jwt_auth import IsAuthenticatedJWT, jwt_required
 from django.db.models import Q
 
 # --- Création d'un espace ---
+from feedback.models import Notification
+
 class CreateSpaceView(APIView):
     @jwt_required
     def post(self, request):
         data = request.data.copy()
-        user = request.user
+        user = request.user  # le propriétaire (prof)
 
         serializer = SpaceSerializer(data=data)
         if serializer.is_valid():
             space = serializer.save(utilisateur=user)
+ 
+            Notification.objects.create(
+                message_notif=f"Un nouvel espace '{space.nom_space}' vous a été assigné.",
+                utilisateur_destinataire=space.utilisateur,
+                action_type="assignation_espace",
+                module_source="Espace",
+                extra_data={
+                    "space_id": space.id_space,
+                    "space_title": space.nom_space
+                }
+            )
+
             return Response(SpaceSerializer(space).data, status=201)
+
         return Response(serializer.errors, status=400)
+
 
 
 # --- Liste des espaces du prof connecté ---
@@ -632,3 +648,4 @@ def delete_space(request, space_id):
         {"message": "Espace supprimé avec succès"},
         status=status.HTTP_204_NO_CONTENT
     )
+

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/Navbar.jsx";
+import Navbar from "../components/common/NavBar.jsx";
 import { Plus } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button.jsx";
@@ -31,7 +31,7 @@ export default function AllCoursesPage() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const navigate = useNavigate();
-  const { t } = useTranslation("allcourses");
+  const { t } = useTranslation("contentPage");
   const { toggleDarkMode } = useContext(ThemeContext);
 
   const userData = JSON.parse(localStorage.getItem("user"));

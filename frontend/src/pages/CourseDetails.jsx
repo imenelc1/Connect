@@ -645,7 +645,15 @@ const handleAddItem = (selectedItemId) => {
               className="w-full sm:w-50 md:w-[200px] lg:w-70 h-10 md:h-12 lg:h-10 mt-4 sm:mt-0 px-5 py-6 bg-grad-1 text-white transition-all flex items-center gap-2 justify-center whitespace-nowrap"
               onClick={() => setOpenModal(true)}
             >
-              <Plus size={18} /> {t("addItem")}
+              <Plus size={18} />
+              {activeStep === 1
+  ? t("addCourse")
+  : activeStep === 2
+  ? t("addQuiz")
+  : activeStep === 3
+  ? t("addExo")
+  : null}
+              
             </Button>
           )}
         </div>

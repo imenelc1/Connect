@@ -10,7 +10,7 @@ import { toast } from "react-hot-toast";
 import Input from "../components/common/Input.jsx";
 import ModernDropdown from "../components/common/ModernDropdown.jsx";
 import StudentDetailModal from "../components/ui/StudentDetailModal.jsx";
-
+import progressionService from "../services/progressionService";
 // ================= MODAL ÉDITION =================
 function StudentEditModal({ studentForm, setStudentForm, onClose, onSubmit, editErrors = {}, t }) {
   if (!studentForm) return null;
@@ -322,7 +322,29 @@ export default function StudentsManagement() {
     }
   };
 
+  useEffect(() => {
+    const fetchStudents = async () => {
+      setLoading(true);
+      try {
+        const data = await progressionService.getCurrentProgressStudents();
 
+        // Formater si nécessaire
+        const formatted = data.map(s => ({
+          ...s,
+          courses_count: s.courses_count || s.courses?.length || 0,
+        }));
+
+        setStudents(formatted);
+      } catch (err) {
+        console.error("Erreur récupération étudiants:", err);
+        setError("Impossible de charger les étudiants.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
   //===========AJOUTER UN ETUDIANT==========
   const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
   const [newStudentForm, setNewStudentForm] = useState({
@@ -472,8 +494,17 @@ export default function StudentsManagement() {
 
   return (
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      <Navbar />
-      <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+
+      <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
@@ -521,6 +552,7 @@ export default function StudentsManagement() {
                 </div>
                 <ProgressBar value={s.progress} />
               </div>
+
 
               <div className="flex justify-between text-sm text-grayc mt-4">
                 <span>{t("StudentsManagement.joined")}</span>

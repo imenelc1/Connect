@@ -27,7 +27,7 @@ export default function AllExercisesPage() {
   const token = localStorage.getItem("token");
   const currentUserId = getCurrentUserId();
   const navigate = useNavigate();
-  const { t } = useTranslation("allExercises");
+  const { t } = useTranslation("contentPage");
   const { toggleDarkMode } = useContext(ThemeContext);
 
   const [exercises, setExercises] = useState([]);
