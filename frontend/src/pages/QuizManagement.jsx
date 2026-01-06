@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Trash2, FileText, SquarePen } from "lucide-react";
@@ -28,6 +28,23 @@ export default function QuizzesManagement() {
   const [editModal, setEditModal] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // ================= RESIZE =================
+    // Handle window resize
+      useEffect(() => {
+        const resizeHandler = () => setWindowWidth(window.innerWidth);
+        window.addEventListener("resize", resizeHandler);
+        return () => window.removeEventListener("resize", resizeHandler);
+      }, []);
+       // Sidebar collapsed
+        useEffect(() => {
+          const handler = (e) => setSidebarCollapsed(e.detail);
+          window.addEventListener("sidebarChanged", handler);
+          return () => window.removeEventListener("sidebarChanged", handler);
+        }, []);
+      
+        const sidebarWidth = sidebarCollapsed ? 60 : 240;
 
   const [editValues, setEditValues] = useState({ title: "", description: "", visibilite_exo: false });
 
@@ -144,18 +161,15 @@ export default function QuizzesManagement() {
 
   return (
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      <Navbar />
-      <main
-  className="
-    flex-1
-    p-6
-    pt-10
-    space-y-5
-    transition-all
-    pl-16
-    md:pl-64
-  "
->
+         {/* Sidebar */}
+         <div>
+           <Navbar />
+         </div>
+        
+         <main className={`
+           flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+           ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+         `}>
 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>

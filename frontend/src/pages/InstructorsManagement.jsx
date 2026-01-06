@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import Input from "../components/common/Input";
 import ModernDropdown from "../components/common/ModernDropdown.jsx";

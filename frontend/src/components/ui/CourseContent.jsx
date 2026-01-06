@@ -299,9 +299,13 @@ useEffect(() => {
             <h3 className="text-base sm:text-lg font-semibold">{t("readyQuiz")}</h3>
             <p className="text-sm sm:text-base opacity-90">{t("quizDesc")}</p>
           </div>
-          <button className="bg-white text-blue font-medium px-4 sm:px-6 py-2 rounded-xl shadow flex items-center gap-1 sm:gap-2 text-sm sm:text-base">
-            {t("startQuiz")} <ChevronRight size={16} />
-          </button>
+          <button
+  className="bg-white text-blue font-medium px-4 sm:px-6 py-2 rounded-xl shadow flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+  onClick={() => navigate(`/cours/${courseId}/quizzes`)}
+>
+  {t("startQuiz")} <ChevronRight size={16} />
+</button>
+
         </div>
       </div>
 
@@ -353,7 +357,10 @@ useEffect(() => {
         </div>
 
         <textarea
-          className="w-full h-36 sm:h-48 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
+          className="w-full h-36 sm:h-48 border  rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none bg-[rgb(var(--color-input-bg))]
+        text-[rgb(var(--color-input-text))]
+        placeholder-[rgb(var(--color-input-placeholder))]
+        border border-[rgb(var(--color-input-border))] text-sm sm:text-base"
           placeholder={t("feedbackPlaceholder")}
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}

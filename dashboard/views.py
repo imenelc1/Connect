@@ -322,8 +322,12 @@ def student_total_tentatives(request, student_id):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
-def global_progress(request):
-    user = request.user
+def global_progress(request, user_id=None):
+    if user_id:
+        user = Utilisateur.objects.get(id_utilisateur=user_id)
+
+    else:
+     user = request.user
 
     # ---- Cours ----
     courses = Cours.objects.all()

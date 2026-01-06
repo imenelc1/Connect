@@ -8,6 +8,7 @@ import ThemeContext from "../context/ThemeContext";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import api from "../services/apiGenerale";
 import { toast } from "react-hot-toast";
+import Input from "../components/common/Input";
 
 // Import des icônes React
 import {
@@ -319,15 +320,13 @@ export default function BadgesManagement() {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface">
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+      <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
 
-      <Navbar />
-     <main
-  className={`
-    flex-1 p-4 sm:p-6 pt-28 space-y-8 transition-all
-    pl-16 md:pl-64
-  `}
->
 
 
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
@@ -363,11 +362,10 @@ export default function BadgesManagement() {
           }}
         >
           {filteredBadges.map((badge) => (
-           <div
-  className={`rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between ${
-    categoryColors[badge.category]?.card || categoryColors.default.card
-  }`}
->
+            <div
+              className={`rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between ${categoryColors[badge.category]?.card || categoryColors.default.card
+                }`}
+            >
 
               <div className="flex justify-between mb-4">
                 <div
@@ -433,9 +431,9 @@ export default function BadgesManagement() {
           {
             label: t("fields.title"),
             element: (
-              <input
+              <Input
                 type="text"
-                className="border p-2 rounded w-full"
+                className="border p-2 rounded w-full "
                 value={formValues.title}
                 onChange={(e) =>
                   setFormValues({ ...formValues, title: e.target.value })
@@ -447,7 +445,7 @@ export default function BadgesManagement() {
             label: "Description",
             element: (
               <textarea
-                className="border p-2 rounded w-full"
+                className="border p-2 rounded w-full  bg-surface"
                 value={formValues.desc}
                 onChange={(e) =>
                   setFormValues({ ...formValues, desc: e.target.value })
@@ -463,7 +461,7 @@ export default function BadgesManagement() {
                 onChange={(e) =>
                   setFormValues({ ...formValues, category: e.target.value })
                 }
-                className="border p-2 rounded w-full"
+                className="border p-2 rounded w-full bg-surface"
               >
                 <option value="success">{t("fields.categories.success")}</option>
                 <option value="special">{t("fields.categories.special")}</option>
@@ -474,9 +472,9 @@ export default function BadgesManagement() {
           {
             label: "Condition",
             element: (
-              <input
+              <Input
                 type="text"
-                className="border p-2 rounded w-full"
+                className="border p-2 rounded w-full "
                 value={formValues.condition}
                 onChange={(e) =>
                   setFormValues({ ...formValues, condition: e.target.value })
@@ -487,9 +485,9 @@ export default function BadgesManagement() {
           {
             label: t("fields.xpPoints"),
             element: (
-              <input
+              <Input
                 type="number"
-                className="border p-2 rounded w-full"
+                className="border p-2 rounded w-full "
                 value={formValues.xpPoint}
                 onChange={(e) =>
                   setFormValues({

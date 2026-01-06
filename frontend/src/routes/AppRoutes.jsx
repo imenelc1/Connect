@@ -261,6 +261,12 @@ export default function AppRoutes() {
             <AllQuizzesPage />
           </PrivateRoute>
         }/>
+        <Route path="/cours/:coursId/quizzes" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <AllQuizzesPage />
+          </PrivateRoute>
+        } />
+
         <Route path="/create-quiz" element={
           <PrivateRoute allowedRoles={["enseignant"]}>
             <CreateQuiz />

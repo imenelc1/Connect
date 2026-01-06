@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/NavBar.jsx";
+import Navbar from "../components/common/Navbar.jsx";
 import { Plus } from "lucide-react";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button.jsx";
