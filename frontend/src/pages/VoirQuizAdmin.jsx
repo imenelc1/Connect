@@ -67,128 +67,142 @@ export default function VoirQuizAdmin() {
   );
 
   return (
-     <div className="flex min-h-screen bg-surface">
-       <Navbar />
- 
-       <main
-         className={`
+    <div className="flex min-h-screen bg-surface">
+      <Navbar />
+
+      <main
+        className={`
            flex-1 transition-all duration-300
            px-4 md:px-10 py-8
            ${sidebarCollapsed ? "md:ml-16" : "md:ml-56"}
          `}
-       >
-         {/* ===== HERO ===== */}
-         <section className="max-w-5xl mx-auto text-center mb-10 animate-slide-in">
-           <h1 className="
+      >
+        {/* ===== HERO ===== */}
+        <section className="max-w-5xl mx-auto text-center mb-10 animate-slide-in">
+          <h1 className="
              text-4xl md:text-5xl font-extrabold
              bg-grad-all bg-clip-text text-transparent
            ">
-             {quiz.exercice.titre}
-           </h1>
- 
-           <p className="mt-4 text-gray max-w-3xl mx-auto leading-relaxed">
-             {quiz.exercice.enonce}
-           </p>
-         </section>
- 
-         {/* ===== STATS ===== */}
-         <section className="
+            {quiz.exercice.titre}
+          </h1>
+
+          <p className="mt-4 text-gray max-w-3xl mx-auto leading-relaxed">
+            {quiz.exercice.enonce}
+          </p>
+        </section>
+
+        {/* ===== STATS ===== */}
+        <section className="
            max-w-4xl mx-auto
            grid grid-cols-1 sm:grid-cols-3 gap-4
            mb-12
          ">
-           <StatCard
-             icon={<FaClock />}
-             label={quiz.activerDuration ? `${quiz.durationMinutes} ${t("minutes")}` : t("nonLimited")}
-             gradient="bg-grad-2"
-           />
-           <StatCard
-             icon={<FaMedal />}
-             label={`${totalPoints} ${t("points")}`}
-             gradient="bg-grad-3"
-           />
-           <StatCard
-             icon={<FaStar />}
-             label={quiz.exercice.niveau}
-             gradient="bg-grad-4"
-           />
-         </section>
- 
-         {/* ===== QUESTIONS ===== */}
-         <section className="max-w-5xl mx-auto space-y-4">
-           {quiz.questions.map((q, index) => (
-             <div
-               key={q.id}
-               className="
+          <StatCard
+            icon={
+              <span className="text-[rgb(var(--color-primary))] dark:text-[rgb(var(--color-supp))]">
+                <FaClock />
+              </span>
+            }
+            label={quiz.activerDuration ? `${quiz.durationMinutes} ${t("minutes")}` : t("nonLimited")}
+            gradient="bg-grad-2"
+          />
+
+          <StatCard
+            icon={
+              <span className="text-[rgb(var(--color-yellow-code))] dark:text-[rgb(var(--color-icons-about))]">
+                <FaMedal />
+              </span>
+            }
+            label={`${totalPoints} ${t("points")}`}
+            gradient="bg-grad-3"
+          />
+
+          <StatCard
+            icon={
+              <span className="text-[rgb(var(--color-tertiary))] dark:text-[rgb(var(--color-supp))]">
+                <FaStar />
+              </span>
+            }
+            label={quiz.exercice.niveau}
+            gradient="bg-grad-4"
+          />
+
+        </section>
+
+        {/* ===== QUESTIONS ===== */}
+        <section className="max-w-5xl mx-auto space-y-4">
+          {quiz.questions.map((q, index) => (
+            <div
+              key={q.id}
+              className="
                  bg-card rounded-2xl p-5
                  shadow-card hover:shadow-strong
                  transition
                "
-             >
-               <div className="flex justify-between items-center mb-3">
-                 <h3 className="font-semibold text-lg">
-                   {index + 1}. {q.texte}
-                 </h3>
-                 <span className="
+            >
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-semibold text-lg">
+                  {index + 1}. {q.texte}
+                </h3>
+                <span className="
                    text-sm px-3 py-1 rounded-full
                    bg-primary/10 text-primary font-medium
                  ">
-                   {q.score} pts
-                 </span>
-               </div>
- 
-               <ul className="grid gap-2">
-                 {q.options.map((opt) => (
-                   <li
-                     key={opt.id}
-                     className="
+                  {q.score} pts
+                </span>
+              </div>
+
+              <ul className="grid gap-2">
+                {q.options.map((opt) => (
+                  <li
+                    key={opt.id}
+                    className="
                        rounded-xl px-4 py-2
                        border border-gray-light
                        bg-grad-2
                        hover:bg-grad-3
                        transition
                      "
-                   >
-                     {opt.texte}
-                   </li>
-                 ))}
-               </ul>
-             </div>
-           ))}
-         </section>
- 
-         {/* ===== ACTION ===== */}
-         <div className="flex justify-center mt-12">
-           <Button
-             variant="quizBack"
-             text={
-               <span className="flex items-center gap-2">
-                 <FaHome /> {t("backMenu")}
-               </span>
-             }
-             onClick={() => navigate("/all-quizzes")}
-           />
-         </div>
-       </main>
-     </div>
-   );
- }
- 
- /* ===== SMALL COMPONENT ===== */
- function StatCard({ icon, label, gradient }) {
-   return (
-     <div
-       className={`
+                  >
+                    {opt.texte}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+
+        {/* ===== ACTION ===== */}
+        <div className="flex justify-center mt-12">
+          <Button
+            variant="quizBack"
+            text={
+              <span className="flex items-center gap-2">
+                <FaHome /> {t("backMenu")}
+              </span>
+            }
+            onClick={() => navigate("/all-quizzes")}
+          />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+/* ===== SMALL COMPONENT ===== */
+function StatCard({ icon, label, gradient }) {
+  return (
+    <div
+      className={`
          ${gradient}
          rounded-2xl p-4
          shadow-card
          flex flex-col items-center justify-center
          gap-2
        `}
-     >
-       <div className="text-primary text-xl">{icon}</div>
-       <span className="font-semibold text-sm text-center">{label}</span>
-     </div>
-   );
- }
- 
+    >
+      <div className="text-primary text-xl">{icon}</div>
+      <span className="font-semibold text-sm text-center">{label}</span>
+    </div>
+  );
+}

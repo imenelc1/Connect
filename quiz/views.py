@@ -351,3 +351,13 @@ def quizzes_faits_par_etudiant(request):
         })
 
     return Response(data)
+
+
+
+class QuizParCoursAPIView(APIView):
+
+    def get(self, request, cours_id):
+        # On récupère tous les quiz dont l'exercice appartient à ce cours
+        quizzes = Quiz.objects.select_related('exercice').filter(exercice__cours_id=cours_id)
+        serializer = QuizSerializer1(quizzes, many=True)
+        return Response(serializer.data)

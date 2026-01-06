@@ -201,14 +201,7 @@ export default function DashboardAdmin() {
           </div>
            <div className="flex items-center gap-3 ml-auto">
             <NotificationBell />
-            <UserCircle
-              initials={initials}
-              onToggleTheme={toggleDarkMode}
-              onChangeLang={(lang) => {
-                const i18n = window.i18n;
-                if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-              }}
-            />
+           
           </div>
          
           

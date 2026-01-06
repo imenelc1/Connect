@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import "../styles/index.css";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import NavSetting from "../components/common/navsetting";
 import Button from "../components/common/Button";
 import { Sun, Globe } from "lucide-react";
@@ -33,17 +33,17 @@ export default function AdminSetting() {
   const handleLanguageChange = (e) => i18n.changeLanguage(e.target.value);
 
   return (
-    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      {/* Sidebar */}
-      <Navbar />
-
-      {/* Main Content */}
-      <main
-        className={`
-          flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
-          ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-        `}
-      >
+    <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                 {/* Sidebar */}
+                 <div>
+                   <Navbar />
+                 </div>
+           
+                 {/* Main Content */}
+                 <main className={`
+                   flex-1 p-6 pt-10 space-y-5 transition-all duration-300
+                   ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+                 `}>
 
         
 
