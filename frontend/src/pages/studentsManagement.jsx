@@ -9,93 +9,8 @@ import ThemeContext from "../context/ThemeContext";
 import { toast } from "react-hot-toast";
 import Input from "../components/common/Input.jsx";
 import ModernDropdown from "../components/common/ModernDropdown.jsx";
-
+import StudentDetailModal from "../components/ui/StudentDetailModal.jsx";
 // ================= MODAL DÉTAIL =================
-// ================= MODAL DÉTAIL =================
-function StudentDetailModal({ studentId, onClose }) {
-  const [student, setStudent] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
- 
-  useEffect(() => {
-    if (!studentId) return;
-
-    const fetchStudent = async () => {
-      const token = localStorage.getItem("admin_token");
-      if (!token) return setError("Token JWT manquant");
-
-      setLoading(true);
-      try {
-        const res = await fetch(`http://localhost:8000/api/users/utilisateurs/${studentId}/progression/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error(`Erreur ${res.status}`);
-        const data = await res.json();
-        setStudent(data);
-      } catch (err) {
-        console.error(err);
-        setError("Impossible de charger les informations de l'étudiant.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStudent();
-  }, [studentId]);
-  console.log({ student });
-  if (!studentId) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-lg relative overflow-y-auto max-h-[80vh]">
-        <button className="absolute top-4 right-4 text-gray-500 hover:text-gray-800" onClick={onClose}>✕</button>
-
-        {loading ? (
-          <p>Chargement...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : student ? (
-          <>
-            {/* Informations générales */}
-            <h2 className="text-2xl font-bold mb-2">{student.utilisateur.nom} {student.utilisateur.prenom}</h2>
-            <p className="text-sm text-gray-500 mb-4">{student.utilisateur.email}</p>
-
-            <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p><strong>Date de naissance:</strong> {student.utilisateur.date_naissance || "—"}</p>
-              <p><strong>Matricule:</strong> {student.utilisateur.matricule || "—"}</p>
-              <p><strong>Spécialité:</strong> {student.utilisateur.specialite || "—"}</p>
-              <p><strong>Année d'étude:</strong> {student.utilisateur.annee_etude || "—"}</p>
-            </div>
-
-            {/* Progression */}
-            <h3 className="font-semibold text-lg mb-2">Cours lus: {student.cours_lus?.length}</h3>
-            {student.cours_lus?.length > 0 ? (
-              <ul className="mb-4 list-disc list-inside">
-                {student.cours_lus.map((c, idx) => <li key={idx}>{c.titre_cour}</li>)}
-              </ul>
-            ) : <p className="mb-4 text-sm text-gray-500">Aucun cours lu</p>}
-
-            <h3 className="font-semibold text-lg mb-2">Exercices faits: {student.exercices_faits?.length} </h3>
-            {student.exercices_faits?.length > 0 ? (
-              <ul className="mb-4 list-disc list-inside">
-                {student.exercices_faits.map((e, idx) => <li key={idx}>{e.titre_exo}</li>)}
-              </ul>
-            ) : <p className="mb-4 text-sm text-gray-500">Aucun exercice fait</p>}
-
-            <h3 className="font-semibold text-lg mb-2">Quiz faits : {student.quiz_faits?.length}</h3>
-            {student.quiz_faits?.length > 0 ? (
-              <ul className="mb-4 list-disc list-inside">
-                {student.quiz_faits.map((q, idx) => (
-                  <li key={idx}>{q.titre_quiz} – Score: {q.score_obtenu}</li>
-                ))}
-              </ul>
-            ) : <p className="mb-4 text-sm text-gray-500">Aucun quiz fait</p>}
-          </>
-        ) : null}
-      </div>
-    </div>
-  );
-}
 
 
 // ================= MODAL ÉDITION =================
@@ -248,35 +163,58 @@ export default function StudentsManagement() {
 
   // ================= FETCH =================
   useEffect(() => {
-    const fetchStudents = async () => {
-      const token = localStorage.getItem("admin_token");
-      if (!token) return setError("Token JWT manquant.");
+  const fetchStudents = async () => {
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+      setError("Token JWT manquant.");
+      return;
+    }
 
-      setLoading(true);
-      try {
-        const res = await fetch(
-          "http://localhost:8000/api/users/students-with-progress/",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) throw new Error(`Erreur (${res.status})`);
-        const data = await res.json();
+    setLoading(true);
+    try {
+      // 1️⃣ Liste existante des étudiants
+      const res = await fetch(
+        "http://localhost:8000/api/users/students-with-progress/",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error(`Erreur (${res.status})`);
 
-        const formatted = data.map(s => ({
-          ...s,
-          courses: s.courses || [],
-          courses_count: s.courses_count || s.courses?.length || 0,
-        }));
+      const studentsData = await res.json();
 
-        setStudents(formatted);
-      } catch (err) {
-        console.error(err);
-        setError("Impossible de charger les étudiants.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStudents();
-  }, []);
+      // 2️⃣ Pour chaque étudiant → vraie progression globale (dashboard)
+      const studentsWithRealProgress = await Promise.all(
+        studentsData.map(async (s) => {
+          const progRes = await fetch(
+            `http://localhost:8000/api/dashboard/global-progress/${s.id}/`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          if (!progRes.ok) {
+            console.warn("Erreur progression pour étudiant", s.id);
+            return { ...s, progress: 0 };
+          }
+
+          const progData = await progRes.json();
+
+          return {
+            ...s,
+            progress: progData.global_progress ?? 0,
+          };
+        })
+      );
+
+      setStudents(studentsWithRealProgress);
+
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de charger les étudiants.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchStudents();
+}, []);
 
 
 
@@ -570,9 +508,11 @@ export default function StudentsManagement() {
 
       {/* Modals */}
       <StudentDetailModal
-        studentId={selectedStudent}   // ici selectedStudent est l'ID
-        onClose={() => setSelectedStudent(null)}
-      />
+  open={!!selectedStudent}   // true si un étudiant est sélectionné
+  studentId={selectedStudent}
+  onClose={() => setSelectedStudent(null)}
+/>
+
       <StudentEditModal studentForm={studentForm} setStudentForm={setStudentForm} onClose={() => { setEditStudent(null); setStudentForm(null); }} onSubmit={handleUpdate} />
       {addStudentModalOpen && (
         <StudentAddModal

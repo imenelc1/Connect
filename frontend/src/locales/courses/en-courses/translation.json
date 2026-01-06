@@ -7,11 +7,14 @@
   "myCourses": "My courses",
   "chapterPrev": "Previous Page",
   "chapterNext": "Next Page",
+  "coursTermine": "Course completed",
+  "leconNondispo": "No lessons available",
   "readyQuiz": "Ready to test your knowledge?",
   "quizDesc": "Take the chapter quiz to validate your understanding",
   "startQuiz": "Start the quiz",
   "rateCourse": "Rate the course out of 5:",
   "send": "Send",
+
 
   "feedback1": "Algorithms classes helped me develop my logic skills.",
   "feedback2": "Practical exercises boosted my understanding of C.",

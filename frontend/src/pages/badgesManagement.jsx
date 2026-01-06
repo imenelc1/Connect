@@ -320,11 +320,11 @@ export default function BadgesManagement() {
   };
 
   return (
-   <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-                        {/* Sidebar */}
-                        <div>
-                          <Navbar />
-                        </div>
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
       <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
 
 
@@ -362,11 +362,10 @@ export default function BadgesManagement() {
           }}
         >
           {filteredBadges.map((badge) => (
-           <div
-  className={`rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between ${
-    categoryColors[badge.category]?.card || categoryColors.default.card
-  }`}
->
+            <div
+              className={`rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between ${categoryColors[badge.category]?.card || categoryColors.default.card
+                }`}
+            >
 
               <div className="flex justify-between mb-4">
                 <div

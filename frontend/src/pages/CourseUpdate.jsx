@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
 import { Trash2, ChevronUp } from "lucide-react";
@@ -631,7 +631,7 @@ export default function CourseUpdate() {
         {/* STEP 3 */}
         {activeStep === 3 && (
           <div className="w-full bg-white rounded-2xl shadow-md p-6">
-            <h2 className="text-xl font-semibold">{t("course.publish_course")}</h2>
+            <h2 className="text-xl font-semibold">{t("course.publish_description")}</h2>
             {/* Ici tu peux ajouter les options de publication */}
           </div>
         )}

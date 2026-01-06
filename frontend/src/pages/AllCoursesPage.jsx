@@ -31,7 +31,7 @@ export default function AllCoursesPage() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const navigate = useNavigate();
-  const { t } = useTranslation("allcourses");
+  const { t } = useTranslation("contentPage");
   const { toggleDarkMode } = useContext(ThemeContext);
 
   const userData = JSON.parse(localStorage.getItem("user"));

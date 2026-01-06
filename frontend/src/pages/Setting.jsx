@@ -227,17 +227,17 @@ export default function Setting() {
     const initials = `${user.nom?.[0] || ""}${user.prenom?.[0] || ""}`.toUpperCase();
 
     return (
-         <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-              {/* Sidebar */}
-              <div>
+        <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
+            {/* Sidebar */}
+            <div>
                 <Navbar />
-              </div>
-        
-              {/* Main Content */}
-              <main className={`
-                flex-1 p-6 pt-10 space-y-5 transition-all duration-300
-                ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-              `}>
+            </div>
+
+            {/* Main Content */}
+            <main className={`
+    flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+    ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+`}>
                 {/* Toast notifications */}
                 <Toaster position="top-right" />
 
@@ -727,4 +727,3 @@ export default function Setting() {
         </div>
     );
 }
-

@@ -8,7 +8,9 @@
   "status": {
     "all": "Tous",
     "completed": "Terminés",
-    "notCompleted": "Non terminés"
+    "notCompleted": "Non terminés",
+    "submitted": "Soumis",
+    "draft" : "Brouillon"
   },
   "myCourses": "Mes cours",
   "allCourses": "Tous les cours",

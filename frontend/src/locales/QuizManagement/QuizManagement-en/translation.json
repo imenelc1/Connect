@@ -2,6 +2,8 @@
     "title": "Quizzes Management",
     "subtitle": "Create and manage quizzes",
     "searchPlaceholder": "Search quizzes..",
+    "voir_quiz": "View quiz",
+
     "stats": {
         "questions": "Questions",
         "attempts": "Attempts",
