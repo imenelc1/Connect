@@ -3,6 +3,7 @@ import Navbar from "../components/common/NavBar";
 import Button from "../components/common/Button";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Input from "../components/common/Input";
 import {
   createForum,
   updateForum,
@@ -472,7 +473,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-2xl p-6 w-full max-w-md border border-gray-800/20">
+      <div className="bg-card rounded-2xl p-6 w-full max-w-md border border-gray-800/20">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-muted">
             {editingForum ? "Modifier le forum" : t("ForumManagement.createF")}
@@ -490,7 +491,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
             <label className="block text-sm font-medium text-gray mb-2">
               Titre du forum *
             </label>
-            <input
+            <Input
               type="text"
               required
               value={formData.titre_forum}
@@ -512,7 +513,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
               onChange={(e) =>
                 setFormData({ ...formData, contenu_forum: e.target.value })
               }
-              className="w-full p-3 border border-gray-800/20 rounded-lg bg-surface text-muted min-h-[120px] focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full p-3 rounded-lg bg-surface text-muted min-h-[120px] focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="Décrivez le sujet de ce forum..."
             />
           </div>
@@ -526,7 +527,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
                 type="button"
                 onClick={() => setFormData({ ...formData, cible: "etudiants" })}
                 className={`flex-1 p-4 border rounded-xl flex flex-col items-center gap-2 transition-all ${formData.cible === "etudiants"
-                  ? "border-primary bg-primary/10 text-primary shadow-sm"
+                  ? "border-muted bg-muted/10 text-muted shadow-sm"
                   : "border-gray-800/20 bg-surface text-gray hover:border-primary/30"
                   }`}
               >
@@ -537,7 +538,7 @@ const ForumModal = ({ isOpen, onClose, onSubmit, editingForum }) => {
                 type="button"
                 onClick={() => setFormData({ ...formData, cible: "enseignants" })}
                 className={`flex-1 p-4 border rounded-xl flex flex-col items-center gap-2 transition-all ${formData.cible === "enseignants"
-                  ? "border-primary bg-primary/10 text-primary shadow-sm"
+                  ? "border-muted bg-muted/10 text-muted shadow-sm"
                   : "border-gray-800/20 bg-surface text-gray hover:border-primary/30"
                   }`}
               >
@@ -708,6 +709,14 @@ export default function ForumManagement() {
       setLoading(false);
     }
   };
+  
+
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth < 768);
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
 
   useEffect(() => {
     fetchForums();
@@ -716,24 +725,22 @@ export default function ForumManagement() {
   // =========================
   // RESPONSIVE EFFECTS
   // =========================
-  useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (mobile) setSidebarCollapsed(true);
-    };
-
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-
-    handleResize(); // Appeler au chargement initial
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("sidebarChanged", handleSidebarChange);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("sidebarChanged", handleSidebarChange);
-    };
-  }, []);
+  // Effet pour la responsivité
+    useEffect(() => {
+      const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+  
+      // Gestion de la sidebar
+      const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("sidebarChanged", handleSidebarChange);
+  
+      return () => { 
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("sidebarChanged", handleSidebarChange);
+      };
+    }, []);
 
   // =========================
   // HANDLERS FORUMS
@@ -1279,7 +1286,7 @@ export default function ForumManagement() {
   // =========================
   // RENDER
   // =========================
-  return (
+   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
       {/* Sidebar */}
       <div>
@@ -1288,89 +1295,114 @@ export default function ForumManagement() {
 
       {/* Main Content */}
       <main className={`
-        flex-1 p-6 pt-10 space-y-5 transition-all duration-300
+        flex-1 p-4 sm:p-6 pt-6 sm:pt-10 space-y-5 transition-all duration-300 overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-muted">
-              {t("ForumManagement.forumM") || "Gestion des Forums"}
-            </h1>
-            <p className="text-gray">
-              {t("ForumManagement.Managediscussion") || "Gérez et modérez les forums de discussion"}
-            </p>
-          </div>
+        
+       {/* Header */}
+<div className="flex flex-row justify-between items-center gap-4 mb-6">
+  <div className="flex-1">
+    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-muted">
+      {t("ForumManagement.forumM") || "Gestion des Forums"}
+    </h1>
+    <p className="text-gray text-sm sm:text-base">
+      {t("ForumManagement.Managediscussion") || "Gérez et modérez les forums de discussion"}
+    </p>
+  </div>
 
-          <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
-            <NotificationBell />
-            
-          </div>
-        </div>
+  <div className="flex items-center gap-3">
+    <NotificationBell />
+    <UserCircle
+      initials={initials}
+      onToggleTheme={toggleDarkMode}
+      onChangeLang={(lang) => {
+        const i18n = window.i18n;
+        if (i18n?.changeLanguage) i18n.changeLanguage(lang);
+      }}
+    />
+  </div>
+</div>
+
 
         {/* STATISTIQUES */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className={`rounded-2xl p-6 shadow-sm hover:shadow-md transition flex justify-between items-center bg-gradient-to-br ${stat.bg}`}
+              className={`rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition flex justify-between items-center bg-gradient-to-br ${stat.bg} min-w-0`}
             >
-              <div>
-                <p className="text-gray">{stat.title}</p>
-                <h2 className="text-2xl sm:text-3xl font-bold text-muted">{stat.value}</h2>
+              <div className="min-w-0">
+                <p className="text-gray text-sm sm:text-base truncate">{stat.title}</p>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-muted truncate">
+                  {stat.value}
+                </h2>
               </div>
-              <div className="opacity-80">
-                {stat.icon}
+              <div className="opacity-80 flex-shrink-0 ml-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center">
+                  {React.cloneElement(stat.icon, {
+                    size: isMobile ? 24 : 40
+                  })}
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* GRID: FORUMS ONLY (removed activities section) */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-muted mb-4">Forums de discussion</h2>
+        {/* GRID: FORUMS ONLY */}
+        <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-sm overflow-hidden">
+          <h2 className="text-lg sm:text-xl font-semibold text-muted mb-4">Forums de discussion</h2>
 
-          {/* TABS */}
-          <div className="flex overflow-x-auto gap-2 bg-primary/50 p-2 font-semibold rounded-full w-max max-w-full shadow-sm mb-4 text-sm">
-            {filterTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveFilter(tab.id)}
-                className={`px-4 py-1.5 transition-all duration-300 rounded-full text-white font-bold text-sm
-                  ${activeFilter === tab.id
-                    ? "text-white bg-primary shadow-md"
-                    : "text-primary/70"
-                  }`}
-              >
-                {tab.label} {tab.id !== "all" && `(${forums.filter(f => f.cible === tab.id).length})`}
-              </button>
-            ))}
+          {/* TABS - Version mobile améliorée */}
+         <div className="flex overflow-x-auto gap-1 sm:gap-2 mb-3 sm:mb-4 pb-1 sm:pb-2 -mx-4 sm:mx-0 px-2 sm:px-3 ">
+
+           <div className="flex gap-1 sm:gap-2 bg-grad-1 p-1 sm:p-2 rounded-full min-w-max">
+
+              {filterTabs.map((tab) => (
+               <button
+  key={tab.id}
+  onClick={() => setActiveFilter(tab.id)}
+  className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-full
+    transition-all duration-300
+    text-[10px] sm:text-xs
+px-2 py-0.5
+
+    font-semibold whitespace-nowrap
+    ${activeFilter === tab.id
+      ? "bg-primary shadow-sm"
+      : "text-primary/70"
+    }`}
+>
+
+                  {tab.label} {tab.id !== "all" && `(${forums.filter(f => f.cible === tab.id).length})`}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* BARRE DE RECHERCHE ET BOUTON CRÉER */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1 max-w-xl">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
+            <div className="relative flex-1 min-w-0">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Rechercher un forum..."
-                  className="w-full pl-12 pr-4 py-3 bg-surface border border-gray-800/20 rounded-xl text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full pl-9 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 bg-surface border border-gray-800/20 rounded-xl text-muted focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base"
                 />
               </div>
             </div>
 
             <Button
               text={
-                <span className="flex items-center gap-2">
-                  <Plus size={18} />
-                  {t("ForumManagement.createF") || "Créer un forum"}
+                <span className="flex items-center gap-1.5 sm:gap-2">
+                  <Plus size={16} className="sm:w-5 sm:h-5" />
+                  <span className="text-sm sm:text-base">{t("ForumManagement.createF") || "Créer un forum"}</span>
                 </span>
               }
               variant="primary"
-              className="!w-auto px-6 py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+              className="!w-auto px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl shadow-sm hover:shadow-md transition-shadow whitespace-nowrap"
               onClick={() => {
                 setEditingForum(null);
                 setIsModalOpen(true);
@@ -1380,34 +1412,36 @@ export default function ForumManagement() {
 
           {/* États de chargement/erreur */}
           {loading && (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-              <p className="text-gray">Chargement des forums...</p>
+            <div className="text-center py-8 sm:py-12">
+              <div className="inline-block animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-primary mb-3 sm:mb-4"></div>
+              <p className="text-gray text-sm sm:text-base">Chargement des forums...</p>
             </div>
           )}
 
           {error && !loading && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center mb-6">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <p className="text-red-500 mb-3">{error}</p>
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 sm:p-6 text-center mb-6">
+              <AlertCircle className="w-10 h-10 sm:w-12 sm:h-12 text-red-500 mx-auto mb-3 sm:mb-4" />
+              <p className="text-red-500 mb-3 text-sm sm:text-base">{error}</p>
               <Button
                 variant="secondary"
                 onClick={fetchForums}
-                className="px-4 py-2"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base"
               >
                 Réessayer
               </Button>
             </div>
           )}
 
-          {/* Liste des forums */}
+          {/* Liste des forums - VERSION MOBILE CORRIGÉE */}
           {!loading && !error && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-4 sm:grid sm:grid-cols-1 lg:grid-cols-2 sm:gap-4">
               {filteredForums.length === 0 ? (
-                <div className="text-center py-12">
-                  <MessageSquare className="w-16 h-16 text-gray mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-muted mb-2">Aucun forum trouvé</h3>
-                  <p className="text-gray mb-6 max-w-md mx-auto">
+                <div className="text-center py-8 sm:py-12">
+                  <MessageSquare className="w-12 h-12 sm:w-16 sm:h-16 text-gray mx-auto mb-3 sm:mb-4" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-muted mb-2 px-4">
+                    Aucun forum trouvé
+                  </h3>
+                  <p className="text-gray mb-4 sm:mb-6 px-4 mx-auto text-sm sm:text-base max-w-md">
                     {search ? "Aucun forum ne correspond à votre recherche." : "Commencez par créer votre premier forum."}
                   </p>
                   {!search && (
@@ -1417,9 +1451,9 @@ export default function ForumManagement() {
                         setEditingForum(null);
                         setIsModalOpen(true);
                       }}
-                      className="px-6 py-3"
+                      className="px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base"
                     >
-                      <Plus size={18} className="mr-2" />
+                      <Plus size={16} className="mr-1.5 sm:mr-2" />
                       Créer un forum
                     </Button>
                   )}
@@ -1428,35 +1462,133 @@ export default function ForumManagement() {
                 filteredForums.map((forum) => (
                   <div
                     key={forum.id}
-                    className="bg-surface rounded-2xl p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300"
+                    className="bg-grad-5 rounded-2xl p-4 sm:p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden"
                   >
-                    <div className="flex flex-col lg:flex-row lg:items-start gap-5">
-                      {/* Icône et info de base */}
-                      <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${forum.cible === "etudiants"
+                    {/* MOBILE LAYOUT */}
+                    <div className="sm:hidden">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${forum.cible === "etudiants"
+                            ? "bg-grad-4"
+                            : "bg-grad-2"
+                            }`}>
+                            {forum.cible === "etudiants" ? (
+                              <GraduationCap className="w-5 h-5 text-white" />
+                            ) : (
+                              <Users className="w-5 h-5 text-white" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1">
+                              <h3 className="text-base font-semibold text-muted truncate">
+                                {forum.title}
+                              </h3>
+                            </div>
+                            <span className={`text-xs px-2 py-1 rounded-full mt-1 ${forum.cible === "etudiants"
+                              ? "bg-muted/20 text-muted"
+                              : "bg-pink/20 text-pink"
+                              }`}>
+                              {forum.cible === "etudiants" ? "Étudiants" : "Enseignants"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description mobile */}
+                      <p className="text-gray text-sm mb-3 line-clamp-2">
+                        {forum.originalData?.contenu_forum || "Pas de description"}
+                      </p>
+
+                      {/* Stats mobile compact */}
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div className="flex items-center gap-2 text-sm text-gray">
+                          <MessageSquare size={14} />
+                          <span>{forum.threads} discussions</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray">
+                          <TrendingUp size={14} />
+                          <span>{forum.posts} likes</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray truncate">
+                          <User size={14} />
+                          <span className="truncate">Créé par {forum.utilisateur.split(' ')[0]}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray">
+                          <Clock size={14} />
+                          <span>{forum.date_creation}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions mobile */}
+                      <div className="flex gap-2 pt-3 border-t border-gray-800/20">
+                        <Button
+                          variant="manage"
+                          onClick={() => handleViewForum(forum)}
+                          className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs"
+                        >
+                          <Eye size={14} />
+                          Voir
+                        </Button>
+                        <Button
+                          variant="manage"
+                          onClick={() => {
+                            setEditingForum(forum);
+                            setIsModalOpen(true);
+                          }}
+                          className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs"
+                        >
+                          <Edit2 size={14} />
+                          Modifier
+                        </Button>
+                        <Button
+                          variant="manage"
+                          onClick={() => handleLikeForum(forum.id)}
+                          className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs ${forum.userHasLiked
+                            ? "bg-red-500/10 text-red-500"
+                            : ""
+                            }`}
+                        >
+                          <Heart size={14} fill={forum.userHasLiked ? "currentColor" : "none"} />
+                          <span>{forum.posts || 0}</span>
+                        </Button>
+                        <Button
+                          variant="manage"
+                          onClick={() => {
+                            setForumToDelete(forum);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs bg-red-500/10 text-red-500"
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* DESKTOP LAYOUT */}
+                    <div className="hidden sm:flex flex-col lg:flex-row lg:items-start gap-4 sm:gap-5">
+                      <div className="flex items-start gap-4 flex-1 min-w-0">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${forum.cible === "etudiants"
                           ? "bg-grad-4"
                           : "bg-grad-2"
                           }`}>
                           {forum.cible === "etudiants" ? (
-                            <GraduationCap className="w-6 h-6 text-white dark:text-purple" />
+                            <GraduationCap className="w-6 h-6 text-white" />
                           ) : (
-                            <Users className="w-6 h-6 text-white dark:text-pink" />
+                            <Users className="w-6 h-6 text-white" />
                           )}
                         </div>
 
-
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-2">
-                            <h3 className="text-lg font-semibold text-muted">
+                            <h3 className="text-lg font-semibold text-muted truncate">
                               {forum.title}
                             </h3>
-                            <span className={`text-xs px-2 py-1 rounded-full ${forum.cible === "etudiants"
-                                ? "bg-primary/20 text-primary"
-                                : "bg-pink/20 text-pink"
+                            <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${forum.cible === "etudiants"
+                              ? "bg-muted/20 text-muted"
+                              : "bg-pink/20 text-pink"
                               }`}>
                               {forum.cible === "etudiants" ? "Pour étudiants" : "Pour enseignants"}
                             </span>
-
                           </div>
 
                           <p className="text-gray text-sm mb-3 line-clamp-2">
@@ -1484,7 +1616,6 @@ export default function ForumManagement() {
                         </div>
                       </div>
 
-                      {/* Boutons d'action */}
                       <div className="flex lg:flex-col gap-2 lg:border-l lg:pl-5 border-gray-800/20">
                         <Button
                           variant="manage"
@@ -1494,7 +1625,6 @@ export default function ForumManagement() {
                           <Eye size={16} />
                           Voir
                         </Button>
-
                         <Button
                           variant="manage"
                           onClick={() => {
@@ -1506,20 +1636,15 @@ export default function ForumManagement() {
                           <Edit2 size={16} />
                           Modifier
                         </Button>
-
-                        {/* BOUTON J'AIME SEUL AJOUTÉ */}
                         <Button
                           variant="manage"
                           onClick={() => handleLikeForum(forum.id)}
-                          className={`flex items-center gap-2 px-3 py-2 transition-all duration-200 ${forum.userHasLiked
-                            ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                            : "hover:bg-primary/10"
+                          className={`flex items-center gap-2 px-3 py-2 ${forum.userHasLiked
+                            ? "bg-red-500/10 text-red-500"
+                            : ""
                             }`}
                         >
-                          <Heart
-                            size={16}
-                            fill={forum.userHasLiked ? "currentColor" : "none"}
-                          />
+                          <Heart size={16} fill={forum.userHasLiked ? "currentColor" : "none"} />
                           <span className={`text-xs px-1.5 py-0.5 rounded-full ${forum.userHasLiked
                             ? "bg-red-500/20"
                             : "bg-primary/20"
@@ -1527,14 +1652,13 @@ export default function ForumManagement() {
                             {forum.posts || 0}
                           </span>
                         </Button>
-
                         <Button
                           variant="manage"
                           onClick={() => {
                             setForumToDelete(forum);
                             setIsDeleteModalOpen(true);
                           }}
-                          className="flex items-center gap-2 px-3 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                          className="flex items-center gap-2 px-3 py-2 bg-red-500/10 text-red-500"
                         >
                           <Trash2 size={16} />
                           Supprimer
@@ -1549,7 +1673,7 @@ export default function ForumManagement() {
         </div>
       </main>
 
-      {/* ========================= */}
+       {/* ========================= */}
       {/* MODALS */}
       {/* ========================= */}
 
@@ -1592,5 +1716,6 @@ export default function ForumManagement() {
         onDeleteComment={handleDeleteComment}
       />
     </div>
+    
   );
 }

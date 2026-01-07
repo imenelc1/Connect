@@ -7,11 +7,5 @@
     "Avancé": "Advanced"
 
   },
-  "start":"Start the exercise",
-  "CheckQuiz": "Check quiz",
-  "Errors": {
-    "ExercisesLoadFailed": "Failed to load exercises",
-    "ConfirmDeleteExercise": "Are you sure you want to delete this exercise?",
-     "DeleteFailed": "Failed to delete"
-}
+  "start":"Start"
 }

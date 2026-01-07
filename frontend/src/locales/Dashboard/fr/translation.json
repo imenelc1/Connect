@@ -34,9 +34,7 @@
     "FetchHistoryError": "Erreur lors de la récupération de l'historique des professeurs",
     "LoadingNotifications": "Chargement des notifications...",
     "NoNotifications": "Aucune notification disponible.",
-    "FetchExercisesError": "Erreur lors de la récupération des exercices",
-     "notificationLoad":"Chargement des notifications...",
-     "noNotif":"Aucune notification disponible."
+    "FetchExercisesError": "Erreur lors de la récupération des exercices"
 
  
   }

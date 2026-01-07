@@ -34,9 +34,7 @@
     "FetchHistoryError": "Error while fetching professor history",
     "LoadingNotifications": "Loading notifications...",
     "NoNotifications": "No notifications available.",
-    "FetchExercisesError": "Error while fetching exercises",
-    "notificationLoad":"Loading notifications...",
-    "noNotif":"No notifications available."
+    "FetchExercisesError": "Error while fetching exercises"
 
   }
 }

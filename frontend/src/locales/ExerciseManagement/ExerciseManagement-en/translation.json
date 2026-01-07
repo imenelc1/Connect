@@ -2,6 +2,7 @@
   "title": "Exercises Management",
   "description": "Manage coding exercises and problems.",
   "searchPlaceholder": "Search exercises...",
+  "voir_exo": "View the exercice",
   "difficulty": {
     "easy": "Easy",
     "medium": "Medium",

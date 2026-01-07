@@ -40,8 +40,12 @@
   "deleteSuccess": "Instructor deleted successfully",
   "updateSuccess": "Instructor updated successfully",
   "createSuccess": "Instructor created successfully",
-  "joinedAt": "Joined at",
+  "joinedAt": "Date of registration",
   "prof":"Professor",
   "MC":"Associate Professor ",
-  "MA":"Assistant Professor"
+  "MA":"Assistant Professor",
+  "deleteError": "Unable to delete instructor",
+  "serverError": "Server error"
+
+
 }

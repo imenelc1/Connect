@@ -4,24 +4,8 @@
   "placeholder_question": "Écris ta question...",
   "error_message": "❌ Une erreur est survenue. Réessaie.",
   "student_fetch_error": "Erreur récupération étudiant :",
-  "bot_greeting": "Bonjour {{name}} 👋\nJe suis ton Coach C.\nExplique-moi ce qui te bloque.",
+   "bot_greeting": "Bonjour {{name}} 👋\nJe suis ton Coach C.\nExplique-moi ce qui te bloque.",
   "student": "étudiant",
-  "input_placeholder": "Écris ta question...",
-  "aiBadgeError": "Erreur lors de l'attribution du badge IA",
-  "exerciseGreeting": "Bonjour {{name}} 👋\nJe vois que tu travailles sur l'exercice : **{{exerciseTitle}}**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.",
-  "courseGreeting": "Bonjour {{name}} 👋\nJe suis ton assistant cours pour ce cours.",
-  "genericGreeting": "Bonjour {{name}} 👋\nJe suis ton assistant IA.",
-  "untitledExercise": "en cours",
-  "codeAnalysis": "Analyse le code fourni ci-dessus.\nExplique précisément ce qui ne va pas.\nN'écris PAS la solution complète.\nN'améliore pas le code.\nIndique les erreurs logiques, syntaxiques ou conceptuelles.",
-  "noCodeYet": "Refuse de donner la solution complète.\nExplique que le code actuel est encore le code de base.\nInvite l'étudiant à essayer d'écrire une première version liée à l'exercice.\nDonne seulement des indices.\nSois encourageant.",
-    "onlyHints": "Donne UNIQUEMENT des indices.\nExplique le principe sans écrire de code.",
-    "stepByStep": "Explique la logique étape par étape.\nTu peux utiliser du pseudo-code.\nNe donne PAS la solution complète.",
-    "fullSolution": "Donne maintenant la solution complète en C,\navec une explication ligne par ligne.\nNe pose AUCUNE question à l'étudiant.",
-  "header": {
-    "assistantCourse": "Assistant Cours",
-    "assistantExercise": "Assistant Exercice",
-    "assistantIA": "Assistant IA"
-  },
-   "coursePlaceholder": "Pose une question sur le cours…",
-    "problemPlaceholder": "Explique ton problème…"
+   "input_placeholder": "Écris ta question..."
+
 }

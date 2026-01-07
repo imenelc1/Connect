@@ -11,11 +11,7 @@
     "duration_label": "Duration",
     "level_label": "Level",
     "cours": "Course",
-    "solution_label": "Solution (optional — visible only after completing the exercise)",
-     "solution_placeholder": "Write the solution here (optional)",
-     "max_submissions": "Max submissions",
-      "unlimited": "Unlimited"
-     
+    "solution_label": "Solution (optional — visible only after completing the exercise)"
 
   },
   "select": {
@@ -54,14 +50,5 @@
   },
   
   
-    "solution_note": "This solution is only visible to the teacher. It will be revealed to the student only after they have completed the exercise.",
-    "Errors": {
-
-      "CourseLoadFailed": "Failed to load course",
-      "NotLoggedIn": "User not logged in",
-      "CourseCreationFailed": "Failed to create course",
-    "ExerciseCreationFailed": "Failed to create exercise"
-    
-}
-
+    "solution_note": "This solution is only visible to the teacher. It will be revealed to the student only after they have completed the exercise."
 }

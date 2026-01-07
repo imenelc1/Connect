@@ -7,14 +7,6 @@
     "Intermédiaire": "Intermédiaire",
     "Avancé": "Avancé"
   },
-  "start":"Commencer l'exercice",
-   "CheckQuiz": "Vérifier le quiz",
-  "Errors": {
-    "ExercisesLoadFailed": "Erreur chargement exercices",
-    "ConfirmDeleteExercise": "Tu es sûr de supprimer cet exercice ?",
-     "DeleteFailed": "Erreur lors de la suppression"
-
-}
-
+  "start":"Commencer"
 
 }

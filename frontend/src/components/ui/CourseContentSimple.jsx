@@ -1,5 +1,7 @@
 import React from "react";
 import { ChevronRight, ChevronLeft, BookOpen, Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
 
 export default function CourseContentSimple({
   course,
@@ -10,6 +12,7 @@ export default function CourseContentSimple({
 }) {
   const { title, sections } = course;
   const courseId = course.id || "default";
+  const { t } = useTranslation("courses");
 
   const LESSONS_PER_PAGE = 2;
   const section = sections[currentSectionIndex] || { lessons: [], ordre: 0 };
@@ -83,9 +86,13 @@ export default function CourseContentSimple({
             </div>
           ))
         ) : (
-          <p className="text-center text-sm sm:text-base text-gray-500 mt-4">Aucune leçon disponible</p>
+          <p className="text-center text-sm sm:text-base text-gray-500 mt-4"> {t("leconNondispo")}</p>
         )}
+
+
       </div>
+       
+
 
       {/* Navigation */}
       <div className="flex flex-row gap-2 sm:gap-3 mt-4">
@@ -94,7 +101,7 @@ export default function CourseContentSimple({
           disabled={currentSectionIndex === 0 && currentLessonPage === 0}
           className="flex items-center gap-1 sm:gap-2 bg-white px-3 sm:px-4 py-1 sm:py-2 rounded-xl border border-blue/40 shadow text-blue text-xs sm:text-base hover:bg-blue/10 disabled:opacity-30"
         >
-          <ChevronLeft size={14} className="sm:w-4 sm:h-4" /> Précédent
+          <ChevronLeft size={14} className="sm:w-4 sm:h-4" /> {t("chapitrePrec")}
         </button>
         <button
           onClick={nextLessonPage}
@@ -104,14 +111,14 @@ export default function CourseContentSimple({
               : "bg-blue text-white hover:bg-blue/90"
           }`}
         >
-          {isLastPage ? "Terminer" : "Suivant"}
+          {isLastPage ? "Terminer" : t("ChapitreSuiv")}
           {!isLastPage && <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
         </button>
       </div>
 
       {isLastPage && (
         <div className="mb-4 p-4 text-center">
-          <p className="text-green-700 font-semibold text-sm sm:text-base">Cours terminé !</p>
+          <p className="text-green-700 font-semibold text-sm sm:text-base">{t("coursTermine")}!</p>
         </div>
       )}
     </div>

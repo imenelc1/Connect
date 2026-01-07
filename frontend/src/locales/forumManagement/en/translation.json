@@ -1,25 +1,68 @@
-
 {
   "ForumManagement": {
-    "forumM": "Forums Management" ,
-    "Managediscussion":"Manage discussion forums and threads",
-    "createF": "Create Forum",
-    "searchF": "Search forums ...",
-    "GeneralD":"General Discussion",
-    "Talk":"Talk about anything C relatded",
-    "ButtonManage":"Manage",
-    "threads":"threads",
-    "posts":"posts",
-    "memebers":"members",
-    "Homework":"Homework Help",
-    "gethelp":"Get help with your assignements",
-    "ProjetShowcase":"Project Showcase",
-    "share":"Share your C projects",
-    "AlgorithmD":"Algorithm Discussion",
-    "deepDive":"Deep dive into algorithms",
-    "career":"Career Advice",
-    "Careerp":"Career guidance for C developers",
-    "Bug":"Bug Reports",
-    "Report":"Report plateform issues"
+    "forumM": "Forums Management",
+    "Managediscussion": "Manage discussion forums and threads",
+    "createF": "Create forum",
+    "searchF": "Search forums...",
+    "ButtonManage": "Manage",
+
+    "createdByFirstName": "Created by {{user}}",
+    "dateSeparator": "•",
+
+    "forStudents": "For students",
+    "forTeachers": "For teachers",
+
+    "discussionForums": "Discussion forums",
+    "loadingForums": "Loading forums...",
+    "retry": "Retry",
+    "noForumFound": "No forum found",
+
+    "students": "Students",
+    "teachers": "Instructors",
+
+    "noDescription": "No description",
+    "noDescriptionProvided": "No description provided.",
+
+    "discussions": "{{count}} discussions",
+    "likes": "{{count}} likes",
+
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+
+    "forumDescription": "Forum description",
+    "messages": "Messages",
+    "totalLikes": "Total likes",
+    "comments": "Comments",
+
+    "postMessage": "Post a message",
+    "textareaPlaceholder": "Share your thoughts, questions or suggestions...",
+
+    "noMessagesYet": "No messages yet",
+    "beFirstToParticipate": "Be the first to join the discussion!",
+
+    "admin": "Admin",
+    "deleteMessage": "Delete message",
+    "reply": "Reply",
+    "cancel": "Cancel",
+
+    "replies": "Replies ({{count}})",
+    "deleteComment": "Delete comment",
+
+    "close": "Close",
+
+    "forumTitle": "Forum title *",
+    "description": "Description *",
+    "targetAudience": "Target audience *",
+
+    "loading": "Loading...",
+    "create": "Create",
+
+    "deleteForumTitle": "Delete forum",
+    "deleteForumMessage": "Are you sure you want to delete the forum \"{{title}}\"? This will also delete all associated messages and comments."
+
+    
+
+   
   }
 }

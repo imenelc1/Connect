@@ -6,10 +6,5 @@
     "Intermédiaire": "Intermédiaire",
     "Avancé": "Avancé"
   },
-  "searchPlaceholder": "Rechercher un cours...",
-    "errors": {
-    "loadCourses": "Erreur lors du chargement des cours",
-    "deleteError": "Erreur lors de la suppression du cours"
-  },
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce cours ?"
+  "searchPlaceholder": "Rechercher un cours..."
 }

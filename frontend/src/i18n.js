@@ -123,13 +123,8 @@ import translationENAssistant from "./locales/AssistantIA/en-assistant/translati
 import translationFRAssistant from "./locales/AssistantIA/fr-assistant/translation.json"
 import translationFRWelcomereset from "./locales/welcomeresetpassword/fr/auth.json"
 import translationENWelcomereset from "./locales/welcomeresetpassword/en/auth.json"
-import translationFRAllExercises from "./locales/AllExercises/fr/translation.json"
-import translationENAllExercises from "./locales/AllExercises/en/translation.json"
-import translationENAllCourses from "./locales/AllCourses/en/translation.json"
-import translationFRAllCourses from "./locales/AllCourses/fr/translation.json"
-import translationFRAllQuizzes from "./locales/AllQuizzes/fr/translation.json"
-import translationENAllQuizzes from "./locales/AllQuizzes/en/translation.json"
-
+import translationFRAdminsetting from "./locales/adminsetting/fr/translation.json";
+import translationENAdminsetting from "./locales/adminsetting/en/translation.json";
 
 
 
@@ -179,9 +174,8 @@ const resources = {
     space: translationFRSpacesPage,
     instructors: translationFRInstructors,
     auth: translationFRWelcomereset,
-    allExercises:translationFRAllExercises,
-    allcourses:translationFRAllCourses,
-    allQuizzes:translationFRAllQuizzes
+    settingadmin: translationFRAdminsetting,
+
   },
 
   en: {
@@ -227,9 +221,8 @@ const resources = {
     notifications: translationENNotification,
     assistant: translationENAssistant,
     auth: translationENWelcomereset,
-    allExercises:translationENAllExercises,
-    allcourses:translationENAllCourses,
-    allQuizzes:translationENAllQuizzes
+    settingadmin: translationENAdminsetting,
+
 
 
 
@@ -244,4 +237,3 @@ i18n.use(initReactI18next).init({
 });
 
 export default i18n;
-

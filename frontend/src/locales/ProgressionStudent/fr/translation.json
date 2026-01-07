@@ -14,20 +14,19 @@
     "joined": "Inscrit le",
     "Week": "Semaine",
     "level": "Note",
-    "submissionsLabel": "Soumissions",
+    "submissionsLabel": "soumissions",
     "submitted": "Exercices soumis",
     "empty": "Aucun exercice soumis pour le moment",
     "completed": "Quiz terminés",
     "noneCompleted": "Aucun quiz terminé pour l'instant",
-    "QuizAverageScore": "Note moyenne des quiz",
-    "weeklyDataLog": "Données hebdomadaires",
-    "untitledExercise": "Sans titre",
-    "title": "Progression"
+     "QuizAverageScore": "Note moyenne des quiz",
+     "weeklyDataLog": "Données hebdomadaires" ,
+     "weeklySubmissionsError": "Erreur lors de la récupération des soumissions hebdomadaires",
+     "untitledExercise": "Sans titre"
   },
   "errors": {
     "dashboardError": "Erreur lors du chargement du tableau de bord",
     "averageScore": "Erreur lors de la récupération de la note moyenne",
-    "attempts": "Erreur lors de la récupération des tentatives",
-    "weeklySubmissionsError": "Erreur lors de la récupération des soumissions hebdomadaires"
+    "attempts": "Erreur lors de la récupération des tentatives"
   }
 }

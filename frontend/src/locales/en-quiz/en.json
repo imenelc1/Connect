@@ -1,4 +1,6 @@
 {
+  "preview": "preview quiz",
+  "info": "quiz information",
   "newQuiz": "NEW Quiz",
   "exitPreview": "Exit Preview",
   "noData": "No quiz data found.",
@@ -10,7 +12,16 @@
   "questionText": "Enter your question here...",
   "answerOption": "Answer option...",
   "sendQuiz": "Send Quiz",
-
+  "selectCourse": "Select a course",
+  "chooseCourse": "choose",
+  "visibility": "visibility",
+  "public": "public",
+  "private": "private",
+  "selectLevel": "select level",
+  "scoreMinimum": "Score minimum",
+  "maxAttempts": "max attempts",
+  "delais_entre_tentative": "Delay between attempts",
+  "enableDuration": "Activate timer",
   "quizSettings": "Quiz Settings",
   "quizTitle": "Quiz Title",
   "quizTitlePlaceholder": "Quiz title...",
@@ -22,21 +33,27 @@
   "beginner": "Beginner",
   "intermediate": "Intermediate",
   "advanced": "Advanced",
-
   "quizSummary": "Quiz Summary",
   "totalQuestions": "Total Questions:",
   "totalPoints": "Total Points:",
   "passScore": "Pass Score:",
   "durationLabel": "Duration:",
-
   "questions": "Questions",
   "addQuestion": "Add Question",
-
   "answers": "Answers",
   "answerOptionA": "Answer option A",
   "answerOptionB": "Answer option B",
   "addAnswer": "Add Answer",
-
   "saveDraft": "Save as Draft",
-  "previewQuiz": "Preview Quiz"
+  "previewQuiz": "Preview Quiz",
+  "loading": "Loading...",
+  "backMenu": "Back to menu",
+  "errors": {
+    "quizNotFound": "Quiz not found"
+  },
+  "levels": {
+    "debutant": "Beginner",
+    "intermediaire": "Intermediate",
+    "avance": "Advanced"
+  }
 }

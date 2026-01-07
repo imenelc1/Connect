@@ -296,11 +296,11 @@ export default function Dashboardetu() {
           <div className="space-y-3">
             {loadingNotifications ? (
               <div className="flex items-center justify-center py-4">
-                <p className="text-sm text-gray-500">{t("Dashboard.notificationLoad")}</p>
+                <p className="text-sm text-gray-500">Chargement des notifications...</p>
               </div>
             ) : formattedNotifications.length === 0 ? (
               <div className="flex items-center justify-center py-4">
-                <p className="text-sm text-gray-500">{t("Dashboard.noNotif")}</p>
+                <p className="text-sm text-gray-500">Aucune notification disponible.</p>
               </div>
             ) : (
               formattedNotifications.map((item, index) => (

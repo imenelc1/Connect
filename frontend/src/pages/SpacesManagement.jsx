@@ -1,15 +1,24 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
-import { Folder, SquarePen, Trash2, Plus } from "lucide-react";
+import Navbar from "../components/common/Navbar";
+import {
+  Folder,
+  SquarePen,
+  Trash2,
+  Plus,
+  BookOpen,
+  FileText,
+  HelpCircle
+} from "lucide-react";
 import Button from "../components/common/Button";
 import AddModel from "../components/common/AddModel";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ThemeContext from "../context/ThemeContext";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import ModernDropdown from "../components/common/ModernDropdown";
 
 export default function SpacesPage() {
-  const { t } = useTranslation("space");
+  const { t } = useTranslation("Spaces");
   const { toggleDarkMode } = useContext(ThemeContext);
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -24,13 +33,14 @@ export default function SpacesPage() {
   const [students, setStudents] = useState([]); // étudiants à ajouter
   const [studentsInSpace, setStudentsInSpace] = useState([]); // étudiants déjà dans l'espace
   const [error, setError] = useState("");
-const [courses, setCourses] = useState([]);
-const [exercices, setExercices] = useState([]);
-const [quizzes, setQuizzes] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [exercices, setExercices] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
 
   const [addStudentsModalOpen, setAddStudentsModalOpen] = useState(false);
   const [selectedSpace, setSelectedSpace] = useState(null);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectedTab, setSelectedTab] = useState("students");
 
   // ================= FETCH SPACES =================
   useEffect(() => {
@@ -49,7 +59,8 @@ const [quizzes, setQuizzes] = useState([]);
         }));
         setSpaces(formatted);
       } catch (err) {
-        console.error("Erreur chargement espaces :", err);
+        console.error(t("space.errors.load"), err);
+
       }
     };
     fetchSpaces();
@@ -102,103 +113,105 @@ const [quizzes, setQuizzes] = useState([]);
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error("Erreur modification space");
+        if (!res.ok) throw new Error(t("errors.update"));
         const data = await res.json();
         setSpaces((prev) =>
           prev.map((s) => s.id === editIndex ? { id: data.id_space, title: data.nom_space, description: data.description, utilisateur: data.utilisateur } : s)
         );
-        toast.success("Espace mis à jour !");
+        toast.success(t("messages.updateSuccess"));
       } else {
         const res = await fetch("http://localhost:8000/api/spaces/admin/create/", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error("Erreur création space");
+        if (!res.ok) throw new Error(t("errors.create"));
+
         const data = await res.json();
         setSpaces((prev) => [...prev, { id: data.id_space, title: data.nom_space, description: data.description, utilisateur: data.utilisateur }]);
-        toast.success("Espace créé !");
+        toast.success(t("messages.createSuccess"));
       }
       setOpenModal(false);
       setNewSpace({ title: "", description: "", utilisateur: "" });
       setEditIndex(null);
     } catch (err) {
       console.error(err);
-      toast.error("Opération échouée");
+      toast.error(t("messages.operationFailed"));
     }
   };
 
   // ================= HANDLE DELETE SPACE =================
   const handleDeleteSpace = async (id_space) => {
-    if (!window.confirm("Voulez-vous vraiment supprimer cet espace ?")) return;
+    if (!window.confirm(t("confirmDeleteSpace"))) return;
+
     try {
       const token = localStorage.getItem("admin_token");
       const res = await fetch(`http://localhost:8000/api/spaces/space/${id_space}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Erreur suppression espace");
+      if (!res.ok) throw new Error(t("errors.delete"));
       setSpaces((prev) => prev.filter((s) => s.id !== id_space));
-      toast.success("Espace supprimé !");
+      toast.success(t("messages.deleteSuccess"));
     } catch (err) {
       console.error(err);
-      toast.error("Impossible de supprimer l'espace");
+      toast.error(t("errors.spaceDeleteFailed"));
     }
   };
 
   // ================= OPEN MODAL POUR GÉRER LES ÉTUDIANTS =================
   // ================= OPEN MODAL POUR GÉRER LES ÉTUDIANTS =================
-const handleOpenSpaceStudents = async (space) => {
-  setSelectedSpace(space);
-  setAddStudentsModalOpen(true);
+  const handleOpenSpaceStudents = async (space) => {
+    setSelectedSpace(space);
+    setAddStudentsModalOpen(true);
 
-  const token = localStorage.getItem("admin_token");
-  if (!token) return toast.error("Token manquant");
+    const token = localStorage.getItem("admin_token");
+    if (!token) return toast.error("Token manquant");
 
-  try {
-    // Récupérer les détails de l'espace
-    const res = await fetch(
-      `http://localhost:8000/api/spaces/space/${space.id}/details/`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (!res.ok) throw new Error("Erreur chargement espace");
-    const data = await res.json();
+    try {
+      // Récupérer les détails de l'espace
+      const res = await fetch(
+        `http://localhost:8000/api/spaces/space/${space.id}/details/`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error(t("errors.load"));
+      const data = await res.json();
 
-    // Étudiants déjà dans l'espace
-    const inSpace = data.students.map((s) => ({
-      ...s,
-      id_utilisateur: s.id_utilisateur || s.id, // assure cohérence des IDs
-    }));
-    setStudentsInSpace(inSpace);
-
-    // Récupérer tous les étudiants
-    const resAll = await fetch(
-      "http://localhost:8000/api/users/students-with-progress/",
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const allStudentsData = await resAll.json();
-
-    // Étudiants disponibles à ajouter (ceux qui ne sont pas déjà dans l'espace)
-    const inSpaceIds = inSpace.map((s) => s.id_utilisateur);
-    const otherStudents = allStudentsData
-      .filter((s) => !inSpaceIds.includes(s.id))
-      .map((s) => ({
+      // Étudiants déjà dans l'espace
+      const inSpace = data.students.map((s) => ({
         ...s,
-        id_utilisateur: s.id, // standardiser l'ID pour le checkbox
+        id_utilisateur: s.id_utilisateur || s.id, // assure cohérence des IDs
       }));
+      setStudentsInSpace(inSpace);
 
-    setStudents(otherStudents);
-    setSelectedStudents([]); // aucune sélection par défaut
+      // Récupérer tous les étudiants
+      const resAll = await fetch(
+        "http://localhost:8000/api/users/students-with-progress/",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const allStudentsData = await resAll.json();
 
-    // Contenus
-    setCourses(data.courses || []);
-    setExercices(data.exercices || []);
-    setQuizzes(data.quizzes || []);
-  } catch (err) {
-    console.error(err);
-    toast.error("Impossible de charger les détails de l'espace");
-  }
-};
+      // Étudiants disponibles à ajouter (ceux qui ne sont pas déjà dans l'espace)
+      const inSpaceIds = inSpace.map((s) => s.id_utilisateur);
+      const otherStudents = allStudentsData
+        .filter((s) => !inSpaceIds.includes(s.id))
+        .map((s) => ({
+          ...s,
+          id_utilisateur: s.id, // standardiser l'ID pour le checkbox
+        }));
+
+      setStudents(otherStudents);
+      setSelectedStudents([]); // aucune sélection par défaut
+
+      // Contenus
+      setCourses(data.courses || []);
+      setExercices(data.exercices || []);
+      setQuizzes(data.quizzes || []);
+    } catch (err) {
+      console.error(err);
+      toast.error(t("errors.loadDetails"));
+    }
+  };
 
 
   // ================= ADD STUDENTS TO SPACE =================
@@ -212,7 +225,7 @@ const handleOpenSpaceStudents = async (space) => {
 
   const handleAddStudentsToSpace = async (e) => {
     e.preventDefault();
-    if (!selectedSpace || selectedStudents.length === 0) return toast.error("Sélectionnez au moins un étudiant");
+    if (!selectedSpace || selectedStudents.length === 0) return toast.error(t("errors.selectAtLeastOneStudent"));
 
     try {
       const token = localStorage.getItem("admin_token");
@@ -225,10 +238,11 @@ const handleOpenSpaceStudents = async (space) => {
         });
         if (!res.ok) {
           const data = await res.json();
-          throw new Error(data.error || "Erreur ajout étudiant");
+          throw new Error(data.error || t("errors.addStudentFailed"));
         }
       }
-      toast.success("Étudiants ajoutés !");
+      toast.success(t("messages.AddSuccess"));
+
       setAddStudentsModalOpen(false);
       setSelectedStudents([]);
     } catch (err) {
@@ -236,82 +250,92 @@ const handleOpenSpaceStudents = async (space) => {
       toast.error(err.message);
     }
   };
-const handleRemoveStudentFromSpace = async (student) => {
-  if (!selectedSpace) return;
+  const handleRemoveStudentFromSpace = async (student) => {
+    if (!selectedSpace) return;
 
-  const confirmDelete = window.confirm(
-    `Voulez-vous vraiment retirer ${student.nom} ${student.prenom} de l'espace ?`
-  );
-  if (!confirmDelete) return;
+    const confirmDelete = window.confirm(
+     t("messages.confirmRemoveStudent", { firstName: student.prenom, lastName: student.nom })
+    );
+    if (!confirmDelete) return;
 
-  try {
-    const token = localStorage.getItem("admin_token");
+    try {
+      const token = localStorage.getItem("admin_token");
 
-    const res = await fetch(
-      "http://localhost:8000/api/spaces/admin/remove-student/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          student_id: student.id_utilisateur,
-          space_id: selectedSpace.id,
-        }),
+      const res = await fetch(
+        "http://localhost:8000/api/spaces/admin/remove-student/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            student_id: student.id_utilisateur,
+            space_id: selectedSpace.id,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || t("messages.studentRemoveFailed"));
       }
-    );
 
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error || "Erreur suppression étudiant");
+      // 1️⃣ Retirer de "Déjà dans l'espace"
+      setStudentsInSpace((prev) =>
+        prev.filter((s) => s.id_utilisateur !== student.id_utilisateur)
+      );
+
+      // 2️⃣ Ajouter à "Ajouter à l'espace"
+      setStudents((prev) => [...prev, student]);
+
+      toast.success(  t("messages.studentRemovedFromSpace", { firstName: student.prenom, lastName: student.nom })
+    );
+    } catch (err) {
+      console.error(err);
+toast.error(err.message || t("messages.studentRemoveFailed"));
     }
-
-    // 1️⃣ Retirer de "Déjà dans l'espace"
-    setStudentsInSpace((prev) =>
-      prev.filter((s) => s.id_utilisateur !== student.id_utilisateur)
-    );
-
-    // 2️⃣ Ajouter à "Ajouter à l'espace"
-    setStudents((prev) => [...prev, student]);
-
-    toast.success(`${student.nom} ${student.prenom} retiré de l'espace`);
-  } catch (err) {
-    console.error(err);
-    toast.error(err.message || "Impossible de supprimer l'étudiant");
-  }
-};
+  };
+  const teacherOptions = teachers.map((t) => ({
+    value: t.id_utilisateur,
+    label: `${t.prenom} ${t.nom}`,
+  }));
 
   // ================= FIELDS FOR SPACE MODAL =================
   const fields = [
-    { label: "Nom", placeholder: "Nom de l'espace", value: newSpace.title, onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }) },
-    { label: "Description", placeholder: "Description", value: newSpace.description, onChange: (e) => setNewSpace({ ...newSpace, description: e.target.value }) },
+    { label: t("fieldSpaceName"), placeholder: t("fieldSpaceNamePlaceholder"), value: newSpace.title, onChange: (e) => setNewSpace({ ...newSpace, title: e.target.value }) },
+    { label: t("fieldDescription"), placeholder: t("fieldDescriptionPlaceholder"), value: newSpace.description, onChange: (e) => setNewSpace({ ...newSpace, description: e.target.value }) },
     {
-      label: "Propriétaire",
+      label: t("owner"),
       element: (
-        <select value={newSpace.utilisateur} onChange={(e) => setNewSpace({ ...newSpace, utilisateur: e.target.value })} className="w-full p-2 border border-gray-300 rounded-lg">
-          <option value="">-- Sélectionner un enseignant --</option>
-          {teachers.map((t) => <option key={t.id_utilisateur} value={t.id_utilisateur}>{t.prenom} {t.nom}</option>)}
-        </select>
+        <ModernDropdown
+          value={newSpace.utilisateur}
+          onChange={(value) =>
+            setNewSpace({ ...newSpace, utilisateur: value })
+          }
+          options={teacherOptions}
+          placeholder={t("selectTeacher")}
+          style={{ width: "100%" }}
+        />
       ),
-    },
+    }
   ];
 
   return (
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-                      {/* Sidebar */}
-                      <div>
-                        <Navbar />
-                      </div>
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
       <main className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}`}>
-       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-muted">Gestion des espaces</h1>
-            <p className="text-gray">Gere les espaces des enseignants</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-muted"> {t("title")}</h1>
+            <p className="text-gray">{t("description")}</p>
           </div>
 
           <Button
-            text={<span className="flex items-center gap-2"><Plus size={18}/> Ajouter Espace</span>}
+            text={<span className="flex items-center gap-2"><Plus size={18} /> {t("addSpaceButton")}</span>}
             variant="primary"
             className="!w-auto px-6 py-2 rounded-xl"
             onClick={() => { setEditIndex(null); setNewSpace({ title: "", description: "", utilisateur: "" }); setOpenModal(true); }}
@@ -333,11 +357,11 @@ const handleRemoveStudentFromSpace = async (student) => {
                   <p className="text-grayc text-sm mt-1 line-clamp-2">{space.description}</p>
                   {space.utilisateur && (
                     <p className="text-sm text-gray-500 mb-1">
-                      Propriétaire : {teachers.find(t => t.id_utilisateur === space.utilisateur)?.prenom}{" "}
+                      {t("owner")} : {teachers.find(t => t.id_utilisateur === space.utilisateur)?.prenom}{" "}
                       {teachers.find(t => t.id_utilisateur === space.utilisateur)?.nom}
                     </p>
                   )}
-                  
+
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-4">
@@ -355,7 +379,7 @@ const handleRemoveStudentFromSpace = async (student) => {
                 <Trash2
                   size={18}
                   className="text-red hover:opacity-80 cursor-pointer"
-                  title="Supprimer"
+                  title={t("deleteSpace")}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDeleteSpace(space.id);
@@ -368,171 +392,198 @@ const handleRemoveStudentFromSpace = async (student) => {
       </main>
 
       {/* Modal Création/Edition d'espace */}
-      <AddModel open={openModal} onClose={() => setOpenModal(false)} fields={fields} onSubmit={handleSubmit} submitLabel={editIndex ? "Modifier" : "Créer"} cancelLabel="Annuler" />
+      <AddModel open={openModal} onClose={() => setOpenModal(false)} fields={fields} onSubmit={handleSubmit} submitLabel={editIndex ? t("update") : t("create")} cancelLabel={t("cancel")} />
 
       {/* Modal Gérer les étudiants */}
-   {addStudentsModalOpen && (
-  <div className="fixed inset-0 bg-black/50 flex justify-center items-start pt-10 z-50 overflow-y-auto">
-    <div className="bg-white dark:bg-gray-800 p-10 rounded-xl w-full max-w-4xl max-h-[95vh] overflow-hidden relative shadow-xl">
-      <h2 className="text-3xl font-bold mb-8 text-center">
-        Gérer les étudiants et contenus de "{selectedSpace?.title}"
-      </h2>
-<div className="text-center mb-3 text-sm text-gray-500">
-        Étudiants : {studentsInSpace.length} | Cours : {courses.length} | Quiz : {quizzes.length}
-      </div>
-      {/* Bouton Fermer */}
-      <button
-        className="absolute top-5 right-5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-3xl font-bold"
-        onClick={() => setAddStudentsModalOpen(false)}
-        aria-label="Fermer modal"
-      >
-        ✕
-      </button>
+      {/* ========== MODAL : GÉRER LES ÉTUDIANTS ========== */}
+      {addStudentsModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-start pt-10 z-50 overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-5xl max-h-[95vh] flex flex-col p-4 md:p-8">
 
-      {/* Grille Étudiants */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Déjà dans l'espace */}
-        <div>
-          <h3 className="font-semibold mb-4 text-xl">Déjà dans l'espace</h3>
-          {studentsInSpace.length === 0 ? (
-            <p className="text-sm text-gray-500">Aucun étudiant</p>
-          ) : (
-            <ul className="space-y-3 max-h-96 overflow-y-auto pr-3">
-              {studentsInSpace.map((s) => (
-                <li
-                  key={s.id_utilisateur}
-                  className="flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm"
-                >
-                  <span className="truncate font-medium text-base">
-                    {s.nom} {s.prenom} ({s.email || s.adresse_email})
-                  </span>
-                  <Trash2
-                    size={20}
-                    className="text-red hover:opacity-80 cursor-pointer"
-                    title="Supprimer de l'espace"
-                    onClick={() => handleRemoveStudentFromSpace(s)}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {t("editSpace")} "{selectedSpace?.title}"
+              </h2>
+              <button
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-3xl font-bold"
+                onClick={() => setAddStudentsModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
 
-        {/* Ajouter à l'espace */}
-        <div>
-          <h3 className="font-semibold mb-4 text-xl">Ajouter à l'espace</h3>
-          {students.length === 0 ? (
-            <p className="text-sm text-gray-500">
-              Tous les étudiants sont déjà dans cet espace.
-            </p>
-          ) : (
-            <form onSubmit={handleAddStudentsToSpace} className="space-y-3 max-h-96 overflow-y-auto pr-3">
-             {students.map((student) => (
-  <div
-    key={student.id_utilisateur}
-    className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
-  >
-    <input
-      type="checkbox"
-      id={`student-${student.id_utilisateur}`}
-      checked={selectedStudents.includes(student.id_utilisateur)}
-      onChange={() => toggleStudent(student.id_utilisateur)}
-    />
-    <label
-      htmlFor={`student-${student.id_utilisateur}`}
-      className="truncate font-medium text-base"
-    >
-      {student.nom} {student.prenom} ({student.adresse_email || student.email})
-    </label>
-  </div>
-))}
+            {/* Onglets */}
+            <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+              <button
+                className={`flex-1 py-2 text-center font-medium ${selectedTab === "students"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-gray-500"
+                  }`}
+                onClick={() => setSelectedTab("students")}
+              >
+                {t("tabs.students")}
+              </button>
+              <button
+                className={`flex-1 py-2 text-center font-medium ${selectedTab === "contents"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-gray-500"
+                  }`}
+                onClick={() => setSelectedTab("contents")}
+              >
+                {t("tabs.contents")}
+              </button>
+            </div>
 
-              <div className="flex justify-end gap-4 mt-5">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setAddStudentsModalOpen(false)}
-                >
-                  Annuler
-                </Button>
-                <Button type="submit" variant="primary">
-                  Ajouter
-                </Button>
+            {/* CONTENU */}
+            {selectedTab === "students" && (
+              <div className="grid md:grid-cols-2 gap-4 md:gap-6 flex-1 overflow-y-auto">
+
+                {/* Déjà dans l'espace */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 shadow-inner overflow-y-auto">
+                  <h3 className="font-semibold text-lg mb-3 text-gray-800 dark:text-gray-200">
+                    {t("actions.alreadyInSpace")}
+                  </h3>
+
+                  {studentsInSpace.length === 0 ? (
+                    <p className="text-sm text-gray-500">{t("noStudents")}</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {studentsInSpace.map((s) => (
+                        <li
+                          key={s.id_utilisateur}
+                          className="flex justify-between items-center p-3 bg-white dark:bg-gray-700 rounded-lg shadow hover:shadow-md transition"
+                        >
+                          <span className="truncate font-medium">
+                            {s.nom} {s.prenom} ({s.email || s.adresse_email})
+                          </span>
+                          <Trash2
+                            size={20}
+                            className="text-red-500 hover:text-red-600 cursor-pointer"
+                            onClick={() => handleRemoveStudentFromSpace(s)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Ajouter à l'espace */}
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 shadow-inner overflow-y-auto">
+                  <h3 className="font-semibold text-lg mb-3 text-gray-800 dark:text-gray-200">
+                    {t("actions.addToSpace")}
+                  </h3>
+
+                  {students.length === 0 ? (
+                    <p className="text-sm text-gray-500">{t("actions.allStudentsInSpace")}</p>
+                  ) : (
+                    <form onSubmit={handleAddStudentsToSpace} className="space-y-2">
+                      {students.map((student) => (
+                        <label
+                          key={student.id_utilisateur}
+                          className="flex items-center gap-3 p-3 bg-white dark:bg-gray-700 rounded-lg shadow hover:shadow-md transition cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedStudents.includes(student.id_utilisateur)}
+                            onChange={() => toggleStudent(student.id_utilisateur)}
+                            className="accent-primary w-5 h-5"
+                          />
+                          <span className="truncate">
+                            {student.nom} {student.prenom} (
+                            {student.adresse_email || student.email})
+                          </span>
+                        </label>
+                      ))}
+
+                      <div className="flex justify-end gap-4 mt-4">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          onClick={() => setAddStudentsModalOpen(false)}
+                        >
+                          {t("cancel")}
+                        </Button>
+                        <Button type="submit" variant="primary">
+                          {t("addToSpaceButton")}
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+                </div>
               </div>
-            </form>
-          )}
+            )}
+
+            {selectedTab === "contents" && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto">
+
+                {/* Cours */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <BookOpen size={20} /> {t("contents.courses")}
+                  </h3>
+                  {courses.length === 0 ? (
+                    <p className="text-sm text-gray-500">{t("contents.noCourses")}</p>
+                  ) : (
+                    <ul className="space-y-2 max-h-60 overflow-y-auto">
+                      {courses.map((c) => (
+                        <li
+                          key={c.id_cours}
+                          className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"
+                        >
+                          {c.titre}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Exercices */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <FileText size={20} /> {t("contents.exercises")}
+                  </h3>
+                  {exercices.length === 0 ? (
+                    <p className="text-sm text-gray-500">{t("contents.noExercises")}</p>
+                  ) : (
+                    <ul className="space-y-2 max-h-60 overflow-y-auto">
+                      {exercices.map((e) => (
+                        <li
+                          key={e.id_exercice}
+                          className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"
+                        >
+                          {e.titre}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Quiz */}
+                <div>
+                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <HelpCircle size={20} /> {t("contents.quiz")}
+                  </h3>
+                  {quizzes.length === 0 ? (
+                    <p className="text-sm text-gray-500">{t("contents.noQuiz")}</p>
+                  ) : (
+                    <ul className="space-y-2 max-h-60 overflow-y-auto">
+                      {quizzes.map((q) => (
+                        <li
+                          key={q.id_quiz}
+                          className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"
+                        >
+                          {q.titre}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-
-      <hr className="my-10" />
-
-      {/* Grille Cours / Exercices / Quiz */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Cours */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">📘 Cours</h3>
-          {courses.length === 0 ? (
-            <p className="text-sm text-gray-500">Aucun cours</p>
-          ) : (
-            <ul className="space-y-2 max-h-60 overflow-y-auto">
-              {courses.map((c) => (
-                <li
-                  key={c.id_cours}
-                  className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"
-                >
-                  {c.titre}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Exercices */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">📝 Exercices</h3>
-          {exercices.length === 0 ? (
-            <p className="text-sm text-gray-500">Aucun exercice</p>
-          ) : (
-            <ul className="space-y-2 max-h-60 overflow-y-auto">
-              {exercices.map((e) => (
-                <li
-                  key={e.id_exercice}
-                  className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"
-                >
-                  {e.titre}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Quiz */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4">❓ Quiz</h3>
-          {quizzes.length === 0 ? (
-            <p className="text-sm text-gray-500">Aucun quiz</p>
-          ) : (
-            <ul className="space-y-2 max-h-60 overflow-y-auto">
-              {quizzes.map((q) => (
-                <li
-                  key={q.id_quiz}
-                  className="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg"
-                >
-                  {q.titre}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
-
-
+      )}
     </div>
   );
 }

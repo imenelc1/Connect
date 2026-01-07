@@ -12,7 +12,7 @@
     "RegistratioNumber": "Registration Number",
     "Speciality": "Specialty",
     "StudyYear": "Study Year",
-    "Grade": "Rank",
+    "Grade": "Grade",
     "Editprofile": "Edit Profile",
     "SaveChanges": "Save Changes",
     "Role": {
@@ -52,8 +52,7 @@
     "ProfileUpdateSuccess": "Profile updated successfully!",
     "PasswordUpdateFailed": "Failed to update password",
     "ProfileLoadFailed": "Cannot load user profile",
-    "ProfileUpdateFailed": "Failed to update profile",
-    "FormErrors": "Form errors"
+    "ProfileUpdateFailed": "Failed to update profile"
   },
   "Global": {
     "Loading": "Loading..."

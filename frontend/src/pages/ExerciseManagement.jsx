@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Search, SquarePen, Trash2, Code } from "lucide-react";
@@ -255,10 +255,17 @@ const openView = (exercise) => {
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filtered.map((item) => (
-            <div
-              key={item.id_exercice}
-              className={`${difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
-            >
+         <div
+  key={item.id_exercice}
+  className={`
+    ${difficultyBgMap[item.niveau_exo] || "bg-white"}
+    rounded-2xl p-6 shadow-sm hover:shadow-md transition
+    flex flex-col
+    overflow-hidden
+  `}
+>
+
+
               <div className="flex justify-between items-center mb-4">
                 <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
                   <Code size={24} className="text-muted" />
@@ -267,34 +274,38 @@ const openView = (exercise) => {
                   className={`px-3 py-1 text-xs font-medium rounded-full ${item.niveau_exo === "debutant"
                     ? "bg-muted/20 text-muted"
                     : item.niveau_exo === "intermediaire"
-                      ? "bg-pink/20 text-pink"
-                      : "bg-purple/20 text-purple"
+                      ? "bg-secondary/20 text-secondary"
+                      : "bg-pink/20 text-pink"
                     }`}
                 >
-                  {item.niveau_exercice_label}
+                  {item.niveau_exo === "easy"
+                    ? t("difficulty.Beginner")
+                    : item.niveau_exo === "intermediaire"
+                      ? t("difficulty.medium")
+                      : t("difficulty.hard")}
                 </span>
 
               </div>
 
-              <h3 className="font-semibold text-lg mb-2">
+              <h3 className="font-semibold text-lg mb-2 whitespace-normal break-words ">
                 {item.titre_exo}
               </h3>
-              <p className="text-grayc text-sm mb-4">
+              <p className="text-grayc text-sm mb-4 whitespace-normal break-words">
                 {item.utilisateur_name}
               </p>
-              <p className="text-grayc text-sm mb-4">
+              <p className="text-grayc text-sm mb-4 whitespace-normal break-words">
                 {item.categorie}
               </p>
 
-              <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
+              <div className="flex text-sm text-gray-500 mt-auto gap-3">
                 <Button
                                       variant="courseStart"
-                                      className={`px-4 py-2 whitespace-nowrap ${buttonStyles[item.niveau_exercice_label]}`}
+                                      className={`px-2 py-2 whitespace-nowrap ${buttonStyles[item.niveau_exercice_label]}`}
                                      onClick={() => openView(item)}
                                     >
-                                      Voir Exercice
+                                      {t("voir_exo")}
                                     </Button>
-                <div className="flex gap-3" >
+                <div className="flex gap-1" >
                  
                   <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
                     <SquarePen size={20} />
