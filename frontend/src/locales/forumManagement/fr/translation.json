@@ -1,25 +1,66 @@
-
 {
   "ForumManagement": {
-    "forumM": "Gestion des forums" ,
-    "Managediscussion":"Gérer les forums et les fils de discussion",
+    "forumM": "Gestion des forums",
+    "Managediscussion": "Gérer les forums et les fils de discussion",
     "createF": "Créer un forum",
-    "searchF": "Rechercher des forums ...",
-    "GeneralD":"Discussion générale",
-    "Talk":"Parlez de tout ce qui concerne C",
-    "ButtonManage":"Gérer",
-    "threads":"fils de discussion",
-    "posts":"messages",
-    "memebers":"membres",
-    "Homework":"Aide aux devoirs",
-    "gethelp":"Obtenez de l'aide pour vos devoirs",
-    "ProjetShowcase":"Vitrine du projet",
-    "share":"Partagez vos projets C",
-    "AlgorithmD":"Discussion sur l'algorithme",
-    "deepDive":"Analyse approfondie des algorithmes",
-    "career":"Conseils de carrière",
-    "Careerp":"Conseils de carrière pour les développeurs C",
-    "Bug":"Rapports de bogues",
-    "Report":"Signaler les problèmes de la plateforme"
+    "searchF": "Rechercher des forums...",
+    "ButtonManage": "Gérer",
+
+    "createdByFirstName": "Créé par {{user}}",
+    "dateSeparator": "•",
+
+    "forStudents": "Pour étudiants",
+    "forTeachers": "Pour enseignants",
+
+    "discussionForums": "Forums de discussion",
+    "loadingForums": "Chargement des forums...",
+    "retry": "Réessayer",
+    "noForumFound": "Aucun forum trouvé",
+
+    "students": "Étudiants",
+    "teachers": "Enseignants",
+
+    "noDescription": "Pas de description",
+    "noDescriptionProvided": "Aucune description fournie.",
+
+    "discussions": "{{count}} discussions",
+    "likes": "{{count}} likes",
+
+    "view": "Voir",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+
+    "forumDescription": "Description du forum",
+    "messages": "Messages",
+    "totalLikes": "Likes totaux",
+    "comments": "Commentaires",
+
+    "postMessage": "Poster un message",
+    "textareaPlaceholder": "Partagez vos pensées, questions ou suggestions...",
+
+    "noMessagesYet": "Aucun message pour le moment",
+    "beFirstToParticipate": "Soyez le premier à participer à la discussion !",
+
+    "admin": "Admin",
+    "deleteMessage": "Supprimer le message",
+    "reply": "Répondre",
+    "cancel": "Annuler",
+
+    "replies": "Réponses ({{count}})",
+    "deleteComment": "Supprimer le commentaire",
+
+    "close": "Fermer",
+
+    "forumTitle": "Titre du forum *",
+    "description": "Description *",
+    "targetAudience": "Public cible *",
+
+    "loading": "En cours...",
+    "create": "Créer",
+
+    "deleteForumTitle": "Supprimer le forum",
+    "deleteForumMessage": "Êtes-vous sûr de vouloir supprimer le forum \"{{title}}\" ? Cette action supprimera également tous les messages et commentaires associés."
+
+
   }
 }

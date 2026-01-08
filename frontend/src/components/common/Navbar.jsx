@@ -121,7 +121,9 @@ export default function Navbar() {
 
   const quizRoutes = [
     "/all-quizzes",
-    "/quiz-preview"
+    "/quiz-preview",
+    "/create-quiz",
+    
 
   ];
   const classementRoutes = [
@@ -139,6 +141,11 @@ export default function Navbar() {
     "/student-exercises",
     "/students",
   ];
+  const adminQuizRoutes = [
+  "/QuizManagement",
+  "/Voir-quiz",
+];
+
 
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
@@ -207,6 +214,7 @@ export default function Navbar() {
           if (item.href === "/badges" && classementRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
           if (item.href === "/spaces" && spacesRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
           if (item.href === "/my-students" && mystudentsRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+           if (item.href === "/QuizManagement" && adminQuizRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
 
           return (
             <NavLink

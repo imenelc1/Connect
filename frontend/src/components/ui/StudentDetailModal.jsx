@@ -38,7 +38,10 @@ export default function StudentDetailModal({ open, onClose, studentId }) {
         setStudent(data);
       } catch (err) {
         console.error(err);
-        setError(t("StudentsManagement.errors.loadStudent") || "Impossible de charger les informations de l'étudiant.");
+        setError(
+          t("StudentsManagement.errors.loadStudent") ||
+            "Impossible de charger les informations de l'étudiant."
+        );
       } finally {
         setLoading(false);
       }
@@ -50,12 +53,23 @@ export default function StudentDetailModal({ open, onClose, studentId }) {
   if (!open) return null;
 
   const utilisateur = student?.utilisateur || {};
-  const initials = `${utilisateur.nom?.[0] || ""}${utilisateur.prenom?.[0] || ""}`.toUpperCase();
-  const joinedDate = utilisateur.joined ?? utilisateur.date_joined ?? utilisateur.created_at;
+
+  // **Nouvelle logique pour la date de join**
+  const joinedDate =
+    student?.joined ?? // si l'API /students-with-progress a fourni joined
+    utilisateur.joined ??
+    utilisateur.date_joined ??
+    utilisateur.created_at;
+
   const joinedFormatted = joinedDate ? new Date(joinedDate).toLocaleDateString() : "-";
 
+  const initials = `${utilisateur.nom?.[0] || ""}${utilisateur.prenom?.[0] || ""}`.toUpperCase();
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50" onClick={onClose}>
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
+      onClick={onClose}
+    >
       <div
         className="bg-card rounded-2xl shadow-xl p-6 w-full max-w-md animate-fadeIn overflow-y-auto max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}

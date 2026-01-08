@@ -2,23 +2,86 @@
   "spacesTitle": "Espaces",
   "mySpacesTitle": "Mes espaces",
   "createSpaceButton": "+ Créer un espace",
+
   "modalTitle": "Créer un nouvel espace",
   "modalSubtitle": "Remplissez les informations pour créer un espace",
-  "modalSubmit": "Ajouter l'espace",
+  "modalSubmit": "Ajouter l’espace",
   "modalCancel": "Annuler",
-  "fieldSpaceName": "Nom de l'espace",
-  "fieldSpaceNamePlaceholder": "Entrez le nom de l'espace",
+
+  "fieldSpaceName": "Nom de l’espace",
+  "fieldSpaceNamePlaceholder": "Entrez le nom de l’espace",
   "fieldDescription": "Description",
-  "fieldDescriptionPlaceholder": "Entrez la description de l'espace",
-  "created": "Créé le ",
-  "noSpacesMessage": "Aucun espace n'a encore été créé.",
-  "noStudentSpaces": "Vous n'êtes inscrit à aucun espace.",
-  "spaceNameRequired": "Le nom de l'espace est requis.",
+  "fieldDescriptionPlaceholder": "Entrez la description de l’espace",
+
+  "created": "Créé le",
+  "owner": "Propriétaire",
+  "selectTeacher": "-- Sélectionner un enseignant --",
+
+  "noSpacesMessage": "Aucun espace n’a encore été créé.",
+  "noStudentSpaces": "Vous n’êtes inscrit à aucun espace.",
+"noStudents": "Aucun étudiant dans cet espace",
+
+  "spaceNameRequired": "Le nom de l’espace est requis.",
   "spaceNameExists": "Un espace avec ce nom existe déjà.",
+
   "spaceCreated": "Espace créé avec succès !",
-  "spaceCreationFailed": "Une erreur est survenue lors de la création de l'espace.",
+  
+"addToSpaceButton": "Ajouter ",
+
   "confirmDeleteSpace": "Êtes-vous sûr de vouloir supprimer cet espace ?",
   "spaceDeleted": "Espace supprimé avec succès !",
-  "spaceDeleteFailed": "Une erreur est survenue lors de la suppression de l'espace.",
-  "deleteSpace": "Supprimer l'espace"
+  
+
+  "deleteSpace": "Supprimer l’espace",
+  "editSpace": "Modifier l’espace",
+
+  "title": "Gestion des espaces",
+  "description": "Gérer les espaces des enseignants",
+
+  "addSpaceButton": "Ajouter un espace",
+  "cancel": "Annuler",
+  "create":"Créer",
+  "update":"Mettre à jour",
+
+  "tabs": {
+    "students": "Étudiants",
+    "contents": "Contenus"
+  },
+
+  "actions": {
+    "alreadyInSpace": "Déjà dans l’espace",
+    "addToSpace": "Ajouter à l’espace",
+    "allStudentsInSpace": "Tous les étudiants dans cet espace"
+  },
+
+  "contents": {
+    "courses": "Cours",
+    "noCourses": "Aucun cours disponible",
+    "exercises": "Exercices",
+    "noExercises": "Aucun exercice disponible",
+    "quiz": "Quiz",
+    "noQuiz": "Aucun quiz disponible"
+  },
+
+  "errors": {
+    "load": "Erreur lors du chargement des espaces",
+    "create": "Erreur lors de la création de l’espace",
+     "update": "Erreur lors de la modification de l’espace",
+     "delete": "Erreur lors de la suppression de l’espace",
+     "spaceCreationFailed": "Une erreur est survenue lors de la création de l’espace.",
+     "spaceDeleteFailed": "Une erreur est survenue lors de la suppression de l’espace.",
+      "loadDetails": "Impossible de charger les détails de l'espace",
+      "selectAtLeastOneStudent": "Sélectionnez au moins un étudiant",
+  "addStudentFailed": "Erreur ajout étudiant"
+  },
+
+  "messages": {
+    "createSuccess": "Espace créé !",
+    "operationFailed": "Opération échouée",
+    "updateSuccess": "Espace mis à jour !",
+    "AddSuccess": "Étudiants ajoutés !",
+    "confirmRemoveStudent": "Voulez-vous vraiment retirer {{firstName}} {{lastName}} de l'espace ?",
+    "studentRemovedFromSpace": "{{firstName}} {{lastName}} retiré de l'espace",
+  "studentRemoveFailed": "Impossible de retirer l'étudiant"
+  }
 }

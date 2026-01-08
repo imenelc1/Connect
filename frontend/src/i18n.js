@@ -127,6 +127,9 @@ import translationFRAdminsetting from "./locales/adminsetting/fr/translation.jso
 import translationENAdminsetting from "./locales/adminsetting/en/translation.json";
 
 
+
+
+
 const resources = {
   fr: {
     translation: translationFR,
@@ -171,7 +174,8 @@ const resources = {
     space: translationFRSpacesPage,
     instructors: translationFRInstructors,
     auth: translationFRWelcomereset,
-    settingadmin: translationFRAdminsetting
+    settingadmin: translationFRAdminsetting,
+
   },
 
   en: {
@@ -217,7 +221,8 @@ const resources = {
     notifications: translationENNotification,
     assistant: translationENAssistant,
     auth: translationENWelcomereset,
-    settingadmin: translationENAdminsetting
+    settingadmin: translationENAdminsetting,
+
 
 
 

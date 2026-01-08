@@ -95,17 +95,30 @@ export default function QuizPreview() {
           mb-12
         ">
           <StatCard
-            icon={<FaClock />}
+            icon={
+              <span className="text-[rgb(var(--color-primary))] dark:text-[rgb(var(--color-supp))]">
+                <FaClock />
+              </span>
+            }
             label={quiz.activerDuration ? `${quiz.durationMinutes} ${t("minutes")}` : t("nonLimited")}
             gradient="bg-grad-2"
           />
           <StatCard
-            icon={<FaMedal />}
+            icon={
+              <span className="text-[rgb(var(--color-yellow-code))] dark:text-[rgb(var(--color-icons-about))]">
+                <FaMedal />
+              </span>
+            }
             label={`${totalPoints} ${t("points")}`}
             gradient="bg-grad-3"
           />
+
           <StatCard
-            icon={<FaStar />}
+            icon={
+              <span className="text-[rgb(var(--color-tertiary))] dark:text-[rgb(var(--color-supp))]">
+                <FaStar />
+              </span>
+            }
             label={quiz.exercice.niveau}
             gradient="bg-grad-4"
           />

@@ -62,6 +62,10 @@ export default function CourseUpdate() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
 
+  const generateTempId = () => `temp-${Date.now()}-${Math.random()}`;
+  const isTempId = (id) => typeof id === "string" && id.startsWith("temp-");
+
+
 
   useEffect(() => {
     if (!coursId) return;
@@ -151,15 +155,26 @@ export default function CourseUpdate() {
   };
 
   const addLessonToSection = (sectionId) => {
+  setSections((prev) =>
+    prev.map((s) =>
+      s.id === sectionId
+        ? {
+            ...s,
+            lessons: [
+              ...s.lessons,
+              {
+                id: generateTempId(),
+                title: "",
+                content: "",
+                type: "text",
+              },
+            ],
+          }
+        : s
+    )
+  );
+};
 
-    setSections((prev) =>
-      prev.map((s) =>
-        s.id === sectionId
-          ? { ...s, lessons: [...s.lessons, { id: null, title: "" }] }
-          : s
-      )
-    );
-  };
 
   const updateLessonTitle = (sectionId, lessonId, newTitle) => {
     setSections((prev) =>
@@ -193,7 +208,7 @@ export default function CourseUpdate() {
 
   const removeSection = async (id) => {
 
-    const confirmDelete = window.confirm("Tu es sûr de supprimer cette section ?");
+    const confirmDelete = window.confirm("Etes-vous sûr de vouloir supprimer cette section?");
     if (!confirmDelete) return;
     const token = localStorage.getItem("token");
 
@@ -333,20 +348,21 @@ export default function CourseUpdate() {
           }
 
 
-          if (lesson.id) {
-            await api.put(`courses/Lesson/${lesson.id}/`, formData, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-          } else {
-            const resLesson = await api.post("courses/createLesson/", formData, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-            lesson.id = resLesson.data.id_lecon;
-          }
-          continue;
+          if (lesson.id && !isTempId(lesson.id)) {
+  // 🔵 Leçon EXISTANTE → UPDATE
+  await api.put(`courses/Lesson/${lesson.id}/`, formData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+} else {
+  // 🟢 Nouvelle leçon → CREATE
+  const resLesson = await api.post("courses/createLesson/", formData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  lesson.id = resLesson.data.id_lecon; // remplace l’id temporaire
+}
+
+
         }
-
-
 
       }
 
@@ -357,6 +373,33 @@ export default function CourseUpdate() {
       toast.error("Erreur lors de la mise à jour du cours.");
     }
   };
+
+
+  const updateLessonType = (sectionId, lessonId, newType) => {
+  setSections((prev) =>
+    prev.map((s) =>
+      s.id === sectionId
+        ? {
+            ...s,
+            lessons: s.lessons.map((l) =>
+              l.id === lessonId
+                ? {
+                    ...l,
+                    type: newType,
+                    content: newType !== "image" ? l.content || "" : "",
+                    imageFile: newType === "image" ? l.imageFile : null,
+                    preview: newType === "image" ? l.preview : null,
+                  }
+                : l
+            ),
+          }
+        : s
+    )
+  );
+};
+
+
+
 
 
 

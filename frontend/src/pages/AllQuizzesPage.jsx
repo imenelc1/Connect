@@ -1,5 +1,7 @@
   import React, { useEffect, useState, useContext, useMemo } from "react";
-  import Navbar from "../components/common/NavBar";
+  import { useParams, useLocation } from "react-router-dom";
+
+  import Navbar from "../components/common/Navbar";
   import { Plus, Bell } from "lucide-react";
   import ContentCard from "../components/common/ContentCard";
   import Button from "../components/common/Button";
@@ -24,6 +26,8 @@
     const navigate = useNavigate();
     const { t } = useTranslation("contentPage");
     const { toggleDarkMode } = useContext(ThemeContext);
+    const { coursId } = useParams(); // <--- récupère le cours si présent
+
 
     const userData = JSON.parse(localStorage.getItem("user"));
     const userRole = userData?.user?.role ?? userData?.role;
@@ -46,49 +50,53 @@
       return 3;
     };
 
-    // 🔹 Fetch quiz depuis le backend (initial + recherche)
-    useEffect(() => {
-      const controller = new AbortController();
+   useEffect(() => {
+    const controller = new AbortController();
 
-      const fetchQuizzes = async () => {
-        try {
-          const url = `http://localhost:8000/api/quiz/api/quiz?search=${searchTerm}`;
-          const res = await fetch(url, { signal: controller.signal });
-          const data = await res.json();
+    const fetchQuizzes = async () => {
+      try {
+        // Si coursId présent, fetch seulement les quiz de ce cours
+        const url = coursId
+          ? `http://localhost:8000/api/quiz/cours/${coursId}/`
+          : `http://localhost:8000/api/quiz/api/quiz?search=${searchTerm}`;
 
-          const formatted = data.map(c => ({
-            id: c.exercice?.id_exercice,
-            quizId: c.id,
-            title: c.exercice?.titre_exo,
-            description: c.exercice?.enonce,
-            level: c.exercice?.niveau_exercice_label,
-            categorie: c.exercice?.categorie,
-            author: c.exercice?.utilisateur_name,
-            author_id: c.exercice?.utilisateur,
-            visibilite_exo:c.exercice?.visibilite_exo,
-            initials: c.exercice?.utilisateur_name
-              .split(" ")
-              .map(n => n[0])
-              .join("")
-              .toUpperCase(),
-            isMine: c.exercice?.utilisateur === currentUserId,
-            nbMax_tentative: c.nbMax_tentative,
-            delai_entre_tentatives: c.delai_entre_tentatives,
-            activer: c.activerDuration,
-            duration: c.duration_minutes,
-            visible: c.exercice?.visibilite_exo === true || c.exercice?.utilisateur === currentUserId, // <-- Nouveau champ
+        const res = await fetch(url, { signal: controller.signal });
+        const data = await res.json();
 
-          }))
+        const formatted = data.map(c => ({
+          id: c.exercice?.id_exercice,
+          quizId: c.id,
+          title: c.exercice?.titre_exo,
+          description: c.exercice?.enonce,
+          level: c.exercice?.niveau_exercice_label,
+          categorie: c.exercice?.categorie,
+          author: c.exercice?.utilisateur_name,
+          author_id: c.exercice?.utilisateur,
+          visibilite_exo: c.exercice?.visibilite_exo,
+          initials: c.exercice?.utilisateur_name
+            .split(" ")
+            .map(n => n[0])
+            .join("")
+            .toUpperCase(),
+          isMine: c.exercice?.utilisateur === currentUserId,
+          nbMax_tentative: c.nbMax_tentative,
+          delai_entre_tentatives: c.delai_entre_tentatives,
+          activer: c.activerDuration,
+          duration: c.duration_minutes,
+          visible:
+            c.exercice?.visibilite_exo === true ||
+            c.exercice?.utilisateur === currentUserId,
+        }));
 
-          setQuizzes(formatted);
-        } catch (err) {
-          if (err.name !== "AbortError") console.error(err);
-        }
-      };
+        setQuizzes(formatted);
+      } catch (err) {
+        if (err.name !== "AbortError") console.error(err);
+      }
+    };
 
-      fetchQuizzes();
-      return () => controller.abort();
-    }, [searchTerm, currentUserId]);
+    fetchQuizzes();
+    return () => controller.abort();
+  }, [searchTerm, currentUserId, coursId]);
 
     // 🔹 Fetch tentatives pour chaque quiz affiché
     useEffect(() => {

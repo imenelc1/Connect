@@ -185,7 +185,8 @@ export function QuizTakePage() {
         {/* Stats */}
         <div className="flex justify-center gap-6 mb-6 text-white">
           {quiz.activerDuration && (
-            <div className="flex items-center gap-2 bg-blue px-4 py-2 rounded text-white">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink text-white shadow-sm">
+
               <FaClock /> {formatTime(secondsLeft)}
             </div>
           )}
@@ -204,14 +205,22 @@ export function QuizTakePage() {
 
         <ContentProgress value={Math.round(progressValue)} className="mb-6" color={progressColor} />
 
-        <div className="bg-grad-2 rounded-xl p-4 mb-6">
+        <div className="bg-grad-3 rounded-2xl p-6 mb-6 shadow-card animate-slide-in">
+
           <h3 className="font-semibold mb-3">{q.texte}</h3>
 
           <div className="flex flex-col gap-2">
             {q.options.map((opt) => (
               <label
                 key={opt.id}
-                className="flex items-center gap-3 border rounded-lg px-3 py-2 cursor-pointer"
+                className={`
+        flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all
+        border shadow-sm
+        ${answers[q.id] === opt.id
+                    ? "bg-[rgb(var(--color-blue-primary-light))] border-blue shadow-md"
+                    : "bg-card border-gray-light hover:bg-[rgb(var(--color-blue-primary-light))]"
+                  }
+      `}
               >
                 <input
                   type="radio"
@@ -223,13 +232,38 @@ export function QuizTakePage() {
               </label>
             ))}
           </div>
+
+          {/* 👉 MESSAGE UX ICI */}
+          {!answers[q.id] && (
+            <p className="text-sm text-gray mt-2 text-center">
+              {t("selectAnswer")}
+            </p>
+          )}
+
+
         </div>
       </div>
 
-      <div className="flex gap-4 justify-between mt-4">
-        <Button text={`< ${t("prev")}`} onClick={prevQuestion} disabled={currentQuestion === 0} />
-        <Button text={`${t("next")} >`} onClick={nextQuestion} disabled={!answers[q.id]} />
+      <div className="flex justify-between items-center gap-4 mt-6">
+        <Button
+          variant="quizBack"
+          text={`← ${t("prev")}`}
+          onClick={prevQuestion}
+          disabled={currentQuestion === 0}
+        />
+
+        <Button
+          variant="quizNext"
+          text={
+            currentQuestion === quiz.questions.length - 1
+              ? t("finish")
+              : `${t("next")} →`
+          }
+          onClick={nextQuestion}
+          disabled={!answers[q.id]}
+        />
       </div>
+
     </div>
   );
 }

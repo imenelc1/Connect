@@ -34,32 +34,6 @@ class QuizDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
 
-    # 🔹 Update (modification)
-    def update(self, request, *args, **kwargs):
-        response = super().update(request, *args, **kwargs)
-        quiz = self.get_object()
-        enseignant = quiz.exercice.utilisateur  # L’auteur de l’exercice
-        if request.user.is_staff and enseignant:
-            Notification.objects.create(
-                utilisateur_destinataire=enseignant,
-                action_type='quiz_updated',
-                module_source='quiz',
-                message_notif=f"📢 Votre quiz lié à l'exercice '{quiz.exercice.titre_exo}' a été modifié."
-            )
-        return response
-
-    # 🔹 Destroy (suppression)
-    def destroy(self, request, *args, **kwargs):
-        quiz = self.get_object()
-        enseignant = quiz.exercice.utilisateur  # récupérer avant suppression
-        if request.user.is_staff and enseignant:
-            Notification.objects.create(
-                utilisateur_destinataire=enseignant,
-                action_type='quiz_deleted',
-                module_source='quiz',
-                message_notif=f"❌ Votre quiz lié à l'exercice '{quiz.exercice.titre_exo}' a été supprimé."
-            )
-        return super().destroy(request, *args, **kwargs)
 
 
 class QuestionListCreateView(generics.ListCreateAPIView):
@@ -377,3 +351,13 @@ def quizzes_faits_par_etudiant(request):
         })
 
     return Response(data)
+
+
+
+class QuizParCoursAPIView(APIView):
+
+    def get(self, request, cours_id):
+        # On récupère tous les quiz dont l'exercice appartient à ce cours
+        quizzes = Quiz.objects.select_related('exercice').filter(exercice__cours_id=cours_id)
+        serializer = QuizSerializer1(quizzes, many=True)
+        return Response(serializer.data)
