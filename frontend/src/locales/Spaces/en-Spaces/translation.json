@@ -3,22 +3,71 @@
   "mySpacesTitle": "My Spaces",
   "createSpaceButton": "+ Create Space",
   "modalTitle": "Create New Space",
-  "modalSubtitle": "Fill the information to create a space",
+  "modalSubtitle": "Fill in the information to create a space",
   "modalSubmit": "Add Space",
   "modalCancel": "Cancel",
   "fieldSpaceName": "Space Name",
   "fieldSpaceNamePlaceholder": "Enter space name",
   "fieldDescription": "Description",
   "fieldDescriptionPlaceholder": "Enter space description",
-  "created": "Created on ",
+  "created": "Created on",
+  "owner": "Owner",
+  "selectTeacher": "-- Select an Instructor--",
   "noSpacesMessage": "No spaces have been created yet.",
   "noStudentSpaces": "You are not enrolled in any spaces yet.",
   "spaceNameRequired": "Space name is required.",
   "spaceNameExists": "A space with this name already exists.",
   "spaceCreated": "Space created successfully!",
-  "spaceCreationFailed": "An error occurred while creating the space.",
+"noStudents": "No students in this space",
   "confirmDeleteSpace": "Are you sure you want to delete this space?",
   "spaceDeleted": "Space deleted successfully!",
-  "spaceDeleteFailed": "An error occurred while deleting the space.",
-  "deleteSpace": "Delete space"
+  "addToSpaceButton":"Add ",
+  "deleteSpace": "Delete space",
+  "editSpace": "Edit space",
+  "title": "Spaces Management",
+  "description": "Manage teachers' spaces",
+  "addSpaceButton": "Add Space",
+  "cancel": "Cancel",
+  "create": "Create",
+  "update": "Update",
+  "tabs": {
+    "students": "Students",
+    "contents": "Contents"
+  },
+ 
+  "actions": {
+    "alreadyInSpace": "Already in space",
+    "addToSpace": "Add to space",
+    "allStudentsInSpace": "All students in this space"
+  },
+  "contents": {
+    "courses": "Courses",
+    "noCourses": "No courses available",
+    "exercises": "Exercises",
+    "noExercises": "No exercises available",
+    "quiz": "Quizzes",
+    "noQuiz": "No quizzes available"
+  },
+  "errors": {
+    "load": "Error while loading spaces",
+    "create": "Error while creating space",
+     "update": "Error while updating space",
+     "delete": "Error while deleting space",
+       "spaceCreationFailed": "An error occurred while creating the space.",
+       "spaceDeleteFailed": "An error occurred while deleting the space.",
+     "loadDetails": "Unable to load space details",
+     "selectAtLeastOneStudent": "Select at least one student",
+  "addStudentFailed": "Error adding student"
+  },
+  "messages": {
+    "createSuccess": "Space created!",
+    "operationFailed": "Operation failed",
+    "updateSuccess": "Space updated!",
+    "deleteSuccess":"Space Deleted!",
+     "AddSuccess": "Students added!",
+     "confirmRemoveStudent": "Are you sure you want to remove {{firstName}} {{lastName}} from the space?",
+     "studentRemovedFromSpace": "{{firstName}} {{lastName}} removed from the space",
+  "studentRemoveFailed": "Unable to remove the student"
+    
+  }
 }
