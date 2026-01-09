@@ -5,6 +5,7 @@ import ExerciseContext from "../context/ExerciseContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getSystemPrompt, getAIAnswer } from "../services/iaService";
+import { useTranslation } from "react-i18next";
 
 const detectLanguage = (text) =>
   /[àâçéèêëîïôûùüÿñæœ]/i.test(text) ? "fr" : "en";
@@ -42,6 +43,7 @@ export default function AssistantIA({
   mode = "generic",
   course = null,
 }) {
+   const { t } = useTranslation("assistant"); 
   const exercise = useContext(ExerciseContext); // récupère l'exercice
   const [student, setStudent] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -82,7 +84,7 @@ export default function AssistantIA({
     const u = JSON.parse(stored);
     setStudent({
       id: u.user_id,
-      name: `${u.prenom || ""} ${u.nom || ""}`.trim() || "Étudiant",
+      name: `${u.prenom || ""} ${u.nom || ""}`.trim() ||  t("student"),
     });
   }, []);
 
@@ -103,7 +105,7 @@ export default function AssistantIA({
           text:
             actualMode === "exercise"
               ? `Bonjour ${student.name
-              } 👋\nJe vois que tu travailles sur l'exercice : **${exercise?.titre || "en cours"
+              } 👋\nJe vois que tu travailles sur l'exercice : **${exercise?.titre || t("chat.exercise_in_progress")
               }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
               : actualMode === "course"
                 ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`

@@ -157,12 +157,90 @@ export default function AppRoutes() {
         <Route path="/ListeExercices" element={<CourseExercisesPage />} />{/* */}
         <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
 
+       <Route path="/student-exercice" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <StudentExercice />
+          </PrivateRoute>
+        }/>
+        <Route path="/student-exercises/:studentId" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <StudentExercice />
+          </PrivateRoute>
+        }/>
+        <Route path="/students/:studentId/progression" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <ProgressExercice />
+          </PrivateRoute>
+        }/>
+        <Route path="/start-exercise/:exerciceId" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <TheoryExercisePage />
+          </PrivateRoute>
+        }/>
+        <Route path="/start-exerciseCode/:exerciceId" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <CodeExercisePage />
+          </PrivateRoute>
+        }/>
+        <Route path="/submitted-exercise/:tentativeId" element={
+          <PrivateRoute allowedRoles={["etudiant"]}>
+            <SubmittedExercise />
+          </PrivateRoute>
+        }/>
+        <Route path="/SubmittedExos" element={
+          <PrivateRoute allowedRoles={["etudiant"]}>
+            <SubmittedExercises />
+          </PrivateRoute>
+        }/>
+        <Route path="/submitted-exercise-theory/:tentativeId" element={
+          <PrivateRoute allowedRoles={["etudiant"]}>
+            <SubmittedExoTheory />
+          </PrivateRoute>
+        }/>
+        <Route path="/submitted-exercise-theory/" element={
+          <PrivateRoute allowedRoles={["etudiant"]}>
+            <SubmittedExoTheory />
+          </PrivateRoute>
+        }/>
+        <Route path="/progress-exercice" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <ProgressExercice />
+          </PrivateRoute>
+        }/>
+        <Route path="/progress-student/" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <ProgressStudent />
+          </PrivateRoute>
+        }/>
+        <Route path="/new-exercise" element={
+          <PrivateRoute allowedRoles={["enseignant"]}>
+            <NewExercise />
+          </PrivateRoute>
+        }/>
+        <Route path="/exercise-preview" element={
+          <PrivateRoute allowedRoles={["enseignant"]}>
+            <ExercisePreview />
+          </PrivateRoute>
+        }/>
+        <Route path="/exercices/edit/:id" element={
+          <PrivateRoute allowedRoles={["enseignant"]}>
+            <UpdateExercice />
+          </PrivateRoute>
+        }/>
+
+
         {/* ========= QUIZZES ========= */}
         <Route path="/all-quizzes" element={
           <PrivateRoute allowedRoles={["etudiant", "enseignant", "admin"]}>
             <AllQuizzesPage />
           </PrivateRoute>
+        }/>
+        <Route path="/cours/:coursId/quizzes" element={
+          <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            <AllQuizzesPage />
+          </PrivateRoute>
         } />
+
         <Route path="/create-quiz" element={
           <PrivateRoute allowedRoles={["enseignant"]}>
             <CreateQuiz />

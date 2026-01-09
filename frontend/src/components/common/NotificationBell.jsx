@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Loader, Check, MessageSquare, BookOpen, Award, TrendingUp, X, Trash2, Filter, Calendar, User, RefreshCw, CheckCircle } from 'lucide-react';
 import { useNotifications } from '../../context/NotificationContext';
 import NotificationPanel from './NotificationPanel';
+import { useTranslation } from 'react-i18next';
+
 
 const NotificationBell = () => {
+  const { t } = useTranslation("notifications");
   const [showDropdown, setShowDropdown] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -21,14 +24,14 @@ const NotificationBell = () => {
     try {
       await fetchNotifications();
     } catch (err) {
-      console.error("Erreur lors du chargement des notifications:", err);
+      console.error(t("errorLoading"), err);
     } finally {
       setRefreshing(false);
     }
   };
 
   const getIconByModule = (moduleSource) => {
-    switch(moduleSource?.toLowerCase()) {
+    switch (moduleSource?.toLowerCase()) {
       case 'forum': return <MessageSquare size={18} className="text-blue-500" />;
       case 'cours': return <BookOpen size={18} className="text-green-500" />;
       case 'exercice': return <Award size={18} className="text-purple-500" />;
@@ -72,7 +75,11 @@ const NotificationBell = () => {
             if (!showDropdown) handleRefresh();
           }}
           className="relative p-2 rounded-full hover:bg-primary/10 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
-          aria-label={`Notifications ${unreadCount > 0 ? `(${unreadCount} non lues)` : ''}`}
+          aria-label={
+            unreadCount > 0
+              ? t(unreadCount > 1 ? "bell.aria_plural" : "bell.aria", { count: unreadCount })
+              : t("bell.aria", { count: 0 }) // ou simplement "Notifications"
+          }
         >
           <Bell size={22} className="text-gray dark:text-white" />
           {unreadCount > 0 && (
@@ -88,9 +95,9 @@ const NotificationBell = () => {
             <div className="p-4 border-b border-gray-800/20">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-lg text-muted">Notifications</h3>
+                  <h3 className="font-bold text-lg text-muted">{t("title")}</h3>
                   <p className="text-sm text-gray mt-1">
-                    {unreadCount} non lue{unreadCount !== 1 ? 's' : ''}
+                    {t(unreadCount > 1 ? "header.unread_plural" : "header.unread", { count: unreadCount })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -123,7 +130,7 @@ const NotificationBell = () => {
                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md text-sm"
                   >
                     <CheckCircle size={16} />
-                    Tout lire
+                    {t("markAll")}
                   </button>
                   <button
                     onClick={deleteAllNotifications}
@@ -131,7 +138,7 @@ const NotificationBell = () => {
                     className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-red-600/30 text-sm"
                   >
                     <Trash2 size={16} />
-                    Tout supprimer
+                    {t("actions.deleteAll")}
                   </button>
                 </div>
               </div>
@@ -142,14 +149,14 @@ const NotificationBell = () => {
               {loading && !refreshing ? (
                 <div className="flex flex-col items-center justify-center p-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  <p className="text-sm text-gray mt-2">Chargement des notifications...</p>
+                  <p className="text-sm text-gray mt-2">{t("loading")}</p>
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-8">
                   <Bell size={48} className="text-gray mb-3" />
-                  <p className="text-muted text-center">Aucune notification pour le moment</p>
+                  <p className="text-muted text-center">{t("empty")}</p>
                   <p className="text-sm text-gray text-center mt-1">
-                    Vous serez notifié ici dès qu'il y aura de nouvelles activités
+                    {t("list.emptyHint")}
                   </p>
                 </div>
               ) : (
@@ -162,9 +169,8 @@ const NotificationBell = () => {
                         handleNotificationNavigation(notif);
                         setShowDropdown(false);
                       }}
-                      className={`p-4 cursor-pointer transition-colors hover:bg-card ${
-                        !notif.is_read ? 'bg-primary/10 border-l-4 border-primary' : ''
-                      }`}
+                      className={`p-4 cursor-pointer transition-colors hover:bg-card ${!notif.is_read ? 'bg-primary/10 border-l-4 border-primary' : ''
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center bg-card">
@@ -172,7 +178,7 @@ const NotificationBell = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-muted">{notif.message_notif}</p>
-                          
+
                           <div className="flex flex-wrap items-center gap-2 mt-2">
                             {notif.date_envoie && (
                               <div className="flex items-center gap-1 text-xs text-gray">
@@ -180,7 +186,7 @@ const NotificationBell = () => {
                                 <span>{formatDate(notif.date_envoie)}</span>
                               </div>
                             )}
-                            
+
                             {(notif.envoyeur_prenom || notif.envoyeur_nom) && (
                               <div className="flex items-center gap-1 text-xs text-gray">
                                 <User size={12} />
@@ -188,7 +194,7 @@ const NotificationBell = () => {
                               </div>
                             )}
                           </div>
-                          
+
                           {notif.module_source && (
                             <div className="mt-2">
                               <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded-full capitalize">
@@ -197,7 +203,7 @@ const NotificationBell = () => {
                             </div>
                           )}
                         </div>
-                        
+
                         {!notif.is_read && (
                           <div className="w-2 h-2 bg-primary rounded-full animate-pulse flex-shrink-0 mt-2"></div>
                         )}
@@ -213,13 +219,19 @@ const NotificationBell = () => {
               <div className="p-4 border-t border-gray-800/20 bg-card rounded-b-xl">
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-gray">
-                    Affichage de {Math.min(notifications.length, 5)} sur {notifications.length} notification{notifications.length !== 1 ? 's' : ''}
+                    {t(
+                      notifications.length > 1 ? "footer.display_plural" : "footer.display",
+                      {
+                        shown: Math.min(notifications.length, 5),
+                        total: notifications.length
+                      }
+                    )}
                   </p>
                   <button
                     onClick={() => { setShowPanel(true); setShowDropdown(false); }}
                     className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
                   >
-                    Voir tout →
+                    {t("footer.viewAll")}
                   </button>
                 </div>
               </div>

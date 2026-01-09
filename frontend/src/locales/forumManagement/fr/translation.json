@@ -11,11 +11,15 @@
 
     "forStudents": "Pour étudiants",
     "forTeachers": "Pour enseignants",
+    "totalForums": "Forums totaux",
+      "totalMessages": "Messages totaux",
 
     "discussionForums": "Forums de discussion",
     "loadingForums": "Chargement des forums...",
     "retry": "Réessayer",
     "noForumFound": "Aucun forum trouvé",
+    "noForumMatchSearch": "Aucun forum ne correspond à votre recherche.",
+  "createFirstForum": "Commencez par créer votre premier forum.",
 
     "students": "Étudiants",
     "teachers": "Enseignants",
@@ -32,6 +36,9 @@
 
     "forumDescription": "Description du forum",
     "messages": "Messages",
+    "message": "{{count}} message",      
+"message_plural": "{{count}} messages", 
+
     "totalLikes": "Likes totaux",
     "comments": "Commentaires",
 
@@ -54,12 +61,85 @@
     "forumTitle": "Titre du forum *",
     "description": "Description *",
     "targetAudience": "Public cible *",
+    "forumTitlePlaceholder": "Ex: Débats sur l'IA",
+  "descriptionPlaceholder": "Décrivez le sujet de ce forum...",
 
     "loading": "En cours...",
     "create": "Créer",
 
     "deleteForumTitle": "Supprimer le forum",
-    "deleteForumMessage": "Êtes-vous sûr de vouloir supprimer le forum \"{{title}}\" ? Cette action supprimera également tous les messages et commentaires associés."
+    "deleteForumMessage": "Êtes-vous sûr de vouloir supprimer le forum \"{{title}}\" ? Cette action supprimera également tous les messages et commentaires associés.",
+
+"replyTextareaPlaceholder": "Écrivez votre réponse..." ,
+"defaultUser": "Utilisateur" ,
+
+  "like": "{{count}} like",
+  "like_plural": "{{count}} likes",
+  "replyy": "{{count}} réponse",
+  "reply_plural": "{{count}} réponses",
+
+   "unknownError": "Erreur inconnue",
+  "genericError": "Une erreur est survenue",
+
+  "adminNotAuthenticated": "Admin non authentifié",
+  "serverError": "Erreur serveur",
+
+  "cannotLoadForums": "Impossible de charger les forums",
+
+  "missingToken": "Token manquant. Veuillez vous reconnecter.",
+  "forumUpdatedSuccess": "Forum modifié avec succès !",
+
+  "invalidServerResponseMissingForumId": "Réponse invalide du serveur : id_forum manquant",
+
+  "administrator": "Administrateur",
+
+  "forumCreatedSuccess": "Forum créé avec succès !",
+
+   "errors": {
+    "invalidData": "Données invalides. Vérifiez que tous les champs sont correctement remplis.",
+    "forbidden": "Accès interdit. Vous n'avez pas les permissions nécessaires.",
+    "unauthorized": "Session expirée. Veuillez vous reconnecter.",
+    "serverError": "Erreur serveur. Veuillez réessayer plus tard.",
+    "networkError": "Erreur réseau. Vérifiez votre connexion internet."
+  },
+
+   "forumDeletedSuccess": "Forum supprimé avec succès !",
+  "deleteForumError": "Erreur lors de la suppression du forum",
+
+
+  "likeAuthRequired": "Vous devez être connecté pour aimer un forum",
+
+  "cannotLoadMessages": "Impossible de charger les messages",
+
+  "forumLoadError": "Erreur lors du chargement du forum",
+
+  "noForumSelected": "Aucun forum sélectionné !",
+  "mustBeLoggedIn": "Vous devez être connecté !",
+
+  "invalidServerResponse": "Réponse invalide du serveur",
+   "messageSentSuccess": "Message envoyé avec succès !",
+  "forbidden": "Accès interdit. Vérifiez vos permissions.",
+  "endpointNotFound": "Endpoint non trouvé. Vérifiez l'URL de l'API.",
+"serverErrorDjango": "Erreur serveur. Vérifiez les logs Django.",
+
+  "error": "Erreur",
+
+   "filterAll": "Tous les forums",
+  "filterStudents": "Pour étudiants",
+  "filterTeachers": "Pour enseignants",
+
+   "discussion": "discussions",
+    "likee": "likes",
+  "createdBy": "Créé par"
+
+
+
+
+
+
+
+
+
 
 
   }
