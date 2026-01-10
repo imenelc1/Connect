@@ -1,10 +1,11 @@
 {
     "title": "Notifications",
     "aria": "Notifications ({{count}} non lues)",
+    "aria_plural": "Notifications ({{count}} non lues)",
     "unread": "{{count}} non lue",
     "markAll": "Tout lire",
     "markAllRead": "Tout marquer comme lu",
-    "refresh": "Rafraîchir",
+    "refresh": "Actualiser",
     "loading": "Chargement des notifications...",
     "empty": "Aucune notification",
     "emptyHint": "Vous serez notifié ici des nouvelles activités",
@@ -17,5 +18,47 @@
     "daysAgo": "il y a {{count}} j",
     "errorLoading": "Erreur lors du chargement des notifications",
     "tryAgain": "Réessayer",
-    "allRead": "Toutes lues"
+    "allRead": "Toutes lues",
+    "label": "Filtrer par :",
+    "loadNotifications": "Impossible de charger les notifications. Vérifiez votre connexion.",
+
+      "footer": {
+    "count": "Affichage de {{count}} notification",
+    "count_plural": "Affichage de {{count}} notifications",
+    "filtered": "(filtrées)",
+    "display": "Affichage de {{shown}} sur {{total}} notification",
+    "display_plural": "Affichage de {{shown}} sur {{total}} notifications",
+    "viewAll": "Voir tout →"
+  },
+    "actions": {
+    "markAsRead": "Marquer comme lu",
+    "delete": "Supprimer",
+     "deleteAll": "Tout supprimer"
+  },
+
+  "emptyF": {
+    "title": "Aucune notification pour le moment",
+    "subtitle": "Vous serez notifié ici dès qu'il y aura de nouvelles activités",
+    "filtered": "Aucune notification ne correspond aux critères",
+    "filtered_hint": "Essayez de modifier vos critères de filtrage"
+  },
+   "header": {
+  "title": "Toutes les notifications",
+    "unread": "{{count}} non lue",
+    "unread_plural": "{{count}} non lues",
+    "total": "sur {{total}} notification",
+    "total_plural": "sur {{total}} notifications"
+  },
+  "filter": {
+    "all": "Toutes",
+    "unread": "Non lues",
+    "forum": "Forum",
+    "cours": "Cours",
+    "exercice": "Exercice",
+    "classement": "Classement",
+    "progress": "Progression",
+    "courses": "Cours",
+    "quiz": "Quiz",
+    "space": "Espace"
+  }
 }
