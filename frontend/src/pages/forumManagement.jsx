@@ -57,79 +57,62 @@ const ForumViewModal = ({
   onDeleteMessage,
   onDeleteComment
 }) => {
+  const { t } = useTranslation("ForumManagement");
   const [newMessage, setNewMessage] = useState("");
   const [newComment, setNewComment] = useState({});
   const [messageDropdown, setMessageDropdown] = useState(null);
-  const [commentDropdown, setCommentDropdown] = useState(null);
-  const { t } = useTranslation("ForumManagement");
 
   if (!isOpen || !forum) return null;
 
-  const handleSubmitMessage = async () => {
-    if (newMessage.trim()) {
-      await onPostMessage(newMessage);
-      setNewMessage("");
-    }
-  };
-
-  const handleSubmitComment = async (messageId) => {
-    const commentText = newComment[messageId];
-    if (commentText?.trim()) {
-      await onPostComment(messageId, commentText);
-      setNewComment(prev => ({ ...prev, [messageId]: "" }));
-    }
-  };
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-gray-800/20">
-        {/* Header du modal */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-4 py-6 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-gray-800/20">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-primary/10 rounded-full transition-colors"
-            >
-              <X size={24} className="text-grayc" />
-            </button>
-            <div>
-              <h2 className="text-2xl font-bold text-muted">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+      <div className="
+        relative w-full max-w-6xl h-[92vh]
+        bg-surface
+        rounded-3xl
+        shadow-strong
+        border border-gray-800/10 dark:border-white/10
+        flex flex-col overflow-hidden
+        animate-scaleIn
+      ">
+
+        {/* ================= HEADER ================= */}
+        <div className="
+          sticky top-0 z-20
+          bg-surface/90 backdrop-blur
+          border-b border-gray-800/10 dark:border-white/10
+          px-8 py-6
+        ">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <h2 className="text-3xl font-bold tracking-tight text-muted">
                 {forum.title}
               </h2>
-              <p className="text-gray">
-                {t("ForumManagement.createdByFirstName", { user: forum.utilisateur })}{" "}
-                {t("ForumManagement.dateSeparator")} {forum.date_creation}
+              <p className="text-sm text-gray">
+                {t("ForumManagement.createdByFirstName", { user: forum.utilisateur })} · {forum.date_creation}
               </p>
-
             </div>
-          </div>
 
-          <div className="flex gap-2">
-            <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${forum.cible === "etudiants"
-              ? "bg-grad-4 text-white"
-              : "bg-grad-2 text-white"
-              }`}>
-              {forum.cible === "etudiants" ? (
-                <span className="flex items-center gap-1 text-primary">
-                  <GraduationCap size={12} />
-                  {t("ForumManagement.forStudents")}
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-pink">
-                  <Users size={12} />
-                  {t("ForumManagement.forTeachers")}
-                </span>
-              )}
-            </span>
+            <button
+              onClick={onClose}
+              className="p-3 rounded-xl hover:bg-primary/10 transition"
+            >
+              <X size={22} />
+            </button>
           </div>
         </div>
 
-        {/* Contenu défilable */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* Description du forum */}
-          <div className="mb-6 p-5 bg-card rounded-2xl shadow-sm border border-gray-800/20">
-            <h3 className="font-semibold text-muted mb-3 flex items-center gap-2">
-              <MessageSquare size={18} className="text-primary" />
+        {/* ================= CONTENT ================= */}
+        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
+
+          {/* DESCRIPTION */}
+          <div className="
+            relative bg-card rounded-2xl p-6
+            shadow-card
+            border border-gray-800/10 dark:border-white/10
+          ">
+            <div className="absolute inset-x-0 top-0 h-1 bg-grad-1 rounded-t-2xl" />
+            <h3 className="text-lg font-semibold text-muted mb-3">
               {t("ForumManagement.forumDescription")}
             </h3>
             <p className="text-gray leading-relaxed">
@@ -137,296 +120,249 @@ const ForumViewModal = ({
             </p>
           </div>
 
-          {/* Statistiques */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-card p-4 rounded-2xl border border-gray-800/20 text-center shadow-sm">
-              <div className="text-2xl font-bold text-primary">{messages.length}</div>
-              <div className="text-sm text-gray">  {t("ForumManagement.messages")}</div>
-            </div>
-            <div className="bg-card p-4 rounded-2xl border border-gray-800/20 text-center shadow-sm">
-              <div className="text-2xl font-bold text-pink">
-                {messages.reduce((sum, msg) => sum + (msg.nombre_likes || 0), 0)}
+          {/* STATS */}
+          <div className="grid grid-cols-3 gap-5">
+            <div className="bg-stat-softblue-1 rounded-2xl p-5 text-center shadow-card">
+              <div className="text-3xl font-bold text-primary">
+                {messages.length}
               </div>
-              <div className="text-sm text-gray"> {t("ForumManagement.totalLikes")}</div>
-            </div>
-            <div className="bg-card p-4 rounded-2xl border border-gray-800/20 text-center shadow-sm">
-              <div className="text-2xl font-bold text-blue">
-                {messages.reduce((sum, msg) => sum + (msg.commentaires?.length || 0), 0)}
+              <div className="text-xs uppercase tracking-wide text-gray mt-1">
+                {t("ForumManagement.messages")}
               </div>
-              <div className="text-sm text-gray">{t("ForumManagement.comments")}</div>
+            </div>
+
+            <div className="bg-stat-pink-1 rounded-2xl p-5 text-center shadow-card">
+              <div className="text-3xl font-bold text-pink">
+                {messages.reduce((s, m) => s + (m.nombre_likes || 0), 0)}
+              </div>
+              <div className="text-xs uppercase tracking-wide text-gray mt-1">
+                {t("ForumManagement.totalLikes")}
+              </div>
+            </div>
+
+            <div className="bg-stat-purple-1 rounded-2xl p-5 text-center shadow-card">
+              <div className="text-3xl font-bold text-blue">
+                {messages.reduce((s, m) => s + (m.commentaires?.length || 0), 0)}
+              </div>
+              <div className="text-xs uppercase tracking-wide text-gray mt-1">
+                {t("ForumManagement.comments")}
+              </div>
             </div>
           </div>
 
-          {/* Formulaire pour poster un message */}
-          <div className="mb-6 p-5 bg-card rounded-2xl shadow-sm border border-gray-800/20">
-            <h3 className="font-semibold text-muted mb-4 flex items-center gap-2">
-              <Send size={18} className="text-primary" />
+          {/* POST MESSAGE */}
+          <div className="
+            bg-card rounded-2xl p-6
+            shadow-card
+            border border-gray-800/10 dark:border-white/10
+          ">
+            <h3 className="text-lg font-semibold text-muted mb-4">
               {t("ForumManagement.postMessage")}
             </h3>
-            <div className="flex gap-3">
-              <textarea
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder={t("ForumManagement.textareaPlaceholder")}
-                className="flex-1 p-4 border border-gray-800/20 rounded-xl bg-surface text-muted focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                rows="3"
-              />
-              <div className="flex flex-col gap-2">
+
+            <textarea
+              rows={3}
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder={t("ForumManagement.textareaPlaceholder")}
+              className="
+                w-full rounded-xl p-4
+                bg-[rgb(var(--color-input-bg))]
+                text-[rgb(var(--color-input-text))]
+                border border-[rgb(var(--color-input-border))]
+                placeholder:text-[rgb(var(--color-input-placeholder))]
+                focus:ring-2 focus:ring-primary/40
+                resize-none transition
+              "
+            />
+
+            <div className="flex justify-end mt-4">
+              <div className="inline-flex">
                 <Button
                   variant="primary"
-                  onClick={handleSubmitMessage}
                   disabled={!newMessage.trim()}
-                  className="px-6 py-3 h-auto rounded-xl"
+                  className="px-10 py-2"
+                  onClick={async () => {
+                    await onPostMessage(newMessage);
+                    setNewMessage("");
+                  }}
                 >
-                  <Send size={20} />
+                  <Send size={16} />
                 </Button>
               </div>
             </div>
+
+
           </div>
 
-          {/* Liste des messages */}
-          <div className="space-y-4">
-            {messages.length === 0 ? (
-              <div className="text-center py-12 bg-card rounded-2xl border border-gray-800/20">
-                <MessageCircle className="w-16 h-16 text-gray mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-muted mb-2"> {t("ForumManagement.noMessagesYet")}</h3>
-                <p className="text-gray max-w-md mx-auto">
-                  {t("ForumManagement.beFirstToParticipate")}
-                </p>
-              </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id_message}
-                  className="bg-card rounded-2xl border border-gray-800/20 p-5 hover:border-primary/30 transition-all duration-300 shadow-sm"
-                >
-                  {/* En-tête du message */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${message.administrateur || message.auteur_type === 'admin'
-                        ? 'bg-gradient-to-br from-purple-500 to-pink-500'
-                        : 'bg-gradient-to-br from-blue-500 to-teal-400'
-                        }`}>
-                        {message.administrateur || message.auteur_type === 'admin'
-                          ? '👑'
-                          : (message.utilisateur_nom?.[0] || message.utilisateur?.nom?.[0] || 'U').toUpperCase()
-                        }
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold text-muted">
-                            {message.auteur_nom || (message.utilisateur_nom ? `${message.utilisateur_nom} ${message.utilisateur_prenom}` : 'Utilisateur')}
-                          </h4>
-                          {message.administrateur || message.auteur_type === 'admin' ? (
-                            <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full font-medium">
-                              {t("ForumManagement.admin")}
-                            </span>
-                          ) : null}
-                        </div>
-                        <p className="text-sm text-gray flex items-center gap-1">
-                          <Clock size={12} />
-                          {new Date(message.date_publication).toLocaleDateString("fr-FR", {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
+          {/* MESSAGES */}
+          <div className="space-y-6">
+            {messages.map(message => (
+              <div
+                key={message.id_message}
+                className="
+                  bg-card rounded-2xl p-6
+                  shadow-card
+                  border border-gray-800/10 dark:border-white/10
+                  hover:shadow-strong transition
+                "
+              >
+                {/* HEADER */}
+                <div className="flex justify-between items-start">
+                  <div className="flex gap-4">
+                    <div className="
+                      w-11 h-11 rounded-full
+                      bg-grad-7
+                      flex items-center justify-center
+                      text-white font-bold
+                    ">
+                      {(message.auteur_nom?.[0] || "U").toUpperCase()}
                     </div>
 
-                    {/* Menu actions */}
-                    <div className="relative">
-                      <button
-                        onClick={() => setMessageDropdown(
-                          messageDropdown === message.id_message ? null : message.id_message
-                        )}
-                        className="p-2 hover:bg-primary/10 rounded-lg transition-colors"
-                      >
-                        <MoreVertical className="w-5 h-5 text-gray" />
-                      </button>
-
-                      {messageDropdown === message.id_message && (
-                        <div className="absolute right-0 mt-2 w-48 bg-surface rounded-lg shadow-lg border border-gray-800/20 z-10 overflow-hidden">
-                          <button
-                            onClick={() => {
-                              onDeleteMessage(message.id_message);
-                              setMessageDropdown(null);
-                            }}
-                            className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-500/10 flex items-center transition-colors"
-                          >
-                            <Trash2 size={16} className="mr-3" />
-                            {t("ForumManagement.deleteMessage")}
-                          </button>
-                        </div>
-                      )}
+                    <div>
+                      <h4 className="font-semibold text-muted">
+                        {message.auteur_nom || "Utilisateur"}
+                      </h4>
+                      <p className="text-xs text-gray mt-0.5">
+                        {new Date(message.date_publication).toLocaleString("fr-FR")}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Contenu du message */}
-                  <p className="text-gray mb-4 leading-relaxed whitespace-pre-line">
-                    {message.contenu_message}
-                  </p>
+                  <button
+                    onClick={() =>
+                      setMessageDropdown(
+                        messageDropdown === message.id_message ? null : message.id_message
+                      )
+                    }
+                    className="p-2 rounded-xl hover:bg-primary/10 transition"
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+                </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-6 border-t border-gray-800/20 pt-4">
-                    <button
-                      onClick={() => onLikeMessage(message.id_message)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 ${message.user_has_liked
-                        ? "bg-red-500/10 text-red-500"
-                        : "hover:bg-primary/10 text-gray"
-                        }`}
-                    >
-                      <Heart
-                        size={18}
-                        fill={message.user_has_liked ? "currentColor" : "none"}
-                        className={message.user_has_liked ? "animate-pulse" : ""}
-                      />
-                      <span className="font-medium">{message.nombre_likes || 0}</span>
-                    </button>
+                {/* CONTENT */}
+                <p className="mt-5 text-gray leading-relaxed whitespace-pre-line">
+                  {message.contenu_message}
+                </p>
 
-                    <button
-                      onClick={() => setNewComment(prev => ({
+                {/* ACTIONS */}
+                <div className="
+                  mt-6 flex gap-6 pt-4
+                  border-t border-gray-800/10 dark:border-white/10
+                ">
+                  <button
+                    onClick={() => onLikeMessage(message.id_message)}
+                    className={`flex items-center gap-2 text-sm transition
+    ${message.likedByUser ? "text-red" : "text-red hover:text-red"}
+  `}
+                  >
+                    <Heart
+                      size={16}
+                      fill={message.likedByUser ? "currentColor" : "none"} // rempli en rouge quand liked
+                    />
+                    {message.nombre_likes || 0}
+                  </button>
+
+
+
+                  <button
+                    onClick={() =>
+                      setNewComment(prev => ({
                         ...prev,
                         [message.id_message]: prev[message.id_message] || ""
-                      }))}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary/10 text-gray transition-all duration-200"
-                    >
-                      <MessageCircle size={18} />
-                      <span>{t("ForumManagement.reply")}</span>
-                      {message.commentaires?.length > 0 && (
-                        <span className="bg-primary/20 text-primary text-xs px-2 py-1 rounded-full">
-                          {message.commentaires.length}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Formulaire de commentaire */}
-                  {newComment[message.id_message] !== undefined && (
-                    <div className="mt-4 pl-12">
-                      <div className="flex gap-3">
-                        <input
-                          type="text"
-                          value={newComment[message.id_message] || ""}
-                          onChange={(e) => setNewComment(prev => ({
-                            ...prev,
-                            [message.id_message]: e.target.value
-                          }))}
-                          placeholder={t("ForumManagement.replyTextareaPlaceholder")}
-                          className="flex-1 px-4 py-3 border border-gray-800/20 rounded-xl bg-surface text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-                          onKeyPress={(e) => e.key === 'Enter' && handleSubmitComment(message.id_message)}
-                        />
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            variant="primary"
-                            onClick={() => handleSubmitComment(message.id_message)}
-                            disabled={!newComment[message.id_message]?.trim()}
-                            className="px-4 py-3 rounded-xl"
-                          >
-                            <Send size={16} />
-                          </Button>
-                          <button
-                            onClick={() => {
-                              setNewComment(prev => {
-                                const updated = { ...prev };
-                                delete updated[message.id_message];
-                                return updated;
-                              });
-                            }}
-                            className="px-3 py-2 text-sm text-gray hover:text-muted transition-colors"
-                          >
-                            {t("ForumManagement.cancel")}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Liste des commentaires */}
-                  {message.commentaires && message.commentaires.length > 0 && (
-                    <div className="mt-4 space-y-3">
-                      <div className="text-sm text-gray font-medium mb-2">
-                        {t("ForumManagement.replies", { count: message.commentaires.length })}
-                      </div>
-                      {message.commentaires.map((comment) => (
-                        <div
-                          key={comment.id_commentaire || comment.id}
-                          className="pl-12 py-3 border-l-2 border-primary/30 bg-primary/5 rounded-r-lg"
-                        >
-                          <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-grad-3 rounded-full flex items-center justify-center text-xs text-white font-bold">
-                                {comment.utilisateur_nom?.[0] || comment.utilisateur?.nom?.[0] || "U"}
-                              </div>
-                              <div>
-                                <span className="font-medium text-sm text-muted">
-                                  {(comment.utilisateur_nom || comment.utilisateur?.nom || t("ForumManagement.defaultUser"))}{" "}
-                                  {comment.utilisateur_prenom || comment.utilisateur?.prenom || ""}                                </span>
-                                <span className="text-xs text-gray ml-2">
-                                  {new Date(comment.date_commpub || comment.date_creation).toLocaleTimeString("fr-FR", {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </span>
-                              </div>
-                            </div>
-
-                            <button
-                              onClick={() => onDeleteComment(comment.id_commentaire, message.id_message)}
-                              className="text-red-500 hover:text-red-400 p-1 transition-colors"
-                              title={t("ForumManagement.deleteComment")}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                          <p className="text-sm text-gray ml-10">
-                            {comment.contenu_comm || comment.contenu}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                      }))
+                    }
+                    className="flex items-center gap-2 text-sm hover:text-primary transition"
+                  >
+                    <MessageCircle size={16} />
+                    {t("ForumManagement.reply")}
+                  </button>
                 </div>
-              ))
-            )}
+
+                {/* COMMENT FORM */}
+                {newComment[message.id_message] !== undefined && (
+                  <div className="mt-5 ml-8 pl-6 border-l border-primary/30">
+                    <input
+                      value={newComment[message.id_message]}
+                      onChange={(e) =>
+                        setNewComment(prev => ({
+                          ...prev,
+                          [message.id_message]: e.target.value
+                        }))
+                      }
+                      placeholder={t("ForumManagement.replyTextareaPlaceholder")}
+                      className="
+                        w-full rounded-xl px-4 py-3
+                        bg-[rgb(var(--color-input-bg))]
+                        text-[rgb(var(--color-input-text))]
+                        border border-[rgb(var(--color-input-border))]
+                        focus:ring-2 focus:ring-primary/40
+                        transition
+                      "
+                    />
+
+                    <div className="flex justify-end mt-4">
+                      <div className="inline-flex">
+                        <Button
+                          size="sm"
+                          disabled={!newComment[message.id_message]?.trim()}
+                          className="px-10 py-2"
+                          onClick={() =>
+                            onPostComment(message.id_message, newComment[message.id_message])
+                          }
+                        >
+                          <Send size={14} />
+                        </Button>
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+                {/* COMMENTS */}
+                {message.commentaires?.length > 0 && (
+                  <div className="mt-5 space-y-3 ml-8">
+                    {message.commentaires.map(comment => (
+                      <div
+                        key={comment.id_commentaire}
+                        className="
+                          bg-primary/5
+                          dark:bg-white/5
+                          rounded-xl p-4 text-sm
+                        "
+                      >
+                        <span className="font-medium text-muted">
+                          {comment.utilisateur_nom}
+                        </span>
+                        <p className="text-gray mt-1">
+                          {comment.contenu_comm}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Footer du modal */}
-        <div className="border-t border-gray-800/20 p-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4 text-sm text-gray">
-              <span className="flex items-center gap-1">
-                <MessageSquare size={14} />
-                {t("ForumManagement.message", { count: messages.length })}
-
-              </span>
-              <span className="flex items-center gap-1">
-                <Heart size={14} />
-                {t("ForumManagement.like", { count: messages.reduce((sum, msg) => sum + (msg.nombre_likes || 0), 0) })}
-              </span>
-              <span className="flex items-center gap-1">
-                <MessageCircle size={14} />
-                {t("ForumManagement.reply", { count: messages.reduce((sum, msg) => sum + (msg.commentaires?.length || 0), 0) })}
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                onClick={onClose}
-                className="px-6 py-2"
-              >
-                {t("ForumManagement.close")}
-              </Button>
-            </div>
-          </div>
+        {/* ================= FOOTER ================= */}
+        <div className="
+          sticky bottom-0
+          bg-surface/90 backdrop-blur
+          border-t border-gray-800/10 dark:border-white/10
+          px-8 py-4 flex justify-end
+        ">
+          <Button variant="secondary" onClick={onClose}>
+            {t("ForumManagement.close")}
+          </Button>
         </div>
       </div>
     </div>
   );
 };
+
 
 // =========================
 // MODAL DE CRÉATION/MODIFICATION
@@ -1251,32 +1187,32 @@ export default function ForumManagement() {
   // =========================
   // CALCULS MÉMORISÉS
   // =========================
- const stats = useMemo(() => [
-  {
-    title: t("ForumManagement.totalForums"),
-    value: forums.length,
-    icon: <MessageSquare className="text-primary" size={40} />,
-    bg: "bg-grad-5"
-  },
-  {
-    title: t("ForumManagement.forStudents"),
-    value: forums.filter(f => f.cible === "etudiants").length,
-    icon: <GraduationCap className="text-purple dark:text-supp" size={40} />,
-    bg: "bg-grad-4"
-  },
-  {
-    title: t("ForumManagement.forTeachers"),
-    value: forums.filter(f => f.cible === "enseignants").length,
-    icon: <Users className="text-pink" size={40} />,
-    bg: "bg-grad-2"
-  },
-  {
-    title: t("ForumManagement.totalMessages"),
-    value: forums.reduce((sum, f) => sum + f.threads, 0),
-    icon: <TrendingUp className="text-primary" size={40} />,
-    bg: "bg-grad-3"
-  },
-], [forums, t]);
+  const stats = useMemo(() => [
+    {
+      title: t("ForumManagement.totalForums"),
+      value: forums.length,
+      icon: <MessageSquare className="text-primary" size={40} />,
+      bg: "bg-grad-5"
+    },
+    {
+      title: t("ForumManagement.forStudents"),
+      value: forums.filter(f => f.cible === "etudiants").length,
+      icon: <GraduationCap className="text-purple dark:text-supp" size={40} />,
+      bg: "bg-grad-4"
+    },
+    {
+      title: t("ForumManagement.forTeachers"),
+      value: forums.filter(f => f.cible === "enseignants").length,
+      icon: <Users className="text-pink" size={40} />,
+      bg: "bg-grad-2"
+    },
+    {
+      title: t("ForumManagement.totalMessages"),
+      value: forums.reduce((sum, f) => sum + f.threads, 0),
+      icon: <TrendingUp className="text-primary" size={40} />,
+      bg: "bg-grad-3"
+    },
+  ], [forums, t]);
 
 
   const filterTabs = useMemo(() => [
@@ -1475,7 +1411,7 @@ px-2 py-0.5
                 filteredForums.map((forum) => (
                   <div
                     key={forum.id}
-                    className="bg-grad-5 rounded-2xl p-4 sm:p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden"
+                    className="bg-grad-2 rounded-2xl p-4 sm:p-5 border border-gray-800/20 hover:border-primary/30 hover:shadow-md transition-all duration-300 overflow-hidden"
                   >
                     {/* MOBILE LAYOUT */}
                     <div className="sm:hidden">
@@ -1557,8 +1493,8 @@ px-2 py-0.5
                           variant="manage"
                           onClick={() => handleLikeForum(forum.id)}
                           className={`flex items-center gap-2 px-3 py-2 ${forum.userHasLiked
-                              ? "bg-red-500/10 text-red-500"
-                              : "text-gray"
+                            ? "bg-red-500/10 text-red-500"
+                            : "text-gray"
                             }`}
                         >
                           <Heart size={14} fill={forum.userHasLiked ? "currentColor" : "none"} />
