@@ -4,7 +4,6 @@ import Button from "../components/common/Button";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Input from "../components/common/Input";
-import Modal from "../components/ui/modal";
 import {
   createForum,
   updateForum,
