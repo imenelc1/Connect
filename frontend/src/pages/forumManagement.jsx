@@ -4,6 +4,7 @@ import Button from "../components/common/Button";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Input from "../components/common/Input";
+import Modal from "../components/ui/modal";
 import {
   createForum,
   updateForum,
@@ -90,7 +91,7 @@ const ForumViewModal = ({
               onClick={onClose}
               className="p-2 hover:bg-primary/10 rounded-full transition-colors"
             >
-              <X size={24} className="text-muted" />
+              <X size={24} className="text-grayc" />
             </button>
             <div>
               <h2 className="text-2xl font-bold text-muted">
@@ -110,12 +111,12 @@ const ForumViewModal = ({
               : "bg-grad-2 text-white"
               }`}>
               {forum.cible === "etudiants" ? (
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 text-primary">
                   <GraduationCap size={12} />
                   {t("ForumManagement.forStudents")}
                 </span>
               ) : (
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 text-pink">
                   <Users size={12} />
                   {t("ForumManagement.forTeachers")}
                 </span>
@@ -1251,33 +1252,33 @@ export default function ForumManagement() {
   // =========================
   // CALCULS MÉMORISÉS
   // =========================
-  const stats = useMemo(() => [
+ const stats = useMemo(() => [
+  {
+    title: t("ForumManagement.totalForums"),
+    value: forums.length,
+    icon: <MessageSquare className="text-primary" size={40} />,
+    bg: "bg-grad-5"
+  },
+  {
+    title: t("ForumManagement.forStudents"),
+    value: forums.filter(f => f.cible === "etudiants").length,
+    icon: <GraduationCap className="text-purple dark:text-supp" size={40} />,
+    bg: "bg-grad-4"
+  },
+  {
+    title: t("ForumManagement.forTeachers"),
+    value: forums.filter(f => f.cible === "enseignants").length,
+    icon: <Users className="text-pink" size={40} />,
+    bg: "bg-grad-2"
+  },
+  {
+    title: t("ForumManagement.totalMessages"),
+    value: forums.reduce((sum, f) => sum + f.threads, 0),
+    icon: <TrendingUp className="text-primary" size={40} />,
+    bg: "bg-grad-3"
+  },
+], [forums, t]);
 
-    {
-      title: t("ForumManagement.totalForums"),
-      value: forums.length,
-      icon: <MessageSquare className="text-blue" size={40} />,
-      bg: "bg-grad-5"
-    },
-    {
-      title: t("ForumManagement.forStudents"),
-      value: forums.filter(f => f.cible === "etudiants").length,
-      icon: <GraduationCap className="text-purple" size={40} />,
-      bg: "bg-grad-4"
-    },
-    {
-      title: t("ForumManagement.forTeachers"),
-      value: forums.filter(f => f.cible === "enseignants").length,
-      icon: <Users className="text-pink" size={40} />,
-      bg: "bg-grad-2"
-    },
-    {
-      title: t("ForumManagement.totalMessages"),
-      value: forums.reduce((sum, f) => sum + f.threads, 0),
-      icon: <TrendingUp className="text-blue" size={40} />,
-      bg: "bg-grad-3"
-    },
-  ], [forums]);
 
   const filterTabs = useMemo(() => [
     { id: "all", label: t("ForumManagement.filterAll") },
@@ -1381,8 +1382,8 @@ px-2 py-0.5
 
     font-semibold whitespace-nowrap
     ${activeFilter === tab.id
-                      ? "bg-primary shadow-sm"
-                      : "text-primary/70"
+                      ? "bg-primary text-white shadow-sm"
+                      : "text-grayc dark:text-primary/70"
                     }`}
                 >
 
@@ -1515,19 +1516,19 @@ px-2 py-0.5
                       {/* Stats mobile compact */}
                       <div className="grid grid-cols-2 gap-3 mb-3">
                         <div className="flex items-center gap-2 text-sm text-gray">
-                          <MessageSquare size={14} />
+                          <MessageSquare size={14} className="text-grayc" />
                           <span>{forum.threads} {t("ForumManagement.discussion")}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray">
-                          <TrendingUp size={14} />
+                          <TrendingUp size={14} className="text-grayc" />
                           <span>{forum.posts}{t("ForumManagement.likee")}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray truncate">
-                          <User size={14} />
+                          <User size={14} className="text-grayc" />
                           <span className="truncate"> {t("ForumManagement.createdBy")} {forum.utilisateur.split(' ')[0]}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray">
-                          <Clock size={14} />
+                          <Clock size={14} className="text-grayc" />
                           <span>{forum.date_creation}</span>
                         </div>
                       </div>
@@ -1556,9 +1557,9 @@ px-2 py-0.5
                         <Button
                           variant="manage"
                           onClick={() => handleLikeForum(forum.id)}
-                          className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-2 text-xs ${forum.userHasLiked
-                            ? "bg-red-500/10 text-red-500"
-                            : ""
+                          className={`flex items-center gap-2 px-3 py-2 ${forum.userHasLiked
+                              ? "bg-red-500/10 text-red-500"
+                              : "text-gray"
                             }`}
                         >
                           <Heart size={14} fill={forum.userHasLiked ? "currentColor" : "none"} />
@@ -1585,9 +1586,9 @@ px-2 py-0.5
                           : "bg-grad-2"
                           }`}>
                           {forum.cible === "etudiants" ? (
-                            <GraduationCap className="w-6 h-6 text-white" />
+                            <GraduationCap className="w-6 h-6 text-purple" />
                           ) : (
-                            <Users className="w-6 h-6 text-white" />
+                            <Users className="w-6 h-6 text-pink" />
                           )}
                         </div>
 
@@ -1605,21 +1606,21 @@ px-2 py-0.5
                           </div>
 
                           <p className="text-gray text-sm mb-3 line-clamp-2">
-                            {forum.originalData?.contenu_forum ||  t("ForumManagement.noDescription")}
+                            {forum.originalData?.contenu_forum || t("ForumManagement.noDescription")}
                           </p>
 
                           <div className="flex flex-wrap gap-4 text-sm text-gray">
                             <span className="flex items-center gap-1">
                               <MessageSquare size={14} />
-                                {forum.threads} {t("ForumManagement.discussion")}
+                              {forum.threads} {t("ForumManagement.discussion")}
                             </span>
                             <span className="flex items-center gap-1">
                               <TrendingUp size={14} />
-                               {forum.posts} {t("ForumManagement.likee")}
+                              {forum.posts} {t("ForumManagement.likee")}
                             </span>
                             <span className="flex items-center gap-1">
                               <User size={14} />
-                             {t("ForumManagement.createdBy")}  {forum.utilisateur}
+                              {t("ForumManagement.createdBy")}  {forum.utilisateur}
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock size={14} />
@@ -1636,7 +1637,7 @@ px-2 py-0.5
                           className="flex items-center gap-2 px-3 py-2"
                         >
                           <Eye size={16} />
-                        {t("ForumManagement.view")}
+                          {t("ForumManagement.view")}
                         </Button>
                         <Button
                           variant="manage"
@@ -1647,7 +1648,7 @@ px-2 py-0.5
                           className="flex items-center gap-2 px-3 py-2"
                         >
                           <Edit2 size={16} />
-                         {t("ForumManagement.edit")}
+                          {t("ForumManagement.edit")}
                         </Button>
                         <Button
                           variant="manage"
