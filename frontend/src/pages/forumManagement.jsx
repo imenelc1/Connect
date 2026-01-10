@@ -665,7 +665,6 @@ export default function ForumManagement() {
   // FETCH FORUMS
   // =========================
   const fetchForums = async () => {
-    const { t } = useTranslation("ForumManagemen");
     try {
       setLoading(true);
       setError(null);

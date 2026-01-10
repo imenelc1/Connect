@@ -85,18 +85,18 @@ def notify_prof_on_course_update(sender, instance, created, **kwargs):
         return
 
     Notification.objects.create(
-        message_notif=f"Votre cours '{instance.titre_cour}' a été modifié par un administrateur.",
-        utilisateur_destinataire=prof,
-        admin_destinataire=None,  # ADMIN non destinataire
-        action_type="UPDATE",
-        module_source="COURS",
-        content_type=ContentType.objects.get_for_model(instance),
-        object_id=instance.id_cours,
-        extra_data={
-            "admin_id": admin.id_admin,
-            "admin_email": admin.email_admin
-        }
-    )
+    message_notif=f"Votre cours '{instance.titre_cour}' a été modifié par un administrateur.",
+    utilisateur_destinataire=prof,
+    admin_destinataire=None,
+    action_type="UPDATE",
+    module_source="COURS",
+    content_type=ContentType.objects.get_for_model(instance),
+    object_id=instance.id_cours,
+    extra_data={}   #vide = sûr
+)
+
+    # Récupère l'admin courant depuis le middleware
+      # pas d'admin connecté → pas de notif
 
 # -----------------------------
 # SIGNAL DELETE
