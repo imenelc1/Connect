@@ -16,7 +16,7 @@ export default function CourseContent({
 }) {
   const { t } = useTranslation("courses");
   const { title, sections } = course;
-  const courseId = course.id || "default";
+  const courseId = course.id || t("courseIdDefault");;
   const navigate = useNavigate();
 
   // Timer
@@ -48,14 +48,14 @@ export default function CourseContent({
           stars: f.etoile,
           nomComplet: f.utilisateur_nom && f.utilisateur_prenom
             ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-            : f.utilisateur_nom || "Utilisateur anonyme",
+            : f.utilisateur_nom || t("anonymousUser"),
 
 
         }));
 
         setAllFeedbacks(formatted);
       } catch (err) {
-        console.error("Erreur chargement feedbacks", err);
+        console.error(t("feedbackLoadError"), err);
       } finally {
         setLoadingFeedbacks(false);
       }
@@ -160,7 +160,7 @@ export default function CourseContent({
           stars: f.etoile,
           nomComplet: f.afficher_nom
             ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-            : "Utilisateur anonyme",
+            : t("anonymousUser"),
           initials: f.afficher_nom
             ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
             : "??",
@@ -168,7 +168,7 @@ export default function CourseContent({
 
         setAllFeedbacks(formatted);
       } catch (err) {
-        console.error("Erreur chargement feedbacks", err);
+        console.error(t("feedbackLoadError"), err);
       } finally {
         setLoadingFeedbacks(false);
       }
@@ -179,7 +179,7 @@ export default function CourseContent({
 
   const handleSubmit = async () => {
     if (!feedback || rating === 0) {
-      alert("Veuillez écrire un feedback et donner une note");
+      alert(t("feedbackRequired"));
       return;
     }
 
@@ -201,7 +201,7 @@ export default function CourseContent({
           stars: f.etoile,
           nomComplet: f.afficher_nom
             ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-            : "Utilisateur anonyme",
+            : t("anonymousUser"),
           initials: f.afficher_nom
             ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
             : "??",
@@ -213,7 +213,7 @@ export default function CourseContent({
       setAfficherNom(false);
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de l'envoi");
+      alert(t("sendError"));
     }
   };
 
@@ -224,7 +224,7 @@ export default function CourseContent({
         <h1 className="text-xl sm:text-3xl font-bold text-muted">{title}</h1>
         <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm">
           <span className="flex items-center gap-1 text-muted font-medium">
-            <BookOpen size={14} className="sm:w-4 sm:h-4" /> Chapitre {section.ordre} / {sections.length}
+            <BookOpen size={14} className="sm:w-4 sm:h-4" /> {t("chapter")} {section.ordre} / {sections.length}
           </span>
           <span className="flex items-center gap-1 text-muted">
             <Clock size={14} className="sm:w-4 sm:h-4" /> {formatTime(secondsSpent)}
@@ -285,7 +285,7 @@ export default function CourseContent({
               : "bg-blue text-white hover:bg-blue/90"
             }`}
         >
-          {isLastPage ? "Terminer" : t("ChapitreSuiv")}
+          {isLastPage ? t("finish") : t("ChapitreSuiv")}
           {!isLastPage && <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
         </button>
 
@@ -322,11 +322,11 @@ export default function CourseContent({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 flex-1 px-4 sm:px-6">
             {loadingFeedbacks ? (
               <p className="col-span-3 text-center text-gray-300">
-                Chargement des feedbacks...
+                {t("loadingFeedbacks")}
               </p>
             ) : currentFeedbacks.length === 0 ? (
               <p className="col-span-3 text-center text-gray-300">
-                Aucun feedback pour ce cours
+                {t("noFeedbacks")}
               </p>
             ) : (
               currentFeedbacks.map((f) => (
@@ -351,7 +351,7 @@ export default function CourseContent({
         <div className="flex items-center gap-2 mb-4">
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={afficherNom} onChange={(e) => setAfficherNom(e.target.checked)} />
-            Afficher mon nom
+            {t("showName")}
           </label>
         </div>
 

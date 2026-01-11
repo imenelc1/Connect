@@ -221,7 +221,7 @@ const ForumViewModal = ({
 
                     <div>
                       <h4 className="font-semibold text-muted">
-                        {message.auteur_nom || "Utilisateur"}
+                        {message.auteur_nom || t("ForumManagement.defaultUser")}
                       </h4>
                       <p className="text-xs text-gray mt-0.5">
                         {new Date(message.date_publication).toLocaleString("fr-FR")}

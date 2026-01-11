@@ -123,7 +123,7 @@ export default function Navbar() {
     "/all-quizzes",
     "/quiz-preview",
     "/create-quiz",
-    
+
 
   ];
   const classementRoutes = [
@@ -142,27 +142,22 @@ export default function Navbar() {
     "/students",
   ];
   const adminQuizRoutes = [
-  "/QuizManagement",
-  "/Voir-quiz",
-];
+    "/QuizManagement",
+    "/Voir-quiz",
+  ];
 
 
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
 
-  return (
-
+return (
     <aside
       className={`fixed h-screen overflow-visible bg-card rounded-3xl shadow-2xl p-3
-  top-0 left-0 z-50 transition-all duration-300
-  w-16
-  md:${collapsed ? "w-16" : "w-56"}
-`}
-    >
-
-
-
+                  top-0 left-0 z-50 transition-all duration-300
+                  w-16
+                  md:${collapsed ? "w-16" : "w-56"}`}
+      >
       {/* Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
@@ -177,9 +172,6 @@ export default function Navbar() {
       >
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
       </button>
-
-
-
 
       {/* Header */}
       <div className="flex items-center justify-center p-2 bg-card rounded-2xl shadow-sm -mt-1 mb-1">
@@ -214,7 +206,7 @@ export default function Navbar() {
           if (item.href === "/badges" && classementRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
           if (item.href === "/spaces" && spacesRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
           if (item.href === "/my-students" && mystudentsRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
-           if (item.href === "/QuizManagement" && adminQuizRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+          if (item.href === "/QuizManagement" && adminQuizRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
 
           return (
             <NavLink
