@@ -144,13 +144,13 @@ export default function AppRoutes() {
         } />
 
         {/* ========= COURSES ========= */}
-        <Route path="/all-courses" element={<AllCoursesPage />} /> {/*mli7a */}
-        <Route path="/CourseDetails/:id" element={<CourseDetails />} />{/* */}
-        <Route path="/course-details" element={<CourseDetails />} />{/* */}
-        <Route path="/Seecourses/:id" element={<Courses />} />{/* */}
-        <Route path="/courses/edit/:id" element={<CourseUpdate />} />{/* */}
-        <Route path="/courses" element={<CourseUpdate />} />{/* */}
-        <Route path="/CoursInfo" element={<CoursInfo />} />{/* */}
+        <Route path="/all-courses" element={<AllCoursesPage />} /> {/*top qowa */}
+        <Route path="/CourseDetails/:id" element={<CourseDetails />} />{/* qowa*/}
+        <Route path="/course-details" element={<CourseDetails />} />{/* qowa*/}
+        <Route path="/Seecourses/:id" element={<Courses />} />{/* qowa */}
+        <Route path="/courses/edit/:id" element={<CourseUpdate />} />{/*qowa */}
+        <Route path="/courses" element={<CourseUpdate />} />{/* qowa*/}
+        <Route path="/CoursInfo" element={<CoursInfo />} />{/* qowa */}
 
         {/* ========= EXERCISES ========= */}
         <Route path="/all-exercises" element={<AllExercisesPage />} />{/* */}

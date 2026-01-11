@@ -1,6 +1,7 @@
+// 
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Topbar from "../components/common/TopBar";
 import AddModal from "../components/common/AddModel";
 import Button from "../components/common/Button";

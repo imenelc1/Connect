@@ -1,8 +1,11 @@
 import React from "react";
 import { CheckCircle } from "lucide-react";
 import ProgressBar from "./ProgressBar";
+import { useTranslation } from "react-i18next";
+
 
 export default function CoursesSidebarItem({ sections, currentSectionIndex, setCurrentSectionIndex }) {
+    const {t} = useTranslation("courses");
   if (!Array.isArray(sections)) sections = [];
 
   const toggleSection = (index) => {
@@ -39,7 +42,7 @@ export default function CoursesSidebarItem({ sections, currentSectionIndex, setC
             }`}
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-[15px] font-semibold">{section.title || "Titre manquant"}</h2>
+              <h2 className="text-[15px] font-semibold">{section.title || t("titleMissing")}</h2>
               {sectionProgress === 100 && <CheckCircle className="w-5 h-5 text-purple" />}
             </div>
             <div className="mt-2">

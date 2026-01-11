@@ -10,6 +10,8 @@ import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import api from "../services/courseService";
 import progressionService from "../services/progressionService";
 import CourseContext from "../context/CourseContext";
+import { useNavigate } from "react-router-dom";
+
 
 
 export default function Courses() {
@@ -17,6 +19,7 @@ export default function Courses() {
   const { toggleDarkMode } = useContext(ThemeContext);
   const { id: coursId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
   //Verifer pour l'ia 
   const [courseAiEnabled, setCourseAiEnabled] = useState(true);
@@ -69,7 +72,7 @@ export default function Courses() {
         }))
       );
     } catch (err) {
-      console.error("Erreur lors du marquage de la leçon :", err);
+      console.error(t("lessonMarkError"), err);
     }
   };
 
@@ -126,7 +129,7 @@ export default function Courses() {
 
         setSections(fetchedSections);
       } catch (err) {
-        console.error("Erreur chargement cours :", err.response?.data || err);
+        console.error(t("courseLoadError"), err.response?.data || err);
       }
     };
 
@@ -155,40 +158,39 @@ export default function Courses() {
     );
   };
 
-useEffect(() => {
-  if (!coursId  || !userId) return;
-  if(userRole !== "etudiant") return;
-  const checkAIStatusForCourse = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8000/api/spaces/cours/${coursId}/student/${userId}/check/`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+  useEffect(() => {
+    if (!coursId || !userId) return;
+    if (userRole !== "etudiant") return;
+    const checkAIStatusForCourse = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/spaces/cours/${coursId}/student/${userId}/check/`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error(t("aiCheckCourseError"));
+        const data = await res.json();
+
+        // si un espace commun existe et que ai_enabled === false => IA désactivée
+        if (data.same_space) {
+          const disabled = data.spaces.some(space => space.ai_enabled === false);
+          setCourseAiEnabled(!disabled);
+        } else {
+          setCourseAiEnabled(true);
         }
-      );
-
-      if (!res.ok) throw new Error("Erreur vérification IA pour le cours");
-
-      const data = await res.json();
-
-      // si un espace commun existe et que ai_enabled === false => IA désactivée
-      if (data.same_space) {
-        const disabled = data.spaces.some(space => space.ai_enabled === false);
-        setCourseAiEnabled(!disabled);
-      } else {
-        setCourseAiEnabled(true);
+      } catch (err) {
+        console.error(t("aiCheckCourseError"), err);
+        setCourseAiEnabled(true); // fallback : IA activée
       }
-    } catch (err) {
-      console.error("Erreur vérification IA pour le cours :", err);
-      setCourseAiEnabled(true); // fallback : IA activée
-    }
-  };
+    };
 
-  checkAIStatusForCourse();
-}, [coursId, userId]);
-console.log({courseAiEnabled});
+    checkAIStatusForCourse();
+  }, [coursId, userId]);
+  console.log({ courseAiEnabled });
 
   return (
     <CourseContext.Provider
@@ -209,20 +211,20 @@ console.log({courseAiEnabled});
               <ContentSearchBar />
             </div>
             <HeadMascotte
-  courseData={
-    sections.length > 0
-      ? {
-          id: coursId,
-          title,
-          description,
-          level,
-          duration,
-          sections,
-        }
-      : null
-  }
-  aiEnabled={courseAiEnabled} // <-- nouveau prop
-/>
+              courseData={
+                sections.length > 0
+                  ? {
+                    id: coursId,
+                    title,
+                    description,
+                    level,
+                    duration,
+                    sections,
+                  }
+                  : null
+              }
+              aiEnabled={courseAiEnabled} // <-- nouveau prop
+            />
 
 
 

@@ -62,7 +62,7 @@ export default function CourseContentSimple({
         <h1 className="text-xl sm:text-3xl font-bold text-muted">{title}</h1>
         <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm">
           <span className="flex items-center gap-1 text-muted font-medium">
-            <BookOpen size={14} className="sm:w-4 sm:h-4" /> Chapitre {section.ordre} / {sections.length}
+            <BookOpen size={14} className="sm:w-4 sm:h-4" /> {t("chapter")} {section.ordre} / {sections.length}
           </span>
         </div>
         <p>{course.duration}</p>
@@ -111,7 +111,7 @@ export default function CourseContentSimple({
               : "bg-blue text-white hover:bg-blue/90"
           }`}
         >
-          {isLastPage ? "Terminer" : t("ChapitreSuiv")}
+          {isLastPage ? t("finish")  : t("ChapitreSuiv")}
           {!isLastPage && <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
         </button>
       </div>

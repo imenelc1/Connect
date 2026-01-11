@@ -25,7 +25,7 @@
     "back": "Back",
 
     "publish_title": "Publish Course",
-    "publish_description": "→ Final page here.",
+   "publish_description": "→ Final step before publishing.",
 
     "text": "Text",
     "example": "Example",
@@ -39,7 +39,19 @@
     "summary": "Course Summary",
     "untitled_section": "Untitled section",
     "untitled_lesson": "Untitled lesson",
-    "no_content": "No content provided"
+    "no_content": "No content provided",
+    "error_loading_course": "Error loading course",
+    "confirm_delete_section": "Are you sure you want to delete this section?",
+     "section_deleted_success": "Section deleted successfully!",
+      "error_delete_section": "Error deleting section",
+       "error_cannot_delete_section": "Unable to delete the section.",
+       "confirm_delete_lesson": "Are you sure you want to delete this lesson?",
+       "lesson_deleted_success": "Lesson deleted successfully!",
+    "error_delete_lesson": "Error deleting lesson",
+    "error_cannot_delete_lesson": "Unable to delete the lesson.",
+    "course_updated_success": "Course updated successfully!",
+    "error_update_course": "Error updating course",
+    "error_cannot_update_course": "Error updating the course."
   },
 
   "select": {

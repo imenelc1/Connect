@@ -371,14 +371,14 @@ export default function Dashboardens() {
                 </button>
 
                 <button
-                  onClick={() => navigate("/stats")}
+                  onClick={() => navigate("/my-students")}
                   className="w-full pl-4 sm:pl-6 flex items-center gap-3 sm:gap-4 
                            py-4 sm:py-6 px-3 bg-white/30 hover:bg-white/10 
                            rounded-bl-2xl sm:rounded-bl-full transition"
                 >
                   <TrendingDown size={isMobile ? 18 : 22} />
                   <span className="ml-8 sm:ml-16 text-base sm:text-xl font-bold">
-                    {t("Dashboard.Stats")}
+                    {t("Dashboard.mystudents")}
                   </span>
                 </button>
               </div>
