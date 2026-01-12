@@ -2,16 +2,17 @@
   "StudentsManagement": {
     "StudentsManagement": "Gestion des étudiants",
     "view": "Consulter et gérer les comptes étudiants",
-    "buttonAdd": "Ajouter un étudiant",
+    "specialtyPlaceholder": "Spécialité",
+    "year": "Année",
     "searchPlaceholder": "Rechercher des étudiants...",
     "Encolled": "Cours suivis",
     "Overal": "Progrès global",
-    "joined": "Rejoint",
+    "joined": "Rejoint le",
     "close": "Fermer",
-    
     "editStudent": "Modifier l'étudiant",
     "addStudent": "Ajouter un étudiant",
-    
+    "loading": "Chargement...",
+    "editStudentTitle": "Modifier {{lastName}} {{firstName}}",
     "labels": {
       "firstName": "Prénom",
       "lastName": "Nom",
@@ -21,26 +22,55 @@
       "speciality": "Spécialité",
       "year": "Année"
     },
-    
     "buttons": {
       "cancel": "Annuler",
       "save": "Enregistrer",
-      "create": "Créer"
+      "create": "Créer",
+      "add": "Ajouter un étudiant"
     },
-    
+
     "errors": {
       "required": "Champ requis",
       "invalidEmail": "Email invalide",
       "minAge": "L'étudiant doit avoir au moins 16 ans",
       "invalidRegNumber": "Matricule invalide",
-      "noNumbers": "Pas de chiffres"
+      "noNumbers": "Pas de chiffres autorisés",
+        "emailRequired": "Email requis",
+      "loadStudent": "Impossible de charger les informations de l'étudiant.",
+      "createStudent": "Erreur création étudiant",
+      "creationFailed": "Erreur lors de la création",
+      "fixErrors": "Corrigez les erreurs avant de continuer",
+    "missingToken": "Token JWT manquant",
+     "updateFailed": "Erreur lors de la mise à jour",
+    "updateStudentFailed": "Erreur lors de la mise à jour de l'étudiant",
+    "deleteFailed": "Erreur lors de la suppression",
+    "deleteStudentFailed": "Impossible de supprimer l’étudiant",
+    "fetchError": "Erreur ({{status}})",
+    "loadStudents": "Impossible de charger les étudiants.",
+    "loadProgress": "Erreur lors du chargement de la progression de l'étudiant",
+      "noData": "Aucune donnée disponible"
+
     },
-    
     "detailLabels": {
       "coursesRead": "Cours lus",
       "exercisesDone": "Exercices faits",
       "quizzesDone": "Quiz faits",
+      "score": "Score",
+      "noCourses": "Aucun cours lu",
+      "noExercises": "Aucun exercice fait",
+      "noQuizzes": "Aucun quiz fait",
       "joinedOn": "Rejoint le"
-    }
+    },
+    "subjects": {
+      "math": "Mathématiques",
+      "cs": "Informatique",
+      "st": "Sciences et Technologies"
+    },
+    "messages": {
+    "studentCreated": "Étudiant créé avec succès",
+        "studentUpdated": "Étudiant mis à jour avec succès !",
+           "confirmDeleteStudent": "Êtes-vous sûr de vouloir supprimer cet étudiant ?",
+    "studentDeleted": "Étudiant supprimé avec succès !"
+  }
   }
 }

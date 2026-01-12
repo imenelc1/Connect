@@ -36,7 +36,14 @@
 "completed": "{{value}}% completed",
 "maxAttemptsReached": "Maximum number of attempts reached",
     "retryIn": "Retry in {{minutes}} min",
-    "remainingAttempts": "Remaining attempts: {{count}}"
+    "remainingAttempts": "Remaining attempts: {{count}}",
+    "unknownName": "Unknown name",
+
+     "errors": {
+    "loadCourses": "Error loading courses",
+    "deleteCourse": "Error while deleting"
+  },
+  "confirmDeleteCourse": "Are you sure you want to delete this course?"
 
 
 

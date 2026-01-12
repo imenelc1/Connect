@@ -5,7 +5,7 @@ import Button from "../components/common/Button";
 import { Trash, Sun, Globe, Shield, User, UserRound, Mail, Pen, Hash, Award } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import api from "../services/api";
 import UserCircle from "../components/common/UserCircle";
 import toast, { Toaster } from "react-hot-toast";
@@ -727,3 +727,4 @@ export default function Setting() {
         </div>
     );
 }
+

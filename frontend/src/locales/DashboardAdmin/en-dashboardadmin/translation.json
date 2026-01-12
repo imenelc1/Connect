@@ -30,6 +30,23 @@
   "coursesFollowed": "Followed Courses ",
   "activityTitle": "Platform Activity",
    "registrationsAndLogins": "📥 Registrations & 🔐 Logins"
-}
+},
+"notificationLoad":"Notification loading...",
+"noNotif":"No notifications at the moment",
+"notifications": {
+    "newStudent": "New student registration",
+    "courseApproved": "Course 'Algorithms' approved",
+    "exerciseSubmitted": "Exercise submitted by student",
+    "newTeacher": "New teacher registered"
+  },
+  "days": {
+    "Monday": "Monday",
+    "Tuesday": "Tuesday",
+    "Wednesday": "Wednesday",
+    "Thursday": "Thursday",
+    "Friday": "Friday",
+    "Saturday": "Saturday",
+    "Sunday": "Sunday"
+  }
 
 }

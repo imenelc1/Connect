@@ -5,8 +5,7 @@
   "search": "Search...",
   "assistant": "AI Assistant",
   "myCourses": "My courses",
-  "chapterPrev": "Previous Page",
-  "chapterNext": "Next Page",
+ 
   "coursTermine": "Course completed",
   "leconNondispo": "No lessons available",
   "readyQuiz": "Ready to test your knowledge?",
@@ -22,7 +21,33 @@
    "yourFeedback": "Your feedback",
   "feedbackPlaceholder": "Share your comments, suggestions or remarks...",
 
-   "text":"text"
+
+   "chapter":"Chapter",
+   "finish": "Finish",
+   "titleMissing": "Missing title",
+   "courseIdDefault": "default",
+   "anonymousUser": "Anonymous user",
+   "feedbackLoadError": "Error loading feedbacks",
+   "feedbackRequired": "Please write a feedback and give a rating",
+   "sendError": "Error while sending",
+   "loadingFeedbacks": "Loading feedbacks...",
+"noFeedbacks": "No feedbacks for this course",
+"showName": "Show my name",
+"lessonMarkError": "Error marking the lesson:",
+"courseLoadError": "Error loading course:",
+"aiCheckCourseError": "Error checking AI for the course"
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

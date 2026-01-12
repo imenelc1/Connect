@@ -380,7 +380,8 @@ export default function BadgesManagement() {
                   className={`h-6 px-3 py-1 text-xs font-medium rounded-full ${buttonStyles[badge.category]?.xp || buttonStyles.default.xp
                     }`}
                 >
-                  {badge.category}
+                  {t(`fields.categories.${badge.category}`)}
+
                 </span>
               </div>
               <h2 className="font-semibold text-lg">{badge.title}</h2>
@@ -423,7 +424,7 @@ export default function BadgesManagement() {
           setCreateModal(false);
           setEditModal(false);
         }}
-        title={selectedBadge ? t("editTitle") : t("createBadge")}
+        title={selectedBadge ? t("BadgesManagement.editTitle") : t("BadgesManagement.createBadge")}
         submitLabel={selectedBadge ? t("common.save") : t("common.create")}
         cancelLabel={t("common.cancel")}
         onSubmit={submitBadge}
@@ -536,9 +537,9 @@ export default function BadgesManagement() {
       <AddModal
         open={studentsModalOpen}
         onClose={() => setStudentsModalOpen(false)}
-        title={t("modalTitle", { title: selectedBadge?.title })}
+        title={t("BadgesManagement.modalTitle", { title: selectedBadge?.title })}
 
-        submitLabel={t("BadgesManagement.close")}
+        submitLabel={t("common.close")}
         cancelLabel=""
         onSubmit={() => setStudentsModalOpen(false)}
         fields={[

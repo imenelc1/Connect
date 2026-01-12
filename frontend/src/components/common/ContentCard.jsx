@@ -7,30 +7,35 @@ import { FiEdit, FiTrash2, FiCheckCircle } from "react-icons/fi";
 import progressionService from "../../services/progressionService";
 
 /* ===================== STYLES ===================== */
+// Couleurs  selon le niveau du cours /exo/quiz
 const levelStyles = {
   Débutant: "bg-blue text-white",
   Intermédiaire: "bg-purple text-white",
   Avancé: "bg-pink text-white",
 };
-
+ 
+//couleur des buttons selons les niveau
 const buttonStyles = {
   Débutant: "bg-blue text-white",
   Intermédiaire: "bg-purple text-white",
   Avancé: "bg-pink text-white",
 };
 
+//couleur de cercle utilisateur selon le niveau
 const initialsBgMap = {
   Débutant: "bg-blue",
   Intermédiaire: "bg-purple",
   Avancé: "bg-pink",
 };
 
+//couleur de barre de progression selon le niveau
 const progressColorMap = {
   Débutant: "bg-blue",
   Intermédiaire: "bg-purple",
   Avancé: "bg-pink",
 };
 
+//mapping des niveaux
 const levelKeyMap = {
   Débutant: "beginner",
   Intermédiaire: "intermediate",
@@ -39,20 +44,22 @@ const levelKeyMap = {
 
 /* ===================== COMPONENT ===================== */
 export default function ContentCard({
-  course,
-  role,
-  showProgress,
-  type,
+  course, //objet cours qui peut etre cours ou quiz ou exo
+  role, //etudiant /enseignant
+  showProgress, //progression
+  type, //type de contenu cours, exercice, quiz
   className = "",
-  onDelete,
+  onDelete, //suppression
 }) {
-  const { t } = useTranslation("contentPage");
+  const { t } = useTranslation("contentPage"); //traduction
   const location = useLocation();
   const navigate = useNavigate();
   const [progress, setProgress] = useState(course?.progress ?? 0);
 
+  // pas d'object=> rien a afficher
   if (!course) return null;
 
+  //le type de la page selon le type des objets envoyé
   const pageType =
     type ||
     (location.pathname.includes("courses")
@@ -61,6 +68,7 @@ export default function ContentCard({
       ? "exercise"
       : "quiz");
 
+  // labels dynamique selon le type de la page
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
     continue: t(
@@ -77,6 +85,7 @@ export default function ContentCard({
         : t("checkQuiz"),
   };
 
+  //commencer le contenu selon le type et role
   const handleStart = () => {
     if (pageType === "exercise") {
       navigate(
@@ -93,6 +102,7 @@ export default function ContentCard({
     }
   };
 
+  //reinitialiser la progression
   const handleRestart = async () => {
     try {
       await progressionService.resetCourseProgress(course.id);
@@ -109,8 +119,10 @@ export default function ContentCard({
     }
   };
 
+  //voir la liste des exercices associé
   const seeExercises = () => navigate(`/ListeExercices/${course.id}`);
 
+  //naviger vers la page de modification de contenu 
   const handleEdit = () => {
     navigate(
       pageType === "course"
@@ -128,6 +140,7 @@ export default function ContentCard({
     >
       {/* ================= BODY ================= */}
       <div className="flex flex-col flex-1 min-w-0">
+        {/* titre et niveau */}
         <div className="flex justify-between items-start gap-3">
           <h2 className="font-semibold text-lg line-clamp-2 break-words">
             {course.title}
@@ -138,11 +151,12 @@ export default function ContentCard({
             {t(`levels.${levelKeyMap[course.level]}`)}
           </span>
         </div>
-
+        {/*description */}
         <p className="text-grayc my-3 line-clamp-3 break-words">
           {course.description}
         </p>
 
+        {/*auteur et duree */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <div
@@ -162,6 +176,7 @@ export default function ContentCard({
           </span>
         </div>
 
+        {/* barre de progression pour la page exercice et cours */}
         {showProgress && pageType !== "quiz" && (
           <ContentProgress
             value={progress}
@@ -173,9 +188,12 @@ export default function ContentCard({
 
       {/* ================= FOOTER ================= */}
       <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        {/*etudiant */}
         {role === "etudiant" && (
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             {/* ================= QUIZ ================= */}
+            {/*afficher le button start quiz seuelement si il n'a pas atteint le nb max de tentative */}
+            {/* ou  il a depassé la duree entre deux tentatives*/}
             {pageType === "quiz" ? (
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 {!course.isBlocked && (
@@ -217,6 +235,7 @@ export default function ContentCard({
             ) : (
               <>
                 {/* ================= COURSES & EXOS ================= */}
+                {/* le button start cours/exercice  seulon la progression */}
                 {progress === 0 && (
                   <div className="flex flex-col sm:flex-row gap-3">
                     <Button
@@ -297,7 +316,8 @@ export default function ContentCard({
             >
               {labels.check}
             </Button>
-
+            
+            {/* pouvoir modifer ou supprimer l'objet si auteur=currentuser */}
             {course.isMine && (
               <>
                 <FiEdit

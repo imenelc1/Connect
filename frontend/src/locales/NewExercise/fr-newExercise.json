@@ -11,7 +11,9 @@
     "duration_label": "Durée",
     "level_label": "Niveau",
     "cours": "Cours",
-    "solution_label": "Solution (optionnel — visible après réalisation de l’exercice)"
+    "solution_label": "Solution (optionnel — visible après réalisation de l’exercice)",
+    "solution_placeholder":"Écrivez la solution ici (facultatif)"
+
 
   },
   "select": {
@@ -48,6 +50,7 @@
     "courseVisibility": "Visibilité",
     "course_selected": "Cours sélectionné"
   },
-      "solution_note": "Cette solution est visible uniquement par l’enseignant. Elle ne sera révélée à l’étudiant qu’après qu’il aura terminé l’exercice."
+      "solution_note": "Cette solution est visible uniquement par l’enseignant. Elle ne sera révélée à l’étudiant qu’après qu’il aura terminé l’exercice.",
+      "max_sub":"Soumission max"
 
 }

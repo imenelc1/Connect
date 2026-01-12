@@ -1,25 +1,154 @@
-
 {
   "ForumManagement": {
-    "forumM": "Forums Management" ,
-    "Managediscussion":"Manage discussion forums and threads",
-    "createF": "Create Forum",
-    "searchF": "Search forums ...",
-    "GeneralD":"General Discussion",
-    "Talk":"Talk about anything C relatded",
-    "ButtonManage":"Manage",
-    "threads":"threads",
-    "posts":"posts",
-    "memebers":"members",
-    "Homework":"Homework Help",
-    "gethelp":"Get help with your assignements",
-    "ProjetShowcase":"Project Showcase",
-    "share":"Share your C projects",
-    "AlgorithmD":"Algorithm Discussion",
-    "deepDive":"Deep dive into algorithms",
-    "career":"Career Advice",
-    "Careerp":"Career guidance for C developers",
-    "Bug":"Bug Reports",
-    "Report":"Report plateform issues"
+    "forumM": "Forums Management",
+    "Managediscussion": "Manage discussion forums and threads",
+    "createF": "Create forum",
+    "searchF": "Search forums...",
+    "ButtonManage": "Manage",
+
+    "createdByFirstName": "Created by {{user}}",
+    "dateSeparator": "•",
+
+   "totalForums": "Total forums",
+    "forStudents": "For students",
+    "forTeachers": "For teachers",
+      "totalMessages": "Total messages",
+
+    "discussionForums": "Discussion forums",
+    "loadingForums": "Loading forums...",
+    "retry": "Retry",
+    "noForumFound": "No forum found",
+    "noForumMatchSearch": "No forums match your search.",
+  "createFirstForum": "Start by creating your first forum.",
+
+    "students": "Students",
+    "teachers": "Instructors",
+
+    "noDescription": "No description",
+    "noDescriptionProvided": "No description provided.",
+
+    "discussions": "{{count}} discussions",
+    "likes": "{{count}} likes",
+
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+
+    "forumDescription": "Forum description",
+    "messages": "Messages",
+    "message": "{{count}} message",      
+    "message_plural": "{{count}} messages", 
+    
+    "totalLikes": "Total likes",
+    
+    "comments": "Comments",
+
+    "postMessage": "Post a message",
+    "textareaPlaceholder": "Share your thoughts, questions or suggestions...",
+
+    "noMessagesYet": "No messages yet",
+    "beFirstToParticipate": "Be the first to join the discussion!",
+
+    "admin": "Admin",
+    "deleteMessage": "Delete message",
+    "reply": "Reply",
+    "cancel": "Cancel",
+
+    "replies": "Replies ({{count}})",
+    "deleteComment": "Delete comment",
+
+    "close": "Close",
+
+    "forumTitle": "Forum title *",
+    "description": "Description *",
+    "targetAudience": "Target audience *",
+    "forumTitlePlaceholder": "Ex: AI debates",
+  "descriptionPlaceholder": "Describe the topic of this forum...",
+
+    "loading": "Loading...",
+    "create": "Create",
+
+    "deleteForumTitle": "Delete forum",
+    "deleteForumMessage": "Are you sure you want to delete the forum \"{{title}}\"? This will also delete all associated messages and comments.",
+
+    "replyTextareaPlaceholder": "Write your reply..."  ,
+    "defaultUser": "User",
+
+    
+  "like": "{{count}} like",
+  "like_plural": "{{count}} likes",
+  "replyy": "{{count}} reply",
+  "reply_plural": "{{count}} replies",
+
+  "unknownError": "Unknown error",
+  "genericError": "An error occurred",
+
+  "adminNotAutenticated": "Admin not authenticated",
+  "serverError": "Server error",
+
+    "cannotLoadForums": "Unable to load forums",
+
+    "missingToken": "Missing token. Please log in again.",
+    "forumUpdatedSuccess": "Forum updated successfully!",
+
+    "invalidServerResponseMissingForumId": "Invalid server response: missing id_forum",
+
+    "administrator": "Administrator",
+
+    "forumCreatedSuccess": "Forum created successfully!",
+
+    "errors": {
+    "invalidData": "Invalid data. Please check that all fields are filled correctly.",
+    "forbidden": "Access denied. You do not have the required permissions.",
+    "unauthorized": "Session expired. Please log in again.",
+    "serverError": "Server error. Please try again later.",
+    "networkError": "Network error. Check your internet connection."
+  },
+
+   "forumDeletedSuccess": "Forum deleted successfully!",
+  "deleteForumError": "Error while deleting the forum",
+
+  "likeAuthRequired": "You must be logged in to like a forum",
+
+  "cannotLoadMessages": "Unable to load messages",
+  "forumLoadError": "Error loading forum",
+
+   "noForumSelected": "No forum selected!",
+  "mustBeLoggedIn": "You must be logged in!",
+
+  "invalidServerResponse": "Invalid server response",
+
+   "messageSentSuccess": "Message sent successfully!",
+  "forbidden": "Access denied. Check your permissions.",
+  "endpointNotFound": "Endpoint not found. Check the API URL.",
+   "serverErrorDjango": "Server error. Check Django logs.",
+  "error": "Error",
+
+
+  "filterAll": "All forums",
+  "filterStudents": "For students",
+  "filterTeachers": "For teachers",
+   "discussion": "discussions",
+    "likee": "likes",
+  "createdBy": "Created by"
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+   
   }
 }

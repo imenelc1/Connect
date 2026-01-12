@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { SquarePen, Trash2, BookOpen } from "lucide-react";
@@ -188,18 +188,30 @@ export default function CoursesManagement() {
 
   // DELETE
    const handleDeleteCourse = async (courseId) => {
-    if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
-    try {
-      await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
+  if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:8000/api/courses/cours/${courseId}/delete/`,
+      {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setCourses((prev) => prev.filter((c) => c.id !== courseId));
-    } catch (err) {
-      console.error("Erreur suppression :", err);
-      alert("Erreur lors de la suppression");
-    }
-  };
+      }
+    );
+
+    if (!res.ok) throw new Error("Erreur suppression");
+
+    setCourses((prev) =>
+      prev.filter((c) => c.id_cours !== courseId)
+    );
+
+    toast.success("Cours supprimé avec succès");
+  } catch (err) {
+    console.error("Erreur suppression :", err);
+    toast.error("Erreur lors de la suppression");
+  }
+};
+
 
 
   return (

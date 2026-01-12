@@ -91,7 +91,7 @@ export default function CoursePage() {
   const [minutes, setMinutes] = useState("00");
   const [seconds, setSeconds] = useState("00");
   const [duration, setDuration] = useState("");
-const [currentCoursId, setCurrentCoursId] = useState(null);
+  const [currentCoursId, setCurrentCoursId] = useState(null);
   useEffect(() => {
     setDuration(`${hours}:${minutes}:${seconds}`);
   }, [hours, minutes, seconds]);
@@ -219,8 +219,9 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
       setCurrentCoursId(coursId);
       return coursId;
     } catch (err) {
-      console.error("Erreur création cours :", err.response?.data || err.message);
-      toast.error("Erreur lors de la création du cours");
+      console.error(t("course.error_create_course"), err.response?.data || err.message);
+      toast.error(t("course.error_create_course_toast"));
+
       return null;
     }
   };
@@ -249,7 +250,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
 
           const formData = new FormData();
           formData.append("section", sectionId);
-          formData.append("titre_lecon", lesson.title || `Leçon ${j + 1}`);
+          formData.append("titre_lecon", lesson.title || t("course.untitled_lessons", { number: j + 1 }));
           formData.append("contenu_lecon", lesson.content || "");
           formData.append("utilisateur", currentUserId);
           formData.append("type_lecon", lessonType);
@@ -265,11 +266,11 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
         }
       }
 
-      toast.success("Sections et leçons enregistrées !");
+      toast.success(t("course.sections_lessons_saved"));
       setActiveStep(3);
     } catch (err) {
-      console.error("Erreur création sections/leçons :", err.response?.data || err);
-      toast.error("Erreur lors de l'enregistrement.");
+      console.error(t("course.error_create_sections_lessons"), err.response?.data || err);
+      toast.error(t("course.error_save_sections_lessons"));
     }
   };
 
@@ -281,7 +282,8 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
       await handleSaveAllSections(coursId);
       navigate("/all-courses");
     } catch (error) {
-      console.error("Erreur lors de l'enregistrement complet :", error);
+      console.error(t("course.error_save_complete"), error);
+
     }
   };
   useEffect(() => {
@@ -290,11 +292,11 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
     return () => window.removeEventListener("sidebarChanged", handler);
   }, []);
   if (authLoading) {
-    return <div style={{ padding: 20 }}>Checking authentication...</div>;
+    return <div style={{ padding: 20 }}>{t("auth.checking")}</div>;
   }
 
   if (!isAuthenticated || !userData) {
-    return <div style={{ padding: 20 }}>Not authenticated...</div>;
+    return <div style={{ padding: 20 }}>{t("auth.not_authenticated")}</div>;
   }
 
 
@@ -349,7 +351,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
   !bg-card !text-black dark:!text-white
   
 "
-                
+
               />
             </div>
 
@@ -371,7 +373,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
                     value={hours}
                     onChange={setHours}
                     options={hourOptions}
-                    placeholder="Heures"
+                    placeholder={t("select.hours")}
                     className="flex-1"
                   />
                   <ModernDropdown
@@ -385,7 +387,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
                     value={seconds}
                     onChange={setSeconds}
                     options={minuteSecondOptions.map(o => ({ ...o, label: `${o.value} s` }))}
-                    placeholder="Secondes"
+                    placeholder={t("select.seconds")}
                     className="flex-1"
                   />
                 </div>
@@ -420,7 +422,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
             </div>
 
             <div className="flex justify-between mt-6 sm:mt-10">
-              <button  className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition" onClick={() => navigate("/all-courses")}>
+              <button className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition" onClick={() => navigate("/all-courses")}>
                 {t("course.cancel")}
               </button>
               <button
@@ -689,6 +691,7 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
 
 
         )}
+        
 
 
 
@@ -697,3 +700,4 @@ const [currentCoursId, setCurrentCoursId] = useState(null);
     </div>
   );
 }
+

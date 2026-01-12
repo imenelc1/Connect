@@ -14,9 +14,10 @@ export default function ContentFilters({
   onCompletedChange
 }) {
   const { t } = useTranslation("filters");
+  //niveaux possible
   const levels = ["ALL", "Débutant", "Intermédiaire", "Avancé"];
 
-  const [completedStatus, setCompletedStatus] = useState("");
+  const [completedStatus, setCompletedStatus] = useState(""); //pour le filtre completé/non complété
   const [courseFilter, setCourseFilter] = useState("");
   const [exerciseStatus, setExerciseStatus] = useState("");
 
@@ -40,7 +41,7 @@ export default function ContentFilters({
     }
   };
 
-  const current = labels[type];
+  const current = labels[type]; //labels dynamique selon le type courant
 
 
   return (
@@ -76,15 +77,15 @@ export default function ContentFilters({
             }}
             placeholder={t("status.all")}
             options={[
-              { value: "", label: t("status.all") },
-              { value: "completed", label: t("status.completed") },
-              { value: "not_completed", label: t("status.notCompleted") },
+              { value: "", label: t("status.all") }, //tous
+              { value: "completed", label: t("status.completed") }, //complété
+              { value: "not_completed", label: t("status.notCompleted") }, //non complété
             ]}
             className="w-full sm:w-40"
           />
         )}
 
-        {/* ÉTAT DES EXERCICES */}
+        {/* FILTRE ÉTAT DES EXERCICES */}
         {type === "exercises" && userRole === "etudiant" && (
           <ModernDropdown
             value={activeFilter} // ← utiliser la valeur active depuis le parent
@@ -94,8 +95,8 @@ export default function ContentFilters({
             placeholder={t("status.all")}
             options={[
               { value: "ALL", label: t("status.all") },
-              { value: "soumis", label: t("status.submitted") },
-              { value: "brouillon", label: t("status.draft") },
+              { value: "soumis", label: t("status.submitted") }, //soumis
+              { value: "brouillon", label: t("status.draft") }, //brouillon
             ]}
             className="w-full sm:w-40"
           />

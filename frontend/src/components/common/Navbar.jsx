@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import "../../styles/index.css";
+import { useContext } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import IconeLogoComponent from "./IconeLogoComponent";
-import { useContext } from "react";
-import AuthContext from "../../context/AuthContext";
 
+import IconeLogoComponent from "./IconeLogoComponent";
+
+import AuthContext from "../../context/AuthContext";
+import "../../styles/index.css";
+
+//icones
 import {
   Settings,
   LogOut,
@@ -28,12 +31,14 @@ import {
 export default function Navbar() {
   const { t } = useTranslation("navbar");
   const location = useLocation();
-
-  const [collapsed, setCollapsed] = useState(false);
-  const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
   const { logout } = useContext(AuthContext);
 
+  //etat de la sidbar (ouverte/reduite)
+  const [collapsed, setCollapsed] = useState(false);
+  //info utilisateur
+  const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
 
+  //recuperation de l'utilisateur connecté
   useEffect(() => {
     let userObj = { nom: "", prenom: "", role: "" };
 
@@ -56,10 +61,17 @@ export default function Navbar() {
     });
   }, []);
 
+    /**
+   * 🔄 Informe le reste de l’app que la sidebar a changé d’état
+   * (utile pour ajuster le margin-left du contenu principal)
+   */
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("sidebarChanged", { detail: collapsed }));
   }, [collapsed]);
 
+  /**
+   * 🔗 Liens selon le rôle
+   */
   const studentLinks = [
     { href: "/", label: t("home"), icon: Home },
     { href: "/dashboard-etu", label: t("dashboard"), icon: Activity },
@@ -95,6 +107,7 @@ export default function Navbar() {
     { href: "/ForumManagement", label: t("forms"), icon: FileText },
   ];
 
+  // Choix des liens selon le rôle
   const links =
     userData.role === "admin"
       ? adminLinks
@@ -123,7 +136,7 @@ export default function Navbar() {
     "/all-quizzes",
     "/quiz-preview",
     "/create-quiz",
-    
+
 
   ];
   const classementRoutes = [
@@ -142,27 +155,22 @@ export default function Navbar() {
     "/students",
   ];
   const adminQuizRoutes = [
-  "/QuizManagement",
-  "/Voir-quiz",
-];
+    "/QuizManagement",
+    "/Voir-quiz",
+  ];
 
 
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
 
-  return (
-
+return (
     <aside
       className={`fixed h-screen overflow-visible bg-card rounded-3xl shadow-2xl p-3
-  top-0 left-0 z-50 transition-all duration-300
-  w-16
-  md:${collapsed ? "w-16" : "w-56"}
-`}
-    >
-
-
-
+                  top-0 left-0 z-50 transition-all duration-300
+                  w-16
+                  md:${collapsed ? "w-16" : "w-56"}`}
+      >
       {/* Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
@@ -177,9 +185,6 @@ export default function Navbar() {
       >
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
       </button>
-
-
-
 
       {/* Header */}
       <div className="flex items-center justify-center p-2 bg-card rounded-2xl shadow-sm -mt-1 mb-1">
@@ -214,7 +219,7 @@ export default function Navbar() {
           if (item.href === "/badges" && classementRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
           if (item.href === "/spaces" && spacesRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
           if (item.href === "/my-students" && mystudentsRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
-           if (item.href === "/QuizManagement" && adminQuizRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+          if (item.href === "/QuizManagement" && adminQuizRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
 
           return (
             <NavLink
