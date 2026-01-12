@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 
 export default function PublishQuizButton({ onClick }) {
-  const { t } = useTranslation("createQuiz");
+  const { t } = useTranslation("createQuiz"); 
 
   return (
     <button
