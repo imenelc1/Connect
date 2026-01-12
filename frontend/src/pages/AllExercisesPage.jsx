@@ -35,19 +35,21 @@ export default function AllExercisesPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [searchTerm, setSearchTerm] = useState("");
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
   // 🔹 Fetch tous les exercices
   useEffect(() => {
     fetch("http://localhost:8000/api/exercices/api/exo/")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (!Array.isArray(data)) return setExercises([]);
-        const formatted = data.map(c => ({
+        const formatted = data.map((c) => ({
           id: c.id_exercice,
           title: c.titre_exo,
           level: c.niveau_exercice_label,
@@ -57,65 +59,65 @@ export default function AllExercisesPage() {
           coursId: c.cours, // pour navigation vers le cours si besoin
           initials: c.utilisateur_name
             .split(" ")
-            .map(n => n[0])
+            .map((n) => n[0])
             .join("")
             .toUpperCase(),
-          isMine: c.utilisateur === currentUserId
+          isMine: c.utilisateur === currentUserId,
         }));
         setExercises(formatted);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Erreur chargement exercices :", err);
         setExercises([]);
       });
   }, [currentUserId]);
 
+  //Recherche exercice
 
-
- //Recherche exercice
-  
   useEffect(() => {
-  const controller = new AbortController();
+    const controller = new AbortController();
 
-  fetch(`http://localhost:8000/api/exercices/exo?search=${searchTerm}`, {
-    signal: controller.signal
-  })
-    .then(res => res.json())
-    .then(data => {
-      const formatted = data.map(c => ({
-        id: c.id_exercice,
-        title: c.titre_exo,
-        level: c.niveau_exercice_label,
-        categorie: c.categorie,
-        description: c.enonce,
-        author: c.utilisateur_name,
-        coursId: c.cours,
-        initials: c.utilisateur_name
-          .split(" ")
-          .map(n => n[0])
-          .join("")
-          .toUpperCase(),
-        isMine: c.utilisateur === currentUserId
-      }));
-      setExercises(formatted);
+    fetch(`http://localhost:8000/api/exercices/exo?search=${searchTerm}`, {
+      signal: controller.signal,
     })
-    .catch(err => {
-      if (err.name !== "AbortError") console.error(err);
-    });
+      .then((res) => res.json())
+      .then((data) => {
+        const formatted = data.map((c) => ({
+          id: c.id_exercice,
+          title: c.titre_exo,
+          level: c.niveau_exercice_label,
+          categorie: c.categorie,
+          description: c.enonce,
+          author: c.utilisateur_name,
+          coursId: c.cours,
+          initials: c.utilisateur_name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase(),
+          isMine: c.utilisateur === currentUserId,
+        }));
+        setExercises(formatted);
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") console.error(err);
+      });
 
-  return () => controller.abort();
-}, [searchTerm]);
-
+    return () => controller.abort();
+  }, [searchTerm]);
 
   const handleDeleteExo = async (exoId) => {
     if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
 
     try {
-      await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setExercises(prev => prev.filter(ex => ex.id !== exoId));
+      await fetch(
+        `http://localhost:8000/api/exercices/exercice/${exoId}/delete/`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setExercises((prev) => prev.filter((ex) => ex.id !== exoId));
     } catch (err) {
       console.error("Erreur suppression :", err);
       alert("Erreur lors de la suppression");
@@ -143,47 +145,48 @@ export default function AllExercisesPage() {
   };
 
   // 🔹 Filtrage
-  let filteredExercises = filterLevel === "ALL" ? exercises : exercises.filter(ex => ex.level === filterLevel);
+  let filteredExercises =
+    filterLevel === "ALL"
+      ? exercises
+      : exercises.filter((ex) => ex.level === filterLevel);
   if (userRole === "enseignant" && categoryFilter === "mine") {
-    filteredExercises = filteredExercises.filter(ex => ex.isMine);
+    filteredExercises = filteredExercises.filter((ex) => ex.isMine);
   }
 
   return (
-     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-               {/* Sidebar */}
-               <div>
-                 <Navbar />
-               </div>
-      
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
 
-     <main className={`
+      <main
+        className={`
         flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-      `}>
-         <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
-  {/* Titre */}
-  <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
-    {t("exercisesTitle")}
-  </h1>
+      `}
+      >
+        <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+          {/* Titre */}
+          <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
+            {t("exercisesTitle")}
+          </h1>
 
-  {/* Notifications + User */}
-  <div className="flex items-center gap-3">
-    <NotificationBell />
-    <UserCircle
-      initials={initials}
-      onToggleTheme={toggleDarkMode}
-      onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
-    />
-  </div>
-</header>
-
-     
-     
+          {/* Notifications + User */}
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
+            />
+          </div>
+        </header>
 
         <ContentSearchBar
-         value={searchTerm}
-         onChange={(e) => setSearchTerm(e.target.value)}
-       />
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
 
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
@@ -207,13 +210,22 @@ export default function AllExercisesPage() {
           )}
         </div>
 
-        <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))`,
+          }}
+        >
           {filteredExercises.map((exercise) => (
-            <ExerciseCard key={exercise.id} exercise={exercise} />
-
+            <ExerciseCard
+              key={exercise.id}
+              exercise={exercise}
+              role={userRole} // ENVOI DU RÔLE
+              isMine={exercise.isMine} // PROPRIÉTAIRE
+              onDelete={handleDeleteExo}
+            />
           ))}
         </div>
-
       </main>
     </div>
   );
