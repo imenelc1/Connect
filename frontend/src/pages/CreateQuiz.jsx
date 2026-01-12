@@ -85,7 +85,7 @@ export default function CreateQuiz() {
         }));
         setCourses(formatted);
       })
-      .catch((err) => console.error("Erreur chargement cours :", err));
+      .catch((err) => console.error(t("errors.loadCourses"), err));
   }, []);
   const myCourses = courses.filter((c) => c.isMine);
 
@@ -130,10 +130,10 @@ export default function CreateQuiz() {
   const handleSaveStep1 = async () => {
     const token = localStorage.getItem("token");
     const currentUserId = getCurrentUserId();
-    
+
 
     if (!token || !currentUserId) {
-      toast.error("Utilisateur non connecté");
+      toast.error(t("errors.notLoggedIn"));
 
       return null;
     }
@@ -145,7 +145,8 @@ export default function CreateQuiz() {
       !quizData.level ||
       !quizData.courseId
     ) {
-      toast.warning("Veuillez remplir tous les champs obligatoires");
+      toast.warning(t("errors.requiredFields"));
+
 
       return null;
     }
@@ -171,17 +172,18 @@ export default function CreateQuiz() {
 
       const exerciceId = response.data.id_exercice;
 
-      console.log("✅ Exercice créé :", exerciceId);
+      console.log(t("success.exerciseCreated", { id: exerciceId }));
+
 
       return exerciceId; // IMPORTANT pour step 2
 
     } catch (error) {
       console.error(
-        "❌ Erreur création exercice :",
-        error.response?.data || error.message
+        t("errors.exerciseCreate", {
+          message: error.response?.data || error.message
+        })
       );
-      toast.error("Erreur lors de la sauvegarde de l'exercice");
-      return null;
+      toast.error(t("errors.exerciseSave"));
     }
   };
   /*step 2 creation quiz a partir de exo */
@@ -215,19 +217,19 @@ export default function CreateQuiz() {
       );
 
       const quizId = response.data.id;
-      console.log("✅ Quiz créé :", quizId);
+      console.log(t("success.quizCreated", { id: quizId }));
       return quizId;
+
 
     } catch (error) {
       console.error(
-        "❌ Erreur création quiz :",
-        error.response?.data || error.message
+        t("errors.quizCreation", { details: error.response?.data || error.message })
       );
-      toast.error("Erreur lors de la création du quiz");
+      toast.error(t("errors.quizCreateToast"));
       return null;
     }
   };
-  
+
   /* step 3 les questions et option*/
   const handleSaveStep3 = async (idQuiz) => {
     const token = localStorage.getItem("token");
@@ -265,13 +267,14 @@ export default function CreateQuiz() {
         }
       }
 
-      console.log("✅ Toutes les questions et options créées !");
-      toast.success("Quiz complet créé avec succès !");
+      console.log(t("success.allQuestionsCreated"));
+      toast.success(t("success.quizCreatedSuccess"));
       return true;
 
     } catch (error) {
-      console.error("❌ Erreur création questions/options :", error.response?.data || error.message);
-      toast.error("Erreur lors de la création des questions");
+      console.error(t("errors.questionsOptionsError"), error.response?.data || error.message);
+      toast.error(t("errors.questionsCreateError"));
+
       return false;
     }
   };
@@ -427,7 +430,7 @@ export default function CreateQuiz() {
 
                 <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-pink text-white text-xs md:text-sm">
                   <FaStar className="w-3 h-3 md:w-4 md:h-4" />
-                  <span>{quizData.level || t("level")}</span>
+                 <span>{t(`levels.${quizData.level}`) || t("level")}</span>
                 </div>
 
                 <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-green text-white text-xs md:text-sm">
@@ -508,3 +511,4 @@ export default function CreateQuiz() {
     </div>
   );
 }
+

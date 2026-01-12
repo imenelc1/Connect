@@ -33,7 +33,11 @@
     
     "errors": {
     "loadCourses": "Erreur de chargement des cours",
-    "deleteCourse": "Erreur lors de la suppression"
+    "deleteCourse": "Erreur lors de la suppression",
+    "loadQuizAttempts": "Erreur chargement tentatives"
   },
-  "confirmDeleteCourse": "Tu es sûr de supprimer ce cours ?"
+  "confirmDeleteCourse": "Tu es sûr de supprimer ce cours ?",
+  "confirmDeleteExercise": "Tu es sûr de supprimer cet exercice ?",
+  "errorDelete": "Erreur lors de la suppression",
+  "errorDeleteLog": "Erreur suppression"
 }

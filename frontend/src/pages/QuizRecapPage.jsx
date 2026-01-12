@@ -36,7 +36,7 @@ export default function QuizRecapPage() {
           }
         );
 
-        if (!res.ok) throw new Error("Quiz non trouvé");
+        if (!res.ok) throw new Error(t("noQuiz"));
         const data = await res.json();
         setQuiz(data); // l'API renvoie directement un objet
         setLoading(false);
@@ -49,8 +49,9 @@ export default function QuizRecapPage() {
     fetchQuizRecap();
   }, [exerciceId, currentUserId]);
 
-  if (loading) return <p>Chargement du quiz...</p>;
-  if (!quiz) return <p>Quiz introuvable.</p>;
+  if (loading) return <p>{t("loading")}</p>;
+  if (!quiz) return <p>{t("noQuiz")}</p>;
+
   const totalPoints = quiz.quiz.questions ? quiz.quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
 
 
@@ -74,7 +75,7 @@ export default function QuizRecapPage() {
           <FaTrophy size={40} />
         </div>
 
-        {/* Score */}
+       {/* Score */}
         <div className="text-3xl font-bold mb-3">
           {quiz.quiz.reponse_quiz_utilisateur?.score_total || 0} / {totalPoints}
         </div>

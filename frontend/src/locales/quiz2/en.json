@@ -8,6 +8,15 @@
   "point": "point",
   "prev": "Previous",
   "next": "Next",
-  "selectAnswer": "Please select an answer"
+  "submitError": "Error submitting the quiz",
+  "loading":"Loading...",
+  "finish": "Finish",
+   "selectAnswer": "Please select an answer",
 
+
+  "levels": {
+  "debutant": "Beginner",
+  "intermediaire": "Intermediate",
+  "avance": "Advanced"
+  }
 }

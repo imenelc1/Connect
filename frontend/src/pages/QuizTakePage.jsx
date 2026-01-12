@@ -137,7 +137,7 @@ export function QuizTakePage() {
       });
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de la soumission du quiz");
+      alert(t("submitError")); 
     }
   };
 
@@ -166,7 +166,7 @@ export function QuizTakePage() {
 
   const progressColor = "bg-blue border-blue";
 
-  if (loading || !quiz) return <p>Chargement...</p>;
+  if (loading || !quiz) return <p>{t("loading")}</p>;
 
   /* ================= RENDER ================= */
   return (
@@ -195,7 +195,7 @@ export function QuizTakePage() {
           </div>
 
           <div className="flex items-center gap-2 bg-pink px-4 py-2 rounded">
-            <FaStar /> {quiz.exercice.niveau}
+            <FaStar /> {t(`levels.${quiz.exercice.niveau.toLowerCase()}`)}
           </div>
         </div>
 
@@ -267,3 +267,4 @@ export function QuizTakePage() {
     </div>
   );
 }
+

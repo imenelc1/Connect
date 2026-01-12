@@ -11,7 +11,7 @@ export default function CourseContentSimple({
   setSectionPages,
 }) {
   const { title, sections } = course;
-  const courseId = course.id || "default";
+  const courseId = course.id || t("courseIdDefault");
   const { t } = useTranslation("courses");
 
   const LESSONS_PER_PAGE = 2;

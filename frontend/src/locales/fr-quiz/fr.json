@@ -1,5 +1,5 @@
 {
-  "preview":"Aperçu du quiz",
+  "preview": "Aperçu du quiz",
   "info": "Infromations du quiz",
   "newQuiz": "Nouveau Quiz",
   "exitPreview": "Quitter l’aperçu",
@@ -10,23 +10,18 @@
   "points": "point(s)",
   "level": "Avancé",
   "questionText": "Entrez votre question ici...",
-  "answerOption": "Option de réponse...",
+  "answerOption": "Choix de réponse...",
   "sendQuiz": "Envoyer le quiz",
-
-
-   "selectCourse": "Selectionnez le cours",
+  "selectCourse": "Selectionnez le cours",
   "chooseCourse": "Choisir",
   "visibility": "visibilité",
-  "public":"public",
-  "private":"privé",
+  "public": "public",
+  "private": "privée",
   "selectLevel": "selectionnez le niveau",
   "scoreMinimum": "Score minimum",
-  "maxAttempts":"Tentatives maximum",
+  "maxAttempts": "Tentatives maximum",
   "delais_entre_tentative": "délais entre tentatives",
-  "enableDuration": "activer le temps", 
-
-
-
+  "enableDuration": "Activer le chronomètre",
   "quizSettings": "Paramètres du Quiz",
   "quizTitle": "Titre du Quiz",
   "quizTitlePlaceholder": "Titre du quiz...",
@@ -38,33 +33,54 @@
   "beginner": "Débutant",
   "intermediate": "Intermédiaire",
   "advanced": "Avancé",
-
   "quizSummary": "Résumé du Quiz",
   "totalQuestions": "Nombre de questions :",
   "totalPoints": "Nombre de points :",
   "passScore": "Score requis :",
   "durationLabel": "Durée :",
-
   "questions": "Questions",
   "addQuestion": "Ajouter une question",
-
   "answers": "Réponses",
   "answerOptionA": "Option de réponse A",
   "answerOptionB": "Option de réponse B",
   "addAnswer": "Ajouter une réponse",
-
   "saveDraft": "Enregistrer le brouillon",
   "previewQuiz": "Aperçu du Quiz",
-
-    "loading": "Chargement...",
-     "backMenu": "Retour au menu",
-
-   "errors": {
-    "quizNotFound": "Quiz non trouvé"
+  "loading": "Chargement...",
+  "backMenu": "Retour au menu",
+  "unlimited": "Illimité",
+  "publishQuiz": "Publier le quiz",
+  "errors": {
+    "quizNotFound": "Quiz non trouvé",
+    "loadCourses": "Erreur de chargement des cours",
+    "notLoggedIn": "Utilisateur non connecté",
+    "requiredFields": "Veuillez remplir tous les champs obligatoires",
+    "exerciseCreate": "Erreur création exercice : {{message}}",
+    "exerciseSave": "Erreur lors de la sauvegarde de l'exercice",
+    "quizCreation": "❌ Erreur création quiz errors: {{details}}",
+    "quizCreateToast": "Erreur lors de la création du quiz",
+    "questionsOptionsError": "❌ Erreur création questions/options :",
+    "questionsCreateError": "Erreur lors de la création des questions",
+    "eachQuestionMustHaveCorrectAnswer": "Chaque question doit avoir une réponse correcte",
+    "backendError": "❌ ERREUR BACKEND 👉",
+    "updateError": "❌ Erreur lors de la mise à jour"
   },
   "levels": {
     "debutant": "Débutant",
     "intermediaire": "Intermédiaire",
     "avance": "Avancé"
+  },
+  "success": {
+    "exerciseCreated": "Exercice créé : {{id}}",
+    "quizCreated": "✅ Quiz créé : {{id}}",
+    "allQuestionsCreated": "✅ Toutes les questions et options créées !",
+    "quizCreatedSuccess": "Quiz complet créé avec succès !",
+    "quizUpdatedSuccess": "✅ Quiz mis à jour avec succès !",
+    "draftSaved": "Brouillon enregistré"
+
+  },
+  "logs": {
+    "quizApiResponse": "🔥 RÉPONSE DE L'API QUIZ",
+    "exerciseFromApi": "🔥 EXERCICE DE L'API"
   }
 }
