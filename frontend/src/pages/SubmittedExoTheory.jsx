@@ -20,7 +20,7 @@ export default function SubmittedExoTheory() {
     try {
       const token = localStorage.getItem("token");
       const BACKEND_URL = "http://127.0.0.1:8000";
-      
+
       const feedbackResponse = await axios.get(
         `${BACKEND_URL}/api/feedback-exercice/list/`,
         {
@@ -28,13 +28,13 @@ export default function SubmittedExoTheory() {
           params: { tentative_ids: tentativeId }
         }
       );
-      
+
       if (feedbackResponse.data && feedbackResponse.data.length > 0) {
         return feedbackResponse.data[0];
       }
       return null;
     } catch (error) {
-      console.warn("Erreur récupération feedback:", error);
+      console.warn(t("errors.feedbackFetch"), error);
       return null;
     }
   };
@@ -47,7 +47,7 @@ export default function SubmittedExoTheory() {
 
         // 2. Récupérer le feedback depuis le nouveau modèle
         const feedbackResponse = await fetchFeedback(tentativeId);
-        
+
         // 3. Préparer les données de l'exercice
         const exerciseInfo = {
           // InfoCard
@@ -73,7 +73,7 @@ export default function SubmittedExoTheory() {
         };
 
         setExerciseData(exerciseInfo);
-        
+
         // 4. Stocker aussi les données complètes du feedback si besoin
         if (feedbackResponse) {
           setFeedbackData({
@@ -85,7 +85,7 @@ export default function SubmittedExoTheory() {
         }
 
       } catch (err) {
-        console.error("Erreur chargement tentative théorie", err);
+        console.error(t("errors.loadAttempt"), err);
       } finally {
         setLoading(false);
       }
@@ -123,7 +123,7 @@ export default function SubmittedExoTheory() {
       <main className="flex-1 ml-16 md:ml-56 p-6">
         {/* TITLE */}
         <h1 className="text-3xl ml-5 mb-5 font-semibold text-primary">
-          {t("Completed Exercise") || "Exercice Complété"}
+          {t("completedExercise")}
         </h1>
 
         {/* INFO CARD */}
@@ -134,7 +134,7 @@ export default function SubmittedExoTheory() {
           <div className="flex items-center gap-2 mb-3">
             <BookOpen size={20} className="text-primary" />
             <h2 className="text-lg font-semibold">
-              {t("exerciseStatement") || "Énoncé de l'exercice"}
+              {t("exerciseStatement")}
             </h2>
           </div>
 
@@ -148,12 +148,13 @@ export default function SubmittedExoTheory() {
           <div className="flex items-center gap-2 mb-3">
             <FileText size={20} className="text-primary" />
             <h2 className="text-lg font-semibold">
-              {t("studentAnswer") || "Réponse de l'étudiant"}
+              {t("studentAnswer")}
             </h2>
           </div>
 
           <div className="bg-primary/10 p-4 rounded-xl text-sm text-textc whitespace-pre-wrap">
-            {exerciseData.answer || t("noAnswer") || "Aucune réponse fournie"}
+            {exerciseData.answer || t("noAnswer")}
+
           </div>
         </div>
 
@@ -162,7 +163,7 @@ export default function SubmittedExoTheory() {
           <div className="bg-card p-4 rounded-xl border border-primary/65 mt-4">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle size={18} className="text-green-600" />
-              <h3 className="font-semibold">{t("solution") || "Solution"}</h3>
+              <h3 className="font-semibold">{t("solution")}</h3>
             </div>
 
             <div className="bg-green-100/40 p-3 rounded text-sm whitespace-pre-wrap">
@@ -178,19 +179,19 @@ export default function SubmittedExoTheory() {
             <div className="flex-1">
               <div className="flex justify-between items-center mb-3">
                 <h2 className="text-xl font-semibold">
-                  {t("teacherFeedback") || "Feedback du professeur"}
+                  {t("teacherFeedback")}
                 </h2>
                 {feedbackData && (
                   <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
-                    Nouveau système
+                    {t("newSystem")}
                   </span>
                 )}
               </div>
-              
+
               {/* Contenu du feedback */}
               <div className="bg-white/80 p-4 rounded-xl mb-3">
                 <p className="text-textc whitespace-pre-wrap">
-                  {exerciseData.feedback || t("noFeedback") || "Aucun feedback pour le moment"}
+                  {exerciseData.feedback || t("noFeedback")}
                 </p>
               </div>
 
@@ -200,12 +201,13 @@ export default function SubmittedExoTheory() {
                   <div className="flex flex-wrap gap-3">
                     {feedbackData.feedback_prof && (
                       <div>
-                        <span className="font-medium">Professeur:</span> {feedbackData.feedback_prof.nom} {feedbackData.feedback_prof.prenom}
+                        <span className="font-medium">{t("teacher")}</span> {feedbackData.feedback_prof.nom} {feedbackData.feedback_prof.prenom}
                       </div>
                     )}
                     {feedbackData.created_at && (
                       <div>
-                        <span className="font-medium">Date:</span> {new Date(feedbackData.created_at).toLocaleDateString()}
+                        <span className="font-medium">{t("date") || "Date"}:</span>{" "}
+                        {new Date(feedbackData.created_at).toLocaleDateString()}
                       </div>
                     )}
                   </div>
@@ -219,16 +221,16 @@ export default function SubmittedExoTheory() {
         <div className="mt-6 text-sm text-gray-500">
           <div className="flex flex-wrap gap-4">
             <div>
-              <span className="font-medium">ID Exercice:</span> {exerciseData.exerciceId}
+              <span className="font-medium">{t("exerciseId")}:</span> {exerciseData.exerciceId}
             </div>
             <div>
-              <span className="font-medium">ID Tentative:</span> {exerciseData.tentativeId}
+              <span className="font-medium">{t("attemptId")}:</span> {exerciseData.tentativeId}
             </div>
             <div>
-              <span className="font-medium">Statut:</span> {exerciseData.etat}
+              <span className="font-medium">{t("status")}:</span> {exerciseData.etat}
             </div>
             <div>
-              <span className="font-medium">Catégorie:</span> {exerciseData.category}
+              <span className="font-medium">{t("category")}:</span> {exerciseData.category}
             </div>
           </div>
         </div>

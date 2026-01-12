@@ -16,5 +16,12 @@
     "positivep2":"points over the past weeks.Keep encouraging this progress!" ,
     "joined":"Joined on",
      "Submitted":"Submitted on"
+  },
+  "noExercises": "No exercises available",
+  "errors": {
+    "fetchData": "Error fetching data",
+        "fetchStats": "Error fetching teacher stats",
+         "studentNotFound": "Error: Student not found"
+
   }
 }

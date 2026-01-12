@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 
 import { Globe, FileText, Activity } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -42,7 +42,7 @@ export default function UpdateExercice() {
 
   const currentUserId = getCurrentUserId();
 
-useEffect(() => {
+  useEffect(() => {
     if (!coursId) return;
 
     const fetchCourse = async () => {
@@ -59,11 +59,11 @@ useEffect(() => {
         setSelectedCourseId(data.cours);
         setCategory(data.categorie);
         setCourseVisibility(data.visibilite_exo_label);
-        
 
-        
+
+
       } catch (err) {
-        console.error("Erreur chargement exercice :", err.response?.data || err);
+        console.error(t("errors.loadExercise"), err.response?.data || err);
       }
     };
 
@@ -84,7 +84,7 @@ useEffect(() => {
         }));
         setCourses(formatted);
       })
-      .catch((err) => console.error("Erreur chargement cours :", err));
+      .catch((err) => console.error(t("errors.loadCourses"), err));
   }, []);
 
 
@@ -98,11 +98,11 @@ useEffect(() => {
     { label: t("exercises.preview"), icon: Activity },
   ];
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-      useEffect(() => {
-         const handler = (e) => setSidebarCollapsed(e.detail);
-         window.addEventListener("sidebarChanged", handler);
-         return () => window.removeEventListener("sidebarChanged", handler);
-       }, []);
+  useEffect(() => {
+    const handler = (e) => setSidebarCollapsed(e.detail);
+    window.addEventListener("sidebarChanged", handler);
+    return () => window.removeEventListener("sidebarChanged", handler);
+  }, []);
 
   // Save step 1
   const handleSaveStep1 = async (coursId) => {
@@ -110,15 +110,15 @@ useEffect(() => {
     const currentUserId = getCurrentUserId();
 
     if (!token || !currentUserId) {
-      alert("Utilisateur non connecté");
+      alert(t("errors.notAuthenticated"));
       return null;
     }
 
- 
+
 
     try {
       const res = await api.put(
-       `exercices/${coursId}/`,
+        `exercices/${coursId}/`,
         {
           titre_exo: title,
           enonce: statement,
@@ -130,25 +130,26 @@ useEffect(() => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-        toast.success("exercice mis à jour avec succès !");
+      toast.success(t("messages.exerciseUpdated"));
 
       const exoId = res.data.id_exercice;
       navigate("/all-exercises");
       return exoId;
     } catch (err) {
-      console.error("Erreur mise à jour:", err.response?.data || err.message);
-      alert("Erreur lors de la mise à jour de l'exercice");
+      console.error(t("errors.updateExercise"), err.response?.data || err.message);
+      alert(t("errors.updateExercise"));
+
       return null;
     }
   };
 
 
-  
+
   return (
     <div className="w-full min-h-screen  bg-surface">
       {/* SIDEBAR */}
 
-       <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
+      <div className="flex-shrink-0 w-14 sm:w-16 md:w-48">
         <Navbar />
       </div>
 
@@ -305,7 +306,8 @@ useEffect(() => {
                   <strong>{t("course.course_topic")} :</strong> {statement}
                 </p>
                 <p>
-                  <strong>{t("course.level")} :</strong> {level}
+                  <strong>{t("course.level")} :</strong> {t(`preview.${level}`)}
+
                 </p>
                 <p>
                   <strong>{t("course.courseVisibility")} :</strong> {courseVisibility}

@@ -84,7 +84,7 @@ export default function ProgressExercice() {
         setCourses(coursesRes.data.courses || []);
 
       } catch (err) {
-        console.error("Erreur fetchData:", err);
+         console.error(t("errors.fetchData"), err);
         setStudent({});
         setExercises([]);
         setCourses([]);
@@ -115,7 +115,7 @@ export default function ProgressExercice() {
         );
         setProgressScoreData(progressRes.data);
       } catch (err) {
-        console.error("Erreur récupération stats prof :", err);
+        console.error(t("errors.fetchStats"), err);
         setAverageScore(null);
         setProgressScoreData([]);
       }
@@ -124,7 +124,7 @@ export default function ProgressExercice() {
     fetchProfStats();
   }, [studentId, token]);
 
-  if (!student) return <p>Erreur : étudiant introuvable</p>;
+if (!student) return <p>{t("errors.studentNotFound")}</p>;
 
   const { nom = "—", prenom = "—", adresse_email = "—", date_joined = null } = student;
   const initials = ((prenom || "").charAt(0) + (nom || "").charAt(0)).toUpperCase();

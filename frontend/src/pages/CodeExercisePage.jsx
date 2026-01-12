@@ -6,7 +6,7 @@ import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
 import Mascotte from "../assets/head_mascotte.svg";
 
-import NavBar from "../components/common/NavBar";
+import NavBar from "../components/common/Navbar";
 import AssistantIA from "./AssistantIA";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
@@ -224,7 +224,7 @@ useEffect(() => {
         { source_code: userCode, language_id: 49, stdin: userInput }
       );
       const { stdout, stderr, compile_output } = res.data;
-      const result = stdout || stderr || compile_output || "Aucune sortie pour le moment...";
+      const result = stdout || stderr || compile_output || t("output.noOutput");
       setOutput(result);
       if (stderr || compile_output) sendNotification(t("assistant.executionErrorHelp"), "hint");
     } catch {
@@ -319,7 +319,7 @@ useEffect(() => {
         }
       );
 
-      if (!res.ok) throw new Error("Erreur vérification IA");
+     if (!res.ok) throw new Error(t("errors.aiCheckFailed"));
 
       const data = await res.json();
 
@@ -331,7 +331,7 @@ useEffect(() => {
         setAiAllowed(true);
       }
     } catch (err) {
-      console.error("Erreur vérification IA :", err);
+      console.error(t("errors.aiCheckFailed"), err);
       setAiAllowed(true); // fallback : IA activée
     }
   };

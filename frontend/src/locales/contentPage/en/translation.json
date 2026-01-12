@@ -16,41 +16,45 @@
     "advanced": "Advanced"
   },
 
- "continueCourse": "Continue ",
-"continueExercise": "Continue",
-"continueQuiz": "Continue",
+  "continueCourse": "Continue",
+  "continueExercise": "Continue",
+  "continueQuiz": "Continue",
 
-"restartCourse": "Restart",
-"restartExercise": "Restart",
-"restartQuiz": "Restart",
+  "restartCourse": "Restart",
+  "restartExercise": "Restart",
+  "restartQuiz": "Restart",
 
-"startCourse": "Start",
-"startExercise": "Start",
-"startQuiz": "Start",
+  "startCourse": "Start",
+  "startExercise": "Start",
+  "startQuiz": "Start",
 
-"checkCourse": "Check the course",
-"checkExercise": "Check the exercise",
-"checkQuiz": "Check the quiz",
+  "checkCourse": "Check the course",
+  "checkExercise": "Check the exercise",
+  "checkQuiz": "Check the quiz",
 
-"checkExos": "Check exercises",
-"completed": "{{value}}% completed",
-"maxAttemptsReached": "Maximum number of attempts reached",
-    "retryIn": "Retry in {{minutes}} min",
-    "remainingAttempts": "Remaining attempts: {{count}}",
-    "unknownName": "Unknown name",
+  "checkExos": "Check exercises",
+  "completed": "{{value}}% completed",
+  "maxAttemptsReached": "Maximum number of attempts reached",
+  "retryIn": "Retry in {{minutes}} min",
+  "remainingAttempts": "Remaining attempts: {{count}}",
+  "unknownName": "Unknown name",
 
-     "errors": {
+  "errors": {
     "loadCourses": "Error loading courses",
     "deleteCourse": "Error while deleting",
-    "loadQuizAttempts": "Error loading quiz attempts"
+    "loadQuizAttempts": "Error loading quiz attempts",
+    "loadExercises": "Error loading exercises",
+     "fetchEexercises":"Error while fetching exercises"
   },
+
   "confirmDeleteCourse": "Are you sure you want to delete this course?",
-   "confirmDeleteExercise": "Are you sure you want to delete this exercise?",
+  "confirmDeleteExercise": "Are you sure you want to delete this exercise?",
   "errorDelete": "Error while deleting",
-  "errorDeleteLog": "Delete error"
+  "errorDeleteLog": "Delete error",
+  "loadingExercises": "Loading exercises...",
+"noExercises": "No exercises available.",
+"exerciseTitle": "Exercise {{index}} — {{title}}"
 
 
-
-
-
+  
 }

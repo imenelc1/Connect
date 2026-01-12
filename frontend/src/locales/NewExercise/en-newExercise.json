@@ -29,6 +29,11 @@
     "private": "Private",
     "public": "Public"
   },
+   "preview": {
+  "debutant": "Beginner",
+  "intermediaire": "Intermediate",
+  "avance": "Advanced"
+  },
   "buttons": {
     "cancel": "Cancel",
     "save_next": "Save & Next",
@@ -52,5 +57,18 @@
   
   
     "solution_note": "This solution is only visible to the teacher. It will be revealed to the student only after they have completed the exercise.",
-    "max_sub":"Max submissions"
+    "max_sub":"Max submissions",
+    "unlimited": "Unlimited",
+    "errors": {
+  "loadCourses": "Error loading courses",
+  "notAuthenticated": "User not logged in",
+   "createExercise": "Error creating exercise",
+     "loadExercise": "Error loading exercise",
+     "updateExercise": "Error updating exercise"
+},
+"messages": {
+  "exerciseUpdated": "Exercise updated successfully!"
+}
+
+
 }

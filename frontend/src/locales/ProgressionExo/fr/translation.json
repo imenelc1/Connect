@@ -16,7 +16,14 @@
      "positivep1":"Les élèves se sont améliorés de ",
     "positivep2":"Des points ont été marqués ces dernières semaines. Continuez à encourager ces progrès !" 
     , "joined":"Rejoint le",
-    "Submitted":" Soumis le"
+    "Submitted":" Soumis le",
+    "noExercises": "Aucun exercice disponible"
    
+  },
+  "errors": {
+    "fetchData": "Erreur lors de la récupération des données",
+        "fetchStats": "Erreur lors de la récupération des statistiques professeur",
+         "studentNotFound": "Erreur : étudiant introuvable"
+
   }
 }

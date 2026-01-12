@@ -5,7 +5,7 @@ import { MessageCircle, Globe } from "lucide-react";
 import { MdAutoAwesome } from "react-icons/md";
 import { useParams } from "react-router-dom";
 
-import NavBar from "../components/common/NavBar";
+import NavBar from "../components/common/Navbar";
 import Mascotte from "../assets/head_mascotte.svg";
 import HeadMascotte from "../components/ui/HeadMascotte";
 
@@ -174,7 +174,7 @@ export default function TheoryExercisePage() {
         const last = await res.json();
         if (last?.reponse) setAnswer(last.reponse);
       } catch (err) {
-        console.error("Erreur chargement tentative:", err);
+         console.error(t("loadAttemptError"), err);
       }
     };
 
@@ -198,7 +198,7 @@ export default function TheoryExercisePage() {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to check AI status");
+if (!res.ok) throw new Error(t("aiStatusCheckFailed"));
 
       const data = await res.json();
 
@@ -210,7 +210,7 @@ export default function TheoryExercisePage() {
         setAiAllowed(true); // pas d'espace commun = IA activée
       }
     } catch (err) {
-      console.error("Erreur vérification IA :", err);
+      console.error(t("aiCheckError"), err);
       setAiAllowed(true); // fallback : IA activée
     }
   };
