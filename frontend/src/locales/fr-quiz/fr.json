@@ -54,5 +54,17 @@
   "addAnswer": "Ajouter une réponse",
 
   "saveDraft": "Enregistrer le brouillon",
-  "previewQuiz": "Aperçu du Quiz"
+  "previewQuiz": "Aperçu du Quiz",
+
+    "loading": "Chargement...",
+     "backMenu": "Retour au menu",
+
+   "errors": {
+    "quizNotFound": "Quiz non trouvé"
+  },
+  "levels": {
+    "debutant": "Débutant",
+    "intermediaire": "Intermédiaire",
+    "avance": "Avancé"
+  }
 }

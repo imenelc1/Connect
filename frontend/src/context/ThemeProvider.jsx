@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from "react";
+// context/ThemeProvider.jsx
+import { useEffect, useState } from "react";
 import ThemeContext from "./ThemeContext";
 
-export const ThemeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(false);
+export function ThemeProvider({ children }) {
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
 
   const toggleDarkMode = () => {
-    setDarkMode(prev => !prev);
+    setDarkMode((prev) => !prev);
   };
 
-  // Charger la valeur stockée au démarrage
   useEffect(() => {
-    const saved = localStorage.getItem("darkMode");
-    if (saved !== null) setDarkMode(saved === "true");
-  }, []);
+    const root = document.documentElement;
 
-  // Appliquer la classe sur <html> + sauvegarder
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-    localStorage.setItem("darkMode", darkMode);
+    if (darkMode) {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
   }, [darkMode]);
 
   return (
@@ -25,4 +28,4 @@ export const ThemeProvider = ({ children }) => {
       {children}
     </ThemeContext.Provider>
   );
-};
+}

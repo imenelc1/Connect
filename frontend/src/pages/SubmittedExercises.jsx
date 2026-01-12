@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
-import Navbar from "../components/common/NavBar";
+import React, { useEffect, useState ,useContext} from "react";
+import Navbar from "../components/common/Navbar";
 import { CheckCircle, Clock, MessageCircle, Calendar, ChevronRight } from "lucide-react";
 import { getTentatives } from "../services/progressionService";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import ThemeContext from "../context/ThemeContext";
 
 export default function SubmittedExercises() {
   const { t } = useTranslation("SubmittedExercises");
   const [exercises, setExercises] = useState([]);
   const [filter, setFilter] = useState("All");
   const [expandedCards, setExpandedCards] = useState({});
+    const { toggleDarkMode } = useContext(ThemeContext);
   const [loading, setLoading] = useState(true);
    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -215,7 +217,7 @@ export default function SubmittedExercises() {
           <div className="flex justify-between items-start mt-4 gap-3">
             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-textc text-sm">
               <div className="flex items-center gap-1">
-                <Calendar size={14} className="text-primary shrink-0" />
+                <Calendar size={14} className="text-muted shrink-0" />
                 <span className="break-words">
                   {formatDate(ex.submittedDate)}
                 </span>
@@ -223,7 +225,7 @@ export default function SubmittedExercises() {
 
               {ex.categorie === "code" && (
                 <div className="flex items-center gap-1">
-                  <span className="text-primary font-bold">{`</>`}</span>
+                  <span className="text-muted font-bold">{`</>`}</span>
                   <span className="break-words">{ex.language}</span>
                 </div>
               )}
@@ -253,7 +255,7 @@ export default function SubmittedExercises() {
 
             <ChevronRight
               size={20}
-              className="text-primary cursor-pointer hover:text-primary/80 shrink-0"
+              className="text-muted cursor-pointer hover:text-primary/80 shrink-0"
               onClick={() => {
                 ex.categorie === "code"
                   ? (window.location.href = `/submitted-exercise/${ex.id}`)
@@ -267,8 +269,8 @@ export default function SubmittedExercises() {
             {ex.hasFeedback && (
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 mb-1">
-                  <MessageCircle size={16} className="text-primary" />
-                  <span className="font-semibold text-sm text-primary">
+                  <MessageCircle size={16} className="text-muted" />
+                  <span className="font-semibold text-sm text-muted">
                     {t("teacherFeedback") || "Feedback du professeur"}
                   </span>
                 </div>
@@ -284,7 +286,7 @@ export default function SubmittedExercises() {
           {/* Toggle */}
           <button
             onClick={() => toggleCard(ex.id)}
-            className="self-end mt-2 text-sm text-primary hover:underline"
+            className="self-end mt-2 text-sm text-muted hover:underline"
           >
             {isExpanded ? "Voir moins" : "Voir plus de détails"}
           </button>

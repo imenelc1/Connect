@@ -26,7 +26,7 @@ export default function DashboardAdmin() {
   const token = localStorage.getItem("admin_token");
   const adminData = JSON.parse(localStorage.getItem("admin")) || {};
   const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
-  
+
   // États pour les notifications - IDENTIQUE
   const { notifications, loading: loadingNotifications, fetchNotifications } = useNotifications();
 
@@ -57,29 +57,29 @@ export default function DashboardAdmin() {
     if (!Array.isArray(notifications) || notifications.length === 0) {
       // Retourner des données mock si aucune notification
       return [
-        { 
-          title: "Nouvelle inscription étudiant", 
-          date: dayjs().format("DD/MM/YYYY"), 
-          day: dayjs().format("dddd"), 
-          time: dayjs().format("HH:mm") 
+        {
+          title: t("notifications.newStudent"),
+          date: dayjs().format("DD/MM/YYYY"),
+          day: t(`days.${dayjs().format("dddd")}`),
+          time: dayjs().format("HH:mm")
         },
-        { 
-          title: "Cours 'Algorithmes' approuvé", 
-          date: dayjs().subtract(1, 'day').format("DD/MM/YYYY"), 
-          day: dayjs().subtract(1, 'day').format("dddd"), 
-          time: "14:15" 
+        {
+          title: t("notifications.courseApproved"),
+          date: dayjs().subtract(1, 'day').format("DD/MM/YYYY"),
+          day: t(`days.${dayjs().subtract(1, 'day').format("dddd")}`),
+          time: "14:15"
         },
-        { 
-          title: "Exercice soumis par étudiant", 
-          date: dayjs().subtract(2, 'day').format("DD/MM/YYYY"), 
-          day: dayjs().subtract(2, 'day').format("dddd"), 
-          time: "16:45" 
+        {
+          title: t("notifications.exerciseSubmitted"),
+          date: dayjs().subtract(2, 'day').format("DD/MM/YYYY"),
+          day: t(`days.${dayjs().subtract(2, 'day').format("dddd")}`),
+          time: "16:45"
         },
-        { 
-          title: "Nouveau professeur inscrit", 
-          date: dayjs().subtract(3, 'day').format("DD/MM/YYYY"), 
-          day: dayjs().subtract(3, 'day').format("dddd"), 
-          time: "09:20" 
+        {
+          title: t("notifications.newTeacher"),
+          date: dayjs().subtract(3, 'day').format("DD/MM/YYYY"),
+          day: t(`days.${dayjs().subtract(3, 'day').format("dddd")}`),
+          time: "09:20"
         }
       ];
     }
@@ -195,24 +195,17 @@ export default function DashboardAdmin() {
       `}>
         {/* Header */}
         <div className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
-           <div>
+          <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">{t("title")}</h1>
             <p className="text-gray">{t("subtitle")}</p>
           </div>
-           <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-3 ml-auto">
             <NotificationBell />
-            <UserCircle
-              initials={initials}
-              onToggleTheme={toggleDarkMode}
-              onChangeLang={(lang) => {
-                const i18n = window.i18n;
-                if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-              }}
-            />
+           
           </div>
-         
-          
-         
+
+
+
         </div>
 
         {/* STATS WITH PROTOTYPE COLORS */}
@@ -240,17 +233,17 @@ export default function DashboardAdmin() {
           <div className="bg-card rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-muted mb-4">{t("recentActivity")}</h2>
             <p className="text-gray-500 text-xs mb-4">
-                        {dayjs().startOf('week').format("DD MMM")} - {dayjs().endOf('week').format("DD MMM")}
-                      </p>
+              {dayjs().startOf('week').format("DD MMM")} - {dayjs().endOf('week').format("DD MMM")}
+            </p>
             {/* Même structure que le dashboard enseignant */}
             <div className="space-y-3">
               {loadingNotifications ? (
                 <div className="flex items-center justify-center py-4">
-                  <p className="text-sm text-gray-500">Chargement des notifications...</p>
+                  <p className="text-sm text-gray-500">{t("notificationLoad")}</p>
                 </div>
               ) : formattedNotifications.length === 0 ? (
                 <div className="flex items-center justify-center py-4">
-                  <p className="text-sm text-gray-500">Aucune notification pour le moment</p>
+                  <p className="text-sm text-gray-500">{t("noNotif")}</p>
                 </div>
               ) : (
                 formattedNotifications.map((item, index) => (

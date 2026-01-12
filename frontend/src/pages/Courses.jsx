@@ -10,6 +10,8 @@ import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import api from "../services/courseService";
 import progressionService from "../services/progressionService";
 import CourseContext from "../context/CourseContext";
+import { useNavigate } from "react-router-dom";
+
 
 
 export default function Courses() {
@@ -17,6 +19,7 @@ export default function Courses() {
   const { toggleDarkMode } = useContext(ThemeContext);
   const { id: coursId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
   //Verifer pour l'ia 
   const [courseAiEnabled, setCourseAiEnabled] = useState(true);

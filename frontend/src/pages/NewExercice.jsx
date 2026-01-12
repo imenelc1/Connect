@@ -342,7 +342,7 @@ export default function NewExercise() {
                 </p>
 
                 <p>
-                <strong>{t("max soumissions") || "Max soumissions"} :</strong> {maxSoumissions === 0 ? "Illimité" : maxSoumissions}
+                <strong>{t("max_sub") || "Max soumissions"} :</strong> {maxSoumissions === 0 ? "Illimité" : maxSoumissions}
               </p>
 
               <p>

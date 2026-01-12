@@ -243,7 +243,10 @@ export default function InstructorsPage() {
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || "Erreur serveur");
+      if (!res.ok) {
+        throw new Error(data.error || t("serverError"));
+      }
+
 
       // Mise à jour du state
       if (editIndex !== null) {
@@ -305,7 +308,7 @@ export default function InstructorsPage() {
       });
 
 
-      if (!res.ok) throw new Error("Impossible de supprimer cet enseignant");
+      if (!res.ok) throw new Error(t("deleteError"));
 
       // Supprimer du frontend
       setInstructors(instructors.filter((_, i) => i !== index));
