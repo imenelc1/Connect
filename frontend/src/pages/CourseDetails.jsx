@@ -445,6 +445,20 @@ export default function SpaceDetails() {
         toast.error(t("addFailed"));
       });
   };
+   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+  
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+  
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
 
 
 
@@ -569,9 +583,16 @@ export default function SpaceDetails() {
     activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
 
   return (
-    <div className="flex w-full bg-surface min-h-screen">
-      <Navbar />
-      <main className="flex-1 p-6 lg:ml-64 bg-bg min-h-screen">
+     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                        {/* Sidebar */}
+                        <div>
+                          <Navbar />
+                        </div>
+    
+      <main className={`
+            flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+            ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+          `}>
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <button
