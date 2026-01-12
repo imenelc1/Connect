@@ -71,7 +71,7 @@ export default function ExerciseCard({
       );
       onDelete?.(exercise.id);
     } catch (err) {
-      console.error("Erreur suppression :", err);
+      console.error(t("errorDelete"), err);
     }
   };
 

@@ -154,8 +154,8 @@ export default function AppRoutes() {
         <Route path="/CoursInfo" element={<CoursInfo />} />{/* cest bon*/}
 
         {/* ========= EXERCISES ========= */}
-        <Route path="/all-exercises" element={<AllExercisesPage />} />{/* */}
-        <Route path="/ListeExercices" element={<CourseExercisesPage />} />{/* */}
+        <Route path="/all-exercises" element={<AllExercisesPage />} />{/* bieeen*/}
+        <Route path="/ListeExercices" element={<CourseExercisesPage />} />{/*cest la meme que celle en haut donc bieeen */}
         <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
 
        <Route path="/student-exercice" element={

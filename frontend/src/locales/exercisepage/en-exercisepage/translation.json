@@ -27,5 +27,11 @@
      "exercise_load_error": "Unable to load the exercise.",
       "tip_title": "Tip",
       "save": "Save",
-     "ai_assistant": "AI Assistant"
+     "ai_assistant": "AI Assistant",
+     "loadAttemptError": "Error loading attempt",
+     "aiStatusCheckFailed": "Failed to check AI status",
+     "aiCheckError": "Error checking AI status"
+
+
+
 }

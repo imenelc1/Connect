@@ -30,6 +30,12 @@
     "private": "Privé",
     "public": "Public"
   },
+  "preview": {
+  "debutant": "Débutant",
+  "intermediaire": "Intermédiaire",
+  "avance": "Avancé"
+  },
+ 
   "buttons": {
     "cancel": "Annuler",
     "save_next": "Enregistrer & Suivant",
@@ -51,6 +57,22 @@
     "course_selected": "Cours sélectionné"
   },
       "solution_note": "Cette solution est visible uniquement par l’enseignant. Elle ne sera révélée à l’étudiant qu’après qu’il aura terminé l’exercice.",
-      "max_sub":"Soumission max"
+      "max_sub":"Soumission max",
+      "unlimited": "Illimité",
+
+    
+  "errors": {
+
+  "loadCourses": "Erreur lors du chargement des cours",
+  "notAuthenticated": "Utilisateur non connecté",
+  "createExercise": "Erreur lors de la création de l'exercice",
+  "loadExercise": "Erreur lors du chargement de l'exercice",
+  "updateExercise": "Erreur lors de la mise à jour de l'exercice"
+},
+"messages": {
+  "exerciseUpdated": "Exercice mis à jour avec succès !"
+}
+
+
 
 }

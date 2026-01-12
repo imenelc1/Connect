@@ -36,7 +36,13 @@
     "categoryPlaceholder": "Sélectionner une catégorie",
     "difficulty": "Difficulté",
     "visibilite": "visibilité",
-    "visibiliteLabel": "Exercice visible par les étudiants"
+    "visibiliteLabel": "Exercice visible par les étudiants",
+     "statement": "Énoncé",
+    "author": "Auteur",
+    "level": "Niveau",
+    "visibility": "Visibilité",
+    "course": "Cours",
+    "maxAttempts": "Maximum de tentatives"
 
   },
   "errors": {
@@ -44,6 +50,16 @@
     "createExercise": "Erreur lors de la création de l'exercice.",
     "editExercise": "Erreur lors de la modification de l'exercice.",
     "deleteExercise": "Erreur lors de la suppression de l'exercice.",
-    "invalidData": "Les exercices ne sont pas un tableau :"
+    "invalidData": "Les exercices ne sont pas un tableau :",
+    "loadCourses": "Erreur lors du chargement des cours",
+    "updateExercise": "Erreur lors de la mise à jour de l'exercice"
+  },
+  "success": {
+  "updateExercise": "Exercice mis à jour avec succès !"
+},
+ "viewModal": {
+    "title": "Voir l'exercice",
+    "close": "Fermer"
   }
+
 }

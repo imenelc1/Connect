@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { MessageCircle, Globe } from "lucide-react";
 import { MdAutoAwesome } from "react-icons/md";
 
-import NavBar from "../components/common/NavBar";
+import NavBar from "../components/common/Navbar";
 import Mascotte from "../assets/head_mascotte.svg";
 import AssistantIA from "./AssistantIA";
 
@@ -68,7 +68,7 @@ export default function ExercisePage() {
               onClick={() => setOpenAssistant(true)}
               className="flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl bg-[rgb(var(--color-primary))] text-white font-medium shadow-md hover:brightness-110 transition text-xs sm:text-sm md:text-base"
             >
-              <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
+              <MessageCircle size={18} strokeWidth={1.8} /> {t("ai_assistant")}
             </button>
 
             <img src={Mascotte} className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11" alt="Mascotte" />

@@ -39,9 +39,8 @@ export default function AllExercisesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
-  const initials = `${userData?.nom?.[0] || ""}${
-    userData?.prenom?.[0] || ""
-  }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
+    }`.toUpperCase();
 
   // 🔹 Fetch tous les exercices
   useEffect(() => {
@@ -67,7 +66,7 @@ export default function AllExercisesPage() {
         setExercises(formatted);
       })
       .catch((err) => {
-        console.error("Erreur chargement exercices :", err);
+        console.error(t("errors.loadExercises"), err);
         setExercises([]);
       });
   }, [currentUserId]);
@@ -107,7 +106,7 @@ export default function AllExercisesPage() {
   }, [searchTerm]);
 
   const handleDeleteExo = async (exoId) => {
-    if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
+    if (!window.confirm(t("confirmDeleteExercise"))) return;
 
     try {
       await fetch(
@@ -119,8 +118,8 @@ export default function AllExercisesPage() {
       );
       setExercises((prev) => prev.filter((ex) => ex.id !== exoId));
     } catch (err) {
-      console.error("Erreur suppression :", err);
-      alert("Erreur lors de la suppression");
+      console.error(t("errorDeleteLog"), err);
+      alert(t("errorDelete"));
     }
   };
 

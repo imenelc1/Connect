@@ -9,8 +9,8 @@
     "hard": "Hard"
   },
   "categorie":{
-    "code": "code",
-    "question_cours": "course questions"
+    "code": "Code",
+    "question_cours": "Course's question"
   },
   "addExerciseButton": "+ Add Exercise",
   "modal": {
@@ -35,14 +35,30 @@
     "categoryPlaceholder": "Select category",
     "difficulty": "Difficulty",
     "visibilite": "visibilite",
-    "visibiliteLabel": "Visible to students "
+    "visibiliteLabel": "Visible to students ",
+    "statement": "Statement",
+    "author": "Author",
+    "level": "Level",
+    "visibility": "Visibility",
+    "course": "Course",
+    "maxAttempts": "Maximum attempts"
   },
   "errors": {
     "fetchExercises": "Error fetching exercises.",
     "createExercise": "Error creating exercise.",
     "editExercise": "Error updating exercise.",
     "deleteExercise": "Error deleting exercise.",
-  "invalidData": "Exercises data is not an array:"
+  "invalidData": "Exercises data is not an array:",
+  "loadCourses": "Error loading courses",
+  "updateExercise": "Error updating exercise"
    
+  },
+  "success": {
+  "updateExercise": "Exercise updated successfully!"
+},
+  "viewModal": {
+    "title": "View Exercise",
+    "close": "Close"
   }
+
 }
