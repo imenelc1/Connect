@@ -10,9 +10,9 @@ import ModernDropdown from "./ModernDropdown";
 export default function QuizSettings({ quizData, onQuizChange, courses }) {
   const { t } = useTranslation("createQuiz"); //traduction
 
-const handleChange = (field, value) => {
-  onQuizChange(field, value);  // juste passer la valeur, ne pas utiliser une fonction ici
-};
+  const handleChange = (field, value) => {
+    onQuizChange(field, value);  // juste passer la valeur, ne pas utiliser une fonction ici
+  };
 
 
   //niveaux du quiz
@@ -39,7 +39,7 @@ const handleChange = (field, value) => {
           <input
             value={quizData.title || ""}
             onChange={(e) => handleChange("title", e.target.value)}
-             className="shadow-md rounded-md px-3 py-2 outline-none"
+            className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -50,25 +50,25 @@ const handleChange = (field, value) => {
             value={quizData.description || ""}
             onChange={(e) => handleChange("description", e.target.value)}
             rows={3}
-             className="shadow-md rounded-md px-3 py-2 outline-none"
+            className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
         {/* COURS */}
         <div className="flex flex-col gap-2">
           <label>{t("selectCourse")}</label>
-        
-         <ModernDropdown
-  value={quizData.courseId || ""}
-  onChange={(val) => handleChange("courseId", val)}
-  options={[
-    { value: "", label: t("chooseCourse") },
-    ...myCourses.map((course) => ({
-      value: course.id,
-      label: course.title,
-    })),
-  ]}
-/>
+
+          <ModernDropdown
+            value={quizData.courseId || ""}
+            onChange={(val) => handleChange("courseId", val)}
+            options={[
+              { value: "", label: t("chooseCourse") },
+              ...myCourses.map((course) => ({
+                value: course.id,
+                label: course.title,
+              })),
+            ]}
+          />
 
         </div>
 
@@ -89,51 +89,58 @@ const handleChange = (field, value) => {
         <div className="flex flex-col gap-2">
           <label>{t("quizLevel")}</label>
           <ModernDropdown
-  value={quizData.level || ""}
-  onChange={(val) => handleChange("level", val)}
-  options={[
-    { value: "", label: t("selectLevel") },
-    ...levels.map((lvl) => ({
-      value: lvl.key,
-      label: lvl.label,
-    })),
-  ]}
-/>
+            value={quizData.level || ""}
+            onChange={(val) => handleChange("level", val)}
+            options={[
+              { value: "", label: t("selectLevel") },
+              ...levels.map((lvl) => ({
+                value: lvl.key,
+                label: lvl.label,
+              })),
+            ]}
+          />
 
 
-          
+
         </div>
-{/*score minimum*/}
-<div className="flex flex-col gap-2">
-  <label className="text-sm font-medium">{t("scoreMinimum")}</label>
-  <input
-    type="number"
-    min={0}
-    max={100}
-    value={quizData.passingScore || 0} // valeur contrôlée
-    onChange={(e) =>
-      onQuizChange("passingScore", parseInt(e.target.value) || 0)
-    }
-    className="w-full  shadow-md text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
-    
-  />
-</div>
-
-        {/* nombre max de tentatives */}
+        {/*score minimum*/}
         <div className="flex flex-col gap-2">
-          <label>{t("maxAttempts")}</label>
+          <label className="text-sm font-medium">{t("scoreMinimum")}</label>
           <input
             type="number"
             min={0}
-            value={quizData.maxAttempts || 0}
+            max={100}
+            value={quizData.passingScore || 0} // valeur contrôlée
             onChange={(e) =>
-              handleChange("maxAttempts", parseInt(e.target.value) || 0)
+              onQuizChange("passingScore", parseInt(e.target.value) || 0)
             }
-             className="shadow-md rounded-md px-3 py-2 outline-none"
+            className="w-full  shadow-md text-sm px-3 py-2 rounded-xl border focus:ring-2 focus:ring-primary/40 outline-none transition text-black"
+
           />
         </div>
 
-         {/* duree  entre deux tentative */}
+        {/* nombre max de tentatives */}
+        <div className="flex flex-col gap-1">
+          <label>{t("maxAttempts")}</label>
+
+          <input
+            type="number"
+            min={0}
+            value={quizData.maxAttempts}
+            onChange={(e) =>
+              handleChange("maxAttempts", parseInt(e.target.value) || 0)
+            }
+            className="shadow-md rounded-md px-3 py-2 outline-none"
+          />
+
+          {/* 👇 TEXTE EXPLICATIF */}
+          <p className="text-xs text-gray-500 italic">
+            {t("maxAttemptsHint")}
+          </p>
+        </div>
+
+
+        {/* duree  entre deux tentative */}
         <div className="flex flex-col gap-2">
           <label>{t("delais_entre_tentative")}</label>
           <input
@@ -144,7 +151,7 @@ const handleChange = (field, value) => {
               handleChange("delais_entre_tentative", parseInt(e.target.value) || 0)
 
             }
-             className="shadow-md rounded-md px-3 py-2 outline-none"
+            className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         </div>
 
@@ -157,7 +164,7 @@ const handleChange = (field, value) => {
             onChange={(e) =>
               handleChange("durationEnabled", e.target.checked)
             }
-            
+
           />
           <label>{t("enableDuration")}</label>
         </div>
@@ -171,7 +178,7 @@ const handleChange = (field, value) => {
             onChange={(e) =>
               handleChange("duration", parseInt(e.target.value) || 0)
             }
-             className="shadow-md rounded-md px-3 py-2 outline-none"
+            className="shadow-md rounded-md px-3 py-2 outline-none"
           />
         )}
       </div>

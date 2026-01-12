@@ -50,6 +50,8 @@
   "backMenu": "Retour au menu",
   "unlimited": "Illimité",
   "publishQuiz": "Publier le quiz",
+  "unlimitedAttempts": "Tentatives illimitées",
+  "maxAttemptsHint": "0 signifie tentatives illimitées",
   "errors": {
     "quizNotFound": "Quiz non trouvé",
     "loadCourses": "Erreur de chargement des cours",

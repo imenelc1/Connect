@@ -49,6 +49,8 @@
   "loading": "Loading...",
   "backMenu": "Back to menu",
   "unlimited": "Unlimited",
+  "unlimitedAttempts": "Unlimited attempts",
+  "maxAttemptsHint": "0 means unlimited attempts",
   "publishQuiz": "Publish Quiz",
   "errors": {
     "quizNotFound": "Quiz not found",

@@ -493,8 +493,14 @@ export default function CreateQuiz() {
                 </div>
 
                 <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-green text-white text-xs md:text-sm">
-                  <span>{quizData.maxAttempts || t("unlimited")} {t("maxAttempts")}</span>
+                  <span>
+                    {quizData.maxAttempts === 0
+                      ? t("unlimitedAttempts")
+                      : `${quizData.maxAttempts} ${t("maxAttempts")}`
+                    }
+                  </span>
                 </div>
+
 
                 <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
                   <span>{quizData.passingScore || 0} {t("scoreMinimum")}</span>
