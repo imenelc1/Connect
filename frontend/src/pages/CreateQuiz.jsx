@@ -1,24 +1,32 @@
+// React & Router
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/common/Navbar"; // Navbar responsive
+
+// UI Components
+import Navbar from "../components/common/Navbar";
 import QuizSettings from "../components/common/QuizSettings";
 import QuizSummary from "../components/common/QuizSummary";
 import QuestionForm from "../components/common/QuestionForm";
-import SaveDraftButton from "../components/common/SaveDraftButton";
 import PublishQuizButton from "../components/common/PublishQuizButton";
-import Logo from "../components/common/LogoComponent";
-import { useTranslation } from "react-i18next";
-import { Globe, FileText, Activity } from "lucide-react";
-import ThemeContext from "../context/ThemeContext";
-import ThemeButton from "../components/common/ThemeButton";
-import { getCurrentUserId } from "../hooks/useAuth";
-import api from "../services/courseService"; // Make sure your API helper is here
+import Topbar from "../components/common/TopBar";
 import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
-import Topbar from "../components/common/TopBar";
+
+// Context & Hooks
+import ThemeContext from "../context/ThemeContext";
+import { getCurrentUserId } from "../hooks/useAuth";
+
+// Services
+import api from "../services/courseService";
+
+// Utils & Libs
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
+
+// Icons
+import { FileText, Activity } from "lucide-react";
 import { FaClock, FaMedal, FaStar } from "react-icons/fa";
-import { toast } from "react-toastify";
+
 
 
 
@@ -27,6 +35,9 @@ export default function CreateQuiz() {
 
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("createQuiz");
+  /* ============================
+   STATE & CONFIGURATION
+============================ */
   const [activeStep, setActiveStep] = useState(1);
   const { toggleDarkMode } = useContext(ThemeContext);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -43,6 +54,12 @@ export default function CreateQuiz() {
     { label: t("info"), icon: FileText },
     { label: t("preview"), icon: Activity },
   ];
+
+  /* ============================
+   QUIZ DATA MODEL
+   Central state for quiz creation
+============================ */
+
   const [quizData, setQuizData] = useState({
     title: "",
     description: "",
@@ -126,7 +143,11 @@ export default function CreateQuiz() {
   const totalQuestions = quizData.questions.length;
 
 
-  /*save exercice comme step 1*/
+  /* ============================
+   API – STEP 1
+   Create exercice (quiz container)
+============================ */
+
   const handleSaveStep1 = async () => {
     const token = localStorage.getItem("token");
     const currentUserId = getCurrentUserId();
@@ -138,7 +159,6 @@ export default function CreateQuiz() {
       return null;
     }
 
-    // Vérification minimale
     if (
       !quizData.title ||
       !quizData.description ||
@@ -175,7 +195,7 @@ export default function CreateQuiz() {
       console.log(t("success.exerciseCreated", { id: exerciceId }));
 
 
-      return exerciceId; // IMPORTANT pour step 2
+      return exerciceId;
 
     } catch (error) {
       console.error(
@@ -186,16 +206,14 @@ export default function CreateQuiz() {
       toast.error(t("errors.exerciseSave"));
     }
   };
-  /*step 2 creation quiz a partir de exo */
+  /* ============================
+    API – STEP 2
+    Create quiz linked to exercice
+ ============================ */
   const handleSaveStep2 = async (exerciceIdParam) => {
     const token = localStorage.getItem("token");
-    const idToUse = exerciceIdParam || exerciceId; // fallback si param non fourni
+    const idToUse = exerciceIdParam || exerciceId;
 
-    /*if (!token || !idToUse) {
-      alert("Exercice non trouvé. Veuillez créer l'exercice d'abord.");
-      return null;
-    }
-  */
     try {
       const response = await api.post(
         "/quiz/",
@@ -230,31 +248,28 @@ export default function CreateQuiz() {
     }
   };
 
-  /* step 3 les questions et option*/
+  /* ============================
+    API – STEP 3
+    Create questions & options
+ ============================ */
   const handleSaveStep3 = async (idQuiz) => {
     const token = localStorage.getItem("token");
-    /*if (!token || !exerciceId) {
-      alert("Exercice non trouvé. Veuillez créer l'exercice et le quiz d'abord.");
-      return null;
-    }*/
 
     try {
       for (const question of quizData.questions) {
-        // 1️⃣ Créer la question
         const questionRes = await api.post(
           "/quiz/Question/",
           {
-            texte_qst: question.text,        // texte de la question
+            texte_qst: question.text,
             reponse_correcte: question.answers.find(a => a.isCorrect)?.text || "",
             score: question.points || 1,
-            exercice: idQuiz,            // FK vers Exercice
+            exercice: idQuiz,
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
         const questionId = questionRes.data.id_qst;
 
-        // 2️⃣ Créer les options
         for (const answer of question.answers) {
           await api.post(
             "/quiz/Option/",
@@ -278,22 +293,63 @@ export default function CreateQuiz() {
       return false;
     }
   };
+  /* ============================
+     VALIDATION
+     Ensures quiz integrity before preview/publish
+  ============================ */
+  const validateQuiz = () => {
+    if (
+      !quizData.title.trim() ||
+      !quizData.description.trim() ||
+      !quizData.level ||
+      !quizData.courseId
+    ) {
+      toast.error(t("errors.requiredFields"));
+      return false;
+    }
 
+    for (let i = 0; i < quizData.questions.length; i++) {
+      const q = quizData.questions[i];
 
-  /* tester save quiz */
+      if (!q.text.trim()) {
+        toast.error(t("errors.questionTextRequired", { index: i + 1 }));
+        return false;
+      }
+
+      const hasCorrect = q.answers.some(a => a.isCorrect);
+      if (!hasCorrect) {
+        toast.error(t("errors.correctAnswerRequired", { index: i + 1 }));
+        return false;
+      }
+
+      for (let j = 0; j < q.answers.length; j++) {
+        if (!q.answers[j].text.trim()) {
+          toast.error(
+            t("errors.answerTextRequired", { qIndex: i + 1, aIndex: j + 1 })
+          );
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  /* ============================
+   PUBLISH WORKFLOW
+   Step 1 → Step 2 → Step 3
+============================ */
   const handlePublishQuiz = async () => {
-    // Step 1 : créer l'exercice
+    if (!validateQuiz()) return;
+
     const exoId = await handleSaveStep1();
     if (!exoId) return;
 
-    // Step 2 : créer le quiz
     const quizId = await handleSaveStep2(exoId);
-    // if (!quizId) return;
+    if (!quizId) return;
 
-    // Step 3 : créer les questions et options
     await handleSaveStep3(exoId);
 
-    // Rediriger vers liste des quiz ou page de confirmation
     navigate("/all-quizzes");
   };
 
@@ -393,7 +449,14 @@ export default function CreateQuiz() {
 
                 {/* ACTION BUTTONS */}
                 <div className="mt-6 flex flex-col sm:flex-row gap-4 sm:justify-between">
-                  <PublishQuizButton onClick={() => setActiveStep(2)} />
+                  <PublishQuizButton
+                    onClick={() => {
+                      if (validateQuiz()) {
+                        setActiveStep(2);
+                      }
+                    }}
+                  />
+
                 </div>
 
               </div>
@@ -430,7 +493,7 @@ export default function CreateQuiz() {
 
                 <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-pink text-white text-xs md:text-sm">
                   <FaStar className="w-3 h-3 md:w-4 md:h-4" />
-                 <span>{t(`levels.${quizData.level}`) || t("level")}</span>
+                  <span>{t(`levels.${quizData.level}`) || t("level")}</span>
                 </div>
 
                 <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-green text-white text-xs md:text-sm">

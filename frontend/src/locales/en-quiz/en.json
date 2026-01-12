@@ -56,6 +56,9 @@
     "notLoggedIn": "User not logged in",
     "requiredFields": "Please fill in all required fields",
     "exerciseCreate": "Exercise creation error: {{message}}",
+    "questionTextRequired": "Question {{index}} is empty",
+    "correctAnswerRequired": "Please select a correct answer for question {{index}}",
+    "answerTextRequired": "Answer {{aIndex}} is empty in question {{qIndex}}",
     "exerciseSave": "Error saving the exercise",
     "quizCreation": "❌ Quiz creation error: {{details}}",
     "quizCreateToast": "Error creating the quiz",
@@ -77,7 +80,6 @@
     "quizCreatedSuccess": "Quiz successfully created!",
     "quizUpdatedSuccess": "✅ Quiz updated successfully!",
     "draftSaved": "Draft saved"
-
   },
   "logs": {
     "quizApiResponse": "🔥 QUIZ API RESPONSE",
