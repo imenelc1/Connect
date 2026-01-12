@@ -1,6 +1,8 @@
 import ModernDropdown from "../common/ModernDropdown";
+import { useTranslation } from "react-i18next";
 
 export default function MyQuizzesSelect({ items, selectedItemId, onChange, existingItems }) {
+    const { t, i18n } = useTranslation("CourseDetails");
   // Récupérer les IDs des quizzes déjà dans l'espace
   const existingIds = new Set(existingItems.map(q => q.id));
 
@@ -8,7 +10,7 @@ export default function MyQuizzesSelect({ items, selectedItemId, onChange, exist
     .filter(q => q && q.id && !existingIds.has(q.id))  // ignorer les undefined et ceux déjà ajoutés
     .map(q => ({
       value: q.id,
-      label: q.title?.trim() || "Sans titre"
+      label: q.title?.trim() || t("noTitle")
     }));
 
   return (
@@ -16,7 +18,7 @@ export default function MyQuizzesSelect({ items, selectedItemId, onChange, exist
       value={selectedItemId}
       onChange={onChange}
       options={options}
-      placeholder="Sélectionnez un quiz"
+      placeholder={t("selectQuizPlaceholder")}
       style={{ width: "450px" }}
     />
   );

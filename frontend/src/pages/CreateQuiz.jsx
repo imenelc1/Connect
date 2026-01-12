@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/common/NavBar"; // Navbar responsive
+import Navbar from "../components/common/Navbar"; // Navbar responsive
 import QuizSettings from "../components/common/QuizSettings";
 import QuizSummary from "../components/common/QuizSummary";
 import QuestionForm from "../components/common/QuestionForm";

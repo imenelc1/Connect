@@ -101,7 +101,10 @@ export default function CourseUpdate() {
 
         setSections(fetchedSections);
       } catch (err) {
-        console.error("Erreur chargement cours :", err.response?.data || err);
+        console.error(
+          `${t("course.error_loading_course")} :`,
+          err.response?.data?.message || err.message || err
+        );
       }
     };
 
@@ -155,10 +158,10 @@ export default function CourseUpdate() {
   };
 
   const addLessonToSection = (sectionId) => {
-  setSections((prev) =>
-    prev.map((s) =>
-      s.id === sectionId
-        ? {
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
             ...s,
             lessons: [
               ...s.lessons,
@@ -170,10 +173,10 @@ export default function CourseUpdate() {
               },
             ],
           }
-        : s
-    )
-  );
-};
+          : s
+      )
+    );
+  };
 
 
   const updateLessonTitle = (sectionId, lessonId, newTitle) => {
@@ -208,7 +211,7 @@ export default function CourseUpdate() {
 
   const removeSection = async (id) => {
 
-    const confirmDelete = window.confirm("Etes-vous sûr de vouloir supprimer cette section?");
+    const confirmDelete = window.confirm(t("course.confirm_delete_section"));
     if (!confirmDelete) return;
     const token = localStorage.getItem("token");
 
@@ -221,16 +224,20 @@ export default function CourseUpdate() {
       // Puis mettre à jour le state
       setSections((prev) => prev.filter((s) => s.id !== id));
 
-      toast.success("Section supprimée avec succès !");
+      toast.success(t("course.section_deleted_success"));
     } catch (err) {
-      console.error("Erreur suppression section :", err.response?.data || err.message);
-      toast.error("Impossible de supprimer la section.");
+      console.error(
+        `${t("course.error_delete_section")} :`,
+        err.response?.data?.message || err.message || err
+      );
+      toast.error(t("course.error_cannot_delete_section"));
+
     }
   };
 
 
   const removeLesson = async (sectionId, lessonId) => {
-    const confirmDelete = window.confirm("Tu es sûr de supprimer cette leçon?");
+    const confirmDelete = window.confirm(t("course.confirm_delete_lesson"));
     if (!confirmDelete) return;
     const token = localStorage.getItem("token");
 
@@ -249,10 +256,13 @@ export default function CourseUpdate() {
         )
       );
 
-      toast.success("Leçon supprimée avec succès !");
+      toast.success(t("course.lesson_deleted_success"));
     } catch (err) {
-      console.error("Erreur suppression leçon :", err.response?.data || err.message);
-      toast.error("Impossible de supprimer la leçon.");
+      console.error(
+        `${t("course.error_delete_lesson")} :`,
+        err.response?.data?.message || err.message || err
+      );
+      toast.error(t("course.error_cannot_delete_lesson"));
     }
   };
 
@@ -349,54 +359,57 @@ export default function CourseUpdate() {
 
 
           if (lesson.id && !isTempId(lesson.id)) {
-  // 🔵 Leçon EXISTANTE → UPDATE
-  await api.put(`courses/Lesson/${lesson.id}/`, formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-} else {
-  // 🟢 Nouvelle leçon → CREATE
-  const resLesson = await api.post("courses/createLesson/", formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  lesson.id = resLesson.data.id_lecon; // remplace l’id temporaire
-}
+            // 🔵 Leçon EXISTANTE → UPDATE
+            await api.put(`courses/Lesson/${lesson.id}/`, formData, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          } else {
+            // 🟢 Nouvelle leçon → CREATE
+            const resLesson = await api.post("courses/createLesson/", formData, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            lesson.id = resLesson.data.id_lecon; // remplace l’id temporaire
+          }
 
 
         }
 
       }
 
-      toast.success("Cours mis à jour avec succès !");
+      toast.success(t("course.course_updated_success"));
       setActiveStep(3)
     } catch (err) {
-      console.error("Erreur mise à jour :", err.response?.data || err.message);
-      toast.error("Erreur lors de la mise à jour du cours.");
+      console.error(
+        `${t("course.error_update_course")} :`,
+        err.response?.data?.message || err.message || err
+      );
+      toast.error(t("course.error_cannot_update_course"));
     }
   };
 
 
   const updateLessonType = (sectionId, lessonId, newType) => {
-  setSections((prev) =>
-    prev.map((s) =>
-      s.id === sectionId
-        ? {
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
             ...s,
             lessons: s.lessons.map((l) =>
               l.id === lessonId
                 ? {
-                    ...l,
-                    type: newType,
-                    content: newType !== "image" ? l.content || "" : "",
-                    imageFile: newType === "image" ? l.imageFile : null,
-                    preview: newType === "image" ? l.preview : null,
-                  }
+                  ...l,
+                  type: newType,
+                  content: newType !== "image" ? l.content || "" : "",
+                  imageFile: newType === "image" ? l.imageFile : null,
+                  preview: newType === "image" ? l.preview : null,
+                }
                 : l
             ),
           }
-        : s
-    )
-  );
-};
+          : s
+      )
+    );
+  };
 
 
 
@@ -407,32 +420,32 @@ export default function CourseUpdate() {
 
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-          {/* Sidebar */}
-          <div>
-            <Navbar />
-          </div>
-    
-          {/* Main Content */}
-          <main className={`
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+
+      {/* Main Content */}
+      <main className={`
             flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen
             ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
           `}>
-            {/* User controls */}
-            <div className="flex justify-end items-center gap-4">
-              <UserCircle
-                initials={initials}
-                onToggleTheme={toggleDarkMode}
-                onChangeLang={(lang) => i18n.changeLanguage(lang)}
-              />
-            </div>
-    
-            {/* Topbar avec étapes */}
-            <Topbar
-              steps={courseSteps}
-              activeStep={activeStep}
-              setActiveStep={setActiveStep}
-              className="flex justify-between"
-            />
+        {/* User controls */}
+        <div className="flex justify-end items-center gap-4">
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
+        </div>
+
+        {/* Topbar avec étapes */}
+        <Topbar
+          steps={courseSteps}
+          activeStep={activeStep}
+          setActiveStep={setActiveStep}
+          className="flex justify-between"
+        />
         {/* STEP 1 */}
         {activeStep === 1 && (
           <div className="w-full bg-grad-2 rounded-2xl shadow-md p-6 lg:p-10">
@@ -682,3 +695,4 @@ export default function CourseUpdate() {
     </div>
   );
 }
+

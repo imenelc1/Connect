@@ -6,7 +6,11 @@
   "student_fetch_error": "Error fetching student:",
   "bot_greeting": "Hello {{name}} 👋\nI'm your Coach C.\nTell me what's blocking you.",
   "student": "student",
-  "input_placeholder": "Type your question.."
-  
-
+  "input_placeholder": "Type your question..",
+  "chat": {
+    "exercise_greeting": "Hello {{name}} 👋\nI see you're working on the exercise: **{{title}}**.\nTell me what you don’t understand and I’ll help you step by step.",
+    "course_greeting": "Hello {{name}} 👋\nI'm your course assistant for this course.",
+    "generic_greeting": "Hello {{name}} 👋\nI'm your AI assistant.",
+    "exercise_in_progress": "in progress"
+  }
 }

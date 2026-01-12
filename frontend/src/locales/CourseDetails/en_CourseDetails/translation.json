@@ -9,7 +9,7 @@
   },
   "coursesTitle": "Courses",
   "addCourse": "Add Course",
-  "addExo": "Add Exrcice",
+  "addExo": "Add Exercise",
   "addQuiz": "Add Quiz",
 
   "createdOn": "Created on",
@@ -23,5 +23,36 @@
   "quizzesTitle": "Quizzes",
 
   "selectCourseLabel": "Validate",
-  "selectCoursePlaceholder": "Select a course"
+  "selectCoursePlaceholder": "Select a course",
+  "defaultSpaceName": "My space",
+  "loadSpaceError": "Failed to load space details",
+  "unknownAuthor": "Unknown",
+  "noTitle": "Untitled",
+  "fetchItemsError": "Failed to fetch my items",
+  "addItemError": "Failed to add item",
+  "draft": "draft",
+"submitted": "submitted",
+"attempts": "Attempts",
+"fetchExercisesError": "Failed to fetch exercises:",
+ "addItem": "Add Item",
+  "selectItemToAdd": "Select the item to add",
+  "addButton": "Add",
+  "selectItemLabel": "Choose an item",
+  "enableAI_course": "Enable AI assistant for this course",
+  "enableAI_exercise": "Enable AI assistant for this exercise",
+  "selectQuizPlaceholder": "Select a quiz",
+  "selectExercisePlaceholder": "Select an exercise",
+  "exercisesTitle": "Exercises",
+"addedSuccessfully": "Added successfully!"
+
+  
+
+
+
+
+
+
+
+
+
 }

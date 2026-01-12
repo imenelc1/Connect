@@ -95,6 +95,8 @@ def notify_prof_on_course_update(sender, instance, created, **kwargs):
     extra_data={}   #vide = sûr
 )
 
+    # Récupère l'admin courant depuis le middleware
+      # pas d'admin connecté → pas de notif
 
 # -----------------------------
 # SIGNAL DELETE

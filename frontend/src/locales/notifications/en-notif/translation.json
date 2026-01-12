@@ -1,9 +1,8 @@
 {
-
     "title": "Notifications",
     "aria": "Notifications ({{count}} unread)",
-    "unread": "{{count}} unread",
-    "markAll": "Mark all as read",
+    "aria_plural": "Notifications ({{count}} unread)",
+    "markAll": "read all",
     "markAllRead": "Mark all as read",
     "refresh": "Refresh",
     "loading": "Loading notifications...",
@@ -16,8 +15,47 @@
     "minutesAgo": "{{count}} min ago",
     "hoursAgo": "{{count}} h ago",
     "daysAgo": "{{count}} d ago",
-    "errorLoading":"Error loading notifications",
-    "tryAgain":"Try again",
-    "allRead": "All read"
-  
+    "errorLoading": "Error loading notifications",
+    "tryAgain": "Try again",
+    "allRead": "All read",
+    "label": "Filter by:",
+    "loadNotifications": "Unable to load notifications. Please check your connection.",
+    "footer": {
+        "count": "Showing {{count}} notification",
+        "count_plural": "Showing {{count}} notifications",
+        "filtered": "(filtered)",
+        "display": "Showing {{shown}} of {{total}} notification",
+        "display_plural": "Showing {{shown}} of {{total}} notifications",
+        "viewAll": "View all →"
+    },
+    "actions": {
+        "markAsRead": "Mark as read",
+        "delete": "Delete",
+        "deleteAll": "Delete all"
+    },
+    "emptyF": {
+        "title": "No notifications at the moment",
+        "subtitle": "You will see new activities here",
+        "filtered": "No notifications match the filter criteria",
+        "filtered_hint": "Try changing your filter criteria"
+    },
+    "header": {
+        "title": "All notifications",
+        "unread": "{{count}} unread",
+        "unread_plural": "{{count}} unread",
+        "total": "out of {{total}} notifications",
+        "total_plural": "out of {{total}} notifications"
+    },
+    "filter": {
+        "all": "All",
+        "unread": "Unread",
+        "forum": "Forum",
+        "cours": "Course",
+        "exercice": "Exercise",
+        "classement": "Ranking",
+        "progress": "Progress",
+        "courses": "Courses",
+        "quiz": "Quiz",
+        "space": "Space"
+    }
 }
