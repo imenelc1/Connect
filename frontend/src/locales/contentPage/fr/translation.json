@@ -28,5 +28,12 @@
   "completed": "{{value}}% terminé",
   "maxAttemptsReached": "Nombre maximum de tentatives atteint",
   "retryIn": "Réessayez dans {{minutes}} min",
-  "remainingAttempts": "Tentatives restantes : {{count}}"
+  "remainingAttempts": "Tentatives restantes : {{count}}",
+    "unknownName": "Nom inconnu",
+    
+    "errors": {
+    "loadCourses": "Erreur de chargement des cours",
+    "deleteCourse": "Erreur lors de la suppression"
+  },
+  "confirmDeleteCourse": "Tu es sûr de supprimer ce cours ?"
 }

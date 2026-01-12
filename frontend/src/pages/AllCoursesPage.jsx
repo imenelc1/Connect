@@ -28,7 +28,7 @@ export default function AllCoursesPage() {
   const [filterLevel, setFilterLevel] = useState("ALL");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const navigate = useNavigate();
   const { t } = useTranslation("contentPage");
@@ -45,7 +45,7 @@ export default function AllCoursesPage() {
         const data = await progressionService.getCoursesProgress();
 
         const formatted = data.map((c) => {
-          const nom = c.utilisateur_name || "Nom Inconnu";
+          const nom = c.utilisateur_name || t("unknownName");
 
           // ✅ Initiales Nom + Prénom
           const initials = nom
@@ -75,7 +75,8 @@ export default function AllCoursesPage() {
 
         setCourses(formatted);
       } catch (err) {
-        console.error("Erreur chargement cours :", err);
+        console.error(t("errors.loadCourses"), err);
+
       }
     };
 
@@ -84,7 +85,8 @@ export default function AllCoursesPage() {
 
   // Handle delete
   const handleDeleteCourse = async (courseId) => {
-    if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
+    if (!window.confirm(t("confirmDeleteCourse"))) return;
+
     try {
       await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
         method: "DELETE",
@@ -92,8 +94,9 @@ export default function AllCoursesPage() {
       });
       setCourses((prev) => prev.filter((c) => c.id !== courseId));
     } catch (err) {
-      console.error("Erreur suppression :", err);
-      alert("Erreur lors de la suppression");
+      console.error(t("errors.deleteCourse"), err);
+      alert(t("errors.deleteCourse"));
+
     }
   };
 
@@ -129,21 +132,21 @@ export default function AllCoursesPage() {
 
   return (
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-                  {/* Sidebar */}
-                  <div>
-                    <Navbar />
-                  </div>
-     
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+
       <main className={`
         flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
-                <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+        <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
           {/* Titre */}
           <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
             {t("coursesTitle")}
           </h1>
-        
+
           {/* Notifications + User */}
           <div className="flex items-center gap-3">
             <NotificationBell />
@@ -154,7 +157,7 @@ export default function AllCoursesPage() {
             />
           </div>
         </header>
-       
+
 
         <ContentSearchBar value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
 
@@ -192,10 +195,10 @@ export default function AllCoursesPage() {
             >
               {userRole === "etudiant" && (
                 <Button
-                
+
                   variant="courseStart"
                   className="mt-2 w-full"
-                  
+
                   onClick={() => {
                     if (course.action === "start") {
                       navigate(`/course/${course.id}/lesson/first`);

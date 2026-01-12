@@ -41,7 +41,10 @@
   "enableAI_course": "Enable AI assistant for this course",
   "enableAI_exercise": "Enable AI assistant for this exercise",
   "selectQuizPlaceholder": "Select a quiz",
-  "selectExercisePlaceholder": "Select an exercise"
+  "selectExercisePlaceholder": "Select an exercise",
+  "exercisesTitle": "Exercises",
+"addedSuccessfully": "Added successfully!"
+
   
 
 

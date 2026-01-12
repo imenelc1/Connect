@@ -387,4 +387,5 @@ export default function CourseContent({
       </div>
     </div>
   );
+  
 }

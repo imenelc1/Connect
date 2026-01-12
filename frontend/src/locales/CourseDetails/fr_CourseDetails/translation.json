@@ -42,7 +42,8 @@
   "enableAI_course": "Activer l’assistant IA pour ce cours",
   "enableAI_exercise": "Activer l’assistant IA pour cet exercice",
   "selectQuizPlaceholder": "Sélectionnez un quiz",
-  "selectExercisePlaceholder": "Sélectionnez un exercice"
+  "selectExercisePlaceholder": "Sélectionnez un exercice",
+   "addedSuccessfully": "Ajout effectué avec succès !"
 
 
 

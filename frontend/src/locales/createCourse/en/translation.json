@@ -51,7 +51,18 @@
     "error_cannot_delete_lesson": "Unable to delete the lesson.",
     "course_updated_success": "Course updated successfully!",
     "error_update_course": "Error updating course",
-    "error_cannot_update_course": "Error updating the course."
+    "error_cannot_update_course": "Error updating the course.",
+    "error_create_course": "Error creating course:",
+"error_create_course_toast": "Error while creating the course",
+"untitled_lessons": "Lesson {{number}}",
+"sections_lessons_saved": "Sections and lessons saved!",
+"error_create_sections_lessons": "Error creating sections/lessons:",
+"error_save_sections_lessons": "Error while saving.",
+"error_save_complete": "Erreur lors de l'enregistrement complet :"
+
+
+
+
   },
 
   "select": {
@@ -61,6 +72,15 @@
     "month": "Month",
     "Beginner": "Beginner",
     "Intermediate": "Intermediate",
-    "Advanced": "Advanced"
-  }
+    "Advanced": "Advanced",
+     "seconds": "Seconds",
+       "hours": "Hours"
+       
+  },
+
+  "auth": {
+  "checking": "Checking authentication...",
+  "not_authenticated": "Not authenticated..."
+}
+
 }
