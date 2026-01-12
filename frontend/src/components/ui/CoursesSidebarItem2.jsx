@@ -1,6 +1,8 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export default function CoursesSidebarItem2({
+  
   sections,
   currentSectionIndex,
   setCurrentSectionIndex
@@ -10,6 +12,7 @@ export default function CoursesSidebarItem2({
   const selectSection = (index) => {
     setCurrentSectionIndex(index);
   };
+   const {t} = useTranslation("courses");
 
   return (
     <aside className="
@@ -37,7 +40,7 @@ export default function CoursesSidebarItem2({
             }`}
           >
             <h2 className="text-[15px] font-semibold">
-              {section.title || "Titre manquant"}
+              {section.title ||  t("titleMissing")}
             </h2>
           </div>
         );
