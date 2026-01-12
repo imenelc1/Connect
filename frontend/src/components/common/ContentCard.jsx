@@ -20,22 +20,20 @@ const buttonStyles = {
   Intermédiaire: "bg-purple text-white",
   Avancé: "bg-pink text-white",
 };
-
 //couleur de cercle utilisateur selon le niveau
 const initialsBgMap = {
   Débutant: "bg-blue",
   Intermédiaire: "bg-purple",
   Avancé: "bg-pink",
 };
-
 //couleur de barre de progression selon le niveau
 const progressColorMap = {
   Débutant: "bg-blue",
   Intermédiaire: "bg-purple",
   Avancé: "bg-pink",
 };
-
 //mapping des niveaux
+
 const levelKeyMap = {
   Débutant: "beginner",
   Intermédiaire: "intermediate",
@@ -47,19 +45,17 @@ export default function ContentCard({
   course, //objet cours qui peut etre cours ou quiz ou exo
   role, //etudiant /enseignant
   showProgress, //progression
-  type, //type de contenu cours, exercice, quiz
+  type,
   className = "",
   onDelete, //suppression
 }) {
-  const { t } = useTranslation("contentPage"); //traduction
+  const { t } = useTranslation("contentPage");  //traduction
   const location = useLocation();
   const navigate = useNavigate();
   const [progress, setProgress] = useState(course?.progress ?? 0);
-
-  // pas d'object=> rien a afficher
+// pas d'object=> rien a afficher
   if (!course) return null;
-
-  //le type de la page selon le type des objets envoyé
+ //le type de la page selon le type des objets envoyé
   const pageType =
     type ||
     (location.pathname.includes("courses")
@@ -84,8 +80,7 @@ export default function ContentCard({
         ? t("checkExercise")
         : t("checkQuiz"),
   };
-
-  //commencer le contenu selon le type et role
+ //commencer le contenu selon le type et role
   const handleStart = () => {
     if (pageType === "exercise") {
       navigate(
@@ -101,8 +96,7 @@ export default function ContentCard({
       navigate(`/Seecourses/${course.id}`);
     }
   };
-
-  //reinitialiser la progression
+//reinitialiser la progression
   const handleRestart = async () => {
     try {
       await progressionService.resetCourseProgress(course.id);
@@ -118,10 +112,8 @@ export default function ContentCard({
       console.error(err);
     }
   };
-
   //voir la liste des exercices associé
   const seeExercises = () => navigate(`/ListeExercices/${course.id}`);
-
   //naviger vers la page de modification de contenu 
   const handleEdit = () => {
     navigate(
@@ -155,7 +147,6 @@ export default function ContentCard({
         <p className="text-grayc my-3 line-clamp-3 break-words">
           {course.description}
         </p>
-
         {/*auteur et duree */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -175,7 +166,6 @@ export default function ContentCard({
               : course.duration}
           </span>
         </div>
-
         {/* barre de progression pour la page exercice et cours */}
         {showProgress && pageType !== "quiz" && (
           <ContentProgress
@@ -316,7 +306,6 @@ export default function ContentCard({
             >
               {labels.check}
             </Button>
-            
             {/* pouvoir modifer ou supprimer l'objet si auteur=currentuser */}
             {course.isMine && (
               <>
