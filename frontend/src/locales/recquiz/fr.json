@@ -11,6 +11,9 @@
     "correctAnswer": "Bonne réponse",
   "backMenu": "Retour au menu",
   "reset": "Réinitialiser",
+  "loading": "Chargement...",
+  "noQuiz": "Quiz non trouvé",
+   "tryAgain": "Réessayez",
   "levels": {
     "beginner": "Débutant",
     "intermediate": "Intermédiaire",

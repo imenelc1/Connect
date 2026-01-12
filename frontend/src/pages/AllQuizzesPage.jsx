@@ -1,56 +1,56 @@
-  import React, { useEffect, useState, useContext, useMemo } from "react";
-  import { useParams, useLocation } from "react-router-dom";
+import React, { useEffect, useState, useContext, useMemo } from "react";
+import { useParams, useLocation } from "react-router-dom";
 
-  import Navbar from "../components/common/Navbar";
-  import { Plus, Bell } from "lucide-react";
-  import ContentCard from "../components/common/ContentCard";
-  import Button from "../components/common/Button";
-  import ContentFilters from "../components/common/ContentFilters";
-  import ContentSearchBar from "../components/common/ContentSearchBar";
-  import ThemeContext from "../context/ThemeContext";
-  import UserCircle from "../components/common/UserCircle";
-  import { useTranslation } from "react-i18next";
-  import NotificationBell from "../components/common/NotificationBell";
-  import { getCurrentUserId } from "../hooks/useAuth";
-  import { useNavigate } from "react-router-dom";
+import Navbar from "../components/common/Navbar";
+import { Plus, Bell } from "lucide-react";
+import ContentCard from "../components/common/ContentCard";
+import Button from "../components/common/Button";
+import ContentFilters from "../components/common/ContentFilters";
+import ContentSearchBar from "../components/common/ContentSearchBar";
+import ThemeContext from "../context/ThemeContext";
+import UserCircle from "../components/common/UserCircle";
+import { useTranslation } from "react-i18next";
+import NotificationBell from "../components/common/NotificationBell";
+import { getCurrentUserId } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
-  const gradientMap = {
-    Débutant: "bg-grad-2",
-    Intermédiaire: "bg-grad-3",
-    Avancé: "bg-grad-4",
+const gradientMap = {
+  Débutant: "bg-grad-2",
+  Intermédiaire: "bg-grad-3",
+  Avancé: "bg-grad-4",
+};
+
+export default function AllQuizzesPage() {
+  const token = localStorage.getItem("token");
+  const currentUserId = getCurrentUserId();
+  const navigate = useNavigate();
+  const { t } = useTranslation("contentPage");
+  const { toggleDarkMode } = useContext(ThemeContext);
+  const { coursId } = useParams(); // <--- récupère le cours si présent
+
+
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userRole = userData?.user?.role ?? userData?.role;
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
+
+  const [quizzes, setQuizzes] = useState([]);
+  const [tentativesByQuiz, setTentativesByQuiz] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterLevel, setFilterLevel] = useState("ALL");
+  const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  const sidebarWidth = sidebarCollapsed ? 60 : 240;
+  const getGridCols = () => {
+    if (windowWidth < 640) return 1;
+    if (windowWidth < 1024) return 2;
+    return 3;
   };
 
-  export default function AllQuizzesPage() {
-    const token = localStorage.getItem("token");
-    const currentUserId = getCurrentUserId();
-    const navigate = useNavigate();
-    const { t } = useTranslation("contentPage");
-    const { toggleDarkMode } = useContext(ThemeContext);
-    const { coursId } = useParams(); // <--- récupère le cours si présent
-
-
-    const userData = JSON.parse(localStorage.getItem("user"));
-    const userRole = userData?.user?.role ?? userData?.role;
-    const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
-
-    const [quizzes, setQuizzes] = useState([]);
-    const [tentativesByQuiz, setTentativesByQuiz] = useState({});
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filterLevel, setFilterLevel] = useState("ALL");
-    const [categoryFilter, setCategoryFilter] = useState("all"); // "mine" ou "all"
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-      const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-    const sidebarWidth = sidebarCollapsed ? 60 : 240;
-    const getGridCols = () => {
-      if (windowWidth < 640) return 1;
-      if (windowWidth < 1024) return 2;
-      return 3;
-    };
-
-   useEffect(() => {
+  useEffect(() => {
     const controller = new AbortController();
 
     const fetchQuizzes = async () => {
@@ -98,182 +98,182 @@
     return () => controller.abort();
   }, [searchTerm, currentUserId, coursId]);
 
-    // 🔹 Fetch tentatives pour chaque quiz affiché
-    useEffect(() => {
-      if (!currentUserId || quizzes.length === 0) return;
+  // 🔹 Fetch tentatives pour chaque quiz affiché
+  useEffect(() => {
+    if (!currentUserId || quizzes.length === 0) return;
 
-      const fetchTentatives = async () => {
-        try {
-          const results = {};
-          await Promise.all(
-            quizzes.map(async quiz => {
-              const res = await fetch(
-                `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${currentUserId}/`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-              const data = await res.json();
-              results[quiz.quizId] = data;
-            })
-          );
-          setTentativesByQuiz(results);
-        } catch (err) {
-          console.error("Erreur chargement tentatives :", err);
-        }
-      };
-
-      fetchTentatives();
-    }, [quizzes, currentUserId, token]);
-
-    // 🔹 Calcul quizzesWithAttempts
-    const quizzesWithAttempts = useMemo(() => {
-      return quizzes.map(quiz => {
-        const tentatives = tentativesByQuiz[quiz.quizId] || [];
-
-        let isBlocked = false;
-        let minutesRestantes = 0;
-        let tentativesRestantes = null;
-
-        if (quiz.nbMax_tentative > 0) {
-          tentativesRestantes = quiz.nbMax_tentative - tentatives.length;
-          if (tentativesRestantes <= 0) isBlocked = true;
-        }
-
-        if (!isBlocked && tentatives.length > 0 && quiz.delai_entre_tentatives) {
-          const last = tentatives[0];
-          if (last.date_fin) {
-            const lastEnd = new Date(last.date_fin);
-            const now = new Date();
-            const diffMs =
-              lastEnd.getTime() + quiz.delai_entre_tentatives * 60 * 1000 - now.getTime();
-            if (diffMs > 0) {
-              isBlocked = true;
-              minutesRestantes = Math.ceil(diffMs / 60000);
-            }
-          }
-        }
-
-        return { ...quiz, tentatives, isBlocked, minutesRestantes, tentativesRestantes };
-      });
-    }, [quizzes, tentativesByQuiz]);
-
-    // 🔹 Filtres et recherche finale (niveau + catégorie)
-    const filteredList = useMemo(() => {
-      let list =
-        filterLevel === "ALL"
-          ? quizzesWithAttempts
-          : quizzesWithAttempts.filter(q => q.level === filterLevel);
-
-      if (userRole === "enseignant" && categoryFilter === "mine") {
-        list = list.filter(q => q.isMine);
-      }
-      list = list.filter((q) => q.visible);
-      console.log({list});
-      return list;
-    }, [quizzesWithAttempts, filterLevel, categoryFilter, userRole]);
-
-    // 🔹 Delete quiz
-    const handleDeleteQuiz = async (exoId) => {
-      if (!window.confirm("Tu es sûr de supprimer cet exercice?")) return;
+    const fetchTentatives = async () => {
       try {
-        await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setQuizzes(prev => prev.filter(c => c.id !== exoId));
+        const results = {};
+        await Promise.all(
+          quizzes.map(async quiz => {
+            const res = await fetch(
+              `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${currentUserId}/`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const data = await res.json();
+            results[quiz.quizId] = data;
+          })
+        );
+        setTentativesByQuiz(results);
       } catch (err) {
-        console.error("Erreur suppression :", err);
-        alert("Erreur lors de la suppression");
+        console.error(t("errors.loadQuizAttempts"), err);
       }
     };
 
-    // 🔹 Sidebar & resize
-    useEffect(() => {
-      const handler = (e) => setSidebarCollapsed(e.detail);
-      window.addEventListener("sidebarChanged", handler);
-      return () => window.removeEventListener("sidebarChanged", handler);
-    }, []);
+    fetchTentatives();
+  }, [quizzes, currentUserId, token]);
 
-    useEffect(() => {
-      const resizeHandler = () => setWindowWidth(window.innerWidth);
-      window.addEventListener("resize", resizeHandler);
-      return () => window.removeEventListener("resize", resizeHandler);
-    }, []);
+  // 🔹 Calcul quizzesWithAttempts
+  const quizzesWithAttempts = useMemo(() => {
+    return quizzes.map(quiz => {
+      const tentatives = tentativesByQuiz[quiz.quizId] || [];
 
-    return (
-      <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-            {/* Sidebar */}
-            <div>
-              <Navbar />
-            </div>
-       
+      let isBlocked = false;
+      let minutesRestantes = 0;
+      let tentativesRestantes = null;
 
-         {/* Main content */}
+      if (quiz.nbMax_tentative > 0) {
+        tentativesRestantes = quiz.nbMax_tentative - tentatives.length;
+        if (tentativesRestantes <= 0) isBlocked = true;
+      }
+
+      if (!isBlocked && tentatives.length > 0 && quiz.delai_entre_tentatives) {
+        const last = tentatives[0];
+        if (last.date_fin) {
+          const lastEnd = new Date(last.date_fin);
+          const now = new Date();
+          const diffMs =
+            lastEnd.getTime() + quiz.delai_entre_tentatives * 60 * 1000 - now.getTime();
+          if (diffMs > 0) {
+            isBlocked = true;
+            minutesRestantes = Math.ceil(diffMs / 60000);
+          }
+        }
+      }
+
+      return { ...quiz, tentatives, isBlocked, minutesRestantes, tentativesRestantes };
+    });
+  }, [quizzes, tentativesByQuiz]);
+
+  // 🔹 Filtres et recherche finale (niveau + catégorie)
+  const filteredList = useMemo(() => {
+    let list =
+      filterLevel === "ALL"
+        ? quizzesWithAttempts
+        : quizzesWithAttempts.filter(q => q.level === filterLevel);
+
+    if (userRole === "enseignant" && categoryFilter === "mine") {
+      list = list.filter(q => q.isMine);
+    }
+    list = list.filter((q) => q.visible);
+    console.log({ list });
+    return list;
+  }, [quizzesWithAttempts, filterLevel, categoryFilter, userRole]);
+
+  // 🔹 Delete quiz
+  const handleDeleteQuiz = async (exoId) => {
+    if (!window.confirm(t("confirmDeleteExercise"))) return;
+    try {
+      await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setQuizzes(prev => prev.filter(c => c.id !== exoId));
+    } catch (err) {
+      console.error(t("errorDeleteLog"), err);
+      alert(t("errorDelete"));
+    }
+  };
+
+  // 🔹 Sidebar & resize
+  useEffect(() => {
+    const handler = (e) => setSidebarCollapsed(e.detail);
+    window.addEventListener("sidebarChanged", handler);
+    return () => window.removeEventListener("sidebarChanged", handler);
+  }, []);
+
+  useEffect(() => {
+    const resizeHandler = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", resizeHandler);
+    return () => window.removeEventListener("resize", resizeHandler);
+  }, []);
+
+  return (
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+
+
+      {/* Main content */}
       <main className={`
         flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
-     <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
-  {/* Titre */}
-  <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
-    {t("quizzesTitle")}
-  </h1>
+        <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
+          {/* Titre */}
+          <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
+            {t("quizzesTitle")}
+          </h1>
 
-  {/* Notifications + User */}
-  <div className="flex items-center gap-3">
-    <NotificationBell />
-    <UserCircle
-      initials={initials}
-      onToggleTheme={toggleDarkMode}
-      onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
-    />
-  </div>
-</header>
+          {/* Notifications + User */}
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <UserCircle
+              initials={initials}
+              onToggleTheme={toggleDarkMode}
+              onChangeLang={(lang) => window.i18n?.changeLanguage(lang)}
+            />
+          </div>
+        </header>
 
 
-          <ContentSearchBar
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+        <ContentSearchBar
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
+
+        <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
+          <ContentFilters
+            type="quizzes"
+            userRole={userRole}
+            onFilterChange={setFilterLevel}
+            activeFilter={filterLevel}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            showCompletedFilter={userRole === "etudiant"}
           />
 
-          <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
-            <ContentFilters
-              type="quizzes"
-              userRole={userRole}
-              onFilterChange={setFilterLevel}
-              activeFilter={filterLevel}
-              categoryFilter={categoryFilter}
-              setCategoryFilter={setCategoryFilter}
-              showCompletedFilter={userRole === "etudiant"}
+          {userRole === "enseignant" && (
+            <Button
+              variant="courseStart"
+              onClick={() => navigate("/create-quiz")}
+              className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
+            >
+              <Plus size={18} /> {t("createQuizBtn")}
+            </Button>
+          )}
+        </div>
+
+        <div
+          className="grid gap-6"
+          style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}
+        >
+          {filteredList.map((quiz, idx) => (
+            <ContentCard
+              key={idx}
+              className={gradientMap[quiz.level]}
+              course={quiz}
+              role={userRole}
+              showProgress={userRole === "etudiant"}
+              onDelete={handleDeleteQuiz}
             />
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
 
-            {userRole === "enseignant" && (
-              <Button
-                variant="courseStart"
-                onClick={() => navigate("/create-quiz")}
-                className="w-full sm:w-50 md:w-40 lg:w-80 h-10 md:h-12 lg:h-25 mt-6 bg-primary text-white transition-all"
-              >
-                <Plus size={18} /> {t("createQuizBtn")}
-              </Button>
-            )}
-          </div>
-
-          <div
-            className="grid gap-6"
-            style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}
-          >
-            {filteredList.map((quiz, idx) => (
-              <ContentCard
-                key={idx}
-                className={gradientMap[quiz.level]}
-                course={quiz}
-                role={userRole}
-                showProgress={userRole === "etudiant"}
-                onDelete={handleDeleteQuiz}
-              />
-            ))}
-          </div>
-        </main>
-      </div>
-    );
-  }
-  
