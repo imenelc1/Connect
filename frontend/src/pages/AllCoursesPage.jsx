@@ -1,18 +1,21 @@
 import React, { useEffect, useState, useContext } from "react";
-import Navbar from "../components/common/Navbar.jsx";
 import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { getCurrentUserId } from "../hooks/useAuth";
+import progressionService from "../services/progressionService";
+import ThemeContext from "../context/ThemeContext.jsx";
+
+//Les les composants personalisé
+import Navbar from "../components/common/Navbar.jsx";
 import ContentCard from "../components/common/ContentCard";
 import Button from "../components/common/Button.jsx";
 import ContentFilters from "../components/common/ContentFilters";
 import ContentSearchBar from "../components/common/ContentSearchBar";
-import { useTranslation } from "react-i18next";
 import UserCircle from "../components/common/UserCircle";
-import { useNavigate } from "react-router-dom";
-import ThemeContext from "../context/ThemeContext.jsx";
-import { getCurrentUserId } from "../hooks/useAuth";
-import progressionService from "../services/progressionService";
 import NotificationBell from "../components/common/NotificationBell";
 
+//couleur du fond selon le niveau du cours
 const gradientMap = {
   Débutant: "bg-grad-2",
   Intermédiaire: "bg-grad-3",
@@ -20,31 +23,40 @@ const gradientMap = {
 };
 
 export default function AllCoursesPage() {
+  //token et l'utilisateur courant
   const token = localStorage.getItem("token");
   const currentUserId = getCurrentUserId();
+
+  //etats des filtres et recherche
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [courses, setCourses] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLevel, setFilterLevel] = useState("ALL");
+
+  //responsivité et sidebar
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [completedFilter, setCompletedFilter] = useState("");
+  
+  //liste des cours
+  const [courses, setCourses] = useState([]);
 
   const navigate = useNavigate();
-  const { t } = useTranslation("contentPage");
+  const { t } = useTranslation("contentPage"); //traduction
   const { toggleDarkMode } = useContext(ThemeContext);
 
+  //recuperer l'utilisateur depuis localStorage
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
+  //initials pour l'avatar
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""}`.toUpperCase();
 
-  // Fetch courses + progress
+  // recuperer les cours + progression des utilisateurs
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const data = await progressionService.getCoursesProgress();
-
+        //normaliser les données backend => frontend
         const formatted = data.map((c) => {
           const nom = c.utilisateur_name || t("unknownName");
 
@@ -84,7 +96,7 @@ export default function AllCoursesPage() {
     fetchCourses();
   }, [currentUserId]);
 
-  // Handle delete
+  // supprimer un cours
   const handleDeleteCourse = async (courseId) => {
     if (!window.confirm(t("confirmDeleteCourse"))) return;
 
@@ -101,14 +113,14 @@ export default function AllCoursesPage() {
     }
   };
 
-  // Handle window resize
+  // gestion de resize ecran
   useEffect(() => {
     const resizeHandler = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", resizeHandler);
     return () => window.removeEventListener("resize", resizeHandler);
   }, []);
 
-  // Sidebar collapsed
+  // l'etat de la sidebar
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
     window.addEventListener("sidebarChanged", handler);
@@ -116,9 +128,9 @@ export default function AllCoursesPage() {
   }, []);
 
   const sidebarWidth = sidebarCollapsed ? 60 : 240;
-  const getGridCols = () => (windowWidth < 640 ? 1 : windowWidth < 1024 ? 2 : 3);
+  const getGridCols = () => (windowWidth < 640 ? 1 : windowWidth < 1024 ? 2 : 3); //nombre de colonnes de la grille
 
-  // Filtered + search
+  // filtres combiné (visibilité+ niveau + recherche)
   let filteredCourses = courses
   .filter((c) => c.visible)
   .filter((c) => filterLevel === "ALL" || c.level === filterLevel)
@@ -143,11 +155,12 @@ export default function AllCoursesPage() {
       <div>
         <Navbar />
       </div>
-
+      {/* Contenu principal */}
       <main className={`
         flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
         ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
       `}>
+        {/* Header */}
         <header className="flex flex-row justify-between items-center gap-3 sm:gap-4 mb-6">
           {/* Titre */}
           <h1 className="text-lg sm:text-2xl font-bold text-muted truncate">
@@ -165,9 +178,9 @@ export default function AllCoursesPage() {
           </div>
         </header>
 
-
+        {/* Recherche */}
         <ContentSearchBar value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-
+        {/* Filtres + bouton création */}
         <div className="mt-6 mb-6 flex flex-col sm:flex-row justify-between gap-4">
           <ContentFilters
             type="courses"
@@ -179,7 +192,7 @@ export default function AllCoursesPage() {
             showCompletedFilter={userRole === "etudiant"}
             onCompletedChange={setCompletedFilter} 
           />
-
+          {/* button creation seulement si l'utilisateur=enseignant*/}
           {userRole === "enseignant" && (
             <Button
               variant="courseStart"
@@ -192,6 +205,7 @@ export default function AllCoursesPage() {
           )}
         </div>
 
+          {/* Liste des cours */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredCourses.map((course, idx) => (
             <ContentCard
@@ -202,6 +216,7 @@ export default function AllCoursesPage() {
               showProgress={userRole === "etudiant"}
               onDelete={handleDeleteCourse}
             >
+               {/* Bouton action étudiant selon la progression*/}
               {userRole === "etudiant" && (
                 <Button
 

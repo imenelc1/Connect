@@ -1,12 +1,17 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // Framer Motion pour les animations
+//les composants personalisé utilisés
 import CodeBlock from "../common/CodeBlock";
-import mascotte from "../../assets/mascotte.svg";
 import CardsSection from "../common/CardsSection";
 import AboutSection from "../ui/AboutSection";
-import "../../styles/index.css";
+import mascotte from "../../assets/mascotte.svg"; //l'image de la mascotte
+import "../../styles/index.css"; 
 
 export default function Body() {
+  // Configuration de l’animation "fade up"
+  // hidden : état initial (invisible et plus bas)
+  // visible : état final (visible et position normale)
+
   const fadeUp = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
@@ -14,7 +19,7 @@ export default function Body() {
 
   return (
     <section className="py-20 bg-background flex flex-col items-center gap-16 w-full max-w-[1400px] mx-auto px-6">
-      
+      {/* Bloc contenant le CodeBlock + la mascotte */}
       <motion.div
         className="flex flex-row items-center justify-center gap-0"
         initial="hidden"
@@ -22,9 +27,11 @@ export default function Body() {
         viewport={{ once: true, amount: 0.3 }}
         variants={fadeUp}
       >
+        {/* CodeBlock légèrement remonté sur desktop */}
         <div className="md:-translate-y-10">
           <CodeBlock />
         </div>
+        {/* Image de la mascotte avec animation indépendante */}
         <motion.img
           src={mascotte}
           alt="Robot"
@@ -35,6 +42,7 @@ export default function Body() {
         />
       </motion.div>
 
+      {/* Section "À propos" avec animation */}
       <motion.div
         className="w-full"
         initial="hidden"
@@ -44,7 +52,7 @@ export default function Body() {
       >
         <AboutSection />
       </motion.div>
-
+      {/* Section des cartes avec animation */}
       <motion.div
         className="w-full"
         initial="hidden"

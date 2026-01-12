@@ -1,27 +1,35 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
+import { Trash2, ChevronUp } from "lucide-react";
+import { FolderPlus } from "lucide-react";
+import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import api from "../services/courseService"; //services api utilisé
+import { useNotifications } from "../context/NotificationContext";
+
+//les composants personalisé utilisé
 import Navbar from "../components/common/Navbar.jsx";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
-import { Trash2, ChevronUp } from "lucide-react";
 import ThemeContext from "../context/ThemeContext";
-import { FolderPlus } from "lucide-react";
-import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
-import api from "../services/courseService";
-import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 import CoursesSidebarItem2 from "../components/ui/CoursesSidebarItem2.jsx";
 import CourseContentSimple from "../components/ui/CourseContentSimple.jsx";
+
+
+/*
+  page creation du cours
+*/
+
 export default function CoursePage() {
-  const navigate = useNavigate();
-  const { t, i18n } = useTranslation("courseInfo");
+  const navigate = useNavigate(); //navigation
+  const { t, i18n } = useTranslation("courseInfo");//traduction
   const { toggleDarkMode } = useContext(ThemeContext);
 
-  // États pour la responsivité
+  // États pour la responsivité et sidebar
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -50,7 +58,10 @@ export default function CoursePage() {
     };
   }, []);
 
-  // --- Read localStorage ONCE ---
+  /* =======================
+    Auth : lecture du localStorage
+    - redirection vers login si token ou user manquant
+  ======================= */
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const rawUserData = localStorage.getItem("user");
@@ -72,27 +83,28 @@ export default function CoursePage() {
     }
   }, []);
 
-  // user data
+  // données utilisateur connecté
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
   const currentUserId = userData?.id_utilisateur;
   const userRole = userData?.role;
 
-  // --- Step management ---
+  // gestion des etapes de creation
   const [activeStep, setActiveStep] = useState(1);
-
   const courseSteps = [
     { label: t("course.basic_info"), icon: Monitor },
     { label: t("course.curriculum"), icon: BookOpenCheck },
     { label: t("course.publish_title"), icon: CheckCircle },
   ];
 
+  //---- durée du cours
   const [hours, setHours] = useState("00");
   const [minutes, setMinutes] = useState("00");
   const [seconds, setSeconds] = useState("00");
   const [duration, setDuration] = useState("");
   const [currentCoursId, setCurrentCoursId] = useState(null);
   useEffect(() => {
+    // concatène hh:mm:ss 
     setDuration(`${hours}:${minutes}:${seconds}`);
   }, [hours, minutes, seconds]);
 
@@ -106,7 +118,7 @@ export default function CoursePage() {
     label: `${i * 5} min`
   }));
 
-  // --- Course info ---
+  // --- info principale du cours ---
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState("");
@@ -125,7 +137,7 @@ export default function CoursePage() {
     },
   ]);
 
-  // --- Section management ---
+  // ---gestion des sections ---
   const addSection = () => {
     setSections(prev => [
       ...prev,
@@ -149,7 +161,7 @@ export default function CoursePage() {
     setSections(prev => prev.filter(s => s.id !== id));
   };
 
-  // --- Lesson management ---
+  // --- gestion des leçons ---
   const addLessonToSection = sectionId => {
     setSections(prev =>
       prev.map(s => s.id === sectionId ? { ...s, lessons: [...s.lessons, { id: Date.now(), title: "", content: "" }] } : s)
@@ -199,7 +211,7 @@ export default function CoursePage() {
     );
   };
 
-  // --- Save course & sections ---
+  // --- etpae 01: seuvgrader les infos du cours ---
   const handleSaveStep1 = async () => {
     try {
       const res = await api.post(
@@ -225,7 +237,7 @@ export default function CoursePage() {
       return null;
     }
   };
-
+  // --- etape 02: sauvgarde les sections et les leçons --
   const handleSaveAllSections = async courseId => {
     try {
       for (let i = 0; i < sections.length; i++) {
@@ -267,25 +279,27 @@ export default function CoursePage() {
       }
 
       toast.success(t("course.sections_lessons_saved"));
-      setActiveStep(3);
+      setActiveStep(3); // passe à la prévisualisation
     } catch (err) {
       console.error(t("course.error_create_sections_lessons"), err.response?.data || err);
       toast.error(t("course.error_save_sections_lessons"));
     }
   };
 
+  //--- comibiné les 2 etapes du sauvgarde
   const handleSaveAll = async () => {
     try {
-      const coursId = await handleSaveStep1();
+      const coursId = await handleSaveStep1(); //les info du cours et retourner le di du cours
       if (!coursId) return;
 
-      await handleSaveAllSections(coursId);
-      navigate("/all-courses");
+      await handleSaveAllSections(coursId); //les sections et leçons
+      navigate("/all-courses"); //rediriger vers la pages des cours
     } catch (error) {
       console.error(t("course.error_save_complete"), error);
 
     }
   };
+
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
     window.addEventListener("sidebarChanged", handler);
@@ -334,7 +348,7 @@ export default function CoursePage() {
           className="flex justify-between"
         />
 
-        {/* STEP 1 */}
+        {/* STEP 1 : info generale du cours */}
         {activeStep === 1 && (
           <div className="w-full bg-grad-2 rounded-2xl shadow-md p-4 sm:p-6 lg:p-8">
             <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-muted">
@@ -343,6 +357,7 @@ export default function CoursePage() {
 
             <div className="flex flex-col mb-4 sm:mb-6 ">
               <label className="font-medium mb-2 text-muted">{t("course.title")}</label>
+              {/* titre */}
               <Input
                 placeholder={t("course.course_title_placeholder")}
                 value={title}
@@ -357,6 +372,7 @@ export default function CoursePage() {
 
             <div className="flex flex-col mb-4 sm:mb-6">
               <label className="font-medium mb-2 text-muted">{t("course.course_topic")}</label>
+              {/* description */}
               <textarea
                 className="w-full bg-card  text-black  dark:text-white  min-h-[120px] sm:min-h-[180px] border border-gray-300 rounded-xl p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder={t("course.course_topic_placeholder")}
@@ -368,6 +384,7 @@ export default function CoursePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="flex flex-col">
                 <label className="font-medium mb-2 text-muted">{t("course.duration")}</label>
+                {/* duree */}
                 <div className="flex gap-2">
                   <ModernDropdown
                     value={hours}
@@ -392,7 +409,7 @@ export default function CoursePage() {
                   />
                 </div>
               </div>
-
+              {/* niveau */}
               <div className="flex flex-col">
                 <label className="font-medium mb-2 text-muted">{t("course.level")}</label>
                 <ModernDropdown
@@ -406,7 +423,7 @@ export default function CoursePage() {
                   ]}
                 />
               </div>
-
+              {/* visibilité: public privé */}
               <div className="flex flex-col md:col-span-2">
                 <label className="font-medium mb-2 text-muted">{t("course.visibility")}</label>
                 <ModernDropdown
@@ -425,6 +442,7 @@ export default function CoursePage() {
               <button className="px-6 py-2 rounded-xl bg-gray-100 font-medium text-gray-700 hover:bg-gray-200 transition" onClick={() => navigate("/all-courses")}>
                 {t("course.cancel")}
               </button>
+              {/* vers l'etape suivants, sections et leçons */}
               <button
                 className="px-4 sm:px-6 py-2 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition"
                 onClick={() => setActiveStep(2)}
@@ -436,7 +454,7 @@ export default function CoursePage() {
         )}
 
 
-        {/* STEP 2 */}
+        {/* STEP 2 : sections et leçons*/}
         {activeStep === 2 && (
           <div className="w-full bg-grad-2 rounded-2xl shadow-md p-4 sm:p-6 lg:p-8">
 
@@ -444,6 +462,7 @@ export default function CoursePage() {
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-muted">
                 {t("course.curriculum")}
               </h1>
+              {/*ajouter une section */}
               <button
                 className="px-4 sm:px-6 py-2 rounded-xl bg-primary text-white shadow-sm hover:shadow-md transition self-start"
                 onClick={addSection}
@@ -469,13 +488,14 @@ export default function CoursePage() {
 
                     {/* Contenu */}
                     <div className="flex-1 flex flex-col gap-2 w-full">
+                      {/* titre */}
                       <Input
                         value={section.title}
                         onChange={(e) => updateSectionTitle(section.id, e.target.value)}
                         placeholder={t("course.section_title_placeholder")}
                         className="!border-none !bg-transparent px-0 font-medium text-lg w-full"
                       />
-
+                      {/* description */}
                       <textarea
                         className="w-full min-h-[80px] border  bg-card border-gray-300 rounded-xl p-3 text-sm sm:text-base"
                         placeholder={t("course.section_description_placeholder")}
@@ -496,7 +516,7 @@ export default function CoursePage() {
                             }`}
                         />
                       </button>
-
+                      {/* supprimer la section */}
                       <button
                         className="hover:text-red-500 transition"
                         onClick={() => removeSection(section.id)}
@@ -520,14 +540,14 @@ export default function CoursePage() {
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3 w-full">
                         <div className="text-sm font-medium text-gray-600 w-6">{idx + 1}.</div>
-
+                        {/* titre de la leçon */}
                         <Input
                           placeholder={t("course.lesson_title")}
                           value={lesson.title}
                           onChange={(e) => updateLessonTitle(section.id, lesson.id, e.target.value)}
                           className="flex-1 text-black dark:text-white !bg-card w-full"
                         />
-
+                        {/* le contenu selon le type de la leçon */}
                         <div className="flex ml-[270px] gap-4">
                           <ModernDropdown
                             value={lesson.type || "text"}
@@ -545,6 +565,7 @@ export default function CoursePage() {
                                 )
                               )
                             }
+                            
                             options={[
                               { value: "text", label: t("course.text") },
                               { value: "image", label: t("course.image") },
@@ -552,6 +573,7 @@ export default function CoursePage() {
                             ]}
                             className="w-full sm:w-32"
                           />
+                          {/* supprimer la leçon */}
                           <button
                             onClick={() => removeLesson(section.id, lesson.id)}
                             className="text-gray-400 hover:text-red-500"
@@ -570,7 +592,7 @@ export default function CoursePage() {
                           onChange={(e) => updateLessonContent(section.id, lesson.id, e.target.value)}
                         />
                       )}
-
+                      {/* l'image quant la leçon type=image */}
                       {lesson.type === "image" && (
                         <div className="flex flex-col gap-2 mt-2">
                           <label
@@ -602,6 +624,7 @@ export default function CoursePage() {
                   ))}
 
                 <div className="flex justify-center mt-4">
+                  {/* ajouter une leçon à une section */}
                   <button
                     onClick={() => addLessonToSection(section.id)}
                     className="w-full sm:w-1/2 rounded-xl py-2 bg-primary text-white font-medium hover:bg-primary/90 transition"

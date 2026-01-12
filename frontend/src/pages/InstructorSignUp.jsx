@@ -1,25 +1,25 @@
 import React, { useState, useContext } from "react";
-import Input from "../components/common/Input";
-import Button from "../components/common/Button.jsx";
-import AuthTabs from "../components/common/AuthTabs";
-import LogoIconeComponent from "../components/common/IconeLogoComponent";
-import Mascotte from "../components/common/Mascotte.jsx";
-import api from "../services/api";
-
-import LogoComponent from "../components/common/LogoComponent";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../context/AuthContext.jsx";
 import {
   FaEye, FaEyeSlash, FaPaperPlane, FaStar, FaIdBadge,
   FaCalendarAlt, FaLock, FaEnvelope, FaUser, FaGraduationCap
 } from "react-icons/fa";
-
-
+import api from "../services/api";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
+//les composants personalisé utilisé
+import Input from "../components/common/Input";
+import Button from "../components/common/Button.jsx";
+import AuthTabs from "../components/common/AuthTabs";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
+import Mascotte from "../components/common/Mascotte.jsx";
+import LogoComponent from "../components/common/LogoComponent";
 import ModernDropdown from "../components/common/ModernDropdown.jsx";
+
 const InstructorSignUp = () => {
+  // ---------------------- ÉTAT DU FORMULAIRE ----------------------
   const [formData, setFormData] = useState({
     nickname: "",
     fullname: "",
@@ -30,13 +30,16 @@ const InstructorSignUp = () => {
     regnumber: "",
     rank: ""
   });
-  const { t, i18n } = useTranslation("signup");
+  const { t, i18n } = useTranslation("signup"); //traduction
   const { toggleDarkMode } = useContext(ThemeContext);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState({}); //gestion des erreurs
+  //affichage et masquage des mot de passe
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-const navigate = useNavigate();
-const { loginUser } = useContext(AuthContext);
+
+  const navigate = useNavigate();//navigation
+  const { loginUser } = useContext(AuthContext);   // Contexte Auth (connexion automatique après inscription)
+
 
   // mapping backend -> frontend
   const fieldMap = {
@@ -49,10 +52,12 @@ const { loginUser } = useContext(AuthContext);
     grade: "rank",
   };
 
-  // regex utiles
+  // regex de validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const matriculeRegex = /^\d{12}$/;
   const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/; // lettres + accents + espaces + ' -
+
+  // ====================== GESTION DES CHAMPS ======================
 
   // VALIDATION EN TEMPS RÉEL pendant la saisie
   const handleChange = (e) => {
@@ -80,6 +85,7 @@ const { loginUser } = useContext(AuthContext);
       }
     }
 
+    // ---------- Confirmation mot de passe ----------
     if (name === "confirm") {
       if (value !== formData.password) {
         setErrors(prev => ({ ...prev, confirm: t("passwordMismatch") }));
@@ -87,7 +93,7 @@ const { loginUser } = useContext(AuthContext);
         setErrors(prev => ({ ...prev, confirm: "" }));
       }
     }
-
+    // ---------- Nom / Prénom ----------
     if ((name === "nickname" || name === "fullname") && /\d/.test(value)) {
       setErrors(prev => ({ ...prev, [name]:  t("nameNumbers") }));
     } else if (name === "nickname" || name === "fullname") {
@@ -100,7 +106,7 @@ const { loginUser } = useContext(AuthContext);
         setErrors(prev => ({ ...prev, [name]: "" }));
       }
     }
-
+    // ---------- Email ----------
     if (name === "email") {
       if (value && !emailRegex.test(value)) {
         setErrors(prev => ({ ...prev, email: t("invalidEmail") }));
@@ -109,6 +115,7 @@ const { loginUser } = useContext(AuthContext);
       }
     }
 
+    // ---------- Matricule ----------
     if (name === "regnumber") {
       if (value && !/^\d*$/.test(value)) {
         setErrors(prev => ({ ...prev, regnumber: t("regCond") }));
@@ -120,6 +127,7 @@ const { loginUser } = useContext(AuthContext);
       }
     }
 
+    // ---------- Date de naissance ----------
     if (name === "dob") {
       if (value) {
         const birthDate = new Date(value);
@@ -175,7 +183,7 @@ const { loginUser } = useContext(AuthContext);
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // Validation du formulaire
+  // Validation globale du formulaire
   if (!validateForm()) {
     toast.error(t("fixErrors"));
     return;
@@ -194,7 +202,7 @@ const { loginUser } = useContext(AuthContext);
   };
 
   try {
-    const res = await api.post("register/", payload);
+    const res = await api.post("register/", payload); //appel api
 
     // 🔹 Créer userData à partir de la réponse backend
     const userData = {
@@ -275,7 +283,7 @@ const { loginUser } = useContext(AuthContext);
 
 
 
-
+      {/* composant de l'authentification*/}
       <AuthTabs
         role="instructor"
         active="signup"

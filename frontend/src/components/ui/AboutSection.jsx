@@ -4,7 +4,7 @@ import { AiOutlineHeart, AiOutlineBulb } from "react-icons/ai";
 import { useTranslation } from "react-i18next";
 
 export default function AboutSection() {
-  const { t } = useTranslation("acceuil");
+  const { t } = useTranslation("acceuil"); //traduction de la page (espace du nom="acceuil")
 
   return (
     <div id="about" className="about-container w-full px-8 md:px-16 py-6 flex flex-col md:flex-row justify-between gap-20 font-poppins bg-surface">

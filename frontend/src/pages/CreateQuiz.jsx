@@ -50,14 +50,14 @@ export default function CreateQuiz() {
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
 
+  //les etapes du processus de la creation
   const exerciseSteps = [
     { label: t("info"), icon: FileText },
     { label: t("preview"), icon: Activity },
   ];
 
   /* ============================
-   QUIZ DATA MODEL
-   Central state for quiz creation
+   le model quiz pour la creation
 ============================ */
 
   const [quizData, setQuizData] = useState({
@@ -86,10 +86,11 @@ export default function CreateQuiz() {
     ]
   });
 
-  const currentUserId = getCurrentUserId();
+  const currentUserId = getCurrentUserId(); //l'utilisateur connecté
 
   const [courses, setCourses] = useState([]);
 
+  //fecth des cours pour les utiliser dans la creation
   useEffect(() => {
     fetch("http://localhost:8000/api/courses/api/cours")
       .then((res) => res.json())
@@ -144,8 +145,7 @@ export default function CreateQuiz() {
 
 
   /* ============================
-   API – STEP 1
-   Create exercice (quiz container)
+   step 1 : creere l'objet exercice du quiz
 ============================ */
 
   const handleSaveStep1 = async () => {
@@ -207,8 +207,7 @@ export default function CreateQuiz() {
     }
   };
   /* ============================
-    API – STEP 2
-    Create quiz linked to exercice
+    step 2 les infos du quiz
  ============================ */
   const handleSaveStep2 = async (exerciceIdParam) => {
     const token = localStorage.getItem("token");
@@ -249,8 +248,7 @@ export default function CreateQuiz() {
   };
 
   /* ============================
-    API – STEP 3
-    Create questions & options
+   step 3 : les questions et options
  ============================ */
   const handleSaveStep3 = async (idQuiz) => {
     const token = localStorage.getItem("token");
@@ -294,8 +292,7 @@ export default function CreateQuiz() {
     }
   };
   /* ============================
-     VALIDATION
-     Ensures quiz integrity before preview/publish
+     valider quiz avant de le publier
   ============================ */
   const validateQuiz = () => {
     if (
@@ -336,8 +333,7 @@ export default function CreateQuiz() {
   };
 
   /* ============================
-   PUBLISH WORKFLOW
-   Step 1 → Step 2 → Step 3
+  publier le quiz, combiner de step 1 et step 2
 ============================ */
   const handlePublishQuiz = async () => {
     if (!validateQuiz()) return;
@@ -350,7 +346,7 @@ export default function CreateQuiz() {
 
     await handleSaveStep3(exoId);
 
-    navigate("/all-quizzes");
+    navigate("/all-quizzes"); //navigation vers la pages des quiz
   };
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -377,7 +373,7 @@ export default function CreateQuiz() {
 
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-3 sm:gap-4">
-          {/* User + Bell */}
+          {/* utilisateur et notifications */}
           <div className="flex items-center gap-3 order-1 sm:order-2 mt-0 sm:mt-0 self-end sm:self-auto">
             <NotificationBell />
             <UserCircle
@@ -394,7 +390,7 @@ export default function CreateQuiz() {
         <div className="max-w-7xl mx-auto">
 
 
-
+          {/* la barre des etapes de la creation */}
           <Topbar
             steps={exerciseSteps}
             activeStep={activeStep}
@@ -402,13 +398,13 @@ export default function CreateQuiz() {
             className="flex justify-between"
           />
 
-          {/* MAIN GRID */}
+          {/*  GRID principale */}
           {activeStep === 1 && (
             <div
               className="rounded-2xl shadow-lg p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 bg-grad-2
                max-w-7xl mx-auto mt-10"
             >
-              {/* LEFT COLUMN (SETTINGS + SUMMARY) */}
+              {/* colonne a gauche (info generale du quiz) */}
               <div className="flex flex-col gap-4 lg:col-span-1 lg:sticky lg:top-10 lg:self-start">
                 <QuizSettings
                   quizData={quizData}
@@ -424,7 +420,7 @@ export default function CreateQuiz() {
                 />
               </div>
 
-              {/* RIGHT COLUMN (QUESTIONS) */}
+              {/* colonne a droite (questions) */}
               <div className="flex flex-col gap-4 lg:col-span-2 flex-1 px-0 md:px-4">
 
                 {/* HEADER QUESTIONS */}
@@ -439,7 +435,7 @@ export default function CreateQuiz() {
                   </button>
                 </div>
 
-                {/* QUESTIONS LIST */}
+                {/*liste des questions*/}
                 <div className="flex-1 overflow-auto max-h-[70vh]">
                   <QuestionForm
                     questions={quizData.questions}

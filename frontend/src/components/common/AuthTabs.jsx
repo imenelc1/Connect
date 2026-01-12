@@ -2,16 +2,22 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+//Composant authTabs
+
 const AuthTabs = ({ role = "student", active = "signin" }) => {
   const navigate = useNavigate();
   const { t } = useTranslation("login");
-
+ /**
+   * Redirige vers la page login ou signup
+   * en conservant le rôle dans l'URL
+   */
   const goTo = (type) => {
     navigate(`/${type === "signin" ? "login" : "signup"}/${role}`);
   };
 
   return (
     <div className="flex justify-center bg-white p-1 rounded-full w-80 mx-auto shadow-sm mt-5 md:-mt-20">
+      {/* Onglet Connexion */}
       <button
         onClick={() => goTo("signin")}
         className={`flex-1 py-2 rounded-full font-medium transition-colors duration-300 ${
@@ -22,7 +28,7 @@ const AuthTabs = ({ role = "student", active = "signin" }) => {
       >
         {t("login.signIn")}
       </button>
-
+      {/* Onglet Inscription */}
       <button
         onClick={() => goTo("signup")}
         className={`flex-1 py-2 rounded-full font-medium transition-colors duration-300 ${

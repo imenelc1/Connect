@@ -1,22 +1,28 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import ModernDropdown from "./ModernDropdown";
+/*====
+  Composant utiliser dans la creation et la modification d'un quiz, 
+  configuration des info generale du quiz, titre, duration, ...
+
+*/
 
 export default function QuizSettings({ quizData, onQuizChange, courses }) {
-  const { t } = useTranslation("createQuiz");
+  const { t } = useTranslation("createQuiz"); //traduction
 
 const handleChange = (field, value) => {
   onQuizChange(field, value);  // juste passer la valeur, ne pas utiliser une fonction ici
 };
 
 
-
+  //niveaux du quiz
   const levels = [
     { key: "debutant", label: t("beginner") },
     { key: "intermediaire", label: t("intermediate") },
     { key: "avance", label: t("advanced") },
   ];
 
+  //filtrer les cours appartenant a l'utilisateur 
   const myCourses = courses.filter((c) => c.isMine);
 
   return (
@@ -98,7 +104,6 @@ const handleChange = (field, value) => {
           
         </div>
 {/*score minimum*/}
-{/* SCORE MINIMUM */}
 <div className="flex flex-col gap-2">
   <label className="text-sm font-medium">{t("scoreMinimum")}</label>
   <input
@@ -114,7 +119,7 @@ const handleChange = (field, value) => {
   />
 </div>
 
-        {/* MAX ATTEMPTS */}
+        {/* nombre max de tentatives */}
         <div className="flex flex-col gap-2">
           <label>{t("maxAttempts")}</label>
           <input
@@ -144,7 +149,7 @@ const handleChange = (field, value) => {
         </div>
 
 
-        {/* DURÉE */}
+        {/* activer/desativer la duree */}
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -157,6 +162,7 @@ const handleChange = (field, value) => {
           <label>{t("enableDuration")}</label>
         </div>
 
+        {/* afficher l'input de la duree seulement si activeDuration=true */}
         {quizData.durationEnabled && (
           <input
             type="number"
