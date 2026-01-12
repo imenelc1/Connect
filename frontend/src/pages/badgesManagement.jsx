@@ -9,8 +9,6 @@ import ContentSearchBar from "../components/common/ContentSearchBar";
 import api from "../services/apiGenerale";
 import { toast } from "react-hot-toast";
 import Input from "../components/common/Input";
-
-// Import des icônes React
 import {
   FaMedal,
   FaChartLine,
@@ -240,7 +238,7 @@ export default function BadgesManagement() {
       xpPoint: badge.xpPoint,
       icon: "",
     });
-    setPreviewIcon(""); // pas de fichier uploadé, icône React sera affichée
+    setPreviewIcon(""); 
     setEditModal(true);
   };
 

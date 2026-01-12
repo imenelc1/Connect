@@ -9,9 +9,7 @@ import { useNavigate } from "react-router-dom";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ModernDropdown from "../components/common/ModernDropdown";
 import ThemeContext from "../context/ThemeContext";
-import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 import { toast } from 'react-hot-toast';
 const levelStyles = {
   Débutant: "bg-blue text-white",
@@ -59,7 +57,7 @@ export default function CoursesManagement() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [teachers, setTeachers] = useState([]);
 
-  const token = localStorage.getItem("admin_token"); // JWT admin
+  const token = localStorage.getItem("admin_token"); 
 
   const difficultyOptions = [
     { value: "debutant", label: t("difficulty.Beginner") },
