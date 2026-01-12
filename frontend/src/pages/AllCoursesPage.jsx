@@ -29,6 +29,7 @@ export default function AllCoursesPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [completedFilter, setCompletedFilter] = useState("");
 
   const navigate = useNavigate();
   const { t } = useTranslation("contentPage");
@@ -119,12 +120,18 @@ export default function AllCoursesPage() {
 
   // Filtered + search
   let filteredCourses = courses
-    .filter((c) => c.visible)
-    .filter((c) => filterLevel === "ALL" || c.level === filterLevel)
-    .filter((c) =>
-      c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  .filter((c) => c.visible)
+  .filter((c) => filterLevel === "ALL" || c.level === filterLevel)
+  .filter((c) => {
+    if (completedFilter === "completed") return c.progress === 100;
+    if (completedFilter === "not_completed") return c.progress < 100;
+    return true;
+  })
+  .filter((c) =>
+    c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    c.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
 
   if (userRole === "enseignant" && categoryFilter === "mine") {
     filteredCourses = filteredCourses.filter((c) => c.isMine);
@@ -170,7 +177,9 @@ export default function AllCoursesPage() {
             categoryFilter={categoryFilter}
             setCategoryFilter={setCategoryFilter}
             showCompletedFilter={userRole === "etudiant"}
+            onCompletedChange={setCompletedFilter} 
           />
+
           {userRole === "enseignant" && (
             <Button
               variant="courseStart"
@@ -186,7 +195,7 @@ export default function AllCoursesPage() {
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredCourses.map((course, idx) => (
             <ContentCard
-              key={idx}
+              key={course.id}
               className={gradientMap[course.level]}
               course={course}
               role={userRole}

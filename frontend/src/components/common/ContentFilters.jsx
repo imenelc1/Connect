@@ -57,8 +57,8 @@ export default function ContentFilters({
               key={lvl}
               onClick={() => onFilterChange(lvl)}
               className={`px-2 py-1 sm:px-4 sm:py-1.5 transition-all duration-300 rounded-full font-bold sm:text-sm ${lvl === activeFilter
-                  ? "bg-primary text-white shadow-md"
-                  : "text-white hover:text-primary"
+                ? "bg-primary text-white shadow-md"
+                : "text-white hover:text-primary"
                 }`}
             >
               {lvl === "ALL" ? t("allLevels") : t(`levels.${lvl}`)}
@@ -72,7 +72,7 @@ export default function ContentFilters({
             value={completedStatus}
             onChange={(value) => {
               setCompletedStatus(value);
-              onCompletedChange?.(value);
+              onCompletedChange(value);
             }}
             placeholder={t("status.all")}
             options={[
@@ -80,9 +80,9 @@ export default function ContentFilters({
               { value: "completed", label: t("status.completed") },
               { value: "not_completed", label: t("status.notCompleted") },
             ]}
-            className="w-full sm:w-40"
           />
         )}
+
 
         {/* ÉTAT DES EXERCICES */}
         {type === "exercises" && userRole === "etudiant" && (

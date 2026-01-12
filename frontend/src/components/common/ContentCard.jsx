@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
@@ -50,6 +50,9 @@ export default function ContentCard({
   const location = useLocation();
   const navigate = useNavigate();
   const [progress, setProgress] = useState(course?.progress ?? 0);
+  useEffect(() => {
+    setProgress(course?.progress ?? 0);
+  }, [course?.progress]);
 
   if (!course) return null;
 
@@ -58,8 +61,8 @@ export default function ContentCard({
     (location.pathname.includes("courses")
       ? "course"
       : location.pathname.includes("exercises")
-      ? "exercise"
-      : "quiz");
+        ? "exercise"
+        : "quiz");
 
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
@@ -73,8 +76,8 @@ export default function ContentCard({
       pageType === "course"
         ? t("checkCourse")
         : pageType === "exercise"
-        ? t("checkExercise")
-        : t("checkQuiz"),
+          ? t("checkExercise")
+          : t("checkQuiz"),
   };
 
   const handleStart = () => {
@@ -101,8 +104,8 @@ export default function ContentCard({
         pageType === "quiz"
           ? `/QuizIntro/${course.id}`
           : pageType === "course"
-          ? `/Seecourses/${course.id}`
-          : `/ListeExercices/${course.id}`
+            ? `/Seecourses/${course.id}`
+            : `/ListeExercices/${course.id}`
       );
     } catch (err) {
       console.error(err);
@@ -116,8 +119,8 @@ export default function ContentCard({
       pageType === "course"
         ? `/courses/edit/${course.id}`
         : pageType === "exercise"
-        ? `/exercices/edit/${course.id}`
-        : `/quiz/edit/${course.id}`
+          ? `/exercices/edit/${course.id}`
+          : `/quiz/edit/${course.id}`
     );
   };
 
@@ -157,8 +160,8 @@ export default function ContentCard({
             {pageType === "exercise"
               ? course.categorie
               : pageType === "quiz" && course.duration
-              ? `${course.duration} min`
-              : course.duration}
+                ? `${course.duration} min`
+                : course.duration}
           </span>
         </div>
 
@@ -186,7 +189,7 @@ export default function ContentCard({
                       onClick={handleStart}
                     >
                       {course.tentatives?.length > 0 &&
-                      course.tentativesRestantes <= 0
+                        course.tentativesRestantes <= 0
                         ? labels.restart
                         : labels.start}
                     </Button>
