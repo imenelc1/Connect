@@ -48,7 +48,8 @@ import ProgressStudent from "../pages/ProgressionStudent";
 import SubmittedExoTheory from "../pages/SubmittedExoTheory.jsx";
 
 /* ================= QUIZZES ================= */
-import AllQuizzesPage from "../pages/AllQuizzesPage";
+
+import AllQuizzesPage from "../pages/AllQuizzesPage";   
 import CreateQuiz from "../pages/CreateQuiz";
 import QuizPreview from "../pages/QuizPreview";
 import QuizIntroPage from "../pages/QuizIntroPage";
@@ -232,42 +233,51 @@ export default function AppRoutes() {
         {/* ========= QUIZZES ========= */}
         <Route path="/all-quizzes" element={
           <PrivateRoute allowedRoles={["etudiant", "enseignant", "admin"]}>
+            {/* tres bieeeeeen */}
             <AllQuizzesPage />
           </PrivateRoute>
         }/>
         <Route path="/cours/:coursId/quizzes" element={
           <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            {/* bieeeeeeeeen */}
             <AllQuizzesPage />
           </PrivateRoute>
         } />
 
         <Route path="/create-quiz" element={
+        
           <PrivateRoute allowedRoles={["enseignant"]}>
+            {/* bieeeeeeeeen */}
             <CreateQuiz />
           </PrivateRoute>
         } />
         <Route path="/quiz-preview/:exerciceId" element={
           <PrivateRoute allowedRoles={["enseignant"]}>
+            {/* bieeeeeeeeen */}
             <QuizPreview />
           </PrivateRoute>
         } />
         <Route path="/quiz-intro/:exerciceId" element={
           <PrivateRoute allowedRoles={["etudiant"]}>
+            {/* yesssss */}
             <QuizIntroPage />
           </PrivateRoute>
         } />
         <Route path="/quizTake/:exerciceId" element={
           <PrivateRoute allowedRoles={["etudiant"]}>
+            {/* tres bien */}
             <QuizTakePage />
           </PrivateRoute>
         } />
         <Route path="/QuizRecape/:exerciceId" element={
           <PrivateRoute allowedRoles={["etudiant"]}>
+            {/* qowaaa  */}
             <QuizRecapPage />
           </PrivateRoute>
         } />
         <Route path="/quiz/edit/:exerciceId" element={
           <PrivateRoute allowedRoles={["enseignant"]}>
+            {/* cest booon */}
             <UpdateQuiz />
           </PrivateRoute>
         } />

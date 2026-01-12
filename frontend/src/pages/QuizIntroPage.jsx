@@ -23,7 +23,7 @@ export default function QuizIntroPage() {
   useEffect(() => {
     fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId}/`)
       .then(res => {
-        if (!res.ok) throw new Error("Quiz non trouvé");
+       if (!res.ok) throw new Error(t("noQuiz"));
         return res.json();
       })
       .then(data => {
@@ -59,11 +59,11 @@ export default function QuizIntroPage() {
   }, [exerciceId]);
 
   if (loading) {
-    return <div className="text-center mt-20 text-lg">Chargement...</div>;
+    return <div className="text-center mt-20 text-lg">{t("loading")}</div>;
   }
 
   if (!quiz) {
-    return <div className="text-center mt-20 text-lg">Quiz non trouvé</div>;
+    return <div className="text-center mt-20 text-lg">{t("noQuiz")}</div>;
   }
 
   const totalPoints = quiz.questions
@@ -122,7 +122,7 @@ export default function QuizIntroPage() {
           className="flex items-center gap-2 px-4 py-2 rounded-md shadow-sm text-white"
           style={{ background: "rgb(var(--color-pink))" }}
         >
-          <FaStar /> {quiz.level}
+          <FaStar /> {t(`levels.${quiz.level.toLowerCase()}`)}
         </div>
       </div>
 
@@ -159,3 +159,4 @@ export default function QuizIntroPage() {
     </div>
   );
 }
+

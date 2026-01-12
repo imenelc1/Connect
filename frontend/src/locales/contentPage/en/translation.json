@@ -41,9 +41,13 @@
 
      "errors": {
     "loadCourses": "Error loading courses",
-    "deleteCourse": "Error while deleting"
+    "deleteCourse": "Error while deleting",
+    "loadQuizAttempts": "Error loading quiz attempts"
   },
-  "confirmDeleteCourse": "Are you sure you want to delete this course?"
+  "confirmDeleteCourse": "Are you sure you want to delete this course?",
+   "confirmDeleteExercise": "Are you sure you want to delete this exercise?",
+  "errorDelete": "Error while deleting",
+  "errorDeleteLog": "Delete error"
 
 
 

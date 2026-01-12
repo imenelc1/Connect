@@ -13,5 +13,16 @@
   "pointsTotaux": "Minimum required score for the quiz",
   "start": "Let's start! 🚀",
   "back": "Back to menu",
-  "testTranslation": "This is a translation test"
+  "testTranslation": "This is a translation test",
+
+  "noQuiz": "Quiz not found",
+   "loading":"Loading...",
+
+   "levels": {
+  "debutant": "Beginner",
+  "intermediaire": "Intermediate",
+  "avance": "Advanced"
+}
+
+
 }
