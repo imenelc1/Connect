@@ -1,28 +1,21 @@
+# middleware.py
 import threading
-from users.models import Administrateur
-from .jwt_auth import jwt_authenticate
+_admin_local = threading.local()
 
 class AdminContextMiddleware:
-    """
-    Middleware pour stocker l'objet admin courant dans le thread.
-    Permet aux signaux de savoir si l'action est faite par un admin.
-    """
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # Par défaut, on efface l'admin courant
-        threading.current_thread().current_admin = None
-
+        _admin_local.admin = None
         try:
-            # On essaie d'authentifier le token JWT
             user, payload = jwt_authenticate(request)
-            # Vérifie si c'est un admin
             if payload.get("role") == "admin":
-                admin = Administrateur.objects.get(id_admin=payload.get("admin_id"))
-                threading.current_thread().current_admin = admin
-        except Exception:
-            pass  # si pas d'admin ou token invalide, on ignore
-
+                _admin_local.admin = Administrateur.objects.get(id_admin=payload.get("admin_id"))
+        except:
+            pass
         response = self.get_response(request)
         return response
+
+def get_current_admin():
+    return getattr(_admin_local, "admin", None)

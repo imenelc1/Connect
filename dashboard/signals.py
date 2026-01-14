@@ -46,9 +46,7 @@ def notify_prof_on_submission(sender, instance, created, **kwargs):
             "student_id": student.id_utilisateur
         }
     )
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.contrib.contenttypes.models import ContentType
+
 
 from feedback.models import FeedbackExercice
 from dashboard.models import TentativeExercice
@@ -101,11 +99,11 @@ def notify_student_on_feedback(sender, instance, created, **kwargs):
 
 # dashboard/signals.py
 from django.db.models.signals import post_save, pre_save
-from django.dispatch import receiver
+
 from django.utils import timezone
 from datetime import timedelta, datetime
 from django.db.models import Sum, Count
-from django.contrib.contenttypes.models import ContentType
+
 
 from feedback.utils import create_notification
 from .models import (
@@ -120,24 +118,22 @@ from courses.models import Cours, Lecon, Section
 from exercices.models import Exercice
 from users.models import Utilisateur, Etudiant
 import math
-
+def is_student(user):
+    return Etudiant.objects.filter(utilisateur=user).exists()
 # ============================================================================
 # 1. SIGNAL: Leçon complétée
 # ============================================================================
 @receiver(post_save, sender=LeconComplete)
 def handle_lesson_completed(sender, instance, created, **kwargs):
-    """
-    Gère les notifications lorsqu'une leçon est complétée
-    """
-    if not created:
-        return
-    
-    lecon = instance.lecon
     user = instance.utilisateur
+    if not created or not is_student(user):
+        return
+
+    lecon = instance.lecon
     section = lecon.section
     cours = section.cours
-    
-    # ========= NOTIFICATION BASIQUE =========
+
+    # Notification de leçon terminée
     create_notification(
         destinataire=user,
         action_type='lesson_completed',
@@ -145,16 +141,12 @@ def handle_lesson_completed(sender, instance, created, **kwargs):
         content_object=lecon,
         message=f"✅ Leçon '{lecon.titre_lecon}' terminée !"
     )
-    
-    # ========= PROGRESSION DE LA SECTION =========
+
+    # Progression section
     total_section = Lecon.objects.filter(section=section).count()
-    completed_section = LeconComplete.objects.filter(
-        utilisateur=user,
-        lecon__section=section
-    ).count()
-    section_progress = (completed_section / total_section * 100) if total_section > 0 else 0
-    
-    # Notification pour section complète
+    completed_section = LeconComplete.objects.filter(utilisateur=user, lecon__section=section).count()
+    section_progress = (completed_section / total_section * 100) if total_section else 0
+
     if section_progress >= 100:
         create_notification(
             destinataire=user,
@@ -163,16 +155,12 @@ def handle_lesson_completed(sender, instance, created, **kwargs):
             content_object=section,
             message=f"🎯 Section '{section.titre_section}' terminée !"
         )
-    
-    # ========= PROGRESSION DU COURS =========
+
+    # Progression cours
     total_cours = Lecon.objects.filter(section__cours=cours).count()
-    completed_cours = LeconComplete.objects.filter(
-        utilisateur=user,
-        lecon__section__cours=cours
-    ).count()
-    cours_progress = (completed_cours / total_cours * 100) if total_cours > 0 else 0
-    
-    # Mettre à jour ProgressionCours
+    completed_cours = LeconComplete.objects.filter(utilisateur=user, lecon__section__cours=cours).count()
+    cours_progress = (completed_cours / total_cours * 100) if total_cours else 0
+
     progression_cours, _ = ProgressionCours.objects.get_or_create(
         utilisateur=user,
         cours=cours,
@@ -181,56 +169,18 @@ def handle_lesson_completed(sender, instance, created, **kwargs):
     progression_cours.avancement_cours = cours_progress
     progression_cours.derniere_lecon = lecon
     progression_cours.save()
-    
-    # ========= NOTIFICATIONS DE JALONS DU COURS =========
-    milestones = {
-        25: "🚀 Démarrage impressionnant ! Vous avez complété 25% du cours.",
-        50: "🎯 À mi-chemin ! Vous avez terminé la moitié du cours.",
-        75: "💪 Plus que 25% ! Vous approchez de la fin.",
-        90: "🔥 Presque terminé ! Plus que 10% à compléter.",
-        100: "🏆 FÉLICITATIONS ! Vous avez terminé le cours !"
-    }
-    
-    for milestone, message in milestones.items():
-        if progression_cours._previous_progress < milestone <= cours_progress:
+
+    # Jalons cours
+    milestones = {25:"🚀 25%",50:"🎯 50%",75:"💪 75%",90:"🔥 90%",100:"🏆 100%"}
+    for milestone, msg in milestones.items():
+        if getattr(progression_cours, "_previous_progress", 0) < milestone <= cours_progress:
             create_notification(
                 destinataire=user,
                 action_type=f'course_milestone_{milestone}',
                 module_source='courses',
                 content_object=cours,
-                message=f"{message} ({cours.titre_cour})"
+                message=f"{msg} du cours '{cours.titre_cour}'"
             )
-    
-    # ========= PREMIÈRE LEÇON =========
-    if completed_cours == 1:
-        create_notification(
-            destinataire=user,
-            action_type='first_lesson',
-            module_source='courses',
-            message=f"🌟 Première leçon terminée ! Bienvenue dans '{cours.titre_cour}'"
-        )
-    
-    # ========= PROGRESSION JOURNALIÈRE =========
-    today = timezone.now().date()
-    lessons_today = LeconComplete.objects.filter(
-        utilisateur=user,
-        date__date=today
-    ).count()
-    
-    if lessons_today == 3:
-        create_notification(
-            destinataire=user,
-            action_type='daily_goal',
-            module_source='progress',
-            message="📚 Objectif quotidien atteint ! 3 leçons terminées aujourd'hui."
-        )
-    elif lessons_today == 5:
-        create_notification(
-            destinataire=user,
-            action_type='daily_master',
-            module_source='progress',
-            message="🔥 Incroyable ! 5 leçons terminées aujourd'hui !"
-        )
 
 # ============================================================================
 # 2. SIGNAL: Suivi de la progression du cours
@@ -238,6 +188,9 @@ def handle_lesson_completed(sender, instance, created, **kwargs):
 @receiver(pre_save, sender=ProgressionCours)
 def track_progress_change(sender, instance, **kwargs):
     """Stocke l'ancienne progression pour détecter les changements"""
+    user = instance.utilisateur
+    if not is_student(user):
+        return
     if instance.pk:
         try:
             old = ProgressionCours.objects.get(pk=instance.pk)
@@ -250,10 +203,13 @@ def track_progress_change(sender, instance, **kwargs):
 @receiver(post_save, sender=ProgressionCours)
 def notify_progress_achievements(sender, instance, created, **kwargs):
     """Notifie les réalisations de progression"""
+    
     if created:
         return
     
     user = instance.utilisateur
+    if not is_student(user):
+        return
     cours = instance.cours
     
     # Vérifier si c'est le premier cours avec progression
@@ -281,10 +237,13 @@ def handle_quiz_completion(sender, instance, created, **kwargs):
     """
     Gère les notifications pour les quiz complétés
     """
+    
     if not instance.terminer or not created:
         return
     
     user = instance.etudiant
+    if not is_student(user):
+        return
     quiz = instance.quiz
     
     # ========= CALCUL DU SCORE =========
@@ -356,10 +315,13 @@ def handle_study_session(sender, instance, created, **kwargs):
     """
     Gère les notifications pour les sessions d'étude
     """
+    
     if not created:
         return
     
     user = instance.utilisateur
+    if not is_student(user):
+        return
     duration = instance.duration
     
     # ========= SESSIONS LONGUES =========
@@ -415,10 +377,13 @@ def handle_weekly_progress(sender, instance, created, **kwargs):
     """
     Analyse la progression hebdomadaire et envoie des notifications
     """
+    
     if not created:
         return
     
     user = instance.utilisateur
+    if not is_student(user):
+        return
     
     # ========= PROGRESSION HEBDOMADAIRE =========
     start_of_week = timezone.now() - timedelta(days=7)
@@ -460,6 +425,8 @@ def check_special_achievements(user):
     """
     Vérifie et notifie les réalisations spéciales
     """
+    if not is_student(user):
+        return
     # ========= COURS COMPLÉTÉS =========
     completed_courses = ProgressionCours.objects.filter(
         utilisateur=user,
@@ -501,6 +468,8 @@ def check_special_achievements(user):
 # ============================================================================
 def calculate_streak(user):
     """Calcule la série de jours consécutifs avec activité"""
+    if not is_student(user):
+        return 0
     today = timezone.now().date()
     streak = 0
     
@@ -532,6 +501,8 @@ def calculate_streak(user):
 def check_consistency(user):
     """Vérifie la régularité d'apprentissage"""
     # Jours avec activité ce mois
+    if not is_student(user):
+        return
     today = timezone.now().date()
     start_of_month = today.replace(day=1)
     
@@ -584,15 +555,13 @@ def check_consistency(user):
 # SIGNAL: Vérifications périodiques (à exécuter via tâche cron)
 # ============================================================================
 def check_periodic_achievements():
-    """
-    Fonction à appeler périodiquement pour vérifier les réalisations
-    """
     from datetime import date
-    
     today = date.today()
     
-    # Vérifier pour tous les utilisateurs
+    # Vérifier pour tous les étudiants
     for user in Utilisateur.objects.filter(etudiant__isnull=False):
+        if not is_student(user):
+            continue
         # Vérifier la série
         streak = calculate_streak(user)
         
@@ -602,12 +571,15 @@ def check_periodic_achievements():
         # Vérifier les réalisations spéciales
         check_special_achievements(user)
         
-        # Vérifier les objectifs hebdomadaires
-        if today.weekday() == 0:  # Lundi
+        # Vérifier les objectifs hebdomadaires (lundi)
+        if today.weekday() == 0:
             check_weekly_goals(user)
+
 
 def check_weekly_goals(user):
     """Vérifie les objectifs hebdomadaires"""
+    if not is_student(user):
+        return
     start_of_week = timezone.now() - timedelta(days=7)
     
     # Leçons cette semaine
