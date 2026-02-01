@@ -345,7 +345,6 @@ export default function UpdateQuiz() {
                 </div>
 
                 <div className="mt-10 flex flex-col sm:flex-row gap-4 sm:justify-between">
-                  <SaveDraftButton onClick={() => console.log(t("success.draftSaved"), quizData)} />
                   <PublishQuizButton onClick={() => setActiveStep(2)} />
                 </div>
               </div>

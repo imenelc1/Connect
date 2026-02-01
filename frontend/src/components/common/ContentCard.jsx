@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
@@ -13,7 +13,7 @@ const levelStyles = {
   Intermédiaire: "bg-purple text-white",
   Avancé: "bg-pink text-white",
 };
- 
+
 //couleur des buttons selons les niveau
 const buttonStyles = {
   Débutant: "bg-blue text-white",
@@ -57,9 +57,9 @@ export default function ContentCard({
     setProgress(course?.progress ?? 0);
   }, [course?.progress]);
 
-// pas d'object=> rien a afficher
+  // pas d'object=> rien a afficher
   if (!course) return null;
- //le type de la page selon le type des objets envoyé
+  //le type de la page selon le type des objets envoyé
   const pageType =
     type ||
     (location.pathname.includes("courses")
@@ -84,7 +84,7 @@ export default function ContentCard({
           ? t("checkExercise")
           : t("checkQuiz"),
   };
- //commencer le contenu selon le type et role
+  //commencer le contenu selon le type et role
   const handleStart = () => {
     if (pageType === "exercise") {
       navigate(
@@ -100,7 +100,7 @@ export default function ContentCard({
       navigate(`/Seecourses/${course.id}`);
     }
   };
-//reinitialiser la progression
+  //reinitialiser la progression
   const handleRestart = async () => {
     try {
       await progressionService.resetCourseProgress(course.id);
@@ -181,37 +181,28 @@ export default function ContentCard({
       </div>
 
       {/* ================= FOOTER ================= */}
-      <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        {/*etudiant */}
+      <div className="mt-4">
+        {/* ================= ETUDIANT ================= */}
         {role === "etudiant" && (
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <>
             {/* ================= QUIZ ================= */}
-            {/*afficher le button start quiz seuelement si il n'a pas atteint le nb max de tentative */}
-            {/* ou  il a depassé la duree entre deux tentatives*/}
             {pageType === "quiz" ? (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {!course.isBlocked && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="courseStart"
-                      className={`px-4 py-2 ${buttonStyles[course.level]}`}
-                      onClick={handleStart}
-                    >
-                      {course.tentatives?.length > 0 &&
-                        course.tentativesRestantes <= 0
-                        ? labels.restart
-                        : labels.start}
-                    </Button>
-
+                  <Button
+                    variant="heroPrimary"
+                    className={`${buttonStyles[course.level]} px-4 py-2 w-full col-span-2`}
+                    onClick={handleStart}
+                  >
                     {course.tentatives?.length > 0 &&
-                      course.tentativesRestantes <= 0 && (
-                        <FiCheckCircle className="text-purple" size={18} />
-                      )}
-                  </div>
+                      course.tentativesRestantes <= 0
+                      ? labels.restart
+                      : labels.start}
+                  </Button>
                 )}
 
                 {course.isBlocked && (
-                  <p className="text-sm text-red-500 font-semibold">
+                  <p className="col-span-2 text-sm text-red-500 font-semibold">
                     {course.tentativesRestantes <= 0
                       ? t("maxAttemptsReached")
                       : t("retryIn", { minutes: course.minutesRestantes })}
@@ -219,7 +210,7 @@ export default function ContentCard({
                 )}
 
                 {course.tentativesRestantes > 0 && (
-                  <p className="text-xs text-gray-400">
+                  <p className="col-span-2 text-xs text-gray-400">
                     {t("remainingAttempts", {
                       count: course.tentativesRestantes,
                     })}
@@ -229,19 +220,21 @@ export default function ContentCard({
             ) : (
               <>
                 {/* ================= COURSES & EXOS ================= */}
-                {/* le button start cours/exercice  seulon la progression */}
+
+                {/* ===== progress = 0 ===== */}
                 {progress === 0 && (
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <Button
                       variant="heroPrimary"
-                      className={`whitespace-nowrap px-4 whitespace-nowrap py-2 ${levelStyles[course.level]} `}
+                      className={`${buttonStyles[course.level]} px-4 py-2 w-full`}
                       onClick={() => navigate(`/Seecourses/${course.id}`)}
                     >
                       {labels.start}
                     </Button>
+
                     <Button
-                      variant="heroPrimary"
-                      className={`${buttonStyles[course.level]} whitespace-nowrap px-4 whitespace-nowrap py-2`}
+                      variant="heroOutline"
+                      className="px-4 py-2 w-full"
                       onClick={seeExercises}
                     >
                       {t("checkExos")}
@@ -249,23 +242,28 @@ export default function ContentCard({
                   </div>
                 )}
 
+                {/* ===== progress 1 → 99 ===== */}
                 {progress > 0 && progress < 100 && (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-3">
-                      <Button variant="heroOutline" className="px-4 whitespace-nowrap" onClick={handleRestart}>
-                        {labels.restart}
-                      </Button>
-                      <Button
-                        variant="heroPrimary"
-                        className={` whitespace-nowrap ${levelStyles[course.level]} px-4 py-2`}
-                        onClick={seeExercises}
-                      >
-                        {t("checkExos")}
-                      </Button>
-                    </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="heroOutline"
+                      className="px-4 py-2 w-full"
+                      onClick={handleRestart}
+                    >
+                      {labels.restart}
+                    </Button>
+
+                    <Button
+                      variant="heroOutline"
+                      className="px-4 py-2 w-full"
+                      onClick={seeExercises}
+                    >
+                      {t("checkExos")}
+                    </Button>
+
                     <Button
                       variant="heroPrimary"
-                      className={`${buttonStyles[course.level]} px-4 py-2`}
+                      className={`${buttonStyles[course.level]} px-4 py-2 w-full col-span-2`}
                       onClick={() =>
                         navigate(`/Seecourses/${course.id}`, {
                           state: { lastLessonId: course.lastLessonId },
@@ -277,18 +275,20 @@ export default function ContentCard({
                   </div>
                 )}
 
+                {/* ===== progress = 100 ===== */}
                 {progress >= 100 && (
-                  <div className="flex gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <Button
                       variant="heroOutline"
-                      className="px-4 whitespace-nowrap py-2"
+                      className="px-4 py-2 w-full"
                       onClick={handleRestart}
                     >
                       {labels.restart}
                     </Button>
+
                     <Button
-                      variant="heroPrimary"
-                      className={`whitespace-nowrap px-4 whitespace-nowrap py-2 ${buttonStyles[course.level]} px-0 py-2`}
+                      variant="heroOutline"
+                      className="px-4 py-2 w-full"
                       onClick={seeExercises}
                     >
                       {t("checkExos")}
@@ -297,20 +297,20 @@ export default function ContentCard({
                 )}
               </>
             )}
-          </div>
+          </>
         )}
 
         {/* ================= ENSEIGNANT ================= */}
         {role === "enseignant" && (
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 gap-3 items-center">
             <Button
-              variant="courseStart"
-              className={`${buttonStyles[course.level]} px-4 py-2`}
+              variant="heroPrimary"
+              className={`${buttonStyles[course.level]} px-4 py-2 w-full col-span-2`}
               onClick={handleStart}
             >
               {labels.check}
             </Button>
-            {/* pouvoir modifer ou supprimer l'objet si auteur=currentuser */}
+
             {course.isMine && (
               <>
                 <FiEdit
@@ -328,6 +328,7 @@ export default function ContentCard({
           </div>
         )}
       </div>
+
     </div>
   );
 }

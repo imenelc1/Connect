@@ -10,7 +10,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         model = Utilisateur
         fields = [
             'id_utilisateur', 'nom', 'prenom', 'date_naissance',
-            'adresse_email', 'mot_de_passe', 'matricule', 'must_change_password'
+            'adresse_email', 'mot_de_passe', 'matricule', 'must_change_password', "can_create_any_course_content"
         ]
    
     def create(self, validated_data):
@@ -19,6 +19,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         user.set_password(mot_de_passe)
         user.save()
         return user
+   
 
 
 class EtudiantSerializer(serializers.ModelSerializer):
@@ -55,6 +56,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     grade = serializers.SerializerMethodField()
     specialite = serializers.SerializerMethodField()
     annee_etude = serializers.SerializerMethodField()
+    can_create_any_course_content = serializers.SerializerMethodField()
     joined = serializers.DateTimeField(source='date_inscription', format="%Y-%m-%d")  # ← AJOUTÉ
 
     class Meta:
@@ -62,7 +64,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id_utilisateur', 'nom', 'prenom', 'date_naissance',
             'adresse_email', 'matricule', 'role', 'grade', 'specialite',
-            'annee_etude', 'joined', 'must_change_password'
+            'annee_etude', 'joined', 'must_change_password',
+             'can_create_any_course_content'
         ]
 
     def get_role(self, obj):
@@ -82,6 +85,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_annee_etude(self, obj):
         return getattr(getattr(obj, "etudiant", None), "annee_etude", None)
+    def get_can_create_any_course_content(self, obj):
+        if hasattr(obj, "enseignant") and obj.enseignant is not None:
+            return obj.enseignant.can_create_any_course_content
+        return False
 
 class AdminProfileSerializer(serializers.ModelSerializer):
     class Meta:

@@ -23,7 +23,7 @@ export default function QuizSettings({ quizData, onQuizChange, courses }) {
   ];
 
   //filtrer les cours appartenant a l'utilisateur 
-  const myCourses = courses.filter((c) => c.isMine);
+const myCourses = courses;
 
   return (
     <div className="rounded-3xl shadow-xl p-6 max-w-[20rem] border border-white/10 backdrop-blur bg-grad-3 text-black">

@@ -48,25 +48,73 @@ export default function NewExercise() {
   // États pour la responsivité
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const currentUserId = getCurrentUserId();
 
   const [maxSoumissions, setMaxSoumissions] = useState(0); // 0 = illimité
-
   const [courses, setCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const userEmail = userData?.user?.email;
+
+  // ===== AUTH =====
+
+  const currentUserId = userData?.user_id;
+  const isSpecialTeacher = Boolean(userData?.can_create_any_course_content);
+
+
+
+
   useEffect(() => {
+    setLoadingCourses(true);
+
     fetch("http://localhost:8000/api/courses/api/cours")
       .then((res) => res.json())
       .then((data) => {
+        console.log("RAW API DATA:", data);
+
         const formatted = data.map((c) => ({
           id: c.id_cours,
           title: c.titre_cour,
-
-          isMine: c.utilisateur === currentUserId, //NEWDED GHR ISMINE //
+          utilisateurId: c.utilisateur, // propriétaire du cours
+          isPublic: c.visibilite_cour ?? true, // 🔥 important
         }));
+
+        console.log("FORMATTED COURSES:", formatted);
+
         setCourses(formatted);
+        setLoadingCourses(false);
       })
-      .catch((err) => console.error(t("errors.loadCourses"), err));
+      .catch(() => setLoadingCourses(false));
   }, []);
+
+
+  const courseOptions = React.useMemo(() => {
+    if (!courses.length) return [];
+
+    //  ENSEIGNANT SPÉCIAL → TOUS LES COURS
+    if (isSpecialTeacher) {
+      return courses.map((c) => ({
+        value: c.id,
+        label: c.title,
+      }));
+    }
+
+    //  ENSEIGNANT NORMAL → seulement ses cours
+    return courses
+      .filter((c) => c.utilisateurId === currentUserId)
+      .map((c) => ({
+        value: c.id,
+        label: c.title,
+      }));
+  }, [courses, isSpecialTeacher, currentUserId]);
+
+
+
+  console.log("DEBUG AUTH", {
+    currentUserId,
+    isSpecialTeacher,
+    userData
+  });
+
+
 
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
@@ -268,13 +316,11 @@ export default function NewExercise() {
                 <ModernDropdown
                   value={selectedCourseId}
                   onChange={setSelectedCourseId}
-                  placeholder={t("select.placeholder")}
-                  options={[
-                    ...courses
-                      .filter((c) => c.isMine)
-                      .map((c) => ({ value: c.id, label: c.title })),
-                  ]}
+                  placeholder={loadingCourses ? "Chargement..." : t("select.placeholder")}
+                  options={courseOptions}
                 />
+
+
               </div>
 
               <div className="flex flex-col w-150px">

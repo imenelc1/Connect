@@ -55,6 +55,7 @@ class Etudiant(models.Model):
 class Enseignant(models.Model):
     utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, primary_key=True)
     grade = models.CharField(max_length=50)
+    can_create_any_course_content = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.utilisateur.nom} {self.utilisateur.prenom} - Enseignant"

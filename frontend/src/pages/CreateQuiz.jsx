@@ -87,6 +87,7 @@ export default function CreateQuiz() {
   });
 
   const currentUserId = getCurrentUserId(); //l'utilisateur connecté
+  const isSpecialTeacher = Boolean(userData?.can_create_any_course_content);
 
   const [courses, setCourses] = useState([]);
 
@@ -98,14 +99,25 @@ export default function CreateQuiz() {
         const formatted = data.map((c) => ({
           id: c.id_cours,
           title: c.titre_cour,
-
-          isMine: c.utilisateur === currentUserId, //NEWDED GHR ISMINE //
+          utilisateurId: c.utilisateur, // 🔑 propriétaire du cours
         }));
+
         setCourses(formatted);
       })
       .catch((err) => console.error(t("errors.loadCourses"), err));
-  }, []);
-  const myCourses = courses.filter((c) => c.isMine);
+  }, [currentUserId]);
+  const availableCourses = React.useMemo(() => {
+    // ⭐ ENSEIGNANT SPÉCIAL → TOUS LES COURS
+    if (isSpecialTeacher) {
+      return courses;
+    }
+
+    // 👨‍🏫 ENSEIGNANT NORMAL → seulement ses cours
+    return courses.filter(
+      (c) => c.utilisateurId === currentUserId
+    );
+  }, [courses, isSpecialTeacher, currentUserId]);
+
 
 
 
@@ -409,8 +421,9 @@ export default function CreateQuiz() {
                 <QuizSettings
                   quizData={quizData}
                   onQuizChange={handleQuizChange}
-                  courses={courses}
+                  courses={availableCourses}
                 />
+
                 <QuizSummary
                   totalQuestions={totalQuestions}
                   totalPoints={totalPoints}
