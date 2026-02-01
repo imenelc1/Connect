@@ -2,12 +2,19 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
+/*
+  Compsant topBar
+  barre de navigation pour etapes
+  afficher les etapes d'un processus, ex: creation du cours, modification
+ */
 export default function Topbar({ steps = [], activeStep, setActiveStep, onStepChange, className = "" }) {
+  
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); //pour la navigation
 
   return (
     <div className={`w-full bg-card rounded-2xl shadow-md p-4 flex items-center justify-center ${className}`}>
+      {/* Boucle sur toutes les etapes */}
       {steps.map((step, index) => {
         const isActive = activeStep === index + 1;
         const Icon = step.icon || (() => <div />);
@@ -26,13 +33,14 @@ export default function Topbar({ steps = [], activeStep, setActiveStep, onStepCh
             }}
             className={`flex flex-col items-center gap-1 cursor-pointer ${activeStep < index + 1 ? "opacity-60" : ""}`}
           >
+            {/*icons et labels */}
             <div className="flex items-center gap-2">
               <Icon size={18} className={isActive ? "text-muted" : "text-grayc"} />
               <span className={`font-semibold text-sm md:text-base ${isActive ? "text-muted" : "text-grayc"}`}>
                 {t(step.label)}
               </span>
             </div>
-
+            {/* barre en dessous de l'etape pour indiquer l'etape active */}
             <div className={`w-20 h-[3px] rounded-full ${isActive ? "bg-muted" : "bg-transparent"}`}></div>
           </div>
         );

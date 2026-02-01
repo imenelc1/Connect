@@ -13,7 +13,19 @@
      "Edit":"Modifier",
      "Send":"Envoyer des retours",
      "Pending":"En attente",
-     "Reviewect":"Réviser"
+     "Reviewect":"Réviser",
+     "joinedOn": "Inscrit(e) le {{date}}",
+    "evaluated": "évaluées",
+    "noExercises": "Aucun exercice disponible",
+    "noSubmissions": "Aucune tentative soumise"
+
+
+
+
   
-  }
+  },
+  "errors": {
+  "loadFeedbacks": "Erreur lors de la récupération des retours",
+   "fetchStudentExercise": "Erreur lors de la récupération de l'exercice étudiant"
+}
 }

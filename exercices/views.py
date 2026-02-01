@@ -10,25 +10,33 @@ from users.jwt_auth import jwt_required
 from rest_framework.views import APIView
 from rest_framework import status
 from feedback.models import Notification
+from courses.models import Cours  
 
 class CreateExoView(APIView):
-
     @jwt_required
     def post(self, request):
         data = request.data.copy()
-        data["utilisateur"] = request.user_id  
+        user = request.user
+
+        # Vérifier le cours
+        cours_id = data.get("cours")
+        try:
+            cours = Cours.objects.get(id_cours=cours_id)
+        except Cours.DoesNotExist:
+            return Response({"error": "Cours introuvable"}, status=404)
+
+        # Vérification de permission
+        if (cours.utilisateur != user) and not getattr(user.enseignant, "can_create_any_course_content", False):
+            return Response({"error": "Vous n'avez pas le droit de créer un exercice pour ce cours"}, status=403)
+
+        # Ajouter l'utilisateur pour le serializer
+        data["utilisateur"] = user.id_utilisateur
 
         serializer = ExerciceSerializer1(data=data)
-
         if serializer.is_valid():
-            exercice = serializer.save()
-            return Response(ExerciceSerializer1(exercice).data, status=201)
-
+            exo = serializer.save()
+            return Response(ExerciceSerializer1(exo).data, status=201)
         return Response(serializer.errors, status=400)
-
-
-
-
 
 @api_view(['GET'])
 def Exercice_list_api(request):

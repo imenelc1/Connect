@@ -27,6 +27,12 @@
     "exercise_load_error": "Impossible de charger l'exercice.",
      "tip_title": "Astuce",
      "save": "Sauvegarder",
-       "ai_assistant": "Assistant IA"
+       "ai_assistant": "Assistant IA",
+       "loadAttemptError": "Erreur lors du chargement de la tentative",
+       "aiStatusCheckFailed": "Échec de la vérification du statut de l'IA",
+       "aiCheckError": "Erreur lors de la vérification de l'IA"
+
+
+
 
 }

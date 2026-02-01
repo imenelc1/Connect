@@ -30,8 +30,8 @@ export default function SpacesPage() {
   const [newSpace, setNewSpace] = useState({ title: "", description: "", utilisateur: "" });
   const [spaces, setSpaces] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  const [students, setStudents] = useState([]); // étudiants à ajouter
-  const [studentsInSpace, setStudentsInSpace] = useState([]); // étudiants déjà dans l'espace
+  const [students, setStudents] = useState([]);
+  const [studentsInSpace, setStudentsInSpace] = useState([]);
   const [error, setError] = useState("");
   const [courses, setCourses] = useState([]);
   const [exercices, setExercices] = useState([]);
@@ -102,7 +102,6 @@ export default function SpacesPage() {
 
   // ================= HANDLE ADD / EDIT SPACE =================
   const handleSubmit = async (e) => {
-    //e.preventDefault();
     const token = localStorage.getItem("admin_token");
     const payload = { nom_space: newSpace.title, description: newSpace.description, utilisateur: newSpace.utilisateur };
 
@@ -160,7 +159,6 @@ export default function SpacesPage() {
   };
 
   // ================= OPEN MODAL POUR GÉRER LES ÉTUDIANTS =================
-  // ================= OPEN MODAL POUR GÉRER LES ÉTUDIANTS =================
   const handleOpenSpaceStudents = async (space) => {
     setSelectedSpace(space);
     setAddStudentsModalOpen(true);
@@ -169,7 +167,6 @@ export default function SpacesPage() {
     if (!token) return toast.error("Token manquant");
 
     try {
-      // Récupérer les détails de l'espace
       const res = await fetch(
         `http://localhost:8000/api/spaces/space/${space.id}/details/`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -177,10 +174,9 @@ export default function SpacesPage() {
       if (!res.ok) throw new Error(t("errors.load"));
       const data = await res.json();
 
-      // Étudiants déjà dans l'espace
       const inSpace = data.students.map((s) => ({
         ...s,
-        id_utilisateur: s.id_utilisateur || s.id, // assure cohérence des IDs
+        id_utilisateur: s.id_utilisateur || s.id,
       }));
       setStudentsInSpace(inSpace);
 
@@ -197,11 +193,11 @@ export default function SpacesPage() {
         .filter((s) => !inSpaceIds.includes(s.id))
         .map((s) => ({
           ...s,
-          id_utilisateur: s.id, // standardiser l'ID pour le checkbox
+          id_utilisateur: s.id,
         }));
 
       setStudents(otherStudents);
-      setSelectedStudents([]); // aucune sélection par défaut
+      setSelectedStudents([]); t
 
       // Contenus
       setCourses(data.courses || []);
@@ -254,7 +250,7 @@ export default function SpacesPage() {
     if (!selectedSpace) return;
 
     const confirmDelete = window.confirm(
-     t("messages.confirmRemoveStudent", { firstName: student.prenom, lastName: student.nom })
+      t("messages.confirmRemoveStudent", { firstName: student.prenom, lastName: student.nom })
     );
     if (!confirmDelete) return;
 
@@ -281,19 +277,17 @@ export default function SpacesPage() {
         throw new Error(data.error || t("messages.studentRemoveFailed"));
       }
 
-      // 1️⃣ Retirer de "Déjà dans l'espace"
       setStudentsInSpace((prev) =>
         prev.filter((s) => s.id_utilisateur !== student.id_utilisateur)
       );
 
-      // 2️⃣ Ajouter à "Ajouter à l'espace"
       setStudents((prev) => [...prev, student]);
 
-      toast.success(  t("messages.studentRemovedFromSpace", { firstName: student.prenom, lastName: student.nom })
-    );
+      toast.success(t("messages.studentRemovedFromSpace", { firstName: student.prenom, lastName: student.nom })
+      );
     } catch (err) {
       console.error(err);
-toast.error(err.message || t("messages.studentRemoveFailed"));
+      toast.error(err.message || t("messages.studentRemoveFailed"));
     }
   };
   const teacherOptions = teachers.map((t) => ({
@@ -394,7 +388,6 @@ toast.error(err.message || t("messages.studentRemoveFailed"));
       {/* Modal Création/Edition d'espace */}
       <AddModel open={openModal} onClose={() => setOpenModal(false)} fields={fields} onSubmit={handleSubmit} submitLabel={editIndex ? t("update") : t("create")} cancelLabel={t("cancel")} />
 
-      {/* Modal Gérer les étudiants */}
       {/* ========== MODAL : GÉRER LES ÉTUDIANTS ========== */}
       {addStudentsModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-start pt-10 z-50 overflow-y-auto">

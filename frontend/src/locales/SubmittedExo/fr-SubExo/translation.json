@@ -8,5 +8,28 @@
   "submittedCode": "Code soumis",
   "expectedOutput": "Sortie attendue",
   "actualOutput": "Sortie obtenue",
-  "teacherFeedback": "Retour de l’enseignant"
+  "teacherFeedback": "Retour de l’enseignant",
+  "loading":"Chargement...",
+  "completedExercise": "Exercice complété",
+  "solution": "Solution",
+  "noFeedback": "Aucun feedback pour le moment",
+   "exerciseStatement": "Énoncé de l'exercice",
+   "studentAnswer": "Réponse de l'étudiant",
+  "noAnswer": "Aucune réponse fournie",
+  "newSystem": "Nouveau système",
+  "teacher": "Enseignant",
+  "date": "Date",
+  "exerciseId": "ID Exercice",
+  "attemptId": "ID Tentative",
+  "status": "Statut",
+  "category": "Catégorie",
+
+
+  "errors": {
+  "feedbackLoadFallback": "Erreur récupération feedback, utilisation ancien champ",
+   "notFound":"Non trouvé",
+  "loadAttempt": "Erreur lors du chargement de la tentative",
+  "feedbackFetch":"Erreur récupération feedback:"
+}
+
 }

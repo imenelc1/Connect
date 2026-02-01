@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import SideNavbar from "../components/common/NavBar";
+import SideNavbar from "../components/common/Navbar";
 import { PlayCircle, Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeButton from "../components/common/ThemeButton";

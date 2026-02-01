@@ -3,7 +3,7 @@ import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
-import { Pencil, Trash2 } from "lucide-react";
+import { FiEdit, FiTrash2} from "react-icons/fi";
 
 /* ===================== STYLES ===================== */
 const levelStyles = {
@@ -71,7 +71,7 @@ export default function ExerciseCard({
       );
       onDelete?.(exercise.id);
     } catch (err) {
-      console.error("Erreur suppression :", err);
+      console.error(t("errorDelete"), err);
     }
   };
 
@@ -144,14 +144,14 @@ export default function ExerciseCard({
               onClick={() => navigate(`/exercices/edit/${exercise.id}`)}
               className="text-gray-600 hover:text-blue-600 transition"
             >
-              <Pencil size={18} />
+              <FiEdit size={18} />
             </button>
 
             <button
               onClick={handleDelete}
-              className="text-gray-600 hover:text-red-600 transition"
+              className="text-gray-600 hover:text-red-500 transition"
             >
-              <Trash2 size={18} />
+              <FiTrash2 size={18} />
             </button>
           </div>
         )}

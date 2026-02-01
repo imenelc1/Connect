@@ -28,7 +28,7 @@
   "descriptionLabel": "Description",
   "descriptionPlaceholder": "Quiz description...",
   "duration": "Duration (minutes)",
-  "passingScore": "Passing Score",
+  "passingScore": "Required score",
   "quizLevel": "Quiz Level",
   "beginner": "Beginner",
   "intermediate": "Intermediate",
@@ -48,12 +48,43 @@
   "previewQuiz": "Preview Quiz",
   "loading": "Loading...",
   "backMenu": "Back to menu",
+  "unlimited": "Unlimited",
+  "unlimitedAttempts": "Unlimited attempts",
+  "maxAttemptsHint": "0 means unlimited attempts",
+  "publishQuiz": "Publish Quiz",
   "errors": {
-    "quizNotFound": "Quiz not found"
+    "quizNotFound": "Quiz not found",
+    "loadCourses": "Error loading courses",
+    "notLoggedIn": "User not logged in",
+    "requiredFields": "Please fill in all required fields",
+    "exerciseCreate": "Exercise creation error: {{message}}",
+    "questionTextRequired": "Question {{index}} is empty",
+    "correctAnswerRequired": "Please select a correct answer for question {{index}}",
+    "answerTextRequired": "Answer {{aIndex}} is empty in question {{qIndex}}",
+    "exerciseSave": "Error saving the exercise",
+    "quizCreation": "❌ Quiz creation error: {{details}}",
+    "quizCreateToast": "Error creating the quiz",
+    "questionsOptionsError": "❌ Error creating questions/options:",
+    "questionsCreateError": "Error creating questions",
+    "eachQuestionMustHaveCorrectAnswer": "Each question must have a correct answer",
+    "backendError": "❌ BACKEND ERROR 👉",
+    "updateError": "❌ Error during update"
   },
   "levels": {
     "debutant": "Beginner",
     "intermediaire": "Intermediate",
     "avance": "Advanced"
+  },
+  "success": {
+    "exerciseCreated": "Exercise created: {{id}}",
+    "quizCreated": "✅ Quiz created: {{id}}",
+    "allQuestionsCreated": "✅ All questions and options created!",
+    "quizCreatedSuccess": "Quiz successfully created!",
+    "quizUpdatedSuccess": "✅ Quiz updated successfully!",
+    "draftSaved": "Draft saved"
+  },
+  "logs": {
+    "quizApiResponse": "🔥 QUIZ API RESPONSE",
+    "exerciseFromApi": "🔥 EXERCISE FROM API"
   }
 }

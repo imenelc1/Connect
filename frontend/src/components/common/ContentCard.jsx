@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ContentProgress from "./ContentProgress";
 import Button from "./Button";
 import { useTranslation } from "react-i18next";
@@ -7,29 +7,32 @@ import { FiEdit, FiTrash2, FiCheckCircle } from "react-icons/fi";
 import progressionService from "../../services/progressionService";
 
 /* ===================== STYLES ===================== */
+// Couleurs  selon le niveau du cours /exo/quiz
 const levelStyles = {
   Débutant: "bg-blue text-white",
   Intermédiaire: "bg-purple text-white",
   Avancé: "bg-pink text-white",
 };
 
+//couleur des buttons selons les niveau
 const buttonStyles = {
   Débutant: "bg-blue text-white",
   Intermédiaire: "bg-purple text-white",
   Avancé: "bg-pink text-white",
 };
-
+//couleur de cercle utilisateur selon le niveau
 const initialsBgMap = {
   Débutant: "bg-blue",
   Intermédiaire: "bg-purple",
   Avancé: "bg-pink",
 };
-
+//couleur de barre de progression selon le niveau
 const progressColorMap = {
   Débutant: "bg-blue",
   Intermédiaire: "bg-purple",
   Avancé: "bg-pink",
 };
+//mapping des niveaux
 
 const levelKeyMap = {
   Débutant: "beginner",
@@ -39,28 +42,33 @@ const levelKeyMap = {
 
 /* ===================== COMPONENT ===================== */
 export default function ContentCard({
-  course,
-  role,
-  showProgress,
+  course, //objet cours qui peut etre cours ou quiz ou exo
+  role, //etudiant /enseignant
+  showProgress, //progression
   type,
   className = "",
-  onDelete,
+  onDelete, //suppression
 }) {
-  const { t } = useTranslation("contentPage");
+  const { t } = useTranslation("contentPage");  //traduction
   const location = useLocation();
   const navigate = useNavigate();
   const [progress, setProgress] = useState(course?.progress ?? 0);
+  useEffect(() => {
+    setProgress(course?.progress ?? 0);
+  }, [course?.progress]);
 
+  // pas d'object=> rien a afficher
   if (!course) return null;
-
+  //le type de la page selon le type des objets envoyé
   const pageType =
     type ||
     (location.pathname.includes("courses")
       ? "course"
       : location.pathname.includes("exercises")
-      ? "exercise"
-      : "quiz");
+        ? "exercise"
+        : "quiz");
 
+  // labels dynamique selon le type de la page
   const labels = {
     start: t(`start${pageType.charAt(0).toUpperCase() + pageType.slice(1)}`),
     continue: t(
@@ -73,10 +81,10 @@ export default function ContentCard({
       pageType === "course"
         ? t("checkCourse")
         : pageType === "exercise"
-        ? t("checkExercise")
-        : t("checkQuiz"),
+          ? t("checkExercise")
+          : t("checkQuiz"),
   };
-
+  //commencer le contenu selon le type et role
   const handleStart = () => {
     if (pageType === "exercise") {
       navigate(
@@ -92,7 +100,7 @@ export default function ContentCard({
       navigate(`/Seecourses/${course.id}`);
     }
   };
-
+  //reinitialiser la progression
   const handleRestart = async () => {
     try {
       await progressionService.resetCourseProgress(course.id);
@@ -101,23 +109,23 @@ export default function ContentCard({
         pageType === "quiz"
           ? `/QuizIntro/${course.id}`
           : pageType === "course"
-          ? `/Seecourses/${course.id}`
-          : `/ListeExercices/${course.id}`
+            ? `/Seecourses/${course.id}`
+            : `/ListeExercices/${course.id}`
       );
     } catch (err) {
       console.error(err);
     }
   };
-
+  //voir la liste des exercices associé
   const seeExercises = () => navigate(`/ListeExercices/${course.id}`);
-
+  //naviger vers la page de modification de contenu 
   const handleEdit = () => {
     navigate(
       pageType === "course"
         ? `/courses/edit/${course.id}`
         : pageType === "exercise"
-        ? `/exercices/edit/${course.id}`
-        : `/quiz/edit/${course.id}`
+          ? `/exercices/edit/${course.id}`
+          : `/quiz/edit/${course.id}`
     );
   };
 
@@ -128,6 +136,7 @@ export default function ContentCard({
     >
       {/* ================= BODY ================= */}
       <div className="flex flex-col flex-1 min-w-0">
+        {/* titre et niveau */}
         <div className="flex justify-between items-start gap-3">
           <h2 className="font-semibold text-lg line-clamp-2 break-words">
             {course.title}
@@ -138,11 +147,11 @@ export default function ContentCard({
             {t(`levels.${levelKeyMap[course.level]}`)}
           </span>
         </div>
-
+        {/*description */}
         <p className="text-grayc my-3 line-clamp-3 break-words">
           {course.description}
         </p>
-
+        {/*auteur et duree */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <div
@@ -157,11 +166,11 @@ export default function ContentCard({
             {pageType === "exercise"
               ? course.categorie
               : pageType === "quiz" && course.duration
-              ? `${course.duration} min`
-              : course.duration}
+                ? `${course.duration} min`
+                : course.duration}
           </span>
         </div>
-
+        {/* barre de progression pour la page exercice et cours */}
         {showProgress && pageType !== "quiz" && (
           <ContentProgress
             value={progress}
@@ -172,43 +181,37 @@ export default function ContentCard({
       </div>
 
       {/* ================= FOOTER ================= */}
-      <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="mt-4">
+        {/* ================= ETUDIANT ================= */}
         {role === "etudiant" && (
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <>
             {/* ================= QUIZ ================= */}
             {pageType === "quiz" ? (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 {!course.isBlocked && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="courseStart"
-                      className={`px-4 py-2 ${buttonStyles[course.level]}`}
-                      onClick={handleStart}
-                    >
-                      {course.tentatives?.length > 0 &&
-                      course.tentativesRestantes <= 0
-                        ? labels.restart
-                        : labels.start}
-                    </Button>
-
+                  <Button
+                    variant="heroPrimary"
+                    className={`${buttonStyles[course.level]} px-4 py-2 w-full col-span-2`}
+                    onClick={handleStart}
+                  >
                     {course.tentatives?.length > 0 &&
-                      course.tentativesRestantes <= 0 && (
-                        <FiCheckCircle className="text-purple" size={18} />
-                      )}
-                  </div>
+                      course.tentativesRestantes <= 0
+                      ? labels.restart
+                      : labels.start}
+                  </Button>
                 )}
 
                 {course.isBlocked && (
-                  <p className="text-sm text-red-500 font-semibold">
+                  <p className="col-span-2 text-sm text-red-500 font-semibold">
                     {course.tentativesRestantes <= 0
-                      ? t("course.maxAttemptsReached")
-                      : t("course.retryIn", { minutes: course.minutesRestantes })}
+                      ? t("maxAttemptsReached")
+                      : t("retryIn", { minutes: course.minutesRestantes })}
                   </p>
                 )}
 
                 {course.tentativesRestantes > 0 && (
-                  <p className="text-xs text-gray-400">
-                    {t("course.remainingAttempts", {
+                  <p className="col-span-2 text-xs text-gray-400">
+                    {t("remainingAttempts", {
                       count: course.tentativesRestantes,
                     })}
                   </p>
@@ -217,18 +220,21 @@ export default function ContentCard({
             ) : (
               <>
                 {/* ================= COURSES & EXOS ================= */}
+
+                {/* ===== progress = 0 ===== */}
                 {progress === 0 && (
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <Button
                       variant="heroPrimary"
-                      className={`whitespace-nowrap px-4 whitespace-nowrap py-2 ${levelStyles[course.level]} `}
+                      className={`${buttonStyles[course.level]} px-4 py-2 w-full`}
                       onClick={() => navigate(`/Seecourses/${course.id}`)}
                     >
                       {labels.start}
                     </Button>
+
                     <Button
-                      variant="heroPrimary"
-                      className={`${buttonStyles[course.level]} whitespace-nowrap px-4 whitespace-nowrap py-2`}
+                      variant="heroOutline"
+                      className="px-4 py-2 w-full"
                       onClick={seeExercises}
                     >
                       {t("checkExos")}
@@ -236,23 +242,28 @@ export default function ContentCard({
                   </div>
                 )}
 
+                {/* ===== progress 1 → 99 ===== */}
                 {progress > 0 && progress < 100 && (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-3">
-                      <Button variant="heroOutline" className="px-4 whitespace-nowrap" onClick={handleRestart}>
-                        {labels.restart}
-                      </Button>
-                      <Button
-                        variant="heroPrimary"
-                        className={` whitespace-nowrap ${levelStyles[course.level]} px-4 py-2`}
-                        onClick={seeExercises}
-                      >
-                        {t("checkExos")}
-                      </Button>
-                    </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="heroOutline"
+                      className="px-4 py-2 w-full"
+                      onClick={handleRestart}
+                    >
+                      {labels.restart}
+                    </Button>
+
+                    <Button
+                      variant="heroOutline"
+                      className="px-4 py-2 w-full"
+                      onClick={seeExercises}
+                    >
+                      {t("checkExos")}
+                    </Button>
+
                     <Button
                       variant="heroPrimary"
-                      className={`${buttonStyles[course.level]} px-4 py-2`}
+                      className={`${buttonStyles[course.level]} px-4 py-2 w-full col-span-2`}
                       onClick={() =>
                         navigate(`/Seecourses/${course.id}`, {
                           state: { lastLessonId: course.lastLessonId },
@@ -264,18 +275,20 @@ export default function ContentCard({
                   </div>
                 )}
 
+                {/* ===== progress = 100 ===== */}
                 {progress >= 100 && (
-                  <div className="flex gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <Button
                       variant="heroOutline"
-                      className="px-4 whitespace-nowrap py-2"
+                      className="px-4 py-2 w-full"
                       onClick={handleRestart}
                     >
                       {labels.restart}
                     </Button>
+
                     <Button
-                      variant="heroPrimary"
-                      className={`whitespace-nowrap px-4 whitespace-nowrap py-2 ${buttonStyles[course.level]} px-0 py-2`}
+                      variant="heroOutline"
+                      className="px-4 py-2 w-full"
                       onClick={seeExercises}
                     >
                       {t("checkExos")}
@@ -284,15 +297,15 @@ export default function ContentCard({
                 )}
               </>
             )}
-          </div>
+          </>
         )}
 
         {/* ================= ENSEIGNANT ================= */}
         {role === "enseignant" && (
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 gap-3 items-center">
             <Button
-              variant="courseStart"
-              className={`${buttonStyles[course.level]} px-4 py-2`}
+              variant="heroPrimary"
+              className={`${buttonStyles[course.level]} px-4 py-2 w-full col-span-2`}
               onClick={handleStart}
             >
               {labels.check}
@@ -315,6 +328,7 @@ export default function ContentCard({
           </div>
         )}
       </div>
+
     </div>
   );
 }

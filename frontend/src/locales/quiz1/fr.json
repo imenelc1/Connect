@@ -13,5 +13,16 @@
   "pointsTotaux": "Note minimale pour valider le quiz",
   "start": "C’est parti ! 🚀",
   "back": "Retourner au menu",
-  "testTranslation": "Ceci est un test de traduction"
+  "testTranslation": "Ceci est un test de traduction",
+
+  "noQuiz": "Quiz non trouvé",
+  "loading":"Changement...",
+
+  "levels": {
+  "debutant": "Débutant",
+  "intermediaire": "Intermédiaire",
+  "avance": "Avancé"
+}
+
+
 }

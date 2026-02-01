@@ -45,32 +45,79 @@ export default function NewExercise() {
   const userData = JSON.parse(localStorage.getItem("user"));
   const userRole = userData?.user?.role ?? userData?.role;
   const token = localStorage.getItem("token");
-   // États pour la responsivité
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  // États pour la responsivité
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const currentUserId = getCurrentUserId();
 
   const [maxSoumissions, setMaxSoumissions] = useState(0); // 0 = illimité
-
   const [courses, setCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const userEmail = userData?.user?.email;
+
+  // ===== AUTH =====
+
+  const currentUserId = userData?.user_id;
+  const isSpecialTeacher = Boolean(userData?.can_create_any_course_content);
+
+
+
+
   useEffect(() => {
+    setLoadingCourses(true);
+
     fetch("http://localhost:8000/api/courses/api/cours")
       .then((res) => res.json())
       .then((data) => {
+        console.log("RAW API DATA:", data);
+
         const formatted = data.map((c) => ({
           id: c.id_cours,
           title: c.titre_cour,
-
-          isMine: c.utilisateur === currentUserId, //NEWDED GHR ISMINE //
+          utilisateurId: c.utilisateur, // propriétaire du cours
+          isPublic: c.visibilite_cour ?? true, // 🔥 important
         }));
+
+        console.log("FORMATTED COURSES:", formatted);
+
         setCourses(formatted);
+        setLoadingCourses(false);
       })
-      .catch((err) => console.error("Erreur chargement cours :", err));
+      .catch(() => setLoadingCourses(false));
   }, []);
 
-  const initials = `${userData?.nom?.[0] || ""}${
-    userData?.prenom?.[0] || ""
-  }`.toUpperCase();
+
+  const courseOptions = React.useMemo(() => {
+    if (!courses.length) return [];
+
+    //  ENSEIGNANT SPÉCIAL → TOUS LES COURS
+    if (isSpecialTeacher) {
+      return courses.map((c) => ({
+        value: c.id,
+        label: c.title,
+      }));
+    }
+
+    //  ENSEIGNANT NORMAL → seulement ses cours
+    return courses
+      .filter((c) => c.utilisateurId === currentUserId)
+      .map((c) => ({
+        value: c.id,
+        label: c.title,
+      }));
+  }, [courses, isSpecialTeacher, currentUserId]);
+
+
+
+  console.log("DEBUG AUTH", {
+    currentUserId,
+    isSpecialTeacher,
+    userData
+  });
+
+
+
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
+    }`.toUpperCase();
 
   const exerciseSteps = [
     { label: t("exercises.info"), icon: FileText },
@@ -83,7 +130,7 @@ export default function NewExercise() {
     const currentUserId = getCurrentUserId();
 
     if (!token || !currentUserId) {
-      alert("Utilisateur non connecté");
+      alert(t("errors.notAuthenticated"));
       return null;
     }
 
@@ -116,10 +163,10 @@ export default function NewExercise() {
       return exoId;
     } catch (err) {
       console.error(
-        "Erreur création cours :",
+        t("errors.createExercise"),
         err.response?.data || err.message
       );
-      alert("Erreur lors de la création de l'exercice");
+      alert(t("errors.createExercise"));
       return null;
     }
   };
@@ -269,28 +316,26 @@ export default function NewExercise() {
                 <ModernDropdown
                   value={selectedCourseId}
                   onChange={setSelectedCourseId}
-                  placeholder={t("select.placeholder")}
-                  options={[
-                    ...courses
-                      .filter((c) => c.isMine)
-                      .map((c) => ({ value: c.id, label: c.title })),
-                  ]}
+                  placeholder={loadingCourses ? "Chargement..." : t("select.placeholder")}
+                  options={courseOptions}
                 />
+
+
               </div>
 
-               <div className="flex flex-col w-150px">
+              <div className="flex flex-col w-150px">
                 <label className="block text-textc font-semibold">
                   {t("max soumissions") ||
                     "Nombre max de soumissions (0 = illimité)"}
                 </label>
-               <Input
-                type="number"
-                min={0}
-                value={maxSoumissions}
-                onChange={(e) => setMaxSoumissions(Number(e.target.value))}
-                placeholder="0"
-                className="w-36 border border-grayc shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 !bg-card dark:text-white"
-              />
+                <Input
+                  type="number"
+                  min={0}
+                  value={maxSoumissions}
+                  onChange={(e) => setMaxSoumissions(Number(e.target.value))}
+                  placeholder="0"
+                  className="w-36 border border-grayc shadow-sm focus:outline-none focus:ring-2 focus:ring-primary mb-6 !bg-card dark:text-white"
+                />
 
               </div>
             </div>
@@ -330,7 +375,7 @@ export default function NewExercise() {
                   <strong>{t("course.course_topic")} :</strong> {statement}
                 </p>
                 <p>
-                  <strong>{t("course.level")} :</strong> {level}
+                  <strong>{t("course.level")} :</strong> {t(`preview.${level}`)}
                 </p>
                 <p>
                   <strong>{t("course.courseVisibility")} :</strong>{" "}
@@ -342,10 +387,10 @@ export default function NewExercise() {
                 </p>
 
                 <p>
-                <strong>{t("max_sub") || "Max soumissions"} :</strong> {maxSoumissions === 0 ? "Illimité" : maxSoumissions}
-              </p>
+                  <strong>{t("max_sub") || "Max soumissions"} :</strong> {maxSoumissions === 0 ? t("unlimited") : maxSoumissions}
+                </p>
 
-              <p>
+                <p>
                   <strong>{t("solution")} :</strong> {solution || "-"}
                 </p>
 

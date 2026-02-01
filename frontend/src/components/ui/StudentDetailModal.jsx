@@ -14,7 +14,7 @@ function InfoRow({ label, value, highlight = false }) {
   );
 }
 
-export default function StudentDetailModal({ open, onClose, studentId }) {
+export default function StudentDetailModal({ open, onClose, studentId, joined }) {
   const { t } = useTranslation("StudentsManagement");
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ export default function StudentDetailModal({ open, onClose, studentId }) {
         console.error(err);
         setError(
           t("StudentsManagement.errors.loadStudent") ||
-            "Impossible de charger les informations de l'étudiant."
+          "Impossible de charger les informations de l'étudiant."
         );
       } finally {
         setLoading(false);
@@ -56,12 +56,20 @@ export default function StudentDetailModal({ open, onClose, studentId }) {
 
   // **Nouvelle logique pour la date de join**
   const joinedDate =
-    student?.joined ?? // si l'API /students-with-progress a fourni joined
-    utilisateur.joined ??
-    utilisateur.date_joined ??
-    utilisateur.created_at;
+    student?.utilisateur?.date_joined ||
+    student?.utilisateur?.created_at ||
+    student?.date_joined ||
+    student?.created_at ||
+    null;
 
-  const joinedFormatted = joinedDate ? new Date(joinedDate).toLocaleDateString() : "-";
+
+  const joinedFormatted =
+    joined ||
+    student?.utilisateur?.date_joined ||
+    student?.utilisateur?.created_at ||
+    "-";
+
+
 
   const initials = `${utilisateur.nom?.[0] || ""}${utilisateur.prenom?.[0] || ""}`.toUpperCase();
 
@@ -98,7 +106,12 @@ export default function StudentDetailModal({ open, onClose, studentId }) {
                 <InfoRow label={t("StudentsManagement.detailLabels.coursesRead")} value={student.cours_lus?.length || 0} highlight />
                 <InfoRow label={t("StudentsManagement.detailLabels.exercisesDone")} value={student.exercices_faits?.length || 0} highlight />
                 <InfoRow label={t("StudentsManagement.detailLabels.quizzesDone")} value={student.quiz_faits?.length || 0} highlight />
-                <InfoRow label={t("StudentsManagement.detailLabels.joinedOn")} value={joinedFormatted} highlight />
+                <InfoRow
+                  label={t("StudentsManagement.detailLabels.joinedOn")}
+                  value={joinedFormatted}
+                  highlight
+                />
+
               </div>
             </div>
 

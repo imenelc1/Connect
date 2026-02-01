@@ -78,7 +78,7 @@ function StudentEditModal({ studentForm, setStudentForm, onClose, onSubmit, edit
             />
           </div>
 
-          {/* Spécialité / Année avec ModernDropdown */}
+          {/* Spécialité  */}
           <div className="grid grid-cols-2 gap-4">
             <ModernDropdown
               value={studentForm.specialite}
@@ -132,11 +132,10 @@ function StudentEditModal({ studentForm, setStudentForm, onClose, onSubmit, edit
 
 
 
-//================= MODAL CREER ===================
 // ================= MODAL AJOUT =================
 function StudentAddModal({ onClose, studentForm, setStudentForm, onSubmit, addErrors }) {
   const { t } = useTranslation("StudentsManagement");
-  if (!studentForm) return null; // sécurité
+  if (!studentForm) return null; 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
@@ -264,7 +263,6 @@ export default function StudentsManagement() {
 
         const studentsData = await res.json();
 
-        // 2️⃣ Pour chaque étudiant → vraie progression globale (dashboard)
         const studentsWithRealProgress = await Promise.all(
           studentsData.map(async (s) => {
             const progRes = await fetch(
@@ -302,13 +300,11 @@ export default function StudentsManagement() {
 
 
   // ================= RESIZE =================
-  // Handle window resize
   useEffect(() => {
     const resizeHandler = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", resizeHandler);
     return () => window.removeEventListener("resize", resizeHandler);
   }, []);
-  // Sidebar collapsed
   useEffect(() => {
     const handler = (e) => setSidebarCollapsed(e.detail);
     window.addEventListener("sidebarChanged", handler);
@@ -348,7 +344,6 @@ export default function StudentsManagement() {
   };
 
   const handleUpdate = async (e) => {
-    //e.preventDefault();
     const token = localStorage.getItem("admin_token");
     if (!token || !editStudent) return;
 
@@ -452,7 +447,7 @@ export default function StudentsManagement() {
     const payload = {
       nom: newStudentForm.nickname,
       prenom: newStudentForm.fullname,
-      email: newStudentForm.email, // <-- changer ici
+      email: newStudentForm.email, 
       date_naissance: newStudentForm.dob,
       matricule: newStudentForm.regnumber,
       specialite: newStudentForm.field,
@@ -482,7 +477,7 @@ export default function StudentsManagement() {
       setStudents((prev) => [
         ...prev,
         {
-          id: data.id_utilisateur || Date.now(), // fallback ID
+          id: data.id_utilisateur || Date.now(), 
           nom: payload.nom,
           prenom: payload.prenom,
           email: payload.adresse_email,
@@ -555,7 +550,7 @@ export default function StudentsManagement() {
         {/* Grid */}
         <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${getGridCols()}, minmax(0, 1fr))` }}>
           {filteredStudents.map((s, index) => (
-            <div key={index} className="bg-grad-2 rounded-2xl p-6 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-lg transition" onClick={() => setSelectedStudent(s.id)} >
+            <div key={index} className="bg-grad-2 rounded-2xl p-6 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-lg transition" onClick={() => setSelectedStudent(s)} >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-12 h-12 rounded-full bg-grad-1 text-white flex items-center justify-center text-lg font-semibold">{s.initials}</div>
@@ -594,10 +589,12 @@ export default function StudentsManagement() {
 
       {/* Modals */}
       <StudentDetailModal
-        open={!!selectedStudent}   // true si un étudiant est sélectionné
-        studentId={selectedStudent}
+        open={!!selectedStudent}
+        studentId={selectedStudent?.id}
+        joined={selectedStudent?.joined}
         onClose={() => setSelectedStudent(null)}
       />
+
 
       <StudentEditModal studentForm={studentForm} setStudentForm={setStudentForm} onClose={() => { setEditStudent(null); setStudentForm(null); }} onSubmit={handleUpdate} />
       {addStudentModalOpen && (

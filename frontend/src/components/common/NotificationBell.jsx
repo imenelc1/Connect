@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Loader, Check, MessageSquare, BookOpen, Award, TrendingUp, X, Trash2, Filter, Calendar, User, RefreshCw, CheckCircle } from 'lucide-react';
-import { useNotifications } from '../../context/NotificationContext';
-import NotificationPanel from './NotificationPanel';
+import { useNotifications } from '../../context/NotificationContext'; //hook de notification
+import NotificationPanel from './NotificationPanel'; //paneau de notification
 import { useTranslation } from 'react-i18next';
 
 
 const NotificationBell = () => {
-  const { t } = useTranslation("notifications");
+  const { t } = useTranslation("notifications"); //traduction
   const [showDropdown, setShowDropdown] = useState(false);
   const [showPanel, setShowPanel] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  //hook personnalisé pour gerer les notifications
   const { notifications, loading, unreadCount, fetchNotifications, markAsRead, markAllAsRead, deleteNotification, deleteAllNotifications } = useNotifications();
 
+  //refrecher les notifications dés que le dropdown s'ouvre
   useEffect(() => {
     if (showDropdown) {
       handleRefresh();
     }
   }, [showDropdown]);
 
+  //recurperation des notifications depuis le contexte
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -30,6 +33,7 @@ const NotificationBell = () => {
     }
   };
 
+  //icone selon le type de module
   const getIconByModule = (moduleSource) => {
     switch (moduleSource?.toLowerCase()) {
       case 'forum': return <MessageSquare size={18} className="text-blue-500" />;
@@ -40,6 +44,7 @@ const NotificationBell = () => {
     }
   };
 
+  //navigation selon la notification
   const handleNotificationNavigation = (notif) => {
     const objectId = notif.object_data?.id || notif.object_data?.cours_id || notif.object_data?.exercice_id || notif.object_data?.forum_id;
     switch (notif.module_source?.toLowerCase()) {
@@ -51,6 +56,7 @@ const NotificationBell = () => {
     }
   };
 
+  //formatage des dates
   const formatDate = (dateString) => {
     if (!dateString) return '';
     try {
@@ -69,10 +75,11 @@ const NotificationBell = () => {
   return (
     <>
       <div className="relative">
+        {/* button cloche */}
         <button
           onClick={() => {
             setShowDropdown(!showDropdown);
-            if (!showDropdown) handleRefresh();
+            if (!showDropdown) handleRefresh(); //refrecher si ouverture
           }}
           className="relative p-2 rounded-full hover:bg-primary/10 transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label={
@@ -82,6 +89,7 @@ const NotificationBell = () => {
           }
         >
           <Bell size={22} className="text-gray dark:text-white" />
+          {/* badge de notifications non lues */}
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red text-white text-xs rounded-full flex items-center justify-center font-bold animate-pulse px-1 shadow-md shadow-red-600/30">
               {unreadCount > 9 ? '9+' : unreadCount}
@@ -89,6 +97,8 @@ const NotificationBell = () => {
           )}
         </button>
 
+
+        {/* dropdown rapide */}
         {showDropdown && (
           <div className="absolute right-0 mt-2 w-96 bg-surface dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-800/20 dark:border-gray-700 z-50">
             {/* Header */}
@@ -101,6 +111,7 @@ const NotificationBell = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* boutons refrech et fermer */}
                   <button
                     onClick={handleRefresh}
                     disabled={refreshing}
@@ -240,6 +251,7 @@ const NotificationBell = () => {
         )}
       </div>
 
+        {/* panneau de notifications */}
       <NotificationPanel isOpen={showPanel} onClose={() => setShowPanel(false)} />
     </>
   );

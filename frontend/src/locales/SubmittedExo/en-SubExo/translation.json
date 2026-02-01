@@ -8,5 +8,28 @@
   "submittedCode": "Submitted Code",
   "expectedOutput": "Expected Output",
   "actualOutput": "Actual Output",
-  "teacherFeedback": "Teacher Feedback"
+  "teacherFeedback": "Teacher Feedback",
+  "loading":"Loading...",
+  "completedExercise": "Completed Exercise",
+  "solution": "Solution",
+  "noFeedback": "No feedback yet",
+  "exerciseStatement": "Exercise Statement",
+  "studentAnswer": "Student Answer",
+  "noAnswer": "No answer provided",
+ "newSystem": "New system",
+   "teacher": "Instructor",
+    "date": "Date",
+    "exerciseId": "Exercise ID",
+  "attemptId": "Attempt ID",
+  "status": "Status",
+  "category": "Category",
+
+  "errors": {
+  "feedbackLoadFallback": "Feedback retrieval error, using fallback field",
+  "notFound":"Not Found",
+  "loadAttempt": "Error loading attempt",
+  "feedbackFetch":"Feedback retrieval error:"
+  
+}
+
 }
