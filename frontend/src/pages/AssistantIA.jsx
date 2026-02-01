@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getSystemPrompt, getAIAnswer } from "../services/iaService";
 import { useTranslation } from "react-i18next";
+import TheoryExerciseContext from "../context/TheoryExerciseContext";
 
 const detectLanguage = (text) =>
   /[àâçéèêëîïôûùüÿñæœ]/i.test(text) ? "fr" : "en";
@@ -43,195 +44,228 @@ export default function AssistantIA({
   mode = "generic",
   course = null,
 }) {
-   const { t } = useTranslation("assistant"); 
-  const exercise = useContext(ExerciseContext); // récupère l'exercice
+  const { t } = useTranslation("assistant");
+
+  // ---------------- STATE ----------------
   const [student, setStudent] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [helpLevel, setHelpLevel] = useState(0);
-
   const [aiBadgeSent, setAiBadgeSent] = useState(false);
 
+  // ---------------- CONTEXTS ----------------
+  const codingExercise = useContext(ExerciseContext);
+  const theoryExercise = useContext(TheoryExerciseContext);
+
+  // 🎯 Exercice unifié (code OU théorie)
+  const exercise =
+    codingExercise?.id
+      ? codingExercise
+      : theoryExercise?.id
+        ? theoryExercise
+        : null;
+
+  // 🎯 Mode réel
+  const actualMode =
+    codingExercise?.id
+      ? "exercise"
+      : theoryExercise?.id
+        ? "theory"
+        : mode;
+
+ const chatTargetId =
+  actualMode === "exercise"
+    ? exercise?.id
+    : actualMode === "theory"
+      ? exercise?.id     
+      : actualMode === "course"
+        ? course?.id
+        : "global";
+
+
+  const scrollRef = useRef(null);
+
+  // ---------------- UTILS ----------------
   const hasMeaningfulCode = (code, defaultCode) => {
     if (!code) return false;
-
     const normalize = (str) =>
       str
         .replace(/\s+/g, "")
         .replace(/\/\*.*?\*\//g, "")
         .replace(/\/\/.*$/gm, "");
-
     return normalize(code) !== normalize(defaultCode);
   };
 
-  const scrollRef = useRef(null);
-
-  // Mode dynamique si exercice détecté
-  const actualMode = exercise?.id ? "exercise" : mode;
-  const chatTargetId =
-    actualMode === "exercise"
-      ? exercise?.id
-      : actualMode === "course"
-        ? course?.id
-        : "global";
-
-  // ---------- Load student ----------
+  // ---------------- LOAD STUDENT ----------------
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (!stored) return;
     const u = JSON.parse(stored);
     setStudent({
       id: u.user_id,
-      name: `${u.prenom || ""} ${u.nom || ""}`.trim() ||  t("student"),
+      name: `${u.prenom || ""} ${u.nom || ""}`.trim() || t("student"),
     });
   }, []);
 
-  // ---------- Load chat ----------
+  // ---------------- LOAD CHAT ----------------
   useEffect(() => {
     if (!student?.id) return;
-    const storedChat = localStorage.getItem(
-      `edu.chat.${student.id}.${actualMode}.${chatTargetId}`
-    );
+
+    const key = `edu.chat.${student.id}.${actualMode}.${chatTargetId}`;
+    const storedChat = localStorage.getItem(key);
+
     if (storedChat) {
       const parsed = JSON.parse(storedChat);
-      if (parsed?.messages?.length) setMessages(parsed.messages);
-    } else {
-      setMessages([
-        {
-          id: Date.now(),
-          from: "bot",
-          text:
-            actualMode === "exercise"
-              ? `Bonjour ${student.name
-              } 👋\nJe vois que tu travailles sur l'exercice : **${exercise?.titre || t("chat.exercise_in_progress")
-              }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
-              : actualMode === "course"
-                ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
-                : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`,
-        },
-      ]);
+      if (parsed?.messages?.length) {
+        setMessages(parsed.messages);
+        return;
+      }
     }
+
+    setMessages([
+      {
+        id: Date.now(),
+        from: "bot",
+        text:
+          actualMode === "exercise"
+            ? `Bonjour ${student.name} 👋  
+Je vois que tu travailles sur l'exercice **${exercise?.titre || ""}**.  
+Explique-moi ce qui te bloque.`
+            : actualMode === "theory"
+              ? `Bonjour ${student.name} 👋  
+Je suis là pour t'aider à comprendre cet exercice théorique.`
+              : `Bonjour ${student.name} 👋  
+Je suis ton assistant IA.`,
+      },
+    ]);
   }, [student, actualMode, chatTargetId, exercise]);
 
-  // ---------- Persist chat + scroll ----------
+  // ---------------- SAVE CHAT + SCROLL ----------------
   useEffect(() => {
     if (!student?.id) return;
+
     localStorage.setItem(
       `edu.chat.${student.id}.${actualMode}.${chatTargetId}`,
-      JSON.stringify({ messages, updatedAt: Date.now() })
+      JSON.stringify({ messages })
     );
+
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
     });
   }, [messages, student, actualMode, chatTargetId]);
 
-  // ---------- Send message ----------
+  // ---------------- SEND MESSAGE ----------------
   const handleSend = async () => {
     if (!input.trim() || loading || !student?.id) return;
+
     const userText = input.trim();
     const lang = detectLanguage(userText);
 
-    setMessages((m) => [
-      ...m,
-      { id: Date.now(), from: "user", text: userText },
-    ]);
+    setMessages((m) => [...m, { id: Date.now(), from: "user", text: userText }]);
     setInput("");
 
+    setLoading(true);
+
+    // 🔍 Détection théorie
+    const isTheory = actualMode === "theory";
+
+    // ---------------- RÈGLES PÉDAGOGIQUES ----------------
     let pedagogicRule = "";
 
-    // 🧠 Cas 1 : question sur le CODE
-    if (actualMode === "exercise" && asksAboutCode(userText)) {
+    if (isTheory) {
       pedagogicRule = `
-Analyse le code fourni ci-dessus.
-Explique précisément ce qui ne va pas.
-N'écris PAS la solution complète.
-N'améliore pas le code.
-Indique les erreurs logiques, syntaxiques ou conceptuelles.
+Aide l'étudiant progressivement :
+- Reformule la question
+- Explique les concepts clés
+- Donne un exemple abstrait
+- Ne donne JAMAIS la réponse finale exacte
 `;
     }
 
-    // 🧠 Cas 2 : blocage pédagogique (progressif)
+    else if (actualMode === "exercise" && asksAboutCode(userText)) {
+      pedagogicRule = `
+Analyse le code existant.
+Explique précisément ce qui ne va pas.
+Ne donne PAS la solution complète.
+`;
+    }
+
     else if (actualMode === "exercise" && isExerciseQuestion(userText)) {
       const nextLevel = helpLevel + 1;
       setHelpLevel(nextLevel);
 
-      // 🔒 Blocage si aucun code écrit
       if (
         nextLevel >= 3 &&
         !hasMeaningfulCode(exercise?.code, exercise?.defaultCode)
       ) {
         pedagogicRule = `
-Refuse de donner la solution complète.
-Explique que le code actuel est encore le code de base.
-Invite l'étudiant à essayer d'écrire une première version liée à l'exercice.
+Le code est encore vide ou basique.
+Refuse la solution complète.
 Donne seulement des indices.
-Sois encourageant.
 `;
       } else if (nextLevel === 1) {
-        pedagogicRule = `
-Donne UNIQUEMENT des indices.
-Explique le principe sans écrire de code.
-`;
+        pedagogicRule = `Donne des indices uniquement.`;
       } else if (nextLevel === 2) {
-        pedagogicRule = `
-Explique la logique étape par étape.
-Tu peux utiliser du pseudo-code.
-Ne donne PAS la solution complète.
-`;
+        pedagogicRule = `Explique la logique avec pseudo-code.`;
       } else {
         pedagogicRule = `
 Donne maintenant la solution complète en C,
-avec une explication ligne par ligne.
-Ne pose AUCUNE question à l'étudiant.
+avec explication ligne par ligne.
 `;
       }
     }
 
-    setLoading(true);
-    try {
-      const systemPrompt =
-        getSystemPrompt({
-          lang,
-          mode: actualMode,
-          exercise,
-          student,
-          memory: messages.slice(-6),
-          courseContext: course?.context || "",
-        }) +
-        `
+    // ---------------- CONTEXTE TECHNIQUE ----------------
+    const technicalContext = isTheory
+      ? `
+ÉNONCÉ :
+${exercise?.enonce}
 
-### CONTEXTE TECHNIQUE ACTUEL (NE PAS AFFICHER TEL QUEL À L'ÉTUDIANT)
+RÉPONSE DE L'ÉTUDIANT :
+${exercise?.reponse || "Aucune réponse"}
+`
+      : `
+ÉNONCÉ :
+${exercise?.enonce}
 
-ÉNONCÉ DE L'EXERCICE :
-${exercise?.enonce || "Non disponible"}
-
-CODE ACTUEL DE L'ÉTUDIANT :
+CODE :
 \`\`\`c
-${exercise?.code || "// Aucun code pour le moment"}
+${exercise?.code || "// Aucun code"}
 \`\`\`
 
-SORTIE / ERREURS ACTUELLES :
+SORTIE :
 ${exercise?.output || "Aucune sortie"}
+`;
 
-INSTRUCTIONS IMPORTANTES :
-- Analyse TOUJOURS le code avant de répondre
-- Si l'étudiant demande "quel est le problème", explique ce qui ne va pas dans CE code
-- Ne demande JAMAIS à l'étudiant de coller son code
-- Adapte ton aide au niveau pédagogique (indices → explication → solution)
-` +
-        "\n" +
-        pedagogicRule;
+    // ---------------- PROMPT FINAL ----------------
+    const systemPrompt =
+      getSystemPrompt({
+        lang,
+        mode: actualMode,
+        exercise,
+        student,
+        memory: messages.slice(-6),
+        courseContext: course?.context || "",
+      }) +
+      "\n\n### CONTEXTE TECHNIQUE\n" +
+      technicalContext +
+      "\n\n### RÈGLES PÉDAGOGIQUES\n" +
+      pedagogicRule;
 
-      const answer = await getAIAnswer({ systemPrompt, userPrompt: userText });
+    try {
+      const answer = await getAIAnswer({
+        systemPrompt,
+        userPrompt: userText,
+      });
+
       setMessages((m) => [
         ...m,
-        { id: Date.now() + 2, from: "bot", text: answer },
+        { id: Date.now() + 1, from: "bot", text: answer },
       ]);
 
-      // Badge IA — silencieux, une seule fois
       if (actualMode !== "exercise" && !aiBadgeSent) {
         await awardAIBadge();
         setAiBadgeSent(true);
@@ -240,6 +274,7 @@ INSTRUCTIONS IMPORTANTES :
       setLoading(false);
     }
   };
+
 
   if (!student?.id) return null;
 
