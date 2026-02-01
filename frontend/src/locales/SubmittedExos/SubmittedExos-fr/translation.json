@@ -12,5 +12,11 @@
     "reviewedStat": "Revu",
     "pendingStat": "En attente",
     "exercises": "Exercices",
-    "noFeedback": "pas de retour pour le moment"
+    "noFeedback": "Aucun feedback",
+    "hasFeedback": "Avec feedback",
+    "seeMore": "Voir plus",
+    "seeLess": "Voir moins",
+    "easy": "Facile",
+    "medium": "Intermédiaire",
+    "hard": "Difficile"
 }

@@ -12,5 +12,12 @@
     "reviewedStat": "Reviewed",
     "pendingStat": "Pending Review",
     "exercises": "Exercises",
-    "noFeedback": "pas de retour pour le moment"
+    "noFeedback": "No feedback",
+    "hasFeedback": "With feedback",
+    "seeMore": "See more",
+    "seeLess": "See less",
+    "easy": "Easy",
+    "medium": "Moderate",
+    "hard": "Difficult"
+   
 }
