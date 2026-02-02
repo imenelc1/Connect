@@ -68,7 +68,7 @@ export default function VoirQuizAdmin() {
   );
 
   return (
-    <div className="min-h-screen px-4 md:px-8 py-6 bg-[rgb(var(--color-bg))]">
+    <div className="min-h-screen px-4 md:px-8 py-6 bg-surface">
 
       {/* ACTIONS */}
       <div className="absolute top-4 right-4 flex gap-3">
@@ -119,7 +119,7 @@ export default function VoirQuizAdmin() {
         {quiz.questions.map((q, index) => (
           <div
             key={q.id}
-            className="bg-white rounded-xl shadow p-4"
+            className="bg-card rounded-xl shadow p-4"
           >
             <h3 className="font-semibold mb-2">
               {index + 1}. {q.texte}
@@ -133,7 +133,7 @@ export default function VoirQuizAdmin() {
               {q.options.map((opt) => (
                 <li
                   key={opt.id}
-                  className="border rounded-md px-3 py-2 bg-gray-50"
+                  className="border rounded-md px-3 py-2 bg-card"
                 >
                   {opt.texte}
                 </li>

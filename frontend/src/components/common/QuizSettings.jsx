@@ -134,7 +134,7 @@ const myCourses = courses;
           />
 
           {/* 👇 TEXTE EXPLICATIF */}
-          <p className="text-xs text-gray-500 italic">
+          <p className="text-xs text-gray italic">
             {t("maxAttemptsHint")}
           </p>
         </div>

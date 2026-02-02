@@ -128,7 +128,7 @@ export default function QuestionForm({ questions, onQuestionsChange }) {
   <input
     type="number"
     min={1}
-    value={q.points || 1}
+    value={q.points || 1} 
     onChange={(e) =>
       handleQuestionChange(
         qIndex,
@@ -136,10 +136,10 @@ export default function QuestionForm({ questions, onQuestionsChange }) {
         parseFloat(e.target.value) || 1
       )
     }
-    className="w-20 text-center border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+    className="w-20 text-center text-black border border-gray rounded-md px-2 py-1 shadow-sm  focus:ring-2 focus:ring-blue-400 focus:outline-none "
   />
 
-  <span className="text-sm text-gray-600 font-medium">
+  <span className="text-sm text-gray font-medium">
     points
   </span>
 </div>
