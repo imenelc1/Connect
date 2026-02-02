@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiTrash2 } from "react-icons/fi";
 import ThemeContext from "../context/ThemeContext";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Cards2 from "../components/common/Cards2";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
@@ -194,7 +194,7 @@ export default function SpacesPage() {
                     value={spaceDesc}
                     onChange={(e) => setSpaceDesc(e.target.value)}
                     rows={4}
-                    className="w-full rounded-md px-3 py-2 bg-grad-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full rounded-md px-3 py-2 bg-surface resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 ),
               },

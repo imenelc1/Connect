@@ -164,7 +164,8 @@ class AdminRegisterView(generics.CreateAPIView):
 
 
 class AdminLoginView(APIView):
-    def post(self, request):
+    def post(self, request):       
+
         email = request.data.get('email_admin')
         password = request.data.get('mdp_admin')
 
