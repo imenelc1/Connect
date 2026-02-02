@@ -1,32 +1,41 @@
 import React, { useState, useContext } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Trash2, ChevronUp } from "lucide-react";
+import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
+import { FolderPlus } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import { getCurrentUserId } from "../hooks/useAuth";
+import ThemeContext from "../context/ThemeContext";
+
+//les composants utilisés
 import Navbar from "../components/common/Navbar";
 import Input from "../components/common/Input";
 import Topbar from "../components/common/TopBar";
-import { Trash2, ChevronUp } from "lucide-react";
-import ThemeContext from "../context/ThemeContext";
 import Select from "../components/common/Select";
-import { FolderPlus } from "lucide-react";
-import { Monitor, BookOpenCheck, CheckCircle } from "lucide-react";
-import { getCurrentUserId } from "../hooks/useAuth";
-import api from "../services/courseService";
-import { toast } from "react-hot-toast";
-import { useParams } from "react-router-dom";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
-
-
 import ModernDropdown from "../components/common/ModernDropdown";
 import UserCircle from "../components/common/UserCircle";
 
-export default function CourseUpdate() {
-  const { t, i18n } = useTranslation("courseInfo");
-  const [activeStep, setActiveStep] = useState(1);
-  const { toggleDarkMode } = useContext(ThemeContext);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+//services api utilisé
+import api from "../services/courseService";
 
+
+
+
+
+
+
+export default function CourseUpdate() {
+  const { t, i18n } = useTranslation("courseInfo"); //traduction
+  const [activeStep, setActiveStep] = useState(1); //les etpaes de la modifications
+  const { toggleDarkMode } = useContext(ThemeContext); //changer le theme
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); //sidebar reduite ou non
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768); //detection mobile
+
+  //====== HANDLE RESIZE==========
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
@@ -41,32 +50,36 @@ export default function CourseUpdate() {
   }, []);
 
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); //pour la navigation, redirecton
+  //changer la langue
   const toggleLanguage = () => {
     const newLang = i18n.language === "fr" ? "en" : "fr";
     i18n.changeLanguage(newLang);
   };
 
+  //definition des etapes da la modifcation du cours
   const courseSteps = [
     { label: t("course.basic_info"), icon: Monitor },
     { label: t("course.curriculum"), icon: BookOpenCheck },
     { label: t("course.publish_title"), icon: CheckCircle },
   ];
-  const { id: coursId } = useParams();
+  const { id: coursId } = useParams(); //recuperer l'id du cours depuis l'url
+  //=====STATS===
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [level, setLevel] = useState("");
   const [currentCoursId, setCurrentCoursId] = useState(null);
 
-  const userData = JSON.parse(localStorage.getItem("user"));
+  const userData = JSON.parse(localStorage.getItem("user")); //recuperer l'utilisateur
   const userRole = userData?.user?.role ?? userData?.role;
 
+  //generation d'un ID temporaire pour les nouvelle sections ou leçons
   const generateTempId = () => `temp-${Date.now()}-${Math.random()}`;
   const isTempId = (id) => typeof id === "string" && id.startsWith("temp-");
 
 
-
+  //==============FETCH course =====
   useEffect(() => {
     if (!coursId) return;
 
@@ -82,7 +95,7 @@ export default function CourseUpdate() {
         setDescription(data.description);
         setDuration(data.duration);
         setLevel(data.niveau_cour);
-
+        //transformer les sections et leçons pour l'etat local
         const fetchedSections = (data.sections || []).map((sec) => ({
           id: sec.id_section,
           title: sec.titre_section,
@@ -101,7 +114,10 @@ export default function CourseUpdate() {
 
         setSections(fetchedSections);
       } catch (err) {
-        console.error("Erreur chargement cours :", err.response?.data || err);
+        console.error(
+          `${t("course.error_loading_course")} :`,
+          err.response?.data?.message || err.message || err
+        );
       }
     };
 
@@ -109,10 +125,11 @@ export default function CourseUpdate() {
   }, [coursId]);
 
 
-
+  //initials pour l'auteur du cours
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
 
+  //les sections
   const [sections, setSections] = useState([
     {
       id: 1,
@@ -155,10 +172,10 @@ export default function CourseUpdate() {
   };
 
   const addLessonToSection = (sectionId) => {
-  setSections((prev) =>
-    prev.map((s) =>
-      s.id === sectionId
-        ? {
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
             ...s,
             lessons: [
               ...s.lessons,
@@ -170,10 +187,10 @@ export default function CourseUpdate() {
               },
             ],
           }
-        : s
-    )
-  );
-};
+          : s
+      )
+    );
+  };
 
 
   const updateLessonTitle = (sectionId, lessonId, newTitle) => {
@@ -206,9 +223,34 @@ export default function CourseUpdate() {
     );
   };
 
+  const updateLessonType = (sectionId, lessonId, newType) => {
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
+            ...s,
+            lessons: s.lessons.map((l) =>
+              l.id === lessonId
+                ? {
+                  ...l,
+                  type: newType,
+                  content: newType !== "image" ? l.content || "" : "",
+                  imageFile: newType === "image" ? l.imageFile : null,
+                  preview: newType === "image" ? l.preview : null,
+                }
+                : l
+            ),
+          }
+          : s
+      )
+    );
+  };
+
+
+  //supprimer section
   const removeSection = async (id) => {
 
-    const confirmDelete = window.confirm("Etes-vous sûr de vouloir supprimer cette section?");
+    const confirmDelete = window.confirm(t("course.confirm_delete_section"));
     if (!confirmDelete) return;
     const token = localStorage.getItem("token");
 
@@ -221,16 +263,20 @@ export default function CourseUpdate() {
       // Puis mettre à jour le state
       setSections((prev) => prev.filter((s) => s.id !== id));
 
-      toast.success("Section supprimée avec succès !");
+      toast.success(t("course.section_deleted_success"));
     } catch (err) {
-      console.error("Erreur suppression section :", err.response?.data || err.message);
-      toast.error("Impossible de supprimer la section.");
+      console.error(
+        `${t("course.error_delete_section")} :`,
+        err.response?.data?.message || err.message || err
+      );
+      toast.error(t("course.error_cannot_delete_section"));
+
     }
   };
 
-
+  //supprimer leçon
   const removeLesson = async (sectionId, lessonId) => {
-    const confirmDelete = window.confirm("Tu es sûr de supprimer cette leçon?");
+    const confirmDelete = window.confirm(t("course.confirm_delete_lesson"));
     if (!confirmDelete) return;
     const token = localStorage.getItem("token");
 
@@ -249,17 +295,17 @@ export default function CourseUpdate() {
         )
       );
 
-      toast.success("Leçon supprimée avec succès !");
+      toast.success(t("course.lesson_deleted_success"));
     } catch (err) {
-      console.error("Erreur suppression leçon :", err.response?.data || err.message);
-      toast.error("Impossible de supprimer la leçon.");
+      console.error(
+        `${t("course.error_delete_lesson")} :`,
+        err.response?.data?.message || err.message || err
+      );
+      toast.error(t("course.error_cannot_delete_lesson"));
     }
   };
 
-  // --- Sauvegarde ---
-
-
-
+  // L'image d'une leçon
   const handleLessonImageUpload = (sectionId, lessonId, file) => {
     setSections((prev) =>
       prev.map((s) =>
@@ -281,7 +327,7 @@ export default function CourseUpdate() {
     );
   };
 
-
+  //======ENREGESTRER les modifications du cours , ses sections et leçons
   const handleSaveCourse = async (coursId) => {
     const currentUserId = getCurrentUserId();
     const token = localStorage.getItem("token");
@@ -349,54 +395,35 @@ export default function CourseUpdate() {
 
 
           if (lesson.id && !isTempId(lesson.id)) {
-  // 🔵 Leçon EXISTANTE → UPDATE
-  await api.put(`courses/Lesson/${lesson.id}/`, formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-} else {
-  // 🟢 Nouvelle leçon → CREATE
-  const resLesson = await api.post("courses/createLesson/", formData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  lesson.id = resLesson.data.id_lecon; // remplace l’id temporaire
-}
+            // 🔵 Leçon EXISTANTE → UPDATE
+            await api.put(`courses/Lesson/${lesson.id}/`, formData, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          } else {
+            // 🟢 Nouvelle leçon → CREATE
+            const resLesson = await api.post("courses/createLesson/", formData, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            lesson.id = resLesson.data.id_lecon; // remplace l’id temporaire
+          }
 
 
         }
 
       }
 
-      toast.success("Cours mis à jour avec succès !");
+      toast.success(t("course.course_updated_success"));
       setActiveStep(3)
     } catch (err) {
-      console.error("Erreur mise à jour :", err.response?.data || err.message);
-      toast.error("Erreur lors de la mise à jour du cours.");
+      console.error(
+        `${t("course.error_update_course")} :`,
+        err.response?.data?.message || err.message || err
+      );
+      toast.error(t("course.error_cannot_update_course"));
     }
   };
 
 
-  const updateLessonType = (sectionId, lessonId, newType) => {
-  setSections((prev) =>
-    prev.map((s) =>
-      s.id === sectionId
-        ? {
-            ...s,
-            lessons: s.lessons.map((l) =>
-              l.id === lessonId
-                ? {
-                    ...l,
-                    type: newType,
-                    content: newType !== "image" ? l.content || "" : "",
-                    imageFile: newType === "image" ? l.imageFile : null,
-                    preview: newType === "image" ? l.preview : null,
-                  }
-                : l
-            ),
-          }
-        : s
-    )
-  );
-};
 
 
 
@@ -407,33 +434,33 @@ export default function CourseUpdate() {
 
   return (
     <div className="flex flex-row md:flex-row min-h-screen bg-surface gap-16 md:gap-1">
-          {/* Sidebar */}
-          <div>
-            <Navbar />
-          </div>
-    
-          {/* Main Content */}
-          <main className={`
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+
+      {/* Main Content */}
+      <main className={`
             flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen
             ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
           `}>
-            {/* User controls */}
-            <div className="flex justify-end items-center gap-4">
-              <UserCircle
-                initials={initials}
-                onToggleTheme={toggleDarkMode}
-                onChangeLang={(lang) => i18n.changeLanguage(lang)}
-              />
-            </div>
-    
-            {/* Topbar avec étapes */}
-            <Topbar
-              steps={courseSteps}
-              activeStep={activeStep}
-              setActiveStep={setActiveStep}
-              className="flex justify-between"
-            />
-        {/* STEP 1 */}
+        {/* User controls */}
+        <div className="flex justify-end items-center gap-4">
+          <UserCircle
+            initials={initials}
+            onToggleTheme={toggleDarkMode}
+            onChangeLang={(lang) => i18n.changeLanguage(lang)}
+          />
+        </div>
+
+        {/* Topbar avec étapes */}
+        <Topbar
+          steps={courseSteps}
+          activeStep={activeStep}
+          setActiveStep={setActiveStep}
+          className="flex justify-between"
+        />
+        {/* STEP 1  : les infos generale du cours*/}
         {activeStep === 1 && (
           <div className="w-full bg-grad-2 rounded-2xl shadow-md p-6 lg:p-10">
             <h2 className="text-2xl font-semibold mb-6 text-grad-1">
@@ -505,11 +532,12 @@ export default function CourseUpdate() {
           </div>
         )}
 
-        {/* STEP 2 */}
+        {/* STEP 2  : les sections et leçons*/}
         {activeStep === 2 && (
           <div className="w-full p-5">
             <div className="mt-6 relative bg-gradient-to-br from-grad-2/60 to-grad-2 rounded-2xl backdrop-blur-xl shadow-xl p-6 lg:p-10 border border-white/10">
               <div className="absolute right-8 top-8">
+                {/*button pour ajouter une section*/}
                 <button
                   className="px-6 py-2 rounded-xl bg-grad-1 text-white shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
                   onClick={addSection}
@@ -534,6 +562,8 @@ export default function CourseUpdate() {
                         <div className="w-9 h-9 flex items-center justify-center rounded-full bg-grad-1 text-white font-semibold">
                           {index + 1}
                         </div>
+
+                        {/*titre de la section */}
                         <Input
                           value={section.title}
                           onChange={(e) => updateSectionTitle(section.id, e.target.value)}
@@ -551,6 +581,7 @@ export default function CourseUpdate() {
                               className={`${section.open ? "" : "rotate-180"} transition-transform duration-300`}
                             />
                           </button>
+                          {/*Supprimer une section */}
                           <button
                             className="hover:text-red-500 transition-colors"
                             onClick={() => removeSection(section.id)}
@@ -559,6 +590,7 @@ export default function CourseUpdate() {
                           </button>
                         </div>
                       </div>
+                      {/*description de la section */}
                       <textarea
                         className="w-full mt-2 min-h-[80px] border border-gray-300 rounded-xl p-3"
                         placeholder={t("course.section_description_placeholder")}
@@ -577,12 +609,14 @@ export default function CourseUpdate() {
                       >
                         <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
                           <div className="text-sm font-medium w-6 text-textc">{idx + 1}.</div>
+                          {/* titre de la leçon */}
                           <Input
                             placeholder={t("course.lesson_title")}
                             value={lesson.title}
                             onChange={(e) => updateLessonTitle(section.id, lesson.id, e.target.value)}
                             className="!bg-transparent !border-none text-textc flex-1"
                           />
+                          {/*type de la leçon */}
                           <div className="flex justify-end gap-4 flex-wrap md:flex-nowrap">
                             <ModernDropdown
                               value={lesson.type}
@@ -612,7 +646,7 @@ export default function CourseUpdate() {
                             onChange={(e) => updateLessonContent(section.id, lesson.id, e.target.value)}
                           />
                         )}
-
+                        {/*les images(type =image) */}
                         {lesson.type === "image" && (
                           <div className="flex flex-col gap-2">
                             <label
@@ -640,7 +674,7 @@ export default function CourseUpdate() {
                         )}
                       </div>
                     ))}
-
+                  {/* ajouter leçon */}
                   <div className="flex justify-center mt-2">
                     <button
                       onClick={() => addLessonToSection(section.id)}
@@ -654,12 +688,14 @@ export default function CourseUpdate() {
 
               {/* Navigation */}
               <div className="mt-10 flex items-center justify-between">
+                {/*retour aux info generale du cours */}
                 <button
                   className="px-8 py-2 rounded-xl bg-white dark:bg-white/10 shadow-sm font-medium text-black/60 dark:text-white/70 hover:shadow-md transition"
                   onClick={() => setActiveStep(1)}
                 >
                   {t("course.back")}
                 </button>
+                {/*Enregistrer les modifications */}
                 <button
                   className="px-8 py-2 rounded-xl bg-grad-1 text-white font-medium shadow-lg hover:shadow-xl transition-transform hover:-translate-y-0.5"
                   onClick={() => handleSaveCourse(coursId)}
@@ -675,7 +711,6 @@ export default function CourseUpdate() {
         {activeStep === 3 && (
           <div className="w-full bg-white rounded-2xl shadow-md p-6">
             <h2 className="text-xl font-semibold">{t("course.publish_description")}</h2>
-            {/* Ici tu peux ajouter les options de publication */}
           </div>
         )}
       </main>

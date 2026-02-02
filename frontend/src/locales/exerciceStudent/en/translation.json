@@ -13,6 +13,18 @@
      "Edit":"Edit",
      "Send":"Send feedback",
      "Pending":"Pending",
-     "Reviewect":"Reviewect"
-  }
+     "Reviewect":"Reviewect",
+     "joinedOn": "Joined on {{date}}",
+     "evaluated": "evaluated",
+     "noExercises": "No exercises available",
+     "noSubmissions": "No submissions yet"
+
+
+
+  },
+  "errors": {
+  "loadFeedbacks": "Error fetching feedbacks",
+  "fetchStudentExercise": "Error fetching student exercise"
+}
+
 }

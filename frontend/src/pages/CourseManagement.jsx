@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { SquarePen, Trash2, BookOpen } from "lucide-react";
@@ -9,9 +9,7 @@ import { useNavigate } from "react-router-dom";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ModernDropdown from "../components/common/ModernDropdown";
 import ThemeContext from "../context/ThemeContext";
-import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 import { toast } from 'react-hot-toast';
 const levelStyles = {
   Débutant: "bg-blue text-white",
@@ -59,7 +57,7 @@ export default function CoursesManagement() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [teachers, setTeachers] = useState([]);
 
-  const token = localStorage.getItem("admin_token"); // JWT admin
+  const token = localStorage.getItem("admin_token"); 
 
   const difficultyOptions = [
     { value: "debutant", label: t("difficulty.Beginner") },
@@ -188,18 +186,30 @@ export default function CoursesManagement() {
 
   // DELETE
    const handleDeleteCourse = async (courseId) => {
-    if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
-    try {
-      await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
+  if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:8000/api/courses/cours/${courseId}/delete/`,
+      {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setCourses((prev) => prev.filter((c) => c.id !== courseId));
-    } catch (err) {
-      console.error("Erreur suppression :", err);
-      alert("Erreur lors de la suppression");
-    }
-  };
+      }
+    );
+
+    if (!res.ok) throw new Error("Erreur suppression");
+
+    setCourses((prev) =>
+      prev.filter((c) => c.id_cours !== courseId)
+    );
+
+    toast.success("Cours supprimé avec succès");
+  } catch (err) {
+    console.error("Erreur suppression :", err);
+    toast.error("Erreur lors de la suppression");
+  }
+};
+
 
 
   return (

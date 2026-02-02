@@ -10,10 +10,9 @@ import ActivityCharts from "../components/common/ActivityCharts";
 import NotificationBell from "../components/common/NotificationBell";
 import { useNotifications } from "../context/NotificationContext";
 import dayjs from "dayjs";
-
-// Composant NotificationItem IDENTIQUE à celui du dashboard enseignant
-import NotificationItem from "../components/common/AcivityFeed"; // Même composant
-
+import NotificationItem from "../components/common/AcivityFeed"; 
+import "dayjs/locale/fr";
+import "dayjs/locale/en";
 export default function DashboardAdmin() {
   const { toggleDarkMode } = useContext(ThemeContext);
   const { t, i18n } = useTranslation("DashboardAdmin");
@@ -27,9 +26,10 @@ export default function DashboardAdmin() {
   const adminData = JSON.parse(localStorage.getItem("admin")) || {};
   const initials = `${adminData.nom?.[0] || ""}${adminData.prenom?.[0] || ""}`.toUpperCase();
 
-  // États pour les notifications - IDENTIQUE
+  // États pour les notifications 
   const { notifications, loading: loadingNotifications, fetchNotifications } = useNotifications();
-
+const lang = i18n.language; // "fr" ou "en"
+dayjs.locale(lang);
   // Effet pour la responsivité
   useEffect(() => {
     const handleResize = () => {
@@ -47,15 +47,14 @@ export default function DashboardAdmin() {
     };
   }, []);
 
-  // Effet pour charger les notifications - IDENTIQUE
+  // Effet pour charger les notifications
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  // Fonction pour formater les notifications - IDENTIQUE
+  // Fonction pour formater les notifications 
   const formatNotificationsForFeed = () => {
     if (!Array.isArray(notifications) || notifications.length === 0) {
-      // Retourner des données mock si aucune notification
       return [
         {
           title: t("notifications.newStudent"),
@@ -159,7 +158,6 @@ export default function DashboardAdmin() {
     },
   ];
 
-  // ----- COLORS DU PROTOTYPE -----
   const statGradients = [
     "bg-grad-5",
     "bg-grad-4",
@@ -229,13 +227,12 @@ export default function DashboardAdmin() {
         {/* GRID: ACTIVITY + COURSES */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* LEFT: Recent Activity - NOUVEAU STYLE IDENTIQUE AU DASHBOARD ENSEIGNANT */}
+          {/* LEFT: Recent Activity  */}
           <div className="bg-card rounded-2xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold text-muted mb-4">{t("recentActivity")}</h2>
             <p className="text-gray-500 text-xs mb-4">
-              {dayjs().startOf('week').format("DD MMM")} - {dayjs().endOf('week').format("DD MMM")}
+              {dayjs().format("DD MMM")} - {dayjs().endOf('week').format("DD MMM")}
             </p>
-            {/* Même structure que le dashboard enseignant */}
             <div className="space-y-3">
               {loadingNotifications ? (
                 <div className="flex items-center justify-center py-4">

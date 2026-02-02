@@ -14,17 +14,21 @@ import {
 } from "chart.js"
 import { useTranslation } from "react-i18next"
 import { FaChartBar } from "react-icons/fa"
+import dayjs from "dayjs"
+import "dayjs/locale/fr"
+import "dayjs/locale/en"
+
+// Fonction utilitaire pour récupérer les couleurs CSS
 const getCssRgb = (varName, alpha = 1) => {
   const raw = getComputedStyle(document.documentElement)
     .getPropertyValue(varName)
     .trim()
 
-  // "79 157 222" -> "79,157,222"
   const rgb = raw.replace(/\s+/g, ",")
-
   return `rgba(${rgb}, ${alpha})`
 }
 
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -36,7 +40,12 @@ ChartJS.register(
 )
 
 const ActivityCharts = () => {
-  const { t } = useTranslation("DashboardAdmin")
+  const { t, i18n } = useTranslation("DashboardAdmin")
+
+  // Appliquer la langue pour dayjs
+  useEffect(() => {
+    dayjs.locale(i18n.language)
+  }, [i18n.language])
 
   const [stats, setStats] = useState({
     labels: [],
@@ -47,8 +56,7 @@ const ActivityCharts = () => {
 
   const [colors, setColors] = useState(null)
 
-
-  /* ================= FETCH ================= */
+  // Fetch des stats
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -71,6 +79,8 @@ const ActivityCharts = () => {
 
     fetchStats()
   }, [])
+
+  // Couleurs après mount
   useEffect(() => {
     setColors({
       primary: getCssRgb("--color-primary", 0.75),
@@ -82,15 +92,17 @@ const ActivityCharts = () => {
     })
   }, [])
 
-  /* ================= COLORS (AFTER MOUNT) ================= */
-
-
-  /* ⛔ Ne pas render tant que les couleurs ne sont pas prêtes */
+  // ⛔ Ne pas render tant que les couleurs ne sont pas prêtes
   if (!colors) return null
 
-  /* ================= DATA ================= */
+  // Traduire les labels (mois/jours) pour les charts
+  const translatedLabels = stats.labels.map(dateStr =>
+    dayjs(dateStr).format("DD MMM") // "12 janv." en fr, "12 Jan" en en
+  )
+
+  // Data pour Bar chart
   const barData = {
-    labels: stats.labels,
+    labels: translatedLabels,
     datasets: [
       {
         label: t("charts.registrations"),
@@ -111,23 +123,23 @@ const ActivityCharts = () => {
     ],
   }
 
-
+  // Data pour Line chart
   const lineData = {
-  labels: stats.labels,
-  datasets: [
-    {
-      label: t("charts.coursesFollowed"),
-      data: stats.coursesFollowed,
-      borderColor: colors.line,
-      backgroundColor: colors.fill,
-      fill: true,
-      tension: 0.35,
-      pointRadius: 4,
-    },
-  ],
-}
+    labels: translatedLabels,
+    datasets: [
+      {
+        label: t("charts.coursesFollowed"),
+        data: stats.coursesFollowed,
+        borderColor: colors.line,
+        backgroundColor: colors.fill,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4,
+      },
+    ],
+  }
 
-
+  // Options chart
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -158,6 +170,7 @@ const ActivityCharts = () => {
         {t("charts.activityTitle")}
       </h2>
 
+      {/* Bar Chart: Registrations & Logins */}
       <div className="bg-card rounded-xl shadow-card p-5">
         <h3 className="text-lg font-medium mb-4 text-textc">
           {t("charts.registrationsAndLogins")}
@@ -167,6 +180,7 @@ const ActivityCharts = () => {
         </div>
       </div>
 
+      {/* Line Chart: Courses Followed */}
       <div className="bg-card rounded-xl shadow-card p-5">
         <h3 className="text-lg font-medium mb-4 text-textc">
           {t("charts.coursesFollowed")}

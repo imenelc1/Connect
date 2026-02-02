@@ -24,7 +24,7 @@
   "output": {
     "title": "Output:",
     "default": "Hello world!\nProgram finished with exit code 0\nPress ENTER to exit console.",
-    "noOutput":"No output yet"
+    "noOutput":"No output yet..."
   },
 "input": {
   "stdinLabel": "Input (stdin)",
@@ -56,7 +56,8 @@
     "errorSubmit":"Error while submitting",
     "exeError":"Error during execution",
     "errorDetected": "Error detected :",
-    "bugDetected": "Bug detected"
+    "bugDetected": "Bug detected",
+    "aiCheckFailed": "AI verification error"
 },
 "messages":{
   "codeSave":"Code saved",

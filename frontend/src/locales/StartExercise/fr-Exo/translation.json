@@ -52,7 +52,8 @@
     "errorSubmit": "Erreur lors de la soumission",
     "exeError": "Erreur pendant l'exécution",
     "errorDetected": "Erreur détectée :",
-    "bugDetected": "Bug détecté"
+    "bugDetected": "Bug détecté",
+     "aiCheckFailed": "Erreur vérification IA"
   },
   "messages": {
     "codeSave": "Code sauvegardé",

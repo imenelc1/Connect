@@ -41,7 +41,31 @@
     "public": "Public",
     "private": "Privé",
 
-    "courseVisibility": "Visibilité du cours"
+    "courseVisibility": "Visibilité du cours",
+     "error_loading_course": "Erreur chargement cours",
+      "confirm_delete_section": "Êtes-vous sûr de vouloir supprimer cette section ?",
+      "section_deleted_success": "Section supprimée avec succès !",
+       "error_delete_section": "Erreur suppression section",
+        "error_cannot_delete_section": "Impossible de supprimer la section.",
+         "confirm_delete_lesson": "Êtes-vous sûr de vouloir supprimer cette leçon ?",
+         "lesson_deleted_success": "Leçon supprimée avec succès !",
+    "error_delete_lesson": "Erreur suppression leçon",
+    "error_cannot_delete_lesson": "Impossible de supprimer la leçon.",
+    "course_updated_success": "Cours mis à jour avec succès !",
+    "error_update_course": "Erreur mise à jour",
+    "error_cannot_update_course": "Erreur lors de la mise à jour du cours.",
+    "error_create_course": "Erreur création cours :",       
+"error_create_course_toast": "Erreur lors de la création du cours"  ,
+"untitled_lessons": "Leçon {{number}}",
+"sections_lessons_saved": "Sections et leçons enregistrées !",
+"error_create_sections_lessons": "Erreur création sections/leçons :",
+"error_save_sections_lessons": "Erreur lors de l'enregistrement.",
+
+"error_save_complete": "Erreur lors de l'enregistrement complet :"
+
+
+
+
   },
 
   "select": {
@@ -51,6 +75,14 @@
     "month": "Mois",
     "Beginner": "Débutant",
     "Intermediate": "Intermédiaire",
-    "Advanced": "Avancé"
-  }
+    "Advanced": "Avancé",
+     "hours": "Heures",
+     "seconds": "Secondes"
+  },
+
+  "auth": {
+  "checking": "Vérification de l'authentification...",
+  "not_authenticated": "Non authentifié..."
+}
+
 }

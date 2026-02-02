@@ -48,7 +48,8 @@ import ProgressStudent from "../pages/ProgressionStudent";
 import SubmittedExoTheory from "../pages/SubmittedExoTheory.jsx";
 
 /* ================= QUIZZES ================= */
-import AllQuizzesPage from "../pages/AllQuizzesPage";
+
+import AllQuizzesPage from "../pages/AllQuizzesPage";   
 import CreateQuiz from "../pages/CreateQuiz";
 import QuizPreview from "../pages/QuizPreview";
 import QuizIntroPage from "../pages/QuizIntroPage";
@@ -144,17 +145,17 @@ export default function AppRoutes() {
         } />
 
         {/* ========= COURSES ========= */}
-        <Route path="/all-courses" element={<AllCoursesPage />} /> {/*mli7a */}
-        <Route path="/CourseDetails/:id" element={<CourseDetails />} />{/* */}
-        <Route path="/course-details" element={<CourseDetails />} />{/* */}
-        <Route path="/Seecourses/:id" element={<Courses />} />{/* */}
-        <Route path="/courses/edit/:id" element={<CourseUpdate />} />{/* */}
-        <Route path="/courses" element={<CourseUpdate />} />{/* */}
-        <Route path="/CoursInfo" element={<CoursInfo />} />{/* */}
+        <Route path="/all-courses" element={<AllCoursesPage />} /> {/*cest bon */}
+        <Route path="/CourseDetails/:id" element={<CourseDetails />} />{/* cest bon*/}
+        <Route path="/course-details" element={<CourseDetails />} />{/* cest bon*/}
+        <Route path="/Seecourses/:id" element={<Courses />} />{/* cest bon */}
+        <Route path="/courses/edit/:id" element={<CourseUpdate />} />{/*cest bon*/}
+        <Route path="/courses" element={<CourseUpdate />} />{/* kifkif*/}
+        <Route path="/CoursInfo" element={<CoursInfo />} />{/* cest bon*/}
 
         {/* ========= EXERCISES ========= */}
-        <Route path="/all-exercises" element={<AllExercisesPage />} />{/* */}
-        <Route path="/ListeExercices" element={<CourseExercisesPage />} />{/* */}
+        <Route path="/all-exercises" element={<AllExercisesPage />} />{/* bieeen*/}
+        <Route path="/ListeExercices" element={<CourseExercisesPage />} />{/*cest la meme que celle en haut donc bieeen */}
         <Route path="/ListeExercices/:coursId" element={<ListeExercicesPage />} />
 
        <Route path="/student-exercice" element={
@@ -232,42 +233,51 @@ export default function AppRoutes() {
         {/* ========= QUIZZES ========= */}
         <Route path="/all-quizzes" element={
           <PrivateRoute allowedRoles={["etudiant", "enseignant", "admin"]}>
+            {/* tres bieeeeeen */}
             <AllQuizzesPage />
           </PrivateRoute>
         }/>
         <Route path="/cours/:coursId/quizzes" element={
           <PrivateRoute allowedRoles={["etudiant","enseignant","admin"]}>
+            {/* bieeeeeeeeen */}
             <AllQuizzesPage />
           </PrivateRoute>
         } />
 
         <Route path="/create-quiz" element={
+        
           <PrivateRoute allowedRoles={["enseignant"]}>
+            {/* bieeeeeeeeen */}
             <CreateQuiz />
           </PrivateRoute>
         } />
         <Route path="/quiz-preview/:exerciceId" element={
           <PrivateRoute allowedRoles={["enseignant"]}>
+            {/* bieeeeeeeeen */}
             <QuizPreview />
           </PrivateRoute>
         } />
         <Route path="/quiz-intro/:exerciceId" element={
           <PrivateRoute allowedRoles={["etudiant"]}>
+            {/* yesssss */}
             <QuizIntroPage />
           </PrivateRoute>
         } />
         <Route path="/quizTake/:exerciceId" element={
           <PrivateRoute allowedRoles={["etudiant"]}>
+            {/* tres bien */}
             <QuizTakePage />
           </PrivateRoute>
         } />
         <Route path="/QuizRecape/:exerciceId" element={
           <PrivateRoute allowedRoles={["etudiant"]}>
+            {/* qowaaa  */}
             <QuizRecapPage />
           </PrivateRoute>
         } />
         <Route path="/quiz/edit/:exerciceId" element={
           <PrivateRoute allowedRoles={["enseignant"]}>
+            {/* cest booon */}
             <UpdateQuiz />
           </PrivateRoute>
         } />

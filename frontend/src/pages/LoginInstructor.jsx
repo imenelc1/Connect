@@ -1,22 +1,21 @@
-
 import { useState } from "react";
-import AuthTabs from "../components/common/AuthTabs";
-import Input from "../components/common/Input";
-import Mascotte from "../components/common/Mascotte.jsx";
-import LogoComponent from "../components/common/LogoComponent";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import {FiGlobe, FiEye, FiEyeOff } from "react-icons/fi";
-
-import LogoIconeComponent from "../components/common/IconeLogoComponent";
-import Button from "../components/common/Button.jsx";
 import { useTranslation } from "react-i18next";
 import { useContext } from "react";
-import ThemeContext from "../context/ThemeContext.jsx";
-import ThemeButton from "../components/common/ThemeButton";
-import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import ThemeContext from "../context/ThemeContext.jsx";
+import AuthContext from "../context/AuthContext";
+//composants personalisé utilisés
+import AuthTabs from "../components/common/AuthTabs";
+import Input from "../components/common/Input";
+import Mascotte from "../components/common/Mascotte.jsx";
+import LogoComponent from "../components/common/LogoComponent";
+import LogoIconeComponent from "../components/common/IconeLogoComponent";
+import Button from "../components/common/Button.jsx";
+import ThemeButton from "../components/common/ThemeButton";
 
 export default function LoginInstructor() {
   //  États pour les champs
@@ -83,11 +82,12 @@ export default function LoginInstructor() {
 
 
       localStorage.setItem("currentUserId", res.data.user.id_utilisateur);
-      localStorage.setItem("user", JSON.stringify(res.data.user)); // tu peux le garder si utile
-
+      localStorage.setItem("user", JSON.stringify(res.data.user)); 
       console.log(t("login.api"), res.data);
 
       toast.success(t("success.login"));
+      //si l'enseignant est ajouté par un admin et c'est sa premiere fois qu'il se connecte , redirige vers changer mot de passe
+      //sinon vers dashboard enseignant 
       if (res.data.user.must_change_password) {
       // 🔑 on utilise le reset_token renvoyé par le backend
       navigate(`/welcome-reset-password/${res.data.reset_token}`);

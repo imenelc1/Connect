@@ -193,12 +193,18 @@ export const submitTentative = async ({ exercice_id, reponse, output = "", temps
 };
 
 export const getTentativeById = async (tentativeId) => {
+  if (!tentativeId) {
+    console.warn("getTentativeById appelé avec ID invalide :", tentativeId);
+    return null;
+  }
+
   const res = await api.get(
     `dashboard/tentatives/id/${tentativeId}/`,
     { headers: getAuthHeader() }
   );
   return res.data;
 };
+
 
 // 🔹 Récupérer la dernière tentative de l'utilisateur connecté
 export const getMyLastTentative = async (studentId, exerciceId) => {

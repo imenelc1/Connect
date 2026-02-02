@@ -23,7 +23,6 @@ import Input from "../components/common/Input";
 import NotificationBell from "../components/common/NotificationBell";
 
 
-
 // Contextes & Services
 import ThemeContext from "../context/ThemeContext";
 import { useNotifications } from "../context/NotificationContext";
@@ -149,7 +148,7 @@ export default function Dashboardetu() {
   // Formater le temps en format lisible
   const formatTimeStyled = (secs) => {
     if (!secs || secs < 60) {
-      return <span className="text-blue font-bold">{secs}s</span>;
+      return <span className="text-muted font-bold">{secs}s</span>;
     }
 
     const mins = Math.floor(secs / 60);
@@ -261,6 +260,7 @@ export default function Dashboardetu() {
             text={t("Dashboard.AverageT")}
             value={formatTimeStyled(dailyTime)}
             icon={<Book size={isMobile ? 16 : 18} />}
+           
             bg="bg-grad-4"
             isMobile={isMobile}
           />

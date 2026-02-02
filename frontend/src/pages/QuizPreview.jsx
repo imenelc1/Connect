@@ -27,7 +27,7 @@ export default function QuizPreview() {
 
     fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId}/`)
       .then((res) => {
-        if (!res.ok) throw new Error("Quiz not found");
+        if (!res.ok) throw new Error(t("errors.quizNotFound"));
         return res.json();
       })
       .then((data) => {
@@ -58,7 +58,7 @@ export default function QuizPreview() {
       .catch(() => setLoading(false));
   }, [exerciceId]);
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <div className="p-6">{t("loading")}</div>;
   if (!quiz) return <div className="p-6">{t("noData")}</div>;
 
   const totalPoints = quiz.questions.reduce((sum, q) => sum + q.score, 0);
@@ -100,7 +100,7 @@ export default function QuizPreview() {
                 <FaClock />
               </span>
             }
-            label={quiz.activerDuration ? `${quiz.durationMinutes} ${t("minutes")}` : t("nonLimited")}
+            label={quiz.activerDuration ? `${quiz.durationMinutes} ${t("minutes")}` : t("unlimited")}
             gradient="bg-grad-2"
           />
           <StatCard
@@ -119,7 +119,8 @@ export default function QuizPreview() {
                 <FaStar />
               </span>
             }
-            label={quiz.exercice.niveau}
+            label={t(`levels.${quiz.exercice.niveau}`)}
+
             gradient="bg-grad-4"
           />
         </section>
@@ -201,3 +202,4 @@ function StatCard({ icon, label, gradient }) {
     </div>
   );
 }
+

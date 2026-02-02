@@ -102,11 +102,11 @@ export default function StudentExercice() {
             setFeedbacksMap(feedbacksMap);
             setEvaluatedCount(Object.keys(feedbacksMap).length);
           } catch (fbErr) {
-            console.warn("Erreur récupération feedbacks:", fbErr.message);
+            console.warn(t("errors.loadFeedbacks"), fbErr.message);
           }
         }
       } catch (err) {
-        console.error("Erreur fetch StudentExercice:", err);
+        console.error(t("errors.fetchStudentExercise"), err);
         setStudent({});
         setExercises([]);
         setTotalExercises(0);
@@ -163,7 +163,7 @@ export default function StudentExercice() {
               <p className="text-gray text-sm sm:text-base">{adresse_email}</p>
               {joinedDate && (
                 <p className="text-gray text-xs sm:text-sm">
-                  Joined on {joinedDate}
+                   {t("exerciceStudent.joinedOn", { date: joinedDate })}
                 </p>
               )}
             </div>
@@ -189,7 +189,7 @@ export default function StudentExercice() {
               <p className="text-xl sm:text-2xl font-bold text-blue">
                 {evaluatedCount}
               </p>
-              <p className="text-gray">évaluées</p>
+              <p className="text-gray">{t("exerciceStudent.evaluated")}</p>
             </div>
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function StudentExercice() {
         <div className="flex flex-col gap-6 sm:gap-8 max-w-full sm:max-w-5xl mx-auto">
           {exercises.length === 0 && (
             <p className="text-gray-500">
-              {t("noExercises") || "Aucun exercice"}
+                {t("exerciceStudent.noExercises")}
             </p>
           )}
 
@@ -225,7 +225,7 @@ export default function StudentExercice() {
                 <div className="bg-[rgb(var(--color-card))] dark:bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text))] rounded-3xl shadow-md p-6 border border-[rgb(var(--color-input-border))]">
                   <h3 className="text-lg font-bold text-[rgb(var(--color-text))]">{ex.nom_exercice}</h3>
                   <p className="text-[rgb(var(--color-gray))] mt-2">
-                    Aucune tentative soumise
+                     {t("exerciceStudent.noSubmissions")}
                   </p>
                 </div>
 

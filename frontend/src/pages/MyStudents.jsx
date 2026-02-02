@@ -327,7 +327,7 @@ useEffect(() => {
             <select
               value={space}
               onChange={(e) => setSpace(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-black/80"
+              className="w-full  rounded px-3 py-2 bg-surface text-gray"
             >
               <option value="">{t("selectSpace")}</option>
               {spacesList.map((s) => (

@@ -9,7 +9,7 @@
   },
   "coursesTitle": "Cours",
   "addCourse": "Ajouter un cours",
-  "addExo": "Ajouter un exercise",
+  "addExo": "Ajouter un exercice",
   "addQuiz": "Ajouter un quiz",
 
   "createdOn": "Créé le",
@@ -24,7 +24,36 @@
   "exercisesTitle": "Exercices",
 
   "selectCourseLabel": "Valider",
-  "selectCoursePlaceholder": "Sélectionnez un cours"
+  "selectCoursePlaceholder": "Sélectionnez un cours",
+  "defaultSpaceName": "Mon espace",
+  "loadSpaceError": "Échec du chargement des détails de l'espace",
+  "unknownAuthor": "Inconnu",
+  "noTitle": "Sans titre",
+  "fetchItemsError": "Échec de récupération de mes éléments",
+  "addItemError": "Échec de l’ajout de l’élément",
+  "draft": "brouillon",
+"submitted": "soumis",
+"attempts": "Tentatives",
+"fetchExercisesError": "Erreur lors du chargement des exercices :",
+ "addItem": "Ajouter un item",
+  "selectItemToAdd": "Sélectionnez l’item à ajouter",
+  "addButton": "Ajouter",
+  "selectItemLabel": "Choisissez un item",
+  "enableAI_course": "Activer l’assistant IA pour ce cours",
+  "enableAI_exercise": "Activer l’assistant IA pour cet exercice",
+  "selectQuizPlaceholder": "Sélectionnez un quiz",
+  "selectExercisePlaceholder": "Sélectionnez un exercice",
+   "addedSuccessfully": "Ajout effectué avec succès !"
+
+
+
+
+
+
+
+
+
+
 
 
 }

@@ -8,13 +8,14 @@ import {
   Calendar,
   User,
   RefreshCw
-} from 'lucide-react';
+} from 'lucide-react'; //icones utilisés
 import { useNotifications } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 
 const NotificationPanel = ({ isOpen, onClose }) => {
-  const { t } = useTranslation("notifications");
+  const { t } = useTranslation("notifications"); //traduction
 
+  //stats
   const [filter, setFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
   const { deleteAllNotifications } = useNotifications();
@@ -38,6 +39,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
+  //refraichement
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -60,6 +62,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     return groups;
   }, [notifications]);
 
+  //notifications filtrées selon le filtre courant
   const filteredNotifications = useMemo(() => {
     return notifications.filter(notif => {
       if (filter === 'unread' && notif.is_read) return false;
@@ -68,6 +71,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     });
   }, [notifications, filter]);
 
+  //formater la date pour affichage lisible
   const formatDate = (dateString) => {
     if (!dateString) return '';
     try {
@@ -110,6 +114,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
+      {/* conteneur du paneau */}
       <div
         className={`absolute right-0 top-0 h-full w-full max-w-md bg-surface dark:bg-gray-900 shadow-2xl transform transition-transform duration-300 flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
@@ -163,6 +168,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
         {/* Actions */}
         <div className="flex-shrink-0 p-4 border-b border-gray-800/20 bg-card">
           <div className="flex gap-2">
+            {/* marquer comme lues */}
             <button
               onClick={markAllAsRead}
               disabled={unreadCount === 0 || loading}
@@ -171,6 +177,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
               <CheckCircle size={16} />
               {t("markAllRead")}
             </button>
+            {/* supprimer toutes */}
             <button
               onClick={deleteAllNotifications}
               disabled={notifications.length === 0 || loading}
