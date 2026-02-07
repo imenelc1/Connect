@@ -303,6 +303,10 @@ export default function ContentCard({
         {/* ================= ENSEIGNANT ================= */}
         {role === "enseignant" && (
           <div className="grid grid-cols-2 gap-3 items-center">
+
+            <div className="flex items-center gap-2 col-span-2">
+
+            
             <Button
               variant="heroPrimary"
               className={`${buttonStyles[course.level]} px-4 py-2 w-full col-span-2`}
@@ -325,6 +329,7 @@ export default function ContentCard({
                 />
               </>
             )}
+            </div>
           </div>
         )}
       </div>

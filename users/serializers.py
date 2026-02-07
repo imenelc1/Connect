@@ -10,7 +10,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         model = Utilisateur
         fields = [
             'id_utilisateur', 'nom', 'prenom', 'date_naissance',
-            'adresse_email', 'mot_de_passe', 'matricule', 'must_change_password', "can_create_any_course_content"
+            'adresse_email', 'mot_de_passe', 'matricule', 'must_change_password'
         ]
    
     def create(self, validated_data):

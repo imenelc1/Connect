@@ -66,10 +66,13 @@ class RegisterView(generics.CreateAPIView):
                 annee_etude=request.data.get("annee_etude")
             )
         elif role == "enseignant":
-            Enseignant.objects.create(
-                utilisateur=user,
-                grade=request.data.get("grade")
-            )
+         Enseignant.objects.create(
+        utilisateur=user,
+        grade=request.data.get("grade"),
+        can_create_any_course_content=False
+    )
+
+
         ActivityEvent.objects.create(user=user, event_type="registration")
         # 🔥 CRÉATION DU TOKEN
         token = _create_token(user.id_utilisateur, role)

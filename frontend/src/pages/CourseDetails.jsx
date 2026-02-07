@@ -45,8 +45,9 @@ export default function SpaceDetails() {
   const userId = userData?.user_id;
 
   const userRole = userData?.role || "";
-  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
-    }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${
+    userData?.prenom?.[0] || ""
+  }`.toUpperCase();
 
   const [spaceName, setSpaceName] = useState("");
   const [studentsCount, setStudentsCount] = useState(0);
@@ -70,8 +71,6 @@ export default function SpaceDetails() {
   const [aiEnabledForCourse, setAiEnabledForCourse] = useState(true);
   const [aiEnabledForExercise, setAiEnabledForExercise] = useState(true);
 
-
-
   const steps = [
     { label: t("topbar.course"), icon: BookOpen },
     { label: t("topbar.quizzes"), icon: NotebookPen },
@@ -89,7 +88,7 @@ export default function SpaceDetails() {
         setSpaceName(data.nom_space || t("defaultSpaceName"));
         setStudentsCount(data.students_count || 0);
       })
-      .catch((err) => console.error(t("loadSpaceError"), err))
+      .catch((err) => console.error(t("loadSpaceError"), err));
   }, [id]);
 
   // --- Fetch space items according to active step ---
@@ -107,7 +106,7 @@ export default function SpaceDetails() {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
-            }
+            },
           );
           const data = await res.json();
           const spaceCoursesIds = data.map((sc) => sc.cours.id_cours);
@@ -123,7 +122,7 @@ export default function SpaceDetails() {
                 date: c.date_ajout,
                 progress: c.progress ?? 0,
                 isMine: c.utilisateur === userData?.id,
-              }))
+              })),
           );
         } else if (activeStep === 2) {
           const res = await fetch(
@@ -132,12 +131,11 @@ export default function SpaceDetails() {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
-            }
+            },
           );
 
           const data = await res.json();
           const formatted = (data || []).map((q) => ({
-
             id: q.quiz.exercice?.id_exercice, // EXACT comme AllQuizzesPage
             quizId: q.quiz.id, // IMPORTANT
             title: q.quiz.exercice?.titre_exo,
@@ -166,10 +164,10 @@ export default function SpaceDetails() {
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                   },
-                }
+                },
               );
               results[quiz.quizId] = await res.json();
-            })
+            }),
           );
 
           //  même logique que AllQuizzesPage
@@ -205,11 +203,9 @@ export default function SpaceDetails() {
               }
             }
 
-            const isFinished = tentatives.length > 0 && tentatives.some(t => t.terminer === true);
-
-
-
-
+            const isFinished =
+              tentatives.length > 0 &&
+              tentatives.some((t) => t.terminer === true);
 
             return {
               ...quiz,
@@ -219,7 +215,6 @@ export default function SpaceDetails() {
               minutesRestantes,
               isFinished,
             };
-
           });
 
           setSpaceQuizzes(quizzesWithAttempts);
@@ -231,7 +226,7 @@ export default function SpaceDetails() {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
-            }
+            },
           );
           const data = await res.json();
           setSpaceExercises(
@@ -248,7 +243,7 @@ export default function SpaceDetails() {
                 categorie: e.exercice.categorie,
                 progress: e.progress ?? 0,
                 isMine: e.exercice.utilisateur === userData?.id,
-              }))
+              })),
           );
         }
       } catch (err) {
@@ -267,21 +262,21 @@ export default function SpaceDetails() {
       `http://127.0.0.1:8000/api/spaces/my-courses/`,
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     ).then((res) => res.json());
 
     const fetchMyQuizzes = fetch(
       `http://127.0.0.1:8000/api/spaces/my-quizzes/?space_id=${id}`,
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     ).then((res) => res.json());
 
     const fetchMyExercises = fetch(
       `http://127.0.0.1:8000/api/spaces/my-exercises/`,
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     ).then((res) => res.json());
 
     Promise.all([fetchMyCourses, fetchMyQuizzes, fetchMyExercises])
@@ -293,7 +288,7 @@ export default function SpaceDetails() {
             description: c.description,
             level: c.niveau_cour_label,
             author: c.utilisateur_name,
-          }))
+          })),
         );
 
         setMyQuizzes(
@@ -305,7 +300,7 @@ export default function SpaceDetails() {
               description: q.exercice.enonce || "",
               level: q.exercice.niveau_exercice_label || "",
               author: q.exercice.utilisateur_name || "",
-            }))
+            })),
         );
 
         setMyExercises(
@@ -313,11 +308,11 @@ export default function SpaceDetails() {
             .filter((e) => e.id_exercice)
             .map((e) => ({
               id: e.id_exercice,
-              title: q.exercice.titre_exo?.trim() || t("noTitle"),
+              title: e.titre_exo?.trim() || t("noTitle"), // ← utiliser e.titre_exo
               description: e.enonce || "",
               level: e.niveau_exercice_label || "",
               author: e.utilisateur_name || "",
-            }))
+            })),
         );
       })
       .catch((err) => console.error(t("fetchItemsError"), err));
@@ -342,7 +337,7 @@ export default function SpaceDetails() {
 
     if (activeStep === 1) {
       // --- Courses ---
-      alreadyAdded = spaceCourses.some(c => c.id === idToSend);
+      alreadyAdded = spaceCourses.some((c) => c.id === idToSend);
       url = `http://127.0.0.1:8000/api/spaces/${id}/courses/`;
       bodyKey = "cours";
 
@@ -361,10 +356,9 @@ export default function SpaceDetails() {
         progress: 0,
         isMine: true,
       });
-
     } else if (activeStep === 2) {
       // --- Quizzes ---
-      alreadyAdded = spaceQuizzes.some(c => c.id === idToSend);
+      alreadyAdded = spaceQuizzes.some((c) => c.id === idToSend);
       url = `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`;
       bodyKey = "quiz";
 
@@ -383,10 +377,9 @@ export default function SpaceDetails() {
         progress: 0,
         isMine: true,
       });
-
     } else if (activeStep === 3) {
       // --- Exercises ---
-      alreadyAdded = spaceExercises.some(c => c.id === idToSend);
+      alreadyAdded = spaceExercises.some((c) => c.id === idToSend);
       url = `http://127.0.0.1:8000/api/spaces/${id}/exercises/`;
       bodyKey = "exercice";
 
@@ -421,16 +414,18 @@ export default function SpaceDetails() {
       },
       body: JSON.stringify(body),
     })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error("Failed to add item");
         return res.json();
       })
-      .then(newItem => {
+      .then((newItem) => {
         const itemMapped = mapNewItem(newItem);
 
-        if (activeStep === 1) setSpaceCourses(prev => [...prev, itemMapped]);
-        else if (activeStep === 2) setSpaceQuizzes(prev => [...prev, itemMapped]);
-        else if (activeStep === 3) setSpaceExercises(prev => [...prev, itemMapped]);
+        if (activeStep === 1) setSpaceCourses((prev) => [...prev, itemMapped]);
+        else if (activeStep === 2)
+          setSpaceQuizzes((prev) => [...prev, itemMapped]);
+        else if (activeStep === 3)
+          setSpaceExercises((prev) => [...prev, itemMapped]);
 
         toast.success(t("addedSuccessfully"));
         setOpenModal(false);
@@ -440,35 +435,38 @@ export default function SpaceDetails() {
         setAiEnabledForCourse(true);
         setAiEnabledForExercise(true);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         toast.error(t("addFailed"));
       });
   };
-   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-  
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("sidebarChanged", handleSidebarChange);
-  
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("sidebarChanged", handleSidebarChange);
     };
   }, []);
 
-
-
   useEffect(() => {
     if (!id || activeStep !== 3) return;
     const fetchExercises = async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/spaces/${id}/exercises/`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          },
+        );
         if (!res.ok) throw new Error(res.status);
         const data = await res.json();
 
@@ -479,12 +477,19 @@ export default function SpaceDetails() {
             try {
               const resTent = await fetch(
                 `http://127.0.0.1:8000/api/dashboard/${ex.exercice.id_exercice}/utilisateur/${userId}/tentatives/`,
-                { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+                {
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                },
               );
               const tentatives = resTent.ok ? await resTent.json() : [];
               console.log("tentatives", tentatives);
 
-              const lastTentative = tentatives.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0] || null;
+              const lastTentative =
+                tentatives.sort(
+                  (a, b) => new Date(b.submitted_at) - new Date(a.submitted_at),
+                )[0] || null;
               const etat = lastTentative?.etat || "brouillon";
               const progress = etat === "soumis" ? 100 : lastTentative ? 50 : 0;
 
@@ -503,13 +508,17 @@ export default function SpaceDetails() {
               };
             } catch (err) {
               console.error(err);
-              return { ...ex.exercice, progress: 0, etat: "brouillon", tentatives: [] };
+              return {
+                ...ex.exercice,
+                progress: 0,
+                etat: "brouillon",
+                tentatives: [],
+              };
             }
-          })
+          }),
         );
 
         setSpaceExercises(exercisesWithState);
-
       } catch (err) {
         console.error(t("fetchExercisesError"), err);
       }
@@ -517,7 +526,6 @@ export default function SpaceDetails() {
 
     fetchExercises();
   }, [id, activeStep, userId]);
-
 
   const itemsToDisplay =
     activeStep === 1
@@ -527,7 +535,7 @@ export default function SpaceDetails() {
         : spaceExercises;
   const filteredItems = itemsToDisplay
     // 🔹 Filtre par niveau
-    .filter(item => {
+    .filter((item) => {
       if (activeStep === 3) {
         // Pour les exercices, utiliser le niveau sélectionné
         return filterLevel === "ALL" || item.level === filterLevel;
@@ -536,16 +544,18 @@ export default function SpaceDetails() {
       }
     })
     // 🔹 Filtre par état/progress
-    .filter(item => {
+    .filter((item) => {
       if (userRole !== "etudiant") return true;
 
       if (activeStep === 1) {
         if (activeProgressFilter === "completed") return item.progress === 100;
-        if (activeProgressFilter === "not_completed") return item.progress < 100;
+        if (activeProgressFilter === "not_completed")
+          return item.progress < 100;
       }
 
       if (activeStep === 2) {
-        if (activeProgressFilter === "completed") return item.isFinished === true;
+        if (activeProgressFilter === "completed")
+          return item.isFinished === true;
         if (activeProgressFilter === "not_completed") return !item.isFinished;
       }
 
@@ -564,7 +574,7 @@ export default function SpaceDetails() {
       return true;
     })
     // 🔹 Recherche texte
-    .filter(item => {
+    .filter((item) => {
       if (!searchTerm.trim()) return true;
 
       const search = searchTerm.toLowerCase();
@@ -576,23 +586,22 @@ export default function SpaceDetails() {
       );
     });
 
-
-
-
   const modalItems =
     activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
 
   return (
-     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-                        {/* Sidebar */}
-                        <div>
-                          <Navbar />
-                        </div>
-    
-      <main className={`
+    <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+
+      <main
+        className={`
             flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
             ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
-          `}>
+          `}
+      >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <button
@@ -623,8 +632,6 @@ export default function SpaceDetails() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-
-
           </div>
           <div className="flex items-center gap-2 bg-card text-muted font-semibold px-4 py-2 rounded-md">
             <Users size={16} /> {studentsCount} {t("students")}
@@ -649,13 +656,15 @@ export default function SpaceDetails() {
                   : "exercises"
             }
             userRole={userRole}
-            activeFilter={filterLevel}          // ← filtre NIVEAU
-            onFilterChange={setFilterLevel}     // ← met à jour filterLevel
-            showCompletedFilter={userRole === "etudiant" && (activeStep === 1 || activeStep === 2)}
+            activeFilter={filterLevel} // ← filtre NIVEAU
+            onFilterChange={setFilterLevel} // ← met à jour filterLevel
+            showCompletedFilter={
+              userRole === "etudiant" && (activeStep === 1 || activeStep === 2)
+            }
             onCompletedChange={
               activeStep === 3
-                ? setActiveExerciseFilter       // ← filtre ÉTAT pour exos
-                : setActiveProgressFilter       // ← filtre ÉTAT pour cours/quizzes
+                ? setActiveExerciseFilter // ← filtre ÉTAT pour exos
+                : setActiveProgressFilter // ← filtre ÉTAT pour cours/quizzes
             }
             hideCategoryFilter={true}
           />
@@ -674,7 +683,6 @@ export default function SpaceDetails() {
                   : activeStep === 3
                     ? t("addExo")
                     : null}
-
             </Button>
           )}
         </div>
@@ -683,8 +691,9 @@ export default function SpaceDetails() {
         <div
           className="grid gap-6"
           style={{
-            gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
-              }, minmax(0, 1fr))`,
+            gridTemplateColumns: `repeat(${
+              window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
+            }, minmax(0, 1fr))`,
           }}
         >
           {/* COURSES & QUIZZES */}
@@ -696,13 +705,12 @@ export default function SpaceDetails() {
                   ...item,
                   initials: item.author
                     ? item.author
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
                     : "",
                   duration: item.date ? `${t("createdOn")} ${item.date}` : "",
-
                 }}
                 role={userRole}
                 showProgress={userRole === "etudiant" && activeStep === 1}
@@ -734,7 +742,7 @@ export default function SpaceDetails() {
                 exercise={exercise}
                 onDelete={() =>
                   setSpaceExercises((prev) =>
-                    prev.filter((e) => e.id !== exercise.id)
+                    prev.filter((e) => e.id !== exercise.id),
                   )
                 }
                 onClick={() => navigate(`/exercises/${exercise.id}`)}
@@ -769,14 +777,16 @@ export default function SpaceDetails() {
                             existingItems={spaceCourses} // COURS déjà dans l'espace
                           />
 
-                          {/* ✅ Checkbox IA cours */}
+                          {/*  Checkbox IA cours */}
                           <label className="flex items-center gap-2 mt-4 text-sm text-muted">
                             <input
                               type="checkbox"
                               checked={aiEnabledForCourse}
-                              onChange={(e) => setAiEnabledForCourse(e.target.checked)}
+                              onChange={(e) =>
+                                setAiEnabledForCourse(e.target.checked)
+                              }
                             />
-                              {t("enableAI_course")}
+                            {t("enableAI_course")}
                           </label>
                         </>
                       );
@@ -798,14 +808,16 @@ export default function SpaceDetails() {
                             onChange={setSelectedItemId}
                             existingItems={spaceExercises} // EXERCICES déjà dans l'espace
                           />
-                          {/* ✅ Checkbox IA exercices */}
+                          {/*  Checkbox IA exercices */}
                           <label className="flex items-center gap-2 mt-4 text-sm text-muted">
                             <input
                               type="checkbox"
                               checked={aiEnabledForExercise}
-                              onChange={(e) => setAiEnabledForExercise(e.target.checked)}
+                              onChange={(e) =>
+                                setAiEnabledForExercise(e.target.checked)
+                              }
                             />
-                       {t("enableAI_exercise")}
+                            {t("enableAI_exercise")}
                           </label>
                         </>
                       );
