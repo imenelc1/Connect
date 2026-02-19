@@ -8,3 +8,4 @@ typing_extensions==4.15.0
 tzdata==2025.2
 python-dotenv==1.0.1
 django-extensions>=3.3
+gunicorn
