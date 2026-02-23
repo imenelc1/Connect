@@ -45,7 +45,7 @@ export default function LoginStudent() {
     if (password.length < 8) return setErrorPassword(t("errors.passwordLength"));
 
     try {
-      const res = await api.post("login/", { email, password, role: "etudiant" });
+      const res = await api.post("users/login/", { email, password, role: "etudiant" });
       console.log("LOGIN SUCCESS:", res.data);
 
       const userWithRole = {

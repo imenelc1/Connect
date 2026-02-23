@@ -7,7 +7,7 @@ export async function registerStudent(payload) {
 
 export async function loginUser(payload) {
   // backend renvoie token si tu utilises JWT custom ; sinon adapte
-  return api.post("login/", payload);
+  return api.post("users/login/", payload);
 }
 
 export function saveToken(token) {

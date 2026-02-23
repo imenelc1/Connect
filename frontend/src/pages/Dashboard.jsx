@@ -166,7 +166,7 @@ dayjs.locale(lang);
   ];
 
   useEffect(() => {
-    fetch("${import.meta.env.VITE_API_BASE}/api/users/admin/stats/", {
+    fetch("https://connect-1-t976.onrender.com/api/users/admin/stats/", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

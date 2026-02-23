@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "${import.meta.env.VITE_API_BASE}/api/spaces/",
+  baseURL: "https://connect-1-t976.onrender.com/api/spaces/",
 });
 
 // Ajouter un étudiant à un espace

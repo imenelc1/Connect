@@ -44,7 +44,7 @@ export default function AllExercisesPage() {
 
   // 🔹 Fetch tous les exercices
   useEffect(() => {
-    fetch("${import.meta.env.VITE_API_BASE}/api/exercices/api/exo/")
+    fetch("https://connect-1-t976.onrender.com/api/exercices/api/exo/")
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data)) return setExercises([]);
@@ -76,7 +76,7 @@ export default function AllExercisesPage() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`${import.meta.env.VITE_API_BASE}/api/exercices/exo?search=${searchTerm}`, {
+    fetch(`https://connect-1-t976.onrender.com/api/exercices/exo?search=${searchTerm}`, {
       signal: controller.signal,
     })
       .then((res) => res.json())
@@ -110,7 +110,7 @@ export default function AllExercisesPage() {
 
     try {
       await fetch(
-        `${import.meta.env.VITE_API_BASE}/api/exercices/exercice/${exoId}/delete/`,
+        `https://connect-1-t976.onrender.com/api/exercices/exercice/${exoId}/delete/`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },

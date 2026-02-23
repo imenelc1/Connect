@@ -73,7 +73,7 @@ export default function UpdateExercice() {
 
   const [courses, setCourses] = useState([]);
   useEffect(() => {
-    fetch("${import.meta.env.VITE_API_BASE}/api/courses/api/cours")
+    fetch("https://connect-1-t976.onrender.com/api/courses/api/cours")
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map((c) => ({

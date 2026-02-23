@@ -62,7 +62,7 @@ const ActivityCharts = () => {
       try {
         const token = localStorage.getItem("admin_token")
         const res = await fetch(
-          "${import.meta.env.VITE_API_BASE}/api/dashboard/activity/stats/",
+          "https://connect-1-t976.onrender.com/api/dashboard/activity/stats/",
           {
             headers: {
               Authorization: `Bearer ${token}`,

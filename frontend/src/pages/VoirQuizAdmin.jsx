@@ -18,7 +18,7 @@ export default function VoirQuizAdmin() {
   useEffect(() => {
     if (!exerciceId) return;
 
-    fetch(`${import.meta.env.VITE_API_BASE}/api/quiz/api/quiz/${exerciceId}/`)
+    fetch(`https://connect-1-t976.onrender.com/api/quiz/api/quiz/${exerciceId}/`)
       .then((res) => {
         if (!res.ok) throw new Error(t("errors.quizNotFound"));
 

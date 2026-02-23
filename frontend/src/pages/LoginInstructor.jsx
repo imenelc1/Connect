@@ -62,7 +62,7 @@ export default function LoginInstructor() {
 
     // --- Appel API ---
     try {
-      const res = await api.post("login/", {
+      const res = await api.post("users/login/", {
         email,
         password,
         role: "enseignant" // <-- Obligatoire pour que le backend sache que c'est un enseignant

@@ -159,7 +159,7 @@ export default function SpaceDetails() {
           await Promise.all(
             formatted.map(async (quiz) => {
               const res = await fetch(
-                `${import.meta.env.VITE_API_BASE}/api/quiz/${quiz.quizId}/utilisateur/${userId}/`,
+                `https://connect-1-t976.onrender.com/api/quiz/${quiz.quizId}/utilisateur/${userId}/`,
                 {
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,

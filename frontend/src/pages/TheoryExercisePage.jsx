@@ -94,7 +94,7 @@ export default function TheoryExercisePage() {
       toast.success(t("solution_sent"));
 
       const canSubmitRes = await fetch(
-        `${import.meta.env.VITE_API_BASE}/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
+        `https://connect-1-t976.onrender.com/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -122,7 +122,7 @@ export default function TheoryExercisePage() {
     const fetchExercise = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE}/api/exercices/${exerciceId}/`
+          `https://connect-1-t976.onrender.com/api/exercices/${exerciceId}/`
         );
         if (!response.ok) throw new Error();
         const data = await response.json();
@@ -142,7 +142,7 @@ export default function TheoryExercisePage() {
     if (!exerciceId || !isStudent) return;
 
     fetch(
-      `${import.meta.env.VITE_API_BASE}/api/dashboard/tentatives/can-submit/${exerciceId}`,
+      `https://connect-1-t976.onrender.com/api/dashboard/tentatives/can-submit/${exerciceId}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -161,7 +161,7 @@ export default function TheoryExercisePage() {
     const fetchLastTentative = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_BASE}/api/dashboard/${exercise.id_exercice}/utilisateur/${userId}/tentativerep/`,
+          `https://connect-1-t976.onrender.com/api/dashboard/${exercise.id_exercice}/utilisateur/${userId}/tentativerep/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -190,7 +190,7 @@ export default function TheoryExercisePage() {
     const checkAIStatus = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_BASE}/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+          `https://connect-1-t976.onrender.com/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

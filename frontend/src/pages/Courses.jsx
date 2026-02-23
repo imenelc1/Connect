@@ -164,7 +164,7 @@ export default function Courses() {
     const checkAIStatusForCourse = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_BASE}/api/spaces/cours/${coursId}/student/${userId}/check/`,
+          `https://connect-1-t976.onrender.com/api/spaces/cours/${coursId}/student/${userId}/check/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

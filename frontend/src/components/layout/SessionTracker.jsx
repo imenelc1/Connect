@@ -11,7 +11,7 @@ export default function SessionTracker() {
       if (duration < 30) return;
 
       try {
-        await fetch("${import.meta.env.VITE_API_BASE}/api/dashboard/add-session/", {
+        await fetch("https://connect-1-t976.onrender.com/api/dashboard/add-session/", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

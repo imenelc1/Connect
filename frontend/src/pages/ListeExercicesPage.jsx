@@ -62,7 +62,7 @@ export default function ExercisesPage() {
 
     const fetchExercises = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/exercices/cours/${coursId}/exercices/`);
+        const response = await fetch(`https://connect-1-t976.onrender.com/api/exercices/cours/${coursId}/exercices/`);
         if (!response.ok) {
           throw new Error(t("errors.fetchEexercises"));
         }

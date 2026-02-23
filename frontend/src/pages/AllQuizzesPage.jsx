@@ -57,8 +57,8 @@ export default function AllQuizzesPage() {
       try {
         // Si coursId présent, fetch seulement les quiz de ce cours
         const url = coursId
-          ? `${import.meta.env.VITE_API_BASE}/api/quiz/cours/${coursId}/`
-          : `${import.meta.env.VITE_API_BASE}/api/quiz/api/quiz?search=${searchTerm}`;
+          ? `https://connect-1-t976.onrender.com/api/quiz/cours/${coursId}/`
+          : `https://connect-1-t976.onrender.com/api/quiz/api/quiz?search=${searchTerm}`;
 
         const res = await fetch(url, { signal: controller.signal });
         const data = await res.json();
@@ -108,7 +108,7 @@ export default function AllQuizzesPage() {
         await Promise.all(
           quizzes.map(async quiz => {
             const res = await fetch(
-              `${import.meta.env.VITE_API_BASE}/api/quiz/${quiz.quizId}/utilisateur/${currentUserId}/`,
+              `https://connect-1-t976.onrender.com/api/quiz/${quiz.quizId}/utilisateur/${currentUserId}/`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             const data = await res.json();
@@ -175,7 +175,7 @@ export default function AllQuizzesPage() {
   const handleDeleteQuiz = async (exoId) => {
     if (!window.confirm(t("confirmDeleteExercise"))) return;
     try {
-      await fetch(`${import.meta.env.VITE_API_BASE}/api/exercices/exercice/${exoId}/delete/`, {
+      await fetch(`https://connect-1-t976.onrender.com/api/exercices/exercice/${exoId}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

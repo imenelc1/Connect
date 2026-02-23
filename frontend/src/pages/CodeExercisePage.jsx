@@ -117,13 +117,13 @@ int main() {
 
     const fetchExercise = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/exercices/${exerciceId}/`);
+        const res = await fetch(`https://connect-1-t976.onrender.com/api/exercices/${exerciceId}/`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         setExercise(data);
 
         const canSubmitRes = await fetch(
-          `${import.meta.env.VITE_API_BASE}/api/dashboard/tentatives/can-submit/${exerciceId}`,
+          `https://connect-1-t976.onrender.com/api/dashboard/tentatives/can-submit/${exerciceId}`,
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         const canSubmitData = await canSubmitRes.json();
@@ -311,7 +311,7 @@ useEffect(() => {
   const checkAIStatus = async () => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_BASE}/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+        `https://connect-1-t976.onrender.com/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

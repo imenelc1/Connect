@@ -101,7 +101,7 @@ export default function AllCoursesPage() {
     if (!window.confirm(t("confirmDeleteCourse"))) return;
 
     try {
-      await fetch(`${import.meta.env.VITE_API_BASE}/api/courses/cours/${courseId}/delete/`, {
+      await fetch(`https://connect-1-t976.onrender.com/api/courses/cours/${courseId}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

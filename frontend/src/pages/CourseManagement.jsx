@@ -99,7 +99,7 @@ export default function CoursesManagement() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch("${import.meta.env.VITE_API_BASE}/api/courses/admin/courses/", {
+        const res = await fetch("https://connect-1-t976.onrender.com/api/courses/admin/courses/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(t("errors.fetchCourses"));
@@ -116,7 +116,7 @@ export default function CoursesManagement() {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const res = await fetch("${import.meta.env.VITE_API_BASE}/api/users/enseignants/", {
+        const res = await fetch("https://connect-1-t976.onrender.com/api/users/enseignants/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(t("errors.fetchTeachers"));
@@ -154,7 +154,7 @@ export default function CoursesManagement() {
 
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_API_BASE}/api/courses/${selectedCourse.id_cours}/`,
+      `https://connect-1-t976.onrender.com/api/courses/${selectedCourse.id_cours}/`,
       {
         method: "PUT",
         headers: {
@@ -190,7 +190,7 @@ export default function CoursesManagement() {
 
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_API_BASE}/api/courses/cours/${courseId}/delete/`,
+      `https://connect-1-t976.onrender.com/api/courses/cours/${courseId}/delete/`,
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },

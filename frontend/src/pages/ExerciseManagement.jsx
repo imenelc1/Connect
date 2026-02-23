@@ -71,7 +71,7 @@ export default function ExercisesManagement() {
 
   /* ================= FETCH ================= */
   useEffect(() => {
-    fetch("${import.meta.env.VITE_API_BASE}/api/exercices/api/exo")
+    fetch("https://connect-1-t976.onrender.com/api/exercices/api/exo")
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data)) {
@@ -178,7 +178,7 @@ export default function ExercisesManagement() {
   /* ================= DELETE ================= */
   const handleDelete = (id) => {
     if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
-    fetch(`${import.meta.env.VITE_API_BASE}/api/exercices/${id}/`, {
+    fetch(`https://connect-1-t976.onrender.com/api/exercices/${id}/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,

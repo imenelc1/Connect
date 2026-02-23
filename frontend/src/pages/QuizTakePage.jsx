@@ -25,7 +25,7 @@ export function QuizTakePage() {
   useEffect(() => {
     if (!exerciceId) return;
 
-    fetch(`${import.meta.env.VITE_API_BASE}/api/quiz/api/quiz/${exerciceId}/`)
+    fetch(`https://connect-1-t976.onrender.com/api/quiz/api/quiz/${exerciceId}/`)
       .then((res) => res.json())
       .then((data) => {
         const q = Array.isArray(data) ? data[0] : data;
@@ -113,7 +113,7 @@ export function QuizTakePage() {
   const submitQuiz = async () => {
     try {
       const response = await fetch(
-        "${import.meta.env.VITE_API_BASE}/api/quiz/quiz/submit/",
+        "https://connect-1-t976.onrender.com/api/quiz/quiz/submit/",
         {
           method: "POST",
           headers: {
