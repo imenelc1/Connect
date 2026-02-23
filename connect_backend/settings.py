@@ -18,7 +18,8 @@ SECRET_KEY = "niu+@3uk(v_u&283jn%jb)%0$(!$th@d4xo#2gk)@$b2-+pi-^"
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-    "connect-2-6exc.onrender.com",  # Remplace par ton URL Render
+    "https://connectfrontend.netlify.app/",
+    "connect-2-6exc.onrender.com",  
     "localhost",
     "127.0.0.1",
 ]
