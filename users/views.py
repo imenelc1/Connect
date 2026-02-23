@@ -50,6 +50,7 @@ def _create_token(user_id, role):
 # RegisterView (presque inchangé)
 # -----------------------------
 class RegisterView(generics.CreateAPIView):
+    
     serializer_class = UtilisateurSerializer
 
     def create(self, request, *args, **kwargs):
