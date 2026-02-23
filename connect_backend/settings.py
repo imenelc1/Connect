@@ -18,8 +18,8 @@ SECRET_KEY = "niu+@3uk(v_u&283jn%jb)%0$(!$th@d4xo#2gk)@$b2-+pi-^"
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-    "https://connectfrontend.netlify.app/",
-    "connect-2-6exc.onrender.com",  
+    "connectfrontend.netlify.app",    # Juste le nom de domaine
+    "connect-1-t976.onrender.com",     # Utilise l'URL exacte de ton log Render
     "localhost",
     "127.0.0.1",
 ]
@@ -66,10 +66,10 @@ MIDDLEWARE = [
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
-    "https://monfrontend.vercel.app",  # Remplace par ton URL React front
+    "https://connectfrontend.netlify.app",  # Remplace par ton URL React front
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "https://monfrontend.vercel.app",
+    "https://connectfrontend.netlify.app",
 ]
 CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
 CORS_ALLOW_HEADERS = ["*"]
