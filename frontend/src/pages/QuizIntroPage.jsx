@@ -21,7 +21,7 @@ export default function QuizIntroPage() {
   };
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId}/`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/quiz/api/quiz/${exerciceId}/`)
       .then(res => {
        if (!res.ok) throw new Error(t("noQuiz"));
         return res.json();

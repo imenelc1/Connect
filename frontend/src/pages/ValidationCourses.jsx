@@ -43,7 +43,7 @@ export default function ValidationCourses() {
   const fetchCourses = async (status) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/courses/admin/courses/?status=${status}`,
+        `${process.env.REACT_APP_API_URL}/api/courses/admin/courses/?status=${status}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ export default function ValidationCourses() {
   const updateStatus = async (courseId, status) => {
     try {
       const res = await fetch(
-        `http://localhost:8000/api/courses/admin/${courseId}/status/`,
+        `${process.env.REACT_APP_API_URL}/api/courses/admin/${courseId}/status/`,
         {
           method: "PATCH",
           headers: {

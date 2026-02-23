@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/spaces/",
+  baseURL: "${process.env.REACT_APP_API_URL}/api/spaces/",
 });
 
 // Récupérer les espaces de l'étudiant connecté

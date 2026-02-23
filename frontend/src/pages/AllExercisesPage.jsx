@@ -44,7 +44,7 @@ export default function AllExercisesPage() {
 
   // 🔹 Fetch tous les exercices
   useEffect(() => {
-    fetch("http://localhost:8000/api/exercices/api/exo/")
+    fetch("${process.env.REACT_APP_API_URL}/api/exercices/api/exo/")
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data)) return setExercises([]);
@@ -76,7 +76,7 @@ export default function AllExercisesPage() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`http://localhost:8000/api/exercices/exo?search=${searchTerm}`, {
+    fetch(`${process.env.REACT_APP_API_URL}/api/exercices/exo?search=${searchTerm}`, {
       signal: controller.signal,
     })
       .then((res) => res.json())
@@ -110,7 +110,7 @@ export default function AllExercisesPage() {
 
     try {
       await fetch(
-        `http://localhost:8000/api/exercices/exercice/${exoId}/delete/`,
+        `${process.env.REACT_APP_API_URL}/api/exercices/exercice/${exoId}/delete/`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },

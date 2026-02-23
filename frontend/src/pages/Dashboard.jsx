@@ -166,7 +166,7 @@ dayjs.locale(lang);
   ];
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/users/admin/stats/", {
+    fetch("${process.env.REACT_APP_API_URL}/api/users/admin/stats/", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -159,7 +159,7 @@ export default function SpaceDetails() {
           await Promise.all(
             formatted.map(async (quiz) => {
               const res = await fetch(
-                `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${userId}/`,
+                `${process.env.REACT_APP_API_URL}/api/quiz/${quiz.quizId}/utilisateur/${userId}/`,
                 {
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,

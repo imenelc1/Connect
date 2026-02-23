@@ -57,8 +57,8 @@ export default function AllQuizzesPage() {
       try {
         // Si coursId présent, fetch seulement les quiz de ce cours
         const url = coursId
-          ? `http://localhost:8000/api/quiz/cours/${coursId}/`
-          : `http://localhost:8000/api/quiz/api/quiz?search=${searchTerm}`;
+          ? `${process.env.REACT_APP_API_URL}/api/quiz/cours/${coursId}/`
+          : `${process.env.REACT_APP_API_URL}/api/quiz/api/quiz?search=${searchTerm}`;
 
         const res = await fetch(url, { signal: controller.signal });
         const data = await res.json();
@@ -108,7 +108,7 @@ export default function AllQuizzesPage() {
         await Promise.all(
           quizzes.map(async quiz => {
             const res = await fetch(
-              `http://localhost:8000/api/quiz/${quiz.quizId}/utilisateur/${currentUserId}/`,
+              `${process.env.REACT_APP_API_URL}/api/quiz/${quiz.quizId}/utilisateur/${currentUserId}/`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
             const data = await res.json();
@@ -175,7 +175,7 @@ export default function AllQuizzesPage() {
   const handleDeleteQuiz = async (exoId) => {
     if (!window.confirm(t("confirmDeleteExercise"))) return;
     try {
-      await fetch(`http://localhost:8000/api/exercices/exercice/${exoId}/delete/`, {
+      await fetch(`${process.env.REACT_APP_API_URL}/api/exercices/exercice/${exoId}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

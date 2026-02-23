@@ -107,7 +107,7 @@ export default function Courses() {
             visited: lec.visited,
             preview:
               lec.type_lecon === "image"
-                ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
+                ? `${process.env.REACT_APP_API_URL}/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
                 : null,
           })),
         }));
@@ -164,7 +164,7 @@ export default function Courses() {
     const checkAIStatusForCourse = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/api/spaces/cours/${coursId}/student/${userId}/check/`,
+          `${process.env.REACT_APP_API_URL}/api/spaces/cours/${coursId}/student/${userId}/check/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,

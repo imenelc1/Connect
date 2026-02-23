@@ -62,7 +62,7 @@ const ActivityCharts = () => {
       try {
         const token = localStorage.getItem("admin_token")
         const res = await fetch(
-          "http://localhost:8000/api/dashboard/activity/stats/",
+          "${process.env.REACT_APP_API_URL}/api/dashboard/activity/stats/",
           {
             headers: {
               Authorization: `Bearer ${token}`,

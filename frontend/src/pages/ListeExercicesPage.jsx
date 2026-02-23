@@ -62,7 +62,7 @@ export default function ExercisesPage() {
 
     const fetchExercises = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/exercices/cours/${coursId}/exercices/`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/exercices/cours/${coursId}/exercices/`);
         if (!response.ok) {
           throw new Error(t("errors.fetchEexercises"));
         }

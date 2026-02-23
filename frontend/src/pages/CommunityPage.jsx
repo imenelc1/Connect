@@ -61,7 +61,7 @@ export default function CommunityPage() {
 
   const API_URL = window.REACT_APP_API_URL ||
     (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-      ? "http://localhost:8000/api"
+      ? "${process.env.REACT_APP_API_URL}/api"
       : "/api");
 
   const { toggleDarkMode } = useContext(ThemeContext);

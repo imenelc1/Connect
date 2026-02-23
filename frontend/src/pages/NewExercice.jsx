@@ -65,7 +65,7 @@ export default function NewExercise() {
   useEffect(() => {
     setLoadingCourses(true);
 
-    fetch("http://localhost:8000/api/courses/api/cours")
+    fetch("${process.env.REACT_APP_API_URL}/api/courses/api/cours")
       .then((res) => res.json())
       .then((data) => {
         console.log("RAW API DATA:", data);

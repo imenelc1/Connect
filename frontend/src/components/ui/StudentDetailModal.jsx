@@ -30,7 +30,7 @@ export default function StudentDetailModal({ open, onClose, studentId, joined })
       setLoading(true);
       try {
         const res = await fetch(
-          `http://localhost:8000/api/users/utilisateurs/${studentId}/progression/`,
+          `${process.env.REACT_APP_API_URL}/api/users/utilisateurs/${studentId}/progression/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error(`Erreur ${res.status}`);

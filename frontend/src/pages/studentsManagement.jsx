@@ -256,7 +256,7 @@ export default function StudentsManagement() {
       try {
         // 1️⃣ Liste existante des étudiants
         const res = await fetch(
-          "http://localhost:8000/api/users/students-with-progress/",
+          "${process.env.REACT_APP_API_URL}/api/users/students-with-progress/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error(`Erreur (${res.status})`);
@@ -266,7 +266,7 @@ export default function StudentsManagement() {
         const studentsWithRealProgress = await Promise.all(
           studentsData.map(async (s) => {
             const progRes = await fetch(
-              `http://localhost:8000/api/dashboard/global-progress/${s.id}/`,
+              `${process.env.REACT_APP_API_URL}/api/dashboard/global-progress/${s.id}/`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -321,7 +321,7 @@ export default function StudentsManagement() {
 
 
     try {
-      const res = await fetch(`http://localhost:8000/api/users/admin/users/${studentId}/`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users/admin/users/${studentId}/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -348,7 +348,7 @@ export default function StudentsManagement() {
     if (!token || !editStudent) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/users/etudiants/${editStudent.id}/update/`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users/etudiants/${editStudent.id}/update/`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(studentForm),
@@ -457,7 +457,7 @@ export default function StudentsManagement() {
 
 
     try {
-      const res = await fetch("http://localhost:8000/api/users/admin/etudiants/create/", {
+      const res = await fetch("${process.env.REACT_APP_API_URL}/api/users/admin/etudiants/create/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

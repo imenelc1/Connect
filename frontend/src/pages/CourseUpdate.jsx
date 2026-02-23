@@ -107,7 +107,7 @@ export default function CourseUpdate() {
             content: lec.contenu_lecon,
             type: lec.type_lecon,
             preview: lec.type_lecon === "image"
-              ? `http://localhost:8000/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
+              ? `${process.env.REACT_APP_API_URL}/media/${lec.contenu_lecon.replace(/\\/g, "/")}`
               : null
           })),
         }));

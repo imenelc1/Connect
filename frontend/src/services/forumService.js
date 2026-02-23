@@ -12,7 +12,7 @@ const API_URL = (() => {
     return customApiUrl;
   }
   
-  return isLocalhost ? "http://localhost:8000/api" : "/api";
+  return isLocalhost ? "${process.env.REACT_APP_API_URL}/api" : "/api";
 })();
 
 // ============================================

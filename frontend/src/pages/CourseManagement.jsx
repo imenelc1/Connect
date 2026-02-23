@@ -99,7 +99,7 @@ export default function CoursesManagement() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/courses/admin/courses/", {
+        const res = await fetch("${process.env.REACT_APP_API_URL}/api/courses/admin/courses/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(t("errors.fetchCourses"));
@@ -116,7 +116,7 @@ export default function CoursesManagement() {
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/users/enseignants/", {
+        const res = await fetch("${process.env.REACT_APP_API_URL}/api/users/enseignants/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(t("errors.fetchTeachers"));
@@ -154,7 +154,7 @@ export default function CoursesManagement() {
 
   try {
     const res = await fetch(
-      `http://localhost:8000/api/courses/${selectedCourse.id_cours}/`,
+      `${process.env.REACT_APP_API_URL}/api/courses/${selectedCourse.id_cours}/`,
       {
         method: "PUT",
         headers: {
@@ -190,7 +190,7 @@ export default function CoursesManagement() {
 
   try {
     const res = await fetch(
-      `http://localhost:8000/api/courses/cours/${courseId}/delete/`,
+      `${process.env.REACT_APP_API_URL}/api/courses/cours/${courseId}/delete/`,
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },

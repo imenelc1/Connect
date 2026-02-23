@@ -27,7 +27,7 @@ export default function QuizRecapPage() {
     const fetchQuizRecap = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/api/quiz/exercice/${exerciceId}/utilisateur/${currentUserId}/`,
+          `${process.env.REACT_APP_API_URL}/api/quiz/exercice/${exerciceId}/utilisateur/${currentUserId}/`,
           {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`,

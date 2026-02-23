@@ -94,7 +94,7 @@ export default function TheoryExercisePage() {
       toast.success(t("solution_sent"));
 
       const canSubmitRes = await fetch(
-        `http://localhost:8000/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
+        `${process.env.REACT_APP_API_URL}/api/dashboard/tentatives/can-submit/${exercise.id_exercice}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -122,7 +122,7 @@ export default function TheoryExercisePage() {
     const fetchExercise = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/exercices/${exerciceId}/`
+          `${process.env.REACT_APP_API_URL}/api/exercices/${exerciceId}/`
         );
         if (!response.ok) throw new Error();
         const data = await response.json();
@@ -142,7 +142,7 @@ export default function TheoryExercisePage() {
     if (!exerciceId || !isStudent) return;
 
     fetch(
-      `http://localhost:8000/api/dashboard/tentatives/can-submit/${exerciceId}`,
+      `${process.env.REACT_APP_API_URL}/api/dashboard/tentatives/can-submit/${exerciceId}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -161,7 +161,7 @@ export default function TheoryExercisePage() {
     const fetchLastTentative = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/api/dashboard/${exercise.id_exercice}/utilisateur/${userId}/tentativerep/`,
+          `${process.env.REACT_APP_API_URL}/api/dashboard/${exercise.id_exercice}/utilisateur/${userId}/tentativerep/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -190,7 +190,7 @@ export default function TheoryExercisePage() {
     const checkAIStatus = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8000/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+          `${process.env.REACT_APP_API_URL}/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
