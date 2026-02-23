@@ -70,11 +70,16 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://connectfrontend.netlify.app",
-    "https://connect-1-t976.onrender.com", 
-    ]
-
+    "https://connect-1-t976.onrender.com", ]
 CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
-CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "authorization", # Crucial pour envoyer le token Bearer
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 ROOT_URLCONF = 'connect_backend.urls'
 
@@ -98,8 +103,9 @@ WSGI_APPLICATION = 'connect_backend.wsgi.application'
 # Database PostgreSQL avec Render
 DATABASES = {
     'default': dj_database_url.config(
-        default="postgres://connectdb_7269_user:h4IWXlGdpMfAZjbBi5MYIsHmMsvYDd24@dpg-d6e3uu24d50c73b7veeg-a.frankfurt-postgres.render.com/connectdb_7269",
-        conn_max_age=600
+        default=os.getenv("DATABASE_URL", "postgres://connectdb_7269_user:h4IWXlGdpMfAZjbBi5MYIsHmMsvYDd24@dpg-d6e3uu24d50c73b7veeg-a.frankfurt-postgres.render.com/connectdb_7269"),
+        conn_max_age=600,
+        ssl_require=True 
     )
 }
 
@@ -113,14 +119,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication', # Indispensable pour le Token
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny', # Permet l'accès à register/login par défaut
     ],
 }
-
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
