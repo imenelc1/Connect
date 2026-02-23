@@ -3,15 +3,20 @@ import os
 from dotenv import load_dotenv
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-# SECURITY
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+dotenv_path = os.path.join(BASE_DIR, ".env")
+load_dotenv(dotenv_path)
+
+# Vérification
+print("Loading .env from:", dotenv_path)
+print("SECRET_KEY loaded:", os.getenv("DJANGO_SECRET_KEY"))
+
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-# ⚡ ALLOWED_HOSTS pour Render
 ALLOWED_HOSTS = [
     "connect-2-6exc.onrender.com",  # Remplace par ton URL Render
     "localhost",
