@@ -65,7 +65,7 @@ export default function NewExercise() {
   useEffect(() => {
     setLoadingCourses(true);
 
-    fetch("${process.env.REACT_APP_API_URL}/api/courses/api/cours")
+    fetch("${import.meta.env.VITE_API_URL}/api/courses/api/cours")
       .then((res) => res.json())
       .then((data) => {
         console.log("RAW API DATA:", data);

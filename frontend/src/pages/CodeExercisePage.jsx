@@ -117,13 +117,13 @@ int main() {
 
     const fetchExercise = async () => {
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/exercices/${exerciceId}/`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/exercices/${exerciceId}/`);
         if (!res.ok) throw new Error();
         const data = await res.json();
         setExercise(data);
 
         const canSubmitRes = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/dashboard/tentatives/can-submit/${exerciceId}`,
+          `${import.meta.env.VITE_API_URL}/api/dashboard/tentatives/can-submit/${exerciceId}`,
           { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
         );
         const canSubmitData = await canSubmitRes.json();
@@ -311,7 +311,7 @@ useEffect(() => {
   const checkAIStatus = async () => {
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+        `${import.meta.env.VITE_API_URL}/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

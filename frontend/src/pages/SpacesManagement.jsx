@@ -47,7 +47,7 @@ export default function SpacesPage() {
     const fetchSpaces = async () => {
       try {
         const token = localStorage.getItem("admin_token");
-        const res = await fetch("${process.env.REACT_APP_API_URL}/api/spaces/", {
+        const res = await fetch("${import.meta.env.VITE_API_URL}/api/spaces/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -71,7 +71,7 @@ export default function SpacesPage() {
     const fetchTeachers = async () => {
       try {
         const token = localStorage.getItem("admin_token");
-        const res = await fetch("${process.env.REACT_APP_API_URL}/api/users/enseignants/", {
+        const res = await fetch("${import.meta.env.VITE_API_URL}/api/users/enseignants/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -107,7 +107,7 @@ export default function SpacesPage() {
 
     try {
       if (editIndex) {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/spaces/admin/${editIndex}/update/`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/spaces/admin/${editIndex}/update/`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload),
@@ -119,7 +119,7 @@ export default function SpacesPage() {
         );
         toast.success(t("messages.updateSuccess"));
       } else {
-        const res = await fetch("${process.env.REACT_APP_API_URL}/api/spaces/admin/create/", {
+        const res = await fetch("${import.meta.env.VITE_API_URL}/api/spaces/admin/create/", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload),
@@ -145,7 +145,7 @@ export default function SpacesPage() {
 
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/spaces/space/${id_space}/delete/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/spaces/space/${id_space}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -168,7 +168,7 @@ export default function SpacesPage() {
 
     try {
       const res = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/spaces/space/${space.id}/details/`,
+        `${import.meta.env.VITE_API_URL}/api/spaces/space/${space.id}/details/`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error(t("errors.load"));
@@ -182,7 +182,7 @@ export default function SpacesPage() {
 
       // Récupérer tous les étudiants
       const resAll = await fetch(
-        "${process.env.REACT_APP_API_URL}/api/users/students-with-progress/",
+        "${import.meta.env.VITE_API_URL}/api/users/students-with-progress/",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const allStudentsData = await resAll.json();
@@ -227,7 +227,7 @@ export default function SpacesPage() {
       const token = localStorage.getItem("admin_token");
       for (let studentId of selectedStudents) {
         const student = students.find((s) => s.id_utilisateur === studentId);
-        const res = await fetch("${process.env.REACT_APP_API_URL}/api/spaces/admin/add-students/", {
+        const res = await fetch("${import.meta.env.VITE_API_URL}/api/spaces/admin/add-students/", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ email: student.adresse_email || student.email, space_id: selectedSpace.id }),
@@ -258,7 +258,7 @@ export default function SpacesPage() {
       const token = localStorage.getItem("admin_token");
 
       const res = await fetch(
-        "${process.env.REACT_APP_API_URL}/api/spaces/admin/remove-student/",
+        "${import.meta.env.VITE_API_URL}/api/spaces/admin/remove-student/",
         {
           method: "POST",
           headers: {

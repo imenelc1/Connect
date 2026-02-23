@@ -73,7 +73,7 @@ export default function UpdateExercice() {
 
   const [courses, setCourses] = useState([]);
   useEffect(() => {
-    fetch("${process.env.REACT_APP_API_URL}/api/courses/api/cours")
+    fetch("${import.meta.env.VITE_API_URL}/api/courses/api/cours")
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map((c) => ({

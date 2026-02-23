@@ -25,7 +25,7 @@ export function QuizTakePage() {
   useEffect(() => {
     if (!exerciceId) return;
 
-    fetch(`${process.env.REACT_APP_API_URL}/api/quiz/api/quiz/${exerciceId}/`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/quiz/api/quiz/${exerciceId}/`)
       .then((res) => res.json())
       .then((data) => {
         const q = Array.isArray(data) ? data[0] : data;
@@ -113,7 +113,7 @@ export function QuizTakePage() {
   const submitQuiz = async () => {
     try {
       const response = await fetch(
-        "${process.env.REACT_APP_API_URL}/api/quiz/quiz/submit/",
+        "${import.meta.env.VITE_API_URL}/api/quiz/quiz/submit/",
         {
           method: "POST",
           headers: {

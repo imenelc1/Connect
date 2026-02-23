@@ -11,7 +11,7 @@ export default function SessionTracker() {
       if (duration < 30) return;
 
       try {
-        await fetch("${process.env.REACT_APP_API_URL}/api/dashboard/add-session/", {
+        await fetch("${import.meta.env.VITE_API_URL}/api/dashboard/add-session/", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

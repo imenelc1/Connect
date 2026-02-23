@@ -25,7 +25,7 @@ export default function QuizPreview() {
   useEffect(() => {
     if (!exerciceId) return;
 
-    fetch(`${process.env.REACT_APP_API_URL}/api/quiz/api/quiz/${exerciceId}/`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/quiz/api/quiz/${exerciceId}/`)
       .then((res) => {
         if (!res.ok) throw new Error(t("errors.quizNotFound"));
         return res.json();

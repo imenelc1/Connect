@@ -12,7 +12,7 @@ const API_URL = (() => {
     return customApiUrl;
   }
   
-  return isLocalhost ? "${process.env.REACT_APP_API_URL}/api" : "/api";
+  return isLocalhost ? "${import.meta.env.VITE_API_URL}/api" : "/api";
 })();
 
 // ============================================

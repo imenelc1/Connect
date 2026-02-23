@@ -101,7 +101,7 @@ export default function AllCoursesPage() {
     if (!window.confirm(t("confirmDeleteCourse"))) return;
 
     try {
-      await fetch(`${process.env.REACT_APP_API_URL}/api/courses/cours/${courseId}/delete/`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/courses/cours/${courseId}/delete/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

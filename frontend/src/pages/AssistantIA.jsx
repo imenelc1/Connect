@@ -19,7 +19,7 @@ const asksAboutCode = (msg) =>
 
 import axios from "axios";
 
-const API_URL = "${process.env.REACT_APP_API_URL}/api/badges/ai-explanation-badge/"; // ton endpoint Django
+const API_URL = "${import.meta.env.VITE_API_URL}/api/badges/ai-explanation-badge/"; // ton endpoint Django
 
 async function awardAIBadge() {
   try {

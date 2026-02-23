@@ -612,7 +612,7 @@ export default function ForumManagement() {
         throw new Error(t("ForumManagement.adminNotAuthenticated"));
       }
 
-      const res = await fetch("${process.env.REACT_APP_API_URL}/api/forums/", {
+      const res = await fetch("${import.meta.env.VITE_API_URL}/api/forums/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -841,7 +841,7 @@ export default function ForumManagement() {
         return;
       }
 
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/forums/${forumId}/like/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/forums/${forumId}/like/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -909,7 +909,7 @@ export default function ForumManagement() {
       console.log("🔑 Token:", token ? "Présent" : "Absent");
 
       // ESSAYEZ CES DEUX URLs (l'une peut être la bonne)
-      const url = `${process.env.REACT_APP_API_URL}/api/forums/${forum.id}/messages/`;
+      const url = `${import.meta.env.VITE_API_URL}/api/forums/${forum.id}/messages/`;
       console.log("🌐 Tentative avec URL:", url);
 
       const res = await fetch(url, {
@@ -928,7 +928,7 @@ export default function ForumManagement() {
 
         // ESSAYEZ L'AUTRE URL
         console.log("🔄 Essai avec une autre URL...");
-        const alternativeUrl = `${process.env.REACT_APP_API_URL}/api/forums/${forum.id}/messages`;
+        const alternativeUrl = `${import.meta.env.VITE_API_URL}/api/forums/${forum.id}/messages`;
         console.log("🌐 Essai avec URL:", alternativeUrl);
 
         const res2 = await fetch(alternativeUrl, {
@@ -978,7 +978,7 @@ export default function ForumManagement() {
         return;
       }
 
-      const url = `${process.env.REACT_APP_API_URL}/api/forums/${selectedForum.id}/messages/create/`;
+      const url = `${import.meta.env.VITE_API_URL}/api/forums/${selectedForum.id}/messages/create/`;
 
       const payload = {
         contenu_message: messageContent.trim(),
@@ -1061,7 +1061,7 @@ export default function ForumManagement() {
   const handlePostComment = useCallback(async (messageId, commentContent) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/messages/${messageId}/comments/create/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/messages/${messageId}/comments/create/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1094,7 +1094,7 @@ export default function ForumManagement() {
   const handleLikeMessage = useCallback(async (messageId) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/messages/${messageId}/like/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/messages/${messageId}/like/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1125,7 +1125,7 @@ export default function ForumManagement() {
   const handleDeleteMessage = useCallback(async (messageId) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/messages/${messageId}/delete/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/messages/${messageId}/delete/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1155,7 +1155,7 @@ export default function ForumManagement() {
   const handleDeleteComment = useCallback(async (commentId, messageId) => {
     try {
       const token = localStorage.getItem("admin_token");
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/comments/${commentId}/delete/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/comments/${commentId}/delete/`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

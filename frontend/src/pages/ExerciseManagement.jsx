@@ -71,7 +71,7 @@ export default function ExercisesManagement() {
 
   /* ================= FETCH ================= */
   useEffect(() => {
-    fetch("${process.env.REACT_APP_API_URL}/api/exercices/api/exo")
+    fetch("${import.meta.env.VITE_API_URL}/api/exercices/api/exo")
       .then((res) => res.json())
       .then((data) => {
         if (!Array.isArray(data)) {
@@ -178,7 +178,7 @@ export default function ExercisesManagement() {
   /* ================= DELETE ================= */
   const handleDelete = (id) => {
     if (!window.confirm("Tu es sûr de supprimer cet exercice ?")) return;
-    fetch(`${process.env.REACT_APP_API_URL}/api/exercices/${id}/`, {
+    fetch(`${import.meta.env.VITE_API_URL}/api/exercices/${id}/`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
