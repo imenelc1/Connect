@@ -1,12 +1,77 @@
-
 {
   "StudentsManagement": {
-    "StudentsManagement": "Students Management" ,
-    "view":"View and manage student accounts",
-    "buttonAdd": "Add Student",
-    "Search": "Search Students ...",
-    "Encolled":"Enrolled Courses",
-    "Overal":"Overal Progress",
-    "joined":"Joined"
+    "StudentsManagement": "Students Management",
+    "view": "View and manage student accounts",
+    "specialtyPlaceholder": "Specialty",
+    "year": "year",
+    "searchPlaceholder": "Search students...",
+    "Encolled": "Enrolled Courses",
+    "Overal": "Overall Progress",
+    "joined": "Joined",
+    "close": "Close",
+    "editStudent": "Edit Student",
+    "addStudent": "Add Student",
+    "loading": "Loading...",
+    "editStudentTitle": "Edit {{lastName}} {{firstName}}",
+    "labels": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "dob": "Date of Birth",
+      "regNumber": "Registration Number",
+      "speciality": "Speciality",
+      "year": "Year"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save",
+      "create": "Create",
+      "add": "Add Student"
+    },
+    "errors": {
+      "required": "Required",
+      "invalidEmail": "Invalid email",
+      "minAge": "Student must be at least 16 years old",
+      "invalidRegNumber": "Invalid registration number",
+      "noNumbers": "No numbers allowed",
+      "emailRequired": "Email required",
+      "loadStudent": "Unable to load student information.",
+      "createStudent": "Student creation error",
+      "creationFailed": "Creation failed",
+      "fixErrors": "Fix the errors before continuing",
+      "missingToken": "JWT token missing",
+       "updateFailed": "Update failed",
+    "updateStudentFailed": "Failed to update the student",
+    "deleteFailed": "Deletion failed",
+    "deleteStudentFailed": "Unable to delete the student",
+    "fetchError": "Error ({{status}})",
+    "loadStudents": "Unable to load students.",
+     "loadProgress": "Error loading student progress",
+       "noData": "No data available"
+
+    
+    
+    },
+    "detailLabels": {
+      "coursesRead": "Courses Completed",
+      "exercisesDone": "Exercises Done",
+      "quizzesDone": "Quizzes Done",
+      "score": "Score",
+      "noCourses": "No courses completed",
+      "noExercises": "No exercises done",
+      "noQuizzes": "No quizzes done",
+      "joinedOn": "Joined On"
+    },
+    "subjects": {
+      "math": "Mathematics",
+      "cs": "Computer Science",
+      "st": "Science and Technology"
+    },
+    "messages": {
+      "studentCreated": "Student created successfully",
+       "studentUpdated": "Student updated successfully!",
+       "confirmDeleteStudent": "Are you sure you want to delete this student?",
+    "studentDeleted": "Student deleted successfully!"
+    }
   }
 }

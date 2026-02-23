@@ -7,7 +7,6 @@ import { GraduationCap, UserRound } from "lucide-react";
 import IconeLogoComponent from '../components/common/IconeLogoComponent';
 import Button from '../components/common/Button';
 import LogoComponent from "../components/common/LogoComponent";
-import ThemeButton from "../components/common/ThemeButton";
 
 // Traduction (i18next)
 import { useTranslation } from "react-i18next";
@@ -15,8 +14,7 @@ import { useTranslation } from "react-i18next";
 // Navigation entre routes (React Router)
 import { useNavigate } from "react-router-dom";
 
-// Thème global (dark/light mode)
-import ThemeContext from "../context/ThemeContext";
+
 
 // Styles globaux
 import "../styles/index.css";

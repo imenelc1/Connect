@@ -2,6 +2,7 @@
     "title": "Gestion des Quiz",
     "subtitle": "Créer et gérer les quiz du cours",
     "searchPlaceholder": "Rechercher des quiz...",
+    "voir_quiz": "Voir le quiz",
     "stats": {
         "questions": "Questions",
         "attempts": "Tentatives",
@@ -27,13 +28,27 @@
             },
             "visibiliteLabel": "Quiz visible pour les etudiants",
             "visibilite": "visibilité",
-            "difficulty":
-            {
-                "label": "Dificulté",
-                "easy" :"Facile",
+            "difficulty": {
+                "label": "Difficulté",
+                "easy": "Facile",
                 "medium": "Moyen",
-                "hard":"Difficile"
+                "hard": "Difficile"
             }
-        }
+        },
+        "errors": {
+            "quizLoad": "Erreur chargement quiz",
+            "update": "Erreur de mise à jour",
+            "updateQuiz": "Erreur lors de la mise à jour",
+            "delete": "Erreur suppression",
+            "delQuiz": "Erreur lors de la suppression du quiz"
+        },
+        "messages": {
+            "updateQuiz": "Quiz mis à jour avec succès !",
+            "deleteQuiz":"Êtes-vous sûr de supprimer ce quiz ?"
+        },
+         "defaults": {
+    "noTitle": "Sans titre",
+    "beginner": "Débutant"
+  }
     }
 }

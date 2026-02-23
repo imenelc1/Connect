@@ -10,6 +10,8 @@ import HeadMascotte from "../components/ui/HeadMascotte.jsx";
 import api from "../services/courseService";
 import progressionService from "../services/progressionService";
 import CourseContext from "../context/CourseContext";
+import { useNavigate } from "react-router-dom";
+
 
 
 export default function Courses() {
@@ -17,6 +19,10 @@ export default function Courses() {
   const { toggleDarkMode } = useContext(ThemeContext);
   const { id: coursId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  //Verifer pour l'ia 
+  const [courseAiEnabled, setCourseAiEnabled] = useState(true);
 
   const storedUser = localStorage.getItem("user");
   const userData =
@@ -24,6 +30,8 @@ export default function Courses() {
   const initials = userData
     ? `${userData.nom?.[0] || ""}${userData.prenom?.[0] || ""}`.toUpperCase()
     : "";
+  const userId = userData?.user_id || userData?.id_utilisateur || userData?.id || null;
+  const userRole = userData?.role || "";
 
   const [sections, setSections] = useState([]);
   const [title, setTitle] = useState("");
@@ -64,7 +72,7 @@ export default function Courses() {
         }))
       );
     } catch (err) {
-      console.error("Erreur lors du marquage de la leçon :", err);
+      console.error(t("lessonMarkError"), err);
     }
   };
 
@@ -121,7 +129,7 @@ export default function Courses() {
 
         setSections(fetchedSections);
       } catch (err) {
-        console.error("Erreur chargement cours :", err.response?.data || err);
+        console.error(t("courseLoadError"), err.response?.data || err);
       }
     };
 
@@ -150,6 +158,40 @@ export default function Courses() {
     );
   };
 
+  useEffect(() => {
+    if (!coursId || !userId) return;
+    if (userRole !== "etudiant") return;
+    const checkAIStatusForCourse = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/spaces/cours/${coursId}/student/${userId}/check/`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (!res.ok) throw new Error(t("aiCheckCourseError"));
+        const data = await res.json();
+
+        // si un espace commun existe et que ai_enabled === false => IA désactivée
+        if (data.same_space) {
+          const disabled = data.spaces.some(space => space.ai_enabled === false);
+          setCourseAiEnabled(!disabled);
+        } else {
+          setCourseAiEnabled(true);
+        }
+      } catch (err) {
+        console.error(t("aiCheckCourseError"), err);
+        setCourseAiEnabled(true); // fallback : IA activée
+      }
+    };
+
+    checkAIStatusForCourse();
+  }, [coursId, userId]);
+  console.log({ courseAiEnabled });
+
   return (
     <CourseContext.Provider
       value={{
@@ -177,11 +219,15 @@ export default function Courses() {
                     description,
                     level,
                     duration,
-                    sections, // HeadMascotte s'occupe de créer course.context
+                    sections,
                   }
                   : null
               }
+              aiEnabled={courseAiEnabled} // <-- nouveau prop
             />
+
+
+
 
             <UserCircle
               initials={initials}
@@ -215,3 +261,4 @@ export default function Courses() {
     </CourseContext.Provider>
   );
 }
+

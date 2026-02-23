@@ -29,8 +29,26 @@
   "coursesFollowed": "Cours suivis",
   "activityTitle": "Activité de la plateforme",
   "registrationsAndLogins": "📥 Inscriptions & 🔐 Connexions"
+},
+"notificationLoad":"Chanrgement des notifications...",
+"noNotif": "Aucune notification pour le moment",
+ "notifications": {
+    "newStudent": "Nouvelle inscription étudiant",
+    "courseApproved": "Cours 'Algorithmes' approuvé",
+    "exerciseSubmitted": "Exercice soumis par étudiant",
+    "newTeacher": "Nouveau professeur inscrit"
+  },
+   "days": {
+    "Monday": "Lundi",
+    "Tuesday": "Mardi",
+    "Wednesday": "Mercredi",
+    "Thursday": "Jeudi",
+    "Friday": "Vendredi",
+    "Saturday": "Samedi",
+    "Sunday": "Dimanche"
+  }
 }
-}
+
 
 
 

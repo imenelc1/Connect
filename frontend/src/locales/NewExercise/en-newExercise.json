@@ -11,7 +11,8 @@
     "duration_label": "Duration",
     "level_label": "Level",
     "cours": "Course",
-    "solution_label": "Solution (optional — visible only after completing the exercise)"
+    "solution_label": "Solution (optional — visible only after completing the exercise)",
+    "solution_placeholder":"Write the solution here (optionnal)"
 
   },
   "select": {
@@ -27,6 +28,11 @@
     "question_cours": "Course's questions",
     "private": "Private",
     "public": "Public"
+  },
+   "preview": {
+  "debutant": "Beginner",
+  "intermediaire": "Intermediate",
+  "avance": "Advanced"
   },
   "buttons": {
     "cancel": "Cancel",
@@ -50,5 +56,19 @@
   },
   
   
-    "solution_note": "This solution is only visible to the teacher. It will be revealed to the student only after they have completed the exercise."
+    "solution_note": "This solution is only visible to the teacher. It will be revealed to the student only after they have completed the exercise.",
+    "max_sub":"Max submissions",
+    "unlimited": "Unlimited",
+    "errors": {
+  "loadCourses": "Error loading courses",
+  "notAuthenticated": "User not logged in",
+   "createExercise": "Error creating exercise",
+     "loadExercise": "Error loading exercise",
+     "updateExercise": "Error updating exercise"
+},
+"messages": {
+  "exerciseUpdated": "Exercise updated successfully!"
+}
+
+
 }

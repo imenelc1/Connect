@@ -92,10 +92,7 @@ def notify_prof_on_course_update(sender, instance, created, **kwargs):
         module_source="COURS",
         content_type=ContentType.objects.get_for_model(instance),
         object_id=instance.id_cours,
-        extra_data={
-            "admin_id": admin.id_admin,
-            "admin_email": admin.email_admin
-        }
+        
     )
 
 # -----------------------------

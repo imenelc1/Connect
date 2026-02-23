@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Search, SquarePen, Trash2, Code } from "lucide-react";
@@ -39,22 +39,23 @@ export default function ExercisesManagement() {
   const [editModal, setEditModal] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [courses, setCourses] = useState([]);
-useEffect(() => {
-  const fetchCourses = async () => {
-    try {
-      const res = await api.get("courses/");
-      setCourses(res.data);
-    } catch (err) {
-      console.error("Erreur chargement cours", err);
-    }
-  };
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await api.get("courses/");
+        setCourses(res.data);
+      } catch (err) {
+        console.error(t("errors.loadCourses"), err);
 
-  fetchCourses();
-}, []);
-const getCourseTitle = (courseId) => {
-  const course = courses.find(c => c.id_cours === courseId);
-  return course ? course.titre_cour : "—";
-};
+      }
+    };
+
+    fetchCourses();
+  }, []);
+  const getCourseTitle = (courseId) => {
+    const course = courses.find(c => c.id_cours === courseId);
+    return course ? course.titre_cour : "—";
+  };
 
 
   const [editValues, setEditValues] = useState({
@@ -90,8 +91,8 @@ const getCourseTitle = (courseId) => {
           utilisateur: ex.utilisateur,
           utilisateur_name: ex.utilisateur_name,
           visibilite_exo: ex.visibilite_exo, //est un boolean
-          visibilite_exo_label:ex.visibilite_exo_label,
-          max_soumissions:ex.max_soumissions
+          visibilite_exo_label: ex.visibilite_exo_label,
+          max_soumissions: ex.max_soumissions
         }));
 
         setExercises(formatted);
@@ -142,7 +143,7 @@ const getCourseTitle = (courseId) => {
           niveau_exo: editValues.niveau_exo,
           categorie: editValues.categorie,
           visibilite_exo: editValues.visibilite_exo,
-          
+
           utilisateur: editValues.utilisateur,
           cours: editValues.cours
         },
@@ -150,7 +151,7 @@ const getCourseTitle = (courseId) => {
       );
 
       // ✅ Toast ou alert succès
-      toast.success("Exercice mis à jour avec succès !");
+      toast.success(t("success.updateExercise"));
 
       // Mettre à jour la liste localement
       const updatedExo = res.data;
@@ -166,9 +167,10 @@ const getCourseTitle = (courseId) => {
 
       return updatedExo.id_exercice;
     } catch (err) {
-      console.error("Erreur mise à jour:", err.response?.data || err.message);
-      alert("Erreur lors de la mise à jour de l'exercice");
+      console.error(t("errors.updateExercise"), err.response?.data || err.message);
+      alert(t("errors.updateExercise"));
       return null;
+
     }
   };
 
@@ -186,12 +188,12 @@ const getCourseTitle = (courseId) => {
     );
   };
 
-const [viewModal, setViewModal] = useState(false);
-///const [selectedExercise, setSelectedExercise] = useState(null);
-const openView = (exercise) => {
-  setSelectedExercise(exercise);
-  setViewModal(true);
-};
+  const [viewModal, setViewModal] = useState(false);
+  ///const [selectedExercise, setSelectedExercise] = useState(null);
+  const openView = (exercise) => {
+    setSelectedExercise(exercise);
+    setViewModal(true);
+  };
 
 
 
@@ -257,8 +259,15 @@ const openView = (exercise) => {
           {filtered.map((item) => (
             <div
               key={item.id_exercice}
-              className={`${difficultyBgMap[item.niveau_exo] || "bg-white"} rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col`}
+              className={`
+    ${difficultyBgMap[item.niveau_exo] || "bg-white"}
+    rounded-2xl p-6 shadow-sm hover:shadow-md transition
+    flex flex-col
+    overflow-hidden
+  `}
             >
+
+
               <div className="flex justify-between items-center mb-4">
                 <div className="w-12 h-12 flex items-center justify-center bg-grad-2 rounded-xl">
                   <Code size={24} className="text-muted" />
@@ -267,35 +276,39 @@ const openView = (exercise) => {
                   className={`px-3 py-1 text-xs font-medium rounded-full ${item.niveau_exo === "debutant"
                     ? "bg-muted/20 text-muted"
                     : item.niveau_exo === "intermediaire"
-                      ? "bg-pink/20 text-pink"
-                      : "bg-purple/20 text-purple"
+                      ? "bg-secondary/20 text-secondary"
+                      : "bg-pink/20 text-pink"
                     }`}
                 >
-                  {item.niveau_exercice_label}
+                  {item.niveau_exo === "easy"
+                    ? t("difficulty.Beginner")
+                    : item.niveau_exo === "intermediaire"
+                      ? t("difficulty.medium")
+                      : t("difficulty.hard")}
                 </span>
 
               </div>
 
-              <h3 className="font-semibold text-lg mb-2">
+              <h3 className="font-semibold text-lg mb-2 whitespace-normal break-words ">
                 {item.titre_exo}
               </h3>
-              <p className="text-grayc text-sm mb-4">
+              <p className="text-grayc text-sm mb-4 whitespace-normal break-words">
                 {item.utilisateur_name}
               </p>
-              <p className="text-grayc text-sm mb-4">
+              <p className="text-grayc text-sm mb-4 whitespace-normal break-words">
                 {item.categorie}
               </p>
 
-              <div className="flex justify-between items-center text-sm text-gray-500 mt-auto">
+              <div className="flex text-sm text-gray-500 mt-auto gap-3">
                 <Button
-                                      variant="courseStart"
-                                      className={`px-4 py-2 whitespace-nowrap ${buttonStyles[item.niveau_exercice_label]}`}
-                                     onClick={() => openView(item)}
-                                    >
-                                      Voir Exercice
-                                    </Button>
-                <div className="flex gap-3" >
-                 
+                  variant="courseStart"
+                  className={`px-2 py-2 whitespace-nowrap ${buttonStyles[item.niveau_exercice_label]}`}
+                  onClick={() => openView(item)}
+                >
+                  {t("voir_exo")}
+                </Button>
+                <div className="flex gap-1" >
+
                   <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
                     <SquarePen size={20} />
                   </button>
@@ -378,24 +391,24 @@ const openView = (exercise) => {
         ]}
       />
       <AddModal
-  open={viewModal}
-  onClose={() => setViewModal(false)}
-  title="Voir Exercice"
-  submitLabel="Fermer"
-  cancelLabel=""
-  onSubmit={() => setViewModal(false)}
-  fields={[
-    { label: "Titre", value: selectedExercise?.titre_exo, readonly: true },
-    { label: "Énoncé", value: selectedExercise?.enonce, readonly: true },
-    { label: "Auteur", value: selectedExercise?.utilisateur_name, readonly: true },
-    { label: "Catégorie", value: selectedExercise?.categorie, readonly: true },
-    { label: "Niveau", value: selectedExercise?.niveau_exercice_label, readonly: true },
-    { label: "Visibilité", value: selectedExercise?.visibilite_exo_label, readonly: true },
-    { label: "Cours",  value: getCourseTitle(selectedExercise?.cours), readonly: true },
-    { label: "Maximum de tentatives", value: selectedExercise?.max_soumissions, readonly: true },
-    
-  ]}
-/>
+        open={viewModal}
+        onClose={() => setViewModal(false)}
+        title={t("viewModal.title")}
+        submitLabel={t("viewModal.close")}
+        cancelLabel=""
+        onSubmit={() => setViewModal(false)}
+        fields={[
+          { label: t("field.title"), value: selectedExercise?.titre_exo, readonly: true },
+          { label: t("field.statement"), value: selectedExercise?.enonce, readonly: true },
+          { label: t("field.author"), value: selectedExercise?.utilisateur_name, readonly: true },
+          { label: t("field.category"), value: selectedExercise?.categorie, readonly: true },
+          { label: t("field.level"), value: selectedExercise?.niveau_exercice_label, readonly: true },
+          { label: t("field.visibility"), value: selectedExercise?.visibilite_exo_label, readonly: true },
+          { label: t("field.course"), value: getCourseTitle(selectedExercise?.cours), readonly: true },
+          { label: t("field.maxAttempts"), value: selectedExercise?.max_soumissions, readonly: true },
+
+        ]}
+      />
 
 
     </div>

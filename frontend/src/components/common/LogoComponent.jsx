@@ -5,9 +5,9 @@ import ThemeContext from "../../context/ThemeContext.jsx";
 // Logos pour dark / light mode
 import LogoLight from "../../assets/LogoLight.svg";
 import LogoDark from "../../assets/LogoDark.svg";
-
+// Composant affichant le logo en fonction du thème
 function LogoComponent({ className = "" }) {
-  const { darkMode } = useContext(ThemeContext);
+  const { darkMode } = useContext(ThemeContext);// Récupère l'état du thème depuis le contexte
 
   return (
     <img

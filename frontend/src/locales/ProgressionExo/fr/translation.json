@@ -7,6 +7,7 @@
      "exercice":"Exercice",
      "Progression":"Progression",
     "completedexo": "Exercices terminés",
+    "completedcours":"Cours terminés",
     "courses": "Cours actifs",
     "Weekly": "Taux de soumission hebdomadaire",
     "grade":"Progression des scores au fil du temps",
@@ -15,7 +16,14 @@
      "positivep1":"Les élèves se sont améliorés de ",
     "positivep2":"Des points ont été marqués ces dernières semaines. Continuez à encourager ces progrès !" 
     , "joined":"Rejoint le",
-    "Submitted":" Soumis le"
+    "Submitted":" Soumis le",
+    "noExercises": "Aucun exercice disponible"
    
+  },
+  "errors": {
+    "fetchData": "Erreur lors de la récupération des données",
+        "fetchStats": "Erreur lors de la récupération des statistiques professeur",
+         "studentNotFound": "Erreur : étudiant introuvable"
+
   }
 }

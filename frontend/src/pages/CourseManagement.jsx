@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { SquarePen, Trash2, BookOpen } from "lucide-react";
@@ -9,9 +9,7 @@ import { useNavigate } from "react-router-dom";
 import ContentSearchBar from "../components/common/ContentSearchBar";
 import ModernDropdown from "../components/common/ModernDropdown";
 import ThemeContext from "../context/ThemeContext";
-import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
 import { toast } from 'react-hot-toast';
 const levelStyles = {
   Débutant: "bg-blue text-white",
@@ -59,7 +57,7 @@ export default function CoursesManagement() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [teachers, setTeachers] = useState([]);
 
-  const token = localStorage.getItem("admin_token"); // JWT admin
+  const token = localStorage.getItem("admin_token"); 
 
   const difficultyOptions = [
     { value: "debutant", label: t("difficulty.Beginner") },
@@ -188,18 +186,30 @@ export default function CoursesManagement() {
 
   // DELETE
    const handleDeleteCourse = async (courseId) => {
-    if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
-    try {
-      await fetch(`http://localhost:8000/api/courses/cours/${courseId}/delete/`, {
+  if (!window.confirm("Tu es sûr de supprimer ce cours ?")) return;
+
+  try {
+    const res = await fetch(
+      `http://localhost:8000/api/courses/cours/${courseId}/delete/`,
+      {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setCourses((prev) => prev.filter((c) => c.id !== courseId));
-    } catch (err) {
-      console.error("Erreur suppression :", err);
-      alert("Erreur lors de la suppression");
-    }
-  };
+      }
+    );
+
+    if (!res.ok) throw new Error("Erreur suppression");
+
+    setCourses((prev) =>
+      prev.filter((c) => c.id_cours !== courseId)
+    );
+
+    toast.success("Cours supprimé avec succès");
+  } catch (err) {
+    console.error("Erreur suppression :", err);
+    toast.error("Erreur lors de la suppression");
+  }
+};
+
 
 
   return (
@@ -209,14 +219,7 @@ export default function CoursesManagement() {
         <Navbar />
         <div className="fixed top-6 right-6 flex items-center gap-4 z-50">
         <NotificationBell />
-        <UserCircle
-          initials={initials}
-          onToggleTheme={toggleDarkMode}
-          onChangeLang={(lang) => {
-            const i18n = window.i18n;
-            if (i18n?.changeLanguage) i18n.changeLanguage(lang);
-          }}
-        />
+       
       </div>
       </div>
 
@@ -288,7 +291,7 @@ export default function CoursesManagement() {
                 </p>
               {teachers.length > 0 && (
                 <p className="text-grayc text-sm mb-2">
-                  Auteur: {teachers.find(t => t.id_utilisateur === item.utilisateur)?.nom}{" "}
+                  {t("auteur")}: {teachers.find(t => t.id_utilisateur === item.utilisateur)?.nom}{" "}
                   {teachers.find(t => t.id_utilisateur === item.utilisateur)?.prenom}
                 </p>
               )}
@@ -297,13 +300,13 @@ export default function CoursesManagement() {
               )}
 
               <div className="flex justify-end mt-auto pt-4">
-                <div className="flex gap-3">
+                <div className="flex gap-2">
                    <Button
                     variant="courseStart"
-                    className={`px-4 py-2 whitespace-nowrap ${buttonStyles[item.niveau_cour_label]}`}
+                    className={`px-2 py-2 whitespace-nowrap ${buttonStyles[item.niveau_cour_label]}`}
                     onClick={() => navigate(`/Cours/${item.id_cours}`)}
                   >
-                    Voir Cours
+                    {t("voir_cours")}
                   </Button>
                   <button className="text-muted hover:opacity-80" onClick={() => openEdit(item)}>
                     <SquarePen size={20} />

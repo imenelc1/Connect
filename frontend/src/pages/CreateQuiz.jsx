@@ -1,23 +1,32 @@
+// React & Router
 import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/common/NavBar"; // Navbar responsive
+
+// UI Components
+import Navbar from "../components/common/Navbar";
 import QuizSettings from "../components/common/QuizSettings";
 import QuizSummary from "../components/common/QuizSummary";
 import QuestionForm from "../components/common/QuestionForm";
-import SaveDraftButton from "../components/common/SaveDraftButton";
 import PublishQuizButton from "../components/common/PublishQuizButton";
-import Logo from "../components/common/LogoComponent";
-import { useTranslation } from "react-i18next";
-import { Globe, FileText, Activity } from "lucide-react";
-import ThemeContext from "../context/ThemeContext";
-import ThemeButton from "../components/common/ThemeButton";
-import { getCurrentUserId } from "../hooks/useAuth";
-import api from "../services/courseService"; // Make sure your API helper is here
+import Topbar from "../components/common/TopBar";
 import UserCircle from "../components/common/UserCircle";
 import NotificationBell from "../components/common/NotificationBell";
-import { useNotifications } from "../context/NotificationContext";
-import Topbar from "../components/common/TopBar";
+
+// Context & Hooks
+import ThemeContext from "../context/ThemeContext";
+import { getCurrentUserId } from "../hooks/useAuth";
+
+// Services
+import api from "../services/courseService";
+
+// Utils & Libs
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
+
+// Icons
+import { FileText, Activity } from "lucide-react";
 import { FaClock, FaMedal, FaStar } from "react-icons/fa";
+
 
 
 
@@ -26,6 +35,9 @@ export default function CreateQuiz() {
 
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("createQuiz");
+  /* ============================
+   STATE & CONFIGURATION
+============================ */
   const [activeStep, setActiveStep] = useState(1);
   const { toggleDarkMode } = useContext(ThemeContext);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -38,10 +50,16 @@ export default function CreateQuiz() {
   const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
     }`.toUpperCase();
 
+  //les etapes du processus de la creation
   const exerciseSteps = [
-    { label: t("quiz.info"), icon: FileText },
-    { label: t("quiz.preview"), icon: Activity },
+    { label: t("info"), icon: FileText },
+    { label: t("preview"), icon: Activity },
   ];
+
+  /* ============================
+   le model quiz pour la creation
+============================ */
+
   const [quizData, setQuizData] = useState({
     title: "",
     description: "",
@@ -68,10 +86,11 @@ export default function CreateQuiz() {
     ]
   });
 
-  const currentUserId = getCurrentUserId();
+  const currentUserId = getCurrentUserId(); //l'utilisateur connecté
 
   const [courses, setCourses] = useState([]);
 
+  //fecth des cours pour les utiliser dans la creation
   useEffect(() => {
     fetch("http://localhost:8000/api/courses/api/cours")
       .then((res) => res.json())
@@ -84,7 +103,7 @@ export default function CreateQuiz() {
         }));
         setCourses(formatted);
       })
-      .catch((err) => console.error("Erreur chargement cours :", err));
+      .catch((err) => console.error(t("errors.loadCourses"), err));
   }, []);
   const myCourses = courses.filter((c) => c.isMine);
 
@@ -125,24 +144,30 @@ export default function CreateQuiz() {
   const totalQuestions = quizData.questions.length;
 
 
-  /*save exercice comme step 1*/
+  /* ============================
+   step 1 : creere l'objet exercice du quiz
+============================ */
+
   const handleSaveStep1 = async () => {
     const token = localStorage.getItem("token");
     const currentUserId = getCurrentUserId();
 
+
     if (!token || !currentUserId) {
-      alert("Utilisateur non connecté");
+      toast.error(t("errors.notLoggedIn"));
+
       return null;
     }
 
-    // Vérification minimale
     if (
       !quizData.title ||
       !quizData.description ||
       !quizData.level ||
       !quizData.courseId
     ) {
-      alert("Veuillez remplir tous les champs obligatoires");
+      toast.warning(t("errors.requiredFields"));
+
+
       return null;
     }
 
@@ -167,29 +192,27 @@ export default function CreateQuiz() {
 
       const exerciceId = response.data.id_exercice;
 
-      console.log("✅ Exercice créé :", exerciceId);
+      console.log(t("success.exerciseCreated", { id: exerciceId }));
 
-      return exerciceId; // IMPORTANT pour step 2
+
+      return exerciceId;
 
     } catch (error) {
       console.error(
-        "❌ Erreur création exercice :",
-        error.response?.data || error.message
+        t("errors.exerciseCreate", {
+          message: error.response?.data || error.message
+        })
       );
-      alert("Erreur lors de la sauvegarde de l'exercice");
-      return null;
+      toast.error(t("errors.exerciseSave"));
     }
   };
-  /*step 2 creation quiz a partir de exo */
+  /* ============================
+    step 2 les infos du quiz
+ ============================ */
   const handleSaveStep2 = async (exerciceIdParam) => {
     const token = localStorage.getItem("token");
-    const idToUse = exerciceIdParam || exerciceId; // fallback si param non fourni
+    const idToUse = exerciceIdParam || exerciceId;
 
-    /*if (!token || !idToUse) {
-      alert("Exercice non trouvé. Veuillez créer l'exercice d'abord.");
-      return null;
-    }
-  */
     try {
       const response = await api.post(
         "/quiz/",
@@ -211,43 +234,40 @@ export default function CreateQuiz() {
       );
 
       const quizId = response.data.id;
-      console.log("✅ Quiz créé :", quizId);
+      console.log(t("success.quizCreated", { id: quizId }));
       return quizId;
+
 
     } catch (error) {
       console.error(
-        "❌ Erreur création quiz :",
-        error.response?.data || error.message
+        t("errors.quizCreation", { details: error.response?.data || error.message })
       );
-      alert("Erreur lors de la création du quiz");
+      toast.error(t("errors.quizCreateToast"));
       return null;
     }
   };
-  /* step 3 les questions et option*/
+
+  /* ============================
+   step 3 : les questions et options
+ ============================ */
   const handleSaveStep3 = async (idQuiz) => {
     const token = localStorage.getItem("token");
-    /*if (!token || !exerciceId) {
-      alert("Exercice non trouvé. Veuillez créer l'exercice et le quiz d'abord.");
-      return null;
-    }*/
 
     try {
       for (const question of quizData.questions) {
-        // 1️⃣ Créer la question
         const questionRes = await api.post(
           "/quiz/Question/",
           {
-            texte_qst: question.text,        // texte de la question
+            texte_qst: question.text,
             reponse_correcte: question.answers.find(a => a.isCorrect)?.text || "",
             score: question.points || 1,
-            exercice: idQuiz,            // FK vers Exercice
+            exercice: idQuiz,
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
         const questionId = questionRes.data.id_qst;
 
-        // 2️⃣ Créer les options
         for (const answer of question.answers) {
           await api.post(
             "/quiz/Option/",
@@ -260,33 +280,73 @@ export default function CreateQuiz() {
         }
       }
 
-      console.log("✅ Toutes les questions et options créées !");
-      alert("Quiz complet créé avec succès !");
+      console.log(t("success.allQuestionsCreated"));
+      toast.success(t("success.quizCreatedSuccess"));
       return true;
 
     } catch (error) {
-      console.error("❌ Erreur création questions/options :", error.response?.data || error.message);
-      alert("Erreur lors de la création des questions");
+      console.error(t("errors.questionsOptionsError"), error.response?.data || error.message);
+      toast.error(t("errors.questionsCreateError"));
+
       return false;
     }
   };
+  /* ============================
+     valider quiz avant de le publier
+  ============================ */
+  const validateQuiz = () => {
+    if (
+      !quizData.title.trim() ||
+      !quizData.description.trim() ||
+      !quizData.level ||
+      !quizData.courseId
+    ) {
+      toast.error(t("errors.requiredFields"));
+      return false;
+    }
 
+    for (let i = 0; i < quizData.questions.length; i++) {
+      const q = quizData.questions[i];
 
-  /* tester save quiz */
+      if (!q.text.trim()) {
+        toast.error(t("errors.questionTextRequired", { index: i + 1 }));
+        return false;
+      }
+
+      const hasCorrect = q.answers.some(a => a.isCorrect);
+      if (!hasCorrect) {
+        toast.error(t("errors.correctAnswerRequired", { index: i + 1 }));
+        return false;
+      }
+
+      for (let j = 0; j < q.answers.length; j++) {
+        if (!q.answers[j].text.trim()) {
+          toast.error(
+            t("errors.answerTextRequired", { qIndex: i + 1, aIndex: j + 1 })
+          );
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  /* ============================
+  publier le quiz, combiner de step 1 et step 2
+============================ */
   const handlePublishQuiz = async () => {
-    // Step 1 : créer l'exercice
+    if (!validateQuiz()) return;
+
     const exoId = await handleSaveStep1();
     if (!exoId) return;
 
-    // Step 2 : créer le quiz
     const quizId = await handleSaveStep2(exoId);
-    // if (!quizId) return;
+    if (!quizId) return;
 
-    // Step 3 : créer les questions et options
     await handleSaveStep3(exoId);
 
-    // Rediriger vers liste des quiz ou page de confirmation
-    navigate("/all-quizzes");
+    navigate("/all-quizzes"); //navigation vers la pages des quiz
   };
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -313,7 +373,7 @@ export default function CreateQuiz() {
 
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-3 sm:gap-4">
-          {/* User + Bell */}
+          {/* utilisateur et notifications */}
           <div className="flex items-center gap-3 order-1 sm:order-2 mt-0 sm:mt-0 self-end sm:self-auto">
             <NotificationBell />
             <UserCircle
@@ -330,7 +390,7 @@ export default function CreateQuiz() {
         <div className="max-w-7xl mx-auto">
 
 
-
+          {/* la barre des etapes de la creation */}
           <Topbar
             steps={exerciseSteps}
             activeStep={activeStep}
@@ -338,13 +398,13 @@ export default function CreateQuiz() {
             className="flex justify-between"
           />
 
-          {/* MAIN GRID */}
+          {/*  GRID principale */}
           {activeStep === 1 && (
             <div
               className="rounded-2xl shadow-lg p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 bg-grad-2
                max-w-7xl mx-auto mt-10"
             >
-              {/* LEFT COLUMN (SETTINGS + SUMMARY) */}
+              {/* colonne a gauche (info generale du quiz) */}
               <div className="flex flex-col gap-4 lg:col-span-1 lg:sticky lg:top-10 lg:self-start">
                 <QuizSettings
                   quizData={quizData}
@@ -360,7 +420,7 @@ export default function CreateQuiz() {
                 />
               </div>
 
-              {/* RIGHT COLUMN (QUESTIONS) */}
+              {/* colonne a droite (questions) */}
               <div className="flex flex-col gap-4 lg:col-span-2 flex-1 px-0 md:px-4">
 
                 {/* HEADER QUESTIONS */}
@@ -375,7 +435,7 @@ export default function CreateQuiz() {
                   </button>
                 </div>
 
-                {/* QUESTIONS LIST */}
+                {/*liste des questions*/}
                 <div className="flex-1 overflow-auto max-h-[70vh]">
                   <QuestionForm
                     questions={quizData.questions}
@@ -385,8 +445,14 @@ export default function CreateQuiz() {
 
                 {/* ACTION BUTTONS */}
                 <div className="mt-6 flex flex-col sm:flex-row gap-4 sm:justify-between">
-                  <SaveDraftButton onClick={handleSaveDraft} />
-                  <PublishQuizButton onClick={() => setActiveStep(2)} />
+                  <PublishQuizButton
+                    onClick={() => {
+                      if (validateQuiz()) {
+                        setActiveStep(2);
+                      }
+                    }}
+                  />
+
                 </div>
 
               </div>
@@ -411,33 +477,39 @@ export default function CreateQuiz() {
 
               {/* OVERVIEW CARDS */}
               <div className="grid grid-cols-2 md:flex md:flex-wrap justify-center gap-3 md:gap-4 mb-6">
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-blue text-white text-xs md:text-sm">
-    <FaClock className="w-3 h-3 md:w-4 md:h-4" /> 
-    <span>{quizData.durationEnabled ? quizData.duration : "-"} {t("minutes")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-blue text-white text-xs md:text-sm">
+                  <FaClock className="w-3 h-3 md:w-4 md:h-4" />
+                  <span>{quizData.durationEnabled ? quizData.duration : "-"} {t("minutes")}</span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-purple text-white text-xs md:text-sm">
-    <FaMedal className="w-3 h-3 md:w-4 md:h-4" /> 
-    <span>{quizData.questions.reduce((sum, q) => sum + (q.points || 1), 0)} {t("points")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-purple text-white text-xs md:text-sm">
+                  <FaMedal className="w-3 h-3 md:w-4 md:h-4" />
+                  <span>{quizData.questions.reduce((sum, q) => sum + (q.points || 1), 0)} {t("points")}</span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-pink text-white text-xs md:text-sm">
-    <FaStar className="w-3 h-3 md:w-4 md:h-4" /> 
-    <span>{quizData.level || t("level")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-pink text-white text-xs md:text-sm">
+                  <FaStar className="w-3 h-3 md:w-4 md:h-4" />
+                  <span>{t(`levels.${quizData.level}`) || t("level")}</span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-green text-white text-xs md:text-sm">
-    <span>{quizData.maxAttempts || t("unlimited")} {t("maxAttempts")}</span>
-  </div>
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-green text-white text-xs md:text-sm">
+                  <span>
+                    {quizData.maxAttempts === 0
+                      ? t("unlimitedAttempts")
+                      : `${quizData.maxAttempts} ${t("maxAttempts")}`
+                    }
+                  </span>
+                </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
-    <span>{quizData.passingScore || 0} {t("scoreMinimum")}</span>
-  </div>
 
-  <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
-    <span>{quizData.delais_entre_tentative || 0} {t("delais_entre_tentative")}</span>
-  </div>
-</div> 
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
+                  <span>{quizData.passingScore || 0} {t("scoreMinimum")}</span>
+                </div>
+
+                <div className="px-3 py-1.5 md:px-6 md:py-2 rounded-md shadow-sm flex items-center gap-2 justify-center bg-yellow-500 text-white text-xs md:text-sm">
+                  <span>{quizData.delais_entre_tentative || 0} {t("delais_entre_tentative")}</span>
+                </div>
+              </div>
 
               {/* QUESTIONS PREVIEW */}
               <div className="flex flex-col gap-4">
@@ -504,3 +576,4 @@ export default function CreateQuiz() {
     </div>
   );
 }
+

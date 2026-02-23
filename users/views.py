@@ -66,10 +66,13 @@ class RegisterView(generics.CreateAPIView):
                 annee_etude=request.data.get("annee_etude")
             )
         elif role == "enseignant":
-            Enseignant.objects.create(
-                utilisateur=user,
-                grade=request.data.get("grade")
-            )
+         Enseignant.objects.create(
+        utilisateur=user,
+        grade=request.data.get("grade"),
+        can_create_any_course_content=False
+    )
+
+
         ActivityEvent.objects.create(user=user, event_type="registration")
         # 🔥 CRÉATION DU TOKEN
         token = _create_token(user.id_utilisateur, role)
@@ -130,7 +133,9 @@ class LoginView(APIView):
                 if not hasattr(user, "enseignant"):
                     return Response({"error": "Accès réservé aux enseignants."}, status=403)
                 user_data.update({
-                    "grade": user.enseignant.grade
+                    "grade": user.enseignant.grade,
+                    "can_create_any_course_content": user.enseignant.can_create_any_course_content
+    
                 })
 
             # Si l’utilisateur doit changer le mot de passe, renvoyer aussi un reset_token
@@ -162,7 +167,8 @@ class AdminRegisterView(generics.CreateAPIView):
 
 
 class AdminLoginView(APIView):
-    def post(self, request):
+    def post(self, request):       
+
         email = request.data.get('email_admin')
         password = request.data.get('mdp_admin')
 
@@ -208,11 +214,141 @@ class IsAdminJWT(BasePermission):
 # User Profile
 # -----------------------------
 
-from .serializers import ProfileSerializer, AdminProfileSerializer
-from .models import Administrateur, Utilisateur
+from rest_framework.generics import GenericAPIView
+from rest_framework.response import Response
 
+class UserProfileView(GenericAPIView):
+    permission_classes = [IsAuthenticatedJWT]
 
-class UserProfileView(generics.RetrieveUpdateAPIView):
+    def get_object(self):
+        user = self.request.user
+        return Utilisateur.objects.select_related("enseignant", "etudiant").get(
+            id_utilisateur=user.id_utilisateur
+        )
+
+    def get_serializer_class(self):
+        user = self.get_object()
+        if isinstance(user, Administrateur):
+            return AdminProfileSerializer
+        return ProfileSerializer
+
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_object()
+        data = request.data
+
+        # Champs Utilisateur
+        user.nom = data.get("nom", user.nom)
+        user.prenom = data.get("prenom", user.prenom)
+        user.adresse_email = data.get("adresse_email", user.adresse_email)
+        user.date_naissance = data.get("date_naissance", user.date_naissance)
+        user.matricule = data.get("matricule", user.matricule)
+        user.save()
+
+        # Champs Etudiant
+        if hasattr(user, "etudiant") and user.etudiant:
+            user.etudiant.specialite = data.get("specialite", user.etudiant.specialite)
+            user.etudiant.annee_etude = data.get("annee_etude", user.etudiant.annee_etude)
+            user.etudiant.save()
+
+        # Champs Enseignant
+        if hasattr(user, "enseignant") and user.enseignant:
+            user.enseignant.grade = data.get("grade", user.enseignant.grade)
+            user.enseignant.save()
+
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=200)
+    permission_classes = [IsAuthenticated]  # ou IsAuthenticatedJWT si tu veux ton custom JWT
+
+    def get_object(self):
+        user = self.request.user
+        # Précharge les relations pour éviter obj.enseignant=None
+        if isinstance(user, Utilisateur):
+            return Utilisateur.objects.select_related("enseignant", "etudiant").get(
+                id_utilisateur=user.id_utilisateur
+            )
+        return user  # pour admin
+
+    def get_serializer_class(self):
+        user = self.get_object()
+        if isinstance(user, Administrateur):
+            return AdminProfileSerializer
+        return ProfileSerializer
+
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_object()
+        data = request.data
+
+        # Champs Utilisateur
+        user.nom = data.get("nom", user.nom)
+        user.prenom = data.get("prenom", user.prenom)
+        user.adresse_email = data.get("adresse_email", user.adresse_email)
+        user.date_naissance = data.get("date_naissance", user.date_naissance)
+        user.matricule = data.get("matricule", user.matricule)
+        user.save()
+
+        # Champs Etudiant
+        if hasattr(user, "etudiant"):
+            user.etudiant.specialite = data.get("specialite", user.etudiant.specialite)
+            user.etudiant.annee_etude = data.get("annee_etude", user.etudiant.annee_etude)
+            user.etudiant.save()
+
+        # Champs Enseignant
+        if hasattr(user, "enseignant"):
+            user.enseignant.grade = data.get("grade", user.enseignant.grade)
+            user.enseignant.save()
+
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+    permission_classes = [IsAuthenticatedJWT]
+
+    def get_serializer_class(self):
+        user = self.request.user
+
+        if isinstance(user, Administrateur):
+            return AdminProfileSerializer
+        
+        return ProfileSerializer
+
+    def get(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        user = request.user
+        data = request.data
+
+        # Champs Utilisateur
+        user.nom = data.get("nom", user.nom)
+        user.prenom = data.get("prenom", user.prenom)
+        user.adresse_email = data.get("adresse_email", user.adresse_email)
+        user.date_naissance = data.get("date_naissance", user.date_naissance)
+        user.matricule = data.get("matricule", user.matricule)
+        user.save()
+
+        # Champs Etudiant
+        if hasattr(user, "etudiant"):
+            user.etudiant.specialite = data.get("specialite", user.etudiant.specialite)
+            user.etudiant.annee_etude = data.get("annee_etude", user.etudiant.annee_etude)
+            user.etudiant.save()
+
+        # Champs Enseignant
+        if hasattr(user, "enseignant"):
+            user.enseignant.grade = data.get("grade", user.enseignant.grade)
+            user.enseignant.save()
+
+        serializer = self.get_serializer(user)
+        return Response(serializer.data, status=200)
+
     permission_classes = [IsAuthenticatedJWT]
 
     def get_object(self):

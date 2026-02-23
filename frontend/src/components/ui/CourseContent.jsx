@@ -16,7 +16,7 @@ export default function CourseContent({
 }) {
   const { t } = useTranslation("courses");
   const { title, sections } = course;
-  const courseId = course.id || "default";
+  const courseId = course.id || t("courseIdDefault");;
   const navigate = useNavigate();
 
   // Timer
@@ -33,36 +33,36 @@ export default function CourseContent({
     localStorage.setItem(`courseTimer_${courseId}`, secondsSpent.toString());
   }, [secondsSpent, courseId]);
 
-useEffect(() => {
-  if (!courseId) return;
+  useEffect(() => {
+    if (!courseId) return;
 
-  const fetchFeedbacks = async () => {
-    setLoadingFeedbacks(true);
-    try {
-      const data = await feedbackService.getFeedbacks(courseId);
+    const fetchFeedbacks = async () => {
+      setLoadingFeedbacks(true);
+      try {
+        const data = await feedbackService.getFeedbacks(courseId);
 
-      const formatted = data.map((f) => ({
-        id: f.id_feedback,
-        initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
-        comment: f.contenu,
-        stars: f.etoile,
-        nomComplet: f.utilisateur_nom && f.utilisateur_prenom
-  ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-  : f.utilisateur_nom || "Utilisateur anonyme",
+        const formatted = data.map((f) => ({
+          id: f.id_feedback,
+          initials: `${f.utilisateur_nom?.[0] || ""}${f.utilisateur_prenom?.[0] || ""}`.toUpperCase(),
+          comment: f.contenu,
+          stars: f.etoile,
+          nomComplet: f.utilisateur_nom && f.utilisateur_prenom
+            ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
+            : f.utilisateur_nom || t("anonymousUser"),
 
 
-      }));
+        }));
 
-      setAllFeedbacks(formatted);
-    } catch (err) {
-      console.error("Erreur chargement feedbacks", err);
-    } finally {
-      setLoadingFeedbacks(false);
-    }
-  };
+        setAllFeedbacks(formatted);
+      } catch (err) {
+        console.error(t("feedbackLoadError"), err);
+      } finally {
+        setLoadingFeedbacks(false);
+      }
+    };
 
-  fetchFeedbacks();
-}, [courseId]);
+    fetchFeedbacks();
+  }, [courseId]);
 
 
   const formatTime = (secs) => {
@@ -86,14 +86,14 @@ useEffect(() => {
   );
 
   // Marquer leçons visitées
- useEffect(() => {
-  currentLessons.forEach((lesson) => {
-    if (!lesson.visited) {
-      markLessonVisited(lesson.id);
-      updateSectionProgress(currentSectionIndex, lesson.id);
-    }
-  });
-}, [currentLessons, currentSectionIndex, markLessonVisited, updateSectionProgress]);
+  useEffect(() => {
+    currentLessons.forEach((lesson) => {
+      if (!lesson.visited) {
+        markLessonVisited(lesson.id);
+        updateSectionProgress(currentSectionIndex, lesson.id);
+      }
+    });
+  }, [currentLessons, currentSectionIndex, markLessonVisited, updateSectionProgress]);
 
 
   // Navigation
@@ -160,7 +160,7 @@ useEffect(() => {
           stars: f.etoile,
           nomComplet: f.afficher_nom
             ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-            : "Utilisateur anonyme",
+            : t("anonymousUser"),
           initials: f.afficher_nom
             ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
             : "??",
@@ -168,7 +168,7 @@ useEffect(() => {
 
         setAllFeedbacks(formatted);
       } catch (err) {
-        console.error("Erreur chargement feedbacks", err);
+        console.error(t("feedbackLoadError"), err);
       } finally {
         setLoadingFeedbacks(false);
       }
@@ -179,7 +179,7 @@ useEffect(() => {
 
   const handleSubmit = async () => {
     if (!feedback || rating === 0) {
-      alert("Veuillez écrire un feedback et donner une note");
+      alert(t("feedbackRequired"));
       return;
     }
 
@@ -201,7 +201,7 @@ useEffect(() => {
           stars: f.etoile,
           nomComplet: f.afficher_nom
             ? `${f.utilisateur_nom} ${f.utilisateur_prenom}`
-            : "Utilisateur anonyme",
+            : t("anonymousUser"),
           initials: f.afficher_nom
             ? `${(f.utilisateur_nom?.[0] || "")}${(f.utilisateur_prenom?.[0] || "")}`.toUpperCase()
             : "??",
@@ -213,7 +213,7 @@ useEffect(() => {
       setAfficherNom(false);
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de l'envoi");
+      alert(t("sendError"));
     }
   };
 
@@ -224,7 +224,7 @@ useEffect(() => {
         <h1 className="text-xl sm:text-3xl font-bold text-muted">{title}</h1>
         <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm">
           <span className="flex items-center gap-1 text-muted font-medium">
-            <BookOpen size={14} className="sm:w-4 sm:h-4" /> Chapitre {section.ordre} / {sections.length}
+            <BookOpen size={14} className="sm:w-4 sm:h-4" /> {t("chapter")} {section.ordre} / {sections.length}
           </span>
           <span className="flex items-center gap-1 text-muted">
             <Clock size={14} className="sm:w-4 sm:h-4" /> {formatTime(secondsSpent)}
@@ -250,14 +250,14 @@ useEffect(() => {
             </div>
           ))
         ) : (
-          <p className="text-center text-sm sm:text-base text-gray-500 mt-4">Aucune leçon disponible</p>
+          <p className="text-center text-sm sm:text-base text-gray-500 mt-4"> {t("leconNondispo")}</p>
         )}
       </div>
 
-            {isLastPage && (
+      {isLastPage && (
         <div className="mb-4 p-4  text-center">
           <p className="text-green-700 font-semibold text-sm sm:text-base">
-             Cours terminé !
+            {t("coursTermine")}!
           </p>
         </div>
       )}
@@ -272,23 +272,22 @@ useEffect(() => {
         >
           <ChevronLeft size={14} className="sm:w-4 sm:h-4" /> {t("chapitrePrec")}
         </button>
-      <button
-        onClick={() => {
-          if (isLastPage) {
-            navigate(-1); 
-          } else {
-            nextLessonPage();
-          }
-        }}
-        className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-xs sm:text-base shadow ${
-          isLastPage
-            ? "bg-supp/80 text-white hover:bg-supp/90 focus:bg-supp/30"
-            : "bg-blue text-white hover:bg-blue/90"
-        }`}
-      >
-        {isLastPage ? "Terminer" : t("ChapitreSuiv")}
-        {!isLastPage && <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
-      </button>
+        <button
+          onClick={() => {
+            if (isLastPage) {
+              navigate(-1);
+            } else {
+              nextLessonPage();
+            }
+          }}
+          className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1 sm:py-2 rounded-xl text-xs sm:text-base shadow ${isLastPage
+              ? "bg-supp/80 text-white hover:bg-supp/90 focus:bg-supp/30"
+              : "bg-blue text-white hover:bg-blue/90"
+            }`}
+        >
+          {isLastPage ? t("finish") : t("ChapitreSuiv")}
+          {!isLastPage && <ChevronRight size={14} className="sm:w-4 sm:h-4" />}
+        </button>
 
       </div>
 
@@ -299,9 +298,13 @@ useEffect(() => {
             <h3 className="text-base sm:text-lg font-semibold">{t("readyQuiz")}</h3>
             <p className="text-sm sm:text-base opacity-90">{t("quizDesc")}</p>
           </div>
-          <button className="bg-white text-blue font-medium px-4 sm:px-6 py-2 rounded-xl shadow flex items-center gap-1 sm:gap-2 text-sm sm:text-base">
+          <button
+            className="bg-white text-blue font-medium px-4 sm:px-6 py-2 rounded-xl shadow flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+            onClick={() => navigate(`/cours/${courseId}/quizzes`)}
+          >
             {t("startQuiz")} <ChevronRight size={16} />
           </button>
+
         </div>
       </div>
 
@@ -318,19 +321,19 @@ useEffect(() => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 flex-1 px-4 sm:px-6">
             {loadingFeedbacks ? (
-  <p className="col-span-3 text-center text-gray-300">
-    Chargement des feedbacks...
-  </p>
-) : currentFeedbacks.length === 0 ? (
-  <p className="col-span-3 text-center text-gray-300">
-    Aucun feedback pour ce cours
-  </p>
-) : (
-  currentFeedbacks.map((f) => (
-  <FeedbackCard key={f.id} feedback={f} />
-))
+              <p className="col-span-3 text-center text-gray-300">
+                {t("loadingFeedbacks")}
+              </p>
+            ) : currentFeedbacks.length === 0 ? (
+              <p className="col-span-3 text-center text-gray-300">
+                {t("noFeedbacks")}
+              </p>
+            ) : (
+              currentFeedbacks.map((f) => (
+                <FeedbackCard key={f.id} feedback={f} />
+              ))
 
-)}
+            )}
 
           </div>
 
@@ -348,12 +351,15 @@ useEffect(() => {
         <div className="flex items-center gap-2 mb-4">
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={afficherNom} onChange={(e) => setAfficherNom(e.target.checked)} />
-            Afficher mon nom
+            {t("showName")}
           </label>
         </div>
 
         <textarea
-          className="w-full h-36 sm:h-48 border border-blue/20 rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none text-black/80 text-sm sm:text-base"
+          className="w-full h-36 sm:h-48 border  rounded-2xl p-3 sm:p-4 shadow-sm focus:outline-none bg-[rgb(var(--color-input-bg))]
+        text-[rgb(var(--color-input-text))]
+        placeholder-[rgb(var(--color-input-placeholder))]
+        border border-[rgb(var(--color-input-border))] text-sm sm:text-base"
           placeholder={t("feedbackPlaceholder")}
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
@@ -381,4 +387,5 @@ useEffect(() => {
       </div>
     </div>
   );
+  
 }

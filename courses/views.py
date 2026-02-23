@@ -18,7 +18,21 @@ from datetime import timedelta
 import os
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.db.models import Q
+from dashboard.models import ActivityEvent
+from users.models import Administrateur
 
+def log_activity(user, event_type):
+    """
+    Crée un événement d'activité pour l'utilisateur
+    seulement si ce type d'événement n'a pas encore été enregistré aujourd'hui.
+    """
+    today = datetime.now().date()
+    if not ActivityEvent.objects.filter(
+        user=user,
+        event_type=event_type,
+        created_at__date=today
+    ).exists():
+        ActivityEvent.objects.create(user=user, event_type=event_type)
 class CreateCoursView(APIView):
 
     @jwt_required
@@ -188,6 +202,46 @@ class CoursDetailView(generics.RetrieveUpdateAPIView):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    from users.models import Administrateur
+
+    def update(self, request, *args, **kwargs):
+        response = super().update(request, *args, **kwargs)  # mise à jour du cours
+
+        cours = self.get_object()
+        enseignant = cours.utilisateur
+
+        # Vérifier si l'utilisateur courant est un admin dans ta table Administrateur
+        user = request.user
+        if user.is_authenticated:
+          if Administrateur.objects.filter(email_admin=user.adresse_email).exists() and enseignant:
+             Notification.objects.create(
+            utilisateur_destinataire=enseignant,
+            action_type='course_updated_by_admin',
+            module_source='courses',
+            message_notif=f"📢 Les informations de votre cours '{cours.titre_cour}' ont été modifiées par un administrateur."
+        )
+
+
+        return response
+
+
+    def destroy(self, request, *args, **kwargs):
+        cours = self.get_object()
+        enseignant = cours.utilisateur
+        titre = cours.titre_cour
+
+        if request.user_role == "admin" and enseignant:
+            Notification.objects.create(
+                utilisateur_destinataire=enseignant,
+                action_type="course_deleted_by_admin",
+                module_source="courses",
+                message_notif=f"❌ Votre cours '{titre}' a été supprimé par un administrateur."
+            )
+
+        return super().destroy(request, *args, **kwargs)
+
+
 
 
 class SectionListCreateView(generics.ListCreateAPIView):

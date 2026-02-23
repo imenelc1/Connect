@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
-import "../../styles/index.css";
+import { useContext } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import IconeLogoComponent from "./IconeLogoComponent";
-import { useContext } from "react";
-import AuthContext from "../../context/AuthContext";
 
+import IconeLogoComponent from "./IconeLogoComponent";
+
+import AuthContext from "../../context/AuthContext";
+import "../../styles/index.css";
+
+//icones
 import {
   Settings,
   LogOut,
@@ -28,11 +31,14 @@ import {
 export default function Navbar() {
   const { t } = useTranslation("navbar");
   const location = useLocation();
-
-  const [collapsed, setCollapsed] = useState(false);
-  const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
   const { logout } = useContext(AuthContext);
 
+  //etat de la sidbar (ouverte/reduite)
+  const [collapsed, setCollapsed] = useState(false);
+  //info utilisateur
+  const [userData, setUserData] = useState({ nom: "", prenom: "", role: "" });
+
+  //recuperation de l'utilisateur connecté
   useEffect(() => {
     let userObj = { nom: "", prenom: "", role: "" };
 
@@ -55,10 +61,17 @@ export default function Navbar() {
     });
   }, []);
 
+    /**
+   * 🔄 Informe le reste de l’app que la sidebar a changé d’état
+   * (utile pour ajuster le margin-left du contenu principal)
+   */
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("sidebarChanged", { detail: collapsed }));
   }, [collapsed]);
 
+  /**
+   * 🔗 Liens selon le rôle
+   */
   const studentLinks = [
     { href: "/", label: t("home"), icon: Home },
     { href: "/dashboard-etu", label: t("dashboard"), icon: Activity },
@@ -94,6 +107,7 @@ export default function Navbar() {
     { href: "/ForumManagement", label: t("forms"), icon: FileText },
   ];
 
+  // Choix des liens selon le rôle
   const links =
     userData.role === "admin"
       ? adminLinks
@@ -106,6 +120,7 @@ export default function Navbar() {
   const courseRoutes = [
     "/all-courses",
     "/CoursInfo",
+    "/courses/edit/",
 
   ];
   const exerciseRoutes = [
@@ -119,6 +134,9 @@ export default function Navbar() {
 
   const quizRoutes = [
     "/all-quizzes",
+    "/quiz-preview",
+    "/create-quiz",
+
 
   ];
   const classementRoutes = [
@@ -132,46 +150,41 @@ export default function Navbar() {
 
   ];
   const mystudentsRoutes = [
-  "/my-students",
-  "/student-exercises",
-  "/students",
-];
+    "/my-students",
+    "/student-exercises",
+    "/students",
+  ];
+  const adminQuizRoutes = [
+    "/QuizManagement",
+    "/Voir-quiz",
+  ];
+
 
   const isCourseRelated = courseRoutes.some((path) =>
     location.pathname.startsWith(path)
   );
 
-  return (
-
+return (
     <aside
-    
-      className={`fixed
-    min-h-screen   bg-card rounded-3xl shadow-2xl p-3 flex flex-col 
-     top-0 left-0 z-50 transition-all duration-300
-  
-    w-16
-    md:${collapsed ? "w-16 min-h-screen" : "w-56 "}
-  `}
-    >
-
-
+      className={`fixed h-screen overflow-visible bg-card rounded-3xl shadow-2xl p-3
+                  top-0 left-0 z-50 transition-all duration-300
+                  w-16
+                  md:${collapsed ? "w-16" : "w-56"}`}
+      >
       {/* Toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
         className={`
-    hidden md:flex
-    absolute top-4 
-    ${collapsed ? "right-0 translate-x-1/2" : "-right-4"}
-    ${collapsed ? "w-7 h-7" : "w-9 h-9"}
-    rounded-full bg-grad-1 text-white shadow-md
+    flex
+    absolute top-4
+    ${collapsed ? "right-[-12px]" : "right-[-16px]"}
+    w-9 h-9 rounded-full bg-grad-1 text-white shadow-md
     items-center justify-center
     z-50 transition-all duration-300
   `}
       >
-
         {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
       </button>
-      
 
       {/* Header */}
       <div className="flex items-center justify-center p-2 bg-card rounded-2xl shadow-sm -mt-1 mb-1">
@@ -194,33 +207,19 @@ export default function Navbar() {
       </div>
 
       {/* NAVIGATION */}
-      <nav className="mt-2 flex flex-col gap-2 font-medium pb-2 border-b border-surface/60">
+      <nav className="mt-1 flex flex-col gap-1 font-medium pb-1 border-b border-surface/60">
+
 
         {links.map((item, i) => {
           let forceActive = false;
 
-          // ⭐ si c'est le bouton cours, on force active dans toutes les pages courses
-          if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) {
-            forceActive = true;
-          }
-          if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) {
-            forceActive = true;
-          }
-
-          if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) {
-            forceActive = true;
-          }
-           if (item.href === "/badges" && classementRoutes.some(r => location.pathname.startsWith(r))) {
-            forceActive = true;
-          }
-          
-          if (item.href === "/spaces" && spacesRoutes.some(r => location.pathname.startsWith(r))) {
-            forceActive = true;
-          }
-          if (item.href === "/my-students" && mystudentsRoutes.some(r => location.pathname.startsWith(r))) {
-            forceActive = true;
-          }
-
+          if (item.href === "/all-courses" && courseRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+          if (item.href === "/all-exercises" && exerciseRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+          if (item.href === "/all-quizzes" && quizRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+          if (item.href === "/badges" && classementRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+          if (item.href === "/spaces" && spacesRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+          if (item.href === "/my-students" && mystudentsRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
+          if (item.href === "/QuizManagement" && adminQuizRoutes.some(r => location.pathname.startsWith(r))) forceActive = true;
 
           return (
             <NavLink
@@ -235,45 +234,36 @@ export default function Navbar() {
             >
               <item.icon size={17} strokeWidth={1.5} />
               {!collapsed && (
-                <span className="ml-2 hidden md:inline transition-opacity duration-200 opacity-100">
-                  {item.label}
-                </span>
+                <span className="ml-2 hidden md:inline">{item.label}</span>
               )}
-
-
             </NavLink>
           );
         })}
       </nav>
 
+      {/* SETTINGS + LOGOUT — collés en bas */}
+      <div className="mt-auto flex flex-col gap-1 pt-1">
 
-
-      {/* SETTINGS + LOGOUT */}
-      <div className="flex flex-col gap-1 mt-6 mb-2 pt-1">
         <NavLink
-          to="/settings"
+          to={userData.role === "admin" ? "/admin-settings" : "/settings"}
           className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"
-            }`
+            `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${isActive ? "bg-grad-1 text-white" : "bg-card text-muted hover:bg-grad-2"}`
           }
         >
           <Settings size={17} strokeWidth={1.5} />
-          {!collapsed && <span className="hidden md:inline ">{t("settings")}</span>}
+          {!collapsed && <span className="hidden md:inline">{t("settings")}</span>}
         </NavLink>
 
         <button
-          onClick={() => {
-            logout();     // <-- supprime le token + user
-            window.location.href = "/"; // <-- redirige proprement
-          }}
+          onClick={() => { logout(); window.location.href = "/"; }}
           className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-red hover:bg-red/20 transition-colors"
         >
-
           <LogOut size={17} strokeWidth={1.5} />
-          {!collapsed && <span className="hidden md:inline ">{t("logout")}</span>}
+          {!collapsed && <span className="hidden md:inline">{t("logout")}</span>}
         </button>
 
       </div>
+
     </aside>
   );
 }

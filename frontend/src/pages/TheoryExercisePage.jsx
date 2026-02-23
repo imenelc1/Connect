@@ -7,6 +7,8 @@ import { useParams } from "react-router-dom";
 
 import NavBar from "../components/common/Navbar";
 import Mascotte from "../assets/head_mascotte.svg";
+import HeadMascotte from "../components/ui/HeadMascotte";
+
 import AssistantIA from "./AssistantIA";
 import progressionService from "../services/progressionService";
 import toast from "react-hot-toast";
@@ -20,6 +22,7 @@ export default function TheoryExercisePage() {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [canSubmit, setCanSubmit] = useState(false);
+  const [aiAllowed, setAiAllowed] = useState(true); // par défaut IA activée
 
   const [startTime, setStartTime] = useState(Date.now());
 
@@ -171,12 +174,51 @@ export default function TheoryExercisePage() {
         const last = await res.json();
         if (last?.reponse) setAnswer(last.reponse);
       } catch (err) {
-        console.error("Erreur chargement tentative:", err);
+         console.error(t("loadAttemptError"), err);
       }
     };
 
     fetchLastTentative();
   }, [exercise, isStudent, userId]);
+
+
+  // Verifier si on active l'IA ou non
+
+  useEffect(() => {
+  if (!exercise || !isStudent || !userId) return;
+
+  const checkAIStatus = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+if (!res.ok) throw new Error(t("aiStatusCheckFailed"));
+
+      const data = await res.json();
+
+      // Désactiver l'IA si un espace commun existe et ai_enabled === false
+      if (data.same_space) {
+        const disabled = data.spaces.some(space => space.ai_enabled === false);
+        setAiAllowed(!disabled); // false = désactivé
+      } else {
+        setAiAllowed(true); // pas d'espace commun = IA activée
+      }
+    } catch (err) {
+      console.error(t("aiCheckError"), err);
+      setAiAllowed(true); // fallback : IA activée
+    }
+  };
+
+  checkAIStatus();
+}, [exercise, userId, isStudent]);
+
+
 
   const switchLang = () =>
     i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
@@ -224,18 +266,13 @@ export default function TheoryExercisePage() {
           <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
            
 
-            <button
-              onClick={() => setOpenAssistant(true)}
-              className="flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl bg-[rgb(var(--color-primary))] text-white font-medium shadow-md hover:brightness-110 transition text-xs sm:text-sm md:text-base"
-            >
-              <MessageCircle size={18} strokeWidth={1.8} /> AI Assistant
-            </button>
+           <HeadMascotte
+                             courseData={exercise}
+                             aiEnabled={aiAllowed} // <-- nouveau prop
+                           />
 
-            <img
-              src={Mascotte}
-              className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11"
-              alt="Mascotte"
-            />
+
+
           </div>
         </div>
 
@@ -375,16 +412,28 @@ export default function TheoryExercisePage() {
         {/* HELP BUTTON */}
         <div className="flex justify-center my-10 md:my-12">
           <button
-            onClick={() => setOpenAssistant(true)}
-            className="flex items-center gap-3 px-4 sm:px-5 py-2 rounded-full bg-grad-1 border border-[rgb(var(--color-gray-light))] shadow hover:brightness-95 transition"
-          >
-            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border border-[rgb(var(--color-gray-light))] flex items-center justify-center">
-              <MessageCircle size={16} strokeWidth={1.7} />
-            </div>
-            <span className="text-xs sm:text-sm text-[rgb(var(--color-primary))] font-medium">
-              {t("need_help")}
-            </span>
-          </button>
+  onClick={() => {
+    if (!aiAllowed) {
+      toast.error(t("assistant_disabled") || "Assistant IA désactivé pour cet exercice");
+      return;
+    }
+    setOpenAssistant(true);
+  }}
+  disabled={!aiAllowed}
+  className={`flex items-center gap-3 px-4 sm:px-5 py-2 rounded-full border shadow transition
+    ${aiAllowed
+      ? "bg-grad-1 hover:brightness-95 cursor-pointer"
+      : "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"}
+  `}
+>
+  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full border flex items-center justify-center">
+    <MessageCircle size={16} strokeWidth={1.7} />
+  </div>
+  <span className="text-xs sm:text-sm font-medium">
+    {t("need_help")}
+  </span>
+</button>
+
         </div>
       </div>
 

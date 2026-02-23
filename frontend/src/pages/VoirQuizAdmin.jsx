@@ -20,7 +20,8 @@ export default function VoirQuizAdmin() {
 
     fetch(`http://localhost:8000/api/quiz/api/quiz/${exerciceId}/`)
       .then((res) => {
-        if (!res.ok) throw new Error("Quiz non trouvé");
+        if (!res.ok) throw new Error(t("errors.quizNotFound"));
+
         return res.json();
       })
       .then((data) => {
@@ -57,7 +58,8 @@ export default function VoirQuizAdmin() {
     i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
   };
 
-  if (loading) return <div className="p-8">Loading...</div>;
+  if (loading) return <div className="p-8">{t("loading")}</div>;
+
   if (!quiz) return <div className="p-8">{t("noData")}</div>;
 
   const totalPoints = quiz.questions.reduce(
@@ -77,7 +79,7 @@ export default function VoirQuizAdmin() {
           <Globe size={18} />
         </div>
 
-        
+
       </div>
 
       {/* TITRE */}
@@ -94,18 +96,19 @@ export default function VoirQuizAdmin() {
       <div className="flex justify-center gap-6 mt-8 text-sm">
 
         <div className="flex items-center gap-2 bg-blue text-white px-6 py-2 rounded-md">
-  <FaClock />
-  {quiz.activerDuration
-    ? `${quiz.durationMinutes} ${t("minutes")}`
-    : t("nonLimited")}
-</div>
+          <FaClock />
+          {quiz.activerDuration
+            ? `${quiz.durationMinutes} ${t("minutes")}`
+            : t("nonLimited")}
+        </div>
 
         <div className="flex items-center gap-2 bg-purple text-white px-6 py-2 rounded-md">
           <FaMedal /> {totalPoints} {t("points")}
         </div>
 
         <div className="flex items-center gap-2 bg-pink text-white px-6 py-2 rounded-md">
-          <FaStar /> {quiz.exercice.niveau}
+          <FaStar /> <FaStar /> {t(`levels.${quiz.exercice.niveau}`)}
+
         </div>
 
       </div>
@@ -138,13 +141,13 @@ export default function VoirQuizAdmin() {
             </ul>
           </div>
         ))}
-<Button
-            text={<span className="flex items-center gap-2"><FaHome /> {t("backMenu")}</span>}
-            variant="quizBack"
-            onClick={() => navigate("/QuizManagement")}
-          />
+        <Button
+          text={<span className="flex items-center gap-2"><FaHome /> {t("backMenu")}</span>}
+          variant="quizBack"
+          onClick={() => navigate("/QuizManagement")}
+        />
       </div>
-      
+
     </div>
   );
 }

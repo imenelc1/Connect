@@ -2,21 +2,23 @@ import Button from "./Button.jsx";
 import ThemeContext from "../../context/ThemeContext";
 import React, {  useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function AddModal({
+  
   open,
   onClose,
   title = "",
   subtitle,
   fields = [],
   submitLabel,
-  cancelLabel = "Cancel",
+  cancelLabel,
   onSubmit,
 }) {
   if (!open) return null;
   const { toggleDarkMode } = useContext(ThemeContext);
   const navigate = useNavigate();
-  
+  const { t, i18n } = useTranslation("CourseDetails");
 
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-start z-50 px-4 py-6 overflow-auto">
@@ -60,8 +62,8 @@ export default function AddModal({
                   placeholder={field.placeholder}
                   value={field.value}
                   onChange={field.onChange}
-                  className="w-full bg-gray-50 rounded-lg px-4 py-2 text-gray-800
-                             border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary
+                  className="w-full bg-surface rounded-lg px-4 py-2 
+                              focus:outline-none focus:ring-2 focus:ring-primary
                              focus:border-primary transition duration-200 placeholder-gray-400"
                 />
               )}
@@ -75,7 +77,7 @@ export default function AddModal({
               onClick={onClose}
               className="!px-5 !py-2 !w-auto !text-sm hover:bg-grad-1 transition"
             >
-              {cancelLabel}
+               {cancelLabel || t("cancel")}
             </Button>
             <Button
               variant="primary"

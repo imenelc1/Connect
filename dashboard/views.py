@@ -226,15 +226,16 @@ def add_session(request):
     if duration < 1:
         return Response({"ignored": True})
 
-    # Vérifier si l'utilisateur a une session récente non enregistrée
-    recent_sessions = SessionDuration.objects.filter(
-        utilisateur=request.user
-    ).order_by('-date')[:1]  # dernière session
+    today = timezone.now().date()
 
-    if recent_sessions and (duration < 300):  # si courte, cumuler
-        last_session = recent_sessions[0]
-        last_session.duration += duration
-        last_session.save()
+    recent_session = SessionDuration.objects.filter(
+        utilisateur=request.user,
+        date__date=today
+    ).order_by('-date').first()
+
+    if recent_session and duration < 300:
+        recent_session.duration += duration
+        recent_session.save()
         return Response({"saved": True, "cumulative": True})
     else:
         SessionDuration.objects.create(
@@ -322,8 +323,12 @@ def student_total_tentatives(request, student_id):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticatedJWT])
-def global_progress(request):
-    user = request.user
+def global_progress(request, user_id=None):
+    if user_id:
+        user = Utilisateur.objects.get(id_utilisateur=user_id)
+
+    else:
+     user = request.user
 
     # ---- Cours ----
     courses = Cours.objects.all()
@@ -1469,6 +1474,10 @@ def activity_stats(request):
 
     return Response({
         "labels": labels,
+        "registrations": registrations,
+        "logins": logins,
+        "coursesFollowed": coursesFollowed
+    })  "labels": labels,
         "registrations": registrations,
         "logins": logins,
         "coursesFollowed": coursesFollowed

@@ -2,6 +2,8 @@
     "title": "Quizzes Management",
     "subtitle": "Create and manage quizzes",
     "searchPlaceholder": "Search quizzes..",
+    "voir_quiz": "View quiz",
+
     "stats": {
         "questions": "Questions",
         "attempts": "Attempts",
@@ -35,5 +37,20 @@
                 "hard":"Hard"
             }
         }
-    }
+    },
+    "errors":{
+        "quizLoad":"Error loading quiz",
+        "update":"Updating error",
+        "updateQuiz":"Error updating quiz",
+        "delete":"Deletion error:",
+        "delQuiz":"Error deleting the quiz"
+    },
+    "messages":{
+        "updateQuiz":"Quiz updated successfully!",
+        "deleteQuiz":"Are you sure you want to delete this quiz?"
+    },
+    "defaults": {
+    "noTitle": "Untitled",
+    "beginner": "Beginner"
+  }
 }

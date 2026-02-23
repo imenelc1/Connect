@@ -3,7 +3,7 @@ import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
-import { Pencil, Trash2 } from "lucide-react";
+import { FiEdit, FiTrash2} from "react-icons/fi";
 
 /* ===================== STYLES ===================== */
 const levelStyles = {
@@ -24,25 +24,43 @@ const initialsBgMap = {
   Avancé: "bg-pink",
 };
 
+const levelKeyMap = {
+  Débutant: "beginner",
+  Intermédiaire: "intermediate",
+  Avancé: "advanced",
+};
+
 /* ===================== UTILS ===================== */
 const getInitials = (name = "") =>
   name
     .split(" ")
     .filter(Boolean)
-    .map((word) => word[0])
+    .map((w) => w[0])
     .join("")
     .toUpperCase();
 
 /* ===================== COMPONENT ===================== */
-export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
+export default function ExerciseCard({
+  exercise,
+  role, // "etudiant" | "enseignant"
+  isMine = false,
+  onDelete,
+}) {
   const navigate = useNavigate();
+  const { t } = useTranslation("contentPage");
   const token = localStorage.getItem("token");
-  const { t } = useTranslation("allExercises");
 
   if (!exercise) return null;
 
+  /* ===================== ACTIONS ===================== */
+  const handleStart = () => {
+    exercise.categorie === "code"
+      ? navigate(`/start-exerciseCode/${exercise.id}`)
+      : navigate(`/start-exercise/${exercise.id}`);
+  };
+
   const handleDelete = async () => {
-    if (!window.confirm("Supprimer cet exercice ?")) return;
+    if (!window.confirm(t("confirmDeleteExercise"))) return;
 
     try {
       await axios.delete(
@@ -51,13 +69,16 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       onDelete?.(exercise.id);
     } catch (err) {
-      console.error("Erreur suppression:", err);
+      console.error(t("errorDelete"), err);
     }
   };
 
+  const buttonLabel =
+    role === "enseignant" ? t("checkExercise") : t("startExercise");
+
+  /* ===================== RENDER ===================== */
   return (
     <div
       className={`shadow-md p-6 rounded-3xl flex flex-col justify-between h-full
@@ -67,19 +88,19 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
       {/* ================= HEADER ================= */}
       <div>
         <div className="flex justify-between items-start gap-3">
-          {/* ✅ TITRE FIXÉ */}
           <h2 className="font-semibold text-lg break-words line-clamp-2">
             {exercise.title}
           </h2>
 
           <span
-            className={`px-3 py-1 text-xs rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
+            className={`px-3 py-1 text-xs rounded-full whitespace-nowrap ${
+              levelStyles[exercise.level]
+            }`}
           >
-            {exercise.level}
+            {t(`levels.${levelKeyMap[exercise.level]}`)}
           </span>
         </div>
 
-        {/* ✅ DESCRIPTION FIXÉE */}
         <p className="text-grayc mt-3 line-clamp-3 break-words">
           {exercise.description}
         </p>
@@ -88,7 +109,9 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
         <div className="flex items-center justify-between mt-4 gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <div
-              className={`w-8 h-8 rounded-full ${initialsBgMap[exercise.level]} text-white flex items-center justify-center text-xs font-semibold`}
+              className={`w-8 h-8 rounded-full ${
+                initialsBgMap[exercise.level]
+              } text-white flex items-center justify-center text-xs font-semibold`}
             >
               {getInitials(exercise.author)}
             </div>
@@ -105,46 +128,30 @@ export default function ExerciseCard({ exercise, isOwner = false, onDelete }) {
 
       {/* ================= FOOTER ================= */}
       <div className="flex justify-between items-center mt-4 gap-3">
-        {!isOwner ? (
-          <Button
-            variant="start"
-            className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
-            onClick={() => {
-              exercise.categorie === "code"
-                ? navigate(`/start-exerciseCode/${exercise.id}`)
-                : navigate(`/start-exercise/${exercise.id}`);
-            }}
-          >
-            {t("startExercise")}
-          </Button>
-        ) : (
-          <Button
-            variant="start"
-            className={`py-1 px-4 rounded-full whitespace-nowrap ${levelStyles[exercise.level]}`}
-            onClick={() => {
-              exercise.categorie === "code"
-                ? navigate(`/start-exerciseCode/${exercise.id}`)
-                : navigate(`/start-exercise/${exercise.id}`);
-            }}
-          >
-            Check quiz
-          </Button>
-        )}
+        <Button
+          variant="start"
+          className={`py-1 px-4 rounded-full whitespace-nowrap ${
+            levelStyles[exercise.level]
+          }`}
+          onClick={handleStart}
+        >
+          {buttonLabel}
+        </Button>
 
-        {isOwner && (
+        {role === "enseignant" && isMine && (
           <div className="flex gap-3">
             <button
               onClick={() => navigate(`/exercices/edit/${exercise.id}`)}
               className="text-gray-600 hover:text-blue-600 transition"
             >
-              <Pencil size={18} />
+              <FiEdit size={18} />
             </button>
 
             <button
               onClick={handleDelete}
-              className="text-gray-600 hover:text-red-600 transition"
+              className="text-gray-600 hover:text-red-500 transition"
             >
-              <Trash2 size={18} />
+              <FiTrash2 size={18} />
             </button>
           </div>
         )}

@@ -17,7 +17,8 @@ from .views import (
     SpaceUpdateView,
     AdminAddStudentToSpaceView,
     SpaceStudentsDetailView,
-    Admin_remove_student_from_space
+    Admin_remove_student_from_space,
+    is_student_in_same_space
 )
 
 from spaces import views
@@ -53,6 +54,13 @@ urlpatterns = [
     path("space/<int:space_id>/details/", SpaceStudentsDetailView.as_view(), name="space-students"),
     path('admin/remove-student/', Admin_remove_student_from_space, name='remove-student-from-space'),
     path('space/<int:space_id>/delete/', views.delete_space, name='delete_space'),
+    
+    
+    path(
+        '<str:item_type>/<int:item_id>/student/<int:etudiant_id>/check/',
+        is_student_in_same_space,
+        name='check_same_space'
+    ),
 
 
 ]

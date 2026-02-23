@@ -5,20 +5,25 @@ import ExerciseContext from "../context/ExerciseContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getSystemPrompt, getAIAnswer } from "../services/iaService";
+import { useTranslation } from "react-i18next";
 
+// 🔹 Détecte la langue du texte (français ou anglais)
 const detectLanguage = (text) =>
   /[àâçéèêëîïôûùüÿñæœ]/i.test(text) ? "fr" : "en";
+// 🔹 Vérifie si le message indique une incompréhension de l'exercice
 const isExerciseQuestion = (msg) =>
   /je comprends pas|j'ai pas compris|pas compris|rien compris|c'est flou/i.test(
     msg.toLowerCase()
   );
+// 🔹 Vérifie si le message concerne le code de l'exercice
 const asksAboutCode = (msg) =>
   /mon code|le code|ça marche pas|bug|erreur|probleme/i.test(msg.toLowerCase());
 
 import axios from "axios";
-
+// Endpoint backend pour attribuer un badge IA
 const API_URL = "http://localhost:8000/api/badges/ai-explanation-badge/"; // ton endpoint Django
 
+// 🔹 Fonction pour attribuer le badge IA à l'étudiant
 async function awardAIBadge() {
   try {
     const res = await axios.post(
@@ -37,21 +42,23 @@ async function awardAIBadge() {
   }
 }
 
+// 🔹 Composant principal de l'assistant IA
 export default function AssistantIA({
   onClose,
   mode = "generic",
   course = null,
 }) {
+   const { t } = useTranslation("assistant"); 
   const exercise = useContext(ExerciseContext); // récupère l'exercice
-  const [student, setStudent] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [student, setStudent] = useState(null);// Étudiant connecté
+  const [messages, setMessages] = useState([]);// Historique des messages
+  const [input, setInput] = useState("");// Texte saisi par l'étudiant
+  const [loading, setLoading] = useState(false);// Indique si l'IA écrit
+  const [expanded, setExpanded] = useState(false);// Mode agrandi
   const [helpLevel, setHelpLevel] = useState(0);
-
+  // Niveau d'aide progressive
   const [aiBadgeSent, setAiBadgeSent] = useState(false);
-
+  // Badge IA attribué
   const hasMeaningfulCode = (code, defaultCode) => {
     if (!code) return false;
 
@@ -72,8 +79,8 @@ export default function AssistantIA({
     actualMode === "exercise"
       ? exercise?.id
       : actualMode === "course"
-      ? course?.id
-      : "global";
+        ? course?.id
+        : "global";
 
   // ---------- Load student ----------
   useEffect(() => {
@@ -82,7 +89,7 @@ export default function AssistantIA({
     const u = JSON.parse(stored);
     setStudent({
       id: u.user_id,
-      name: `${u.prenom || ""} ${u.nom || ""}`.trim() || "Étudiant",
+      name: `${u.prenom || ""} ${u.nom || ""}`.trim() ||  t("student"),
     });
   }, []);
 
@@ -102,14 +109,12 @@ export default function AssistantIA({
           from: "bot",
           text:
             actualMode === "exercise"
-              ? `Bonjour ${
-                  student.name
-                } 👋\nJe vois que tu travailles sur l'exercice : **${
-                  exercise?.titre || "en cours"
-                }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
+              ? `Bonjour ${student.name
+              } 👋\nJe vois que tu travailles sur l'exercice : **${exercise?.titre || t("chat.exercise_in_progress")
+              }**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.`
               : actualMode === "course"
-              ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
-              : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`,
+                ? `Bonjour ${student.name} 👋\nJe suis ton assistant cours pour ce cours.`
+                : `Bonjour ${student.name} 👋\nJe suis ton assistant IA.`,
         },
       ]);
     }
@@ -257,8 +262,8 @@ INSTRUCTIONS IMPORTANTES :
                 {actualMode === "course"
                   ? "Assistant Cours"
                   : actualMode === "exercise"
-                  ? "Assistant Exercice"
-                  : "Assistant IA"}
+                    ? "Assistant Exercice"
+                    : "Assistant IA"}
               </p>
               <span className="text-xs opacity-80">{student.name}</span>
             </div>
@@ -282,11 +287,10 @@ INSTRUCTIONS IMPORTANTES :
                 <img src={Mascotte} className="w-7 h-7 mr-2" />
               )}
               <div
-                className={`p-4 rounded-2xl text-sm max-w-[75%] ${
-                  m.from === "user"
+                className={`p-4 rounded-2xl text-sm max-w-[75%] ${m.from === "user"
                     ? "bg-grad-1 text-white"
                     : "bg-card text-text"
-                }`}
+                  }`}
               >
                 {m.from === "bot" ? (
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -310,16 +314,15 @@ INSTRUCTIONS IMPORTANTES :
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder={
-                actualMode === "course"
-                  ? "Pose une question sur le cours…"
-                  : "Explique ton problème…"
-              }
-              className="w-full rounded-full border px-4 py-2 pr-12"
+              placeholder={actualMode === "course" ? "Pose une question sur le cours…" : "Explique ton problème…"}
+              className="w-full rounded-full border border-input-border px-4 py-2 pr-12
+          bg-input-bg text-input-text placeholder-input-placeholder
+          dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-light"
             />
             <button
               onClick={handleSend}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center
+          bg-grad-button text-white hover:opacity-90 transition"
             >
               <Send size={14} />
             </button>

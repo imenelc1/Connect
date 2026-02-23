@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Topbar from "../components/common/TopBar";
 import AddModal from "../components/common/AddModel";
 import Button from "../components/common/Button";
@@ -45,9 +45,8 @@ export default function SpaceDetails() {
   const userId = userData?.user_id;
 
   const userRole = userData?.role || "";
-  const initials = `${userData?.nom?.[0] || ""}${
-    userData?.prenom?.[0] || ""
-  }`.toUpperCase();
+  const initials = `${userData?.nom?.[0] || ""}${userData?.prenom?.[0] || ""
+    }`.toUpperCase();
 
   const [spaceName, setSpaceName] = useState("");
   const [studentsCount, setStudentsCount] = useState(0);
@@ -67,6 +66,10 @@ export default function SpaceDetails() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [activeExerciseFilter, setActiveExerciseFilter] = useState("ALL");
+  //Etas pour activer, desactiver l'ia
+  const [aiEnabledForCourse, setAiEnabledForCourse] = useState(true);
+  const [aiEnabledForExercise, setAiEnabledForExercise] = useState(true);
+
 
 
   const steps = [
@@ -83,10 +86,10 @@ export default function SpaceDetails() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setSpaceName(data.nom_space || "My space");
+        setSpaceName(data.nom_space || t("defaultSpaceName"));
         setStudentsCount(data.students_count || 0);
       })
-      .catch((err) => console.error("Failed to load space details:", err));
+      .catch((err) => console.error(t("loadSpaceError"), err))
   }, [id]);
 
   // --- Fetch space items according to active step ---
@@ -134,7 +137,7 @@ export default function SpaceDetails() {
 
           const data = await res.json();
           const formatted = (data || []).map((q) => ({
-            
+
             id: q.quiz.exercice?.id_exercice, // EXACT comme AllQuizzesPage
             quizId: q.quiz.id, // IMPORTANT
             title: q.quiz.exercice?.titre_exo,
@@ -202,20 +205,20 @@ export default function SpaceDetails() {
               }
             }
 
-        const isFinished = tentatives.length > 0 && tentatives.some(t => t.terminer === true);
+            const isFinished = tentatives.length > 0 && tentatives.some(t => t.terminer === true);
 
 
 
-  
 
-return {
-  ...quiz,
-  tentatives,
-  isBlocked,
-  tentativesRestantes,
-  minutesRestantes,
-  isFinished, 
-};
+
+            return {
+              ...quiz,
+              tentatives,
+              isBlocked,
+              tentativesRestantes,
+              minutesRestantes,
+              isFinished,
+            };
 
           });
 
@@ -239,7 +242,8 @@ return {
                 title: e.exercice.titre_exo,
                 description: e.exercice.enonce,
                 level: e.exercice.niveau_exercice_label,
-                author: e.exercice.utilisateur_name || "Inconnu",
+                author: e.exercice.utilisateur_name || t("unknownAuthor"),
+
                 date: e.exercice.date_creation || "",
                 categorie: e.exercice.categorie,
                 progress: e.progress ?? 0,
@@ -297,7 +301,7 @@ return {
             .filter((q) => q.id && q.exercice) // <-- ajouter q.exercice
             .map((q) => ({
               id: q.id,
-              title: q.exercice.titre_exo?.trim() || "Sans titre",
+              title: q.exercice.titre_exo?.trim() || t("noTitle"),
               description: q.exercice.enonce || "",
               level: q.exercice.niveau_exercice_label || "",
               author: q.exercice.utilisateur_name || "",
@@ -309,232 +313,268 @@ return {
             .filter((e) => e.id_exercice)
             .map((e) => ({
               id: e.id_exercice,
-              title: e.titre_exo?.trim() || "Sans titre",
+              title: q.exercice.titre_exo?.trim() || t("noTitle"),
               description: e.enonce || "",
               level: e.niveau_exercice_label || "",
               author: e.utilisateur_name || "",
             }))
         );
       })
-      .catch((err) => console.error("Failed to fetch my items:", err));
+      .catch((err) => console.error(t("fetchItemsError"), err));
   }, []);
 
   // --- Unified handle add item ---
- // --- Unified handle add item ---
-const handleAddItem = (selectedItemId) => {
-  const idToSend = Number(selectedItemId);
-  if (!idToSend) {
-    toast.error(t("selectItemFirst"));
-    return;
-  }
+  // --- Unified handle add item ---
+  const handleAddItem = (selectedItemId) => {
+    const idToSend = Number(selectedItemId);
+    if (!idToSend) {
+      toast.error(t("selectItemFirst"));
+      return;
+    }
 
-  let alreadyAdded = false;
-  let url = "";
-  let bodyKey = "";
-  let mapNewItem = null;
+    let alreadyAdded = false;
+    let url = "";
+    let bodyKey = "";
+    let mapNewItem = null;
 
-  if (activeStep === 1) {
-    // --- Courses ---
-    alreadyAdded = spaceCourses.some(c => c.id === idToSend);
-    url = `http://127.0.0.1:8000/api/spaces/${id}/courses/`;
-    bodyKey = "cours";
-    mapNewItem = (newItem) => ({
-      id: newItem.cours.id_cours,
-      title: newItem.cours.titre_cour,
-      description: newItem.cours.description,
-      level: newItem.cours.niveau_cour_label,
-      author: newItem.cours.utilisateur_name,
-      date: newItem.cours.date_ajout,
-      progress: 0,
-      isMine: true,
-    });
-  } else if (activeStep === 2) {
-    // --- Quizzes ---
-    alreadyAdded = spaceQuizzes.some(c => c.id === idToSend);
-    url = `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`;
-    bodyKey = "quiz";
-    mapNewItem = (newItem) => ({
-      id: newItem.quiz.exercice?.id_exercice, // navigation correcte
-      quizId: newItem.quiz.id,                 // gardé pour backend / tentatives
-      title: newItem.quiz.exercice?.titre_exo || "Sans titre",
-      description: newItem.quiz.exercice?.enonce || "",
-      level: newItem.quiz.exercice?.niveau_exercice_label || "",
-      author: newItem.quiz.exercice?.utilisateur_name || "Inconnu",
-      date: newItem.quiz.exercice?.date_creation || "",
-      progress: 0,
-      isMine: true,
-    });
-  } else if (activeStep === 3) {
-    // --- Exercises ---
-    alreadyAdded = spaceExercises.some(c => c.id === idToSend);
-    url = `http://127.0.0.1:8000/api/spaces/${id}/exercises/`;
-    bodyKey = "exercice";
-    mapNewItem = (newItem) => ({
-      id: newItem.exercice.id_exercice,
-      title: newItem.exercice.titre_exo || "Sans titre",
-      description: newItem.exercice.enonce || "",
-      level: newItem.exercice.niveau_exercice_label || "",
-      author: newItem.exercice.utilisateur_name || "Inconnu",
-      date: newItem.exercice.date_creation || "",
-      categorie: newItem.exercice.categorie,
-      progress: 0,
-      isMine: true,
-    });
-  }
+    // 👇 payload envoyé au backend
+    let body = {};
 
-  if (alreadyAdded) {
-    toast.error(t("alreadyAdded"));
-    return;
-  }
+    if (activeStep === 1) {
+      // --- Courses ---
+      alreadyAdded = spaceCourses.some(c => c.id === idToSend);
+      url = `http://127.0.0.1:8000/api/spaces/${id}/courses/`;
+      bodyKey = "cours";
 
-  const body = { [bodyKey]: idToSend };
+      body = {
+        cours: idToSend,
+        ai_enabled: aiEnabledForCourse, // ✅ IA cours
+      };
 
-  fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify(body),
-  })
-    .then(res => {
-      if (!res.ok) throw new Error("Failed to add item");
-      return res.json();
+      mapNewItem = (newItem) => ({
+        id: newItem.cours.id_cours,
+        title: newItem.cours.titre_cour,
+        description: newItem.cours.description,
+        level: newItem.cours.niveau_cour_label,
+        author: newItem.cours.utilisateur_name,
+        date: newItem.cours.date_ajout,
+        progress: 0,
+        isMine: true,
+      });
+
+    } else if (activeStep === 2) {
+      // --- Quizzes ---
+      alreadyAdded = spaceQuizzes.some(c => c.id === idToSend);
+      url = `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`;
+      bodyKey = "quiz";
+
+      body = {
+        quiz: idToSend, // ❌ pas d’IA ici (pour l’instant)
+      };
+
+      mapNewItem = (newItem) => ({
+        id: newItem.quiz.exercice?.id_exercice,
+        quizId: newItem.quiz.id,
+        title: newItem.quiz.exercice?.titre_exo || t("noTitle"),
+        description: newItem.quiz.exercice?.enonce || "",
+        level: newItem.quiz.exercice?.niveau_exercice_label || "",
+        author: newItem.quiz.exercice?.utilisateur_name || t("unknownAuthor"),
+        date: newItem.quiz.exercice?.date_creation || "",
+        progress: 0,
+        isMine: true,
+      });
+
+    } else if (activeStep === 3) {
+      // --- Exercises ---
+      alreadyAdded = spaceExercises.some(c => c.id === idToSend);
+      url = `http://127.0.0.1:8000/api/spaces/${id}/exercises/`;
+      bodyKey = "exercice";
+
+      body = {
+        exercice: idToSend,
+        ai_enabled: aiEnabledForExercise, // ✅ IA exercice
+      };
+
+      mapNewItem = (newItem) => ({
+        id: newItem.exercice.id_exercice,
+        title: newItem.exercice.titre_exo || t("noTitle"),
+        description: newItem.exercice.enonce || "",
+        level: newItem.exercice.niveau_exercice_label || "",
+        author: newItem.exercice.utilisateur_name || t("unknownAuthor"),
+        date: newItem.exercice.date_creation || "",
+        categorie: newItem.exercice.categorie,
+        progress: 0,
+        isMine: true,
+      });
+    }
+
+    if (alreadyAdded) {
+      toast.error(t("alreadyAdded"));
+      return;
+    }
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(body),
     })
-    .then(newItem => {
-      const itemMapped = mapNewItem(newItem);
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to add item");
+        return res.json();
+      })
+      .then(newItem => {
+        const itemMapped = mapNewItem(newItem);
 
-      if (activeStep === 1) setSpaceCourses(prev => [...prev, itemMapped]);
-      else if (activeStep === 2) setSpaceQuizzes(prev => [...prev, itemMapped]);
-      else if (activeStep === 3) setSpaceExercises(prev => [...prev, itemMapped]);
+        if (activeStep === 1) setSpaceCourses(prev => [...prev, itemMapped]);
+        else if (activeStep === 2) setSpaceQuizzes(prev => [...prev, itemMapped]);
+        else if (activeStep === 3) setSpaceExercises(prev => [...prev, itemMapped]);
 
-      toast.success(t("addedSuccessfully"));
-      setOpenModal(false);
-      setSelectedItemId("");
-    })
-    .catch(err => {
-      console.error(err);
-      toast.error(t("addFailed"));
-    });
-};
+        toast.success(t("addedSuccessfully"));
+        setOpenModal(false);
+        setSelectedItemId("");
 
+        // 🔄 reset des checkbox
+        setAiEnabledForCourse(true);
+        setAiEnabledForExercise(true);
+      })
+      .catch(err => {
+        console.error(err);
+        toast.error(t("addFailed"));
+      });
+  };
+   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+  
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("sidebarChanged", handleSidebarChange);
+  
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("sidebarChanged", handleSidebarChange);
+    };
+  }, []);
 
 
 
   useEffect(() => {
-  if (!id || activeStep !== 3) return;
+    if (!id || activeStep !== 3) return;
+    const fetchExercises = async () => {
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
 
-  const fetchExercises = async () => {
-    try {
-      const res = await fetch(`http://127.0.0.1:8000/api/spaces/${id}/exercises/`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (!res.ok) throw new Error(res.status);
-      const data = await res.json();
+        const exercises = (data || []).filter((e) => e.exercice);
 
-      const exercises = (data || []).filter((e) => e.exercice);
+        const exercisesWithState = await Promise.all(
+          exercises.map(async (ex) => {
+            try {
+              const resTent = await fetch(
+                `http://127.0.0.1:8000/api/dashboard/${ex.exercice.id_exercice}/utilisateur/${userId}/tentatives/`,
+                { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+              );
+              const tentatives = resTent.ok ? await resTent.json() : [];
+              console.log("tentatives", tentatives);
 
-      const exercisesWithState = await Promise.all(
-        exercises.map(async (ex) => {
-          try {
-            const resTent = await fetch(
-              `http://127.0.0.1:8000/api/dashboard/${ex.exercice.id_exercice}/utilisateur/${userId}/tentatives/`,
-              { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-            );
-            const tentatives = resTent.ok ? await resTent.json() : [];
-            console.log("tentatives", tentatives);
+              const lastTentative = tentatives.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))[0] || null;
+              const etat = lastTentative?.etat || "brouillon";
+              const progress = etat === "soumis" ? 100 : lastTentative ? 50 : 0;
 
-            const lastTentative = tentatives.sort((a,b)=>new Date(b.submitted_at)-new Date(a.submitted_at))[0] || null;
-            const etat = lastTentative?.etat || "brouillon";
-            const progress = etat === "soumis" ? 100 : lastTentative ? 50 : 0;
+              return {
+                id: ex.exercice.id_exercice,
+                title: ex.exercice.titre_exo,
+                description: ex.exercice.enonce,
+                level: ex.exercice.niveau_exercice_label,
+                author: ex.exercice.utilisateur_name || t("unknownAuthor"),
+                date: ex.exercice.date_creation,
+                categorie: ex.exercice.categorie,
+                etat,
+                progress,
+                isMine: ex.exercice.utilisateur === userData?.id,
+                tentatives,
+              };
+            } catch (err) {
+              console.error(err);
+              return { ...ex.exercice, progress: 0, etat: "brouillon", tentatives: [] };
+            }
+          })
+        );
 
-            return {
-              id: ex.exercice.id_exercice,
-              title: ex.exercice.titre_exo,
-              description: ex.exercice.enonce,
-              level: ex.exercice.niveau_exercice_label,
-              author: ex.exercice.utilisateur_name || "Inconnu",
-              date: ex.exercice.date_creation,
-              categorie: ex.exercice.categorie,
-              etat,
-              progress,
-              isMine: ex.exercice.utilisateur === userData?.id,
-              tentatives,
-            };
-          } catch (err) {
-            console.error(err);
-            return { ...ex.exercice, progress: 0, etat: "brouillon", tentatives: [] };
-          }
-        })
-      );
+        setSpaceExercises(exercisesWithState);
 
-      setSpaceExercises(exercisesWithState);
+      } catch (err) {
+        console.error(t("fetchExercisesError"), err);
+      }
+    };
 
-    } catch (err) {
-      console.error("Erreur fetch exercises:", err);
-    }
-  };
-
-  fetchExercises();
-}, [id, activeStep, userId]);
+    fetchExercises();
+  }, [id, activeStep, userId]);
 
 
   const itemsToDisplay =
     activeStep === 1
       ? spaceCourses
       : activeStep === 2
-      ? spaceQuizzes
-      : spaceExercises;
-const filteredItems = itemsToDisplay
-  // 🔹 Filtre par niveau
-  .filter(item => {
-    if (activeStep === 3) {
-      // Pour les exercices, utiliser le niveau sélectionné
-      return filterLevel === "ALL" || item.level === filterLevel;
-    } else {
-      return filterLevel === "ALL" || item.level === filterLevel;
-    }
-  })
-  // 🔹 Filtre par état/progress
-  .filter(item => {
-    if (userRole !== "etudiant") return true;
-
-    if (activeStep === 1) {
-      if (activeProgressFilter === "completed") return item.progress === 100;
-      if (activeProgressFilter === "not_completed") return item.progress < 100;
-    }
-
-    if (activeStep === 2) {
-      if (activeProgressFilter === "completed") return item.isFinished === true;
-      if (activeProgressFilter === "not_completed") return !item.isFinished;
-    }
-
-    if (activeStep === 3) {
-      switch (activeExerciseFilter) {
-        case "soumis":
-          return item.etat === "soumis";
-        case "brouillon":
-          return item.etat === "brouillon";
-        case "ALL":
-        default:
-          return true;
+        ? spaceQuizzes
+        : spaceExercises;
+  const filteredItems = itemsToDisplay
+    // 🔹 Filtre par niveau
+    .filter(item => {
+      if (activeStep === 3) {
+        // Pour les exercices, utiliser le niveau sélectionné
+        return filterLevel === "ALL" || item.level === filterLevel;
+      } else {
+        return filterLevel === "ALL" || item.level === filterLevel;
       }
-    }
+    })
+    // 🔹 Filtre par état/progress
+    .filter(item => {
+      if (userRole !== "etudiant") return true;
 
-    return true;
-  })
-  // 🔹 Recherche texte
-  .filter(item => {
-  if (!searchTerm.trim()) return true;
+      if (activeStep === 1) {
+        if (activeProgressFilter === "completed") return item.progress === 100;
+        if (activeProgressFilter === "not_completed") return item.progress < 100;
+      }
 
-  const search = searchTerm.toLowerCase();
+      if (activeStep === 2) {
+        if (activeProgressFilter === "completed") return item.isFinished === true;
+        if (activeProgressFilter === "not_completed") return !item.isFinished;
+      }
 
-  return (
-    item.title?.toLowerCase().includes(search) ||
-    item.description?.toLowerCase().includes(search) ||
-    item.author?.toLowerCase().includes(search)
-  );
-});
+      if (activeStep === 3) {
+        switch (activeExerciseFilter) {
+          case "soumis":
+            return item.etat === "soumis";
+          case "brouillon":
+            return item.etat === "brouillon";
+          case "ALL":
+          default:
+            return true;
+        }
+      }
+
+      return true;
+    })
+    // 🔹 Recherche texte
+    .filter(item => {
+      if (!searchTerm.trim()) return true;
+
+      const search = searchTerm.toLowerCase();
+
+      return (
+        item.title?.toLowerCase().includes(search) ||
+        item.description?.toLowerCase().includes(search) ||
+        item.author?.toLowerCase().includes(search)
+      );
+    });
 
 
 
@@ -543,9 +583,16 @@ const filteredItems = itemsToDisplay
     activeStep === 1 ? myCourses : activeStep === 2 ? myQuizzes : myExercises;
 
   return (
-    <div className="flex w-full bg-surface min-h-screen">
-      <Navbar />
-      <main className="flex-1 p-6 lg:ml-64 bg-bg min-h-screen">
+     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                        {/* Sidebar */}
+                        <div>
+                          <Navbar />
+                        </div>
+    
+      <main className={`
+            flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+            ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+          `}>
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <button
@@ -572,10 +619,10 @@ const filteredItems = itemsToDisplay
         <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
           <h2 className="text-4xl font-semibold text-muted">{spaceName}</h2>
           <div className="w-full md:w-[400px]">
-           <ContentSearchBar
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-/>
+            <ContentSearchBar
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
 
 
           </div>
@@ -593,25 +640,25 @@ const filteredItems = itemsToDisplay
 
         {/* Filters + Add Button */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
-       <ContentFilters
-  type={
-    activeStep === 1
-      ? "courses"
-      : activeStep === 2
-      ? "quizzes"
-      : "exercises"
-  }
-  userRole={userRole}
-  activeFilter={filterLevel}          // ← filtre NIVEAU
-  onFilterChange={setFilterLevel}     // ← met à jour filterLevel
-  showCompletedFilter={userRole === "etudiant" && (activeStep === 1 || activeStep === 2)}
-  onCompletedChange={
-    activeStep === 3
-      ? setActiveExerciseFilter       // ← filtre ÉTAT pour exos
-      : setActiveProgressFilter       // ← filtre ÉTAT pour cours/quizzes
-  }
-  hideCategoryFilter={true}
-/>
+          <ContentFilters
+            type={
+              activeStep === 1
+                ? "courses"
+                : activeStep === 2
+                  ? "quizzes"
+                  : "exercises"
+            }
+            userRole={userRole}
+            activeFilter={filterLevel}          // ← filtre NIVEAU
+            onFilterChange={setFilterLevel}     // ← met à jour filterLevel
+            showCompletedFilter={userRole === "etudiant" && (activeStep === 1 || activeStep === 2)}
+            onCompletedChange={
+              activeStep === 3
+                ? setActiveExerciseFilter       // ← filtre ÉTAT pour exos
+                : setActiveProgressFilter       // ← filtre ÉTAT pour cours/quizzes
+            }
+            hideCategoryFilter={true}
+          />
 
           {userRole === "enseignant" && (
             <Button
@@ -619,7 +666,15 @@ const filteredItems = itemsToDisplay
               className="w-full sm:w-50 md:w-[200px] lg:w-70 h-10 md:h-12 lg:h-10 mt-4 sm:mt-0 px-5 py-6 bg-grad-1 text-white transition-all flex items-center gap-2 justify-center whitespace-nowrap"
               onClick={() => setOpenModal(true)}
             >
-              <Plus size={18} /> {t("addItem")}
+              <Plus size={18} />
+              {activeStep === 1
+                ? t("addCourse")
+                : activeStep === 2
+                  ? t("addQuiz")
+                  : activeStep === 3
+                    ? t("addExo")
+                    : null}
+
             </Button>
           )}
         </div>
@@ -628,9 +683,8 @@ const filteredItems = itemsToDisplay
         <div
           className="grid gap-6"
           style={{
-            gridTemplateColumns: `repeat(${
-              window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
-            }, minmax(0, 1fr))`,
+            gridTemplateColumns: `repeat(${window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3
+              }, minmax(0, 1fr))`,
           }}
         >
           {/* COURSES & QUIZZES */}
@@ -642,12 +696,13 @@ const filteredItems = itemsToDisplay
                   ...item,
                   initials: item.author
                     ? item.author
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase()
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
                     : "",
-                  duration: item.date ? `Créé le ${item.date}` : "",
+                  duration: item.date ? `${t("createdOn")} ${item.date}` : "",
+
                 }}
                 role={userRole}
                 showProgress={userRole === "etudiant" && activeStep === 1}
@@ -706,12 +761,24 @@ const filteredItems = itemsToDisplay
                   switch (activeStep) {
                     case 1:
                       return (
-                        <MyCoursesSelect
-                          items={myCourses} // LES COURS DE L'UTILISATEUR
-                          selectedItemId={selectedItemId}
-                          onChange={setSelectedItemId}
-                          existingItems={spaceCourses} // COURS déjà dans l'espace
-                        />
+                        <>
+                          <MyCoursesSelect
+                            items={myCourses} // LES COURS DE L'UTILISATEUR
+                            selectedItemId={selectedItemId}
+                            onChange={setSelectedItemId}
+                            existingItems={spaceCourses} // COURS déjà dans l'espace
+                          />
+
+                          {/* ✅ Checkbox IA cours */}
+                          <label className="flex items-center gap-2 mt-4 text-sm text-muted">
+                            <input
+                              type="checkbox"
+                              checked={aiEnabledForCourse}
+                              onChange={(e) => setAiEnabledForCourse(e.target.checked)}
+                            />
+                              {t("enableAI_course")}
+                          </label>
+                        </>
                       );
                     case 2:
                       return (
@@ -724,12 +791,23 @@ const filteredItems = itemsToDisplay
                       );
                     case 3:
                       return (
-                        <MyExercisesSelect
-                          items={myExercises} // SEULEMENT LES EXERCICES DE L'UTILISATEUR
-                          selectedItemId={selectedItemId}
-                          onChange={setSelectedItemId}
-                          existingItems={spaceExercises} // EXERCICES déjà dans l'espace
-                        />
+                        <>
+                          <MyExercisesSelect
+                            items={myExercises} // SEULEMENT LES EXERCICES DE L'UTILISATEUR
+                            selectedItemId={selectedItemId}
+                            onChange={setSelectedItemId}
+                            existingItems={spaceExercises} // EXERCICES déjà dans l'espace
+                          />
+                          {/* ✅ Checkbox IA exercices */}
+                          <label className="flex items-center gap-2 mt-4 text-sm text-muted">
+                            <input
+                              type="checkbox"
+                              checked={aiEnabledForExercise}
+                              onChange={(e) => setAiEnabledForExercise(e.target.checked)}
+                            />
+                       {t("enableAI_exercise")}
+                          </label>
+                        </>
                       );
                     default:
                       return null;

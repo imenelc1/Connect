@@ -4,6 +4,8 @@ import { MdAutoAwesome } from "react-icons/md";
 
 import UserCircle from "../components/common/UserCircle";
 import HeadMascotte from "../components/ui/HeadMascotte";
+import Mascotte from "../assets/head_mascotte.svg";
+
 import NavBar from "../components/common/Navbar";
 import AssistantIA from "./AssistantIA";
 import { useTranslation } from "react-i18next";
@@ -43,6 +45,10 @@ export default function StartExercise() {
   const [notifications, setNotifications] = useState([]);
   const [canSubmit, setCanSubmit] = useState(false);
   const [overwrite, setOverwrite] = useState(false);
+  //verifier si on active l'IA ou pas
+  const [aiAllowed, setAiAllowed] = useState(true); // IA activée par défaut
+
+
   // / États de l'interface
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -133,6 +139,11 @@ int main() {
     fetchExercise();
   }, [exerciceId]);
 
+
+
+ 
+
+
   // ---------------- Load last code ----------------
  // Extraire juste l'id de l'utilisateur
 const userId = userData?.user_id;
@@ -213,7 +224,7 @@ useEffect(() => {
         { source_code: userCode, language_id: 49, stdin: userInput }
       );
       const { stdout, stderr, compile_output } = res.data;
-      const result = stdout || stderr || compile_output || "Aucune sortie pour le moment...";
+      const result = stdout || stderr || compile_output || t("output.noOutput");
       setOutput(result);
       if (stderr || compile_output) sendNotification(t("assistant.executionErrorHelp"), "hint");
     } catch {
@@ -292,6 +303,44 @@ useEffect(() => {
   };
 
 
+
+ //fonction pour activer l'IA ou pas 
+  useEffect(() => {
+  if (!exercise || !isStudent || !userId) return;
+
+  const checkAIStatus = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/spaces/exercice/${exercise.id_exercice}/student/${userId}/check/`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+     if (!res.ok) throw new Error(t("errors.aiCheckFailed"));
+
+      const data = await res.json();
+
+      // si un espace commun existe et que ai_enabled === false => IA désactivée
+      if (data.same_space) {
+        const disabled = data.spaces.some(space => space.ai_enabled === false);
+        setAiAllowed(!disabled);
+      } else {
+        setAiAllowed(true);
+      }
+    } catch (err) {
+      console.error(t("errors.aiCheckFailed"), err);
+      setAiAllowed(true); // fallback : IA activée
+    }
+  };
+
+  checkAIStatus();
+}, [exercise, userId, isStudent]);
+console.log({aiAllowed});
+
+
   // ------------------- JSX -------------------
   return (
     <ExerciseContext.Provider value={exerciseContextValue}>
@@ -318,7 +367,10 @@ useEffect(() => {
 
             <div className="flex gap-3 items-center md:ml-auto ml-[280px] -mt-20 md:mt-0 relative">
               <div className="fixed top-4 right-4 flex items-center gap-3 z-50">
-                <HeadMascotte />
+                <HeadMascotte
+                  courseData={exercise}
+                  aiEnabled={aiAllowed} // <-- nouveau prop
+                />
 
                 {/* Notifications */}
                 <div className="fixed top-20 right-6 flex flex-col gap-3 z-[9999]">
@@ -485,9 +537,23 @@ useEffect(() => {
           {/* Assistant IA */}
           <div className="flex justify-center mb-16">
             <button
-              onClick={() => setOpenAssistant(true)}
-              className="flex items-center gap-3 px-4 md:px-6 py-2 rounded-full bg-white border border-[rgb(var(--color-gray-light))] shadow-card hover:brightness-95 transition text-sm"
-            >
+  onClick={() => {
+    if (!aiAllowed) {
+      toast.error(t("assistant_disabled") || "Assistant IA désactivé pour cet exercice");
+      return;
+    }
+    setOpenAssistant(true);
+  }}
+  disabled={!aiAllowed}
+  className={`
+    flex items-center gap-3 px-4 md:px-6 py-2 rounded-full border shadow-card transition text-sm
+    ${aiAllowed
+      ? "bg-white hover:brightness-95 cursor-pointer"
+      : "bg-gray-200 text-gray-400 cursor-not-allowed opacity-60"
+    }
+  `}
+>
+
               <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[rgb(var(--color-gray-light))]">
                 <MessageCircle
                   size={18}

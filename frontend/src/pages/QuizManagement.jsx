@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import Button from "../components/common/Button";
 import AddModal from "../components/common/AddModel";
 import { Trash2, FileText, SquarePen } from "lucide-react";
@@ -28,10 +28,25 @@ export default function QuizzesManagement() {
   const [editModal, setEditModal] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
-
-  const [editValues, setEditValues] = useState({ title: "", description: "", visibilite_exo: false });
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // ================= RESIZE =================
+  // Handle window resize
+  useEffect(() => {
+    const resizeHandler = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", resizeHandler);
+    return () => window.removeEventListener("resize", resizeHandler);
+  }, []);
+  // Sidebar collapsed
+  useEffect(() => {
+    const handler = (e) => setSidebarCollapsed(e.detail);
+    window.addEventListener("sidebarChanged", handler);
+    return () => window.removeEventListener("sidebarChanged", handler);
+  }, []);
+
+  const sidebarWidth = sidebarCollapsed ? 60 : 240;
+
+  const [editValues, setEditValues] = useState({ title: "", description: "", visibilite_exo: false });
 
   const difficultyBgMap = {
     debutant: "bg-grad-2",
@@ -53,7 +68,7 @@ export default function QuizzesManagement() {
           data.map((q) => ({
             id: q.id,
             exerciceId: q.exercice?.id_exercice,
-            title: q.exercice?.titre_exo || "Sans titre",
+            title: q.exercice?.titre_exo || t("defaults.noTitle"),
             subtitle: q.exercice?.enonce || "",
             questions: q.questions?.length || 0,
             attempts: q.nbMax_tentative || 0,
@@ -61,30 +76,19 @@ export default function QuizzesManagement() {
             utilisateur: q.exercice?.utilisateur,
             score: q.scoreMinimum || 0,
             visibilite_exo: q.exercice?.visibilite_exo,
-            niveau_exo: q.exercice?.niveau_exo || "debutant",
-            niveau_exercice_label:q.exercice?.niveau_exercice_label,
+            niveau_exo: q.exercice?.niveau_exo || t("defaults.beginner"),
+            niveau_exercice_label: q.exercice?.niveau_exercice_label,
             icon: <FileText size={22} />,
           }))
         );
       } catch (err) {
-        console.error("Erreur chargement quiz:", err);
+        console.error(t("errors.quizLoad"), err);
       }
     };
     fetchQuizzes();
   }, [token]);
 
   // ================= Responsivité =================
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("sidebarChanged", handleSidebarChange);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("sidebarChanged", handleSidebarChange);
-    };
-  }, []);
 
   // ================= Edit Quiz =================
 
@@ -118,7 +122,7 @@ export default function QuizzesManagement() {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success("Quiz mis à jour avec succès !");
+      toast.success(t("messages.updateQuiz"));
 
       setQuizzes((prev) =>
         prev.map((q) =>
@@ -131,22 +135,22 @@ export default function QuizzesManagement() {
       setEditModal(false);
       setSelectedQuiz(null);
     } catch (err) {
-      console.error("Erreur mise à jour:", err.response?.data || err.message);
-      alert("Erreur lors de la mise à jour du quiz");
+      console.error(t("errors.update"), err.response?.data || err.message);
+      alert(t("errors.updateQuiz"));
     }
   };
 
   // ================= Delete Quiz =================
   const handleDeleteQuiz = async (exerciceId) => {
-    if (!window.confirm("Tu es sûr de supprimer ce quiz ?")) return;
+    if (!window.confirm(t("messages.deleteQuiz"))) return;
     try {
       await api.delete(`exercices/${exerciceId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setQuizzes((prev) => prev.filter((q) => q.exerciceId !== exerciceId));
     } catch (err) {
-      console.error("Erreur suppression :", err);
-      alert("Erreur lors de la suppression du quiz");
+      console.error(t("errors.delete"), err);
+      alert(t("errors.delQuiz"));
     }
   };
 
@@ -157,11 +161,16 @@ export default function QuizzesManagement() {
 
   return (
     <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
-      <Navbar />
-      <main
-        className={`flex-1 p-6 pt-10 space-y-5 transition-all duration-300 ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""
-          }`}
-      >
+      {/* Sidebar */}
+      <div>
+        <Navbar />
+      </div>
+
+      <main className={`
+           flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+           ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+         `}>
+
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-muted">
@@ -195,13 +204,13 @@ export default function QuizzesManagement() {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                   <Button
-                                                        variant="courseStart"
-                                                        className={`px-4 py-2 whitespace-nowrap ${buttonStyles[q.niveau_exercice_label]}`}
-                                                       onClick={() => navigate(`/Voir-quiz/${q.exerciceId}`)}
-                                                      >
-                                                        Voir Quiz
-                                                      </Button>
+                  <Button
+                    variant="courseStart"
+                    className={`px-4 py-2 whitespace-nowrap ${buttonStyles[q.niveau_exercice_label]}`}
+                    onClick={() => navigate(`/Voir-quiz/${q.exerciceId}`)}
+                  >
+                    {t("voir_quiz")}
+                  </Button>
                   <button
                     className="text-muted hover:opacity-80"
                     onClick={() => handleEdit(q)}

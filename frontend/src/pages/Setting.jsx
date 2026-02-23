@@ -5,7 +5,7 @@ import Button from "../components/common/Button";
 import { Trash, Sun, Globe, Shield, User, UserRound, Mail, Pen, Hash, Award } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import api from "../services/api";
 import UserCircle from "../components/common/UserCircle";
 import toast, { Toaster } from "react-hot-toast";
@@ -16,11 +16,11 @@ export default function Setting() {
     const { t, i18n } = useTranslation("setting");
     const navigate = useNavigate();
     const { darkMode, toggleDarkMode } = useContext(ThemeContext);
-    
+
     // États pour la responsivité
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    
+
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("profile");
@@ -35,13 +35,13 @@ export default function Setting() {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
         };
-        
+
         // Gestion de la sidebar
         const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
-        
+
         window.addEventListener("resize", handleResize);
         window.addEventListener("sidebarChanged", handleSidebarChange);
-        
+
         return () => {
             window.removeEventListener("resize", handleResize);
             window.removeEventListener("sidebarChanged", handleSidebarChange);
@@ -89,23 +89,51 @@ export default function Setting() {
 
     const handleSave = async () => {
         if (!validateProfile()) {
-            console.error("Erreurs dans le formulaire:", formErrors);
+            console.error(t("Errors.FormErrors"), formErrors);
             return;
         }
 
         try {
             const token = localStorage.getItem("token");
-            await api.put("profile/", formData, {
-                headers: { Authorization: `Bearer ${token}` }
+
+            // ✅ PAYLOAD PROPRE (IMPORTANT)
+            const payload = {
+                nom: formData.nom,
+                prenom: formData.prenom,
+                date_naissance: formData.date_naissance,
+                adresse_email: formData.adresse_email,
+                matricule: formData.matricule,
+            };
+
+            // 🎓 Champs étudiant
+            if (user.role === "etudiant") {
+                payload.specialite = formData.specialite;
+                payload.annee_etude = formData.annee_etude;
+            }
+
+            // 👨‍🏫 Champs enseignant
+            if (user.role === "enseignant") {
+                payload.grade = formData.grade;
+            }
+
+            await api.put("profile/", payload, {
+                headers: { Authorization: `Bearer ${token}` },
             });
-            setUser(formData);
+
+            // ⚠️ mettre à jour l’utilisateur avec le payload
+            setUser({ ...user, ...payload });
             setIsEditing(false);
             toast.success(t("Messages.ProfileUpdateSuccess"));
+
         } catch (error) {
-            console.error(t("Errors.ProfileUpdateFailed"), error);
-            toast.error(t("Errors.ProfileUpdateFailed"));
+            console.error("Erreur backend :", error.response?.data);
+            toast.error(
+                JSON.stringify(error.response?.data) ||
+                t("Errors.ProfileUpdateFailed")
+            );
         }
     };
+
 
     const validatePassword = () => {
         const { newPassword, confirmPassword } = passwordData;
@@ -206,364 +234,497 @@ export default function Setting() {
             </div>
 
             {/* Main Content */}
-           <main className={`
+            <main className={`
     flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
     ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
 `}>
-    {/* Toast notifications */}
-    <Toaster position="top-right" />
+                {/* Toast notifications */}
+                <Toaster position="top-right" />
 
-    {/* Top nav tabs */}
-    <NavSetting active={activeTab} onChange={setActiveTab} />
+                {/* Top nav tabs */}
+                <NavSetting active={activeTab} onChange={setActiveTab} />
 
-    {/* -------- PROFILE TAB -------- */}
-    {activeTab === "profile" && (
-        <div className="mt-6 sm:mt-10 bg-grad-2 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-md p-4 sm:p-6 md:p-8 border border-white/40 w-full overflow-hidden">
-            {/* PROFILE HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
-                {/* Avatar + Name */}
-                <div className="flex items-center gap-3 sm:gap-4">
-                    <UserCircle
-                        initials={initials}
-                        onToggleTheme={toggleDarkMode}
-                        onChangeLang={(lang) => i18n.changeLanguage(lang)}
-                        size={isMobile ? "sm" : "md"}
-                    />
-                    {/* Name + email + tag */}
-                    <div className="min-w-0">
-                        <h2 className="text-base sm:text-lg md:text-xl font-semibold text-muted truncate">
-                            {user?.nom} {user?.prenom}
-                        </h2>
-                        <p className="text-gray text-xs sm:text-sm md:text-base truncate">
-                            {user?.adresse_email}
-                        </p>
-                        <span className="inline-block mt-1 bg-primary/20 text-primary text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
-                            {user?.role === "enseignant" ? t("Profile.Professor") : t("Profile.Student")}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Edit button */}
-                <div className="sm:ml-auto mt-3 sm:mt-0">
-                    <Button
-                        variant="Setting"
-                        onClick={() => {
-                            if (isEditing) {
-                                handleSave();
-                            } else {
-                                setIsEditing(true);
-                            }
-                        }}
-                        className="bg-grad-1 hover:bg-primary/80 text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base w-full sm:w-auto"
-                    >
-                        <Pen size={16} className="mr-1 sm:mr-2 inline" />
-                        {isEditing ? t("Profile.SaveChanges") : t("Profile.Editprofile")}
-                    </Button>
-                </div>
-            </div>
-
-            {/* -------- FORM -------- */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {/* Full name */}
-                <div className="flex flex-col">
-                    <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.FullName")}</label>
-                    <div className="relative">
-                        <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                        <input
-                            type="text"
-                            value={formData.nom}
-                            onChange={(e) => {
-                                const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
-                                setFormData({ ...formData, nom: value });
-                            }}
-                            disabled={!isEditing}
-                            className={`w-full pl-8 sm:pl-10 bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-gray-800 text-sm sm:text-base
-                                ${!isEditing ? "opacity-60 cursor-not-allowed" : "focus:ring-2 focus:ring-primary"}`}
-                        />
-                    </div>
-                </div>
-
-                {/* Nickname */}
-                <div className="flex flex-col">
-                    <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.NickName")}</label>
-                    <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                        <input
-                            type="text"
-                            value={formData.prenom}
-                            onChange={(e) => {
-                                const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
-                                setFormData({ ...formData, prenom: value });
-                            }}
-                            disabled={!isEditing}
-                            className={`w-full pl-8 sm:pl-10 bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-gray-800 text-sm sm:text-base
-                                ${!isEditing ? "opacity-60 cursor-not-allowed" : "focus:ring-2 focus:ring-primary"}`}
-                        />
-                    </div>
-                </div>
-
-                {/* Date */}
-                <div className="flex flex-col">
-                    <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.Datebirth")}</label>
-                    <input
-                        type="date"
-                        value={formData.date_naissance}
-                        onChange={(e) => setFormData({ ...formData, date_naissance: e.target.value })}
-                        disabled={!isEditing}
-                        className={`w-full bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-gray-800 text-sm sm:text-base
-                            ${!isEditing ? "opacity-60 cursor-not-allowed" : "focus:ring-2 focus:ring-primary"}`}
-                    />
-                </div>
-
-                {/* Email */}
-                <div className="flex flex-col">
-                    <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.EmailAddress")}</label>
-                    <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                        <input
-                            type="text"
-                            value={formData.adresse_email}
-                            onChange={(e) => setFormData({ ...formData, adresse_email: e.target.value })}
-                            disabled={!isEditing}
-                            className={`w-full pl-8 sm:pl-10 bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-gray-800 text-sm sm:text-base
-                                ${!isEditing ? "opacity-60 cursor-not-allowed" : "focus:ring-2 focus:ring-primary"}`}
-                        />
-                        {formErrors.adresse_email && <p className="text-red text-xs sm:text-sm mt-1">{formErrors.adresse_email}</p>}
-                    </div>
-                </div>
-
-                {/* Registration */}
-                <div className="flex flex-col">
-                    <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.RegistratioNumber")}</label>
-                    <div className="relative">
-                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                        <input
-                            type="text"
-                            value={formData.matricule}
-                            onChange={(e) => setFormData({ ...formData, matricule: e.target.value })}
-                            disabled={!isEditing}
-                            className={`w-full pl-8 sm:pl-10 bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-gray-800 text-sm sm:text-base
-                                ${!isEditing ? "opacity-60 cursor-not-allowed" : "focus:ring-2 focus:ring-primary"}`}
-                        />
-                    </div>
-                </div>
-
-                {/* ---- EXTRA FIELDS BASED ON ROLE ----*/}
-                {user.role === "etudiant" && (
-                    <>
-                        {/* Specialité */}
-                        <div className="flex flex-col">
-                            <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.Speciality")}</label>
-                            <input
-                                type="text"
-                                value={formData.specialite}
-                                onChange={(e) => setFormData({ ...formData, specialite: e.target.value })}
-                                disabled={!isEditing}
-                                className={`w-full bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-gray-800 text-sm sm:text-base
-                                    ${!isEditing ? "opacity-60 cursor-not-allowed" : "focus:ring-2 focus:ring-primary"}`}
-                            />
-                        </div>
-
-                        {/* Année d'étude */}
-                        <div className="flex flex-col">
-                            <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.StudyYear")}</label>
-                            <input
-                                type="text"
-                                value={formData.annee_etude}
-                                onChange={(e) => setFormData({ ...formData, annee_etude: e.target.value })}
-                                disabled={!isEditing}
-                                className={`w-full bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-gray-800 text-sm sm:text-base
-                                    ${!isEditing ? "opacity-60 cursor-not-allowed" : "focus:ring-2 focus:ring-primary"}`}
-                            />
-                        </div>
-                    </>
-                )}
-
-                {user.role === "enseignant" && (
-                    <>
-                        {/* Grade */}
-                        <div className="flex flex-col">
-                            <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.Grade")}</label>
-                            <div className="relative">
-                                <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                                <input
-                                    type="text"
-                                    value={formData.grade}
-                                    onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                                    disabled={!isEditing}
-                                    className={`w-full pl-8 sm:pl-10 bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-gray-800 text-sm sm:text-base
-                                        ${!isEditing ? "opacity-60 cursor-not-allowed" : "focus:ring-2 focus:ring-primary"}`}
+                {/* -------- PROFILE TAB -------- */}
+                {activeTab === "profile" && (
+                    <div className="mt-6 sm:mt-10 bg-grad-2 backdrop-blur-md rounded-2xl sm:rounded-3xl shadow-md p-4 sm:p-6 md:p-8 border border-white/40 w-full overflow-hidden">
+                        {/* PROFILE HEADER */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+                            {/* Avatar + Name */}
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <UserCircle
+                                    initials={initials}
+                                    clickable={false}
+                                    onToggleTheme={toggleDarkMode}
+                                    onChangeLang={(lang) => i18n.changeLanguage(lang)}
+                                    size={isMobile ? "sm" : "md"}
                                 />
+                                {/* Name + email + tag */}
+                                <div className="min-w-0">
+                                    <h2 className="text-base sm:text-lg md:text-xl font-semibold text-muted truncate">
+                                        {user?.nom} {user?.prenom}
+                                    </h2>
+                                    <p className="text-gray text-xs sm:text-sm md:text-base truncate">
+                                        {user?.adresse_email}
+                                    </p>
+                                    <span
+                                        className="
+    inline-block mt-1 text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-full
+    bg-[rgb(var(--color-primary))]/20
+    text-[rgb(var(--color-primary))]
+    dark:bg-[rgb(var(--color-primary))]/40
+    dark:text-[rgb(229_231_235)]
+  "
+                                    >
+                                        {user?.role === "enseignant"
+                                            ? t("Profile.Role.Professor")
+                                            : t("Profile.Role.Student")}
+                                    </span>
+
+                                </div>
+                            </div>
+
+                            {/* Edit button */}
+                            <div className="sm:ml-auto mt-3 sm:mt-0">
+                                <Button
+                                    variant="Setting"
+                                    onClick={() => {
+                                        if (isEditing) {
+                                            handleSave();
+                                        } else {
+                                            setIsEditing(true);
+                                        }
+                                    }}
+                                    className="bg-grad-1 hover:bg-primary/80 text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base w-full sm:w-auto"
+                                >
+                                    <Pen size={16} className="mr-1 sm:mr-2 inline" />
+                                    {isEditing ? t("Profile.SaveChanges") : t("Profile.Editprofile")}
+                                </Button>
                             </div>
                         </div>
-                    </>
+
+                        {/* -------- FORM -------- */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                            {/* Full name */}
+                            <div className="flex flex-col">
+                                <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.FullName")}</label>
+                                <div className="relative">
+                                    <UserRound
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4
+        text-[rgb(var(--color-input-placeholder))]"
+                                    />
+
+                                    <input
+                                        type="text"
+                                        value={formData.nom}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                                            setFormData({ ...formData, nom: value });
+                                        }}
+                                        className={`w-full pl-10 rounded-xl px-3 py-2 shadow-sm text-sm
+        bg-[rgb(var(--color-input-bg))]
+        text-[rgb(var(--color-input-text))]
+        placeholder-[rgb(var(--color-input-placeholder))]
+        border border-[rgb(var(--color-input-border))]
+        focus:outline-none focus:ring-2
+        focus:ring-[rgb(var(--color-primary))]
+        ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}
+    `}
+                                        disabled={!isEditing}
+                                    />
+
+                                </div>
+
+                            </div>
+
+                            {/* Nickname */}
+                            <div className="flex flex-col">
+                                <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.NickName")}</label>
+                                <div className="relative">
+                                    <User
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5
+        text-[rgb(var(--color-input-placeholder))]"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={formData.prenom}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+                                            setFormData({ ...formData, prenom: value });
+                                        }}
+                                        className={`w-full pl-10 rounded-xl px-3 py-2 shadow-sm text-sm
+      bg-[rgb(var(--color-input-bg))]
+      text-[rgb(var(--color-input-text))]
+      placeholder-[rgb(var(--color-input-placeholder))]
+      border border-[rgb(var(--color-input-border))]
+      focus:outline-none focus:ring-2
+      focus:ring-[rgb(var(--color-primary))]
+      ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}
+    `}
+                                        disabled={!isEditing}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Date */}
+                            <div className="flex flex-col">
+                                <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.Datebirth")}</label>
+                                <input
+                                    type="date"
+                                    value={formData.date_naissance}
+                                    onChange={(e) => setFormData({ ...formData, date_naissance: e.target.value })}
+                                    className={`w-full pl-10 rounded-xl px-3 py-2 shadow-sm text-sm
+      bg-[rgb(var(--color-input-bg))]
+      text-[rgb(var(--color-input-text))]
+      placeholder-[rgb(var(--color-input-placeholder))]
+      border border-[rgb(var(--color-input-border))]
+      focus:outline-none focus:ring-2
+      focus:ring-[rgb(var(--color-primary))]
+      ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}
+    `}
+                                    disabled={!isEditing}
+                                />
+                            </div>
+
+                            {/* Email */}
+                            <div className="flex flex-col">
+                                <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.EmailAddress")}</label>
+                                <div className="relative">
+                                    <Mail
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5
+        text-[rgb(var(--color-input-placeholder))]"/>
+                                    <input
+                                        type="text"
+                                        value={formData.adresse_email}
+                                        onChange={(e) => setFormData({ ...formData, adresse_email: e.target.value })}
+                                        className={`w-full pl-10 rounded-xl px-3 py-2 shadow-sm text-sm
+      bg-[rgb(var(--color-input-bg))]
+      text-[rgb(var(--color-input-text))]
+      placeholder-[rgb(var(--color-input-placeholder))]
+      border border-[rgb(var(--color-input-border))]
+      focus:outline-none focus:ring-2
+      focus:ring-[rgb(var(--color-primary))]
+      ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}
+    `}
+                                        disabled={!isEditing}
+                                    />
+                                    {formErrors.adresse_email && <p className="text-red text-xs sm:text-sm mt-1">{formErrors.adresse_email}</p>}
+                                </div>
+                            </div>
+
+                            {/* Registration */}
+                            <div className="flex flex-col">
+                                <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.RegistratioNumber")}</label>
+                                <div className="relative">
+                                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                                    <input
+                                        type="text"
+                                        value={formData.matricule}
+                                        onChange={(e) => setFormData({ ...formData, matricule: e.target.value })}
+                                        className={`w-full pl-10 rounded-xl px-3 py-2 shadow-sm text-sm
+      bg-[rgb(var(--color-input-bg))]
+      text-[rgb(var(--color-input-text))]
+      placeholder-[rgb(var(--color-input-placeholder))]
+      border border-[rgb(var(--color-input-border))]
+      focus:outline-none focus:ring-2
+      focus:ring-[rgb(var(--color-primary))]
+      ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}
+    `}
+                                        disabled={!isEditing}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* ---- EXTRA FIELDS BASED ON ROLE ----*/}
+                            {user.role === "etudiant" && (
+                                <>
+                                    {/* Specialité */}
+                                    <div className="flex flex-col">
+                                        <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.Speciality")}</label>
+                                        <input
+                                            type="text"
+                                            value={formData.specialite}
+                                            onChange={(e) => setFormData({ ...formData, specialite: e.target.value })}
+                                            className={`w-full pl-10 rounded-xl px-3 py-2 shadow-sm text-sm
+      bg-[rgb(var(--color-input-bg))]
+      text-[rgb(var(--color-input-text))]
+      placeholder-[rgb(var(--color-input-placeholder))]
+      border border-[rgb(var(--color-input-border))]
+      focus:outline-none focus:ring-2
+      focus:ring-[rgb(var(--color-primary))]
+      ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}
+    `}
+                                            disabled={!isEditing}
+                                        />
+                                    </div>
+
+                                    {/* Année d'étude */}
+                                    <div className="flex flex-col">
+                                        <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.StudyYear")}</label>
+                                        <input
+                                            type="text"
+                                            value={formData.annee_etude}
+                                            onChange={(e) => setFormData({ ...formData, annee_etude: e.target.value })}
+                                            className={`w-full pl-10 rounded-xl px-3 py-2 shadow-sm text-sm
+      bg-[rgb(var(--color-input-bg))]
+      text-[rgb(var(--color-input-text))]
+      placeholder-[rgb(var(--color-input-placeholder))]
+      border border-[rgb(var(--color-input-border))]
+      focus:outline-none focus:ring-2
+      focus:ring-[rgb(var(--color-primary))]
+      ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}
+    `}
+                                            disabled={!isEditing}
+                                        />
+                                    </div>
+                                </>
+                            )}
+
+                            {user.role === "enseignant" && (
+                                <>
+                                    {/* Grade */}
+                                    <div className="flex flex-col">
+                                        <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Profile.Grade")}</label>
+                                        <div className="relative">
+                                            <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgb(var(--color-input-placeholder))] w-4 h-4 sm:w-5 sm:h-5" />
+                                            <input
+                                                type="text"
+                                                value={formData.grade}
+                                                onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                                                className={`w-full pl-10 rounded-xl px-3 py-2 shadow-sm text-sm
+      bg-[rgb(var(--color-input-bg))]
+      text-[rgb(var(--color-input-text))]
+      placeholder-[rgb(var(--color-input-placeholder))]
+      border border-[rgb(var(--color-input-border))]
+      focus:outline-none focus:ring-2
+      focus:ring-[rgb(var(--color-primary))]
+      ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}
+    `}
+                                                disabled={!isEditing}
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
                 )}
-            </div>
-        </div>
-    )}
 
-    {/* -------- PREFERENCES -------- */}
-    {activeTab === "preferences" && (
-        <div className="mt-6 sm:mt-10 p-4 sm:p-6 bg-grad-2 rounded-2xl sm:rounded-3xl shadow-md w-full overflow-hidden">
-            {/* THEME */}
-            <div className="mb-6 sm:mb-10">
-                <h3 className="text-muted font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
-                    <span className="text-muted"><Sun size={18} className="sm:w-5 sm:h-5" /></span>
-                    {t("Preferences.Theme")}
-                </h3>
+                {/* -------- PREFERENCES -------- */}
+                {activeTab === "preferences" && (
+                    <div className="mt-6 sm:mt-10 p-4 sm:p-6 bg-grad-2 rounded-2xl sm:rounded-3xl shadow-md w-full overflow-hidden">
+                        {/* THEME */}
+                        <div className="mb-6 sm:mb-10">
+                            <h3 className="text-muted font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                                <span className="text-muted"><Sun size={18} className="sm:w-5 sm:h-5" /></span>
+                                {t("Preferences.Theme")}
+                            </h3>
 
-                {/* LIGHT MODE */}
-                <label className="flex items-center justify-between bg-white dark:bg-grad-1 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-2 sm:mb-3 shadow-sm cursor-pointer text-gray-800">
-                    <div>
-                        <p className="font-medium text-sm sm:text-base">{t("Preferences.LightMode")}</p>
-                        <p className="text-xs sm:text-sm text-gray-600">{t("Preferences.Brightp")}</p>
+                            {/* LIGHT MODE */}
+                            <label className="
+  flex items-center justify-between
+  bg-white dark:bg-[rgb(var(--color-card))]
+  rounded-lg sm:rounded-xl
+  p-3 sm:p-4 mb-3
+  shadow-sm cursor-pointer
+  text-gray-800 dark:text-[rgb(var(--color-text))]
+">
+
+                                <div>
+                                    <p className="font-medium text-sm sm:text-base">{t("Preferences.LightMode")}</p>
+                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-[rgb(var(--color-gray))]">
+                                        {t("Preferences.Brightp")}</p>
+                                </div>
+                                <input
+                                    type="radio"
+                                    name="theme"
+                                    className="w-3 h-3 sm:w-4 sm:h-4 text-primary"
+                                    checked={!darkMode}
+                                    onChange={() => toggleDarkMode("light")}
+                                />
+                            </label>
+
+                            {/* DARK MODE */}
+                            <label className="
+  flex items-center justify-between
+  bg-white dark:bg-[rgb(var(--color-card))]
+  rounded-lg sm:rounded-xl
+  p-3 sm:p-4 mb-3
+  shadow-sm cursor-pointer
+  text-gray-800 dark:text-[rgb(var(--color-text))]
+">
+
+                                <div>
+                                    <p className="font-medium text-sm sm:text-base">{t("Preferences.DarkMode")}</p>
+                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-[rgb(var(--color-gray))]">
+                                        {t("Preferences.Easyp")}</p>
+                                </div>
+                                <input
+                                    type="radio"
+                                    name="theme"
+                                    className="w-3 h-3 sm:w-4 sm:h-4 text-primary"
+                                    checked={darkMode}
+                                    onChange={() => toggleDarkMode("dark")}
+                                />
+                            </label>
+                        </div>
+
+                        {/* LANGUAGE */}
+                        <div>
+                            <h3 className="text-muted font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                                <span className="text-muted"><Globe size={18} className="sm:w-5 sm:h-5" /></span>
+                                {t("Preferences.Language")}
+                            </h3>
+
+                            <p className="text-xs sm:text-sm text-gray mb-2">
+                                {t("Preferences.Selectp")}
+                            </p>
+
+                            <select
+                                className="
+    w-full
+    bg-white dark:bg-[rgb(var(--color-card))]
+    rounded-lg sm:rounded-xl
+    p-2 sm:p-3
+    shadow-sm
+    border border-gray-200 dark:border-[rgb(var(--color-input-border))]
+    text-gray-800 dark:text-[rgb(var(--color-text))]
+    text-sm sm:text-base
+    focus:outline-none focus:ring-2
+    focus:ring-[rgb(var(--color-primary))]
+  "
+                                value={i18n.language}
+                                onChange={handleLanguageChange}
+                            >
+                                <option value="fr">{t("Preferences.French")}</option>
+                                <option value="en">{t("Preferences.English")}</option>
+                            </select>
+                        </div>
                     </div>
-                    <input
-                        type="radio"
-                        name="theme"
-                        className="w-3 h-3 sm:w-4 sm:h-4 text-primary"
-                        checked={!darkMode}
-                        onChange={() => toggleDarkMode("light")}
-                    />
-                </label>
+                )}
 
-                {/* DARK MODE */}
-                <label className="flex items-center justify-between bg-white dark:bg-grad-1 rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm cursor-pointer text-gray-800">
-                    <div>
-                        <p className="font-medium text-sm sm:text-base">{t("Preferences.DarkMode")}</p>
-                        <p className="text-xs sm:text-sm text-gray-600">{t("Preferences.Easyp")}</p>
+                {/* -------- ACCOUNT -------- */}
+                {activeTab === "account" && (
+                    <div className="mt-4 sm:mt-6 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-md bg-grad-2 w-full overflow-hidden">
+
+                        {/* ---------------- SECURITY ---------------- */}
+                        <div className="bg-[rgb(var(--color-surface))] dark:bg-[rgb(var(--color-card))] rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-[rgb(var(--color-input-border))] mb-6 sm:mb-10">
+                            <h3 className="text-muted font-bold mb-4 sm:mb-6 flex items-center gap-2 text-sm sm:text-base">
+                                <span className="text-muted"><Shield size={18} className="sm:w-5 sm:h-5" /></span>
+                                {t("Account.Security")}
+                            </h3>
+
+                            {/* Current Password */}
+                            <div className="flex flex-col mb-3 sm:mb-4">
+                                <label className="text-[rgb(var(--color-text))] text-sm sm:text-base mb-1 sm:mb-2">
+                                    {t("Account.CurrentPassword")}
+                                </label>
+                                <input
+                                    type="password"
+                                    placeholder={t("Placeholders.CurrentPassword")}
+                                    value={passwordData.currentPassword}
+                                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                    className="
+            w-full rounded-xl p-2 sm:p-3 shadow-sm text-sm sm:text-base
+            bg-[rgb(var(--color-input-bg))]
+            text-[rgb(var(--color-input-text))]
+            placeholder-[rgb(var(--color-input-placeholder))]
+            border border-[rgb(var(--color-input-border))]
+            focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]
+          "
+                                />
+                            </div>
+
+                            {/* NEW PASSWORD */}
+                            <div className="flex flex-col mb-3 sm:mb-4">
+                                <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Account.NewPassword")}</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder={t("Placeholders.NewPassword")}
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                        className="
+              w-full rounded-xl p-2 sm:p-3 pr-8 sm:pr-10 shadow-sm text-sm sm:text-base
+              bg-[rgb(var(--color-input-bg))]
+              text-[rgb(var(--color-input-text))]
+              placeholder-[rgb(var(--color-input-placeholder))]
+              border border-[rgb(var(--color-input-border))]
+              focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]
+            "
+                                    />
+                                    <span
+                                        className="absolute right-2 sm:right-3 cursor-pointer text-[rgb(var(--color-gray))]"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? <FaEyeSlash size={14} className="sm:w-4 sm:h-4" /> : <FaEye size={14} className="sm:w-4 sm:h-4" />}
+                                    </span>
+                                </div>
+                                {passwordError && <p className="text-red text-xs sm:text-sm mt-1">{passwordError}</p>}
+                            </div>
+
+                            {/* CONFIRM PASSWORD */}
+                            <div className="flex flex-col mb-4 sm:mb-6">
+                                <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Account.ConfirmNewPassword")}</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        type={showConfirm ? "text" : "password"}
+                                        placeholder={t("Placeholders.ConfirmPassword")}
+                                        value={passwordData.confirmPassword}
+                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                        className="
+              w-full rounded-xl p-2 sm:p-3 pr-8 sm:pr-10 shadow-sm text-sm sm:text-base
+              bg-[rgb(var(--color-input-bg))]
+              text-[rgb(var(--color-input-text))]
+              placeholder-[rgb(var(--color-input-placeholder))]
+              border border-[rgb(var(--color-input-border))]
+              focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]
+            "
+                                    />
+                                    <span
+                                        className="absolute right-2 sm:right-3 cursor-pointer text-[rgb(var(--color-gray))]"
+                                        onClick={() => setShowConfirm(!showConfirm)}
+                                    >
+                                        {showConfirm ? <FaEyeSlash size={14} className="sm:w-4 sm:h-4" /> : <FaEye size={14} className="sm:w-4 sm:h-4" />}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* UPDATE BUTTON */}
+                            <div className="flex  mt-3 sm:mt-4">
+                                <Button
+                                    variant="Setting"
+                                    onClick={handlePasswordUpdate}
+                                    className="bg-grad-1 hover:bg-primary/80 text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base w-full sm:w-auto"
+                                >
+                                    {t("Account.UpdatePass")}
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* DANGER ZONE */}
+                        <div className="bg-red/10 border border-red rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+                            <div className="bg-white dark:bg-red/20 border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+                                <h3 className="text-red font-bold mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
+                                    <span className="text-red"><Trash size={18} className="sm:w-5 sm:h-5" /></span>
+                                    {t("Account.DangerZone")}
+                                </h3>
+                                <p className="text-grayc font-medium text-sm sm:text-base">{t("Account.HDelete")}</p>
+                                <p className="text-xs sm:text-sm text-grayc mb-3 sm:mb-5">
+                                    {t("Account.deleteP")}
+                                </p>
+                                <Button
+                                    variant="Setting"
+                                    onClick={() => navigate("/")}
+                                    className="bg-red hover:bg-red/80 text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base w-full sm:w-auto"
+                                >
+                                    {t("Account.DeleteAccount")}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                    <input
-                        type="radio"
-                        name="theme"
-                        className="w-3 h-3 sm:w-4 sm:h-4 text-primary"
-                        checked={darkMode}
-                        onChange={() => toggleDarkMode("dark")}
-                    />
-                </label>
-            </div>
-
-            {/* LANGUAGE */}
-            <div>
-                <h3 className="text-muted font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
-                    <span className="text-muted"><Globe size={18} className="sm:w-5 sm:h-5" /></span>
-                    {t("Preferences.Language")}
-                </h3>
-
-                <p className="text-xs sm:text-sm text-gray mb-2">
-                    {t("Preferences.Selectp")}
-                </p>
-
-                <select
-                    className="w-full bg-white dark:bg-grad-1 rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm border border-gray-200 text-gray-800 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                    value={i18n.language}
-                    onChange={handleLanguageChange}
-                >
-                    <option value="fr">{t("Preferences.French")}</option>
-                    <option value="en">{t("Preferences.English")}</option>
-                </select>
-            </div>
-        </div>
-    )}
-
-    {/* -------- ACCOUNT -------- */}
-    {activeTab === "account" && (
-        <div className="mt-4 sm:mt-6 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-md bg-grad-2 w-full overflow-hidden">
-            {/* SECURITY */}
-            <div className="bg-primary/10 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-white/40 mb-6 sm:mb-10">
-                <h3 className="text-muted font-bold mb-4 sm:mb-6 flex items-center gap-2 text-sm sm:text-base">
-                    <span className="text-muted"><Shield size={18} className="sm:w-5 sm:h-5" /></span>
-                    {t("Account.Security")}
-                </h3>
-
-                {/* Current Password */}
-                <div className="flex flex-col mb-3 sm:mb-4">
-                    <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Account.CurrentPassword")}</label>
-                    <input
-                        type="password"
-                        placeholder={t("Placeholders.CurrentPassword")}
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                        className="bg-grad-2 border border-gray-200 rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-sm text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                </div>
-
-                {/* NEW PASSWORD */}
-                <div className="flex flex-col mb-3 sm:mb-4">
-                    <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Account.NewPassword")}</label>
-                    <div className="relative flex items-center">
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            placeholder={t("Placeholders.NewPassword")}
-                            value={passwordData.newPassword}
-                            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                            className="w-full bg-grad-2 border border-gray-200 rounded-lg sm:rounded-xl p-2 sm:p-3 pr-8 sm:pr-10 shadow-sm text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                        <span
-                            className="absolute right-2 sm:right-3 cursor-pointer text-gray-400"
-                            onClick={() => setShowPassword(!showPassword)}
-                        >
-                            {showPassword ? <FaEyeSlash size={14} className="sm:w-4 sm:h-4" /> : <FaEye size={14} className="sm:w-4 sm:h-4" />}
-                        </span>
-                    </div>
-                    {passwordError && <p className="text-red text-xs sm:text-sm mt-1">{passwordError}</p>}
-                </div>
-
-                {/* CONFIRM PASSWORD */}
-                <div className="flex flex-col mb-4 sm:mb-6">
-                    <label className="text-muted text-sm sm:text-base mb-1 sm:mb-2">{t("Account.ConfirmNewPassword")}</label>
-                    <div className="relative flex items-center">
-                        <input
-                            type={showConfirm ? "text" : "password"}
-                            placeholder={t("Placeholders.ConfirmPassword")}
-                            value={passwordData.confirmPassword}
-                            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                            className="w-full bg-grad-2  border border-gray-200 rounded-lg sm:rounded-xl p-2 sm:p-3 pr-8 sm:pr-10 shadow-sm text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                        <span
-                            className="absolute right-2 sm:right-3 cursor-pointer text-gray-400"
-                            onClick={() => setShowConfirm(!showConfirm)}
-                        >
-                            {showConfirm ? <FaEyeSlash size={14} className="sm:w-4 sm:h-4" /> : <FaEye size={14} className="sm:w-4 sm:h-4" />}
-                        </span>
-                    </div>
-                </div>
-
-                {/* UPDATE BUTTON */}
-                <div className="flex  mt-3 sm:mt-4">
-                    <Button
-                        variant="Setting"
-                        onClick={handlePasswordUpdate}
-                       className="bg-grad-1 hover:bg-primary/80 text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base w-full sm:w-auto"
-                    >
-                        {t("Account.UpdatePass")}
-                    </Button>
-                </div>
-            </div>
-
-            {/* DANGER ZONE */}
-            <div className="bg-red/10 border border-red rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
-                <div className="bg-white dark:bg-red/20 border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
-                    <h3 className="text-red font-bold mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
-                        <span className="text-red"><Trash size={18} className="sm:w-5 sm:h-5" /></span>
-                        {t("Account.DangerZone")}
-                    </h3>
-                    <p className="text-grayc font-medium text-sm sm:text-base">{t("Account.HDelete")}</p>
-                    <p className="text-xs sm:text-sm text-grayc mb-3 sm:mb-5">
-                        {t("Account.deleteP")}
-                    </p>
-                    <Button
-                        variant="Setting"
-                        onClick={() => navigate("/")}
-                         className="bg-red hover:bg-red/80 text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-sm sm:text-base w-full sm:w-auto"
-                    >
-                        {t("Account.DeleteAccount")}
-                    </Button>
-                </div>
-            </div>
-        </div>
-    )}
-</main>
+                )}
+            </main>
         </div>
     );
 }
+

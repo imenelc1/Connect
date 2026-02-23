@@ -184,6 +184,66 @@ def my_quizzes(request):
 
 
 
+#verifier si un item (cours, exo ) et etudiant appartient a un mm espace
+@api_view(["GET"])
+@permission_classes([IsAuthenticatedJWT])
+def is_student_in_same_space(request, item_type, item_id, etudiant_id):
+    """
+    Vérifie si un étudiant et un item (cours ou exercice) partagent un même space.
+    Retourne ai_enabled pour chaque espace commun.
+    
+    item_type: "cours" ou "exercice"
+    item_id: id du cours ou de l'exercice
+    etudiant_id: id de l'étudiant
+    """
+    try:
+        etudiant = Utilisateur.objects.get(id_utilisateur=etudiant_id)
+    except Utilisateur.DoesNotExist:
+        return Response({"error": "Etudiant not found"}, status=404)
+
+    if item_type == "exercice":
+        try:
+            item = Exercice.objects.get(id_exercice=item_id)
+        except Exercice.DoesNotExist:
+            return Response({"error": "Exercice not found"}, status=404)
+        # Espaces contenant l'exercice
+        item_spaces = SpaceExo.objects.filter(exercice=item)
+
+    elif item_type == "cours":
+        try:
+            item = Cours.objects.get(id_cours=item_id)
+        except Cours.DoesNotExist:
+            return Response({"error": "Cours not found"}, status=404)
+        # Espaces contenant le cours
+        item_spaces = SpaceCour.objects.filter(cours=item)
+
+    else:
+        return Response({"error": "item_type must be 'cours' or 'exercice'"}, status=400)
+
+    # Espaces de l'étudiant
+    student_spaces = SpaceEtudiant.objects.filter(etudiant=etudiant).values_list('space_id', flat=True)
+
+    # Intersection + récupérer ai_enabled
+    common_spaces = item_spaces.filter(space_id__in=student_spaces)
+
+    if common_spaces.exists():
+        spaces_info = []
+        for cs in common_spaces:
+            spaces_info.append({
+                "space_id": cs.space.id_space,
+                "space_name": cs.space.nom_space,
+                "ai_enabled": getattr(cs, "ai_enabled", True)  # true par défaut si cours n'a pas ai_enabled
+            })
+
+        return Response({
+            "same_space": True,
+            "spaces": spaces_info
+        })
+    else:
+        return Response({
+            "same_space": False,
+            "spaces": []
+        })
 
 
 
@@ -206,15 +266,30 @@ def space_courses(request, space_id):
         cours_id = request.data.get("cours")
         if not cours_id:
             return Response({"error": "cours field required"}, status=400)
+
         try:
             cours = Cours.objects.get(id_cours=cours_id)
         except Cours.DoesNotExist:
             return Response({"error": "Cours not found"}, status=404)
 
-        space_cour, created = SpaceCour.objects.get_or_create(space=space, cours=cours)
+        # 🔹 Récupérer ai_enabled depuis le frontend
+        ai_enabled = request.data.get("ai_enabled", True)  # True par défaut
+
+        # 🔹 Créer ou récupérer avec ai_enabled
+        space_cour, created = SpaceCour.objects.get_or_create(
+            space=space,
+            cours=cours,
+            defaults={"ai_enabled": ai_enabled}  # ✅ IMPORTANT
+        )
+
+        # 🔹 Si l’objet existe déjà, on peut mettre à jour ai_enabled si nécessaire
+        if not created:
+            space_cour.ai_enabled = ai_enabled
+            space_cour.save()
+
         serializer = SpaceCourSerializer(space_cour)
         return Response(serializer.data, status=201 if created else 200)
-    
+
 
 @api_view(["GET", "POST"])
 @permission_classes([IsAuthenticatedJWT])
@@ -235,14 +310,30 @@ def space_exercises(request, space_id):
         exercice_id = request.data.get("exercice")
         if not exercice_id:
             return Response({"error": "exercice field required"}, status=400)
+
         try:
             exercice = Exercice.objects.get(id_exercice=exercice_id)
         except Exercice.DoesNotExist:
             return Response({"error": "Exercice not found"}, status=404)
 
-        space_exo, created = SpaceExo.objects.get_or_create(space=space, exercice=exercice)
+        # 🔹 Récupérer ai_enabled depuis le frontend
+        ai_enabled = request.data.get("ai_enabled", True)  # True par défaut
+
+        # 🔹 Créer ou récupérer avec ai_enabled
+        space_exo, created = SpaceExo.objects.get_or_create(
+            space=space,
+            exercice=exercice,
+            defaults={"ai_enabled": ai_enabled}  # ✅ IMPORTANT
+        )
+
+        # 🔹 Si l’objet existe déjà, mettre à jour ai_enabled
+        if not created:
+            space_exo.ai_enabled = ai_enabled
+            space_exo.save()
+
         serializer = SpaceExoSerializer(space_exo)
         return Response(serializer.data, status=201 if created else 200)
+
 
 # --- Liste des quizzes d'un espace ---
 @api_view(['GET', 'POST'])
@@ -557,4 +648,3 @@ def delete_space(request, space_id):
         {"message": "Espace supprimé avec succès"},
         status=status.HTTP_204_NO_CONTENT
     )
-

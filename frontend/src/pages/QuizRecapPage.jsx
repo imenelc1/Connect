@@ -36,7 +36,7 @@ export default function QuizRecapPage() {
           }
         );
 
-        if (!res.ok) throw new Error("Quiz non trouvé");
+        if (!res.ok) throw new Error(t("noQuiz"));
         const data = await res.json();
         setQuiz(data); // l'API renvoie directement un objet
         setLoading(false);
@@ -49,100 +49,131 @@ export default function QuizRecapPage() {
     fetchQuizRecap();
   }, [exerciceId, currentUserId]);
 
-  if (loading) return <p>Chargement du quiz...</p>;
-  if (!quiz) return <p>Quiz introuvable.</p>;
+  if (loading) return <p>{t("loading")}</p>;
+  if (!quiz) return <p>{t("noQuiz")}</p>;
+
   const totalPoints = quiz.quiz.questions ? quiz.quiz.questions.reduce((acc, q) => acc + q.score, 0) : 0;
 
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-8 ">
+    <div className="min-h-screen flex flex-col items-center px-4 py-10 bg-bg text-textc">
 
-     
 
       {/* Titre */}
-      <h1 className="text-3xl md:text-4xl font-bold text-primary mb-6">
+      <h1 className="text-3xl md:text-4xl font-bold text-primary mb-8 text-center">
         {quiz.titre_exo}
       </h1>
 
-      
-     
+
+
+
+      {/* Icône */}
+      <div className="w-full max-w-md bg-card border border-blue/20 rounded-2xl shadow-lg p-8 flex flex-col items-center mb-10">
+
         {/* Icône */}
-        <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-4xl shadow-md mb-2">
+        <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white shadow-md mb-4">
           <FaTrophy size={40} />
         </div>
 
-        {/* Score */}
-        <div className="text-3xl font-bold mb-4 text-textc">
+       {/* Score */}
+        <div className="text-3xl font-bold mb-3">
           {quiz.quiz.reponse_quiz_utilisateur?.score_total || 0} / {totalPoints}
         </div>
 
-        {/* Félicitations */}
+        {/* Message */}
         {quiz.quiz.reponse_quiz_utilisateur?.score_total >= quiz.quiz.scoreMinimum ||
- quiz.quiz.reponse_quiz_utilisateur?.score_total === totalPoints ? (
-  <p className="text-green-600 text-xl mb-4">{t("congrats")}</p>
-) : (
-  <p className="text-red-600 text-xl mb-4">{t("tryAgain")}</p>
-)}
-
-
-        {/* Récapitulatif des réponses */}
-        <h3 className="text-xl font-semibold text-textc mb-4">{t("recap")}</h3>
-        <div className="w-full max-w-3xl flex flex-col gap-6">
-          {quiz.quiz.questions.map((q, index) => (
-            <div key={q.id_qst} className="bg-card rounded-xl p-6 shadow-md text-left text-textc border border-blue">
-
-              {/* Numéro + question */}
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-6 h-6 flex items-center justify-center rounded-md text-white font-bold text-sm bg-primary">
-                  {index + 1}
-                </div>
-                <p className="font-semibold">{q.texte_qst}</p>
-              </div>
-
-              {/* Points */}
-              <p className="text-sm text-grayc mb-2">{q.score} {t("point")}</p>
-
-              {/* Options */}
-              <div className="flex flex-col gap-2">
-                {q.options.map((opt) => {
-                  const isSelected = q.reponse_utilisateur?.option_choisie?.id_option === opt.id_option;
-                  const isCorrect = opt.texte_option === q.reponse_correcte;
-
-                  let classes = "rounded-md p-2 border border-gray-300 bg-white ";
-
-                  if (isCorrect) {
-                    // La bonne réponse en vert
-                    classes = "rounded-md p-2 border border-green bg-green";
-                  }
-
-                  if (isSelected && !isCorrect) {
-                    // Réponse choisie mais incorrecte en rouge
-                    classes = "rounded-md p-2 border border-red bg-red";
-                  }
-
-                  return (
-                    <div key={opt.id_option} className={classes}>
-                      {opt.texte_option}
-                    </div>
-                  );
-                })}
-              </div>
-
-            </div>
-          ))}
-        </div>
-
-        {/* Boutons */}
-        <div className="flex flex-col md:flex-row gap-36 mt-10">
-          <Button
-            text={<span className="flex items-center gap-2"><FaHome /> {t("backMenu")}</span>}
-            variant="quizBack"
-            onClick={() => navigate("/all-quizzes")}
-          />
-          
-        </div>
-
+          quiz.quiz.reponse_quiz_utilisateur?.score_total === totalPoints ? (
+          <p className="text-green text-lg font-medium">
+            {t("congrats")}
+          </p>
+        ) : (
+          <p className="text-red text-lg font-medium">
+            {t("tryAgain")}
+          </p>
+        )}
       </div>
-    
+
+
+      {/* Récapitulatif des réponses */}
+      <h3 className="text-2xl font-semibold text-textc mb-6">
+        {t("recap")}
+      </h3>
+
+      <div className="w-full max-w-3xl flex flex-col gap-6">
+        {quiz.quiz.questions.map((q, index) => (
+          <div
+            key={q.id_qst}
+            className="bg-card rounded-2xl p-6 shadow-md text-textc border border-blue/20"
+          >
+
+
+            {/* Numéro + question */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-7 h-7 flex items-center justify-center rounded-md bg-primary text-white font-bold text-sm">
+                {index + 1}
+              </div>
+              <p className="font-semibold text-base md:text-lg">
+                {q.texte_qst}
+              </p>
+            </div>
+
+
+            {/* Points */}
+            <p className="text-sm text-grayc mb-4">
+              {q.score} {t("point")}
+            </p>
+
+
+            {/* Options */}
+            <div className="flex flex-col gap-2">
+              {q.options.map((opt) => {
+                const isSelected = q.reponse_utilisateur?.option_choisie?.id_option === opt.id_option;
+                const isCorrect = opt.texte_option === q.reponse_correcte;
+
+                let classes =
+                  "rounded-lg px-4 py-2 border text-sm transition";
+
+                if (isCorrect) {
+                  classes += " border-green bg-green/20 text-green font-medium";
+                }
+
+                if (isSelected && !isCorrect) {
+                  classes += " border-red bg-red/20 text-red font-medium";
+                }
+
+                if (!isSelected && !isCorrect) {
+                  classes += " border-grayc/30 bg-surface";
+                }
+
+
+                return (
+                  <div key={opt.id_option} className={classes}>
+                    {opt.texte_option}
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        ))}
+      </div>
+
+      {/* Boutons */}
+      <div className="flex justify-center mt-12">
+        <Button
+          variant="quizBack"
+          onClick={() => navigate("/all-quizzes")}
+          text={
+            <span className="flex items-center gap-2">
+              <FaHome />
+              {t("backMenu")}
+            </span>
+          }
+        />
+      </div>
+
+
+    </div>
+
   );
 }

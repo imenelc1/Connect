@@ -1,25 +1,46 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext } from "react";
+
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import Navbar from "../components/common/NavBar";
+import Navbar from "../components/common/Navbar";
 import InfoCard from "../components/common/InfoCard";
 import { MessageCircle, File } from "lucide-react";
 import { getTentativeById } from "../services/progressionService";
-import axios from "axios"; // ← Ajoutez cette importation
+import { useNavigate } from "react-router-dom";
+import ThemeContext from "../context/ThemeContext";
 
+
+import axios from "axios"; // ← Ajoutez cette importation
 export default function SubmittedExercise() {
   const { t } = useTranslation("SubmittedExercise");
+  const navigate = useNavigate();
   const { tentativeId } = useParams();
-
+   const { toggleDarkMode } = useContext(ThemeContext);
   const [loading, setLoading] = useState(true);
   const [exerciseData, setExerciseData] = useState(null);
   const [feedback, setFeedback] = useState(""); // ← État séparé pour le feedback
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth < 768);
+  const handleSidebarChange = (e) => setSidebarCollapsed(e.detail);
+
+  window.addEventListener("resize", handleResize);
+  window.addEventListener("sidebarChanged", handleSidebarChange);
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+    window.removeEventListener("sidebarChanged", handleSidebarChange);
+  };
+}, []);
+
 
   useEffect(() => {
     const fetchTentative = async () => {
       try {
         // 1. Récupérer la tentative
         const data = await getTentativeById(tentativeId);
+      
         
         // 2. Récupérer le feedback depuis le nouveau modèle
         let feedbackContent = data.feedback || ""; // Fallback sur l'ancien champ
@@ -84,12 +105,22 @@ export default function SubmittedExercise() {
   }
 
   return (
-    <div className="flex bg-background min-h-screen">
-      <Navbar />
+  <div className="flex flex-row min-h-screen bg-surface gap-16 md:gap-1">
+                    {/* Sidebar */}
+                    <div>
+                      <Navbar />
+                    </div>
 
-      <main className="flex-1 ml-16 md:ml-56 p-6">
+  <main className={`
+        flex-1 p-4 sm:p-6 pt-10 space-y-5 transition-all duration-300 min-h-screen w-full overflow-x-hidden
+        ${!isMobile ? (sidebarCollapsed ? "md:ml-16" : "md:ml-64") : ""}
+      `}>
+
         {/* INFO CARD */}
+        
         <h1 className="text-3xl ml-5 mb-5 font-semibold text-primary">{t("Completed Exercise")}</h1>
+        
+        
         <InfoCard exercise={exerciseData}/>
 
         <div className="grid grid-cols-1 gap-4">
@@ -100,7 +131,7 @@ export default function SubmittedExercise() {
               <h2 className="text-lg font-semibold">{t("submittedCode")}</h2>
             </div>
 
-            <div className="bg-black rounded-xl overflow-auto h-96 text-gray-300 p-4">
+            <div className="bg-surface rounded-xl overflow-auto h-96 text-gray p-4">
               <pre className="whitespace-pre-wrap">{exerciseData.code}</pre>
             </div>
           </div>

@@ -1,9 +1,10 @@
-import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { FaEnvelope, FaLock } from "react-icons/fa";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { useState, useContext } from "react";// Hooks React pour gérer l'état local et accéder aux contextes
+import { useNavigate } from "react-router-dom";// Hook pour naviguer entre les routes
+import { useTranslation } from "react-i18next";// Hook pour la traduction i18n
+import { FaEnvelope, FaLock } from "react-icons/fa";// Icônes pour email et mot de passe
+import { FiEye, FiEyeOff } from "react-icons/fi";// Icônes pour montrer/masquer le mot de passe
 
+// Import des composants réutilisables de l'application
 import AuthTabs from "../components/common/AuthTabs";
 import Button from "../components/common/Button.jsx";
 import Input from "../components/common/Input";
@@ -11,31 +12,33 @@ import Mascotte from "../components/common/Mascotte.jsx";
 import LogoComponent from "../components/common/LogoComponent";
 import LogoIconeComponent from "../components/common/IconeLogoComponent";
 import ThemeButton from "../components/common/ThemeButton";
+// Import services et contextes
 
-import api from "../services/api";
-import toast from "react-hot-toast";
-import ThemeContext from "../context/ThemeContext";
-import AuthContext from "../context/AuthContext.jsx";
+import api from "../services/api";// Instance axios pour communiquer avec le backend
+import toast from "react-hot-toast";// Notifications utilisateur
+import ThemeContext from "../context/ThemeContext";// Contexte du thème (dark/light)
+import AuthContext from "../context/AuthContext.jsx";// Contexte d'authentification
+
 
 export default function LoginStudent() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation("login");
   const { loginUser } = useContext(AuthContext);
   const { toggleDarkMode } = useContext(ThemeContext);
-
+    // États locaux pour le formulaire
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
   const [errorPassword, setErrorPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
+  // Fonction pour changer la langue entre français et anglais
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language === "fr" ? "en" : "fr");
   };
-
+ // Fonction déclenchée à la soumission du formulaire
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorEmail("");
+    e.preventDefault();// Empêche le rechargement de la page
+    setErrorEmail("");// Réinitialisation des erreurs
     setErrorPassword("");
 
     // --- Validation frontend ---
@@ -45,6 +48,7 @@ export default function LoginStudent() {
     if (password.length < 8) return setErrorPassword(t("errors.passwordLength"));
 
     try {
+      // Appel API login avec rôle "etudiant"
       const res = await api.post("login/", { email, password, role: "etudiant" });
       console.log("LOGIN SUCCESS:", res.data);
 
@@ -53,15 +57,16 @@ export default function LoginStudent() {
         role: res.data.role || res.data.user.role
       };
 
-      // Stockage local
+      // Stockage local des informations utilisateur et du token
       localStorage.setItem("user", JSON.stringify(userWithRole));
       localStorage.setItem("token", res.data.token);
 
-      loginUser(res.data.token, userWithRole); // ⚡ AuthContext
+      loginUser(res.data.token, userWithRole); // Mise à jour du contexte global d'authentification
 
       toast.success(t("success.login"));
       const a=res.data.user.must_change_password;
       console.log({a});
+      // Si l'utilisateur doit changer son mot de passe
      if (res.data.user.must_change_password) {
       // 🔑 on utilise le reset_token renvoyé par le backend
       navigate(`/welcome-reset-password/${res.data.reset_token}`);
@@ -73,7 +78,7 @@ export default function LoginStudent() {
     } catch (error) {
       const backend = error.response?.data;
 
-      // Gestion des erreurs générales
+      // Gestion des erreurs générales provenant du backend
       if (backend?.detail || backend?.error) {
         const msg = backend.detail || backend.error;
         setErrorPassword(msg);

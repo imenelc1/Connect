@@ -6,8 +6,9 @@
   "search": "Rechercher...",
   "assistant": "Assistant IA",
   "myCourses": "Mes cours",
-  "chapterPrev": "page précédente",
-  "chapterNext": "Page suivante",
+
+  "coursTermine": "Cours terminé",
+  "leconNondispo": "aucune leçon disponible",
   "readyQuiz": "Prêt à tester tes connaissances ?",
   "quizDesc": "Passe le quiz de ce chapitre pour valider ta compréhension",
   "startQuiz": "Commencer le quiz",
@@ -17,5 +18,31 @@
   "feedbackPlaceholder": "Partagez vos commentaires, suggestions ou remarques...",
   "feedback1": "Les cours d’algorithmique m’ont beaucoup aidé à développer ma logique.",
   "feedback2": "Les exercices pratiques ont transformé ma compréhension du C.",
-  "feedback3": "Grâce à CONNECT, j’ai réussi mes examens avec d'excellentes notes."
+  "feedback3": "Grâce à CONNECT, j’ai réussi mes examens avec d'excellentes notes.",
+  "chapter":"Chapitre",
+  "finish": "Terminer",
+  "titleMissing": "Titre manquant",
+  "courseIdDefault": "par défaut",
+  "anonymousUser": "Utilisateur anonyme",
+  "feedbackLoadError": "Erreur lors du chargement des feedbacks",
+  "feedbackRequired": "Veuillez écrire un feedback et donner une note",
+  "sendError": "Erreur lors de l'envoi",
+  "loadingFeedbacks": "Chargement des feedbacks...",
+"noFeedbacks": "Aucun feedback pour ce cours",
+"showName": "Afficher mon nom",
+"lessonMarkError": "Erreur lors du marquage de la leçon :",
+"courseLoadError": "Erreur chargement cours :",
+"aiCheckCourseError": "Erreur vérification IA pour le cours"
+
+
+
+
+
+
+
+
+
+
+
+
 }

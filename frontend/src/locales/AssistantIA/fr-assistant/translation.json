@@ -4,8 +4,13 @@
   "placeholder_question": "Écris ta question...",
   "error_message": "❌ Une erreur est survenue. Réessaie.",
   "student_fetch_error": "Erreur récupération étudiant :",
-   "bot_greeting": "Bonjour {{name}} 👋\nJe suis ton Coach C.\nExplique-moi ce qui te bloque.",
+  "bot_greeting": "Bonjour {{name}} 👋\nJe suis ton Coach C.\nExplique-moi ce qui te bloque.",
   "student": "étudiant",
-   "input_placeholder": "Écris ta question..."
-
+  "input_placeholder": "Écris ta question...",
+  "chat": {
+    "exercise_greeting": "Bonjour {{name}} 👋\nJe vois que tu travailles sur l'exercice : **{{title}}**.\nExplique-moi ce que tu ne comprends pas et je t'aiderai étape par étape.",
+    "course_greeting": "Bonjour {{name}} 👋\nJe suis ton assistant cours pour ce cours.",
+    "generic_greeting": "Bonjour {{name}} 👋\nJe suis ton assistant IA.",
+    "exercise_in_progress": "en cours"
+  }
 }

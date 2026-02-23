@@ -11,6 +11,7 @@ urlpatterns = [
  path('student-total-tentatives/<int:student_id>/', views.student_total_tentatives),
  path('daily-time/', views.daily_time, name='daily-time'),
  path('global-progress/', views.global_progress, name='global-progress'),
+ path('global-progress/<int:user_id>/', views.global_progress, name='global-progress'),
  path('complete-lessons-bulk/', views.complete_lessons_bulk, name='complete-lessons-bulk'),
  path('history/', views.GlobalProgressHistoryView.as_view(), name='global-progress-history'),
  path("prof/active/count/", views.active_courses_count_prof, name="active-courses-count-prof"),
