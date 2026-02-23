@@ -95,7 +95,10 @@ WSGI_APPLICATION = 'connect_backend.wsgi.application'
 
 # Database PostgreSQL avec Render
 DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    'default': dj_database_url.config(
+        default="postgres://connectdb_7269_user:h4IWXlGdpMfAZjbBi5MYIsHmMsvYDd24@dpg-d6e3uu24d50c73b7veeg-a.frankfurt-postgres.render.com/connectdb_7269",
+        conn_max_age=600
+    )
 }
 
 # Password validation
