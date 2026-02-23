@@ -116,7 +116,7 @@ export default function StudentSignUp() {
     };
 
     try {
-      const res = await api.post("register/", payload);
+      const res = await api.post("users/register/", payload);
 
       // Créer userData à partir de la réponse backend
       const userData = {

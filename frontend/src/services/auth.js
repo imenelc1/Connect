@@ -2,7 +2,7 @@ import api, { setAuthToken } from "./api";
 
 export async function registerStudent(payload) {
   // payload doit être mappé aux champs Django (voir plus bas)
-  return api.post("register/", payload);
+  return api.post("users/register/", payload);
 }
 
 export async function loginUser(payload) {
