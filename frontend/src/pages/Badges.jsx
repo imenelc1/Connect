@@ -12,7 +12,7 @@ import ThemeContext from "../context/ThemeContext";
 import UserCircle from "../components/common/UserCircle"; // Ajout
 import { MdAutoAwesome } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
-import api from "../services/apiGenerale";
+import api from "../services/api"
 
 
 // Function to choose an icon

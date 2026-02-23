@@ -9,7 +9,7 @@ import { getTentatives } from "../services/progressionService";
 import axios from "axios";
 import { CheckCircle } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
-import api from "../services/apiGenerale";
+import api from "../services/api"
 
 export default function ProgressStudent() {
   const { t } = useTranslation("ProgressStudent");

@@ -6,7 +6,7 @@ import { Plus, Trash, SquarePen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ThemeContext from "../context/ThemeContext";
 import ContentSearchBar from "../components/common/ContentSearchBar";
-import api from "../services/apiGenerale";
+import api from "../services/api"
 import { toast } from "react-hot-toast";
 import Input from "../components/common/Input";
 import {
