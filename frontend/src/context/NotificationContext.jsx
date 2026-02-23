@@ -26,7 +26,7 @@ export const NotificationProvider = ({ children }) => {
   };
   
   const API_URL = window.location.hostname === 'localhost' 
-    ? '${import.meta.env.VITE_API_URL}/api' 
+    ? '${import.meta.env.VITE_API_BASE}/api' 
     : '/api';
 
   // Fonction pour fetch les notifications

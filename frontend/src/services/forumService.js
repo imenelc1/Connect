@@ -1,7 +1,7 @@
 // src/services/forumService.js
 
 // ✅ Configuration simplifiée et robuste
-const BASE_API_URL = import.meta.env.VITE_API_URL || "https://connect-1-t976.onrender.com";
+const BASE_API_URL = import.meta.env.VITE_API_BASE || "https://connect-1-t976.onrender.com";
 const API_URL = `${BASE_API_URL}/api`;
 
 // ============================================

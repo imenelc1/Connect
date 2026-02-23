@@ -30,7 +30,7 @@ export default function StudentDetailModal({ open, onClose, studentId, joined })
       setLoading(true);
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/users/utilisateurs/${studentId}/progression/`,
+          `${import.meta.env.VITE_API_BASE}/api/users/utilisateurs/${studentId}/progression/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error(`Erreur ${res.status}`);

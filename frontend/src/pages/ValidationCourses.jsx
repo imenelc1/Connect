@@ -43,7 +43,7 @@ export default function ValidationCourses() {
   const fetchCourses = async (status) => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/courses/admin/courses/?status=${status}`,
+        `${import.meta.env.VITE_API_BASE}/api/courses/admin/courses/?status=${status}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -64,7 +64,7 @@ export default function ValidationCourses() {
   const updateStatus = async (courseId, status) => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/courses/admin/${courseId}/status/`,
+        `${import.meta.env.VITE_API_BASE}/api/courses/admin/${courseId}/status/`,
         {
           method: "PATCH",
           headers: {

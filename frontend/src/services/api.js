@@ -3,32 +3,26 @@ import axios from "axios";
 const API_BASE = import.meta.env.VITE_API_BASE || "https://connect-1-t976.onrender.com";
 
 const api = axios.create({
-  baseURL: `${API_BASE}/api/users/`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: false,
+  baseURL: `${API_BASE}/api/`,
+  headers: { "Content-Type": "application/json" },
 });
 
-// Routes publiques (pas de token)
-const PUBLIC_ROUTES = ["register", "login"];
-
 api.interceptors.request.use((config) => {
-  // Nettoyage du chemin → retire / au début et / à la fin
-  const path = config.url.replace(/^\//, "").replace(/\/$/, "");
+  // On récupère le token
+  const token = localStorage.getItem("token");
 
-  const isPublic = PUBLIC_ROUTES.includes(path);
+  // Détection simplifiée des routes publiques (Login / Register)
+  // On vérifie si l'URL contient ces mots clés, peu importe les slashes
+  const isPublic = config.url.includes("login") || config.url.includes("register");
 
-  if (!isPublic) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  if (!isPublic && token) {
+    config.headers.Authorization = `Bearer ${token}`;
   } else {
+    // On nettoie l'en-tête pour les routes publiques
     delete config.headers.Authorization;
   }
 
   return config;
-});
+}, (error) => Promise.reject(error));
 
 export default api;

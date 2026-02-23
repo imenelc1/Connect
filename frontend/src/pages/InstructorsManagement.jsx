@@ -123,7 +123,7 @@ export default function InstructorsPage() {
     const fetchInstructors = async () => {
       try {
         const token = localStorage.getItem("admin_token");
-        const res = await fetch("${import.meta.env.VITE_API_URL}/api/users/enseignants/", {
+        const res = await fetch("${import.meta.env.VITE_API_BASE}/api/users/enseignants/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -229,8 +229,8 @@ export default function InstructorsPage() {
 
       // Si édition, utiliser l'ID réel de l'instructeur
       const url = editIndex !== null
-        ? `${import.meta.env.VITE_API_URL}/api/users/enseignants/${instructors[editIndex].id}/update/`
-        : "${import.meta.env.VITE_API_URL}/api/users/admin/enseignants/create/";
+        ? `${import.meta.env.VITE_API_BASE}/api/users/enseignants/${instructors[editIndex].id}/update/`
+        : "${import.meta.env.VITE_API_BASE}/api/users/admin/enseignants/create/";
 
 
       const method = editIndex !== null ? "PUT" : "POST";
@@ -302,7 +302,7 @@ export default function InstructorsPage() {
     const token = localStorage.getItem("admin_token");
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/admin/users/${instructor.id}/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/users/admin/users/${instructor.id}/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
