@@ -59,10 +59,8 @@ export default function CommunityPage() {
   const role = userData?.role;
   const userId = userData?.user_id;
 
-  const API_URL = window.REACT_APP_API_URL ||
-    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-      ? "${import.meta.env.VITE_API_URL}/api"
-      : "/api");
+ const BASE_API_URL = import.meta.env.VITE_API_URL || "https://connect-1-t976.onrender.com";
+  const API_URL = `${BASE_API_URL}/api`;
 
   const { toggleDarkMode } = useContext(ThemeContext);
 
