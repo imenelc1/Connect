@@ -14,7 +14,7 @@ load_dotenv(dotenv_path)
 print("Loading .env from:", dotenv_path)
 print("SECRET_KEY loaded:", os.getenv("DJANGO_SECRET_KEY"))
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = "niu+@3uk(v_u&283jn%jb)%0$(!$th@d4xo#2gk)@$b2-+pi-^"
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
