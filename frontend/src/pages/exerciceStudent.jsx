@@ -34,7 +34,7 @@ export default function StudentExercice() {
   }, []);
 
   const token = localStorage.getItem("token");
-  const BACKEND_URL = "http://127.0.0.1:8000";
+  const BACKEND_URL = "https://connect-1-t976.onrender.com";
   const navigate = useNavigate();
 
   useEffect(() => {

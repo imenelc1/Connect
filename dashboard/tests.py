@@ -1,7 +1,7 @@
 import requests
 
 TOKEN = "token"
-API_URL = "http://127.0.0.1:8000/api/dashboard/tentatives/create/"
+API_URL = "https://connect-1-t976.onrender.com/api/dashboard/tentatives/create/"
 
 headers = {
     "Authorization": f"Bearer {TOKEN}",

@@ -47,7 +47,7 @@ useEffect(() => {
         
         try {
           const token = localStorage.getItem("token");
-          const BACKEND_URL = "http://127.0.0.1:8000";
+          const BACKEND_URL = "https://connect-1-t976.onrender.com";
           
           const response = await axios.get(
             `${BACKEND_URL}/api/feedback-exercice/list/`,

@@ -104,7 +104,7 @@ export default function Dashboardens() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://127.0.0.1:8000/api/dashboard/all-students-submissions/",
+          "https://connect-1-t976.onrender.com/api/dashboard/all-students-submissions/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -131,7 +131,7 @@ export default function Dashboardens() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://127.0.0.1:8000/api/dashboard/quiz_success_rate_prof/",
+          "https://connect-1-t976.onrender.com/api/dashboard/quiz_success_rate_prof/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -152,7 +152,7 @@ export default function Dashboardens() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://127.0.0.1:8000/api/dashboard/daily-time/",
+          "https://connect-1-t976.onrender.com/api/dashboard/daily-time/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setDailyTime(res.data.total_seconds || 0);
@@ -173,7 +173,7 @@ export default function Dashboardens() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://127.0.0.1:8000/api/dashboard/professor_content_counts_global",
+          "https://connect-1-t976.onrender.com/api/dashboard/professor_content_counts_global",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setContentCounts(res.data);

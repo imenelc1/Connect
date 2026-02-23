@@ -26,7 +26,7 @@ export default function TaskCard({
         if (!currentTentative.id) return;
         try {
           const token = localStorage.getItem("token");
-          const BACKEND_URL = "http://127.0.0.1:8000";
+          const BACKEND_URL = "https://connect-1-t976.onrender.com";
           const response = await axios.get(
             `${BACKEND_URL}/api/feedback-exercice/list/`,
             { headers: { Authorization: `Bearer ${token}` }, params: { tentative_ids: currentTentative.id.toString() } }
@@ -46,7 +46,7 @@ export default function TaskCard({
     setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const BACKEND_URL = "http://127.0.0.1:8000";
+      const BACKEND_URL = "https://connect-1-t976.onrender.com";
       const response = await axios.post(
         `${BACKEND_URL}/api/feedback-exercice/`,
         { contenu: newFeedback, exercice: exerciceId, tentative: currentTentative.id },

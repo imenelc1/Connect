@@ -40,7 +40,7 @@ export default function ProgressExercice() {
         window.removeEventListener("sidebarChanged", handleSidebarChange);
       };
     }, []); 
-  const BACKEND_URL = "http://127.0.0.1:8000";
+  const BACKEND_URL = "https://connect-1-t976.onrender.com";
 
   const colorClasses = {
     green: { bar: "bg-green", text: "text-green" },

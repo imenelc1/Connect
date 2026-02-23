@@ -64,7 +64,7 @@ export default function ExerciseCard({
 
     try {
       await axios.delete(
-        `http://127.0.0.1:8000/api/exercices/exercice/${exercise.id}/delete/`,
+        `https://connect-1-t976.onrender.com/api/exercices/exercice/${exercise.id}/delete/`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

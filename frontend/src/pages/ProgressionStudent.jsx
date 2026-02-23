@@ -47,7 +47,7 @@ export default function ProgressStudent() {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const BACKEND_URL = "http://127.0.0.1:8000";
+        const BACKEND_URL = "https://connect-1-t976.onrender.com";
 
         const res = await axios.get(`${BACKEND_URL}/api/dashboard/student/student-progress/`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -78,7 +78,7 @@ export default function ProgressStudent() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          `http://127.0.0.1:8000/api/dashboard/student/student-progress-score/`,
+          `https://connect-1-t976.onrender.com/api/dashboard/student/student-progress-score/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setQuizProgressData(res.data || []);
@@ -96,7 +96,7 @@ export default function ProgressStudent() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://127.0.0.1:8000/api/dashboard/student/student-average-score/",
+          "https://connect-1-t976.onrender.com/api/dashboard/student/student-average-score/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setAverageScore(res.data?.average_score ?? 0);

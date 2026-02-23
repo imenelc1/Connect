@@ -80,7 +80,7 @@ export default function SpaceDetails() {
   // --- Fetch space details ---
   useEffect(() => {
     if (!id) return;
-    fetch(`http://127.0.0.1:8000/api/spaces/${id}/`, {
+    fetch(`https://connect-1-t976.onrender.com/api/spaces/${id}/`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     })
       .then((res) => res.json())
@@ -101,7 +101,7 @@ export default function SpaceDetails() {
           // Courses
           const allCourses = await getCoursesProgress();
           const res = await fetch(
-            `http://127.0.0.1:8000/api/spaces/${id}/courses/`,
+            `https://connect-1-t976.onrender.com/api/spaces/${id}/courses/`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -126,7 +126,7 @@ export default function SpaceDetails() {
           );
         } else if (activeStep === 2) {
           const res = await fetch(
-            `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`,
+            `https://connect-1-t976.onrender.com/api/spaces/${id}/quizzes/`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -221,7 +221,7 @@ export default function SpaceDetails() {
         } else if (activeStep === 3) {
           // Exercises
           const res = await fetch(
-            `http://127.0.0.1:8000/api/spaces/${id}/exercises/`,
+            `https://connect-1-t976.onrender.com/api/spaces/${id}/exercises/`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -259,21 +259,21 @@ export default function SpaceDetails() {
     const token = localStorage.getItem("token");
 
     const fetchMyCourses = fetch(
-      `http://127.0.0.1:8000/api/spaces/my-courses/`,
+      `https://connect-1-t976.onrender.com/api/spaces/my-courses/`,
       {
         headers: { Authorization: `Bearer ${token}` },
       },
     ).then((res) => res.json());
 
     const fetchMyQuizzes = fetch(
-      `http://127.0.0.1:8000/api/spaces/my-quizzes/?space_id=${id}`,
+      `https://connect-1-t976.onrender.com/api/spaces/my-quizzes/?space_id=${id}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       },
     ).then((res) => res.json());
 
     const fetchMyExercises = fetch(
-      `http://127.0.0.1:8000/api/spaces/my-exercises/`,
+      `https://connect-1-t976.onrender.com/api/spaces/my-exercises/`,
       {
         headers: { Authorization: `Bearer ${token}` },
       },
@@ -338,7 +338,7 @@ export default function SpaceDetails() {
     if (activeStep === 1) {
       // --- Courses ---
       alreadyAdded = spaceCourses.some((c) => c.id === idToSend);
-      url = `http://127.0.0.1:8000/api/spaces/${id}/courses/`;
+      url = `https://connect-1-t976.onrender.com/api/spaces/${id}/courses/`;
       bodyKey = "cours";
 
       body = {
@@ -359,7 +359,7 @@ export default function SpaceDetails() {
     } else if (activeStep === 2) {
       // --- Quizzes ---
       alreadyAdded = spaceQuizzes.some((c) => c.id === idToSend);
-      url = `http://127.0.0.1:8000/api/spaces/${id}/quizzes/`;
+      url = `https://connect-1-t976.onrender.com/api/spaces/${id}/quizzes/`;
       bodyKey = "quiz";
 
       body = {
@@ -380,7 +380,7 @@ export default function SpaceDetails() {
     } else if (activeStep === 3) {
       // --- Exercises ---
       alreadyAdded = spaceExercises.some((c) => c.id === idToSend);
-      url = `http://127.0.0.1:8000/api/spaces/${id}/exercises/`;
+      url = `https://connect-1-t976.onrender.com/api/spaces/${id}/exercises/`;
       bodyKey = "exercice";
 
       body = {
@@ -460,7 +460,7 @@ export default function SpaceDetails() {
     const fetchExercises = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/api/spaces/${id}/exercises/`,
+          `https://connect-1-t976.onrender.com/api/spaces/${id}/exercises/`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -476,7 +476,7 @@ export default function SpaceDetails() {
           exercises.map(async (ex) => {
             try {
               const resTent = await fetch(
-                `http://127.0.0.1:8000/api/dashboard/${ex.exercice.id_exercice}/utilisateur/${userId}/tentatives/`,
+                `https://connect-1-t976.onrender.com/api/dashboard/${ex.exercice.id_exercice}/utilisateur/${userId}/tentatives/`,
                 {
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,

@@ -65,7 +65,7 @@ export const addSession = async (duration) => {
   return res.data;
 };
 
-const API_URL = "http://127.0.0.1:8000/api/dashboard/";
+const API_URL = "https://connect-1-t976.onrender.com/api/dashboard/";
 
 const getDailyTime = async () => {
   const token = localStorage.getItem("token");
@@ -215,7 +215,7 @@ export const getMyLastTentative = async (studentId, exerciceId) => {
 
   try {
     const response = await axios.get(
-      `http://127.0.0.1:8000/api/dashboard/tentatives/my-last/${exerciceId}/`,
+      `https://connect-1-t976.onrender.com/api/dashboard/tentatives/my-last/${exerciceId}/`,
       { params: { studentId } }
     );
     return response.data;

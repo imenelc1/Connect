@@ -108,7 +108,7 @@ export default function Dashboardetu() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          "http://127.0.0.1:8000/api/dashboard/daily-time/",
+          "https://connect-1-t976.onrender.com/api/dashboard/daily-time/",
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setDailyTime(res.data.total_seconds || 0);
@@ -131,7 +131,7 @@ export default function Dashboardetu() {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.get(
-          `http://127.0.0.1:8000/api/dashboard/student-total-tentatives/${user.id_utilisateur}/`,
+          `https://connect-1-t976.onrender.com/api/dashboard/student-total-tentatives/${user.id_utilisateur}/`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
